@@ -11,11 +11,12 @@ class Modal extends Component
      * Create a new component instance.
      */
     public function __construct(
-        public string $id,
+        public ?string $id = null,
         public string $title = '',
         public bool $show = false,
     ) {
-        //
+        // Generate a unique ID if none provided
+        $this->id = $this->id ?? uniqid('modal_');
     }
 
     /**
