@@ -1,21 +1,21 @@
 @section('title', 'Menu Pengajuan Peminjaman')
 
 <div>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold">Menu Pengajuan Peminjaman</h4>
-        <a href="#" class="btn btn-light">
+    <div>
+        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4"
+            wire:navigate>
             <i class="tf-icons ti ti-arrow-left me-1"></i>
-            <span class="align-middle">Kembali</span>
+            Kembali
         </a>
+        <h4 class="fw-bold">Menu Pengajuan Peminjaman</h4>
     </div>
 
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6 mb-3">
+                <div class="col-lg mb-3">
                     <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                    <input type="text" class="form-control" id="nama_perusahaan" value="Techno Infinity"
-                        disabled>
+                    <input type="text" class="form-control" id="nama_perusahaan" value="Techno Infinity" disabled>
                 </div>
             </div>
             <div class="card border-1 mb-3 shadow-none">
@@ -39,13 +39,14 @@
                             </div>
                         </div>
                         <div class="mb-4 rounded-">
-                            <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
-                            <option selected>Pilih Sumber Pembiayaan</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
+                            <select class="form-select" id="exampleFormControlSelect1"
+                                aria-label="Default select example">
+                                <option selected>Pilih Sumber Pembiayaan</option>
+                                <option value="1">One</option>
+                                <option value="2">Two</option>
+                                <option value="3">Three</option>
                             </select>
-                      </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -53,21 +54,24 @@
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-lg-3 col-sm-1 mb-6">
-                                <label for="exampleFormControlSelect1" class="form-label">Nama Bank</label>
-                                <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
+                            <label for="exampleFormControlSelect1" class="form-label">Nama Bank</label>
+                            <select class="form-select" id="exampleFormControlSelect1"
+                                aria-label="Default select example">
                                 <option selected>Pilih Bank</option>
                                 <option value="1">BCA</option>
                                 <option value="2">Mandiri</option>
                                 <option value="3">BNI</option>
-                                </select>
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label for="no_rekening" class="form-label">No. Rekening</label>
-                            <input type="text" class="form-control" id="no_rekening" placeholder="Masukkan No. Rekening">
+                            <input type="text" class="form-control" id="no_rekening"
+                                placeholder="Masukkan No. Rekening">
                         </div>
                         <div class="col-md-5">
                             <label for="nama_rekening" class="form-label">Nama Rekening</label>
-                            <input type="text" class="form-control" id="nama_rekening" placeholder="Masukkan Nama Rekening">
+                            <input type="text" class="form-control" id="nama_rekening"
+                                placeholder="Masukkan Nama Rekening">
                         </div>
                     </div>
 
@@ -75,7 +79,8 @@
                         <div class="col-md-6">
                             <label for="lampiran_sid" class="form-label">Lampiran SID</label>
                             <input class="form-control" type="file" id="lampiran_sid">
-                            <div class="form-text">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)
+                            <div class="form-text">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar,
+                                zip)
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -90,14 +95,15 @@
                             <div class="d-flex">
                                 <div class="form-check me-3">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Invoice Financing" id="invoice_financing" wire:model.live="jenis_pembiayaan">
+                                        value="Invoice Financing" id="invoice_financing"
+                                        wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="invoice_financing">
                                         Invoice Financing
                                     </label>
                                 </div>
                                 <div class="form-check me-3">
-                                    <input name="jenis_pembiayaan" class="form-check-input" type="radio" value="PO Financing"
-                                        id="po_financing" wire:model.live="jenis_pembiayaan">
+                                    <input name="jenis_pembiayaan" class="form-check-input" type="radio"
+                                        value="PO Financing" id="po_financing" wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="po_financing">
                                         PO Financing
                                     </label>
@@ -110,8 +116,8 @@
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input name="jenis_pembiayaan" class="form-check-input" type="radio" value="Factoring"
-                                        id="factoring" wire:model.live="jenis_pembiayaan">
+                                    <input name="jenis_pembiayaan" class="form-check-input" type="radio"
+                                        value="Factoring" id="factoring" wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="factoring">
                                         Factoring
                                     </label>
@@ -165,7 +171,10 @@
                     </table>
                 </div>
                 <div class="card-body">
-                    <button type="button" class="btn btn-primary">+ Tambah</button>
+                    <button type="button" class="btn btn-outline-primary wave-effect">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        Tambah
+                    </button>
                 </div>
             </div>
 
@@ -197,7 +206,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                     <label for="rencana_tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran <i
-                            class="tf-icons ti ti-info-circle" data-bs-toggle="tooltip" title="Info"></i></label>
+                            class="tf-icons ti ti-info-circle data-bs-toggle="tooltip" title="Info"></i></label>
                     <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" />
 
                 </div>

@@ -26,8 +26,10 @@ Route::middleware('auth')->group(function () {
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    Volt::route('confirm-password', 'pages.auth.confirm-password')
-        ->name('password.confirm');
+    // COMMENT OUT: Route ini sudah di-handle oleh Fortify
+    // Jika ingin custom confirm-password page, disable Fortify's confirm password di config/fortify.php
+    // Volt::route('confirm-password', 'pages.auth.confirm-password')
+    //     ->name('password.confirm');
 });
 
 Route::post('logout', function () {

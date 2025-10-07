@@ -11,4 +11,5 @@ class Peminjaman extends Component
         return view('livewire.peminjaman')
             ->layout('layouts.app');
     }
+
 }

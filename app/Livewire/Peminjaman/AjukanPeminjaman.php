@@ -42,4 +42,5 @@ class AjukanPeminjaman extends Component
         return view('livewire.peminjaman.ajukan-peminjaman')
         ->layout('layouts.app');
     }
+
 }

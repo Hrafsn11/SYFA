@@ -2,11 +2,12 @@
     <div class="row">
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h1 class="text-2xl font-semibold">Menu Pengajuan Peminjaman</h1>
-                <button type="button" class="btn btn-primary d-flex justify-center align-items-center gap-3">
+                <h4 class="fw-bold">Menu Pengajuan Peminjaman</h4>
+                <a href="{{ route('ajukanpeminjaman') }}" wire:navigate
+                    class="btn btn-primary d-flex justify-center align-items-center gap-3">
                     <i class="fa-solid fa-plus"></i>
                     Ajukan Peminjaman
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -35,10 +36,12 @@
                                 </div>
                             </div>
                             <div class="col-md-10">
-                                <div class="dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-3 mb-md-0">
+                                <div
+                                    class="dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-3 mb-md-0">
                                     <div class="dataTables_filter">
                                         <label>
-                                            <input type="search" class="form-control rounded-md" placeholder="Cari..." />
+                                            <input type="search" class="form-control rounded-md"
+                                                placeholder="Cari..." />
                                         </label>
                                     </div>
                                 </div>
@@ -52,8 +55,6 @@
                                     <th class="text-center" width="5%">No</th>
                                     <th>Nama Perusahaan</th>
                                     <th class="text-center">Lampiran SID</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-center">Tanggal Pengajuan</th>
                                     <th class="text-center">Nilai Kol</th>
                                     <th class="text-center" width="10%">Aksi</th>
                                 </tr>
@@ -74,28 +75,19 @@
                                         </a>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-label-success">Disetujui</span>
-                                    </td>
-                                    <td class="text-center">15 Mar 2024</td>
-                                    <td class="text-center">
                                         <span class="badge bg-label-success">A</span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="ti ti-eye me-1"></i> Detail
-                                                </a>
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="ti ti-edit me-1"></i> Edit
-                                                </a>
-                                                <a class="dropdown-item text-danger" href="#">
-                                                    <i class="ti ti-trash me-1"></i> Hapus
-                                                </a>
-                                            </div>
+                                        <div class="d-flex justify-center align-items-center gap-2">
+                                            <a class="dropdown-item" href="#">
+                                                <i class="ti ti-file-text"></i>
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="ti ti-edit me-1"></i>
+                                            </a>
+                                            <a class="dropdown-item text-danger" href="#">
+                                                <i class="ti ti-trash me-1"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -115,28 +107,19 @@
                                         </a>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-label-warning">Menunggu</span>
-                                    </td>
-                                    <td class="text-center">18 Mar 2024</td>
-                                    <td class="text-center">
                                         <span class="badge bg-label-warning">B</span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="ti ti-eye me-1"></i> Detail
-                                                </a>
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="ti ti-edit me-1"></i> Edit
-                                                </a>
-                                                <a class="dropdown-item text-danger" href="#">
-                                                    <i class="ti ti-trash me-1"></i> Hapus
-                                                </a>
-                                            </div>
+                                        <div class="d-flex justify-center align-items-center gap-2">
+                                            <a class="dropdown-item" href="#">
+                                                <i class="ti ti-file-text"></i>
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="ti ti-edit me-1"></i>
+                                            </a>
+                                            <a class="dropdown-item text-danger" href="#">
+                                                <i class="ti ti-trash me-1"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -156,32 +139,23 @@
                                         </a>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-label-danger">Ditolak</span>
-                                    </td>
-                                    <td class="text-center">20 Mar 2024</td>
-                                    <td class="text-center">
                                         <span class="badge bg-label-danger">D</span>
                                     </td>
                                     <td class="text-center">
-                                        <div class="dropdown">
-                                            <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                                <i class="ti ti-dots-vertical"></i>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="ti ti-eye me-1"></i> Detail
-                                                </a>
-                                                <a class="dropdown-item" href="#">
-                                                    <i class="ti ti-edit me-1"></i> Edit
-                                                </a>
-                                                <a class="dropdown-item text-danger" href="#">
-                                                    <i class="ti ti-trash me-1"></i> Hapus
-                                                </a>
-                                            </div>
+                                        <div class="d-flex justify-center align-items-center gap-2">
+                                            <a class="dropdown-item" href="#">
+                                                <i class="ti ti-file-text"></i>
+                                            </a>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="ti ti-edit me-1"></i>
+                                            </a>
+                                            <a class="dropdown-item text-danger" href="#">
+                                                <i class="ti ti-trash me-1"></i>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
-                                
+
                             </tbody>
                         </table>
 

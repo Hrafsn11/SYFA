@@ -39,15 +39,15 @@
             <span class="menu-header-text">Configuration</span>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('MatrixPinjaman') ? 'active' : '' }}">
-            <a href="{{ route('MatrixPinjaman') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('matrixpinjaman') ? 'active' : '' }}">
+            <a href="{{ route('matrixpinjaman') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-building"></i>
                 <div data-i18n="Config Matrix Pinjaman">Config Matrix Pinjaman</div>
             </a>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('MatrixScore') ? 'active' : '' }}">
-            <a href="{{ route('MatrixScore') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
+            <a href="{{ route('matrixscore') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-user"></i>
                 <div data-i18n="Config Matrix Score">Config Matrix Score</div>
             </a>
