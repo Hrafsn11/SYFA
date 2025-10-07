@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template" data-style="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default"
+    data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template" data-style="light">
 
 <head>
     <meta charset="utf-8">
@@ -14,7 +16,9 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet" />
 
     <!-- Icons -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/fonts/fontawesome.css') }}" />
@@ -23,13 +27,19 @@
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/rtl/core.css') }}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/css/rtl/theme-default.css') }}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/css/rtl/theme-default.css') }}"
+        class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/node-waves/node-waves.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/typeahead-js/typeahead.css') }}" />
+    <link rel="stylesheet" href="assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="assets/vendor/libs/flatpickr/flatpickr.css" />
 
     <!-- Page CSS -->
     @stack('styles')
@@ -101,6 +111,16 @@
 
     <!-- Vendors JS -->
     @stack('vendor-scripts')
+    <script src="assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+
+    <!-- Flat Picker -->
+    <script src="assets/vendor/libs/moment/moment.js"></script>
+    <script src="assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <!-- Form Validation -->
+    <script src="assets/vendor/libs/@form-validation/popular.js"></script>
+    <script src="assets/vendor/libs/@form-validation/bootstrap5.js"></script>
+    <script src="assets/vendor/libs/@form-validation/auto-focus.js"></script>
+
 
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>

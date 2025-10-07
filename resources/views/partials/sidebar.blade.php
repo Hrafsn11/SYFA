@@ -10,7 +10,7 @@
             <i class="ti ti-x d-block d-xl-none ti-md align-middle"></i>
         </a>
     </div>
-
+    
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
@@ -22,25 +22,35 @@
             </a>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('#') ? 'active' : '' }}">
-            <a href="{{ route('dashboard') }}" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-smart-home"></i>
-                <div data-i18n="Dashboard">User</div>
+        <!-- Peminjaman Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Peminjaman</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('peminjaman') ? 'active' : '' }}">
+            <a href="{{ route('peminjaman') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-briefcase"></i>
+                <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
             </a>
         </li>
 
+        <!-- Configuration Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Configuration</span>
+        </li>
 
-
-        <!-- User Management -->
-        @can('manage users')
-        <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-            <a href="{{ route('users.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-users"></i>
-                <div data-i18n="Users">Users</div>
+        <li class="menu-item {{ request()->routeIs('MatrixPinjaman') ? 'active' : '' }}">
+            <a href="{{ route('MatrixPinjaman') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-building"></i>
+                <div data-i18n="Config Matrix Pinjaman">Config Matrix Pinjaman</div>
             </a>
         </li>
-        @endcan
 
-        
+        <li class="menu-item {{ request()->routeIs('MatrixScore') ? 'active' : '' }}">
+            <a href="{{ route('MatrixScore') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-user"></i>
+                <div data-i18n="Config Matrix Score">Config Matrix Score</div>
+            </a>
+        </li>
     </ul>
 </aside>
