@@ -35,6 +35,7 @@ Route::middleware([
     Route::get('peminjaman', Peminjaman::class)->name('peminjaman');
     Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('MatrixPinjaman');
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('MatrixScore');
+    Route::get('ajukan-peminjaman', App\Livewire\Peminjaman\AjukanPeminjaman::class)->name('AjukanPeminjaman');
 });
 
 require __DIR__ . '/auth.php';
