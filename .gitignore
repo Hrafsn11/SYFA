@@ -98,7 +98,7 @@ dist
 # public  ← COMMENT OUT atau hapus ini
 
 # WHITELIST: Track public/assets (template Vuexy)
-!/public/assets/
+# !/public/assets/
 
 # Tapi ignore generated files di public/
 /public/hot

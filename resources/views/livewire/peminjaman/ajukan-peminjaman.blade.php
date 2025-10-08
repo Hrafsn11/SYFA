@@ -1,7 +1,7 @@
 @section('title', 'Menu Pengajuan Peminjaman')
 
 <div>
-    <div>
+       <div>
         <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4"
             wire:navigate>
             <i class="tf-icons ti ti-arrow-left me-1"></i>
@@ -207,11 +207,7 @@
                 <div class="col-md-4 mb-3">
                     <label for="rencana_tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran <i
                             class="tf-icons ti ti-info-circle data-bs-toggle="tooltip" title="Info"></i></label>
-                    <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" />
-
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
+or="pembayaran_total" class="form-label">Pembayaran Total</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="pembayaran_total" value="Rp. 9.180.000"
                             disabled>

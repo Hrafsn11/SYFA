@@ -53,7 +53,7 @@
     @livewireStyles
 
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite([ 'resources/js/app.js']) --}}
 </head>
 
 <body>
@@ -126,6 +126,23 @@
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
+    <script>
+         document.addEventListener('wire:navigate', () => {
+            // Inisialisasi ulang menu dan komponen lain setelah navigasi Livewire
+            if (typeof TemplateCustomizer !== 'undefined') {
+                // Reset dan inisialisasi ulang menu
+                if (window.menu) {
+                    window.menu.destroy();
+                    window.menu = new Menu(document.getElementById('layout-menu'), {
+                        orientation: 'vertical',
+                        closeChildren: false
+                    });
+                }
+                // Inisialisasi ulang komponen lain jika perlu
+                // Contoh: new bootstrap.Tooltip(document.body, { selector: '[data-bs-toggle="tooltip"]' });
+            }
+        });
+    </script>
     <!-- Page JS -->
     @stack('scripts')
 </body>
