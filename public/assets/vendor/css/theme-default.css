@@ -208,14 +208,14 @@ button.list-group-item-primary {
 a.list-group-item-primary:hover, a.list-group-item-primary:focus,
 button.list-group-item-primary:hover,
 button.list-group-item-primary:focus {
-  border-color: #7367f0;
+  border-color: #13ABAB;
   background-color: #dbd9ee;
-  color: #7367f0;
+  color: #13ABAB;
 }
 a.list-group-item-primary.active,
 button.list-group-item-primary.active {
-  border-color: #7367f0 !important;
-  background-color: #7367f0 !important;
+  border-color: #13ABAB !important;
+  background-color: #13ABAB !important;
   color: #fff !important;
 }
 
@@ -493,7 +493,7 @@ button.list-group-item-primary.active {
   border-color: #13ABAB !important;
 }
 .btn-check:focus + .btn-outline-primary, .btn-outline-primary:focus {
-  color: #7367f0;
+  color: #13ABAB;
   background-color: #f4f3fe;
   border-color: #13ABAB;
 }
@@ -503,7 +503,7 @@ button.list-group-item-primary.active {
   border-color: #13ABAB !important;
 }
 .btn-outline-primary.disabled, .btn-outline-primary:disabled {
-  color: #7367f0 !important;
+  color: #13ABAB !important;
 }
 
 .btn-outline-primary .badge {
@@ -532,14 +532,14 @@ button.list-group-item-primary.active {
 .dropdown-menu > li:not(.disabled) > a:not(.dropdown-item):active,
 .dropdown-menu > li.active:not(.disabled) > a:not(.dropdown-item) {
   background-color: #e9e7fd;
-  color: #7367f0 !important;
+  color: #13ABAB !important;
 }
 
 .nav-pills .nav-link.active {
-  box-shadow: 0 0.125rem 0.375rem 0 rgba(115, 103, 240, 0.3);
+  box-shadow: 0 0.125rem 0.375rem 0 rgba(19, 171, 171, 0.3);
 }
 .nav-pills .nav-link.active, .nav-pills .nav-link.active:hover, .nav-pills .nav-link.active:focus {
-  background-color: #7367f0;
+  background-color: #13ABAB;
   color: #fff;
 }
 
@@ -551,7 +551,7 @@ button.list-group-item-primary.active {
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-link.active:hover,
 .nav-tabs .nav-link.active:focus {
-  box-shadow: 0 -2px 0 #7367f0 inset;
+  box-shadow: 0 -2px 0 #13ABAB inset;
 }
 
 .nav-align-bottom .nav-tabs .nav-link.active, .nav-align-bottom .nav-tabs .nav-link.active:hover, .nav-align-bottom .nav-tabs .nav-link.active:focus,
