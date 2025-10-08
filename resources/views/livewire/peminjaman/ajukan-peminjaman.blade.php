@@ -1,9 +1,6 @@
-@section('title', 'Menu Pengajuan Peminjaman')
-
 <div>
-       <div>
-        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4"
-            wire:navigate>
+    <div>
+        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4" wire:navigate>
             <i class="tf-icons ti ti-arrow-left me-1"></i>
             Kembali
         </a>
@@ -18,21 +15,21 @@
                     <input type="text" class="form-control" id="nama_perusahaan" value="Techno Infinity" disabled>
                 </div>
             </div>
-            <div class="card border-1 mb-3 shadow-none">
+            <div class="card border-1 mb-3 shadow-none" id="cardSumberPembiayaan">
                 <div class="card-body ">
                     <div class="col-md-12">
                         <label class="form-label">Sumber Pembiayaan</label>
                         <div class="d-flex">
                             <div class="form-check me-3">
                                 <input name="sumber_pembiayaan" class="form-check-input" type="radio"
-                                    value="Eksternal" id="sumber_eksternal" wire:model.live="sumber_pembiayaan">
+                                    value="Eksternal" id="sumber_eksternal">
                                 <label class="form-check-label" for="sumber_eksternal">
                                     Eksternal
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input name="sumber_pembiayaan" class="form-check-input" type="radio" value="Internal"
-                                    id="sumber_internal" wire:model.live="sumber_pembiayaan">
+                                    id="sumber_internal">
                                 <label class="form-check-label" for="sumber_internal">
                                     Internal
                                 </label>
@@ -75,7 +72,7 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="row mb-3" id="rowLampiranSID">
                         <div class="col-md-6">
                             <label for="lampiran_sid" class="form-label">Lampiran SID</label>
                             <input class="form-control" type="file" id="lampiran_sid">
@@ -93,31 +90,30 @@
                         <div class="col-md-12">
                             <label class="form-label">Jenis Pembiayaan</label>
                             <div class="d-flex">
-                                <div class="form-check me-3">
+                                <div class="form-check me-3" id="radioInvoiceFinancing">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Invoice Financing" id="invoice_financing"
-                                        wire:model.live="jenis_pembiayaan">
+                                        value="Invoice Financing" id="invoice_financing" checked>
                                     <label class="form-check-label" for="invoice_financing">
                                         Invoice Financing
                                     </label>
                                 </div>
-                                <div class="form-check me-3">
+                                <div class="form-check me-3" id="radioPOFinancing">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="PO Financing" id="po_financing" wire:model.live="jenis_pembiayaan">
+                                        value="PO Financing" id="po_financing">
                                     <label class="form-check-label" for="po_financing">
                                         PO Financing
                                     </label>
                                 </div>
-                                <div class="form-check me-3">
+                                <div class="form-check me-3" id="radioInstallment">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Installment" id="installment" wire:model.live="jenis_pembiayaan">
+                                        value="Installment" id="installment">
                                     <label class="form-check-label" for="installment">
                                         Installment
                                     </label>
                                 </div>
-                                <div class="form-check">
+                                <div class="form-check" id="radioFactoring">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Factoring" id="factoring" wire:model.live="jenis_pembiayaan">
+                                        value="Factoring" id="factoring">
                                     <label class="form-check-label" for="factoring">
                                         Factoring
                                     </label>
@@ -129,52 +125,177 @@
             </div>
 
             <div class="card shadow-none border mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Invoice Penjamin</h5>
-                </div>
-                <div class="table-responsive text-nowrap">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>NO</th>
-                                <th>NO. INVOICE</th>
-                                <th>NAMA CLIENT</th>
-                                <th>NILAI INVOICE</th>
-                                <th>NILAI PINJAMAN</th>
-                                <th>NILAI BAGI HASIL</th>
-                                <th>INVOICE DATE</th>
-                                <th>DUE DATE</th>
-                                <th>DOKUMEN INVOICE *</th>
-                                <th>DOKUMEN KONTRAK</th>
-                                <th>DOKUMEN SO</th>
-                                <th>DOKUMEN BAST</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            @foreach ($invoices as $index => $invoice)
-                                <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $invoice['no_invoice'] }}</td>
-                                    <td>{{ $invoice['nama_client'] }}</td>
-                                    <td>Rp. {{ number_format((int) $invoice['nilai_invoice'], 0, ',', '.') }}</td>
-                                    <td>Rp. {{ number_format((int) $invoice['nilai_pinjaman'], 0, ',', '.') }}</td>
-                                    <td>Rp. {{ number_format((int) $invoice['nilai_bagi_hasil'], 0, ',', '.') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($invoice['invoice_date'])->format('d F Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($invoice['due_date'])->format('d F Y') }}</td>
-                                    <td><a href="#">{{ $invoice['dokumen_invoice'] }}</a></td>
-                                    <td><a href="#">{{ $invoice['dokumen_kontrak'] }}</a></td>
-                                    <td><a href="#">{{ $invoice['dokumen_so'] }}</a></td>
-                                    <td><a href="#">{{ $invoice['dokumen_bast'] }}</a></td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
                 <div class="card-body">
+                    <!-- Invoice Table with Collapse based on Jenis Pembiayaan -->
+                    <div class="card shadow-none border mb-4 financing-table" id="invoiceFinancingTable"
+                        style="display: block;">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Invoice Penjamin</h5>
+                        </div>
+                        <div class="table-responsive text-nowrap">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>NO. INVOICE</th>
+                                        <th>NAMA CLIENT</th>
+                                        <th>NILAI INVOICE</th>
+                                        <th>NILAI PINJAMAN</th>
+                                        <th>NILAI BAGI HASIL</th>
+                                        <th>INVOICE DATE</th>
+                                        <th>DUE DATE</th>
+                                        <th>DOKUMEN INVOICE</th>
+                                        <th>DOKUMEN KONTRAK</th>
+                                        <th>DOKUMEN SO</th>
+                                        <th>DOKUMEN BAST</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    @foreach ($invoices as $index => $invoice)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $invoice['no_invoice'] }}</td>
+                                            <td>{{ $invoice['nama_client'] }}</td>
+                                            <td>Rp. {{ number_format((int) $invoice['nilai_invoice'], 0, ',', '.') }}
+                                            </td>
+                                            <td>Rp. {{ number_format((int) $invoice['nilai_pinjaman'], 0, ',', '.') }}
+                                            </td>
+                                            <td>Rp. {{ number_format((int) $invoice['nilai_bagi_hasil'], 0, ',', '.') }}
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($invoice['invoice_date'])->format('d F Y') }}
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($invoice['due_date'])->format('d F Y') }}</td>
+                                            <td><a href="#">{{ $invoice['dokumen_invoice'] }}</a></td>
+                                            <td><a href="#">{{ $invoice['dokumen_kontrak'] }}</a></td>
+                                            <td><a href="#">{{ $invoice['dokumen_so'] }}</a></td>
+                                            <td><a href="#">{{ $invoice['dokumen_bast'] }}</a></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PO Financing Table -->
+                    <div class="card shadow-none border mb-4 financing-table" id="poFinancingTable"
+                        style="display: none;">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Kontrak Penjamin</h5>
+                        </div>
+                        <div class="table-responsive text-nowrap">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>NO. INVOICE</th>
+                                        <th>NAMA CLIENT</th>
+                                        <th>NILAI INVOICE</th>
+                                        <th>NILAI PINJAMAN</th>
+                                        <th>NILAI BAGI HASIL</th>
+                                        <th>KONTRAK DATE</th>
+                                        <th>DUE DATE</th>
+                                        <th>DOKUMEN KONTRAK</th>
+                                        <th>DOKUMEN SO</th>
+                                        <th>DOKUMEN BAST</th>
+                                        <th>DOKUMEN LAINNYA</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    @foreach ($invoices as $index => $invoice)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $invoice['no_invoice'] }}</td>
+                                            <td>{{ $invoice['nama_client'] }}</td>
+                                            <td>Rp. {{ number_format((int) $invoice['nilai_invoice'], 0, ',', '.') }}
+                                            </td>
+                                            <td>Rp. {{ number_format((int) $invoice['nilai_pinjaman'], 0, ',', '.') }}
+                                            </td>
+                                            <td>Rp.
+                                                {{ number_format((int) $invoice['nilai_bagi_hasil'], 0, ',', '.') }}
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($invoice['invoice_date'])->format('d F Y') }}
+                                            </td>
+                                            <td>{{ \Carbon\Carbon::parse($invoice['due_date'])->format('d F Y') }}</td>
+                                            <td><a href="#">{{ $invoice['dokumen_invoice'] }}</a></td>
+                                            <td><a href="#">{{ $invoice['dokumen_kontrak'] }}</a></td>
+                                            <td><a href="#">{{ $invoice['dokumen_so'] }}</a></td>
+                                            <td><a href="#">{{ $invoice['dokumen_bast'] }}</a></td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Installment Table -->
+                    <div class="card shadow-none border mb-4 financing-table" id="installmentTable"
+                        style="display: none;">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Invoice Penjamin</h5>
+                        </div>
+                        <div class="table-responsive text-nowrap">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>NO.INVOICE</th>
+                                        <th>NAMA CLIENT</th>
+                                        <th>NILAI INVOICE</th>
+                                        <th>INVOICE DATE</th>
+                                        <th>NAMA BARANG</th>
+                                        <th>DOKUMEN INVOICE</th>
+                                        <th>DOKUMEN LAINNYA</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    <tr>
+                                        <td colspan="10" class="text-center">Belum ada data installment</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Factoring Table -->
+                    <div class="card shadow-none border mb-4 financing-table" id="factoringTable"
+                        style="display: none;">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Kontrak Penjamin</h5>
+                        </div>
+                        <div class="table-responsive text-nowrap">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>NO. INVOICE</th>
+                                        <th>NAMA CLIENT</th>
+                                        <th>NILAI INVOICE</th>
+                                        <th>NILAI PINJAMAN</th>
+                                        <th>NILAI BAGI HASIL</th>
+                                        <th>INVOICE DATE</th>
+                                        <th>DUE DATE</th>
+                                        <th>DOKUMEN INVOICE</th>
+                                        <th>DOKUMEN KONTRAK</th>
+                                        <th>DOKUMEN SO</th>
+                                        <th>DOKUMEN BAST</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-border-bottom-0">
+                                    <tr>
+                                        <td colspan="10" class="text-center">Belum ada data factoring</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
                     <button type="button" class="btn btn-outline-primary wave-effect">
                         <i class="fa-solid fa-plus me-1"></i>
-                        Tambah
+                        Tambah Invoice
                     </button>
+
+
                 </div>
             </div>
 
@@ -184,34 +305,45 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="total_pinjaman" class="form-label">Total Pinjaman</label>
-                    <input type="text" class="form-control" id="total_pinjaman" value="RP. 9.000.000" disabled>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="harapan_tanggal_pencairan" class="form-label">Harapan Tanggal Pencairan</label>
-                    <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" />
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="total_bagi_hasil" value="2% (Rp. 180.000)"
-                            disabled>
-                        <span class="input-group-text">/Bulan</span>
+            <div class="card border-1 mb-4 shadow-none">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="total_pinjaman" class="form-label">Total Pinjaman</label>
+                            <input type="text" class="form-control" id="total_pinjaman" value="RP. 9.000.000"
+                                disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="harapan_tanggal_pencairan" class="form-label">Harapan Tanggal
+                                Pencairan</label>
+                            <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" />
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="rencana_tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran <i
-                            class="tf-icons ti ti-info-circle data-bs-toggle="tooltip" title="Info"></i></label>
-or="pembayaran_total" class="form-label">Pembayaran Total</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="pembayaran_total" value="Rp. 9.180.000"
-                            disabled>
-                        <span class="input-group-text">/Bulan</span>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="total_bagi_hasil"
+                                    value="2% (Rp. 180.000)" disabled>
+                                <span class="input-group-text">/Bulan</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="rencana_tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran <i
+                                    class="tf-icons ti ti-info-circle data-bs-toggle="tooltip"
+                                    title="Info"></i></label>
+                            <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" />
+
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="pembayaran_total"
+                                    value="Rp. 9.180.000" disabled>
+                                <span class="input-group-text">/Bulan</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -236,7 +368,7 @@ or="pembayaran_total" class="form-label">Pembayaran Total</label>
 
 @push('scripts')
     <script>
-        document.addEventListener('livewire:load', function() {
+        document.addEventListener('livewire:init', function() {
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
@@ -246,6 +378,78 @@ or="pembayaran_total" class="form-label">Pembayaran Total</label>
             // Initialize flatpickr
             flatpickr(".flatpickr-date", {
                 dateFormat: "d/m/Y",
+            });
+        });
+
+        // Handle Jenis Pembiayaan Radio Button Change - Pure JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const radioButtons = document.querySelectorAll('input[name="jenis_pembiayaan"]');
+            const cardSumberPembiayaan = document.getElementById('cardSumberPembiayaan');
+            const rowLampiranSID = document.getElementById('rowLampiranSID');
+            const radioInvoiceFinancing = document.getElementById('radioInvoiceFinancing');
+            const radioPOFinancing = document.getElementById('radioPOFinancing');
+            const radioInstallment = document.getElementById('radioInstallment');
+            const radioFactoring = document.getElementById('radioFactoring');
+
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const selectedValue = this.value;
+
+                    // Hide all tables
+                    document.querySelectorAll('.financing-table').forEach(table => {
+                        table.style.display = 'none';
+                    });
+
+                    // Check if Installment is selected
+                    if (selectedValue === 'Installment') {
+                        // Hide other radio buttons
+                        radioInvoiceFinancing.style.display = 'none';
+                        radioPOFinancing.style.display = 'none';
+                        radioFactoring.style.display = 'none';
+                        
+                        // Hide Sumber Pembiayaan card
+                        cardSumberPembiayaan.style.display = 'none';
+                        
+                        // Hide Lampiran SID and Nilai KOL row
+                        rowLampiranSID.style.display = 'none';
+                        
+                        // Show Installment table
+                        document.getElementById('installmentTable').style.display = 'block';
+                    } else {
+                        // Show all radio buttons again
+                        radioInvoiceFinancing.style.display = '';
+                        radioPOFinancing.style.display = '';
+                        radioInstallment.style.display = '';
+                        radioFactoring.style.display = '';
+                        
+                        // Show Sumber Pembiayaan card
+                        cardSumberPembiayaan.style.display = '';
+                        
+                        // Show Lampiran SID and Nilai KOL row
+                        rowLampiranSID.style.display = '';
+                        
+                        // Show selected table
+                        if (selectedValue === 'Invoice Financing') {
+                            document.getElementById('invoiceFinancingTable').style.display = 'block';
+                        } else if (selectedValue === 'PO Financing') {
+                            document.getElementById('poFinancingTable').style.display = 'block';
+                        } else if (selectedValue === 'Factoring') {
+                            document.getElementById('factoringTable').style.display = 'block';
+                        }
+                    }
+
+                    // Smooth scroll to visible table
+                    setTimeout(() => {
+                        const visibleTable = document.querySelector(
+                            '.financing-table[style*="display: block"]');
+                        if (visibleTable) {
+                            visibleTable.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'nearest'
+                            });
+                        }
+                    }, 100);
+                });
             });
         });
     </script>
