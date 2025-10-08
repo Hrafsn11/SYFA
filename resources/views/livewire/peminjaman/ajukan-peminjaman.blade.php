@@ -1,9 +1,8 @@
 @section('title', 'Menu Pengajuan Peminjaman')
 
 <div>
-       <div>
-        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4"
-            wire:navigate>
+    <div>
+        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4">
             <i class="tf-icons ti ti-arrow-left me-1"></i>
             Kembali
         </a>
@@ -25,14 +24,14 @@
                         <div class="d-flex">
                             <div class="form-check me-3">
                                 <input name="sumber_pembiayaan" class="form-check-input" type="radio"
-                                    value="Eksternal" id="sumber_eksternal" wire:model.live="sumber_pembiayaan">
+                                    value="Eksternal" id="sumber_eksternal" wire:model="sumber_pembiayaan">
                                 <label class="form-check-label" for="sumber_eksternal">
                                     Eksternal
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input name="sumber_pembiayaan" class="form-check-input" type="radio" value="Internal"
-                                    id="sumber_internal" wire:model.live="sumber_pembiayaan">
+                                    id="sumber_internal" wire:model="sumber_pembiayaan">
                                 <label class="form-check-label" for="sumber_internal">
                                     Internal
                                 </label>
@@ -96,28 +95,28 @@
                                 <div class="form-check me-3">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
                                         value="Invoice Financing" id="invoice_financing"
-                                        wire:model.live="jenis_pembiayaan">
+                                        wire:model="jenis_pembiayaan">
                                     <label class="form-check-label" for="invoice_financing">
                                         Invoice Financing
                                     </label>
                                 </div>
                                 <div class="form-check me-3">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="PO Financing" id="po_financing" wire:model.live="jenis_pembiayaan">
+                                        value="PO Financing" id="po_financing" wire:model="jenis_pembiayaan">
                                     <label class="form-check-label" for="po_financing">
                                         PO Financing
                                     </label>
                                 </div>
                                 <div class="form-check me-3">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Installment" id="installment" wire:model.live="jenis_pembiayaan">
+                                        value="Installment" id="installment" wire:model="jenis_pembiayaan">
                                     <label class="form-check-label" for="installment">
                                         Installment
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Factoring" id="factoring" wire:model.live="jenis_pembiayaan">
+                                        value="Factoring" id="factoring" wire:model="jenis_pembiayaan">
                                     <label class="form-check-label" for="factoring">
                                         Factoring
                                     </label>
@@ -207,7 +206,11 @@
                 <div class="col-md-4 mb-3">
                     <label for="rencana_tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran <i
                             class="tf-icons ti ti-info-circle data-bs-toggle="tooltip" title="Info"></i></label>
-or="pembayaran_total" class="form-label">Pembayaran Total</label>
+                    <input class="form-control" type="date" value="2021-06-18" id="html5-date-input" />
+
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="pembayaran_total" value="Rp. 9.180.000"
                             disabled>
@@ -233,20 +236,3 @@ or="pembayaran_total" class="form-label">Pembayaran Total</label>
         </div>
     </div>
 </div>
-
-@push('scripts')
-    <script>
-        document.addEventListener('livewire:load', function() {
-            // Initialize tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
-
-            // Initialize flatpickr
-            flatpickr(".flatpickr-date", {
-                dateFormat: "d/m/Y",
-            });
-        });
-    </script>
-@endpush
