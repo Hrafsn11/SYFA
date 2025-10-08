@@ -16,34 +16,38 @@
                 </div>
             </div>
             <div class="card border-1 mb-3 shadow-none" id="cardSumberPembiayaan">
-                <div class="card-body ">
+                <div class="card-body">
                     <div class="col-md-12">
                         <label class="form-label">Sumber Pembiayaan</label>
                         <div class="d-flex">
                             <div class="form-check me-3">
                                 <input name="sumber_pembiayaan" class="form-check-input" type="radio"
-                                    value="Eksternal" id="sumber_eksternal">
+                                    value="Eksternal" id="sumber_eksternal" wire:model.live="sumber_pembiayaan">
                                 <label class="form-check-label" for="sumber_eksternal">
                                     Eksternal
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input name="sumber_pembiayaan" class="form-check-input" type="radio" value="Internal"
-                                    id="sumber_internal">
+                                    id="sumber_internal" wire:model.live="sumber_pembiayaan">
                                 <label class="form-check-label" for="sumber_internal">
                                     Internal
                                 </label>
                             </div>
                         </div>
-                        <div class="mb-4 rounded-">
-                            <select class="form-select" id="exampleFormControlSelect1"
-                                aria-label="Default select example">
-                                <option selected>Pilih Sumber Pembiayaan</option>
-                                <option value="1">One</option>
-                                <option value="2">Two</option>
-                                <option value="3">Three</option>
-                            </select>
-                        </div>
+
+                        {{-- Bagian @if ini akan merespon perubahan dari wire:model.live --}}
+                        @if ($sumber_pembiayaan === 'Eksternal')
+                            <div class="mt-3" wire:key="tampil-eksternal">
+                                <label class="form-label">Pilih Sumber Eksternal</label>
+                                <select class="form-select" wire:model="sumber_eksternal_id">
+                                    <option selected disabled>Pilih Sumber Pembiayaan</option>
+                                    <option value="1">Pemberi Dana A</option>
+                                    <option value="2">Pemberi Dana B</option>
+                                    <option value="3">Pemberi Dana C</option>
+                                </select>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -406,13 +410,13 @@
                         radioInvoiceFinancing.style.display = 'none';
                         radioPOFinancing.style.display = 'none';
                         radioFactoring.style.display = 'none';
-                        
+
                         // Hide Sumber Pembiayaan card
                         cardSumberPembiayaan.style.display = 'none';
-                        
+
                         // Hide Lampiran SID and Nilai KOL row
                         rowLampiranSID.style.display = 'none';
-                        
+
                         // Show Installment table
                         document.getElementById('installmentTable').style.display = 'block';
                     } else {
@@ -421,16 +425,17 @@
                         radioPOFinancing.style.display = '';
                         radioInstallment.style.display = '';
                         radioFactoring.style.display = '';
-                        
+
                         // Show Sumber Pembiayaan card
                         cardSumberPembiayaan.style.display = '';
-                        
+
                         // Show Lampiran SID and Nilai KOL row
                         rowLampiranSID.style.display = '';
-                        
+
                         // Show selected table
                         if (selectedValue === 'Invoice Financing') {
-                            document.getElementById('invoiceFinancingTable').style.display = 'block';
+                            document.getElementById('invoiceFinancingTable').style.display =
+                            'block';
                         } else if (selectedValue === 'PO Financing') {
                             document.getElementById('poFinancingTable').style.display = 'block';
                         } else if (selectedValue === 'Factoring') {
