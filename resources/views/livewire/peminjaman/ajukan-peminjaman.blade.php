@@ -1,6 +1,6 @@
 <div>
     <div>
-        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4" wire:navigate>
+        <a href="{{ route('peminjaman') }}" class="btn btn-outline-primary mb-4">
             <i class="tf-icons ti ti-arrow-left me-1"></i>
             Kembali
         </a>

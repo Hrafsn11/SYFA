@@ -77,7 +77,11 @@
                 <div class="content-wrapper">
                     <!-- Content -->
                     <div class="container-xxl flex-grow-1 container-p-y">
-                        {{ $slot }}
+                        @hasSection('content')
+                            @yield('content')
+                        @elseif(isset($slot))
+                            {{ $slot }}
+                        @endif
                     </div>
                     <!-- / Content -->
 
@@ -111,6 +115,7 @@
     <script src="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/hammer/hammer.js') }}"></script>
     <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/typeahead-js/typeahead.js') }}"></script>
 
     <!-- Vendors JS -->
     <script src="{{ asset('assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
@@ -130,19 +135,47 @@
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
     <script>
-         document.addEventListener('wire:navigate', () => {
-            // Inisialisasi ulang menu dan komponen lain setelah navigasi Livewire
-            if (typeof TemplateCustomizer !== 'undefined') {
-                // Reset dan inisialisasi ulang menu
-                if (window.menu) {
-                    window.menu.destroy();
-                    window.menu = new Menu(document.getElementById('layout-menu'), {
-                        orientation: 'vertical',
-                        closeChildren: false
-                    });
-                }
-                // Inisialisasi ulang komponen lain jika perlu
-                // Contoh: new bootstrap.Tooltip(document.body, { selector: '[data-bs-toggle="tooltip"]' });
+        window.initializeVuexyLayout = function () {
+            if (typeof Menu === 'undefined') {
+                return;
+            }
+
+            const layoutMenu = document.getElementById('layout-menu');
+            if (!layoutMenu) {
+                return;
+            }
+
+            if (window.menu && typeof window.menu.destroy === 'function') {
+                window.menu.destroy();
+            }
+
+            window.menu = new Menu(layoutMenu, {
+                orientation: layoutMenu.classList.contains('menu-horizontal') ? 'horizontal' : 'vertical',
+                closeChildren: layoutMenu.classList.contains('menu-horizontal')
+            });
+
+            if (window.Helpers?.initSidebarToggle) {
+                window.Helpers.initSidebarToggle();
+            }
+
+            if (typeof bootstrap !== 'undefined') {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+                    if (!el.dataset.tooltipInitialized) {
+                        new bootstrap.Tooltip(el);
+                        el.dataset.tooltipInitialized = 'true';
+                    }
+                });
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout);
+        document.addEventListener('livewire:navigated', window.initializeVuexyLayout);
+        document.addEventListener('livewire:load', () => {
+            window.initializeVuexyLayout();
+            if (window.Livewire?.hook) {
+                window.Livewire.hook('message.processed', () => {
+                    window.initializeVuexyLayout();
+                });
             }
         });
     </script>
