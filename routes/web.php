@@ -1,10 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Livewire\Dashboard;
-use App\Livewire\UserManagement;
+use App\Livewire\Peminjaman;
 use App\Livewire\RoleManagement;
+use App\Livewire\UserManagement;
+use App\Livewire\ConfigMatrixScore;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\ConfigMatrixPinjaman;
 use App\Livewire\PermissionManagement;
+use App\Livewire\Peminjaman\AjukanPeminjaman;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +33,10 @@ Route::middleware([
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
+    Route::get('peminjaman', Peminjaman::class)->name('peminjaman');
+    Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('matrixpinjaman');
+    Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
+    Route::get('ajukan-peminjaman', AjukanPeminjaman::class)->name('ajukanpeminjaman');
 });
 
 require __DIR__ . '/auth.php';

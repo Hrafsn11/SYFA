@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-[x-cloak] {
-    display: none;
+/* Custom Radio Button Color */
+.form-check-input[type="radio"]:checked {
+    background-color: #13ABAB !important;
+    border-color: #13ABAB !important;
+}
+
+.form-check-input[type="radio"]:focus {
+    border-color: #13ABAB;
+    box-shadow: 0 0 0 0.2rem rgba(19, 171, 171, 0.25);
+}
+
+.form-check-input[type="radio"]:checked:focus {
+    background-color: #13ABAB !important;
+    border-color: #13ABAB !important;
+}
+
+/* Hover effect */
+.form-check-input[type="radio"]:hover {
+    border-color: #13ABAB;
 }

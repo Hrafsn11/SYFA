@@ -95,7 +95,18 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public  ← COMMENT OUT atau hapus ini
+
+# WHITELIST: Track public/assets (template Vuexy)
+# !/public/assets/
+
+# Tapi ignore generated files di public/
+/public/hot
+/public/storage
+/public/build/
+/public/js/
+/public/css/
+/public/mix-manifest.json
 
 # Storybook build outputs
 .out
@@ -155,9 +166,6 @@ composer.phar
 
 # Local configuration
 config/local.php
-
-# Test results
-/tests/_output/
 
 # Coverage reports
 /coverage/
