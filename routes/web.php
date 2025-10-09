@@ -20,7 +20,9 @@ use App\Livewire\Peminjaman\PeminjamanCreate;
 |
 */
 
-Route::view('/', 'welcome');
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 // Authenticated routes with Jetstream
 Route::middleware([

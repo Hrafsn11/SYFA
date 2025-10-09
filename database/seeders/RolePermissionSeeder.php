@@ -15,8 +15,17 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
+        // Temporarily change cache driver to array to avoid database cache issues
+        $originalCacheDriver = config('cache.default');
+        config(['cache.default' => 'array']);
+
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        try {
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        } catch (\Exception $e) {
+            // Cache table might not exist yet during fresh migrations
+            // This is safe to ignore as the cache will be cleared when needed
+        }
 
         // Create permissions
         $permissions = [
@@ -92,5 +101,8 @@ class RolePermissionSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
         $admin->assignRole('admin');
+
+        // Restore the original cache driver
+        config(['cache.default' => $originalCacheDriver]);
     }
 }
