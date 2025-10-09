@@ -47,86 +47,32 @@
 
                         <!-- Table -->
                         <table class="datatables-basic table border-top">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th class="text-center" width="5%">No</th>
-                                    <th>Nominal</th>
+                                    <th class="text-center">Nominal</th>
                                     <th class="text-center">Approve Oleh</th>
                                     <th class="text-center" width="10%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Row 1 -->
+                                @foreach ($data as $item)
                                 <tr>
-                                    <td class="text-center">1</td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-semibold">PT. Maju Bersama</span>
-                                            <small class="text-muted">NPWP: 01.234.567.8-901.000</small>
-                                        </div>
-                                    </td>
+                                    <td class="text-center">{{ $loop->iteration }}</td>
+                                    <td class="text-center">{{ $item['nominal'] }}</td>
+                                    <td class="text-center">{{ $item['approve_oleh'] }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-label-warning">Mas Agim</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-center align-items-center gap-1">
-                                            <a class="dropdown-item" href="#">
-                                                <i class="ti ti-edit me-1"></i>
-                                            </a>
-                                            <a class="dropdown-item text-danger" href="#">
-                                                <i class="ti ti-trash me-1"></i>
-                                            </a>
-                                        </div>
-                                    </td>
+                                            <div class="d-flex justify-center align-items-center gap-2">
+                                                <a class="dropdown-item" href="#">
+                                                    <i class="ti ti-edit me-1"></i>
+                                                </a>
+                                                <a class="dropdown-item text-danger" href="#">
+                                                    <i class="ti ti-trash me-1"></i>
+                                                </a>
+                                            </div>
+                                        </td>
                                 </tr>
-
-                                <!-- Row 2 -->
-                                <tr>
-                                    <td class="text-center">2</td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-semibold">PT. Maju Bersama</span>
-                                            <small class="text-muted">NPWP: 01.234.567.8-901.000</small>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-primary">Atmin</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-center align-items-center gap-2">
-                                            <a class="dropdown-item" href="#">
-                                                <i class="ti ti-edit me-1"></i>
-                                            </a>
-                                            <a class="dropdown-item text-danger" href="#">
-                                                <i class="ti ti-trash me-1"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Row 3 -->
-                                <tr>
-                                    <td class="text-center">3</td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-semibold">PT. Maju Bersama</span>
-                                            <small class="text-muted">NPWP: 01.234.567.8-901.000</small>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-danger">Hadi</span>
-                                    </td>
-                                      <td class="text-center">
-                                        <div class="d-flex justify-center align-items-center gap-2">
-                                            <a class="dropdown-item" href="#">
-                                                <i class="ti ti-edit me-1"></i>
-                                            </a>
-                                            <a class="dropdown-item text-danger" href="#">
-                                                <i class="ti ti-trash me-1"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
+                                @endforeach
                                 
                             </tbody>
                         </table>
@@ -135,7 +81,7 @@
                         <div class="row mx-2 mt-3 mb-3">
                             <div class="col-sm-12 col-md-6">
                                 <div class="dataTables_info">
-                                    Menampilkan 1 sampai 5 dari 24 data
+                                    Menampilkan {{ count($data) }} dari {{ count($data) }} data
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-6">
@@ -149,9 +95,6 @@
                                         </li>
                                         <li class="paginate_button page-item">
                                             <a href="#" class="page-link">2</a>
-                                        </li>
-                                        <li class="paginate_button page-item">
-                                            <a href="#" class="page-link">3</a>
                                         </li>
                                         <li class="paginate_button page-item next">
                                             <a href="#" class="page-link">Selanjutnya</a>
