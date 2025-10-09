@@ -100,7 +100,7 @@
                             <div class="d-flex">
                                 <div class="form-check me-3" id="radioInvoiceFinancing">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Invoice Financing" id="invoice_financing" 
+                                        value="Invoice Financing" id="invoice_financing"
                                         wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="invoice_financing">
                                         Invoice Financing
@@ -108,24 +108,21 @@
                                 </div>
                                 <div class="form-check me-3" id="radioPOFinancing">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="PO Financing" id="po_financing"
-                                        wire:model.live="jenis_pembiayaan">
+                                        value="PO Financing" id="po_financing" wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="po_financing">
                                         PO Financing
                                     </label>
                                 </div>
                                 <div class="form-check me-3" id="radioInstallment">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Installment" id="installment"
-                                        wire:model.live="jenis_pembiayaan">
+                                        value="Installment" id="installment" wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="installment">
                                         Installment
                                     </label>
                                 </div>
                                 <div class="form-check" id="radioFactoring">
                                     <input name="jenis_pembiayaan" class="form-check-input" type="radio"
-                                        value="Factoring" id="factoring"
-                                        wire:model.live="jenis_pembiayaan">
+                                        value="Factoring" id="factoring" wire:model.live="jenis_pembiayaan">
                                     <label class="form-check-label" for="factoring">
                                         Factoring
                                     </label>
@@ -145,18 +142,27 @@
             <div class="card border-1 mb-4 shadow-none">
                 <div class="card-body">
                     <!-- Form untuk selain Installment -->
-                    <div id="formNonInstallment" style="display: {{ $jenis_pembiayaan === 'Installment' ? 'none' : 'block' }};">
+                    <div id="formNonInstallment"
+                        style="display: {{ $jenis_pembiayaan === 'Installment' ? 'none' : 'block' }};">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="total_pinjaman" class="form-label">Total Pinjaman</label>
+                                @if ($jenis_pembiayaan === 'Factoring')
+                                    <label for="nominal_pinjaman" class="form-label">Total Nominal Yang
+                                        Dialihkan</label>
+                                @else
+                                    <label for="nominal_pinjaman" class="form-label">Total Pinjaman</label>
+                                @endif
                                 <input type="text" class="form-control" id="total_pinjaman" value="RP. 9.000.000"
                                     disabled>
                             </div>
                             <div class="col-md-6 col-12 mb-6">
                                 <label for="flatpickr-tanggal-pencairan" class="form-label">Harapan Tanggal
                                     Pencairan</label>
-                                <input type="text" class="form-control flatpickr-date" placeholder="DD/MM/YYYY"
-                                    id="flatpickr-tanggal-pencairan" />
+                                <div class="input-group">
+                                    <input type="text" class="form-control flatpickr-date rounded-l-md" placeholder="DD/MM/YYYY"
+                                        id="flatpickr-tanggal-pencairan" />
+                                    <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                </div>
                             </div>
                         </div>
 
@@ -172,8 +178,11 @@
                             <div class="col-md-4 mb-3">
                                 <label for="flatpickr-tanggal-pembayaran" class="form-label">Rencana Tanggal
                                     Pembayaran</label>
-                                <input type="text" class="form-control flatpickr-date" placeholder="DD/MM/YYYY"
-                                    id="flatpickr-tanggal-pembayaran" />
+                                <div class="input-group">
+                                    <input type="text" class="form-control flatpickr-date" placeholder="DD/MM/YYYY"
+                                        id="flatpickr-tanggal-pembayaran" />
+                                    <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                </div>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
@@ -187,28 +196,12 @@
                     </div>
 
                     <!-- Form khusus untuk Installment -->
-                    <div id="formInstallment" style="display: {{ $jenis_pembiayaan === 'Installment' ? 'block' : 'none' }};">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="kebutuhanPinjaman" class="form-label">Kebutuhan Pinjaman</label>
-                                <select class="form-select" id="kebutuhanPinjaman"
-                                    data-placeholder="Pilih Kebutuhan Pinjaman">
-                                    <option value="">Pilih Kebutuhan Pinjaman</option>
-                                    @foreach ($kebutuhan_pinjaman as $kebutuhan)
-                                        <option value="{{ $kebutuhan['value'] }}">{{ $kebutuhan['label'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="deskripsi_pinjaman" class="form-label">Deskripsi Pinjaman</label>
-                                <input type="text" class="form-control bg-light" id="Deskripsi"
-                                    value="Lorem Ipsum" disabled>
-                            </div>
-                        </div>
+                    <div id="formInstallment"
+                        style="display: {{ $jenis_pembiayaan === 'Installment' ? 'block' : 'none' }};">
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label for="nominal_pinjaman" class="form-label">Nominal Pinjaman</label>
+                                <label for="nominal_pinjaman" class="form-label">Total Pinjaman</label>
                                 <input type="text" class="form-control" id="nominal_pinjaman"
                                     placeholder="RP. 9.000.000">
                             </div>
@@ -296,6 +289,7 @@
                 initializeSelect2Elements();
                 initializeAllFlatpickr();
             }, 100);
+
         });
 
         function initializeSelect2Elements() {
@@ -353,24 +347,24 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             const modalTambah = document.getElementById('modalTambahInvoice');
-            
+
             if (!modalTambah) {
                 return;
             }
-            
+
             const bsModal = new bootstrap.Modal(modalTambah);
 
             // Listen for Livewire event to open modal (Livewire v3 syntax)
             document.addEventListener('open-modal', (event) => {
                 const jenisPembiayaan = event.detail.jenisPembiayaan || 'Invoice Financing';
-                
+
                 // Show the modal first
                 bsModal.show();
-                
+
                 // IMPORTANT: Wait for modal to be fully rendered before updating content
                 setTimeout(function() {
                     updateModalContent(jenisPembiayaan);
-                    
+
                     // Initialize flatpickr for modal dates
                     setTimeout(function() {
                         initializeModalFlatpickr();
@@ -382,7 +376,7 @@
         function updateModalContent(jenisPembiayaan) {
             const modalTitle = document.getElementById('modalTitle');
             const allForms = document.querySelectorAll('.modal-form-content');
-            
+
             // Hide all forms
             allForms.forEach(form => {
                 form.style.display = 'none';
@@ -419,10 +413,10 @@
                         altFormat: 'j F Y',
                         onChange: function(selectedDates, dateStr, instance) {
                             const elementId = instance.input.id;
-                            const formattedDate = selectedDates[0] ? 
+                            const formattedDate = selectedDates[0] ?
                                 selectedDates[0].toISOString().split('T')[0] : '';
-                            
-                            switch(elementId) {
+
+                            switch (elementId) {
                                 case 'invoiceContractDate':
                                 case 'poContractDate':
                                 case 'factoringContractDate':
@@ -455,12 +449,12 @@
             setTimeout(function() {
                 initializeSelect2Elements();
                 initializeAllFlatpickr();
-                
+
                 const modal = document.getElementById('modalTambahInvoice');
                 if (modal && modal.classList.contains('show')) {
                     const selectedJenisPembiayaan = @this.modal_jenis_pembiayaan || 'Invoice Financing';
                     updateModalContent(selectedJenisPembiayaan);
-                    
+
                     setTimeout(function() {
                         initializeModalFlatpickr();
                     }, 100);

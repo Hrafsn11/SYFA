@@ -59,7 +59,7 @@
                     <thead>
                         <tr>
                             <th>NO</th>
-                            <th>NO. INVOICE</th>
+                            <th>NO. KONTRAK</th>
                             <th>NAMA CLIENT</th>
                             <th>NILAI INVOICE</th>
                             <th>NILAI PINJAMAN</th>
