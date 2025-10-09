@@ -590,40 +590,40 @@ button.list-group-item-primary.active {
 
 .form-control:focus,
 .form-select:focus {
-  border-color: #7367f0 !important;
+  border-color: #13ABAB !important;
 }
 
 .input-group:focus-within .form-control,
 .input-group:focus-within .input-group-text {
-  border-color: #7367f0 !important;
+  border-color: #13ABAB !important;
 }
 
 .form-check-input:checked {
   background-color: #7367f0;
   border-color: #7367f0;
-  box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.3);
+  box-shadow: 0 2px 6px 0 rgba(19, 171, 171, 0.3);
 }
 .form-check-input[type=checkbox]:indeterminate {
-  background-color: #7367f0;
-  border-color: #7367f0;
-  box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.3);
+  background-color: #13ABAB;
+  border-color: #13ABAB;
+  box-shadow: 0 2px 6px 0 rgba(19, 171, 171, 0.3);
 }
 
 .custom-option.checked {
-  border: 2px solid #7367f0 !important;
+  border: 2px solid #13ABAB !important;
   margin: 0;
 }
 .custom-option.checked .custom-option-body i,
 .custom-option.checked .custom-option-header i {
-  color: #7367f0;
+  color: #13ABAB;
 }
 .custom-option.custom-option-label.checked {
-  background-color: rgba(115, 103, 240, 0.12);
-  color: #7367f0;
+  background-color: rgba(19, 171, 171, 0.12);
+  color: #13ABAB;
 }
 .custom-option.custom-option-label.checked .custom-option-header span,
 .custom-option.custom-option-label.checked .custom-option-title {
-  color: #7367f0;
+  color: #13ABAB;
 }
 
 .form-switch .form-check-input:focus {
@@ -634,30 +634,30 @@ button.list-group-item-primary.active {
 }
 
 .form-control:focus ~ .form-label {
-  border-color: #7367f0;
+  border-color: #13ABAB;
 }
 .form-control:focus ~ .form-label::after {
   border-color: inherit;
 }
 
 .switch-input:checked ~ .switch-toggle-slider {
-  background: #7367f0;
+  background: #13ABAB;
   color: #fff;
-  box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.3);
+  box-shadow: 0 2px 6px 0 rgba(19, 171, 171, 0.3);
 }
 
 .switch-primary.switch .switch-input:checked ~ .switch-toggle-slider {
-  background: #7367f0;
+  background: #13ABAB;
   color: #fff;
-  box-shadow: 0 2px 6px 0 rgba(115, 103, 240, 0.3);
+  box-shadow: 0 2px 6px 0 rgba(19, 171, 171, 0.3);
 }
 
 .timeline .timeline-point-primary {
-  background-color: #7367f0 !important;
-  outline: 3px solid rgba(115, 103, 240, 0.12);
+  background-color: #13ABAB !important;
+  outline: 3px solid rgba(19, 171, 171, 0.12);
 }
 .timeline.timeline-outline .timeline-point-primary {
-  border: 2px solid #7367f0 !important;
+  border: 2px solid #13ABAB !important;
 }
 
 .timeline .timeline-indicator-primary {

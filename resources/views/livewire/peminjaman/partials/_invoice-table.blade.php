@@ -22,6 +22,7 @@
                             <th>DOKUMEN KONTRAK</th>
                             <th>DOKUMEN SO</th>
                             <th>DOKUMEN BAST</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
@@ -39,6 +40,7 @@
                                 <td><a href="#" class="text-primary">{{ $invoice['dokumen_kontrak'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $invoice['dokumen_so'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $invoice['dokumen_bast'] }}</a></td>
+                                <td><a href="#"><i class="fas fa-edit"></i></a></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -68,6 +70,7 @@
                             <th>DOKUMEN SO</th>
                             <th>DOKUMEN BAST</th>
                             <th>DOKUMEN LAINNYA</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
@@ -90,6 +93,7 @@
                                 <td><a href="#" class="text-primary">{{ $po['dokumen_so'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $po['dokumen_bast'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $po['dokumen_lainnya'] }}</a></td>
+                                <td><a href="#"><i class="fas fa-edit"></i></a></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -115,6 +119,7 @@
                             <th>NAMA BARANG</th>
                             <th>DOKUMEN INVOICE</th>
                             <th>DOKUMEN LAINNYA</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
@@ -128,6 +133,7 @@
                                 <td>{{ $inst['nama_barang'] }}</td>
                                 <td><a href="#" class="text-primary">{{ $inst['dokumen_invoice'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $inst['dokumen_lainnya'] }}</a></td>
+                                <td><a href="#"><i class="fas fa-edit"></i></a></td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -146,17 +152,18 @@
                     <thead>
                         <tr>
                             <th>NO</th>
-                            <th>NO. INVOICE</th>
+                            <th>NO. KONTRAK</th>
                             <th>NAMA CLIENT</th>
                             <th>NILAI INVOICE</th>
                             <th>NILAI PINJAMAN</th>
                             <th>NILAI BAGI HASIL</th>
-                            <th>INVOICE DATE</th>
+                            <th>KONTRAK DATE</th>
                             <th>DUE DATE</th>
-                            <th>DOKUMEN INVOICE</th>
                             <th>DOKUMEN KONTRAK</th>
                             <th>DOKUMEN SO</th>
                             <th>DOKUMEN BAST</th>
+                            <th>DOKUMEN LAINNYA</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody class="table-border-bottom-0">
@@ -174,6 +181,8 @@
                                 <td><a href="#" class="text-primary">{{ $fact['dokumen_kontrak'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $fact['dokumen_so'] }}</a></td>
                                 <td><a href="#" class="text-primary">{{ $fact['dokumen_bast'] }}</a></td>
+                                <td><a href="#"><i class="fas fa-edit"></i></a></td>
+
                             </tr>
                         @endforeach
                     </tbody>
