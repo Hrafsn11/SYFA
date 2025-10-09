@@ -96,9 +96,9 @@
                 <div id="formModalPOFinancing" class="modal-form-content" style="display: none;">
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <label class="form-label">No. Invoice <span class="text-danger">*</span></label>
+                            <label class="form-label">No. Kontrak <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" wire:model="new_no_invoice"
-                                placeholder="Masukkan No. Invoice">
+                                placeholder="Masukkan No. Kontrak">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nama Client <span class="text-danger">*</span></label>
@@ -127,13 +127,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Contract Date <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control flatpickr-modal-date" id="poContractDate"
-                                placeholder="01/09/2025">
+                            <div class="input-group">
+                                <input type="text" class="form-control flatpickr-modal-date" id="poContractDate"
+                                    placeholder="01/09/2025">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control flatpickr-modal-date" id="poDueDate"
-                                placeholder="01/09/2025">
+                            <div class="input-group">
+                                <input type="text" class="form-control flatpickr-modal-date" id="poDueDate"
+                                    placeholder="01/09/2025">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -201,8 +207,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Invoice Date <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control flatpickr-modal-date"
-                                id="installmentInvoiceDate" placeholder="01/09/2025">
+                            <div class="input-group">
+                                <input type="text" class="form-control flatpickr-modal-date"
+                                    id="installmentInvoiceDate" placeholder="01/09/2025">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nama Barang <span class="text-danger">*</span></label>
@@ -268,19 +277,25 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Contract Date <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control flatpickr-modal-date"
-                                id="factoringContractDate" placeholder="01/09/2025">
+                            <div class="input-group">
+                                <input type="text" class="form-control flatpickr-modal-date"
+                                    id="factoringContractDate" placeholder="01/09/2025">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
+
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control flatpickr-modal-date" id="factoringDueDate"
+                            <div class="input-group">
+                                <input type="text" class="form-control flatpickr-modal-date" id="factoringDueDate"
                                 placeholder="01/09/2025">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Upload Dokumen Invoice <span
-                                    class="text-danger">*</span></label>
+                            <label class="form-label">Upload Dokumen Invoice</label>
                             <input type="file" class="form-control" wire:model="new_dokumen_invoice">
                             <div wire:loading wire:target="new_dokumen_invoice" class="text-primary">
                                 <small><i class="fa fa-spinner fa-spin"></i> Uploading...</small>
@@ -289,7 +304,8 @@
                                 docx, xls, png, rar, zip)</small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Upload Dokumen Kontrak</label>
+                            <label class="form-label">Upload Dokumen Kontrak  <span
+                                    class="text-danger">*</span></label>
                             <input type="file" class="form-control" wire:model="new_dokumen_kontrak">
                             <div wire:loading wire:target="new_dokumen_kontrak" class="text-primary">
                                 <small><i class="fa fa-spinner fa-spin"></i> Uploading...</small>

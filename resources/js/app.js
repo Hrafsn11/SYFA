@@ -1,5 +1,6 @@
 import "./bootstrap";
 import Alpine from "alpinejs";
+import flatpickr from "flatpickr";
 
 // Prevent initializing Alpine if another copy (vendor/template) already added it
 if (!window.Alpine) {
@@ -15,3 +16,8 @@ if (!window.Alpine) {
 		// ignore
 	}
 }
+
+
+
+// Initialize flatpickr for datepicker
+
