@@ -21,7 +21,9 @@ use App\Livewire\Peminjaman\AjukanPeminjaman;
 |
 */
 
-Route::view('/', 'welcome');
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 
 // Authenticated routes with Jetstream
 Route::middleware([
