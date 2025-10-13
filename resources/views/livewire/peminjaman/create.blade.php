@@ -18,7 +18,7 @@
                         <div class="col-lg mb-3">
                             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
                             <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
-                                value="Techno Infinity" required>
+                                value="Techno Infinity" required disabled>
                         </div>
                     </div>
                     <div class="card border-1 mb-3 shadow-none" id="cardSumberPembiayaan">
@@ -167,7 +167,7 @@
                                         <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="total_bagi_hasil"
-                                                name="total_bagi_hasil" placeholder="2% (Rp. 180.000)">
+                                                name="total_bagi_hasil" placeholder="2% (Rp. 180.000)" disabled>
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -185,7 +185,7 @@
                                         <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="pembayaran_total"
-                                                name="pembayaran_total" placeholder="Rp. 9.180.000">
+                                                name="pembayaran_total" placeholder="Rp. 9.180.000" disabled>
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>

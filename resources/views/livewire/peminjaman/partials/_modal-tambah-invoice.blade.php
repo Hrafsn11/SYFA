@@ -261,7 +261,7 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Upload Dokumen Invoice</label>
+                            <label class="form-label">Upload Dokumen Invoice <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="modal_dokumen_invoice_fact">
                         </div>
                         <div class="col-md-6">

@@ -2,18 +2,10 @@
     <!-- Page Header -->
     <div class="row">
         <div class="col-12">
-            <div class="card mb-6">
+            <h4 class="fw-bold py-3 mb-4">Dashboard</h4>
+            <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-1">Welcome to SYFA Dashboard!</h4>
-                    <p class="mb-0">Admin dashboard for Management user</p>
-                </div>
-            </div>
-
-            <div class="card mb-6">
-                <div class="card-body">
-                    <h4 class="card-title mb-1">User Management</h4>
-                    <p class="mb-0 text-red-200">Manage user accounts, roles, and permissions.</p>
-
+                    Welcome to SYFA Dashboard!
                 </div>
             </div>
         </div>
