@@ -46,6 +46,11 @@
     <script src="{{ asset('assets/js/config.js') }}"></script>
 </head>
 <body>
+    <!-- Background Image with Overlay -->
+    <div class="position-fixed top-0 start-0 w-100 h-100" style="z-index: -1;">
+        <img src="{{ asset('assets/img/bg-login.png') }}" alt="Background" class="w-100 h-100" style="object-fit: cover; opacity: 0.2;" />
+    </div>
+    
     {{ $slot }}
 
     <!-- Core JS -->
@@ -59,18 +64,10 @@
     <script src="{{ asset('assets/vendor/libs/typeahead-js/typeahead.js') }}"></script>
     <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
 
-    <!-- Vendors JS -->
-    <script src="{{ asset('assets/vendor/libs/@form-validation/popular.js') }}"></script>
-    <script src="{{ asset('assets/vendor/libs/@form-validation/bootstrap5.js') }}"></script>
-    <script src="{{ asset('assets/vendor/libs/@form-validation/auto-focus.js') }}"></script>
-
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
 
-    <!-- Page JS -->
-    <script src="{{ asset('assets/js/pages-auth.js') }}"></script>
-
-    @stack('scripts')
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>
