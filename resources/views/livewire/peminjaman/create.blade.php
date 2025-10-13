@@ -82,13 +82,18 @@
                                 <div class="col-md-6">
                                     <label for="lampiran_sid" class="form-label">Lampiran SID</label>
                                     <input class="form-control" type="file" id="lampiran_sid" name="lampiran_sid">
-                                    <div class="form-text">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png,
+                                    <div class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png,
                                         rar, zip)</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nilai_kol" class="form-label">Nilai KOL</label>
                                     <input type="text" class="form-control" id="nilai_kol" name="nilai_kol"
                                         placeholder="Nilai KOL" disabled>
+                                </div>
+                                <div class="">
+                                    <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
+                                    <input type="text" class="form-control" id="defaultFormControlInput"
+                                        placeholder="Tujuan Pembiayaan" aria-describedby="defaultFormControlHelp" />
                                 </div>
                             </div>
 
@@ -273,165 +278,172 @@
 @endsection
 
 @push('scripts')
-<script>
-    // Data storage for invoice tables
-    let invoiceFinancingData = [];
-    let poFinancingData = [];
-    let installmentData = [];
-    let factoringData = [];
-    let currentJenisPembiayaan = 'Invoice Financing';
-    let modalInstance;
-    let currentSumberPembiayaan = 'Eksternal';
+    <script>
+        // Data storage for invoice tables
+        let invoiceFinancingData = [];
+        let poFinancingData = [];
+        let installmentData = [];
+        let factoringData = [];
+        let currentJenisPembiayaan = 'Invoice Financing';
+        let modalInstance;
+        let currentSumberPembiayaan = 'Eksternal';
 
-    $(document).ready(function() {
-        modalInstance = new bootstrap.Modal(document.getElementById('modalTambahInvoice'));
+        $(document).ready(function() {
+            modalInstance = new bootstrap.Modal(document.getElementById('modalTambahInvoice'));
 
-        initSelect2Elements();
+            initSelect2Elements();
 
-        initFlatpickrElements();
+            initFlatpickrElements();
 
-        // Handle Sumber Pembiayaan Radio
-        $('.sumber-pembiayaan-radio').on('change', function() {
-            if ($(this).val() === 'Eksternal') {
-                $('#divSumberEksternal').slideDown();
-            } else {
-                $('#divSumberEksternal').slideUp();
-            }
-        });
-
-        // Handle Jenis Pembiayaan Radio
-        $('.jenis-pembiayaan-radio').on('change', function() {
-            currentJenisPembiayaan = $(this).val();
-            handleJenisPembiayaanChange(currentJenisPembiayaan);
-        });
-
-        // Handle Tambah Invoice Button
-        $('#btnTambahInvoice').on('click', function() {
-            openModal(currentJenisPembiayaan);
-        });
-
-        // Handle Simpan Invoice Button
-        $('#btnSimpanInvoice').on('click', function() {
-            saveInvoiceData();
-        });
-    });
-
-    function handleJenisPembiayaanChange(jenisPembiayaan) {
-        // Hide all tables first
-        $('.financing-table').hide();
-
-        if (jenisPembiayaan === 'Installment') {
-            $('#formNonInstallment').hide();
-            $('#formInstallment').show();
-            $('#cardSumberPembiayaan').hide();
-            $('#rowLampiranSID').hide();
-            $('#installmentTable').show();
-        } else {
-            $('#formNonInstallment').show();
-            $('#formInstallment').hide();
-            $('#cardSumberPembiayaan').show();
-            $('#rowLampiranSID').show();
-
-            // Update label based on type
-            if (jenisPembiayaan === 'Factoring') {
-                $('#labelTotalPinjaman').text('Total Nominal Yang Dialihkan');
-                $('#factoringTable').show();
-            } else if (jenisPembiayaan === 'PO Financing') {
-                $('#labelTotalPinjaman').text('Total Pinjaman');
-                $('#poFinancingTable').show();
-            } else {
-                $('#labelTotalPinjaman').text('Total Pinjaman');
-                $('#invoiceFinancingTable').show();
-            }
-        }
-    }
-
-    function openModal(jenisPembiayaan) {
-        // Hide all modal forms
-        $('.modal-form-content').hide();
-
-        // Clear all modal inputs
-        $('.modal-form-content input[type="text"]').val('');
-        $('.modal-form-content input[type="file"]').val('');
-
-        // Show appropriate form and update title
-        switch (jenisPembiayaan) {
-            case 'Invoice Financing':
-                $('#modalTitle').text('Tambah Invoice Financing');
-                $('#formModalInvoiceFinancing').show();
-                break;
-            case 'PO Financing':
-                $('#modalTitle').text('Tambah PO Financing');
-                $('#formModalPOFinancing').show();
-                break;
-            case 'Installment':
-                $('#modalTitle').text('Tambah Invoice Penjamin');
-                $('#formModalInstallment').show();
-                break;
-            case 'Factoring':
-                $('#modalTitle').text('Tambah Kontrak Penjamin');
-                $('#formModalFactoring').show();
-                break;
-        }
-
-        // Initialize flatpickr for modal after showing
-        setTimeout(function() {
-            initModalFlatpickr();
-        }, 100);
-
-        modalInstance.show();
-    }
-
- 
-    // Menggunakan pola Vuexy untuk Select2
-    function initSelect2Elements() {
-        const select2Elements = $('.form-select');
-        if (select2Elements.length) {
-            select2Elements.each(function() {
-                var $this = $(this);
-                $this.wrap('<div class="position-relative"></div>').select2({
-                    placeholder: $this.data('placeholder') || 'Select value',
-                    dropdownParent: $this.closest('.modal').length ? $this.closest('.modal') : $this.parent()
-                });
+            // Handle Sumber Pembiayaan Radio
+            $('.sumber-pembiayaan-radio').on('change', function() {
+                if ($(this).val() === 'Eksternal') {
+                    $('#divSumberEksternal').slideDown();
+                } else {
+                    $('#divSumberEksternal').slideUp();
+                }
             });
-        }
-    }
 
-    // Menggunakan pola Vuexy untuk Flatpickr
-    function initFlatpickrElements() {
-        const flatpickrDate = document.querySelectorAll('.flatpickr-date');
-        if (flatpickrDate) {
-            flatpickrDate.forEach(function(elem) {
-                if (!elem._flatpickr) {
+            // Handle Jenis Pembiayaan Radio
+            $('.jenis-pembiayaan-radio').on('change', function() {
+                currentJenisPembiayaan = $(this).val();
+                handleJenisPembiayaanChange(currentJenisPembiayaan);
+            });
+
+            // Handle Tambah Invoice Button
+            $('#btnTambahInvoice').on('click', function() {
+                openModal(currentJenisPembiayaan);
+            });
+
+            // Handle Simpan Invoice Button
+            $('#btnSimpanInvoice').on('click', function() {
+                saveInvoiceData();
+            });
+        });
+
+        function handleJenisPembiayaanChange(jenisPembiayaan) {
+            // Hide all tables first
+            $('.financing-table').hide();
+
+            if (jenisPembiayaan === 'Installment') {
+                $('#formNonInstallment').hide();
+                $('#formInstallment').show();
+                $('#cardSumberPembiayaan').hide();
+                $('#rowLampiranSID').hide();
+                $('#installmentTable').show();
+            } else {
+                $('#formNonInstallment').show();
+                $('#formInstallment').hide();
+
+                if (jenisPembiayaan === 'Invoice Financing' || jenisPembiayaan === 'PO Financing') {
+                    $('#cardSumberPembiayaan').show();
+                    $('#rowLampiranSID').show();
+                } else {
+                    $('#cardSumberPembiayaan').hide();
+                    $('#rowLampiranSID').hide();
+                }
+
+                // Update label and show appropriate table based on type
+                if (jenisPembiayaan === 'Factoring') {
+                    $('#labelTotalPinjaman').text('Total Nominal Yang Dialihkan');
+                    $('#factoringTable').show();
+                } else if (jenisPembiayaan === 'PO Financing') {
+                    $('#labelTotalPinjaman').text('Total Pinjaman');
+                    $('#poFinancingTable').show();
+                } else {
+                    $('#labelTotalPinjaman').text('Total Pinjaman');
+                    $('#invoiceFinancingTable').show();
+                }
+            }
+        }
+
+        function openModal(jenisPembiayaan) {
+            // Hide all modal forms
+            $('.modal-form-content').hide();
+
+            // Clear all modal inputs
+            $('.modal-form-content input[type="text"]').val('');
+            $('.modal-form-content input[type="file"]').val('');
+
+            // Show appropriate form and update title
+            switch (jenisPembiayaan) {
+                case 'Invoice Financing':
+                    $('#modalTitle').text('Tambah Invoice Financing');
+                    $('#formModalInvoiceFinancing').show();
+                    break;
+                case 'PO Financing':
+                    $('#modalTitle').text('Tambah PO Financing');
+                    $('#formModalPOFinancing').show();
+                    break;
+                case 'Installment':
+                    $('#modalTitle').text('Tambah Invoice Penjamin');
+                    $('#formModalInstallment').show();
+                    break;
+                case 'Factoring':
+                    $('#modalTitle').text('Tambah Kontrak Penjamin');
+                    $('#formModalFactoring').show();
+                    break;
+            }
+
+            // Initialize flatpickr for modal after showing
+            setTimeout(function() {
+                initModalFlatpickr();
+            }, 100);
+
+            modalInstance.show();
+        }
+
+
+        // Menggunakan pola Vuexy untuk Select2
+        function initSelect2Elements() {
+            const select2Elements = $('.form-select');
+            if (select2Elements.length) {
+                select2Elements.each(function() {
+                    var $this = $(this);
+                    $this.wrap('<div class="position-relative"></div>').select2({
+                        placeholder: $this.data('placeholder') || 'Select value',
+                        dropdownParent: $this.closest('.modal').length ? $this.closest('.modal') : $this
+                            .parent()
+                    });
+                });
+            }
+        }
+
+        // Menggunakan pola Vuexy untuk Flatpickr
+        function initFlatpickrElements() {
+            const flatpickrDate = document.querySelectorAll('.flatpickr-date');
+            if (flatpickrDate) {
+                flatpickrDate.forEach(function(elem) {
+                    if (!elem._flatpickr) {
+                        elem.flatpickr({
+                            monthSelectorType: 'static',
+                            dateFormat: 'd/m/Y',
+                            altInput: true,
+                            altFormat: 'j F Y'
+                        });
+                    }
+                });
+            }
+        }
+
+        // Init flatpickr untuk modal
+        function initModalFlatpickr() {
+            const modalFlatpickr = document.querySelectorAll('.flatpickr-modal-date');
+            if (modalFlatpickr) {
+                modalFlatpickr.forEach(function(elem) {
+                    // Destroy existing instance
+                    if (elem._flatpickr) {
+                        elem._flatpickr.destroy();
+                    }
+                    // Reinitialize
                     elem.flatpickr({
                         monthSelectorType: 'static',
                         dateFormat: 'd/m/Y',
                         altInput: true,
                         altFormat: 'j F Y'
                     });
-                }
-            });
-        }
-    }
-
-    // Init flatpickr untuk modal
-    function initModalFlatpickr() {
-        const modalFlatpickr = document.querySelectorAll('.flatpickr-modal-date');
-        if (modalFlatpickr) {
-            modalFlatpickr.forEach(function(elem) {
-                // Destroy existing instance
-                if (elem._flatpickr) {
-                    elem._flatpickr.destroy();
-                }
-                // Reinitialize
-                elem.flatpickr({
-                    monthSelectorType: 'static',
-                    dateFormat: 'd/m/Y',
-                    altInput: true,
-                    altFormat: 'j F Y'
                 });
-            });
+            }
         }
-    }
-</script>
+    </script>
 @endpush
