@@ -17,7 +17,7 @@
                                                 <th>NILAI BAGI HASIL</th>
                                                 <th>INVOICE DATE</th>
                                                 <th>DUE DATE</th>
-                                                <th>DOKUMEN INVOICE</th>
+                                                <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
                                                 <th>DOKUMEN KONTRAK</th>
                                                 <th>DOKUMEN SO</th>
                                                 <th>DOKUMEN BAST</th>
@@ -80,7 +80,7 @@
                                                 <th>NILAI BAGI HASIL</th>
                                                 <th>KONTRAK DATE</th>
                                                 <th>DUE DATE</th>
-                                                <th>DOKUMEN KONTRAK</th>
+                                                <th>DOKUMEN KONTRAK <span class="text-danger">*</span></th>
                                                 <th>DOKUMEN SO</th>
                                                 <th>DOKUMEN BAST</th>
                                                 <th>DOKUMEN LAINNYA</th>
@@ -136,7 +136,7 @@
                                                 <th>NILAI INVOICE</th>
                                                 <th>INVOICE DATE</th>
                                                 <th>NAMA BARANG</th>
-                                                <th>DOKUMEN INVOICE</th>
+                                                <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
                                                 <th>DOKUMEN LAINNYA</th>
                                                 <th>AKSI</th>
                                             </tr>
@@ -184,7 +184,7 @@
                                                 <th>KONTRAK DATE</th>
                                                 <th>DUE DATE</th>
                                                 <th>DOKUMEN INVOICE</th>
-                                                <th>DOKUMEN KONTRAK</th>
+                                                <th>DOKUMEN KONTRAK <span class="text-danger">*</span></th>
                                                 <th>DOKUMEN SO</th>
                                                 <th>DOKUMEN BAST</th>
                                                 <th>AKSI</th>

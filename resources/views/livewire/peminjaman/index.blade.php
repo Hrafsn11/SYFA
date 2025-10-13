@@ -56,6 +56,7 @@
                                     <th class="text-center">Nama Perusahaan</th>
                                     <th class="text-center">Lampiran SID</th>
                                     <th class="text-center">Nilai Kol</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center" width="10%">Aksi</th>
                                 </tr>
                             </thead>
@@ -81,6 +82,9 @@
                                             @else
                                                 <span class="badge bg-label-danger">{{ $item['nilai_kol'] }}</span>
                                             @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-label-success">Success</span>
                                         </td>
                                         <td class="text-center">
                                             <div class="d-flex justify-center align-items-center gap-2">
