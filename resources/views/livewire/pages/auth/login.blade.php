@@ -29,9 +29,9 @@ new #[Layout('layouts.guest')] class extends Component
 <div class="authentication-wrapper authentication-cover">
     <a href="{{ url('/') }}" class="app-brand auth-cover-brand">
         <span class="app-brand-logo demo">
-            <img src="{{ asset('assets/img/favicon/favicon.ico') }}" alt="{{ config('app.name') }}" class="w-px-40">
+            <img src="{{ asset('assets/img/logo.png') }}" alt="{{ config('app.name') }}" class="w-px-40">
         </span>
-        <span class="app-brand-text demo text-heading fw-bold">{{ config('app.name', 'Vuexy') }}</span>
+        <span class="app-brand-text demo text-heading fw-bold">SYFA</span>
     </a>
 
     <div class="authentication-inner row m-0">

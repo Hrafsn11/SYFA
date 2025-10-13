@@ -31,9 +31,6 @@
         class="template-customizer-theme-css" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
 
-    <!-- Custom CSS -->
-    @vite(['resources/css/app.css'])
-
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/node-waves/node-waves.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
@@ -67,8 +64,11 @@
 
     <!-- Scripts -->
     {{-- @vite([ 'resources/js/app.js']) --}}
-</head>
 
+    <!-- Custom CSS -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+    
 <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
@@ -114,8 +114,6 @@
     <!-- / Layout wrapper -->
 
     @stack('modals')
-
-    @livewireScripts
 
     <!-- Core JS -->
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
