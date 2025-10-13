@@ -10,7 +10,7 @@
             <i class="ti ti-x d-block d-xl-none ti-md align-middle"></i>
         </a>
     </div>
-    
+
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
@@ -27,11 +27,35 @@
             <span class="menu-header-text">Peminjaman</span>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('peminjaman') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('peminjaman*') ? 'active' : '' }}">
             <a href="{{ route('peminjaman') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-briefcase"></i>
                 <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
             </a>
+        </li>
+
+        <!-- Master Data Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Master Data</span>
+        </li>
+
+        <li class="menu-item {{ request()->is('master-data*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="Master Data">Master Data</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('master-data/master-data-kol*') ? 'active' : '' }}">
+                    <a href="{{ route('masterdatakol.index') }}" class="menu-link">
+                        <div data-i18n="Master Data KOL">Master Data KOL</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
+                    <a href="#" class="menu-link">
+                        <div data-i18n="Menu Lainnya">Menu Lainnya</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
         <!-- Configuration Section -->
