@@ -1,14 +1,16 @@
 <?php
 
 use App\Livewire\Dashboard;
-use App\Livewire\Peminjaman\PeminjamanIndex;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\ConfigMatrixPinjaman;
 use App\Livewire\PermissionManagement;
+use App\Livewire\Peminjaman\PeminjamanIndex;
 use App\Livewire\Peminjaman\PeminjamanCreate;
+use App\Livewire\MasterDataKol\MasterDataKolIndex;
+use App\Livewire\MasterDataKol\MasterDataKolCreate;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -38,6 +40,8 @@ Route::middleware([
     Route::get('ajukan-peminjaman', PeminjamanCreate::class)->name('ajukanpeminjaman');
     Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('matrixpinjaman');
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
+    Route::get('master-data/master-data-kol', MasterDataKolIndex::class)->name('masterdatakol.index');
+    Route::get('master-data/master-data-kol/create', MasterDataKolCreate::class)->name('masterdatakol.create');
 });
 
 require __DIR__.'/auth.php';

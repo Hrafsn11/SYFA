@@ -70,7 +70,7 @@
                                                     <i class="ti ti-trash me-1"></i>
                                                 </a>
                                             </div>
-                                        </td>
+                                    </td>
                                 </tr>
                                 @endforeach
                                 
