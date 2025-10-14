@@ -106,12 +106,9 @@ new #[Layout('layouts.guest')] class extends Component {
                                 </button>
                             </div>
                         </form>
-
-
                     </div>
                 </div>
             </div>
-            <!-- /Register -->
         </div>
     </div>
 </div>
