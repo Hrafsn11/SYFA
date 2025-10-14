@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/node-waves/node-waves.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/typeahead-js/typeahead.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/select2/select2.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bootstrap-select/bootstrap-select.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css') }}" />
@@ -68,7 +69,7 @@
     <!-- Custom CSS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-    
+
 <body>
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
@@ -125,6 +126,7 @@
     <script src="{{ asset('assets/vendor/js/menu.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/i18n/i18n.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/typeahead-js/typeahead.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.js') }}"></script>
 
     <!-- Vendors JS -->
     <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
@@ -145,6 +147,9 @@
     <script src="{{ asset('assets/vendor/libs/@form-validation/popular.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/@form-validation/bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/@form-validation/auto-focus.js') }}"></script>
+
+    <script src="{{ asset('assets/js/form-wizard-numbered.js') }}"></script>
+    <script src="{{ asset('assets/js/form-wizard-validation.js') }}"></script>
 
 
     <!-- Main JS -->
@@ -173,18 +178,30 @@
             if (window.Helpers?.initSidebarToggle) {
                 window.Helpers.initSidebarToggle();
             }
+
+            if (typeof bootstrap !== 'undefined') {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+                    if (!el.dataset.tooltipInitialized) {
+                        new bootstrap.Tooltip(el);
+                        el.dataset.tooltipInitialized = 'true';
+                    }
+                });
+            }
         };
 
-        // Initialize on page load
         document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout);
-        
-        // Initialize on Livewire navigation
         document.addEventListener('livewire:navigated', window.initializeVuexyLayout);
+        document.addEventListener('livewire:load', () => {
+            window.initializeVuexyLayout();
+            if (window.Livewire?.hook) {
+                window.Livewire.hook('message.processed', () => {
+                    window.initializeVuexyLayout();
+                });
+            }
+        });
     </script>
     <!-- Page JS -->
     @stack('scripts')
-    
-    @livewireScripts
 </body>
 
 </html>

@@ -10,6 +10,7 @@ use App\Livewire\ConfigMatrixPinjaman;
 use App\Livewire\PermissionManagement;
 use App\Livewire\Peminjaman\PeminjamanIndex;
 use App\Livewire\Peminjaman\PeminjamanCreate;
+use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Livewire\MasterDataKol\MasterDataKolIndex;
 use App\Livewire\MasterDataKol\MasterDataKolCreate;
 /*
@@ -37,8 +38,11 @@ Route::middleware([
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
-    Route::get('peminjaman', PeminjamanIndex::class)->name('peminjaman');
-    Route::get('ajukan-peminjaman', PeminjamanCreate::class)->name('ajukanpeminjaman');
+    // Peminjaman pages handled by controller (migrated from Livewire components)
+    Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
+    // Detail route for a specific peminjaman record
+    Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
+    Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('matrixpinjaman');
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
     Route::get('master-data/master-data-kol', MasterDataKolIndex::class)->name('masterdatakol.index');
