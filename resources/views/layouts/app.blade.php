@@ -173,30 +173,18 @@
             if (window.Helpers?.initSidebarToggle) {
                 window.Helpers.initSidebarToggle();
             }
-
-            if (typeof bootstrap !== 'undefined') {
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
-                    if (!el.dataset.tooltipInitialized) {
-                        new bootstrap.Tooltip(el);
-                        el.dataset.tooltipInitialized = 'true';
-                    }
-                });
-            }
         };
 
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout);
+        
+        // Initialize on Livewire navigation
         document.addEventListener('livewire:navigated', window.initializeVuexyLayout);
-        document.addEventListener('livewire:load', () => {
-            window.initializeVuexyLayout();
-            if (window.Livewire?.hook) {
-                window.Livewire.hook('message.processed', () => {
-                    window.initializeVuexyLayout();
-                });
-            }
-        });
     </script>
     <!-- Page JS -->
     @stack('scripts')
+    
+    @livewireScripts
 </body>
 
 </html>

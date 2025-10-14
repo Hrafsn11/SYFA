@@ -21,7 +21,7 @@ new #[Layout('layouts.guest')] class extends Component {
         
         if (Auth::attempt([$fieldType => $this->email, 'password' => $this->password], $this->remember)) {
             request()->session()->regenerate();
-            $this->redirect('/dashboard', navigate: true);
+            $this->redirect('/dashboard');
         } else {
             $this->addError('email', 'The provided credentials do not match our records.');
         }

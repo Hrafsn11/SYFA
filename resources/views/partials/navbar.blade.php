@@ -156,3 +156,53 @@
         <i class="ti ti-x search-toggler cursor-pointer"></i>
     </div>
 </nav>
+
+<script>
+    // Initialize navbar dropdowns after navbar is rendered
+    (function() {
+        function initNavbarDropdowns() {
+            if (typeof bootstrap === 'undefined') {
+                setTimeout(initNavbarDropdowns, 50);
+                return;
+            }
+            
+            // Re-initialize Perfect Scrollbar for navbar dropdowns
+            if (window.Helpers && typeof window.Helpers.initNavbarDropdownScrollbar === 'function') {
+                window.Helpers.initNavbarDropdownScrollbar();
+            }
+            
+            // Initialize all dropdowns in navbar
+            const navbarElement = document.getElementById('layout-navbar');
+            if (!navbarElement) return;
+            
+            const dropdownTriggers = navbarElement.querySelectorAll('[data-bs-toggle="dropdown"]');
+            
+            dropdownTriggers.forEach((trigger) => {
+                // Dispose any existing dropdown instance
+                const existingInstance = bootstrap.Dropdown.getInstance(trigger);
+                if (existingInstance) {
+                    existingInstance.dispose();
+                }
+                
+                // Create new dropdown instance with options
+                new bootstrap.Dropdown(trigger, {
+                    autoClose: true,
+                    boundary: 'window'
+                });
+            });
+            
+        }
+        
+        // Initialize on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNavbarDropdowns);
+        } else {
+            initNavbarDropdowns();
+        }
+        
+        // Re-initialize on Livewire navigation
+        document.addEventListener('livewire:navigated', function() {
+            setTimeout(initNavbarDropdowns, 100);
+        });
+    })();
+</script>
