@@ -147,7 +147,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">Total
                                             Pinjaman</label>
-                                        <input type="text" class="form-control" id="total_pinjaman"
+                                        <input type="number" class="form-control" id="total_pinjaman"
                                             name="total_pinjaman" placeholder="RP. 9.000.000">
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -166,7 +166,7 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="total_bagi_hasil"
+                                            <input type="number" class="form-control" id="total_bagi_hasil"
                                                 name="total_bagi_hasil" placeholder="2% (Rp. 180.000)" disabled>
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
@@ -197,7 +197,7 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="nominal_pinjaman" class="form-label">Total Pinjaman</label>
-                                        <input type="text" class="form-control" id="nominal_pinjaman"
+                                        <input type="number" class="form-control" id="nominal_pinjaman"
                                             name="nominal_pinjaman" placeholder="RP. 9.000.000">
                                     </div>
                                     <div class="col-md-6">
@@ -415,12 +415,43 @@
             if (flatpickrDate) {
                 flatpickrDate.forEach(function(elem) {
                     if (!elem._flatpickr) {
-                        elem.flatpickr({
-                            monthSelectorType: 'static',
-                            dateFormat: 'd/m/Y',
-                            altInput: true,
-                            altFormat: 'j F Y'
-                        });
+                        // Config khusus untuk tanggal pencairan (minimal 4 hari dari sekarang)
+                        if (elem.id === 'flatpickr-tanggal-pencairan') {
+                            // Hitung tanggal minimal (4 hari dari sekarang)
+                            const minDate = new Date();
+                            minDate.setDate(minDate.getDate() + 4);
+                            
+                            elem.flatpickr({
+                                monthSelectorType: 'static',
+                                dateFormat: 'd/m/Y',
+                                altInput: true,
+                                altFormat: 'j F Y',
+                                minDate: minDate,
+                                disable: [
+                                    function(date) {
+                                        // Disable tanggal kurang dari 4 hari dari sekarang
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        const checkDate = new Date(date);
+                                        checkDate.setHours(0, 0, 0, 0);
+                                        const minDateCheck = new Date(today);
+                                        minDateCheck.setDate(minDateCheck.getDate() + 4);
+                                        return checkDate < minDateCheck;
+                                    }
+                                ],
+                                locale: {
+                                    firstDayOfWeek: 1
+                                }
+                            });
+                        } else {
+                            // Config default untuk flatpickr lainnya
+                            elem.flatpickr({
+                                monthSelectorType: 'static',
+                                dateFormat: 'd/m/Y',
+                                altInput: true,
+                                altFormat: 'j F Y'
+                            });
+                        }
                     }
                 });
             }
