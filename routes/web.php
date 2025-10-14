@@ -2,6 +2,7 @@
 
 use App\Livewire\Dashboard;
 use App\Livewire\RoleManagement;
+use App\Livewire\SumberPendanaanEksternal\Index;
 use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
 use Illuminate\Support\Facades\Route;
@@ -41,7 +42,7 @@ Route::middleware([
     Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('matrixpinjaman');
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
     Route::get('master-data/master-data-kol', MasterDataKolIndex::class)->name('masterdatakol.index');
-    Route::get('master-data/master-data-kol/create', MasterDataKolCreate::class)->name('masterdatakol.create');
+    Route::get('master-data/sumber-pendanaan-eksternal', Index::class)->name('sumberpendanaaneksternal.index');
 });
 
 require __DIR__.'/auth.php';

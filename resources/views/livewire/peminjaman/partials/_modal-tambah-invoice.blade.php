@@ -22,19 +22,19 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nilai Invoice</label>
-                            <input type="text" class="form-control" id="modal_nilai_invoice"
+                            <input type="number" class="form-control" id="modal_nilai_invoice"
                                 placeholder="Masukkan Nilai Invoice">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Nilai Pinjaman</label>
-                            <input type="text" class="form-control" id="modal_nilai_pinjaman"
+                            <input type="number" class="form-control" id="modal_nilai_pinjaman"
                                 placeholder="Masukkan Nilai Pinjaman">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nilai Bagi Hasil</label>
-                            <input type="text" class="form-control" id="modal_nilai_bagi_hasil"
+                            <input type="number" class="form-control" id="modal_nilai_bagi_hasil"
                                 placeholder="Masukkan Nilai Bagi Hasil">
                         </div>
                     </div>
@@ -101,19 +101,19 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nilai Invoice</label>
-                            <input type="text" class="form-control" id="modal_nilai_invoice_po"
+                            <input type="number" class="form-control" id="modal_nilai_invoice_po"
                                 placeholder="Masukkan Nilai Invoice">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Nilai Pinjaman</label>
-                            <input type="text" class="form-control" id="modal_nilai_pinjaman_po"
+                            <input type="number" class="form-control" id="modal_nilai_pinjaman_po"
                                 placeholder="Masukkan Nilai Pinjaman">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nilai Bagi Hasil</label>
-                            <input type="text" class="form-control" id="modal_nilai_bagi_hasil_po"
+                            <input type="number" class="form-control" id="modal_nilai_bagi_hasil_po"
                                 placeholder="Masukkan Nilai Bagi Hasil">
                         </div>
                     </div>
@@ -176,7 +176,7 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nilai Invoice</label>
-                            <input type="text" class="form-control" id="modal_nilai_invoice_inst"
+                            <input type="number" class="form-control" id="modal_nilai_invoice_inst"
                                 placeholder="Masukkan Nilai Invoice">
                         </div>
                     </div>
@@ -225,19 +225,19 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nilai Invoice</label>
-                            <input type="text" class="form-control" id="modal_nilai_invoice_fact"
+                            <input type="number" class="form-control" id="modal_nilai_invoice_fact"
                                 placeholder="Masukkan Nilai Invoice">
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label">Nilai Pinjaman</label>
-                            <input type="text" class="form-control" id="modal_nilai_pinjaman_fact"
+                            <input type="number" class="form-control" id="modal_nilai_pinjaman_fact"
                                 placeholder="Masukkan Nilai Pinjaman">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nilai Bagi Hasil</label>
-                            <input type="text" class="form-control" id="modal_nilai_bagi_hasil_fact"
+                            <input type="number" class="form-control" id="modal_nilai_bagi_hasil_fact"
                                 placeholder="Masukkan Nilai Bagi Hasil">
                         </div>
                     </div>

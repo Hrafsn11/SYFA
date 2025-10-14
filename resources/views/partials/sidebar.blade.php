@@ -50,6 +50,11 @@
                         <div data-i18n="Master Data KOL">Master Data KOL</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->is('master-data/sumber-pendanaan-eksternal*') ? 'active' : '' }}">
+                    <a href="{{ route('sumberpendanaaneksternal.index') }}" class="menu-link">
+                        <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
                     <a href="#" class="menu-link">
                         <div data-i18n="Menu Lainnya">Menu Lainnya</div>

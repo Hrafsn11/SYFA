@@ -2,10 +2,11 @@
     <div class="row">
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">KOL</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3" id="btnTambahKOL">
+                <h4 class="fw-bold">Sumber Pendanaan Eksternal</h4>
+                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                    id="btnTambahSumberPendanaan">
                     <i class="fa-solid fa-plus"></i>
-                    KOL
+                    Sumber Pendanaan
                 </button>
             </div>
         </div>
@@ -51,20 +52,18 @@
                         <table class="datatables-basic table border-top">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="text-center" width="5%">No</th>
-                                    <th class="text-center">KOL</th>
-                                    <th class="text-center">Persentase Pencairan</th>
-                                    <th class="text-center">Jumlah Hari Keterlambatan</th>
+                                    <th class="text-center">No</th>
+                                    <th class="text-center">Nama Instansi</th>
+                                    <th class="text-center">Presentase Bagi Hasil</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($data as $item)
                                     <tr>
-                                        <td class="text-center">{{ $item['id'] }}</td>
-                                        <td class="text-center">{{ $item['kol'] }}</td>
-                                        <td class="text-center">{{ $item['persentase_keterlambatan'] }}</td>
-                                        <td class="text-center">{{ $item['tanggal_tenggat'] }}</td>
+                                        <td class="text-center">{{ $loop->iteration }}</td>
+                                        <td class="text-center">{{ $item['nama_instansi'] }}</td>
+                                        <td class="text-center">{{ $item['presentase_bagi_hasil'] }}%</td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center align-items-center gap-2">
                                                 <a class="" href="#">
@@ -112,72 +111,72 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalTambahKOL" tabindex="-1" aria-labelledby="modalTambahKOLLabel" aria-hidden="true">
+    <div class="modal fade" id="modalTambahSumberPendanaan" tabindex="-1"
+        aria-labelledby="modalTambahSumberPendanaanLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTambahKOLLabel">Tambah KOL</h5>
+                    <h5 class="modal-title" id="modalTambahSumberPendanaanLabel">Tambah Sumber Pendanaan Eksternal</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formTambahKOL">
+                    <!-- Form -->
+                    <form id="formTambahSumberPendanaan">
                         <div class="mb-3">
-                            <label for="kol" class="form-label">KOL <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="kol" placeholder="Masukkan KOL" required min="1" step="1">
+                            <label for="nama_instansi" class="form-label">Nama Instansi <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama_instansi"
+                                placeholder="Masukkan nama instansi" required>
                         </div>
                         <div class="mb-3">
-                            <label for="persentase_keterlambatan" class="form-label">Persentase Pencairan <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="persentase_keterlambatan" placeholder="Masukkan Persentase Pencairan" required min="0" max="100" step="1">
-                        </div>
-                        <div class="mb-3">
-                            <label for="tanggal_tenggat" class="form-label">Jumlah Hari Keterlambatan <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="tanggal_tenggat" placeholder="Masukkan Jumlah Hari Keterlambatan" required min="0" step="1">
+                            <label for="presentase_bagi_hasil" class="form-label">Presentase Bagi Hasil <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="presentase_bagi_hasil"
+                                placeholder="Masukkan presentase bagi hasil" required min="0" max="100" step="1">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="btnSimpanKOL">Simpan</button>
+                    <button type="button" class="btn btn-primary" id="btnSimpanSumberPendanaan">Simpan</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var modalTambahKOL = new bootstrap.Modal(document.getElementById('modalTambahKOL'));
-        var formTambahKOL = document.getElementById('formTambahKOL');
+        var modalTambahSumberPendanaan = new bootstrap.Modal(document.getElementById('modalTambahSumberPendanaan'));
+        var formTambahSumberPendanaan = document.getElementById('formTambahSumberPendanaan');
 
-        document.getElementById('btnTambahKOL').addEventListener('click', function() {
+        document.getElementById('btnTambahSumberPendanaan').addEventListener('click', function() {
             // Reset form ketika modal dibuka
-            formTambahKOL.reset();
-            formTambahKOL.classList.remove('was-validated');
-            modalTambahKOL.show();
+            formTambahSumberPendanaan.reset();
+            formTambahSumberPendanaan.classList.remove('was-validated');
+            modalTambahSumberPendanaan.show();
         });
 
-        document.getElementById('btnSimpanKOL').addEventListener('click', function() {
+        document.getElementById('btnSimpanSumberPendanaan').addEventListener('click', function() {
             // Validasi form
-            if (!formTambahKOL.checkValidity()) {
-                formTambahKOL.classList.add('was-validated');
+            if (!formTambahSumberPendanaan.checkValidity()) {
+                formTambahSumberPendanaan.classList.add('was-validated');
                 return;
             }
 
             // Ambil data dari form
-            var kolData = {
-                kol: parseInt(document.getElementById('kol').value),
-                persentase_keterlambatan: parseInt(document.getElementById('persentase_keterlambatan').value),
-                tanggal_tenggat: parseInt(document.getElementById('tanggal_tenggat').value)
+            var sumberPendanaanData = {
+                nama_instansi: document.getElementById('nama_instansi').value,
+                presentase_bagi_hasil: parseInt(document.getElementById('presentase_bagi_hasil').value),
+                kol: parseInt(document.getElementById('kol').value)
             };
 
-            // Logic to save KOL data goes here
-            console.log('Data KOL:', kolData);
+            // Logic to save Sumber Pendanaan data goes here
+            console.log('Data Sumber Pendanaan:', sumberPendanaanData);
 
             // Reset form dan tutup modal
-            formTambahKOL.reset();
-            formTambahKOL.classList.remove('was-validated');
-            modalTambahKOL.hide();
+            formTambahSumberPendanaan.reset();
+            formTambahSumberPendanaan.classList.remove('was-validated');
+            modalTambahSumberPendanaan.hide();
         });
     });
 </script>
