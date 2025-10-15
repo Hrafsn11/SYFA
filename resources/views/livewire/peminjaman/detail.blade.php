@@ -182,39 +182,47 @@
                                     <!-- Data Invoicing -->
                                     <h6 class="text-muted mb-3">Data Invoicing</h6>
 
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
+                                    <div class="table-responsive text-nowrap">
+                                        <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th class="text-uppercase small">NO</th>
-                                                    <th class="text-uppercase small">NO. INVOICE</th>
-                                                    <th class="text-uppercase small">NAMA CLIENT</th>
-                                                    <th class="text-uppercase small">NILAI INVOICE</th>
-                                                    <th class="text-uppercase small">INVOICE DATE</th>
-                                                    <th class="text-uppercase small">DUE DATE</th>
-                                                    <th class="text-uppercase small">DOKUMEN INVOICE</th>
-                                                    <th class="text-uppercase small">DOKUMEN SO</th>
-                                                    <th class="text-uppercase small">DOKUMEN KONTRAK</th>
-                                                    <th class="text-uppercase small">DOKUMEN BAST</th>
+                                                    <th>NO</th>
+                                                    <th>NO. INVOICE</th>
+                                                    <th>NAMA CLIENT</th>
+                                                    <th>NILAI INVOICE</th>
+                                                    <th>NILAI PINJAMAN</th>
+                                                    <th>NILAI BAGI HASIL</th>
+                                                    <th>INVOICE DATE</th>
+                                                    <th>DUE DATE</th>
+                                                    <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
+                                                    <th>DOKUMEN KONTRAK</th>
+                                                    <th>DOKUMEN SO</th>
+                                                    <th>DOKUMEN BAST</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody class="table-border-bottom-0">
+                                                <!-- Data will be populated by JavaScript -->
                                                 <tr>
                                                     <td>1</td>
-                                                    <td><span class="fw-semibold">2222</span></td>
-                                                    <td>Pelni</td>
-                                                    <td><span class="fw-semibold">Rp. 10.000.000</span></td>
-                                                    <td>15 August 2025</td>
-                                                    <td>24 August 2025</td>
-                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    <td>INV-001</td>
+                                                    <td>Client A</td>
+                                                    <td>Rp. 150.000.000</td>
+                                                    <td>Rp. 100.000.000</td>
+                                                    <td>Rp. 2.000.000</td>
+                                                    <td>01/07/2024</td>
+                                                    <td>01/08/2024</td>
+                                                    <td>
+                                                        <a href="#" class="">Dokumen.pdf</a>
                                                     </td>
-                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    <td>
+                                                        <a href="#" class="">Dokumen.pdf</a>
                                                     </td>
-                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    <td>
+                                                        <a href="#" class="">Dokumen.pdf</a>
                                                     </td>
-                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    <td>
+                                                        <a href="#" class="">Dokumen.pdf</a>
                                                     </td>
-                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -343,8 +351,8 @@
                 <hr class="my-2">
                 <div class="modal-body">
                     <h5 class="mb-2">Apakah anda yakin menyetujui Pengajuan Pinjaman?</h5>
-                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui Pengajuan Pinjaman, dan Isi
-                        Perjanjian Kontrak terlebih dahulu.</p>
+                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui Pengajuan Pinjaman, dan isi
+                        perjanjian Kontrak terlebih dahulu. Pastikan dokumen yang diperlukan sudah sesuai!</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="btnKonfirmasiSetuju">
