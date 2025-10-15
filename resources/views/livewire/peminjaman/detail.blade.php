@@ -382,14 +382,14 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="nominalPengajuan" class="form-label">Nominal Pengajuan</label>
-                                        <input type="number" class="form-control" id="nominalPengajuan"
+                                        <input type="text" class="form-control input-rupiah" id="nominalPengajuan"
                                             value="300000000" disabled>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="nominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="number" class="form-control" id="nominalDisetujui"
-                                            placeholder="Masukkan nominal yang disetujui" required>
+                                        <input type="text" class="form-control input-rupiah" id="nominalDisetujui"
+                                            placeholder="Rp 0" required>
                                         <div class="invalid-feedback">
                                             Silakan isi nominal yang disetujui.
                                         </div>
@@ -498,13 +498,13 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
-                                        <input type="number" class="form-control" id="editNominalPengajuan"
+                                        <input type="text" class="form-control input-rupiah" id="editNominalPengajuan"
                                             value="300000000" disabled>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="number" class="form-control" id="editNominalDisetujui" disabled>
+                                        <input type="text" class="form-control input-rupiah" id="editNominalDisetujui" disabled>
                                     </div>
                                 </div>
 
@@ -680,6 +680,8 @@
                 setTimeout(() => {
                     callback?.();
                     showModal.show();
+                    // Reinitialize Cleave for modal inputs
+                    initCleaveRupiah();
                 }, 300);
             }
 
@@ -775,6 +777,9 @@
 
             // Initialize
             updateStepper();
+            
+            // Initialize Cleave.js for rupiah inputs
+            initCleaveRupiah();
         });
     </script>
 @endsection

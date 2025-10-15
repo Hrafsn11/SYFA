@@ -131,6 +131,7 @@
     <!-- Vendors JS -->
     <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/cleavejs/cleave.js') }}"></script>
     @stack('vendor-scripts')
     <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
 
@@ -154,6 +155,55 @@
 
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
+
+    <!-- Cleave.js Rupiah Helper -->
+    <script>
+        // Global function untuk inisialisasi Cleave.js pada input rupiah
+        window.initCleaveRupiah = function() {
+            // Selector untuk semua input yang perlu format rupiah
+            const rupiahInputs = document.querySelectorAll('.input-rupiah, [data-format="rupiah"]');
+            
+            rupiahInputs.forEach(function(input) {
+                // Skip jika sudah di-initialize
+                if (input.dataset.cleaveInitialized === 'true') {
+                    return;
+                }
+                
+                // Initialize Cleave.js
+                new Cleave(input, {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand',
+                    numeralDecimalScale: 0,
+                    prefix: 'Rp ',
+                    rawValueTrimPrefix: true,
+                    noImmediatePrefix: false
+                });
+                
+                // Mark as initialized
+                input.dataset.cleaveInitialized = 'true';
+            });
+        };
+
+        // Function untuk get raw value (angka saja tanpa format)
+        window.getCleaveRawValue = function(element) {
+            if (!element) return 0;
+            const value = element.value.replace(/[^0-9]/g, '');
+            return parseInt(value) || 0;
+        };
+
+        // Function untuk set value dengan format rupiah
+        window.setCleaveValue = function(element, value) {
+            if (!element) return;
+            // Remove existing Cleave instance if any
+            if (element._vCleave) {
+                element._vCleave.destroy();
+            }
+            // Set value
+            element.value = value;
+            // Reinitialize
+            window.initCleaveRupiah();
+        };
+    </script>
 
     <script>
         window.initializeVuexyLayout = function() {
