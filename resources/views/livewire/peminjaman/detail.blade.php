@@ -1,366 +1,326 @@
 @extends('layouts.app')
-<style>
-    .stepper-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 0 auto;
-        max-width: 1200px;
-    }
 
-    .stepper-item {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        flex: 1;
-    }
-
-    .stepper-item:not(:last-child):after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 3px;
-        background-color: #dee2e6;
-        top: 20px;
-        left: 50%;
-        z-index: -1;
-    }
-
-    .stepper-item.active:not(:last-child):after {
-        background-color: #17a2b8;
-    }
-
-    .step-counter {
-        position: relative;
-        z-index: 5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: #dee2e6;
-        color: #6c757d;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-
-    .stepper-item.active .step-counter {
-        background-color: #17a2b8;
-        color: white;
-    }
-
-    .stepper-item.completed .step-counter {
-        background-color: #17a2b8;
-        color: white;
-    }
-
-    .step-name {
-        text-align: center;
-        font-size: 14px;
-        color: #6c757d;
-        font-weight: 500;
-        max-width: 150px;
-    }
-
-    .stepper-item.active .step-name {
-        color: #17a2b8;
-        font-weight: 600;
-    }
-
-    .stepper-item.completed .step-name {
-        color: #17a2b8;
-    }
-
-    .stepper-arrow {
-        clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%, 20px 50%);
-        background-color: #dee2e6;
-        padding: 12px 30px 12px 40px;
-        margin-right: -18px;
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-width: 180px;
-    }
-
-    .stepper-arrow.active {
-        background-color: #13ABAB;
-    }
-
-    .stepper-arrow.completed {
-        background-color: #13ABAB;
-    }
-
-    .stepper-arrow:first-child {
-        padding-left: 20px;
-        border-radius: 50px 0 0 50px;
-        clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 0 100%);
-    }
-
-    .stepper-arrow:last-child {
-        margin-right: 0;
-        padding-right: 20px;
-        border-radius: 0 50px 50px 0;
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 20px 50%);
-    }
-
-    .arrow-number {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background-color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: #6c757d;
-        flex-shrink: 0;
-    }
-
-    .stepper-arrow.active .arrow-number,
-    .stepper-arrow.completed .arrow-number {
-        color: #17a2b8;
-    }
-
-    .arrow-text {
-        color: #6c757d;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .stepper-arrow.active .arrow-text,
-    .stepper-arrow.completed .arrow-text {
-        color: white;
-        font-weight: 600;
-    }
-
-    @media (max-width: 768px) {
-        .stepper-arrow {
-            min-width: 140px;
-            padding: 10px 25px 10px 35px;
-            font-size: 12px;
-        }
-
-        .arrow-number {
-            width: 24px;
-            height: 24px;
-            font-size: 12px;
-        }
-
-        .arrow-text {
-            font-size: 11px;
-        }
-    }
-</style>
 @section('content')
     <div class="row">
         <div class="col-12">
+            <h4 class="fw-bold mb-0">
+                Detail Pengajuan Peminjaman
+            </h4>
+
+
             <!-- Arrow Style Stepper -->
-            <div class="d-flex overflow-auto mb-5">
-                <div class="stepper-arrow active">
+            <div class="d-flex overflow-auto mb-4 mb-md-5">
+                <div class="stepper-arrow active" data-step="1">
                     <div class="arrow-number">1</div>
                     <div class="arrow-text">Pengajuan Pinjaman</div>
                 </div>
-                <div class="stepper-arrow ">
+                <div class="stepper-arrow" data-step="2">
                     <div class="arrow-number">2</div>
                     <div class="arrow-text">Validasi Dokumen</div>
                 </div>
-                <div class="stepper-arrow">
+                <div class="stepper-arrow" data-step="3">
                     <div class="arrow-number">3</div>
                     <div class="arrow-text">Dokumen Tervalidasi</div>
                 </div>
-                <div class="stepper-arrow">
+                <div class="stepper-arrow" data-step="4">
                     <div class="arrow-number">4</div>
                     <div class="arrow-text">Persetujuan Debitur</div>
                 </div>
-                <div class="stepper-arrow">
+                <div class="stepper-arrow" data-step="5">
                     <div class="arrow-number">5</div>
                     <div class="arrow-text">Validasi Direktur SKI</div>
                 </div>
-                <div class="stepper-arrow">
+                <div class="stepper-arrow" data-step="6">
                     <div class="arrow-number">6</div>
                     <div class="arrow-text">Generate Kontrak</div>
                 </div>
-                <div class="stepper-arrow">
+                <div class="stepper-arrow" data-step="7">
                     <div class="arrow-number">7</div>
                     <div class="arrow-text">Selesai</div>
                 </div>
             </div>
-            <div class="alert alert-warning" role="alert">Pengajuan Pinjaman Anda sedang kami tinjau. Harap tunggu
-                beberapa saat hingga proses verifikasi selesai.</div>
 
-            <div class="page-wrapper">
-                <div class="row">
-                    <div class="col">
-                        <div class="card">
-                            <div class="card-header px-0 pt-0">
-                                <div class="nav-align-top">
-                                    <ul class="nav nav-tabs" role="tablist">
-                                        <li class="nav-item">
-                                            <button type="button" class="nav-link active" data-bs-toggle="tab"
-                                                data-bs-target="#detail-pinjaman" role="tab" aria-selected="true">
-                                                <i class="fas fa-file-invoice d-sm-none"></i>
-                                                <span class="d-none d-sm-inline">Detail Pinjaman</span>
-                                            </button>
-                                        </li>
-                                        <li class="nav-item">
-                                            <button type="button" class="nav-link" data-bs-toggle="tab"
-                                                data-bs-target="#detail-kontrak" role="tab" aria-selected="false">
-                                                <i class="far fa-file-alt d-sm-none"></i>
-                                                <span class="d-none d-sm-inline">Detail Kontrak</span>
-                                            </button>
-                                        </li>
-                                        <li class="nav-item">
-                                            <button type="button" class="nav-link" data-bs-toggle="tab"
-                                                data-bs-target="#activity" role="tab" aria-selected="false">
-                                                <i class="fas fa-chart-line d-sm-none"></i>
-                                                <span class="d-none d-sm-inline">Activity</span>
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
+            <div class="alert alert-warning mb-4" role="alert" id="alertPeninjauan">
+                <i class="fas fa-info-circle me-2"></i>
+                Pengajuan Pinjaman Anda sedang kami tinjau. Harap tunggu
+                beberapa saat hingga proses verifikasi selesai.
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header p-0">
+                            <div class="nav-align-top">
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link active" data-bs-toggle="tab"
+                                            data-bs-target="#detail-pinjaman" role="tab" aria-selected="true">
+                                            <i class="fas fa-wallet me-2"></i>
+                                            <span class="d-none d-sm-inline">Detail Pinjaman</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link" data-bs-toggle="tab"
+                                            data-bs-target="#detail-kontrak" role="tab" aria-selected="false">
+                                            <i class="far fa-file me-2"></i>
+                                            <span class="d-none d-sm-inline">Detail Kontrak</span>
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button type="button" class="nav-link" data-bs-toggle="tab"
+                                            data-bs-target="#activity" role="tab" aria-selected="false">
+                                            <i class="fas fa-chart-line me-2"></i>
+                                            <span class="d-none d-sm-inline">Activity</span>
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
+                        </div>
 
-                            <div class="card-body">
-                                <div class="tab-content p-0">
-                                    <!-- Detail Pinjaman Tab -->
-                                    <div class="tab-pane fade show active" id="detail-pinjaman" role="tabpanel">
-                                        <h5 class="mb-4">Detail Pinjaman</h5>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <!-- Detail Pinjaman Tab -->
+                                <div class="tab-pane fade show active" id="detail-pinjaman" role="tabpanel">
+                                    <div
+                                        class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
+                                        <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
+                                        <button type="button" class="btn btn-primary d-none" id="btnSetujuiPeminjaman">
+                                            <i class="fas fa-check me-2"></i>
+                                            Setujui Peminjaman
+                                        </button>
+                                    </div>
 
-                                        <!-- Data Perusahaan -->
-                                        <h6 class="text-muted mb-3">Data Perusahaan</h6>
-                                        <div class="row g-3 mb-4">
-                                            <div class="col-md-6 col-lg-4 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nama Perusahaan</small>
-                                                    <p class="mb-0">Techno Infinity</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nama Bank</small>
-                                                    <p class="mb-0">HC Service</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">No Rekening</small>
-                                                    <p class="mb-0">130023032390239</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Lampiran SID</small>
-                                                    <p class="mb-0">Pertanyaan Untuk BP Tapera</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nilai KOL</small>
-                                                    <p class="mb-0">3 KOL</p>
-                                                </div>
+                                    <hr class="my-3 my-md-4">
+
+                                    <!-- Data Perusahaan -->
+                                    <h6 class="text-dark mb-3">Data Perusahaan</h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Nama
+                                                    Perusahaan</small>
+                                                <p class="fw-bold mb-0">Techno Infinity</p>
                                             </div>
                                         </div>
-
-                                        <hr class="my-4">
-
-                                        <!-- Data Peminjaman -->
-                                        <h6 class="text-muted mb-3">Data Peminjaman</h6>
-                                        <div class="row g-3 mb-4">
-                                            <div class="col-md-6 col-lg-4">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nominal Pinjaman</small>
-                                                    <p class="mb-0 text-primary fw-semibold">Rp. 300.000.000</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal Pencairan</small>
-                                                    <p class="mb-0">24 Agustus 2024</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Persentase Bagi Hasil</small>
-                                                    <p class="mb-0">2%</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Jenis Pembiayaan</small>
-                                                    <p class="mb-0">Invoice Financing</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal Bayar</small>
-                                                    <p class="mb-0">24 September 2024</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 col-lg-4">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Pembayaran Total</small>
-                                                    <p class="mb-0 text-warning fw-semibold">Rp. 100.000.000</p>
-                                                </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Nama Bank</small>
+                                                <p class="fw-bold mb-0">HC Service</p>
                                             </div>
                                         </div>
-
-                                        <hr class="my-4">
-
-                                        <!-- Data Invoicing -->
-                                        <h6 class="text-muted mb-3">Data Invoicing</h6>
-                                        <div class="table-responsive text-nowrap">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="text-uppercase small">NO</th>
-                                                        <th class="text-uppercase small">NO. INVOICE</th>
-                                                        <th class="text-uppercase small">NAMA CLIENT</th>
-                                                        <th class="text-uppercase small">NILAI INVOICE</th>
-                                                        <th class="text-uppercase small">INVOICE DATE</th>
-                                                        <th class="text-uppercase small">DUE DATE</th>
-                                                        <th class="text-uppercase small">DOKUMEN INVOICE</th>
-                                                        <th class="text-uppercase small">DOKUMEN SO</th>
-                                                        <th class="text-uppercase small">DOKUMEN KONTRAK</th>
-                                                        <th class="text-uppercase small">DOKUMEN BAST</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>1</td>
-                                                        <td><span class="fw-semibold">2222</span></td>
-                                                        <td>Pelni</td>
-                                                        <td><span class="fw-semibold">Rp. 10.000.000</span></td>
-                                                        <td>15 August 2025</td>
-                                                        <td>24 August 2025</td>
-                                                        <td><a href="#" class="text-primary"><i class="far fa-file-pdf me-1"></i>Dokumen.pdf</a></td>
-                                                        <td><a href="#" class="text-primary"><i class="far fa-file-pdf me-1"></i>Dokumen.pdf</a></td>
-                                                        <td><a href="#" class="text-primary"><i class="far fa-file-pdf me-1"></i>Dokumen.pdf</a></td>
-                                                        <td><a href="#" class="text-primary"><i class="far fa-file-pdf me-1"></i>Dokumen.pdf</a></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">No Rekening</small>
+                                                <p class="fw-bold mb-0">130023032390239</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Lampiran SID</small>
+                                                <p class="fw-bold mb-0">Pertanyaan Untuk BP Tapera</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Nilai KOL</small>
+                                                <p class="fw-bold mb-0">3 KOL</p>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <!-- Detail Kontrak Tab -->
-                                    <div class="tab-pane fade" id="detail-kontrak" role="tabpanel">
-                                        <div class="text-center py-5">
-                                            <i class="far fa-file-alt fa-3x text-muted mb-3"></i>
-                                            <h5 class="text-muted">Detail Kontrak</h5>
-                                            <p class="text-muted">Konten detail kontrak akan ditampilkan di sini.</p>
+                                    <hr class="my-3 my-md-4">
+
+                                    <!-- Data Peminjaman -->
+                                    <h6 class="text-dark mb-3">Data Peminjaman</h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Nominal
+                                                    Pinjaman</small>
+                                                <p class="mb-0 text-success fw-semibold">Rp. 300.000.000</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal
+                                                    Pencairan</small>
+                                                <p class="fw-bold mb-0">24 Agustus 2024</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
+                                                    Hasil</small>
+                                                <p class="fw-bold mb-0">2%</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Jenis
+                                                    Pembiayaan</small>
+                                                <p class="fw-bold mb-0">Invoice Financing</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
+                                                    Bayar</small>
+                                                <p class="fw-bold mb-0">24 September 2024</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                            <div class="mb-0">
+                                                <small class="text-light fw-semibold d-block mb-1">Pembayaran
+                                                    Total</small>
+                                                <p class="mb-0 text-warning fw-semibold">Rp. 100.000.000</p>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <!-- Activity Tab -->
-                                    <div class="tab-pane fade" id="activity" role="tabpanel">
-                                        <div class="text-center py-5">
-                                            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                            <h5 class="text-muted">Activity</h5>
-                                            <p class="text-muted">Konten activity akan ditampilkan di sini.</p>
+                                    <hr class="my-3 my-md-4">
+
+                                    <!-- Data Invoicing -->
+                                    <h6 class="text-muted mb-3">Data Invoicing</h6>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-uppercase small">NO</th>
+                                                    <th class="text-uppercase small">NO. INVOICE</th>
+                                                    <th class="text-uppercase small">NAMA CLIENT</th>
+                                                    <th class="text-uppercase small">NILAI INVOICE</th>
+                                                    <th class="text-uppercase small">INVOICE DATE</th>
+                                                    <th class="text-uppercase small">DUE DATE</th>
+                                                    <th class="text-uppercase small">DOKUMEN INVOICE</th>
+                                                    <th class="text-uppercase small">DOKUMEN SO</th>
+                                                    <th class="text-uppercase small">DOKUMEN KONTRAK</th>
+                                                    <th class="text-uppercase small">DOKUMEN BAST</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td><span class="fw-semibold">2222</span></td>
+                                                    <td>Pelni</td>
+                                                    <td><span class="fw-semibold">Rp. 10.000.000</span></td>
+                                                    <td>15 August 2025</td>
+                                                    <td>24 August 2025</td>
+                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    </td>
+                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    </td>
+                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    </td>
+                                                    <td><a href="#" class="text-primary">Dokumen.pdf</a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Detail Kontrak Tab -->
+                                <div class="tab-pane fade" id="detail-kontrak" role="tabpanel">
+                                    <div class="text-center py-5">
+                                        <i class="far fa-file-alt fa-3x text-muted mb-3"></i>
+                                        <h5 class="text-muted">Detail Kontrak</h5>
+                                        <p class="text-muted">Konten detail kontrak akan ditampilkan di sini.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Activity Tab -->
+                                <div class="tab-pane fade" id="activity" role="tabpanel">
+                                    <div class="mb-4">
+                                        <h5 class="mb-0">Aktivitas Terakhir</h5>
+                                    </div>
+
+                                    <hr class="my-3">
+
+                                    <!-- Empty state untuk step 1 & 2 -->
+                                    <div id="activity-empty" class="text-center py-5">
+                                        <div class="mb-3">
+                                            <i class="ti ti-clipboard-list display-4 text-muted"></i>
+                                        </div>
+                                        <h5 class="text-muted mb-2">Belum Ada Aktivitas</h5>
+                                        <p class="text-muted mb-0">Aktivitas akan muncul setelah proses validasi dimulai.
+                                        </p>
+                                    </div>
+
+                                    <!-- Timeline Container - hanya muncul dari step 3 -->
+                                    <div class="d-none" id="timeline-container">
+                                        <!-- Step 3: Validasi Dokumen -->
+                                        <div class="activity-item" id="activity-step-3">
+                                            <div class="row align-items-center mb-3">
+                                                <!-- Keterangan + Icon (Kiri) -->
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-warning">
+                                                                    <i class="ti ti-file-text"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Validasi Dokumen</h6>
+                                                            <p class="text-muted mb-0 small">Pengajuan sedang dalam proses
+                                                                validasi. Harap menunggu hingga proses selesai.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tanggal (Tengah) -->
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-3">-</small>
+                                                </div>
+
+                                                <!-- Button (Kanan) -->
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <!-- No action button for step 3 -->
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 4: Draft Pengajuan Disetujui -->
+                                        <div class="activity-item d-none mt-3" id="activity-step-4">
+                                            <div class="row align-items-center mb-3">
+                                                <!-- Keterangan + Icon (Kiri) -->
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-primary">
+                                                                    <i class="ti ti-file-check"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">
+                                                                Draft: Pengajuan Pinjaman
+                                                                <i class="ti ti-arrow-right mx-1"></i>
+                                                                Pengajuan Disetujui
+                                                            </h6>
+                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Tanggal (Tengah) -->
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-4">-</small>
+                                                </div>
+
+                                                <!-- Button Edit (Kanan) -->
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary"
+                                                        id="btnEditPencairan" title="Edit">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -370,45 +330,443 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 
+    <!-- Modal Persetujuan Pinjaman -->
+    <div class="modal fade" id="modalPersetujuanPinjaman" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Persetujuan Pinjaman</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <hr class="my-2">
+                <div class="modal-body">
+                    <h5 class="mb-2">Apakah anda yakin menyetujui Pengajuan Pinjaman?</h5>
+                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui Pengajuan Pinjaman, dan Isi
+                        Perjanjian Kontrak terlebih dahulu.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btnKonfirmasiSetuju">
+                        Setuju
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnTolakPinjaman">
+                        Tolak
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Modal Konfirmasi Pencairan Dana -->
+    <div class="modal fade" id="modalPencairanDana" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Pencairan Dana</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPencairanDana">
+                    <div class="modal-body">
+                        <!-- Card Data Nominal dan Tanggal -->
+                        <div class="card border mb-3 shadow-none">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nominalPengajuan" class="form-label">Nominal Pengajuan</label>
+                                        <input type="number" class="form-control" id="nominalPengajuan"
+                                            value="300000000" disabled>
+                                    </div>
 
-    {{-- <script>
-        let currentStep = 2;
-        const totalSteps = 7;
-        
-        function updateStepper() {
-            const arrows = document.querySelectorAll('.stepper-arrow');
-            
-            arrows.forEach((arrow, index) => {
-                arrow.classList.remove('active', 'completed');
-                
-                if (index + 1 < currentStep) {
-                    arrow.classList.add('completed');
-                } else if (index + 1 === currentStep) {
-                    arrow.classList.add('active');
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nominalDisetujui" class="form-label">Nominal Disetujui</label>
+                                        <input type="number" class="form-control" id="nominalDisetujui"
+                                            placeholder="Masukkan nominal yang disetujui" required>
+                                        <div class="invalid-feedback">
+                                            Silakan isi nominal yang disetujui.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="flatpickr-tanggal-pencairan" class="form-label">Tanggal
+                                            Pencairan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control flatpickr-date-modal rounded-start"
+                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pencairan" required>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Silakan pilih tanggal pencairan.
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="flatpickr-tanggal-harapan" class="form-label">Tanggal Pencairan yang
+                                            Diharapkan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control rounded-start"
+                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-harapan"
+                                                value="24/08/2024" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Catatan -->
+                        <div class="card border shadow-none">
+                            <div class="card-body">
+                                <label for="catatanLainnya" class="form-label">Catatan Lainnya</label>
+                                <textarea class="form-control" id="catatanLainnya" rows="4"
+                                    placeholder="Berikan catatan tambahan jika diperlukan"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Submit Pencairan Dana
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hasil Review (Penolakan) -->
+    <div class="modal fade" id="modalHasilReview" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hasil Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formHasilReview">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="hasilReview"
+                                placeholder="Berikan catatan alasan penolakan" required>
+                            <div class="invalid-feedback">
+                                Silakan isi hasil review terlebih dahulu.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            Kirim
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Pencairan Dana -->
+    <div class="modal fade" id="modalEditPencairan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Konfirmasi Pencairan Dana</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formEditPencairan">
+                    <div class="modal-body">
+                        <!-- Card Data Nominal dan Tanggal -->
+                        <div class="card border mb-3 shadow-none">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
+                                        <input type="number" class="form-control" id="editNominalPengajuan"
+                                            value="300000000" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
+                                        <input type="number" class="form-control" id="editNominalDisetujui" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="editTanggalPencairan" class="form-label">Tanggal Pencairan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="editTanggalPencairan" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="editTanggalHarapan" class="form-label">Tanggal Pencairan yang
+                                            Diharapkan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="editTanggalHarapan" value="24/08/2024" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Catatan - Only editable field -->
+                        <div class="card border shadow-none">
+                            <div class="card-body">
+                                <label for="editCatatanLainnya" class="form-label">Catatan Lainnya</label>
+                                <textarea class="form-control" id="editCatatanLainnya" rows="4"
+                                    placeholder="Berikan catatan tambahan jika diperlukan"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Simpan Perubahan
+                            <i class="fas fa-save ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // State management
+            let currentStep = 1;
+            const totalSteps = 7;
+            let pencairanData = {
+                nominalDisetujui: '',
+                tanggalPencairan: '',
+                catatan: ''
+            };
+
+            // DOM Elements - Cache untuk performa
+            const elements = {
+                btnSetujui: document.getElementById('btnSetujuiPeminjaman'),
+                btnKonfirmasiSetuju: document.getElementById('btnKonfirmasiSetuju'),
+                btnTolakPinjaman: document.getElementById('btnTolakPinjaman'),
+                btnEditPencairan: document.getElementById('btnEditPencairan'),
+                alertPeninjauan: document.getElementById('alertPeninjauan'),
+                activityEmpty: document.getElementById('activity-empty'),
+                timelineContainer: document.getElementById('timeline-container'),
+                forms: {
+                    pencairan: document.getElementById('formPencairanDana'),
+                    review: document.getElementById('formHasilReview'),
+                    edit: document.getElementById('formEditPencairan')
                 }
+            };
+
+            // Bootstrap Modals
+            const modals = {
+                persetujuan: new bootstrap.Modal(document.getElementById('modalPersetujuanPinjaman')),
+                pencairan: new bootstrap.Modal(document.getElementById('modalPencairanDana')),
+                review: new bootstrap.Modal(document.getElementById('modalHasilReview')),
+                edit: new bootstrap.Modal(document.getElementById('modalEditPencairan'))
+            };
+
+            // Helper: Get formatted date
+            const getFormattedDate = () => new Date().toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
             });
-        }
-        
-        function nextStep() {
-            if (currentStep < totalSteps) {
-                currentStep++;
-                updateStepper();
+
+            // Helper: Toggle element visibility
+            const toggleDisplay = (element, show) => {
+                element?.classList.toggle('d-none', !show);
+            };
+
+            // Update stepper UI
+            function updateStepper() {
+                document.querySelectorAll('.stepper-arrow').forEach((arrow, index) => {
+                    arrow.classList.remove('active', 'completed');
+                    if (index + 1 < currentStep) arrow.classList.add('completed');
+                    else if (index + 1 === currentStep) arrow.classList.add('active');
+                });
+
+                toggleDisplay(elements.btnSetujui, currentStep === 2);
+                elements.alertPeninjauan.style.display = currentStep >= 2 ? 'none' : 'block';
+                updateActivityTimeline();
             }
-        }
-        
-        function previousStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                updateStepper();
+
+            // Update activity timeline
+            function updateActivityTimeline() {
+                const currentDate = getFormattedDate();
+
+                if (currentStep < 3) {
+                    toggleDisplay(elements.activityEmpty, true);
+                    toggleDisplay(elements.timelineContainer, false);
+                    return;
+                }
+
+                toggleDisplay(elements.activityEmpty, false);
+                toggleDisplay(elements.timelineContainer, true);
+
+                if (currentStep >= 3) {
+                    const step3 = document.getElementById('activity-step-3');
+                    toggleDisplay(step3, true);
+                    document.getElementById('date-step-3').textContent = currentDate;
+                }
+
+                if (currentStep >= 4) {
+                    const step4 = document.getElementById('activity-step-4');
+                    toggleDisplay(step4, true);
+                    document.getElementById('date-step-4').textContent = currentDate;
+                }
             }
-        }
-        
-        // Initialize
-        updateStepper();
-    </script> --}}
+
+            // Navigate to step
+            function goToStep(step) {
+                if (step >= 1 && step <= totalSteps) {
+                    currentStep = step;
+                    updateStepper();
+                }
+            }
+
+            // Initialize flatpickr
+            function initFlatpickr() {
+                const input = document.getElementById('flatpickr-tanggal-pencairan');
+                if (input?._flatpickr) input._flatpickr.destroy();
+
+                flatpickr(input, {
+                    monthSelectorType: 'static',
+                    dateFormat: 'd/m/Y',
+                    altInput: true,
+                    altFormat: 'j F Y',
+                    locale: {
+                        firstDayOfWeek: 1
+                    }
+                });
+            }
+
+            // Reset form
+            function resetForm(form) {
+                form.reset();
+                form.classList.remove('was-validated');
+            }
+
+            // Switch modal with delay
+            function switchModal(hideModal, showModal, callback) {
+                hideModal.hide();
+                setTimeout(() => {
+                    callback?.();
+                    showModal.show();
+                }, 300);
+            }
+
+            // Switch to activity tab
+            function switchToActivityTab() {
+                setTimeout(() => {
+                    const tab = document.querySelector('[data-bs-target="#activity"]');
+                    new bootstrap.Tab(tab).show();
+                }, 300);
+            }
+
+            // Event: Stepper arrows click
+            document.querySelectorAll('.stepper-arrow').forEach(arrow => {
+                arrow.style.cursor = 'pointer';
+                arrow.addEventListener('click', () => {
+                    goToStep(parseInt(arrow.getAttribute('data-step')));
+                });
+            });
+
+            // Event: Show approval modal
+            elements.btnSetujui?.addEventListener('click', () => modals.persetujuan.show());
+
+            // Event: Approve - Show pencairan modal
+            elements.btnKonfirmasiSetuju?.addEventListener('click', () => {
+                switchModal(modals.persetujuan, modals.pencairan, () => {
+                    resetForm(elements.forms.pencairan);
+                    document.getElementById('nominalPengajuan').value = '300000000';
+                    document.getElementById('flatpickr-tanggal-harapan').value = '24/08/2024';
+                    initFlatpickr();
+                });
+            });
+
+            // Event: Reject - Show review modal
+            elements.btnTolakPinjaman?.addEventListener('click', () => {
+                switchModal(modals.persetujuan, modals.review, () => {
+                    resetForm(elements.forms.review);
+                });
+            });
+
+            // Event: Submit pencairan dana
+            elements.forms.pencairan?.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (!this.checkValidity()) {
+                    e.stopPropagation();
+                    this.classList.add('was-validated');
+                    return;
+                }
+
+                pencairanData = {
+                    nominalDisetujui: document.getElementById('nominalDisetujui').value,
+                    tanggalPencairan: document.getElementById('flatpickr-tanggal-pencairan').value,
+                    catatan: document.getElementById('catatanLainnya').value.trim()
+                };
+
+                modals.pencairan.hide();
+                resetForm(this);
+                goToStep(4);
+                switchToActivityTab();
+            });
+
+            // Event: Submit review (reject)
+            elements.forms.review?.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (!this.checkValidity()) {
+                    e.stopPropagation();
+                    this.classList.add('was-validated');
+                    return;
+                }
+
+                modals.review.hide();
+                resetForm(this);
+                goToStep(1);
+            });
+
+            // Event: Edit pencairan
+            elements.btnEditPencairan?.addEventListener('click', () => {
+                document.getElementById('editNominalPengajuan').value = '300000000';
+                document.getElementById('editNominalDisetujui').value = pencairanData.nominalDisetujui;
+                document.getElementById('editTanggalPencairan').value = pencairanData.tanggalPencairan;
+                document.getElementById('editTanggalHarapan').value = '24/08/2024';
+                document.getElementById('editCatatanLainnya').value = pencairanData.catatan;
+                modals.edit.show();
+            });
+
+            // Event: Submit edit pencairan
+            elements.forms.edit?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                pencairanData.catatan = document.getElementById('editCatatanLainnya').value.trim();
+                modals.edit.hide();
+            });
+
+            // Initialize
+            updateStepper();
+        });
+    </script>
 @endsection
