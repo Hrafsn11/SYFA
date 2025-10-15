@@ -198,7 +198,7 @@
                             <!-- No. Rekening -->
                             <div class="col-md-6 mb-3">
                                 <label for="no_rek" class="form-label">No. Rekening <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" wire:model.defer="no_rek" placeholder="Masukkan no rekening" required>
+                                <input type="number" step="1" min="0" pattern="[0-9]*"class="form-control" wire:model.defer="no_rek" placeholder="Masukkan no rekening" required>
                                 @error('no_rek') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                         </div>
