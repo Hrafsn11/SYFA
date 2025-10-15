@@ -89,11 +89,11 @@
   --bs-tertiary-bg: rgba(47, 43, 61, 0.1);
   --bs-tertiary-bg-rgb: 47, 43, 61;
   --bs-heading-color: #444050;
-  --bs-link-color: #7367f0;
+  --bs-link-color: #13ABAB;
   --bs-link-color-rgb: 115, 103, 240;
   --bs-link-decoration: none;
-  --bs-link-hover-color: #685dd8;
-  --bs-link-hover-color-rgb: 104, 93, 216;
+  --bs-link-hover-color: #13ABAB;
+  --bs-link-hover-color-rgb: 19, 171, 171;
   --bs-code-color: #e83e8c;
   --bs-highlight-color: #6d6b77;
   --bs-highlight-bg: #ffecd9;
@@ -130,7 +130,7 @@
 :root {
   font-size: var(--bs-root-font-size);
 }
-@media (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {te
   :root {
     scroll-behavior: smooth;
   }
@@ -3736,9 +3736,9 @@ textarea.form-control-lg {
   --bs-nav-tabs-border-color: #e6e6e8;
   --bs-nav-tabs-border-radius: var(--bs-border-radius);
   --bs-nav-tabs-link-hover-border-color: var(--bs-secondary-bg) var(--bs-secondary-bg) #e6e6e8;
-  --bs-nav-tabs-link-active-color: #7367f0;
+  --bs-nav-tabs-link-active-color: #13ABAB;
   --bs-nav-tabs-link-active-bg: #fff;
-  --bs-nav-tabs-link-active-border-color: #7367f0;
+  --bs-nav-tabs-link-active-border-color: #13ABAB;
   border-bottom: var(--bs-nav-tabs-border-width) solid var(--bs-nav-tabs-border-color);
 }
 .nav-tabs .nav-link {

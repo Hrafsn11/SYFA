@@ -1,21 +1,242 @@
-
 /* Custom Radio Button Color */
 .form-check-input[type="radio"]:checked {
-    background-color: #13ABAB !important;
-    border-color: #13ABAB !important;
+  background-color: #13abab !important;
+  border-color: #13abab !important;
 }
 
 .form-check-input[type="radio"]:focus {
-    border-color: #13ABAB;
-    box-shadow: 0 0 0 0.2rem rgba(19, 171, 171, 0.25);
+  border-color: #13abab;
+  box-shadow: 0 0 0 0.2rem rgba(19, 171, 171, 0.25);
 }
 
 .form-check-input[type="radio"]:checked:focus {
-    background-color: #13ABAB !important;
-    border-color: #13ABAB !important;
+  background-color: #13abab !important;
+  border-color: #13abab !important;
 }
 
 /* Hover effect */
 .form-check-input[type="radio"]:hover {
-    border-color: #13ABAB;
+  border-color: #13abab;
+}
+
+.stepper-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.stepper-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stepper-item:not(:last-child):after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background-color: #dee2e6;
+  top: 20px;
+  left: 50%;
+  z-index: -1;
+}
+
+.stepper-item.active:not(:last-child):after {
+  background-color: #17a2b8;
+}
+
+.step-counter {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #dee2e6;
+  color: #6c757d;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.stepper-item.active .step-counter {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.stepper-item.completed .step-counter {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.step-name {
+  text-align: center;
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+  max-width: 150px;
+}
+
+.stepper-item.active .step-name {
+  color: #17a2b8;
+  font-weight: 600;
+}
+
+.stepper-item.completed .step-name {
+  color: #17a2b8;
+}
+
+.stepper-arrow {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 20px) 0,
+    100% 50%,
+    calc(100% - 20px) 100%,
+    0 100%,
+    20px 50%
+  );
+  background-color: #dee2e6;
+  padding: 12px 30px 12px 40px;
+  margin-right: -18px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+}
+
+.stepper-arrow.active {
+  background-color: #13abab;
+}
+
+.stepper-arrow {
+  cursor: pointer;
+}
+
+.stepper-arrow.completed {
+  background-color: #13abab;
+}
+
+.stepper-arrow:first-child {
+  padding-left: 20px;
+  border-radius: 50px 0 0 50px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 20px) 0,
+    100% 50%,
+    calc(100% - 20px) 100%,
+    0 100%
+  );
+}
+
+.stepper-arrow:last-child {
+  margin-right: 0;
+  padding-right: 20px;
+  border-radius: 0 50px 50px 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 20px 50%);
+}
+
+.arrow-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #6c757d;
+  flex-shrink: 0;
+}
+
+.stepper-arrow.active .arrow-number,
+.stepper-arrow.completed .arrow-number {
+  color: #17a2b8;
+}
+
+.arrow-text {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.stepper-arrow.active .arrow-text,
+.stepper-arrow.completed .arrow-text {
+  color: white;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .stepper-arrow {
+    min-width: 140px;
+    padding: 10px 25px 10px 35px;
+    font-size: 12px;
+  }
+
+  .arrow-number {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .arrow-text {
+    font-size: 11px;
+  }
+
+  .timeline-container {
+    position: relative;
+    padding-left: 50px;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 30px;
+  }
+
+  .timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: -29px;
+    top: 40px;
+    width: 1px;
+    height: calc(100% - 20px);
+    background: #d3d3d3;
+    border-left: 1px dashed #d3d3d3;
+  }
+
+  .timeline-badge {
+    position: absolute;
+    left: -45px;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+  }
+
+  .timeline-content {
+    background: transparent;
+    padding: 0;
+  }
+
+  .timeline-content h6 {
+    color: #333;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .timeline-content p {
+    font-size: 13px;
+  }
 }
