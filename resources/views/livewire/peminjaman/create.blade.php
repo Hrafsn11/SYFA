@@ -147,8 +147,8 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">Total
                                             Pinjaman</label>
-                                        <input type="number" class="form-control" id="total_pinjaman"
-                                            name="total_pinjaman" placeholder="RP. 9.000.000">
+                                        <input type="text" class="form-control input-rupiah" id="total_pinjaman"
+                                            name="total_pinjaman" placeholder="Rp 0">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="flatpickr-tanggal-pencairan" class="form-label">Harapan Tanggal
@@ -197,8 +197,8 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label for="nominal_pinjaman" class="form-label">Total Pinjaman</label>
-                                        <input type="number" class="form-control" id="nominal_pinjaman"
-                                            name="nominal_pinjaman" placeholder="RP. 9.000.000">
+                                        <input type="text" class="form-control input-rupiah" id="nominal_pinjaman"
+                                            name="nominal_pinjaman" placeholder="Rp 0">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="tenorPembayaran" class="form-label">Tenor Pembayaran</label>
@@ -291,6 +291,9 @@
             initSelect2Elements();
 
             initFlatpickrElements();
+            
+            // Initialize Cleave.js untuk format rupiah
+            initCleaveRupiah();
 
             // Handle Sumber Pembiayaan Radio
             $('.sumber-pembiayaan-radio').on('change', function() {
@@ -385,6 +388,7 @@
             // Initialize flatpickr for modal after showing
             setTimeout(function() {
                 initModalFlatpickr();
+                initCleaveRupiah(); // Reinitialize Cleave for modal inputs
             }, 100);
 
             modalInstance.show();

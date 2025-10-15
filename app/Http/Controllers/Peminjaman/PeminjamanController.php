@@ -46,12 +46,67 @@ class PeminjamanController extends Controller
 
         // Minimal sample financing data for included invoice tables
         $invoice_financing_data = [
-            ['no_invoice' => 'INV-2025-001','nama_client' => 'PT Maju Jaya','nilai_invoice' => '15.000.000','nilai_pinjaman' => '12.000.000','nilai_bagi_hasil' => '300.000','invoice_date' => '2025-01-15','due_date' => '2025-02-15','dokumen_invoice' => 'invoice_001.pdf','dokumen_kontrak' => 'kontrak_001.pdf','dokumen_so' => 'so_001.pdf','dokumen_bast' => 'bast_001.pdf'],
+            [
+                'no_invoice' => 'INV-2025-001',
+                'nama_client' => 'PT Maju Jaya',
+                'nilai_invoice' => '15000000',
+                'nilai_pinjaman' => '12000000',
+                'nilai_bagi_hasil' => '300000',
+                'invoice_date' => '2025-01-15',
+                'due_date' => '2025-02-15',
+                'dokumen_invoice' => 'invoice_001.pdf',
+                'dokumen_kontrak' => 'kontrak_001.pdf',
+                'dokumen_so' => 'so_001.pdf',
+                'dokumen_bast' => 'bast_001.pdf',
+            ],
         ];
 
-        $po_financing_data = [];
-        $installment_data = [];
-        $factoring_data = [];
+        // Sample PO Financing data
+        $po_financing_data = [
+            [
+                'no_invoice' => 'PO-2025-010',
+                'nama_client' => 'CV Sumber Niaga',
+                'nilai_invoice' => '8000000',
+                'nilai_pinjaman' => '7000000',
+                'nilai_bagi_hasil' => '200000',
+                'invoice_date' => '2025-03-10',
+                'due_date' => '2025-04-10',
+                'dokumen_kontrak' => 'kontrak_po_010.pdf',
+                'dokumen_so' => 'so_po_010.pdf',
+                'dokumen_bast' => 'bast_po_010.pdf',
+                'dokumen_lainnya' => 'lainnya_po_010.pdf',
+            ],
+        ];
+
+        // Sample Installment data
+        $installment_data = [
+            [
+                'no_invoice' => 'INST-2025-05',
+                'nama_client' => 'PT Retailindo',
+                'nilai_invoice' => '2500000',
+                'invoice_date' => '2025-05-01',
+                'nama_barang' => 'Mesin Kasir',
+                'dokumen_invoice' => 'invoice_inst_05.pdf',
+                'dokumen_lainnya' => 'lainnya_inst_05.pdf',
+            ],
+        ];
+
+        // Sample Factoring data
+        $factoring_data = [
+            [
+                'no_invoice' => 'FAC-2025-02',
+                'nama_client' => 'PT Ekspor Jaya',
+                'nilai_invoice' => '50000000',
+                'nilai_pinjaman' => '45000000',
+                'nilai_bagi_hasil' => '1500000',
+                'invoice_date' => '2025-02-20',
+                'due_date' => '2025-03-20',
+                'dokumen_invoice' => 'invoice_fac_02.pdf',
+                'dokumen_kontrak' => 'kontrak_fac_02.pdf',
+                'dokumen_so' => 'so_fac_02.pdf',
+                'dokumen_bast' => 'bast_fac_02.pdf',
+            ],
+        ];
 
         return view('livewire.peminjaman.detail', compact(
             'peminjaman', 'sumber_eksternal', 'banks', 'tenor_pembayaran',
@@ -107,12 +162,64 @@ class PeminjamanController extends Controller
 
         // minimal sample invoice data arrays
         $invoice_financing_data = [
-            ['no_invoice' => 'INV-2025-001','nama_client' => 'PT Maju Jaya','nilai_invoice' => '15.000.000','nilai_pinjaman' => '12.000.000','nilai_bagi_hasil' => '300.000','invoice_date' => '2025-01-15','due_date' => '2025-02-15','dokumen_invoice' => 'invoice_001.pdf','dokumen_kontrak' => 'kontrak_001.pdf','dokumen_so' => 'so_001.pdf','dokumen_bast' => 'bast_001.pdf'],
+            [
+                'no_invoice' => 'INV-2025-001',
+                'nama_client' => 'PT Maju Jaya',
+                'nilai_invoice' => '15000000',
+                'nilai_pinjaman' => '12000000',
+                'nilai_bagi_hasil' => '300000',
+                'invoice_date' => '2025-01-15',
+                'due_date' => '2025-02-15',
+                'dokumen_invoice' => 'invoice_001.pdf',
+                'dokumen_kontrak' => 'kontrak_001.pdf',
+                'dokumen_so' => 'so_001.pdf',
+                'dokumen_bast' => 'bast_001.pdf',
+            ],
         ];
 
-        $po_financing_data = [];
-        $installment_data = [];
-        $factoring_data = [];
+        $po_financing_data = [
+            [
+                'no_invoice' => 'PO-2025-010',
+                'nama_client' => 'CV Sumber Niaga',
+                'nilai_invoice' => '8000000',
+                'nilai_pinjaman' => '7000000',
+                'nilai_bagi_hasil' => '200000',
+                'invoice_date' => '2025-03-10',
+                'due_date' => '2025-04-10',
+                'dokumen_kontrak' => 'kontrak_po_010.pdf',
+                'dokumen_so' => 'so_po_010.pdf',
+                'dokumen_bast' => 'bast_po_010.pdf',
+                'dokumen_lainnya' => 'lainnya_po_010.pdf',
+            ],
+        ];
+
+        $installment_data = [
+            [
+                'no_invoice' => 'INST-2025-05',
+                'nama_client' => 'PT Retailindo',
+                'nilai_invoice' => '2500000',
+                'invoice_date' => '2025-05-01',
+                'nama_barang' => 'Mesin Kasir',
+                'dokumen_invoice' => 'invoice_inst_05.pdf',
+                'dokumen_lainnya' => 'lainnya_inst_05.pdf',
+            ],
+        ];
+
+        $factoring_data = [
+            [
+                'no_invoice' => 'FAC-2025-02',
+                'nama_client' => 'PT Ekspor Jaya',
+                'nilai_invoice' => '50000000',
+                'nilai_pinjaman' => '45000000',
+                'nilai_bagi_hasil' => '1500000',
+                'invoice_date' => '2025-02-20',
+                'due_date' => '2025-03-20',
+                'dokumen_invoice' => 'invoice_fac_02.pdf',
+                'dokumen_kontrak' => 'kontrak_fac_02.pdf',
+                'dokumen_so' => 'so_fac_02.pdf',
+                'dokumen_bast' => 'bast_fac_02.pdf',
+            ],
+        ];
 
         $banks = ['BCA','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
 
