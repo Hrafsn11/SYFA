@@ -55,6 +55,11 @@
                         <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                     </a>
                 </li>
+                <li class="menu-item {{ request()->is('master-data/debitur-investor*') ? 'active' : '' }}">
+                    <a href="{{ route('debiturinvestor.index') }}" class="menu-link">
+                        <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
+                    </a>
+                </li>
                 <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
                     <a href="#" class="menu-link">
                         <div data-i18n="Menu Lainnya">Menu Lainnya</div>
