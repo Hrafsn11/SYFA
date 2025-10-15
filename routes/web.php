@@ -2,7 +2,6 @@
 
 use App\Livewire\Dashboard;
 use App\Livewire\RoleManagement;
-use App\Livewire\SumberPendanaanEksternal\Index;
 use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
 use Illuminate\Support\Facades\Route;
@@ -10,9 +9,11 @@ use App\Livewire\ConfigMatrixPinjaman;
 use App\Livewire\PermissionManagement;
 use App\Livewire\Peminjaman\PeminjamanIndex;
 use App\Livewire\Peminjaman\PeminjamanCreate;
-use App\Http\Controllers\Peminjaman\PeminjamanController;
+use App\Livewire\SumberPendanaanEksternal\Index;
 use App\Livewire\MasterDataKol\MasterDataKolIndex;
 use App\Livewire\MasterDataKol\MasterDataKolCreate;
+use App\Http\Controllers\Peminjaman\PeminjamanController;
+use App\Livewire\MasterDataDebiturInvestor\DebiturInvestorIndex;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,13 +41,15 @@ Route::middleware([
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
     // Peminjaman pages handled by controller (migrated from Livewire components)
     Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
-    // Detail route for a specific peminjaman record
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
+    // Detail route for a specific peminjaman record
     Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('matrixpinjaman');
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
+
     Route::get('master-data/master-data-kol', MasterDataKolIndex::class)->name('masterdatakol.index');
     Route::get('master-data/sumber-pendanaan-eksternal', Index::class)->name('sumberpendanaaneksternal.index');
+    Route::get('master-data/debitur-investor', DebiturInvestorIndex::class)->name('debiturinvestor.index');
 });
 
 require __DIR__.'/auth.php';

@@ -545,12 +545,11 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Batal
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                            Tolak
                         </button>
                         <button type="submit" class="btn btn-primary">
-                            Simpan Perubahan
-                            <i class="fas fa-save ms-2"></i>
+                            Terima
                         </button>
                     </div>
                 </form>

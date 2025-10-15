@@ -212,11 +212,8 @@
                                 </div>
 
                                 <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label class="form-label">Persentase Bagi Hasil (Debit Cost)</label>
-                                    </div>
                                     <div class="col-md-4">
-                                        <label for="pps_debit" class="form-label">PPS</label>
+                                        <label for="pps_debit" class="form-label">Persentase Bagi Hasil (Debit Cost)</label>
                                         <input type="text" class="form-control bg-light" id="pps_debit"
                                             value="10% (Rp. 900.000)" disabled>
                                     </div>
