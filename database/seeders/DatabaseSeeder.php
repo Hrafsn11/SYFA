@@ -12,7 +12,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            RolePermissionSeeder::class,
+            \Database\Seeders\RolePermissionSeeder::class,
+            \Database\Seeders\MasterKolSeeder::class,
+            \Database\Seeders\MasterSumberPendanaanEksternalSeeder::class,
         ]);
     }
 }

@@ -27,8 +27,8 @@ class RolePermissionSeeder extends Seeder
             // This is safe to ignore as the cache will be cleared when needed
         }
 
-        // Create permissions
-        $permissions = [
+    // Create permissions (idempotent)
+    $permissions = [
             // User Management
             'view users',
             'create users',
@@ -56,15 +56,15 @@ class RolePermissionSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Create roles and assign permissions
-        $superAdminRole = Role::create(['name' => 'super-admin']);
-        $superAdminRole->givePermissionTo(Permission::all());
+        // Create roles and assign permissions (idempotent)
+        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        $superAdminRole->syncPermissions(Permission::all());
 
-        $adminRole = Role::create(['name' => 'admin']);
-        $adminRole->givePermissionTo([
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole->syncPermissions([
             'view users',
             'create users',
             'edit users',
@@ -74,33 +74,39 @@ class RolePermissionSeeder extends Seeder
             'view settings',
         ]);
 
-        $moderatorRole = Role::create(['name' => 'moderator']);
-        $moderatorRole->givePermissionTo([
+        $moderatorRole = Role::firstOrCreate(['name' => 'moderator']);
+        $moderatorRole->syncPermissions([
             'view users',
             'edit users',
             'view dashboard',
         ]);
 
-        $userRole = Role::create(['name' => 'user']);
-        $userRole->givePermissionTo([
+        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole->syncPermissions([
             'view dashboard',
         ]);
 
-        // Create a super admin user
-        $superAdmin = User::create([
-            'name' => 'Super Admin',
+        // Create a super admin user (idempotent)
+        $superAdmin = User::firstOrCreate([
             'email' => 'admin@admin.com',
+        ], [
+            'name' => 'Super Admin',
             'password' => bcrypt('password'),
         ]);
-        $superAdmin->assignRole('super-admin');
+        if (! $superAdmin->hasRole('super-admin')) {
+            $superAdmin->assignRole('super-admin');
+        }
 
-        // Create a regular admin user
-        $admin = User::create([
-            'name' => 'Admin User',
+        // Create a regular admin user (idempotent)
+        $admin = User::firstOrCreate([
             'email' => 'admin@example.com',
+        ], [
+            'name' => 'Admin User',
             'password' => bcrypt('password'),
         ]);
-        $admin->assignRole('admin');
+        if (! $admin->hasRole('admin')) {
+            $admin->assignRole('admin');
+        }
 
         // Restore the original cache driver
         config(['cache.default' => $originalCacheDriver]);
