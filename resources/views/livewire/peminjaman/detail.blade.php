@@ -3,7 +3,7 @@
 @section('content')
     <div class="row">
         <div class="col-12">
-            <h4 class="fw-bold mb-0">
+            <h4 class="fw-bold mb-4">
                 Detail Pengajuan Peminjaman
             </h4>
 
@@ -32,10 +32,18 @@
                 </div>
                 <div class="stepper-arrow" data-step="6">
                     <div class="arrow-number">6</div>
-                    <div class="arrow-text">Generate Kontrak</div>
+                    <div class="arrow-text">Validasi Direktur</div>
                 </div>
                 <div class="stepper-arrow" data-step="7">
                     <div class="arrow-number">7</div>
+                    <div class="arrow-text">Generate Kontrak</div>
+                </div>
+                <div class="stepper-arrow" data-step="8">
+                    <div class="arrow-number">8</div>
+                    <div class="arrow-text">Upload Dokumen</div>
+                </div>
+                <div class="stepper-arrow" data-step="9">
+                    <div class="arrow-number">9</div>
                     <div class="arrow-text">Selesai</div>
                 </div>
             </div>
@@ -55,21 +63,21 @@
                                     <li class="nav-item">
                                         <button type="button" class="nav-link active" data-bs-toggle="tab"
                                             data-bs-target="#detail-pinjaman" role="tab" aria-selected="true">
-                                            <i class="fas fa-wallet me-2"></i>
+                                            <i class="ti ti-wallet me-2"></i>
                                             <span class="d-none d-sm-inline">Detail Pinjaman</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
                                         <button type="button" class="nav-link" data-bs-toggle="tab"
                                             data-bs-target="#detail-kontrak" role="tab" aria-selected="false">
-                                            <i class="far fa-file me-2"></i>
+                                            <i class="ti ti-report-money me-2"></i>
                                             <span class="d-none d-sm-inline">Detail Kontrak</span>
                                         </button>
                                     </li>
                                     <li class="nav-item">
                                         <button type="button" class="nav-link" data-bs-toggle="tab"
                                             data-bs-target="#activity" role="tab" aria-selected="false">
-                                            <i class="fas fa-chart-line me-2"></i>
+                                            <i class="ti ti-activity me-2"></i>
                                             <span class="d-none d-sm-inline">Activity</span>
                                         </button>
                                     </li>
@@ -245,7 +253,7 @@
 
                                     <hr class="my-3">
 
-                                    <!-- Empty state untuk step 1 & 2 -->
+                                    <!-- Empty state untuk step 1 -->
                                     <div id="activity-empty" class="text-center py-5">
                                         <div class="mb-3">
                                             <i class="ti ti-clipboard-list display-4 text-muted"></i>
@@ -255,79 +263,241 @@
                                         </p>
                                     </div>
 
-                                    <!-- Timeline Container - hanya muncul dari step 3 -->
+                                    <!-- Timeline Container - hanya muncul dari step 2 -->
                                     <div class="d-none" id="timeline-container">
-                                        <!-- Step 3: Validasi Dokumen -->
-                                        <div class="activity-item" id="activity-step-3">
-                                            <div class="row align-items-center mb-3">
-                                                <!-- Keterangan + Icon (Kiri) -->
+                                        <!-- Step 2: Validasi Dokumen -->
+                                        <div class="activity-item d-none mb-4" id="activity-step-2">
+                                            <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
                                                             <div class="avatar avatar-sm">
                                                                 <span
-                                                                    class="avatar-initial rounded-circle bg-label-warning">
-                                                                    <i class="ti ti-file-text"></i>
-                                                                </span>
+                                                                    class="avatar-initial rounded-circle bg-label-warning"><i
+                                                                        class="ti ti-report-search"></i></span>
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-1">Validasi Dokumen</h6>
                                                             <p class="text-muted mb-0 small">Pengajuan sedang dalam proses
-                                                                validasi. Harap menunggu hingga proses selesai.</p>
+                                                                validasi.</p>
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <!-- Tanggal (Tengah) -->
                                                 <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-3">-</small>
+                                                    <small class="text-muted" id="date-step-2">-</small>
                                                 </div>
-
-                                                <!-- Button (Kanan) -->
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <!-- No action button for step 3 -->
-                                                </div>
+                                                <div class="col-6 col-md-3 text-end"></div>
                                             </div>
                                         </div>
 
-                                        <!-- Step 4: Draft Pengajuan Disetujui -->
-                                        <div class="activity-item d-none mt-3" id="activity-step-4">
-                                            <div class="row align-items-center mb-3">
-                                                <!-- Keterangan + Icon (Kiri) -->
+                                        <!-- Step 3: Dokumen Tervalidasi -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-3">
+                                            <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
                                                             <div class="avatar avatar-sm">
                                                                 <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary">
-                                                                    <i class="ti ti-file-check"></i>
-                                                                </span>
+                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
+                                                                        class="ti ti-file-text"></i></span>
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-1">
-                                                                Draft: Pengajuan Pinjaman
-                                                                <i class="ti ti-arrow-right mx-1"></i>
-                                                                Pengajuan Disetujui
+                                                            <h6 class="mb-1">Draft: Dokumen Tervalidasi <i
+                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui
                                                             </h6>
                                                             <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <!-- Tanggal (Tengah) -->
                                                 <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-4">-</small>
+                                                    <small class="text-muted" id="date-step-3">-</small>
                                                 </div>
-
-                                                <!-- Button Edit (Kanan) -->
                                                 <div class="col-6 col-md-3 text-end">
                                                     <button type="button" class="btn btn-icon btn-sm btn-label-primary"
                                                         id="btnEditPencairan" title="Edit">
                                                         <i class="ti ti-edit"></i>
                                                     </button>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 4: Persetujuan Debitur -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-4">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
+                                                                        class="ti ti-file-text"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Draft: Persetujuan Debitur <i
+                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui</h6>
+                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-4">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 5: Validasi Direktur SKI -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-5">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
+                                                                        class="ti ti-file-text"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Draft: Validasi Direktur SKI <i
+                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui
+                                                            </h6>
+                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-5">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 6: Validasi Direktur -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-6">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
+                                                                        class="ti ti-file-text"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Draft: Validasi Direktur <i
+                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui
+                                                            </h6>
+                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-6">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 7: Generate Kontrak -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-7">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
+                                                                        class="ti ti-file-text"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Draft: Generate Kontrak <i
+                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui</h6>
+                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-7">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 8: Upload Dokumen -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-8">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-warning"><i
+                                                                        class="ti ti-upload"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Upload Dokumen <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui</h6>
+                                                            <p class="text-muted mb-0 small">Bukti Pengiriman telah terkirim.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-8">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end">
+                                                    <button type="button" class="btn btn-icon btn-sm btn-label-success"
+                                                        id="btnUploadDokumen" title="Upload Dokumen">
+                                                        <i class="ti ti-upload"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 9: Selesai -->
+                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-9">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-success"><i
+                                                                        class="ti ti-circle-check"></i></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Selesai</h6>
+                                                            <p class="text-muted mb-0 small">Proses pengajuan pinjaman
+                                                                telah selesai.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-9">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -504,7 +674,8 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="text" class="form-control input-rupiah" id="editNominalDisetujui" disabled>
+                                        <input type="text" class="form-control input-rupiah" id="editNominalDisetujui"
+                                            disabled>
                                     </div>
                                 </div>
 
@@ -557,106 +728,118 @@
         </div>
     </div>
 
+    <!-- Modal Upload Dokumen -->
+    <div class="modal fade" id="modalUploadDokumen" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Dokumen</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formUploadDokumen" class="needs-validation" novalidate>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="fileUpload" class="form-label">Upload Dokumen Kontrak</label>
+                            <input type="file" class="form-control" id="fileUpload" required>
+                            <div class="invalid-feedback">
+                                Silakan pilih file untuk diupload.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // State management
-            let currentStep = 1;
-            const totalSteps = 7;
-            let pencairanData = {
-                nominalDisetujui: '',
-                tanggalPencairan: '',
-                catatan: ''
+            // --- STATE MANAGEMENT ---
+            const state = {
+                currentStep: 1,
+                totalSteps: 9,
+                pencairanData: {
+                    nominalDisetujui: '',
+                    tanggalPencairan: '',
+                    catatan: ''
+                },
             };
 
-            // DOM Elements - Cache untuk performa
-            const elements = {
-                btnSetujui: document.getElementById('btnSetujuiPeminjaman'),
-                btnKonfirmasiSetuju: document.getElementById('btnKonfirmasiSetuju'),
-                btnTolakPinjaman: document.getElementById('btnTolakPinjaman'),
-                btnEditPencairan: document.getElementById('btnEditPencairan'),
+            // --- DOM ELEMENT CACHE ---
+            const dom = {
+                stepper: document.querySelector('.d-flex.overflow-auto'),
                 alertPeninjauan: document.getElementById('alertPeninjauan'),
-                activityEmpty: document.getElementById('activity-empty'),
-                timelineContainer: document.getElementById('timeline-container'),
+                activityTab: document.querySelector('[data-bs-target="#activity"]'),
+                timeline: {
+                    container: document.getElementById('timeline-container'),
+                    empty: document.getElementById('activity-empty'),
+                    items: document.querySelectorAll('.activity-item'),
+                },
+                buttons: {
+                    setujuiPeminjaman: document.getElementById('btnSetujuiPeminjaman'),
+                    konfirmasiSetuju: document.getElementById('btnKonfirmasiSetuju'),
+                    tolakPinjaman: document.getElementById('btnTolakPinjaman'),
+                    editPencairan: document.querySelectorAll('#btnEditPencairan'), // Menggunakan querySelectorAll
+                    uploadDokumen: document.getElementById('btnUploadDokumen'),
+                },
                 forms: {
                     pencairan: document.getElementById('formPencairanDana'),
                     review: document.getElementById('formHasilReview'),
-                    edit: document.getElementById('formEditPencairan')
+                    edit: document.getElementById('formEditPencairan'),
+                    upload: document.getElementById('formUploadDokumen'),
+                },
+                modals: {
+                    persetujuan: new bootstrap.Modal(document.getElementById('modalPersetujuanPinjaman')),
+                    pencairan: new bootstrap.Modal(document.getElementById('modalPencairanDana')),
+                    review: new bootstrap.Modal(document.getElementById('modalHasilReview')),
+                    edit: new bootstrap.Modal(document.getElementById('modalEditPencairan')),
+                    upload: new bootstrap.Modal(document.getElementById('modalUploadDokumen')),
+                },
+                inputs: {
+                    nominalPengajuan: document.getElementById('nominalPengajuan'),
+                    nominalDisetujui: document.getElementById('nominalDisetujui'),
+                    tanggalPencairan: document.getElementById('flatpickr-tanggal-pencairan'),
+                    tanggalHarapan: document.getElementById('flatpickr-tanggal-harapan'),
+                    catatanLainnya: document.getElementById('catatanLainnya'),
+                    editNominalPengajuan: document.getElementById('editNominalPengajuan'),
+                    editNominalDisetujui: document.getElementById('editNominalDisetujui'),
+                    editTanggalPencairan: document.getElementById('editTanggalPencairan'),
+                    editTanggalHarapan: document.getElementById('editTanggalHarapan'),
+                    editCatatanLainnya: document.getElementById('editCatatanLainnya'),
                 }
             };
 
-            // Bootstrap Modals
-            const modals = {
-                persetujuan: new bootstrap.Modal(document.getElementById('modalPersetujuanPinjaman')),
-                pencairan: new bootstrap.Modal(document.getElementById('modalPencairanDana')),
-                review: new bootstrap.Modal(document.getElementById('modalHasilReview')),
-                edit: new bootstrap.Modal(document.getElementById('modalEditPencairan'))
-            };
-
-            // Helper: Get formatted date
+            // --- HELPERS ---
             const getFormattedDate = () => new Date().toLocaleDateString('id-ID', {
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
             });
-
-            // Helper: Toggle element visibility
-            const toggleDisplay = (element, show) => {
-                element?.classList.toggle('d-none', !show);
+            const toggleDisplay = (element, show) => element?.classList.toggle('d-none', !show);
+            const resetForm = (form) => {
+                form?.reset();
+                form?.classList.remove('was-validated');
+            };
+            const switchModal = (hideModal, showModal, onShow) => {
+                hideModal.hide();
+                const handleShow = () => {
+                    onShow?.();
+                    showModal.show();
+                    initCleaveRupiah(); // Re-initialize cleave on new modal
+                    document.getElementById(showModal._element.id).removeEventListener('shown.bs.modal',
+                        handleShow);
+                };
+                document.getElementById(showModal._element.id).addEventListener('shown.bs.modal', handleShow);
             };
 
-            // Update stepper UI
-            function updateStepper() {
-                document.querySelectorAll('.stepper-arrow').forEach((arrow, index) => {
-                    arrow.classList.remove('active', 'completed');
-                    if (index + 1 < currentStep) arrow.classList.add('completed');
-                    else if (index + 1 === currentStep) arrow.classList.add('active');
-                });
-
-                toggleDisplay(elements.btnSetujui, currentStep === 2);
-                elements.alertPeninjauan.style.display = currentStep >= 2 ? 'none' : 'block';
-                updateActivityTimeline();
-            }
-
-            // Update activity timeline
-            function updateActivityTimeline() {
-                const currentDate = getFormattedDate();
-
-                if (currentStep < 3) {
-                    toggleDisplay(elements.activityEmpty, true);
-                    toggleDisplay(elements.timelineContainer, false);
-                    return;
-                }
-
-                toggleDisplay(elements.activityEmpty, false);
-                toggleDisplay(elements.timelineContainer, true);
-
-                if (currentStep >= 3) {
-                    const step3 = document.getElementById('activity-step-3');
-                    toggleDisplay(step3, true);
-                    document.getElementById('date-step-3').textContent = currentDate;
-                }
-
-                if (currentStep >= 4) {
-                    const step4 = document.getElementById('activity-step-4');
-                    toggleDisplay(step4, true);
-                    document.getElementById('date-step-4').textContent = currentDate;
-                }
-            }
-
-            // Navigate to step
-            function goToStep(step) {
-                if (step >= 1 && step <= totalSteps) {
-                    currentStep = step;
-                    updateStepper();
-                }
-            }
-
-            // Initialize flatpickr
-            function initFlatpickr() {
-                const input = document.getElementById('flatpickr-tanggal-pencairan');
-                if (input?._flatpickr) input._flatpickr.destroy();
-
-                flatpickr(input, {
+            // --- INITIALIZATION ---
+            const initFlatpickr = () => {
+                if (dom.inputs.tanggalPencairan?._flatpickr) dom.inputs.tanggalPencairan._flatpickr.destroy();
+                flatpickr(dom.inputs.tanggalPencairan, {
                     monthSelectorType: 'static',
                     dateFormat: 'd/m/Y',
                     altInput: true,
@@ -665,120 +848,152 @@
                         firstDayOfWeek: 1
                     }
                 });
-            }
+            };
 
-            // Reset form
-            function resetForm(form) {
-                form.reset();
-                form.classList.remove('was-validated');
-            }
-
-            // Switch modal with delay
-            function switchModal(hideModal, showModal, callback) {
-                hideModal.hide();
-                setTimeout(() => {
-                    callback?.();
-                    showModal.show();
-                    // Reinitialize Cleave for modal inputs
-                    initCleaveRupiah();
-                }, 300);
-            }
-
-            // Switch to activity tab
-            function switchToActivityTab() {
-                setTimeout(() => {
-                    const tab = document.querySelector('[data-bs-target="#activity"]');
-                    new bootstrap.Tab(tab).show();
-                }, 300);
-            }
-
-            // Event: Stepper arrows click
-            document.querySelectorAll('.stepper-arrow').forEach(arrow => {
-                arrow.style.cursor = 'pointer';
-                arrow.addEventListener('click', () => {
-                    goToStep(parseInt(arrow.getAttribute('data-step')));
+            // --- UI UPDATES ---
+            const updateStepper = () => {
+                document.querySelectorAll('.stepper-arrow').forEach((arrow, index) => {
+                    const step = index + 1;
+                    arrow.classList.toggle('completed', step < state.currentStep);
+                    arrow.classList.toggle('active', step === state.currentStep);
                 });
-            });
+                toggleDisplay(dom.buttons.setujuiPeminjaman, state.currentStep === 2);
+                dom.alertPeninjauan.style.display = state.currentStep >= 2 ? 'none' : 'block';
+                updateActivityTimeline();
+            };
 
-            // Event: Show approval modal
-            elements.btnSetujui?.addEventListener('click', () => modals.persetujuan.show());
+            const updateActivityTimeline = () => {
+                const showTimeline = state.currentStep >= 2;
+                toggleDisplay(dom.timeline.empty, !showTimeline);
+                toggleDisplay(dom.timeline.container, showTimeline);
 
-            // Event: Approve - Show pencairan modal
-            elements.btnKonfirmasiSetuju?.addEventListener('click', () => {
-                switchModal(modals.persetujuan, modals.pencairan, () => {
-                    resetForm(elements.forms.pencairan);
-                    document.getElementById('nominalPengajuan').value = '300000000';
-                    document.getElementById('flatpickr-tanggal-harapan').value = '24/08/2024';
+                if (!showTimeline) return;
+
+                const currentDate = getFormattedDate();
+                dom.timeline.items.forEach((item, index) => {
+                    const step = index + 2; // Timeline items start from step 2
+                    const shouldShow = step <= state.currentStep;
+                    toggleDisplay(item, shouldShow);
+                    if (shouldShow) {
+                        const dateEl = item.querySelector(`#date-step-${step}`);
+                        if (dateEl) dateEl.textContent = currentDate;
+                    }
+                });
+            };
+
+            const goToStep = (step) => {
+                if (step >= 1 && step <= state.totalSteps) {
+                    state.currentStep = step;
+                    updateStepper();
+                }
+            };
+
+            const switchToActivityTab = () => {
+                setTimeout(() => new bootstrap.Tab(dom.activityTab).show(), 300);
+            };
+
+
+            // --- EVENT HANDLERS ---
+            const handleStepperClick = (e) => {
+                const target = e.target.closest('.stepper-arrow');
+                if (target) {
+                    goToStep(parseInt(target.dataset.step));
+                }
+            };
+
+            const handlePencairanSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.pencairan.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.pencairan.classList.add('was-validated');
+                    return;
+                }
+                Object.assign(state.pencairanData, {
+                    nominalDisetujui: dom.inputs.nominalDisetujui.value,
+                    tanggalPencairan: dom.inputs.tanggalPencairan.value,
+                    catatan: dom.inputs.catatanLainnya.value.trim(),
+                });
+                dom.modals.pencairan.hide();
+                resetForm(dom.forms.pencairan);
+                goToStep(4);
+                switchToActivityTab();
+            };
+
+            const handleReviewSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.review.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.review.classList.add('was-validated');
+                    return;
+                }
+                dom.modals.review.hide();
+                resetForm(dom.forms.review);
+                goToStep(1); // Back to the first step after rejection
+            };
+
+            const handleEditPencairanShow = () => {
+                dom.inputs.editNominalPengajuan.value = '300000000';
+                dom.inputs.editTanggalHarapan.value = '24/08/2024';
+                dom.inputs.editNominalDisetujui.value = state.pencairanData.nominalDisetujui;
+                dom.inputs.editTanggalPencairan.value = state.pencairanData.tanggalPencairan;
+                dom.inputs.editCatatanLainnya.value = state.pencairanData.catatan;
+                dom.modals.edit.show();
+            };
+
+            const handleEditPencairanSubmit = (e) => {
+                e.preventDefault();
+                state.pencairanData.catatan = dom.inputs.editCatatanLainnya.value.trim();
+                dom.modals.edit.hide();
+            };
+
+            const handleUploadSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.upload.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.upload.classList.add('was-validated');
+                    return;
+                }
+                // Implement upload logic here
+                console.log('File to upload:', document.getElementById('fileUpload').files[0]);
+                console.log('Catatan:', document.getElementById('uploadCatatan').value);
+
+                dom.modals.upload.hide();
+                resetForm(dom.forms.upload);
+                goToStep(9); // Move to the final step
+                switchToActivityTab();
+            };
+
+
+            // --- EVENT LISTENERS ---
+            dom.stepper.addEventListener('click', handleStepperClick);
+            dom.buttons.setujuiPeminjaman?.addEventListener('click', () => dom.modals.persetujuan.show());
+            dom.buttons.konfirmasiSetuju?.addEventListener('click', () => {
+                switchModal(dom.modals.persetujuan, dom.modals.pencairan, () => {
+                    resetForm(dom.forms.pencairan);
+                    dom.inputs.nominalPengajuan.value = '300000000';
+                    dom.inputs.tanggalHarapan.value = '24/08/2024';
                     initFlatpickr();
                 });
             });
+            dom.buttons.tolakPinjaman?.addEventListener('click', () => {
+                switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
+            });
+            dom.buttons.uploadDokumen?.addEventListener('click', () => dom.modals.upload.show());
 
-            // Event: Reject - Show review modal
-            elements.btnTolakPinjaman?.addEventListener('click', () => {
-                switchModal(modals.persetujuan, modals.review, () => {
-                    resetForm(elements.forms.review);
-                });
+            // Gunakan forEach karena btnEditPencairan sekarang adalah NodeList
+            dom.buttons.editPencairan.forEach(btn => {
+                btn.addEventListener('click', handleEditPencairanShow);
             });
 
-            // Event: Submit pencairan dana
-            elements.forms.pencairan?.addEventListener('submit', function(e) {
-                e.preventDefault();
+            dom.forms.pencairan?.addEventListener('submit', handlePencairanSubmit);
+            dom.forms.review?.addEventListener('submit', handleReviewSubmit);
+            dom.forms.edit?.addEventListener('submit', handleEditPencairanSubmit);
+            dom.forms.upload?.addEventListener('submit', handleUploadSubmit);
 
-                if (!this.checkValidity()) {
-                    e.stopPropagation();
-                    this.classList.add('was-validated');
-                    return;
-                }
 
-                pencairanData = {
-                    nominalDisetujui: document.getElementById('nominalDisetujui').value,
-                    tanggalPencairan: document.getElementById('flatpickr-tanggal-pencairan').value,
-                    catatan: document.getElementById('catatanLainnya').value.trim()
-                };
-
-                modals.pencairan.hide();
-                resetForm(this);
-                goToStep(4);
-                switchToActivityTab();
-            });
-
-            // Event: Submit review (reject)
-            elements.forms.review?.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                if (!this.checkValidity()) {
-                    e.stopPropagation();
-                    this.classList.add('was-validated');
-                    return;
-                }
-
-                modals.review.hide();
-                resetForm(this);
-                goToStep(1);
-            });
-
-            // Event: Edit pencairan
-            elements.btnEditPencairan?.addEventListener('click', () => {
-                document.getElementById('editNominalPengajuan').value = '300000000';
-                document.getElementById('editNominalDisetujui').value = pencairanData.nominalDisetujui;
-                document.getElementById('editTanggalPencairan').value = pencairanData.tanggalPencairan;
-                document.getElementById('editTanggalHarapan').value = '24/08/2024';
-                document.getElementById('editCatatanLainnya').value = pencairanData.catatan;
-                modals.edit.show();
-            });
-
-            // Event: Submit edit pencairan
-            elements.forms.edit?.addEventListener('submit', function(e) {
-                e.preventDefault();
-                pencairanData.catatan = document.getElementById('editCatatanLainnya').value.trim();
-                modals.edit.hide();
-            });
-
-            // Initialize
+            // --- INITIAL EXECUTION ---
             updateStepper();
-            
-            // Initialize Cleave.js for rupiah inputs
-            initCleaveRupiah();
+            initCleaveRupiah(); // Initialize Cleave for initial inputs
         });
     </script>
 @endsection

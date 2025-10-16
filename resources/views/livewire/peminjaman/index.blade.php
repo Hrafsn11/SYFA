@@ -71,7 +71,7 @@
                                                 <span class="fw-semibold">{{ $item['nama_perusahaan'] }}</span>
                                             </td>
                                             <td class="text-center">
-                                                <a href="{{ route('peminjaman.detail', ['id' => $item['id'] ?? ($index + 1)]) }}" class="btn btn-sm btn-icon btn-label-info">
+                                                <a href="#" class="btn btn-sm btn-icon btn-label-info">
                                                     <i class="ti ti-file-text"></i>
                                                 </a>
                                             </td>
