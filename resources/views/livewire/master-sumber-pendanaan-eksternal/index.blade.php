@@ -1,3 +1,6 @@
+@extends('layouts.app')
+
+@section('content')
 <div>
     <div class="row">
         <div class="col-12">
@@ -60,18 +63,18 @@
                             </thead>
                             <tbody>
                                 @foreach ($data as $item)
-                                    <tr>
+                                    <tr data-id="{{ $item->id_instansi }}">
                                         <td class="text-center">{{ $loop->iteration }}</td>
-                                        <td class="text-center">{{ $item['nama_instansi'] }}</td>
-                                        <td class="text-center">{{ $item['presentase_bagi_hasil'] }}%</td>
+                                        <td class="text-center">{{ $item->nama_instansi }}</td>
+                                        <td class="text-center">{{ $item->persentase_bagi_hasil }}%</td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center align-items-center gap-2">
-                                                <a class="" href="#">
-                                                    <i class="ti ti-edit me-1"></i>
-                                                </a>
-                                                <a class="text-danger" href="#">
-                                                    <i class="ti ti-trash me-1"></i>
-                                                </a>
+                                                <button class="btn btn-sm btn-outline-primary btn-edit-sumber" title="Edit">
+                                                    <i class="ti ti-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger btn-delete-sumber" title="Hapus">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -143,7 +146,7 @@
     </div>
 
 </div>
-
+@endsection
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var modalTambahSumberPendanaan = new bootstrap.Modal(document.getElementById('modalTambahSumberPendanaan'));
@@ -153,30 +156,147 @@
             // Reset form ketika modal dibuka
             formTambahSumberPendanaan.reset();
             formTambahSumberPendanaan.classList.remove('was-validated');
+            if (formTambahSumberPendanaan.dataset.editId) delete formTambahSumberPendanaan.dataset.editId;
             modalTambahSumberPendanaan.show();
         });
 
         document.getElementById('btnSimpanSumberPendanaan').addEventListener('click', function() {
-            // Validasi form
             if (!formTambahSumberPendanaan.checkValidity()) {
                 formTambahSumberPendanaan.classList.add('was-validated');
                 return;
             }
-
-            // Ambil data dari form
             var sumberPendanaanData = {
                 nama_instansi: document.getElementById('nama_instansi').value,
-                presentase_bagi_hasil: parseInt(document.getElementById('presentase_bagi_hasil').value),
-                kol: parseInt(document.getElementById('kol').value)
+                persentase_bagi_hasil: parseInt(document.getElementById('presentase_bagi_hasil').value) || 0
             };
 
-            // Logic to save Sumber Pendanaan data goes here
-            console.log('Data Sumber Pendanaan:', sumberPendanaanData);
+            var editId = formTambahSumberPendanaan.dataset.editId;
+            var url = editId ? ('/master/sumber/' + editId) : '/master/sumber';
+            var method = editId ? 'PUT' : 'POST';
 
-            // Reset form dan tutup modal
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(sumberPendanaanData)
+            }).then(r => r.json()).then(res => {
+                if (res.success) {
+                    const tbody = document.querySelector('table.datatables-basic tbody');
+                    if (method === 'POST') {
+                        const d = res.data;
+                        const rowHtml = `
+                            <tr data-id="${d.id_instansi}">
+                                <td class="text-center">${tbody.querySelectorAll('tr').length + 1}</td>
+                                <td class="text-center">${d.nama_instansi}</td>
+                                <td class="text-center">${d.persentase_bagi_hasil}%</td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <button class="btn btn-sm btn-outline-primary btn-edit-sumber" title="Edit">
+                                            <i class="ti ti-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger btn-delete-sumber" title="Hapus">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', rowHtml);
+                    } else {
+                        const d = res.data;
+                        const row = document.querySelector(`table.datatables-basic tbody tr[data-id="${d.id_instansi}"]`);
+                        if (row) {
+                            const cells = row.querySelectorAll('td');
+                            cells[1].textContent = d.nama_instansi;
+                            cells[2].textContent = d.persentase_bagi_hasil + '%';
+                        }
+                    }
+                    delete formTambahSumberPendanaan.dataset.editId;
+                } else {
+                    alert('Gagal menyimpan');
+                }
+            }).catch(err => { console.error(err); alert('Error'); });
+
             formTambahSumberPendanaan.reset();
             formTambahSumberPendanaan.classList.remove('was-validated');
             modalTambahSumberPendanaan.hide();
         });
+
+        // event delegation for edit/delete
+        const tbodySumber = document.querySelector('table.datatables-basic tbody');
+        tbodySumber.addEventListener('click', function(e) {
+            const editBtn = e.target.closest('.btn-edit-sumber');
+            const deleteBtn = e.target.closest('.btn-delete-sumber');
+            if (editBtn) {
+                const row = editBtn.closest('tr');
+                const id = row.dataset.id;
+                fetch('/master/sumber/' + id + '/edit').then(r => r.json()).then(res => {
+                    const d = res.data;
+                    document.getElementById('nama_instansi').value = d.nama_instansi;
+                    document.getElementById('presentase_bagi_hasil').value = d.persentase_bagi_hasil;
+                    formTambahSumberPendanaan.dataset.editId = id;
+                    modalTambahSumberPendanaan.show();
+                }).catch(err => console.error(err));
+            }
+
+            if (deleteBtn) {
+                const row = deleteBtn.closest('tr');
+                const id = row.dataset.id;
+                window._deleteTarget = { id: id, row: row };
+                modalConfirmDeleteSumber.show();
+            }
+        });
     });
 </script>
+
+@push('modals')
+    <div class="modal fade" id="modalConfirmDeleteSumber" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmDeleteSumber">Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var modalEl = document.getElementById('modalConfirmDeleteSumber');
+        window.modalConfirmDeleteSumber = new bootstrap.Modal(modalEl);
+        document.getElementById('btnConfirmDeleteSumber').addEventListener('click', function() {
+            var target = window._deleteTarget;
+            if (!target) return modalConfirmDeleteSumber.hide();
+            fetch('/master/sumber/' + target.id, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }).then(r => r.json()).then(res => {
+                if (res.success) {
+                    if (target.row) target.row.remove();
+                } else {
+                    alert('Gagal menghapus');
+                }
+            }).catch(err => { console.error(err); alert('Error'); })
+            .finally(() => {
+                modalConfirmDeleteSumber.hide();
+                window._deleteTarget = null;
+            });
+        });
+    });
+</script>
+@endpush
