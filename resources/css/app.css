@@ -95,21 +95,21 @@
 .stepper-arrow {
   clip-path: polygon(
     0 0,
-    calc(100% - 20px) 0,
+    calc(100% - 15px) 0,
     100% 50%,
-    calc(100% - 20px) 100%,
+    calc(100% - 15px) 100%,
     0 100%,
-    20px 50%
+    15px 50%
   );
   background-color: #dee2e6;
-  padding: 12px 30px 12px 40px;
-  margin-right: -18px;
+  padding: 8px 25px 8px 35px;
+  margin-right: -13px;
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 180px;
+  gap: 8px;
+  min-width: 120px;
 }
 
 .stepper-arrow.active {
@@ -129,9 +129,9 @@
   border-radius: 50px 0 0 50px;
   clip-path: polygon(
     0 0,
-    calc(100% - 20px) 0,
+    calc(100% - 15px) 0,
     100% 50%,
-    calc(100% - 20px) 100%,
+    calc(100% - 15px) 100%,
     0 100%
   );
 }
@@ -140,12 +140,12 @@
   margin-right: 0;
   padding-right: 20px;
   border-radius: 0 50px 50px 0;
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 20px 50%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 15px 50%);
 }
 
 .arrow-number {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background-color: white;
   display: flex;
@@ -163,7 +163,7 @@
 
 .arrow-text {
   color: #6c757d;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 

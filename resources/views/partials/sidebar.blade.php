@@ -45,18 +45,18 @@
                 <div data-i18n="Master Data">Master Data</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('master-data/master-data-kol*') ? 'active' : '' }}">
-                    <a href="{{ route('masterdatakol.index') }}" class="menu-link">
+                <li class="menu-item {{ request()->is('master-data/kol*') ? 'active' : '' }}">
+                    <a href="{{ route('master-data.kol.index') }}" class="menu-link">
                         <div data-i18n="Master Data KOL">Master Data KOL</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->is('master-data/sumber-pendanaan-eksternal*') ? 'active' : '' }}">
-                    <a href="{{ route('sumberpendanaaneksternal.index') }}" class="menu-link">
+                    <a href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
                         <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->is('master-data/debitur-investor*') ? 'active' : '' }}">
-                    <a href="{{ route('debiturinvestor.index') }}" class="menu-link">
+                    <a href="{{ route('master-data.debitur-investor.index') }}" class="menu-link">
                         <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                     </a>
                 </li>

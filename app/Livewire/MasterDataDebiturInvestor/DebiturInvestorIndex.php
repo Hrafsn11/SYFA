@@ -9,8 +9,7 @@ class DebiturInvestorIndex extends Component
     public $kol;
     public $data;
 
-    // Properti untuk form
-    public $nama_perusahaan, $flagging = 'investor', $nama_ceo, $alamat_perusahaan, $email, $kol_perusahaan, $nama_bank, $no_rek;
+    public $nama_perusahaan, $flagging = 'tidak', $nama_ceo, $alamat_perusahaan, $email, $kol_perusahaan, $nama_bank, $no_rek;
 
     // Properti untuk kontrol modal dan mode
     public $showModal = false;
@@ -19,7 +18,6 @@ class DebiturInvestorIndex extends Component
 
     public function mount()
     {
-        // Data dummy, idealnya ini berasal dari database
         $this->data = [
             [
                 'id' => 1,
@@ -83,7 +81,7 @@ class DebiturInvestorIndex extends Component
 
         if ($item) {
             $this->nama_perusahaan = $item['nama_perusahaan'];
-            $this->flagging = strtolower($item['Flagging']) == 'investor' ? 'investor' : 'debitur';
+            $this->flagging = strtolower($item['Flagging']) == 'investor' ? 'ya' : 'tidak';
             $this->nama_ceo = $item['nama_ceo'];
             $this->alamat_perusahaan = $item['alamat_perusahaan'];
             $this->email = $item['email'];
@@ -112,7 +110,7 @@ class DebiturInvestorIndex extends Component
 
         $newData = [
             'nama_perusahaan' => $this->nama_perusahaan,
-            'Flagging' => ucfirst($this->flagging),
+            'Flagging' => $this->flagging === 'ya' ? 'Investor' : '-',
             'nama_ceo' => $this->nama_ceo,
             'alamat_perusahaan' => $this->alamat_perusahaan,
             'email' => $this->email,
@@ -122,7 +120,6 @@ class DebiturInvestorIndex extends Component
         ];
 
         if ($this->isEditMode) {
-            // Logika untuk update data di array
             $index = collect($this->data)->search(function ($item) {
                 return $item['id'] == $this->editDataId;
             });
@@ -131,14 +128,11 @@ class DebiturInvestorIndex extends Component
                 $this->data[$index] = array_merge(['id' => $this->editDataId], $newData);
             }
         } else {
-            // Logika untuk tambah data baru
             $newId = count($this->data) > 0 ? max(array_column($this->data, 'id')) + 1 : 1;
             $this->data[] = array_merge(['id' => $newId], $newData);
         }
 
         $this->closeModal();
-        // Opsi: tambahkan event untuk notifikasi sukses
-        // session()->flash('message', $this->isEditMode ? 'Data berhasil diperbarui.' : 'Data berhasil ditambahkan.');
     }
 
     public function closeModal()
