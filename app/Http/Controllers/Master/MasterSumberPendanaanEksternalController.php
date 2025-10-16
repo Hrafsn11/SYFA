@@ -16,7 +16,7 @@ class MasterSumberPendanaanEksternalController extends Controller
 
     public function create()
     {
-        return view('master.sumber.create');
+        
     }
 
     public function store(Request $request)
