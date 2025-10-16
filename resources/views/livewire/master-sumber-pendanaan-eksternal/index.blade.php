@@ -171,11 +171,12 @@
             };
 
             var editId = formTambahSumberPendanaan.dataset.editId;
-            var url = editId ? ('/master/sumber/' + editId) : '/master/sumber';
+            var url = editId ? ('/master-data/sumber-pendanaan-eksternal/' + editId) : '/master-data/sumber-pendanaan-eksternal';
             var method = editId ? 'PUT' : 'POST';
 
             fetch(url, {
                 method: method,
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -232,13 +233,15 @@
             if (editBtn) {
                 const row = editBtn.closest('tr');
                 const id = row.dataset.id;
-                fetch('/master/sumber/' + id + '/edit').then(r => r.json()).then(res => {
-                    const d = res.data;
-                    document.getElementById('nama_instansi').value = d.nama_instansi;
-                    document.getElementById('presentase_bagi_hasil').value = d.persentase_bagi_hasil;
-                    formTambahSumberPendanaan.dataset.editId = id;
-                    modalTambahSumberPendanaan.show();
-                }).catch(err => console.error(err));
+                fetch('/master-data/sumber-pendanaan-eksternal/' + id + '/edit', { credentials: 'same-origin' })
+                    .then(r => { console.log('Edit fetch status', r.status); return r.json(); })
+                    .then(res => {
+                        const d = res.data;
+                        document.getElementById('nama_instansi').value = d.nama_instansi;
+                        document.getElementById('presentase_bagi_hasil').value = d.persentase_bagi_hasil;
+                        formTambahSumberPendanaan.dataset.editId = id;
+                        modalTambahSumberPendanaan.show();
+                    }).catch(err => console.error(err));
             }
 
             if (deleteBtn) {
@@ -279,7 +282,7 @@
         document.getElementById('btnConfirmDeleteSumber').addEventListener('click', function() {
             var target = window._deleteTarget;
             if (!target) return modalConfirmDeleteSumber.hide();
-            fetch('/master/sumber/' + target.id, {
+            fetch('/master-data/sumber-pendanaan-eksternal/' + target.id, {
                 method: 'DELETE',
                 credentials: 'same-origin',
                 headers: {

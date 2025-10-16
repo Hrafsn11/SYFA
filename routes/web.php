@@ -45,15 +45,15 @@ Route::middleware([
     Route::get('master-data/master-data-kol', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('masterdatakol.index');
     Route::get('master-data/sumber-pendanaan-eksternal', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('sumberpendanaaneksternal.index');
     
-    // Master Debitur 
+    // Master Debitur dan Investor
     Route::prefix('master-data/debitur-investor')->name('master-data.debitur-investor.')->group(function() {
-        Route::get('/', [\App\Http\Controllers\Master\DebiturController::class, 'index'])->name('index');
-        Route::get('create', [\App\Http\Controllers\Master\DebiturController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Master\DebiturController::class, 'store'])->name('store');
-        Route::get('{id}', [\App\Http\Controllers\Master\DebiturController::class, 'show'])->name('show');
-        Route::get('{id}/edit', [\App\Http\Controllers\Master\DebiturController::class, 'edit'])->name('edit');
-        Route::put('{id}', [\App\Http\Controllers\Master\DebiturController::class, 'update'])->name('update');
-        Route::delete('{id}', [\App\Http\Controllers\Master\DebiturController::class, 'destroy'])->name('destroy');
+        Route::get('/', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'store'])->name('store');
+        Route::get('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'destroy'])->name('destroy');
     });
 
     // Master KOL

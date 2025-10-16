@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             \Database\Seeders\RolePermissionSeeder::class,
             \Database\Seeders\MasterKolSeeder::class,
+            \Database\Seeders\MasterDebiturSeeder::class,
             \Database\Seeders\MasterSumberPendanaanEksternalSeeder::class,
         ]);
     }

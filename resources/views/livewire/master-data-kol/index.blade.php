@@ -174,11 +174,12 @@
             };
 
             var editId = formTambahKOL.dataset.editId;
-            var url = editId ? ('/master/kol/' + editId) : '/master/kol';
+            var url = editId ? ('/master-data/kol/' + editId) : '/master-data/kol';
             var method = editId ? 'PUT' : 'POST';
 
             fetch(url, {
                 method: method,
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -227,7 +228,6 @@
                 alert('Terjadi kesalahan');
             });
 
-            // Reset form dan tutup modal
             formTambahKOL.reset();
             formTambahKOL.classList.remove('was-validated');
             modalTambahKOL.hide();
@@ -240,7 +240,9 @@
             if (editBtn) {
                 const row = editBtn.closest('tr');
                 const id = row.dataset.id;
-                fetch('/master/kol/' + id + '/edit').then(r => r.json()).then(res => {
+                fetch('/master-data/kol/' + id + '/edit', { credentials: 'same-origin' })
+                    .then(r => { console.log('Edit fetch status', r.status); return r.json(); })
+                    .then(res => {
                     const d = res.data;
                     document.getElementById('kol').value = d.kol;
                     document.getElementById('persentase_keterlambatan').value = d.persentase_pencairan;
@@ -289,7 +291,7 @@
             document.getElementById('btnConfirmDeleteKOL').addEventListener('click', function() {
                 var target = window._deleteTarget;
                 if (!target) return modalConfirmDeleteKOL.hide();
-                fetch('/master/kol/' + target.id, {
+                fetch('/master-data/kol/' + target.id, {
                     method: 'DELETE',
                     credentials: 'same-origin',
                     headers: {

@@ -8,11 +8,10 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('master_debitur', function (Blueprint $table) {
+    Schema::create('master_debitur_dan_investor', function (Blueprint $table) {
             $table->increments('id_debitur');
 
             $table->unsignedInteger('id_kol');
-            $table->unsignedInteger('id_instansi')->nullable();
 
             $table->string('nama_debitur', 255);
             $table->string('alamat', 255)->nullable();
@@ -28,18 +27,15 @@ return new class extends Migration
                   ->references('id_kol')->on('master_kol')
                   ->onDelete('restrict')->onUpdate('cascade');
 
-            $table->foreign('id_instansi')
-                  ->references('id_instansi')->on('master_sumber_pendanaan_eksternal')
-                  ->onDelete('set null')->onUpdate('cascade');
         });
     }
 
     public function down()
     {
-        Schema::table('master_debitur', function (Blueprint $table) {
+        Schema::table('master_debitur_dan_investor', function (Blueprint $table) {
             $table->dropForeign(['id_kol']);
             $table->dropForeign(['id_instansi']);
         });
-        Schema::dropIfExists('master_debitur');
+        Schema::dropIfExists('master_debitur_dan_investor');
     }
 };
