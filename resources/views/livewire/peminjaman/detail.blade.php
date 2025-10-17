@@ -825,15 +825,21 @@
                 form?.classList.remove('was-validated');
             };
             const switchModal = (hideModal, showModal, onShow) => {
-                hideModal.hide();
-                const handleShow = () => {
+                const hideModalEl = document.getElementById(hideModal._element.id);
+                const showModalEl = document.getElementById(showModal._element.id);
+
+                const handleHidden = () => {
                     onShow?.();
                     showModal.show();
-                    initCleaveRupiah(); // Re-initialize cleave on new modal
-                    document.getElementById(showModal._element.id).removeEventListener('shown.bs.modal',
-                        handleShow);
+                    showModalEl.addEventListener('shown.bs.modal', function () {
+                        initCleaveRupiah(); // Re-initialize cleave on new modal
+                    }, { once: true });
+
+                    hideModalEl.removeEventListener('hidden.bs.modal', handleHidden);
                 };
-                document.getElementById(showModal._element.id).addEventListener('shown.bs.modal', handleShow);
+
+                hideModalEl.addEventListener('hidden.bs.modal', handleHidden);
+                hideModal.hide();
             };
 
             // --- INITIALIZATION ---
@@ -889,7 +895,7 @@
             };
 
             const switchToActivityTab = () => {
-                setTimeout(() => new bootstrap.Tab(dom.activityTab).show(), 300);
+                new bootstrap.Tab(dom.activityTab).show();
             };
 
 
@@ -955,7 +961,6 @@
                 }
                 // Implement upload logic here
                 console.log('File to upload:', document.getElementById('fileUpload').files[0]);
-                console.log('Catatan:', document.getElementById('uploadCatatan').value);
 
                 dom.modals.upload.hide();
                 resetForm(dom.forms.upload);
@@ -980,7 +985,6 @@
             });
             dom.buttons.uploadDokumen?.addEventListener('click', () => dom.modals.upload.show());
 
-            // Gunakan forEach karena btnEditPencairan sekarang adalah NodeList
             dom.buttons.editPencairan.forEach(btn => {
                 btn.addEventListener('click', handleEditPencairanShow);
             });
@@ -994,6 +998,7 @@
             // --- INITIAL EXECUTION ---
             updateStepper();
             initCleaveRupiah(); // Initialize Cleave for initial inputs
+
         });
     </script>
 @endsection

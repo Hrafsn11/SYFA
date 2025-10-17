@@ -91,13 +91,13 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-center align-items-center gap-2">
-                                                    <a class="dropdown-item" href="{{ route('peminjaman.detail', ['id' => $item['id'] ?? ($index + 1)]) }}">
+                                                    <a class="btn btn-sm btn-icon btn-text-info rounded-pill waves-effect" href="{{ route('peminjaman.detail', ['id' => $item['id'] ?? ($index + 1)]) }}">
                                                         <i class="ti ti-file-text"></i>
                                                     </a>
-                                                    <a class="dropdown-item" href="#">
+                                                    <a class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect" href="#">
                                                         <i class="ti ti-edit me-1"></i>
                                                     </a>
-                                                    <a class="dropdown-item text-danger" href="#">
+                                                    <a class="btn btn-sm btn-icon btn-text-danger rounded-pill waves-effect" href="#">
                                                         <i class="ti ti-trash me-1"></i>
                                                     </a>
                                                 </div>
