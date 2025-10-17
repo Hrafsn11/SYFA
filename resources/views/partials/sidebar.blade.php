@@ -34,6 +34,18 @@
             </a>
         </li>
 
+        <!-- Pengembalian Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Pengembalian</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('pengembalian*') ? 'active' : '' }}">
+            <a href="{{ route('pengembalian.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-wallet"></i>
+                <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
+            </a>
+        </li>
+
         <!-- Master Data Section -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Master Data</span>

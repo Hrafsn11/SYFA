@@ -10,6 +10,7 @@ use App\Livewire\PermissionManagement;
 use App\Livewire\Peminjaman\PeminjamanIndex;
 use App\Livewire\Peminjaman\PeminjamanCreate;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
+use App\Http\Controllers\PengembalianPinjamanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,11 @@ Route::middleware([
     Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
+
+    Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
+    Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
+
+
     // Detail route for a specific peminjaman record
     Route::get('config-matrix-pinjaman', ConfigMatrixPinjaman::class)->name('matrixpinjaman');
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');

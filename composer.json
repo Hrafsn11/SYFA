@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^3.0",
         "livewire/volt": "^1.0",
+        "rappasoft/laravel-livewire-tables": "^3.7",
         "spatie/laravel-permission": "*"
     },
     "require-dev": {
