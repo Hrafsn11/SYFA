@@ -79,7 +79,7 @@
                                         <td class="text-center">{{ $item['nama_bank'] }}</td>
                                         <td class="text-center">{{ $item['no_rek'] }}</td>
                                         <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-icon btn-text-secondary rounded-pill waves-effect edit-btn"
+                                            <button type="button" class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect edit-btn"
                                                 data-id="{{ $item['id'] }}" data-bs-toggle="modal" data-bs-target="#modalTambahDebiturInvestor">
                                                 <i class="ti ti-edit"></i>
                                             </button>

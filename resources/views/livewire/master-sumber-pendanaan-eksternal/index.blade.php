@@ -69,10 +69,10 @@
                                         <td class="text-center">{{ $item->persentase_bagi_hasil }}%</td>
                                         <td class="text-center">
                                             <div class="d-flex justify-content-center align-items-center gap-2">
-                                                <button class="btn btn-sm btn-outline-primary btn-edit-sumber" title="Edit">
+                                                <button class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect btn-edit-sumber" title="Edit">
                                                     <i class="ti ti-edit"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-danger btn-delete-sumber" title="Hapus">
+                                                <button class="btn btn-sm btn-icon btn-text-danger rounded-pill waves-effect btn-delete-sumber" title="Hapus">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
                                             </div>
