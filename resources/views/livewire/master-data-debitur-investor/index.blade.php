@@ -19,7 +19,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-datatable">
-                        <livewire:debiturinvestor-table />
+                        <livewire:debitur-investor-table />
                     </div>
                 </div>
             </div>
