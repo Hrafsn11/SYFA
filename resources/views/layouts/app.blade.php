@@ -60,6 +60,12 @@
     <script src="{{ asset('assets/vendor/js/template-customizer.js') }}"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
 
+    <!-- Adds the Core Table Styles -->
+    @rappasoftTableStyles
+
+    <!-- Adds any relevant Third-Party Styles (Used for DateRangeFilter (Flatpickr) and NumberRangeFilter) -->
+    @rappasoftTableThirdPartyStyles
+
     <!-- Styles -->
     @livewireStyles
 
@@ -162,13 +168,13 @@
         window.initCleaveRupiah = function() {
             // Selector untuk semua input yang perlu format rupiah
             const rupiahInputs = document.querySelectorAll('.input-rupiah, [data-format="rupiah"]');
-            
+
             rupiahInputs.forEach(function(input) {
                 // Skip jika sudah di-initialize
                 if (input.dataset.cleaveInitialized === 'true') {
                     return;
                 }
-                
+
                 // Initialize Cleave.js
                 new Cleave(input, {
                     numeral: true,
@@ -178,7 +184,7 @@
                     rawValueTrimPrefix: true,
                     noImmediatePrefix: false
                 });
-                
+
                 // Mark as initialized
                 input.dataset.cleaveInitialized = 'true';
             });
@@ -250,7 +256,15 @@
             }
         });
     </script>
-    <!-- Page JS -->
+    
+    {{-- ✅ CRITICAL: Livewire Scripts HARUS sebelum Rappasoft --}}
+    @livewireScripts
+    
+    {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
+    @rappasoftTableScripts
+    @rappasoftTableThirdPartyScripts
+    
+    {{-- Custom page scripts --}}
     @stack('scripts')
 </body>
 

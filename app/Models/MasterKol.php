@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Master;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +11,8 @@ class MasterKol extends Model
 
     protected $table = 'master_kol';
     protected $primaryKey = 'id_kol';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'kol','persentase_pencairan','jmlh_hari_keterlambatan'

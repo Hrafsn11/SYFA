@@ -89,151 +89,272 @@
                             <div class="tab-content">
                                 <!-- Detail Pinjaman Tab -->
                                 <div class="tab-pane fade show active" id="detail-pinjaman" role="tabpanel">
-                                    <div
-                                        class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
-                                        <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
-                                        <button type="button" class="btn btn-primary d-none" id="btnSetujuiPeminjaman">
-                                            <i class="fas fa-check me-2"></i>
-                                            Setujui Peminjaman
-                                        </button>
+                                    <!-- Konten Default (Step 1-6, 8-9) -->
+                                    <div id="content-default">
+                                        <div
+                                            class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
+                                            <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
+                                            <button type="button" class="btn btn-primary d-none" id="btnSetujuiPeminjaman">
+                                                <i class="fas fa-check me-2"></i>
+                                                Setujui Peminjaman
+                                            </button>
+                                        </div>
+
+                                        <hr class="my-3 my-md-4">
+
+                                        <!-- Data Perusahaan -->
+                                        <h6 class="text-dark mb-3">Data Perusahaan</h6>
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Nama
+                                                        Perusahaan</small>
+                                                    <p class="fw-bold mb-0">Techno Infinity</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Nama Bank</small>
+                                                    <p class="fw-bold mb-0">HC Service</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">No Rekening</small>
+                                                    <p class="fw-bold mb-0">130023032390239</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Lampiran SID</small>
+                                                    <p class="fw-bold mb-0">Pertanyaan Untuk BP Tapera</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Nilai KOL</small>
+                                                    <p class="fw-bold mb-0">3 KOL</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-3 my-md-4">
+
+                                        <!-- Data Peminjaman -->
+                                        <h6 class="text-dark mb-3">Data Peminjaman</h6>
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Nominal
+                                                        Pinjaman</small>
+                                                    <p class="mb-0 text-success fw-semibold">Rp. 300.000.000</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal
+                                                        Pencairan</small>
+                                                    <p class="fw-bold mb-0">24 Agustus 2024</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
+                                                        Hasil</small>
+                                                    <p class="fw-bold mb-0">2%</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Jenis
+                                                        Pembiayaan</small>
+                                                    <p class="fw-bold mb-0">Invoice Financing</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
+                                                        Bayar</small>
+                                                    <p class="fw-bold mb-0">24 September 2024</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                <div class="mb-0">
+                                                    <small class="text-light fw-semibold d-block mb-1">Pembayaran
+                                                        Total</small>
+                                                    <p class="mb-0 text-warning fw-semibold">Rp. 100.000.000</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-3 my-md-4">
+
+                                        <!-- Data Invoicing -->
+                                        <h6 class="text-muted mb-3">Data Invoicing</h6>
+
+                                        <div class="table-responsive text-nowrap">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>NO</th>
+                                                        <th>NO. INVOICE</th>
+                                                        <th>NAMA CLIENT</th>
+                                                        <th>NILAI INVOICE</th>
+                                                        <th>NILAI PINJAMAN</th>
+                                                        <th>NILAI BAGI HASIL</th>
+                                                        <th>INVOICE DATE</th>
+                                                        <th>DUE DATE</th>
+                                                        <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
+                                                        <th>DOKUMEN KONTRAK</th>
+                                                        <th>DOKUMEN SO</th>
+                                                        <th>DOKUMEN BAST</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="table-border-bottom-0">
+                                                    <!-- Data will be populated by JavaScript -->
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <td>INV-001</td>
+                                                        <td>Client A</td>
+                                                        <td>Rp. 150.000.000</td>
+                                                        <td>Rp. 100.000.000</td>
+                                                        <td>Rp. 2.000.000</td>
+                                                        <td>01/07/2024</td>
+                                                        <td>01/08/2024</td>
+                                                        <td>
+                                                            <a href="#" class="">Dokumen.pdf</a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="#" class="">Dokumen.pdf</a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="#" class="">Dokumen.pdf</a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="#" class="">Dokumen.pdf</a>
+                                                        </td>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
+                                    <!-- End Konten Default -->
 
-                                    <hr class="my-3 my-md-4">
+                                    <!-- Konten Step 7: Generate Kontrak -->
+                                    <div id="content-step7" class="d-none">
+                                        <div class="row">
+                                            <form action="">
+                                                <div class="col-lg mb-3">
+                                                    <label for="jenis_pembiayaan" class="form-label">Jenis
+                                                        Pembiayaan</label>
+                                                    <input type="text" class="form-control" id="jenis_pembiayaan"
+                                                        name="jenis_pembiayaan" value="Invoice & Project Financing"
+                                                        required disabled>
+                                                </div>
 
-                                    <!-- Data Perusahaan -->
-                                    <h6 class="text-dark mb-3">Data Perusahaan</h6>
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Nama
-                                                    Perusahaan</small>
-                                                <p class="fw-bold mb-0">Techno Infinity</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Nama Bank</small>
-                                                <p class="fw-bold mb-0">HC Service</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">No Rekening</small>
-                                                <p class="fw-bold mb-0">130023032390239</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Lampiran SID</small>
-                                                <p class="fw-bold mb-0">Pertanyaan Untuk BP Tapera</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Nilai KOL</small>
-                                                <p class="fw-bold mb-0">3 KOL</p>
-                                            </div>
+                                                <div class="card border-1 shadow-none mb-3">
+                                                    <div class="card-body">
+                                                        <div class="col-lg mb-3">
+                                                            <label for="nama_perusahaan" class="form-label">Nama
+                                                                Perusahaan</label>
+                                                            <input type="text" class="form-control"
+                                                                id="nama_perusahaan" name="nama_perusahaan"
+                                                                value="Techno Infinity" required disabled>
+                                                        </div>
+
+                                                        <div class="col-lg mb-3">
+                                                            <label for="nama_pimpinan" class="form-label">
+                                                                Nama Pimpinan
+                                                            </label>
+                                                            <input type="text" class="form-control" id="nama_pimpinan"
+                                                                name="nama_pimpinan" value="Cahyo" required disabled>
+                                                        </div>
+
+                                                        <div class="col-lg mb-3">
+                                                            <label for="alamat" class="form-label">
+                                                                Alamat Perusahaan
+                                                            </label>
+                                                            <input type="text" class="form-control" id="alamat"
+                                                                name="alamat"
+                                                                value="Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia"
+                                                                required disabled>
+                                                        </div>
+
+                                                        <div class="col-lg mb-3">
+                                                            <label for="tujuan" class="form-label">
+                                                                Tujuan Pembiayaan
+                                                            </label>
+                                                            <input type="text" class="form-control" id="tujuan"
+                                                                name="tujuan"
+                                                                value="Kebutuhan Gaji Operasional/Umum Sept" required
+                                                                disabled>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6 mb-2">
+                                                        <label for="nilai_pembiayaan">Nilai Pembiayaan</label>
+                                                        <input type="text" class="form-control" id="nilai_pembiayaan"
+                                                            name="nilai_pembiayaan" value="Rp.250.000.000" disabled>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="hutang_poko">Hutang Pokok</label>
+                                                        <input type="text" class="form-control" id="hutang_poko"
+                                                            name="hutang_poko" value="Rp.250.000.000" disabled>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6 mb-2">
+                                                        <label for="tenor">Tenor Pembiayaan</label>
+                                                        <input type="text" class="form-control" id="tenor"
+                                                            name="tenor" value="1 Bulan" disabled>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="biaya_admin">Biaya Administrasi</label>
+                                                        <input type="text" class="form-control" id="biaya_admin"
+                                                            name="biaya_admin" value="Rp.0.00" disabled>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg mb-3">
+                                                    <label for="nisbah" class="form-label">Bagi Hasil(Nisbah)</label>
+                                                    <input type="text" class="form-control" id="nisbah"
+                                                        name="nisbah" value="2% flat / bulan" required disabled>
+                                                </div>
+
+                                                <div class="col-lg mb-3">
+                                                    <label for="denda_keterlambatan" class="form-label">
+                                                        Denda Keterlambatan
+                                                    </label>
+                                                    <input type="text" class="form-control" id="denda_keterlambatan"
+                                                        name="denda_keterlambatan"
+                                                        value="2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut"
+                                                        required disabled>
+                                                </div>
+
+                                                <div class="col-lg mb-3">
+                                                    <label for="Jaminan" class="form-label">
+                                                        Jaminan
+                                                    </label>
+                                                    <input type="text" class="form-control" id="Jaminan"
+                                                        name="Jaminan" value="Invoice & Project\ Financing" required
+                                                        disabled>
+                                                </div>
+
+                                                <div class="col-lg mb-3">
+                                                    <label for="Tanda Tangan Debitur" class="form-label">
+                                                        Tanda Tangan Debitur
+                                                    </label>
+                                                    <input type="file" class="form-control" id="fileUpload" required>
+                                                    <div class="invalid-feedback">
+                                                        Silakan pilih file untuk diupload.
+                                                    </div>
+                                                </div>
+
+                                            </form>
                                         </div>
                                     </div>
-
-                                    <hr class="my-3 my-md-4">
-
-                                    <!-- Data Peminjaman -->
-                                    <h6 class="text-dark mb-3">Data Peminjaman</h6>
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Nominal
-                                                    Pinjaman</small>
-                                                <p class="mb-0 text-success fw-semibold">Rp. 300.000.000</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal
-                                                    Pencairan</small>
-                                                <p class="fw-bold mb-0">24 Agustus 2024</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
-                                                    Hasil</small>
-                                                <p class="fw-bold mb-0">2%</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Jenis
-                                                    Pembiayaan</small>
-                                                <p class="fw-bold mb-0">Invoice Financing</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
-                                                    Bayar</small>
-                                                <p class="fw-bold mb-0">24 September 2024</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                            <div class="mb-0">
-                                                <small class="text-light fw-semibold d-block mb-1">Pembayaran
-                                                    Total</small>
-                                                <p class="mb-0 text-warning fw-semibold">Rp. 100.000.000</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <hr class="my-3 my-md-4">
-
-                                    <!-- Data Invoicing -->
-                                    <h6 class="text-muted mb-3">Data Invoicing</h6>
-
-                                    <div class="table-responsive text-nowrap">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>NO</th>
-                                                    <th>NO. INVOICE</th>
-                                                    <th>NAMA CLIENT</th>
-                                                    <th>NILAI INVOICE</th>
-                                                    <th>NILAI PINJAMAN</th>
-                                                    <th>NILAI BAGI HASIL</th>
-                                                    <th>INVOICE DATE</th>
-                                                    <th>DUE DATE</th>
-                                                    <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
-                                                    <th>DOKUMEN KONTRAK</th>
-                                                    <th>DOKUMEN SO</th>
-                                                    <th>DOKUMEN BAST</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="table-border-bottom-0">
-                                                <!-- Data will be populated by JavaScript -->
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>INV-001</td>
-                                                    <td>Client A</td>
-                                                    <td>Rp. 150.000.000</td>
-                                                    <td>Rp. 100.000.000</td>
-                                                    <td>Rp. 2.000.000</td>
-                                                    <td>01/07/2024</td>
-                                                    <td>01/08/2024</td>
-                                                    <td>
-                                                        <a href="#" class="">Dokumen.pdf</a>
-                                                    </td>
-                                                    <td>
-                                                        <a href="#" class="">Dokumen.pdf</a>
-                                                    </td>
-                                                    <td>
-                                                        <a href="#" class="">Dokumen.pdf</a>
-                                                    </td>
-                                                    <td>
-                                                        <a href="#" class="">Dokumen.pdf</a>
-                                                    </td>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    <!-- End Konten Step 7 -->
                                 </div>
 
                                 <!-- Detail Kontrak Tab -->
@@ -246,262 +367,7 @@
                                 </div>
 
                                 <!-- Activity Tab -->
-                                <div class="tab-pane fade" id="activity" role="tabpanel">
-                                    <div class="mb-4">
-                                        <h5 class="mb-0">Aktivitas Terakhir</h5>
-                                    </div>
-
-                                    <hr class="my-3">
-
-                                    <!-- Empty state untuk step 1 -->
-                                    <div id="activity-empty" class="text-center py-5">
-                                        <div class="mb-3">
-                                            <i class="ti ti-clipboard-list display-4 text-muted"></i>
-                                        </div>
-                                        <h5 class="text-muted mb-2">Belum Ada Aktivitas</h5>
-                                        <p class="text-muted mb-0">Aktivitas akan muncul setelah proses validasi dimulai.
-                                        </p>
-                                    </div>
-
-                                    <!-- Timeline Container - hanya muncul dari step 2 -->
-                                    <div class="d-none" id="timeline-container">
-                                        <!-- Step 2: Validasi Dokumen -->
-                                        <div class="activity-item d-none mb-4" id="activity-step-2">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-warning"><i
-                                                                        class="ti ti-report-search"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Validasi Dokumen</h6>
-                                                            <p class="text-muted mb-0 small">Pengajuan sedang dalam proses
-                                                                validasi.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-2">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end"></div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 3: Dokumen Tervalidasi -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-3">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
-                                                                        class="ti ti-file-text"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Draft: Dokumen Tervalidasi <i
-                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui
-                                                            </h6>
-                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-3">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary"
-                                                        id="btnEditPencairan" title="Edit">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 4: Persetujuan Debitur -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
-                                                                        class="ti ti-file-text"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Draft: Persetujuan Debitur <i
-                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui</h6>
-                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-4">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 5: Validasi Direktur SKI -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-5">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
-                                                                        class="ti ti-file-text"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Draft: Validasi Direktur SKI <i
-                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui
-                                                            </h6>
-                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-5">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 6: Validasi Direktur -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-6">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
-                                                                        class="ti ti-file-text"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Draft: Validasi Direktur <i
-                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui
-                                                            </h6>
-                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-6">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 7: Generate Kontrak -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-7">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary"><i
-                                                                        class="ti ti-file-text"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Draft: Generate Kontrak <i
-                                                                    class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui</h6>
-                                                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-7">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan" title="Edit">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 8: Upload Dokumen -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-8">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-warning"><i
-                                                                        class="ti ti-upload"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Upload Dokumen <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui</h6>
-                                                            <p class="text-muted mb-0 small">Bukti Pengiriman telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-8">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-success"
-                                                        id="btnUploadDokumen" title="Upload Dokumen">
-                                                        <i class="ti ti-upload"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 9: Selesai -->
-                                        <div class="activity-item d-none mt-3 mb-4" id="activity-step-9">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-success"><i
-                                                                        class="ti ti-circle-check"></i></span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Selesai</h6>
-                                                            <p class="text-muted mb-0 small">Proses pengajuan pinjaman
-                                                                telah selesai.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-9">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @include('livewire.peminjaman.partials._activity-tabs')
                             </div>
                         </div>
                     </div>
@@ -510,251 +376,9 @@
         </div>
     </div>
 
-    <!-- Modal Persetujuan Pinjaman -->
-    <div class="modal fade" id="modalPersetujuanPinjaman" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Persetujuan Pinjaman</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <hr class="my-2">
-                <div class="modal-body">
-                    <h5 class="mb-2">Apakah anda yakin menyetujui Pengajuan Pinjaman?</h5>
-                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui Pengajuan Pinjaman, dan isi
-                        perjanjian Kontrak terlebih dahulu. Pastikan dokumen yang diperlukan sudah sesuai!</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="btnKonfirmasiSetuju">
-                        Setuju
-                    </button>
-                    <button type="button" class="btn btn-danger" id="btnTolakPinjaman">
-                        Tolak
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Modal Konfirmasi Pencairan Dana -->
-    <div class="modal fade" id="modalPencairanDana" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Pencairan Dana</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formPencairanDana">
-                    <div class="modal-body">
-                        <!-- Card Data Nominal dan Tanggal -->
-                        <div class="card border mb-3 shadow-none">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="nominalPengajuan" class="form-label">Nominal Pengajuan</label>
-                                        <input type="text" class="form-control input-rupiah" id="nominalPengajuan"
-                                            value="300000000" disabled>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="nominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="text" class="form-control input-rupiah" id="nominalDisetujui"
-                                            placeholder="Rp 0" required>
-                                        <div class="invalid-feedback">
-                                            Silakan isi nominal yang disetujui.
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="flatpickr-tanggal-pencairan" class="form-label">Tanggal
-                                            Pencairan</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control flatpickr-date-modal rounded-start"
-                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pencairan" required>
-                                            <span class="input-group-text">
-                                                <i class="ti ti-calendar"></i>
-                                            </span>
-                                        </div>
-                                        <div class="invalid-feedback">
-                                            Silakan pilih tanggal pencairan.
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="flatpickr-tanggal-harapan" class="form-label">Tanggal Pencairan yang
-                                            Diharapkan</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control rounded-start"
-                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-harapan"
-                                                value="24/08/2024" disabled>
-                                            <span class="input-group-text">
-                                                <i class="ti ti-calendar"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card Catatan -->
-                        <div class="card border shadow-none">
-                            <div class="card-body">
-                                <label for="catatanLainnya" class="form-label">Catatan Lainnya</label>
-                                <textarea class="form-control" id="catatanLainnya" rows="4"
-                                    placeholder="Berikan catatan tambahan jika diperlukan"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Batal
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            Submit Pencairan Dana
-                            <i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Hasil Review (Penolakan) -->
-    <div class="modal fade" id="modalHasilReview" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Hasil Review</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formHasilReview">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="hasilReview"
-                                placeholder="Berikan catatan alasan penolakan" required>
-                            <div class="invalid-feedback">
-                                Silakan isi hasil review terlebih dahulu.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-                            Batal
-                        </button>
-                        <button type="submit" class="btn btn-success">
-                            Kirim
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Edit Pencairan Dana -->
-    <div class="modal fade" id="modalEditPencairan" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Konfirmasi Pencairan Dana</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formEditPencairan">
-                    <div class="modal-body">
-                        <!-- Card Data Nominal dan Tanggal -->
-                        <div class="card border mb-3 shadow-none">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
-                                        <input type="text" class="form-control input-rupiah" id="editNominalPengajuan"
-                                            value="300000000" disabled>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="text" class="form-control input-rupiah" id="editNominalDisetujui"
-                                            disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <label for="editTanggalPencairan" class="form-label">Tanggal Pencairan</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
-                                                id="editTanggalPencairan" disabled>
-                                            <span class="input-group-text">
-                                                <i class="ti ti-calendar"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="editTanggalHarapan" class="form-label">Tanggal Pencairan yang
-                                            Diharapkan</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
-                                                id="editTanggalHarapan" value="24/08/2024" disabled>
-                                            <span class="input-group-text">
-                                                <i class="ti ti-calendar"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Card Catatan - Only editable field -->
-                        <div class="card border shadow-none">
-                            <div class="card-body">
-                                <label for="editCatatanLainnya" class="form-label">Catatan Lainnya</label>
-                                <textarea class="form-control" id="editCatatanLainnya" rows="4"
-                                    placeholder="Berikan catatan tambahan jika diperlukan"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-                            Tolak
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            Terima
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Upload Dokumen -->
-    <div class="modal fade" id="modalUploadDokumen" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Upload Dokumen</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formUploadDokumen" class="needs-validation" novalidate>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="fileUpload" class="form-label">Upload Dokumen Kontrak</label>
-                            <input type="file" class="form-control" id="fileUpload" required>
-                            <div class="invalid-feedback">
-                                Silakan pilih file untuk diupload.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
+    <!-- Modal Modal -->
+    @include('livewire.peminjaman.partials._modal-detail-peminjaman')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -783,7 +407,8 @@
                     setujuiPeminjaman: document.getElementById('btnSetujuiPeminjaman'),
                     konfirmasiSetuju: document.getElementById('btnKonfirmasiSetuju'),
                     tolakPinjaman: document.getElementById('btnTolakPinjaman'),
-                    editPencairan: document.querySelectorAll('#btnEditPencairan'), // Menggunakan querySelectorAll
+                    editPencairan: document.querySelectorAll(
+                        '#btnEditPencairan'), // Menggunakan querySelectorAll
                     uploadDokumen: document.getElementById('btnUploadDokumen'),
                 },
                 forms: {
@@ -831,9 +456,11 @@
                 const handleHidden = () => {
                     onShow?.();
                     showModal.show();
-                    showModalEl.addEventListener('shown.bs.modal', function () {
+                    showModalEl.addEventListener('shown.bs.modal', function() {
                         initCleaveRupiah(); // Re-initialize cleave on new modal
-                    }, { once: true });
+                    }, {
+                        once: true
+                    });
 
                     hideModalEl.removeEventListener('hidden.bs.modal', handleHidden);
                 };
@@ -865,7 +492,23 @@
                 });
                 toggleDisplay(dom.buttons.setujuiPeminjaman, state.currentStep === 2);
                 dom.alertPeninjauan.style.display = state.currentStep >= 2 ? 'none' : 'block';
+                updateDetailPinjamanContent(); // Update konten tab Detail Pinjaman
                 updateActivityTimeline();
+            };
+
+            const updateDetailPinjamanContent = () => {
+                const contentDefault = document.getElementById('content-default');
+                const contentStep7 = document.getElementById('content-step7');
+
+                if (state.currentStep === 7) {
+                    // Step 7: Tampilkan konten Generate Kontrak
+                    toggleDisplay(contentDefault, false);
+                    toggleDisplay(contentStep7, true);
+                } else {
+                    // Step lainnya: Tampilkan konten default
+                    toggleDisplay(contentDefault, true);
+                    toggleDisplay(contentStep7, false);
+                }
             };
 
             const updateActivityTimeline = () => {
@@ -934,7 +577,7 @@
                 }
                 dom.modals.review.hide();
                 resetForm(dom.forms.review);
-                goToStep(1); // Back to the first step after rejection
+                goToStep(1);
             };
 
             const handleEditPencairanShow = () => {
@@ -964,12 +607,42 @@
 
                 dom.modals.upload.hide();
                 resetForm(dom.forms.upload);
-                goToStep(9); // Move to the final step
+                goToStep(9);
                 switchToActivityTab();
             };
 
+            const handleGenerateKontrak = () => {
+                // Ambil catatan jika ada
+                const catatan = document.getElementById('catatanKontrak')?.value || '';
 
-            // --- EVENT LISTENERS ---
+                // Konfirmasi generate kontrak
+                if (confirm('Apakah Anda yakin ingin generate kontrak peminjaman?')) {
+                    // Simulasi proses generate (ganti dengan AJAX call sebenarnya)
+                    console.log('Generating kontrak dengan catatan:', catatan);
+
+                    // Tampilkan loading (opsional)
+                    const btnGenerate = document.getElementById('btnGenerateKontrak');
+                    const originalText = btnGenerate.innerHTML;
+                    btnGenerate.disabled = true;
+                    btnGenerate.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+
+                    // Simulasi delay untuk generate
+                    setTimeout(() => {
+                        btnGenerate.disabled = false;
+                        btnGenerate.innerHTML = originalText;
+
+                        // Success notification
+                        alert('Kontrak berhasil di-generate!');
+
+                        // Pindah ke step 8 (Upload Dokumen)
+                        goToStep(8);
+                        switchToActivityTab();
+                    }, 2000);
+                }
+            };
+
+
             dom.stepper.addEventListener('click', handleStepperClick);
             dom.buttons.setujuiPeminjaman?.addEventListener('click', () => dom.modals.persetujuan.show());
             dom.buttons.konfirmasiSetuju?.addEventListener('click', () => {
@@ -994,10 +667,12 @@
             dom.forms.edit?.addEventListener('submit', handleEditPencairanSubmit);
             dom.forms.upload?.addEventListener('submit', handleUploadSubmit);
 
+            // Event listener untuk button Generate Kontrak di Step 7
+            const btnGenerateKontrak = document.getElementById('btnGenerateKontrak');
+            btnGenerateKontrak?.addEventListener('click', handleGenerateKontrak);
 
-            // --- INITIAL EXECUTION ---
             updateStepper();
-            initCleaveRupiah(); // Initialize Cleave for initial inputs
+            initCleaveRupiah();
 
         });
     </script>

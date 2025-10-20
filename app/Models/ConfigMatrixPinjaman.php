@@ -11,9 +11,16 @@ class ConfigMatrixPinjaman extends Model
 
     protected $table = 'config_matrix_pinjaman';
     protected $primaryKey = 'id_matrix_pinjaman';
+    
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'nominal',
         'approve_oleh',
+    ];
+
+    protected $casts = [
+        'nominal' => 'decimal:2',
     ];
 }

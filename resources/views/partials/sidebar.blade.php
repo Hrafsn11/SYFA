@@ -34,6 +34,18 @@
             </a>
         </li>
 
+        <!-- Pengembalian Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Pengembalian</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('pengembalian*') ? 'active' : '' }}">
+            <a href="{{ route('pengembalian.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-wallet"></i>
+                <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
+            </a>
+        </li>
+
         <!-- Master Data Section -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Master Data</span>
@@ -47,7 +59,7 @@
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('master-data/kol*') ? 'active' : '' }}">
                     <a href="{{ route('master-data.kol.index') }}" class="menu-link">
-                        <div data-i18n="Master Data KOL">Master Data KOL</div>
+                        <div data-i18n="KOL">KOL</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->is('master-data/sumber-pendanaan-eksternal*') ? 'active' : '' }}">
