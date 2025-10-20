@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\MasterKolSeeder::class,
             \Database\Seeders\MasterDebiturSeeder::class,
             \Database\Seeders\MasterSumberPendanaanEksternalSeeder::class,
+            \Database\Seeders\ConfigMatrixPinjamanSeeder::class,
         ]);
     }
 }
