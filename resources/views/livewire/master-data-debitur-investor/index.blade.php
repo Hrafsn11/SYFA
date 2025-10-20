@@ -98,7 +98,12 @@
                         <!-- Nama Bank -->
                         <div class="col-md-6 mb-3">
                             <label for="nama_bank" class="form-label">Nama Bank</label>
-                            <input type="text" class="form-control" id="nama_bank" placeholder="Masukkan nama bank">
+                            <select id="nama_bank" class="form-select">
+                                <option value="">Pilih Bank</option>
+                                @foreach($banks as $b)
+                                    <option value="{{ $b }}">{{ $b }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <!-- No. Rekening -->
@@ -155,6 +160,13 @@ $(document).ready(function() {
     $('#id_kol').select2({
         dropdownParent: $modal,
         placeholder: 'Pilih KOL Perusahaan',
+        allowClear: true,
+        width: '100%'
+    });
+
+     $('#nama_bank').select2({
+        dropdownParent: $modal,
+        placeholder: 'Pilih Bank',
         allowClear: true,
         width: '100%'
     });

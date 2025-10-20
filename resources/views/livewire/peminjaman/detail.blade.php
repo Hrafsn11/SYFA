@@ -109,31 +109,37 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nama
                                                         Perusahaan</small>
-                                                    <p class="fw-bold mb-0">Techno Infinity</p>
+                                                    <p class="fw-bold mb-0">{{ $peminjaman['nama_perusahaan'] ?? '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nama Bank</small>
-                                                    <p class="fw-bold mb-0">HC Service</p>
+                                                    <p class="fw-bold mb-0">{{ $peminjaman['nama_bank'] ?? '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">No Rekening</small>
-                                                    <p class="fw-bold mb-0">130023032390239</p>
+                                                    <p class="fw-bold mb-0">{{ $peminjaman['no_rekening'] ?? '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Lampiran SID</small>
-                                                    <p class="fw-bold mb-0">Pertanyaan Untuk BP Tapera</p>
+                                                    <p class="fw-bold mb-0">
+                                                        @if(!empty($peminjaman['lampiran_sid']))
+                                                            <a href="{{ asset('storage/' . $peminjaman['lampiran_sid']) }}" target="_blank">Lihat Lampiran</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nilai KOL</small>
-                                                    <p class="fw-bold mb-0">3 KOL</p>
+                                                    <p class="fw-bold mb-0">{{ $peminjaman['nilai_kol'] ?? '-' }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -147,14 +153,16 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nominal
                                                         Pinjaman</small>
-                                                    <p class="mb-0 text-success fw-semibold">Rp. 300.000.000</p>
+                                                    <p class="mb-0 text-success fw-semibold">Rp. {{ number_format($peminjaman['nominal_pinjaman'] ?? $peminjaman['total_pinjaman'] ?? 0, 0, ',', '.') }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal
                                                         Pencairan</small>
-                                                    <p class="fw-bold mb-0">24 Agustus 2024</p>
+                                                    <p class="fw-bold mb-0">{{ !empty($peminjaman['harapan_tanggal_pencairan']) ? 
+                                                        
+                                                        \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->translatedFormat('j F Y') : '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-4">
@@ -168,21 +176,21 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Jenis
                                                         Pembiayaan</small>
-                                                    <p class="fw-bold mb-0">Invoice Financing</p>
+                                                    <p class="fw-bold mb-0">{{ $peminjaman['jenis_pembiayaan'] ?? 'Invoice Financing' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
                                                         Bayar</small>
-                                                    <p class="fw-bold mb-0">24 September 2024</p>
+                                                    <p class="fw-bold mb-0">{{ !empty($peminjaman['rencana_tgl_pembayaran']) ? \Carbon\Carbon::parse($peminjaman['rencana_tgl_pembayaran'])->translatedFormat('j F Y') : '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Pembayaran
                                                         Total</small>
-                                                    <p class="mb-0 text-warning fw-semibold">Rp. 100.000.000</p>
+                                                    <p class="mb-0 text-warning fw-semibold">Rp. {{ number_format($peminjaman['pembayaran_total'] ?? $peminjaman['total_pembayaran'] ?? 0, 0, ',', '.') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -211,28 +219,42 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody class="table-border-bottom-0">
-                                                    <!-- Data will be populated by JavaScript -->
-                                                    <tr>
-                                                        <td>1</td>
-                                                        <td>INV-001</td>
-                                                        <td>Client A</td>
-                                                        <td>Rp. 150.000.000</td>
-                                                        <td>Rp. 100.000.000</td>
-                                                        <td>Rp. 2.000.000</td>
-                                                        <td>01/07/2024</td>
-                                                        <td>01/08/2024</td>
-                                                        <td>
-                                                            <a href="#" class="">Dokumen.pdf</a>
-                                                        </td>
-                                                        <td>
-                                                            <a href="#" class="">Dokumen.pdf</a>
-                                                        </td>
-                                                        <td>
-                                                            <a href="#" class="">Dokumen.pdf</a>
-                                                        </td>
-                                                        <td>
-                                                            <a href="#" class="">Dokumen.pdf</a>
-                                                        </td>
+                                                    @forelse($invoice_financing_data as $idx => $inv)
+                                                        <tr>
+                                                            <td>{{ $idx + 1 }}</td>
+                                                            <td>{{ $inv['no_invoice'] }}</td>
+                                                            <td>{{ $inv['nama_client'] }}</td>
+                                                            <td>Rp. {{ number_format($inv['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
+                                                            <td>Rp. {{ number_format($inv['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
+                                                            <td>Rp. {{ number_format($inv['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                                                            <td>{{ $inv['invoice_date'] }}</td>
+                                                            <td>{{ $inv['due_date'] }}</td>
+                                                            <td>
+                                                                @if(!empty($inv['dokumen_invoice']))
+                                                                    <a href="{{ asset('storage/' . $inv['dokumen_invoice']) }}" target="_blank">{{ basename($inv['dokumen_invoice']) }}</a>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if(!empty($inv['dokumen_kontrak']))
+                                                                    <a href="{{ asset('storage/' . $inv['dokumen_kontrak']) }}" target="_blank">{{ basename($inv['dokumen_kontrak']) }}</a>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if(!empty($inv['dokumen_so']))
+                                                                    <a href="{{ asset('storage/' . $inv['dokumen_so']) }}" target="_blank">{{ basename($inv['dokumen_so']) }}</a>
+                                                                @endif
+                                                            </td>
+                                                            <td>
+                                                                @if(!empty($inv['dokumen_bast']))
+                                                                    <a href="{{ asset('storage/' . $inv['dokumen_bast']) }}" target="_blank">{{ basename($inv['dokumen_bast']) }}</a>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td colspan="12" class="text-center">Tidak ada invoice</td>
+                                                        </tr>
+                                                    @endforelse
                                                 </tbody>
                                             </table>
                                         </div>
