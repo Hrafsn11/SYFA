@@ -90,6 +90,37 @@ class PeminjamanController extends Controller
     }
 
     /**
+     * Display preview kontrak page.
+     *
+     * @param  int  $id
+     * @return \Illuminate\View\View
+     */
+    public function previewKontrak($id)
+    {
+        // Sample kontrak data
+        $kontrak = [
+            'id_peminjaman' => $id,
+            'no_kontrak' => 'SKI/FIN/2025/001',
+            'tanggal_kontrak' => '22 September 2025',
+            'nama_perusahaan' => 'SYNNOVAC CAPITAL',
+            'nama_debitur' => 'Techno Infinity',
+            'nama_pimpinan' => 'Cahyo',
+            'alamat' => 'Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia',
+            'tujuan_pembiayaan' => 'Kebutuhan Gaji Operasional/Umum Sept',
+            'jenis_pembiayaan' => 'Invoice & Project Financing',
+            'nilai_pembiayaan' => 'Rp. 250.000.000',
+            'hutang_pokok' => 'Rp. 250.000.000',
+            'tenor' => '1 Bulan',
+            'biaya_admin' => 'Rp. 0.00',
+            'nisbah' => '2% flat / bulan',
+            'denda_keterlambatan' => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
+            'jaminan' => 'Invoice & Project Financing',
+        ];
+
+        return view('livewire.peminjaman.preview-kontrak', compact('kontrak'));
+    }
+
+    /**
      * Display the peminjaman index page (list).
      */
     public function index()

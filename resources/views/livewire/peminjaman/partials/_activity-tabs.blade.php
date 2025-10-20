@@ -195,9 +195,9 @@
                     <small class="text-muted" id="date-step-7">-</small>
                 </div>
                 <div class="col-6 col-md-3 text-end">
-                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan"
+                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnPreviewKontrak"
                         title="Edit">
-                        <i class="ti ti-edit"></i>
+                        <i class="ti ti-file-text"></i>
                     </button>
                 </div>
             </div>

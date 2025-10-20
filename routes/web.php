@@ -40,6 +40,7 @@ Route::middleware([
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
     Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
+    Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::post('peminjaman/invoice', [PeminjamanInvoiceController::class, 'store'])->name('peminjaman.invoice.store');
 
