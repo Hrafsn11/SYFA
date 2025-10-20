@@ -97,53 +97,6 @@
 </div>
 @endpush
 
-@push('styles')
-<style>
-    /* Rappasoft Table Styling */
-    .card-datatable {
-        padding: 1.5rem;
-    }
-    
-    /* Header Styling */
-    .card-datatable .table-light th {
-        background-color: #f8f9fa !important;
-        border-bottom: 2px solid #dee2e6 !important;
-        font-weight: 600;
-        font-size: 0.9375rem;
-        color: #566a7f;
-        padding: 0.875rem 1.25rem;
-    }
-    
-    /* Table Cell Styling */
-    .card-datatable table tbody td {
-        padding: 0.875rem 1.25rem;
-        vertical-align: middle;
-        font-size: 0.9375rem;
-    }
-    
-    /* Search & Filter Controls */
-    .card-datatable .form-control,
-    .card-datatable .form-select {
-        font-size: 0.9375rem;
-    }
-    
-    /* Pagination Styling */
-    .card-datatable nav {
-        margin-top: 1rem;
-    }
-    
-    /* Remove extra borders */
-    .card-datatable table {
-        border-collapse: collapse;
-    }
-    
-    .card-datatable table td,
-    .card-datatable table th {
-        border: 1px solid #e7e7e7;
-    }
-</style>
-@endpush
-
 @push('scripts')
 <script>
 $(document).ready(function() {

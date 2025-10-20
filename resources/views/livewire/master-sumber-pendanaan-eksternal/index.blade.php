@@ -1,305 +1,227 @@
 @extends('layouts.app')
 
 @section('content')
-<div>
-    <div class="row">
-        <div class="col-12">
-            <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">Sumber Pendanaan Eksternal</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                    id="btnTambahSumberPendanaan">
-                    <i class="fa-solid fa-plus"></i>
-                    Sumber Pendanaan
-                </button>
+    <div>
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold">Sumber Pendanaan Eksternal</h4>
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        id="btnTambahSumberPendanaan">
+                        <i class="fa-solid fa-plus"></i>
+                        Sumber Pendanaan
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-datatable table-responsive">
-                    <div class="dataTables_wrapper dt-bootstrap5 no-footer">
-                        <!-- Search and Filter -->
-                        <div class="row mx-2 mt-3">
-                            <div class="col-md-2">
-                                <div class="me-3">
-                                    <div class="dataTables_length">
-                                        <label>
-                                            <span class="me-2">Show</span>
-                                            <select class="form-select rounded-md">
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                            </select>
-                                            <span class="me-2">Entries</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-10">
-                                <div
-                                    class="dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-3 mb-md-0">
-                                    <div class="dataTables_filter">
-                                        <label>
-                                            <input type="search" class="form-control rounded-md"
-                                                placeholder="Cari..." />
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Table -->
-                        <table class="datatables-basic table border-top">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="text-center">No</th>
-                                    <th class="text-center">Nama Instansi</th>
-                                    <th class="text-center">Presentase Bagi Hasil</th>
-                                    <th class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($data as $item)
-                                    <tr data-id="{{ $item->id_instansi }}">
-                                        <td class="text-center">{{ $loop->iteration }}</td>
-                                        <td class="text-center">{{ $item->nama_instansi }}</td>
-                                        <td class="text-center">{{ $item->persentase_bagi_hasil }}%</td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                                <button class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect btn-edit-sumber" title="Edit">
-                                                    <i class="ti ti-edit"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-icon btn-text-danger rounded-pill waves-effect btn-delete-sumber" title="Hapus">
-                                                    <i class="ti ti-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                        <!-- Pagination -->
-                        <div class="row mx-2 mt-3 mb-3">
-                            <div class="col-sm-12 col-md-6">
-                                <div class="dataTables_info">
-                                    Menampilkan data {{ count($data) }} dari {{ count($data) }}
-                                </div>
-                            </div>
-                            <div class="col-sm-12 col-md-6">
-                                <div class="dataTables_paginate paging_simple_numbers">
-                                    <ul class="pagination">
-                                        <li class="paginate_button page-item previous disabled">
-                                            <a href="#" class="page-link">Sebelumnya</a>
-                                        </li>
-                                        <li class="paginate_button page-item active">
-                                            <a href="#" class="page-link">1</a>
-                                        </li>
-                                        <li class="paginate_button page-item">
-                                            <a href="#" class="page-link">2</a>
-                                        </li>
-                                        <li class="paginate_button page-item next">
-                                            <a href="#" class="page-link">Selanjutnya</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-datatable">
+                        <livewire:sumber-pendanaan-eksternal-table />
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="modalTambahSumberPendanaan" tabindex="-1"
-        aria-labelledby="modalTambahSumberPendanaanLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTambahSumberPendanaanLabel">Tambah Sumber Pendanaan Eksternal</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Form -->
-                    <form id="formTambahSumberPendanaan">
-                        <div class="mb-3">
-                            <label for="nama_instansi" class="form-label">Nama Instansi <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama_instansi"
-                                placeholder="Masukkan nama instansi" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="presentase_bagi_hasil" class="form-label">Presentase Bagi Hasil <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="presentase_bagi_hasil"
-                                placeholder="Masukkan presentase bagi hasil" required min="0" max="100" step="1">
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="btnSimpanSumberPendanaan">Simpan</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
 @endsection
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var modalTambahSumberPendanaan = new bootstrap.Modal(document.getElementById('modalTambahSumberPendanaan'));
-        var formTambahSumberPendanaan = document.getElementById('formTambahSumberPendanaan');
-
-        document.getElementById('btnTambahSumberPendanaan').addEventListener('click', function() {
-            // Reset form ketika modal dibuka
-            formTambahSumberPendanaan.reset();
-            formTambahSumberPendanaan.classList.remove('was-validated');
-            if (formTambahSumberPendanaan.dataset.editId) delete formTambahSumberPendanaan.dataset.editId;
-            modalTambahSumberPendanaan.show();
-        });
-
-        document.getElementById('btnSimpanSumberPendanaan').addEventListener('click', function() {
-            if (!formTambahSumberPendanaan.checkValidity()) {
-                formTambahSumberPendanaan.classList.add('was-validated');
-                return;
-            }
-            var sumberPendanaanData = {
-                nama_instansi: document.getElementById('nama_instansi').value,
-                persentase_bagi_hasil: parseInt(document.getElementById('presentase_bagi_hasil').value) || 0
-            };
-
-            var editId = formTambahSumberPendanaan.dataset.editId;
-            var url = editId ? ('/master-data/sumber-pendanaan-eksternal/' + editId) : '/master-data/sumber-pendanaan-eksternal';
-            var method = editId ? 'PUT' : 'POST';
-
-            fetch(url, {
-                method: method,
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify(sumberPendanaanData)
-            }).then(r => r.json()).then(res => {
-                if (res.success) {
-                    const tbody = document.querySelector('table.datatables-basic tbody');
-                    if (method === 'POST') {
-                        const d = res.data;
-                        const rowHtml = `
-                            <tr data-id="${d.id_instansi}">
-                                <td class="text-center">${tbody.querySelectorAll('tr').length + 1}</td>
-                                <td class="text-center">${d.nama_instansi}</td>
-                                <td class="text-center">${d.persentase_bagi_hasil}%</td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center align-items-center gap-2">
-                                        <button class="btn btn-sm btn-outline-primary btn-edit-sumber" title="Edit">
-                                            <i class="ti ti-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger btn-delete-sumber" title="Hapus">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                        tbody.insertAdjacentHTML('beforeend', rowHtml);
-                    } else {
-                        const d = res.data;
-                        const row = document.querySelector(`table.datatables-basic tbody tr[data-id="${d.id_instansi}"]`);
-                        if (row) {
-                            const cells = row.querySelectorAll('td');
-                            cells[1].textContent = d.nama_instansi;
-                            cells[2].textContent = d.persentase_bagi_hasil + '%';
-                        }
-                    }
-                    delete formTambahSumberPendanaan.dataset.editId;
-                } else {
-                    alert('Gagal menyimpan');
-                }
-            }).catch(err => { console.error(err); alert('Error'); });
-
-            formTambahSumberPendanaan.reset();
-            formTambahSumberPendanaan.classList.remove('was-validated');
-            modalTambahSumberPendanaan.hide();
-        });
-
-        // event delegation for edit/delete
-        const tbodySumber = document.querySelector('table.datatables-basic tbody');
-        tbodySumber.addEventListener('click', function(e) {
-            const editBtn = e.target.closest('.btn-edit-sumber');
-            const deleteBtn = e.target.closest('.btn-delete-sumber');
-            if (editBtn) {
-                const row = editBtn.closest('tr');
-                const id = row.dataset.id;
-                fetch('/master-data/sumber-pendanaan-eksternal/' + id + '/edit', { credentials: 'same-origin' })
-                    .then(r => { console.log('Edit fetch status', r.status); return r.json(); })
-                    .then(res => {
-                        const d = res.data;
-                        document.getElementById('nama_instansi').value = d.nama_instansi;
-                        document.getElementById('presentase_bagi_hasil').value = d.persentase_bagi_hasil;
-                        formTambahSumberPendanaan.dataset.editId = id;
-                        modalTambahSumberPendanaan.show();
-                    }).catch(err => console.error(err));
-            }
-
-            if (deleteBtn) {
-                const row = deleteBtn.closest('tr');
-                const id = row.dataset.id;
-                window._deleteTarget = { id: id, row: row };
-                modalConfirmDeleteSumber.show();
-            }
-        });
-    });
-</script>
 
 @push('modals')
-    <div class="modal fade" id="modalConfirmDeleteSumber" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="mb-0">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger" id="btnConfirmDeleteSumber">Hapus</button>
-                </div>
+{{-- Modal Tambah/Edit Sumber Pendanaan --}}
+<div class="modal fade" id="modalTambahSumberPendanaan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambahSumberPendanaanLabel">Tambah Sumber Pendanaan Eksternal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTambahSumberPendanaan" novalidate>
+                    <input type="hidden" id="editSumberId">
+                    <div class="mb-3">
+                        <label for="nama_instansi" class="form-label">Nama Instansi <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nama_instansi" 
+                            placeholder="Masukkan nama instansi" required>
+                        <div class="invalid-feedback">Nama instansi wajib diisi</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="persentase_bagi_hasil" class="form-label">
+                            Persentase Bagi Hasil <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" class="form-control" id="persentase_bagi_hasil"
+                            placeholder="Masukkan persentase bagi hasil" required min="0" max="100" step="1">
+                        <div class="invalid-feedback">Persentase wajib diisi (0-100)</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="btnSimpanSumberPendanaan">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSimpanSpinner"></span>
+                    Simpan
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+{{-- Modal Confirm Delete --}}
+<div class="modal fade" id="modalConfirmDeleteSumber" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Hapus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Apakah Anda yakin ingin menghapus Sumber Pendanaan ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDeleteSumber">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" id="btnDeleteSpinner"></span>
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endpush
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var modalEl = document.getElementById('modalConfirmDeleteSumber');
-        window.modalConfirmDeleteSumber = new bootstrap.Modal(modalEl);
-        document.getElementById('btnConfirmDeleteSumber').addEventListener('click', function() {
-            var target = window._deleteTarget;
-            if (!target) return modalConfirmDeleteSumber.hide();
-            fetch('/master-data/sumber-pendanaan-eksternal/' + target.id, {
-                method: 'DELETE',
-                credentials: 'same-origin',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+$(document).ready(function() {
+    const $modal = $('#modalTambahSumberPendanaan');
+    const $modalDelete = $('#modalConfirmDeleteSumber');
+    const $form = $('#formTambahSumberPendanaan');
+    let deleteSumberId = null;
+
+    // Button Tambah - Open empty modal
+    $('#btnTambahSumberPendanaan').on('click', function() {
+        $form[0].reset();
+        $form.removeClass('was-validated');
+        $('#editSumberId').val('');
+        $('#modalTambahSumberPendanaanLabel').text('Tambah Sumber Pendanaan Eksternal');
+        $modal.modal('show');
+    });
+
+    // Delegated Edit Handler
+    $(document).on('click', '.sumber-edit-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        
+        if (!id) { 
+            alert('ID tidak valid'); 
+            return; 
+        }
+        
+        $.ajax({
+            url: `/master-data/sumber-pendanaan-eksternal/${id}/edit`,
+            method: 'GET',
+            success: function(response) {
+                if (response.success && response.data) {
+                    const d = response.data;
+                    $('#editSumberId').val(d.id_instansi);
+                    $('#nama_instansi').val(d.nama_instansi);
+                    $('#persentase_bagi_hasil').val(d.persentase_bagi_hasil);
+                    $('#modalTambahSumberPendanaanLabel').text('Edit Sumber Pendanaan Eksternal');
+                    $modal.modal('show');
                 }
-            }).then(r => r.json()).then(res => {
-                if (res.success) {
-                    if (target.row) target.row.remove();
-                } else {
-                    alert('Gagal menghapus');
-                }
-            }).catch(err => { console.error(err); alert('Error'); })
-            .finally(() => {
-                modalConfirmDeleteSumber.hide();
-                window._deleteTarget = null;
-            });
+            },
+            error: function(xhr) {
+                alert('Gagal mengambil data');
+            }
         });
     });
+
+    // Delegated Delete Handler
+    $(document).on('click', '.sumber-delete-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+        
+        if (!id) { 
+            alert('ID tidak valid'); 
+            return; 
+        }
+        
+        deleteSumberId = id;
+        $modalDelete.modal('show');
+    });
+
+    // Submit form (Add or Edit)
+    $('#btnSimpanSumberPendanaan').on('click', function() {
+        if (!$form[0].checkValidity()) {
+            $form.addClass('was-validated');
+            return;
+        }
+
+        const id = $('#editSumberId').val();
+        const formData = {
+            nama_instansi: $('#nama_instansi').val(),
+            persentase_bagi_hasil: parseInt($('#persentase_bagi_hasil').val()) || 0,
+            _token: '{{ csrf_token() }}'
+        };
+
+        const url = id ? `/master-data/sumber-pendanaan-eksternal/${id}` : '/master-data/sumber-pendanaan-eksternal';
+        const method = id ? 'PUT' : 'POST';
+
+        $('#btnSimpanSpinner').removeClass('d-none');
+        $(this).prop('disabled', true);
+
+        $.ajax({
+            url: url,
+            method: method,
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    $modal.modal('hide');
+                    Livewire.dispatch('refreshSumberPendanaanEksternalTable');
+                }
+            },
+            error: function(xhr) {
+                alert('Gagal menyimpan data');
+            },
+            complete: function() {
+                $('#btnSimpanSpinner').addClass('d-none');
+                $('#btnSimpanSumberPendanaan').prop('disabled', false);
+            }
+        });
+    });
+
+    // Confirm Delete
+    $('#btnConfirmDeleteSumber').on('click', function() {
+        if (!deleteSumberId) return;
+
+        $('#btnDeleteSpinner').removeClass('d-none');
+        $(this).prop('disabled', true);
+
+        $.ajax({
+            url: `/master-data/sumber-pendanaan-eksternal/${deleteSumberId}`,
+            method: 'DELETE',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(response) {
+                if (response.success) {
+                    $modalDelete.modal('hide');
+                    Livewire.dispatch('refreshSumberPendanaanEksternalTable');
+                    deleteSumberId = null;
+                }
+            },
+            error: function(xhr) {
+                alert('Gagal menghapus data');
+            },
+            complete: function() {
+                $('#btnDeleteSpinner').addClass('d-none');
+                $('#btnConfirmDeleteSumber').prop('disabled', false);
+            }
+        });
+    });
+
+    // Reset deleteSumberId when modal closed
+    $modalDelete.on('hidden.bs.modal', function() {
+        deleteSumberId = null;
+    });
+});
 </script>
 @endpush
+

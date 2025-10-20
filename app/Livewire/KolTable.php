@@ -72,6 +72,7 @@ class KolTable extends DataTableComponent
             
             Column::make("Persentase Pencairan", "persentase_pencairan")
                 ->sortable()
+                ->searchable()
                 ->format(function($value, $row) {
                     $percentage = $row->persentase_label ?? ($value ? $value . '%' : '-');
                     return '<div class="text-center">' . $percentage . '</div>';
@@ -80,6 +81,7 @@ class KolTable extends DataTableComponent
             
             Column::make("Jumlah Hari Keterlambatan", "jmlh_hari_keterlambatan")
                 ->sortable()
+                ->searchable()
                 ->format(function($value, $row) {
                     $days = $row->tanggal_tenggat_label ?? ($value ? $value . ' Hari' : '-');
                     return '<div class="text-center">' . $days . '</div>';
@@ -87,7 +89,7 @@ class KolTable extends DataTableComponent
                 ->html(),
             
             Column::make("Aksi")
-                ->label(fn($row) => view('livewire.master-data-kol.table-actions', ['id' => $row->id_kol]))
+                ->label(fn($row) => view('livewire.master-data-kol.partials.table-actions', ['id' => $row->id_kol]))
                 ->html()
                 ->excludeFromColumnSelect(),
         ];

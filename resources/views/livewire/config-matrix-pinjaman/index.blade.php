@@ -46,7 +46,7 @@
                         </div>
 
                         <!-- Table -->
-                        <table class="datatables-basic table border-top">
+                        <table class="datatable table">
                             <thead class="table-light">
                                 <tr>
                                     <th class="text-center" width="5%">No</th>
