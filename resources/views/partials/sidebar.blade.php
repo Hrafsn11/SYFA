@@ -59,7 +59,7 @@
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('master-data/kol*') ? 'active' : '' }}">
                     <a href="{{ route('master-data.kol.index') }}" class="menu-link">
-                        <div data-i18n="Master Data KOL">Master Data KOL</div>
+                        <div data-i18n="KOL">KOL</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->is('master-data/sumber-pendanaan-eksternal*') ? 'active' : '' }}">
