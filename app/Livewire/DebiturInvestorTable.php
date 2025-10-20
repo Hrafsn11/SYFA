@@ -50,7 +50,6 @@ class DebiturInvestorTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        // PENTING: Pastikan primary key (id_debitur) selalu di-select
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->select('id_debitur', 'id_kol', 'nama_debitur', 'alamat', 'email', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging');
