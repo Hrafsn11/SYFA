@@ -238,132 +238,141 @@
                                         </div>
                                     </div>
                                     <!-- End Konten Default -->
-
-                                    <!-- Konten Step 7: Generate Kontrak -->
-                                    <div id="content-step7" class="d-none">
-                                        <div class="row">
-                                            <form action="">
-                                                <div class="col-lg mb-3">
-                                                    <label for="jenis_pembiayaan" class="form-label">Jenis
-                                                        Pembiayaan</label>
-                                                    <input type="text" class="form-control" id="jenis_pembiayaan"
-                                                        name="jenis_pembiayaan" value="Invoice & Project Financing"
-                                                        required disabled>
-                                                </div>
-
-                                                <div class="card border-1 shadow-none mb-3">
-                                                    <div class="card-body">
-                                                        <div class="col-lg mb-3">
-                                                            <label for="nama_perusahaan" class="form-label">Nama
-                                                                Perusahaan</label>
-                                                            <input type="text" class="form-control"
-                                                                id="nama_perusahaan" name="nama_perusahaan"
-                                                                value="Techno Infinity" required disabled>
-                                                        </div>
-
-                                                        <div class="col-lg mb-3">
-                                                            <label for="nama_pimpinan" class="form-label">
-                                                                Nama Pimpinan
-                                                            </label>
-                                                            <input type="text" class="form-control" id="nama_pimpinan"
-                                                                name="nama_pimpinan" value="Cahyo" required disabled>
-                                                        </div>
-
-                                                        <div class="col-lg mb-3">
-                                                            <label for="alamat" class="form-label">
-                                                                Alamat Perusahaan
-                                                            </label>
-                                                            <input type="text" class="form-control" id="alamat"
-                                                                name="alamat"
-                                                                value="Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia"
-                                                                required disabled>
-                                                        </div>
-
-                                                        <div class="col-lg mb-3">
-                                                            <label for="tujuan" class="form-label">
-                                                                Tujuan Pembiayaan
-                                                            </label>
-                                                            <input type="text" class="form-control" id="tujuan"
-                                                                name="tujuan"
-                                                                value="Kebutuhan Gaji Operasional/Umum Sept" required
-                                                                disabled>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6 mb-2">
-                                                        <label for="nilai_pembiayaan">Nilai Pembiayaan</label>
-                                                        <input type="text" class="form-control" id="nilai_pembiayaan"
-                                                            name="nilai_pembiayaan" value="Rp.250.000.000" disabled>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label for="hutang_poko">Hutang Pokok</label>
-                                                        <input type="text" class="form-control" id="hutang_poko"
-                                                            name="hutang_poko" value="Rp.250.000.000" disabled>
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6 mb-2">
-                                                        <label for="tenor">Tenor Pembiayaan</label>
-                                                        <input type="text" class="form-control" id="tenor"
-                                                            name="tenor" value="1 Bulan" disabled>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label for="biaya_admin">Biaya Administrasi</label>
-                                                        <input type="text" class="form-control" id="biaya_admin"
-                                                            name="biaya_admin" value="Rp.0.00" disabled>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-lg mb-3">
-                                                    <label for="nisbah" class="form-label">Bagi Hasil(Nisbah)</label>
-                                                    <input type="text" class="form-control" id="nisbah"
-                                                        name="nisbah" value="2% flat / bulan" required disabled>
-                                                </div>
-
-                                                <div class="col-lg mb-3">
-                                                    <label for="denda_keterlambatan" class="form-label">
-                                                        Denda Keterlambatan
-                                                    </label>
-                                                    <input type="text" class="form-control" id="denda_keterlambatan"
-                                                        name="denda_keterlambatan"
-                                                        value="2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut"
-                                                        required disabled>
-                                                </div>
-
-                                                <div class="col-lg mb-3">
-                                                    <label for="Jaminan" class="form-label">
-                                                        Jaminan
-                                                    </label>
-                                                    <input type="text" class="form-control" id="Jaminan"
-                                                        name="Jaminan" value="Invoice & Project\ Financing" required
-                                                        disabled>
-                                                </div>
-
-                                                <div class="col-lg mb-3">
-                                                    <label for="Tanda Tangan Debitur" class="form-label">
-                                                        Tanda Tangan Debitur
-                                                    </label>
-                                                    <input type="file" class="form-control" id="fileUpload" required>
-                                                    <div class="invalid-feedback">
-                                                        Silakan pilih file untuk diupload.
-                                                    </div>
-                                                </div>
-
-                                            </form>
-                                        </div>
-                                    </div>
-                                    <!-- End Konten Step 7 -->
                                 </div>
 
                                 <!-- Detail Kontrak Tab -->
+                                <!-- Detail Kontrak Tab -->
                                 <div class="tab-pane fade" id="detail-kontrak" role="tabpanel">
-                                    <div class="text-center py-5">
-                                        <i class="far fa-file-alt fa-3x text-muted mb-3"></i>
-                                        <h5 class="text-muted">Detail Kontrak</h5>
-                                        <p class="text-muted">Konten detail kontrak akan ditampilkan di sini.</p>
+                                    <!-- Konten Default (Before Step 7) -->
+                                    <div id="kontrak-default">
+                                        <div class="text-center py-5">
+                                            <i class="far fa-file-alt fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">Detail Kontrak</h5>
+                                            <p class="text-muted">Konten detail kontrak akan ditampilkan di sini.</p>
+                                        </div>
                                     </div>
+
+                                    <!-- Konten Step 7: Generate Kontrak -->
+                                    <div id="kontrak-step7" class="d-none">
+                                        <h5 class="mb-4">Generate Kontrak Peminjaman</h5>
+                                        <form action="" id="formGenerateKontrak">
+                                            <div class="col-lg mb-3">
+                                                <label for="jenis_pembiayaan" class="form-label">Jenis
+                                                    Pembiayaan</label>
+                                                <input type="text" class="form-control" id="jenis_pembiayaan"
+                                                    name="jenis_pembiayaan" value="Invoice & Project Financing"
+                                                    required disabled>
+                                            </div>
+
+                                            <div class="card border-1 shadow-none mb-3">
+                                                <div class="card-body">
+                                                    <div class="col-lg mb-3">
+                                                        <label for="nama_perusahaan" class="form-label">Nama
+                                                            Perusahaan</label>
+                                                        <input type="text" class="form-control"
+                                                            id="nama_perusahaan" name="nama_perusahaan"
+                                                            value="Techno Infinity" required disabled>
+                                                    </div>
+
+                                                    <div class="col-lg mb-3">
+                                                        <label for="nama_pimpinan" class="form-label">
+                                                            Nama Pimpinan
+                                                        </label>
+                                                        <input type="text" class="form-control" id="nama_pimpinan"
+                                                            name="nama_pimpinan" value="Cahyo" required disabled>
+                                                    </div>
+
+                                                    <div class="col-lg mb-3">
+                                                        <label for="alamat" class="form-label">
+                                                            Alamat Perusahaan
+                                                        </label>
+                                                        <input type="text" class="form-control" id="alamat"
+                                                            name="alamat"
+                                                            value="Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia"
+                                                            required disabled>
+                                                    </div>
+
+                                                    <div class="col-lg mb-3">
+                                                        <label for="tujuan" class="form-label">
+                                                            Tujuan Pembiayaan
+                                                        </label>
+                                                        <input type="text" class="form-control" id="tujuan"
+                                                            name="tujuan"
+                                                            value="Kebutuhan Gaji Operasional/Umum Sept" required
+                                                            disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6 mb-2">
+                                                    <label for="nilai_pembiayaan">Nilai Pembiayaan</label>
+                                                    <input type="text" class="form-control" id="nilai_pembiayaan"
+                                                        name="nilai_pembiayaan" value="Rp.250.000.000" disabled>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="hutang_pokok">Hutang Pokok</label>
+                                                    <input type="text" class="form-control" id="hutang_pokok"
+                                                        name="hutang_pokok" value="Rp.250.000.000" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6 mb-2">
+                                                    <label for="tenor">Tenor Pembiayaan</label>
+                                                    <input type="text" class="form-control" id="tenor"
+                                                        name="tenor" value="1 Bulan" disabled>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="biaya_admin">Biaya Administrasi</label>
+                                                    <input type="text" class="form-control" id="biaya_admin"
+                                                        name="biaya_admin" value="Rp.0.00" disabled>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg mb-3">
+                                                <label for="nisbah" class="form-label">Bagi Hasil (Nisbah)</label>
+                                                <input type="text" class="form-control" id="nisbah"
+                                                    name="nisbah" value="2% flat / bulan" required disabled>
+                                            </div>
+
+                                            <div class="col-lg mb-3">
+                                                <label for="denda_keterlambatan" class="form-label">
+                                                    Denda Keterlambatan
+                                                </label>
+                                                <input type="text" class="form-control" id="denda_keterlambatan"
+                                                    name="denda_keterlambatan"
+                                                    value="2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut"
+                                                    required disabled>
+                                            </div>
+
+                                            <div class="col-lg mb-3">
+                                                <label for="jaminan" class="form-label">
+                                                    Jaminan
+                                                </label>
+                                                <input type="text" class="form-control" id="jaminan"
+                                                    name="jaminan" value="Invoice & Project Financing" required
+                                                    disabled>
+                                            </div>
+
+                                            <div class="col-lg mb-3">
+                                                <label for="ttd_debitur" class="form-label">
+                                                    Tanda Tangan Debitur
+                                                </label>
+                                                <input type="file" class="form-control" id="ttd_debitur" required>
+                                                <div class="invalid-feedback">
+                                                    Silakan pilih file untuk diupload.
+                                                </div>
+                                            </div>
+
+                                            <div class="d-flex justify-content-end">
+                                                <button type="submit" class="btn btn-primary" id="btnSimpanKontrak">
+                                                    <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSimpanKontrakSpinner"></span>
+                                                    Simpan
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <!-- End Konten Step 7 -->
                                 </div>
 
                                 <!-- Activity Tab -->
@@ -398,6 +407,7 @@
                 stepper: document.querySelector('.d-flex.overflow-auto'),
                 alertPeninjauan: document.getElementById('alertPeninjauan'),
                 activityTab: document.querySelector('[data-bs-target="#activity"]'),
+                detailKontrakTab: document.querySelector('[data-bs-target="#detail-kontrak"]'),
                 timeline: {
                     container: document.getElementById('timeline-container'),
                     empty: document.getElementById('activity-empty'),
@@ -492,22 +502,22 @@
                 });
                 toggleDisplay(dom.buttons.setujuiPeminjaman, state.currentStep === 2);
                 dom.alertPeninjauan.style.display = state.currentStep >= 2 ? 'none' : 'block';
-                updateDetailPinjamanContent(); // Update konten tab Detail Pinjaman
+                updateDetailKontrakContent(); // Update konten tab Detail Kontrak
                 updateActivityTimeline();
             };
 
-            const updateDetailPinjamanContent = () => {
-                const contentDefault = document.getElementById('content-default');
-                const contentStep7 = document.getElementById('content-step7');
+            const updateDetailKontrakContent = () => {
+                const kontrakDefault = document.getElementById('kontrak-default');
+                const kontrakStep7 = document.getElementById('kontrak-step7');
 
                 if (state.currentStep === 7) {
-                    // Step 7: Tampilkan konten Generate Kontrak
-                    toggleDisplay(contentDefault, false);
-                    toggleDisplay(contentStep7, true);
+                    // Step 7: Tampilkan form Generate Kontrak
+                    toggleDisplay(kontrakDefault, false);
+                    toggleDisplay(kontrakStep7, true);
                 } else {
                     // Step lainnya: Tampilkan konten default
-                    toggleDisplay(contentDefault, true);
-                    toggleDisplay(contentStep7, false);
+                    toggleDisplay(kontrakDefault, true);
+                    toggleDisplay(kontrakStep7, false);
                 }
             };
 
@@ -541,12 +551,22 @@
                 new bootstrap.Tab(dom.activityTab).show();
             };
 
+            const switchToDetailKontrakTab = () => {
+                new bootstrap.Tab(dom.detailKontrakTab).show();
+            };
+
 
             // --- EVENT HANDLERS ---
             const handleStepperClick = (e) => {
                 const target = e.target.closest('.stepper-arrow');
                 if (target) {
-                    goToStep(parseInt(target.dataset.step));
+                    const step = parseInt(target.dataset.step);
+                    goToStep(step);
+                    
+                    // Auto switch ke tab Detail Kontrak jika step 7
+                    if (step === 7) {
+                        switchToDetailKontrakTab();
+                    }
                 }
             };
 
@@ -611,35 +631,50 @@
                 switchToActivityTab();
             };
 
-            const handleGenerateKontrak = () => {
-                // Ambil catatan jika ada
-                const catatan = document.getElementById('catatanKontrak')?.value || '';
-
-                // Konfirmasi generate kontrak
-                if (confirm('Apakah Anda yakin ingin generate kontrak peminjaman?')) {
-                    // Simulasi proses generate (ganti dengan AJAX call sebenarnya)
-                    console.log('Generating kontrak dengan catatan:', catatan);
-
-                    // Tampilkan loading (opsional)
-                    const btnGenerate = document.getElementById('btnGenerateKontrak');
-                    const originalText = btnGenerate.innerHTML;
-                    btnGenerate.disabled = true;
-                    btnGenerate.innerHTML =
-                        '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
-
-                    // Simulasi delay untuk generate
-                    setTimeout(() => {
-                        btnGenerate.disabled = false;
-                        btnGenerate.innerHTML = originalText;
-
-                        // Success notification
-                        alert('Kontrak berhasil di-generate!');
-
-                        // Pindah ke step 8 (Upload Dokumen)
-                        goToStep(8);
-                        switchToActivityTab();
-                    }, 2000);
+            const handleGenerateKontrakSubmit = (e) => {
+                e.preventDefault();
+                
+                const form = e.target;
+                if (!form.checkValidity()) {
+                    e.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
                 }
+
+                const btnSimpan = document.getElementById('btnSimpanKontrak');
+                const spinner = document.getElementById('btnSimpanKontrakSpinner');
+                const originalText = btnSimpan.innerHTML;
+
+                // Show loading
+                btnSimpan.disabled = true;
+                spinner.classList.remove('d-none');
+
+                // Simulasi proses generate kontrak (ganti dengan AJAX call sebenarnya)
+                setTimeout(() => {
+                    btnSimpan.disabled = false;
+                    spinner.classList.add('d-none');
+                    
+                    // Reset form
+                    form.classList.remove('was-validated');
+                    
+                    // Success - pindah ke step 8
+                    goToStep(8);
+                    switchToActivityTab();
+                }, 2000);
+            };
+
+            const handleBatalKontrak = () => {
+                const form = document.getElementById('formGenerateKontrak');
+                form.classList.remove('was-validated');
+                // Kembali ke step sebelumnya atau tetap di step 7
+            };
+
+            const handlePreviewKontrak = () => {
+                // Get peminjaman ID from current page
+                const peminjamanId = {{ $peminjaman['id'] ?? 1 }};
+                
+                // Open preview in new tab
+                window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
             };
 
 
@@ -667,9 +702,16 @@
             dom.forms.edit?.addEventListener('submit', handleEditPencairanSubmit);
             dom.forms.upload?.addEventListener('submit', handleUploadSubmit);
 
-            // Event listener untuk button Generate Kontrak di Step 7
-            const btnGenerateKontrak = document.getElementById('btnGenerateKontrak');
-            btnGenerateKontrak?.addEventListener('click', handleGenerateKontrak);
+            // Event listener untuk form Generate Kontrak di Step 7
+            const formGenerateKontrak = document.getElementById('formGenerateKontrak');
+            formGenerateKontrak?.addEventListener('submit', handleGenerateKontrakSubmit);
+            
+            const btnBatalKontrak = document.getElementById('btnBatalKontrak');
+            btnBatalKontrak?.addEventListener('click', handleBatalKontrak);
+
+            // Event listener untuk button Preview Kontrak di Activity Tab
+            const btnPreviewKontrak = document.getElementById('btnPreviewKontrak');
+            btnPreviewKontrak?.addEventListener('click', handlePreviewKontrak);
 
             updateStepper();
             initCleaveRupiah();
