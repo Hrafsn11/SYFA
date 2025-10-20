@@ -6,7 +6,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\MasterDebiturDanInvestor;
 
-class DebiturinvestorTable extends DataTableComponent
+class DebiturInvestorTable extends DataTableComponent
 {
     protected $model = MasterDebiturDanInvestor::class;
 
