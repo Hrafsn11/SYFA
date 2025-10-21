@@ -16,11 +16,33 @@ class PeminjamanController extends Controller
      * @param  int  $id
      * @return \Illuminate\View\View
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $header = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
-        if (!$header) {
-            abort(404);
+        $requestedType = $request->query('type');
+
+        // If caller specified a type explicitly, respect it (helps disambiguate identical numeric ids across tables)
+        if ($requestedType === 'invoice') {
+            $headerInvoice = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
+            if (!$headerInvoice) abort(404);
+            $headerType = 'invoice';
+            $header = $headerInvoice;
+        } elseif ($requestedType === 'po') {
+            $headerPO = \App\Models\PeminjamanPoFinancing::with(['debitur.kol','details'])->find($id);
+            if (!$headerPO) abort(404);
+            $headerType = 'po';
+            $header = $headerPO;
+        } else {
+            // Backward compatible fallback: try invoice first then PO
+            $headerInvoice = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
+            if ($headerInvoice) {
+                $headerType = 'invoice';
+                $header = $headerInvoice;
+            } else {
+                $headerPO = \App\Models\PeminjamanPoFinancing::with(['debitur.kol','details'])->find($id);
+                if (!$headerPO) abort(404);
+                $headerType = 'po';
+                $header = $headerPO;
+            }
         }
 
         $persentase = null;
@@ -33,23 +55,46 @@ class PeminjamanController extends Controller
             }
         }
 
-        $peminjaman = [
-            'id' => $header->id_invoice_financing,
-            'nama_perusahaan' => $header->debitur->nama_debitur ?? '',
-            'nama_bank' => $header->nama_bank,
-            'no_rekening' => $header->no_rekening,
-            'lampiran_sid' => $header->lampiran_sid,
-            'nilai_kol' => $header->debitur->kol->kol ?? '',
-            'nominal_pinjaman' => $header->total_pinjaman,
-            'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
-            'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
-            'total_bagi_hasil' => $header->total_bagi_hasil,
-            'pembayaran_total' => $header->pembayaran_total ?? null,
-            'persentase_bagi_hasil' => $persentase,
-            'jenis_pembiayaan' => $header->sumber_pembiayaan ?? 'Invoice Financing',
-        ];
+        if ($headerType === 'invoice') {
+            $peminjaman = [
+                'id' => $header->id_invoice_financing,
+                'nama_perusahaan' => $header->debitur->nama_debitur ?? '',
+                'nama_bank' => $header->nama_bank,
+                'no_rekening' => $header->no_rekening,
+                'lampiran_sid' => $header->lampiran_sid,
+                'nilai_kol' => $header->debitur->kol->kol ?? '',
+                'nominal_pinjaman' => $header->total_pinjaman,
+                'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
+                'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
+                'total_bagi_hasil' => $header->total_bagi_hasil,
+                'pembayaran_total' => $header->pembayaran_total ?? null,
+                'persentase_bagi_hasil' => $persentase,
+                'jenis_pembiayaan' => $header->sumber_pembiayaan ?? 'Invoice Financing',
+            ];
+        } else {
+            // PO header mapping
+            $peminjaman = [
+                'id' => $header->id_po_financing,
+                'nama_perusahaan' => $header->debitur?->nama_debitur ?? '',
+                'nama_bank' => $header->nama_bank,
+                'no_rekening' => $header->no_rekening,
+                'lampiran_sid' => $header->lampiran_sid,
+                'nilai_kol' => $header->debitur?->kol->kol ?? '',
+                'nominal_pinjaman' => $header->total_pinjaman,
+                'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
+                'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
+                'total_bagi_hasil' => $header->total_bagi_hasil,
+                'pembayaran_total' => $header->pembayaran_total ?? null,
+                'persentase_bagi_hasil' => $persentase,
+                'jenis_pembiayaan' => $header->sumber_pembiayaan ?? 'PO Financing',
+            ];
+        }
 
-        $invoice_financing_data = $header->invoices->map(function($inv) {
+        $invoice_financing_data = [];
+        $po_financing_data = [];
+
+        if ($headerType === 'invoice') {
+            $invoice_financing_data = $header->invoices->map(function($inv) {
             return [
                 'no_invoice' => $inv->no_invoice,
                 'nama_client' => $inv->nama_client,
@@ -63,9 +108,26 @@ class PeminjamanController extends Controller
                 'dokumen_so' => $inv->dokumen_so,
                 'dokumen_bast' => $inv->dokumen_bast,
             ];
-        })->toArray();
+            })->toArray();
+        } else {
+            // Map PO details
+            $po_financing_data = $header->details->map(function($d) {
+                return [
+                    'no_kontrak' => $d->no_kontrak,
+                    'nama_client' => $d->nama_client,
+                    'nilai_invoice' => $d->nilai_invoice,
+                    'nilai_pinjaman' => $d->nilai_pinjaman,
+                    'nilai_bagi_hasil' => $d->nilai_bagi_hasil,
+                    'kontrak_date' => $d->kontrak_date,
+                    'due_date' => $d->due_date,
+                    'dokumen_kontrak' => $d->dokumen_kontrak,
+                    'dokumen_so' => $d->dokumen_so,
+                    'dokumen_bast' => $d->dokumen_bast,
+                    'dokumen_lainnya' => $d->dokumen_lainnya,
+                ];
+            })->toArray();
+        }
 
-        $po_financing_data = [];
         $installment_data = [];
         $factoring_data = [];
 
@@ -144,16 +206,32 @@ class PeminjamanController extends Controller
      */
     public function index()
     {
-        $records = PeminjamanInvoiceFinancing::with(['debitur.kol'])->orderBy('created_at','desc')->get();
-        $peminjaman_data = $records->map(function($r) {
+        $invoiceRecords = PeminjamanInvoiceFinancing::with(['debitur.kol'])->get();
+        $poRecords = \App\Models\PeminjamanPoFinancing::with(['debitur.kol'])->get();
+
+        $invoiceData = $invoiceRecords->map(function($r) {
             return [
                 'id' => $r->id_invoice_financing,
+                'type' => 'invoice',
                 'nama_perusahaan' => $r->debitur->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
                 'nilai_kol' => $r->debitur->kol->kol ?? '',
                 'status' => $r->status ?? 'draft',
             ];
         })->toArray();
+
+        $poData = $poRecords->map(function($r) {
+            return [
+                'id' => $r->id_po_financing,
+                'type' => 'po',
+                'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
+                'lampiran_sid' => $r->lampiran_sid,
+                'nilai_kol' => $r->debitur?->kol->kol ?? '',
+                'status' => $r->status ?? 'draft',
+            ];
+        })->toArray();
+
+        $peminjaman_data = array_merge($invoiceData, $poData);
 
         return view('livewire.peminjaman.index', compact('peminjaman_data'));
     }

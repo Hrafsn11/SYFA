@@ -343,54 +343,161 @@
 
         let editInvoiceIndex = -1;
 
+
         function saveInvoiceData() {
-            const index = editInvoiceIndex >= 0 ? editInvoiceIndex : invoiceFinancingData.length;
-            const no_invoice = $('#modal_no_invoice').val();
-            const nama_client = $('#modal_nama_client').val();
-            const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice')) || 0;
-            const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman')) || 0;
-            const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math.round(nilai_pinjaman * 0.02);
-            let invoice_date = $('#modal_invoice_date').val();
-            let due_date = $('#modal_due_date').val();
+            if (currentJenisPembiayaan === 'Invoice Financing') {
+                const index = editInvoiceIndex >= 0 ? editInvoiceIndex : invoiceFinancingData.length;
+                const no_invoice = $('#modal_no_invoice').val();
+                const nama_client = $('#modal_nama_client').val();
+                const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice')) || 0;
+                const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman')) || 0;
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math.round(nilai_pinjaman * 0.02);
+                let invoice_date = $('#modal_invoice_date').val();
+                let due_date = $('#modal_due_date').val();
 
-            invoice_date = convertDMYToISO(invoice_date);
-            due_date = convertDMYToISO(due_date);
+                invoice_date = convertDMYToISO(invoice_date);
+                due_date = convertDMYToISO(due_date);
 
-            const dokumen_invoice_file = document.getElementById('modal_dokumen_invoice').files[0] || null;
-            const dokumen_kontrak_file = document.getElementById('modal_dokumen_kontrak').files[0] || null;
-            const dokumen_so_file = document.getElementById('modal_dokumen_so').files[0] || null;
-            const dokumen_bast_file = document.getElementById('modal_dokumen_bast').files[0] || null;
+                const dokumen_invoice_file = document.getElementById('modal_dokumen_invoice').files[0] || null;
+                const dokumen_kontrak_file = document.getElementById('modal_dokumen_kontrak').files[0] || null;
+                const dokumen_so_file = document.getElementById('modal_dokumen_so').files[0] || null;
+                const dokumen_bast_file = document.getElementById('modal_dokumen_bast').files[0] || null;
 
-            // Basic validation
-            if (!no_invoice || nilai_pinjaman <= 0) {
-                alert('No. Invoice dan Nilai Pinjaman wajib diisi dan > 0');
-                return;
+                // Basic validation
+                if (!no_invoice || nilai_pinjaman <= 0) {
+                    alert('No. Invoice dan Nilai Pinjaman wajib diisi dan > 0');
+                    return;
+                }
+
+                const payload = {
+                    no_invoice: no_invoice,
+                    nama_client: nama_client,
+                    nilai_invoice: parseFloat(nilai_invoice),
+                    nilai_pinjaman: parseFloat(nilai_pinjaman),
+                    nilai_bagi_hasil: parseFloat(nilai_bagi_hasil),
+                    invoice_date: invoice_date,
+                    due_date: due_date,
+                    dokumen_invoice_file: dokumen_invoice_file,
+                    dokumen_kontrak_file: dokumen_kontrak_file,
+                    dokumen_so_file: dokumen_so_file,
+                    dokumen_bast_file: dokumen_bast_file,
+                };
+
+                if (editInvoiceIndex >= 0) {
+                    invoiceFinancingData[editInvoiceIndex] = payload;
+                    editInvoiceIndex = -1;
+                } else {
+                    invoiceFinancingData.push(payload);
+                }
+
+                modalInstance.hide();
+                renderInvoiceTables();
+            } else if (currentJenisPembiayaan === 'PO Financing') {
+                const index = editInvoiceIndex >= 0 ? editInvoiceIndex : poFinancingData.length;
+                const no_kontrak = $('#modal_no_kontrak_po').val();
+                const nama_client = $('#modal_nama_client_po').val();
+                const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_po')) || 0;
+                const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman_po')) || 0;
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_po')) || Math.round(nilai_pinjaman * 0.02);
+                let contract_date = $('#modal_contract_date_po').val();
+                let due_date = $('#modal_due_date_po').val();
+
+                contract_date = convertDMYToISO(contract_date);
+                due_date = convertDMYToISO(due_date);
+
+                const dokumen_kontrak_file = document.getElementById('modal_dokumen_kontrak_po').files[0] || null;
+                const dokumen_so_file = document.getElementById('modal_dokumen_so_po').files[0] || null;
+                const dokumen_bast_file = document.getElementById('modal_dokumen_bast_po').files[0] || null;
+                const dokumen_lainnya_file = document.getElementById('modal_dokumen_lainnya_po').files[0] || null;
+
+                // Basic validation
+                if (!no_kontrak || nilai_pinjaman <= 0) {
+                    alert('No. Kontrak dan Nilai Pinjaman wajib diisi dan > 0');
+                    return;
+                }
+
+                const payload = {
+                    no_kontrak: no_kontrak,
+                    nama_client: nama_client,
+                    nilai_invoice: parseFloat(nilai_invoice),
+                    nilai_pinjaman: parseFloat(nilai_pinjaman),
+                    nilai_bagi_hasil: parseFloat(nilai_bagi_hasil),
+                    contract_date: contract_date,
+                    due_date: due_date,
+                    dokumen_kontrak_file: dokumen_kontrak_file,
+                    dokumen_so_file: dokumen_so_file,
+                    dokumen_bast_file: dokumen_bast_file,
+                    dokumen_lainnya_file: dokumen_lainnya_file,
+                };
+
+                if (editInvoiceIndex >= 0) {
+                    poFinancingData[editInvoiceIndex] = payload;
+                    editInvoiceIndex = -1;
+                } else {
+                    poFinancingData.push(payload);
+                }
+
+                modalInstance.hide();
+                renderPOFinancingTable();
             }
+        }
+        function renderPOFinancingTable() {
+            const tbody = $('#poFinancingTable tbody');
+            tbody.empty();
+            poFinancingData.forEach(function(po, idx) {
+                const row = `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${po.no_kontrak}</td>
+                    <td>${po.nama_client}</td>
+                    <td>Rp. ${numberWithThousandSeparator(po.nilai_invoice)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(po.nilai_pinjaman)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(po.nilai_bagi_hasil)}</td>
+                    <td>${po.contract_date || ''}</td>
+                    <td>${po.due_date || ''}</td>
+                    <td>${po.dokumen_kontrak_file ? po.dokumen_kontrak_file.name : ''}</td>
+                    <td>${po.dokumen_so_file ? po.dokumen_so_file.name : ''}</td>
+                    <td>${po.dokumen_bast_file ? po.dokumen_bast_file.name : ''}</td>
+                    <td>${po.dokumen_lainnya_file ? po.dokumen_lainnya_file.name : ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning btn-edit-po" data-idx="${idx}">Edit</button>
+                        <button class="btn btn-sm btn-danger btn-remove-po" data-idx="${idx}">Hapus</button>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
 
-            const payload = {
-                no_invoice: no_invoice,
-                nama_client: nama_client,
-                nilai_invoice: parseFloat(nilai_invoice),
-                nilai_pinjaman: parseFloat(nilai_pinjaman),
-                nilai_bagi_hasil: parseFloat(nilai_bagi_hasil),
-                invoice_date: invoice_date,
-                due_date: due_date,
-                dokumen_invoice_file: dokumen_invoice_file,
-                dokumen_kontrak_file: dokumen_kontrak_file,
-                dokumen_so_file: dokumen_so_file,
-                dokumen_bast_file: dokumen_bast_file,
-            };
+            // handle remove
+            $('.btn-remove-po').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                poFinancingData.splice(idx, 1);
+                renderPOFinancingTable();
+            });
 
-            if (editInvoiceIndex >= 0) {
-                // update existing
-                invoiceFinancingData[editInvoiceIndex] = payload;
-                editInvoiceIndex = -1;
-            } else {
-                invoiceFinancingData.push(payload);
-            }
+            // handle edit
+            $('.btn-edit-po').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                const po = poFinancingData[idx];
+                if (!po) return;
 
-            modalInstance.hide();
-            renderInvoiceTables();
+                $('#modal_no_kontrak_po').val(po.no_kontrak);
+                $('#modal_nama_client_po').val(po.nama_client);
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_po'), 'Rp ' + numberWithThousandSeparator(po.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_po'), 'Rp ' + numberWithThousandSeparator(po.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_po'), 'Rp ' + numberWithThousandSeparator(po.nilai_bagi_hasil || 0));
+                $('#modal_contract_date_po').val(po.contract_date || '');
+                $('#modal_due_date_po').val(po.due_date || '');
+
+                // File inputs cannot be pre-filled
+                $('#modal_dokumen_kontrak_po').val('');
+                $('#modal_dokumen_so_po').val('');
+                $('#modal_dokumen_bast_po').val('');
+                $('#modal_dokumen_lainnya_po').val('');
+
+                editInvoiceIndex = idx;
+                modalInstance.show();
+            });
         }
 
         function renderInvoiceTables() {
@@ -461,12 +568,17 @@
 
         $('#formPeminjaman').on('submit', function(e) {
             e.preventDefault();
-            if (invoiceFinancingData.length === 0) {
-                if (!confirm('Anda belum menambahkan invoice, lanjutkan menyimpan?')) return;
-            }
 
             const form = document.getElementById('formPeminjaman');
             const fd = new FormData(form);
+
+            // Basic client-side check depending on selected jenis pembiayaan
+            if (currentJenisPembiayaan === 'Invoice Financing' && invoiceFinancingData.length === 0) {
+                if (!confirm('Anda belum menambahkan invoice, lanjutkan menyimpan?')) return;
+            }
+            if (currentJenisPembiayaan === 'PO Financing' && poFinancingData.length === 0) {
+                if (!confirm('Anda belum menambahkan kontrak PO, lanjutkan menyimpan?')) return;
+            }
 
             // Append master id (if available)
             const masterId = '{{ optional($master)->id_debitur ?? '' }}';
@@ -507,33 +619,98 @@
             // Ensure sumber pembiayaan eksternal selection is included (select2 may wrap it)
             const sumberEksternalVal = $('#select2Basic').val();
             if (sumberEksternalVal) fd.set('sumber_eksternal_id', sumberEksternalVal);
+            if (sumberEksternalVal) fd.set('id_instansi', sumberEksternalVal);
 
             // normalize sumber pembiayaan value to lowercase
             const sumberVal = $('input[name="sumber_pembiayaan"]:checked').val();
             if (sumberVal) fd.set('sumber_pembiayaan', sumberVal.toLowerCase());
 
-            // Append invoices JSON
-            fd.set('invoices', JSON.stringify(invoiceFinancingData.map(i => ({
-                no_invoice: i.no_invoice,
-                nama_client: i.nama_client,
-                nilai_invoice: i.nilai_invoice,
-                nilai_pinjaman: i.nilai_pinjaman,
-                nilai_bagi_hasil: i.nilai_bagi_hasil,
-                invoice_date: i.invoice_date,
-                due_date: i.due_date
-            }))));
+            // Attach detail arrays and files depending on jenis pembiayaan
+            let postUrl = '{{ route('peminjaman.invoice.store') }}';
+            if (currentJenisPembiayaan === 'Invoice Financing') {
+                fd.set('invoices', JSON.stringify(invoiceFinancingData.map(i => ({
+                    no_invoice: i.no_invoice,
+                    nama_client: i.nama_client,
+                    nilai_invoice: i.nilai_invoice,
+                    nilai_pinjaman: i.nilai_pinjaman,
+                    nilai_bagi_hasil: i.nilai_bagi_hasil,
+                    invoice_date: i.invoice_date,
+                    due_date: i.due_date
+                }))));
 
-            // Append files
-            invoiceFinancingData.forEach(function(inv, idx) {
-                if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv.dokumen_invoice_file);
-                if (inv.dokumen_kontrak_file) fd.append(`files[${idx}][dokumen_kontrak]`, inv.dokumen_kontrak_file);
-                if (inv.dokumen_so_file) fd.append(`files[${idx}][dokumen_so]`, inv.dokumen_so_file);
-                if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv.dokumen_bast_file);
-            });
+                invoiceFinancingData.forEach(function(inv, idx) {
+                    if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv.dokumen_invoice_file);
+                    if (inv.dokumen_kontrak_file) fd.append(`files[${idx}][dokumen_kontrak]`, inv.dokumen_kontrak_file);
+                    if (inv.dokumen_so_file) fd.append(`files[${idx}][dokumen_so]`, inv.dokumen_so_file);
+                    if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv.dokumen_bast_file);
+                });
+                postUrl = '{{ route('peminjaman.invoice.store') }}';
+            } else if (currentJenisPembiayaan === 'PO Financing') {
+                // Append each detail as form fields so PHP/Laravel parses them as array
+                poFinancingData.forEach(function(p, idx) {
+                    fd.append(`details[${idx}][no_kontrak]`, p.no_kontrak || '');
+                    fd.append(`details[${idx}][nama_client]`, p.nama_client || '');
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(p.nilai_invoice || 0));
+                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(p.nilai_pinjaman || 0));
+                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(p.nilai_bagi_hasil || 0));
+                    fd.append(`details[${idx}][kontrak_date]`, p.contract_date || '');
+                    fd.append(`details[${idx}][due_date]`, p.due_date || '');
+
+                    // Append files for each PO detail using keys like details[0][dokumen_kontrak]
+                    if (p.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, p.dokumen_kontrak_file);
+                    if (p.dokumen_so_file) fd.append(`details[${idx}][dokumen_so]`, p.dokumen_so_file);
+                    if (p.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, p.dokumen_bast_file);
+                    if (p.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, p.dokumen_lainnya_file);
+                });
+
+                postUrl = '{{ route('peminjaman.po.store') }}';
+            }
+
+            // If posting PO Financing, ensure required header fields exist
+            if (currentJenisPembiayaan === 'PO Financing') {
+                // no_kontrak is required by server; prefer explicit header input if present, otherwise use first detail
+                if (!fd.get('no_kontrak')) {
+                    if (poFinancingData.length > 0 && poFinancingData[0].no_kontrak) {
+                        fd.set('no_kontrak', poFinancingData[0].no_kontrak);
+                    }
+                }
+
+                // Ensure total_pinjaman is present; compute from details if empty
+                let totalPinjamanValue = fd.get('total_pinjaman');
+                if (!totalPinjamanValue || totalPinjamanValue === '') {
+                    let sum = 0;
+                    poFinancingData.forEach(function(p) {
+                        sum += Number(normalizeNumericForServer(p.nilai_pinjaman || 0) || 0);
+                    });
+                    fd.set('total_pinjaman', normalizeNumericForServer(sum));
+                } else {
+                    fd.set('total_pinjaman', normalizeNumericForServer(totalPinjamanValue));
+                }
+
+                // Ensure total_bagi_hasil and pembayaran_total exist (we set total_bagi_hasil earlier from form if present)
+                const existingBagi = fd.get('total_bagi_hasil') || 0;
+                if (!existingBagi || existingBagi === '0') {
+                    // compute as 2% of total_pinjaman
+                    const tp = Number(normalizeNumericForServer(fd.get('total_pinjaman') || 0));
+                    const bagi = Math.round(tp * 0.02 * 100) / 100;
+                    fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
+                    fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
+                } else {
+                    // ensure pembayaran_total exists
+                    if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
+                        const tp = Number(normalizeNumericForServer(fd.get('total_pinjaman') || 0));
+                        const bagi = Number(normalizeNumericForServer(fd.get('total_bagi_hasil') || 0));
+                        fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
+                    }
+                }
+
+                // Ensure status provided
+                if (!fd.get('status')) fd.set('status', 'submitted');
+            }
 
             // send via AJAX
             $.ajax({
-                url: '{{ route('peminjaman.invoice.store') }}',
+                url: postUrl,
                 method: 'POST',
                 data: fd,
                 processData: false,
@@ -548,6 +725,9 @@
                         // redirect to detail
                         if (resp.data && resp.data.id_invoice_financing) {
                             window.location.href = '/peminjaman/' + resp.data.id_invoice_financing;
+                        } else if (resp.id) {
+                            // PO controller returns 'id' for header
+                            window.location.href = '/peminjaman/' + resp.id;
                         } else {
                             window.location.href = '/peminjaman';
                         }
@@ -745,6 +925,14 @@
                 return `${y}-${m}-${d}`;
             }
             return dmy;
+        }
+
+        // Normalize numeric values to plain number string for server (remove currency formatting)
+        function normalizeNumericForServer(v) {
+            if (v === null || typeof v === 'undefined') return '';
+            if (typeof v === 'number') return v.toString();
+            // If Cleave raw getter exists and returned a number-like string, keep digits and dot
+            return String(v).toString().replace(/[^0-9\.\-]+/g, '');
         }
 
         (function() {

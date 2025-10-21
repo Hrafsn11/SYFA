@@ -10,8 +10,6 @@ return new class extends Migration
     {
         Schema::create('invoice_financing', function (Blueprint $table) {
             $table->increments('id_invoice');
-            // linked to header's primary key (renamed to id_invoice_financing)
-            // note: id_peminjaman column removed in favor of id_invoice_financing
             $table->string('no_invoice', 255);
             $table->string('nama_client', 255)->nullable();
             $table->decimal('nilai_invoice', 15, 2)->default(0);
