@@ -59,10 +59,10 @@
                             <div class="row mb-3">
                                 <div class="col-lg-3 col-sm-12 mb-3">
                                     <label for="selectBank" class="form-label">Nama Bank</label>
-                                    <select class="form-select non-editable select-non-editable" id="selectBank" name="nama_bank" required disabled aria-disabled="true">
+                                    <select class="form-select non-editable select-non-editable" id="selectBank" name="nama_bank" required disabled aria-disabled="true" data-selected="{{ old('nama_bank', optional($master)->nama_bank) }}">
                                         <option value="">Pilih Bank</option>
                                         @foreach ($banks as $bank)
-                                            <option value="{{ $bank }}" {{ (old('nama_bank', optional(value: $master)->nama_bank) == $bank) ? 'selected' : '' }}>{{ $bank }} </option>
+                                            <option value="{{ $bank }}" {{ (old('nama_bank', optional($master)->nama_bank) == $bank) ? 'selected' : '' }}>{{ $bank }} </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -489,6 +489,7 @@
 
             // Disabled inputs aren't submitted by forms; include some explicitly
             const selectedBank = $('#selectBank').val();
+            console.log('DEBUG selectedBank:', selectedBank);
             if (selectedBank) fd.set('nama_bank', selectedBank);
             const noRek = $('#no_rekening').val();
             if (noRek) fd.set('no_rekening', noRek);
@@ -545,8 +546,8 @@
                     if (resp.success) {
                         alert('Peminjaman berhasil disimpan');
                         // redirect to detail
-                        if (resp.data && resp.data.id_peminjaman) {
-                            window.location.href = '/peminjaman/' + resp.data.id_peminjaman;
+                        if (resp.data && resp.data.id_invoice_financing) {
+                            window.location.href = '/peminjaman/' + resp.data.id_invoice_financing;
                         } else {
                             window.location.href = '/peminjaman';
                         }
@@ -639,7 +640,7 @@
         // Menggunakan pola Vuexy untuk Select2
         function initSelect2Elements() {
             const select2Elements = $('.form-select');
-            if (select2Elements.length) {
+                    if (select2Elements.length) {
                 select2Elements.each(function() {
                     var $this = $(this);
                     $this.wrap('<div class="position-relative"></div>').select2({
@@ -647,6 +648,12 @@
                         dropdownParent: $this.closest('.modal').length ? $this.closest('.modal') : $this
                             .parent()
                     });
+
+                    // If server passed a preselected value, apply it so Select2 renders it
+                    const preselected = $this.data('selected');
+                    if (preselected) {
+                        $this.val(preselected).trigger('change.select2');
+                    }
 
                     if ($this.hasClass('select-non-editable')) {
                         $this.prop('disabled', true);

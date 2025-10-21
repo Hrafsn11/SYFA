@@ -10,7 +10,7 @@ class PeminjamanInvoiceFinancing extends Model
     use HasFactory;
 
     protected $table = 'peminjaman_invoice_financing';
-    protected $primaryKey = 'id_peminjaman';
+    protected $primaryKey = 'id_invoice_financing';
     public $incrementing = true;
     protected $keyType = 'int';
 
@@ -20,7 +20,7 @@ class PeminjamanInvoiceFinancing extends Model
 
     public function invoices()
     {
-        return $this->hasMany(InvoiceFinancing::class, 'id_peminjaman', 'id_peminjaman');
+        return $this->hasMany(InvoiceFinancing::class, 'id_invoice_financing', 'id_invoice_financing');
     }
 
     public function debitur()

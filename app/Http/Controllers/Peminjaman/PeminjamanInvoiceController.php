@@ -117,7 +117,7 @@ class PeminjamanInvoiceController extends Controller
                 }
 
                 InvoiceFinancing::create([
-                    'id_peminjaman' => $header->id_peminjaman,
+                    'id_invoice_financing' => $header->id_invoice_financing,
                     'no_invoice' => $no,
                     'nama_client' => $inv['nama_client'] ?? null,
                     'nilai_invoice' => $nilai_invoice,
@@ -157,7 +157,7 @@ class PeminjamanInvoiceController extends Controller
 
             DB::commit();
 
-            return response()->json(['success'=>true,'data'=>['id_peminjaman'=>$header->id_peminjaman]]);
+            return response()->json(['success'=>true,'data'=>['id_invoice_financing'=>$header->id_invoice_financing]]);
 
         } catch (\Throwable $e) {
             DB::rollBack();

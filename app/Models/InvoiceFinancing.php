@@ -15,11 +15,11 @@ class InvoiceFinancing extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_peminjaman','no_invoice','nama_client','nilai_invoice','nilai_pinjaman','nilai_bagi_hasil','invoice_date','due_date','dokumen_invoice','dokumen_kontrak','dokumen_so','dokumen_bast','created_by'
+        'id_invoice_financing','no_invoice','nama_client','nilai_invoice','nilai_pinjaman','nilai_bagi_hasil','invoice_date','due_date','dokumen_invoice','dokumen_kontrak','dokumen_so','dokumen_bast','created_by'
     ];
 
     public function peminjaman()
     {
-        return $this->belongsTo(PeminjamanInvoiceFinancing::class, 'id_peminjaman', 'id_peminjaman');
+        return $this->belongsTo(PeminjamanInvoiceFinancing::class, 'id_invoice_financing', 'id_invoice_financing');
     }
 }

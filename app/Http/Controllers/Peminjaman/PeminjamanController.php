@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PeminjamanInvoiceFinancing;
 use App\Models\MasterDebiturDanInvestor;
+use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
@@ -33,7 +34,7 @@ class PeminjamanController extends Controller
         }
 
         $peminjaman = [
-            'id' => $header->id_peminjaman,
+            'id' => $header->id_invoice_financing,
             'nama_perusahaan' => $header->debitur->nama_debitur ?? '',
             'nama_bank' => $header->nama_bank,
             'no_rekening' => $header->no_rekening,
@@ -68,7 +69,25 @@ class PeminjamanController extends Controller
         $installment_data = [];
         $factoring_data = [];
 
-        $banks = ['BCA','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        // Try to read enum values for `nama_bank` from DB so we don't keep duplicate hardcoded lists.
+        // Fallback to the previous hardcoded array if query fails or column isn't an enum.
+        try {
+            $banks = [];
+            $column = DB::selectOne("SHOW COLUMNS FROM peminjaman_invoice_financing LIKE 'nama_bank'");
+            if ($column && preg_match('/^enum\((.*)\)$/', $column->Type, $matches)) {
+                $vals = explode(',', $matches[1]);
+                foreach ($vals as $v) {
+                    // strip surrounding quotes and trim
+                    $banks[] = trim($v, "' \t\n\r\0\x0B");
+                }
+            }
+            if (empty($banks)) {
+                // fallback
+                $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+            }
+        } catch (\Throwable $e) {
+            $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        }
         $tenor_pembayaran = [
             ['value' => '3', 'label' => '3 Bulan'],
             ['value' => '6', 'label' => '6 Bulan'],
@@ -99,7 +118,7 @@ class PeminjamanController extends Controller
     {
         // Sample kontrak data
         $kontrak = [
-            'id_peminjaman' => $id,
+            'id_invoice_financing' => $id,
             'no_kontrak' => 'SKI/FIN/2025/001',
             'tanggal_kontrak' => '22 September 2025',
             'nama_perusahaan' => 'SYNNOVAC CAPITAL',
@@ -128,7 +147,7 @@ class PeminjamanController extends Controller
         $records = PeminjamanInvoiceFinancing::with(['debitur.kol'])->orderBy('created_at','desc')->get();
         $peminjaman_data = $records->map(function($r) {
             return [
-                'id' => $r->id_peminjaman,
+                'id' => $r->id_invoice_financing,
                 'nama_perusahaan' => $r->debitur->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
                 'nilai_kol' => $r->debitur->kol->kol ?? '',
@@ -173,7 +192,23 @@ class PeminjamanController extends Controller
         $installment_data = [];
         $factoring_data = [];
 
-        $banks = ['BCA','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        // Try to read enum values for `nama_bank` from DB so we don't keep duplicate hardcoded lists.
+        // Fallback to a reasonable default if query fails or column isn't an enum.
+        try {
+            $banks = [];
+            $column = DB::selectOne("SHOW COLUMNS FROM peminjaman_invoice_financing LIKE 'nama_bank'");
+            if ($column && preg_match('/^enum\((.*)\)$/', $column->Type, $matches)) {
+                $vals = explode(',', $matches[1]);
+                foreach ($vals as $v) {
+                    $banks[] = trim($v, "' \t\n\r\0\x0B");
+                }
+            }
+            if (empty($banks)) {
+                $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+            }
+        } catch (\Throwable $e) {
+            $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        }
 
         $master = null;
         try {

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('peminjaman_invoice_financing', function (Blueprint $table) {
-            $table->increments('id_peminjaman');
+            $table->increments('id_invoice_financing');
             $table->unsignedInteger('id_debitur');
             $table->unsignedInteger('id_instansi')->nullable();
             $table->enum('sumber_pembiayaan', ['eksternal','internal'])->default('eksternal');
