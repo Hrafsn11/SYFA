@@ -91,8 +91,17 @@
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-center align-items-center gap-2">
+                                                    @php
+                                                        $detailRouteParams = ['id' => $item['id'] ?? $index + 1];
+                                                        if (!empty($item['type'])) {
+                                                            // pass as query param
+                                                            $detailUrl = route('peminjaman.detail', $detailRouteParams) . '?type=' . $item['type'];
+                                                        } else {
+                                                            $detailUrl = route('peminjaman.detail', $detailRouteParams);
+                                                        }
+                                                    @endphp
                                                     <a class="btn btn-sm btn-icon btn-text-info rounded-pill waves-effect"
-                                                        href="{{ route('peminjaman.detail', ['id' => $item['id'] ?? $index + 1]) }}">
+                                                        href="{{ $detailUrl }}">
                                                         <i class="ti ti-file-text"></i>
                                                     </a>
                                                     <a class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect"
