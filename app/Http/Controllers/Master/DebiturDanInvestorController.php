@@ -12,7 +12,10 @@ class DebiturDanInvestorController extends Controller
     public function index()
     {
         $kol = MasterKol::orderBy('id_kol', 'asc')->get();
-        return view('livewire.master-data-debitur-investor.index', compact('kol'));
+        $banks = [
+            'BCA','BSI','Mandiri','BRI','BNI','Danamon','Permata Bank','OCBC','Panin Bank','UOB Indonesia','CIMB Niaga'
+        ];
+        return view('livewire.master-data-debitur-investor.index', compact('kol','banks'));
     }
 
     public function store(Request $request)
@@ -23,7 +26,7 @@ class DebiturDanInvestorController extends Controller
             'alamat' => 'nullable|string|max:500',
             'email' => 'nullable|email|max:255',
             'nama_ceo' => 'nullable|string|max:255',
-            'nama_bank' => 'nullable|string|max:255',
+            'nama_bank' => 'nullable|string|in:BCA,BSI,Mandiri,BRI,BNI,Danamon,Permata Bank,OCBC,Panin Bank,UOB Indonesia,CIMB Niaga',
             'no_rek' => 'nullable|string|max:100',
             'flagging' => 'nullable|string|in:ya,tidak'
         ]);
@@ -58,7 +61,7 @@ class DebiturDanInvestorController extends Controller
             'alamat' => 'nullable|string|max:500',
             'email' => 'nullable|email|max:255',
             'nama_ceo' => 'nullable|string|max:255',
-            'nama_bank' => 'nullable|string|max:255',
+            'nama_bank' => 'nullable|string|in:BCA,BSI,Mandiri,BRI,BNI,Danamon,Permata Bank,OCBC,Panin Bank,UOB Indonesia,CIMB Niaga',
             'no_rek' => 'nullable|string|max:100',
             'flagging' => 'nullable|string|in:ya,tidak'
         ]);

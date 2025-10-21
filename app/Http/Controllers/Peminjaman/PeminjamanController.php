@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Peminjaman;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\PeminjamanInvoiceFinancing;
+use App\Models\MasterDebiturDanInvestor;
+use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
@@ -15,28 +18,76 @@ class PeminjamanController extends Controller
      */
     public function show($id)
     {
-        // For now, pass minimal data required by the view. The Livewire detail view
-        // in this project expects the UI only; we'll pass a sample array so the
-        // blade can render if it needs an id or basic data.
+        $header = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
+        if (!$header) {
+            abort(404);
+        }
+
+        $persentase = null;
+        if (!empty($header->id_instansi)) {
+            try {
+                $master = \App\Models\MasterSumberPendanaanEksternal::find($header->id_instansi);
+                $persentase = $master?->persentase_bagi_hasil ?? null;
+            } catch (\Throwable $e) {
+                $persentase = null;
+            }
+        }
+
         $peminjaman = [
-            'id' => $id,
-            'nama_perusahaan' => 'Techno Infinity',
-            'nilai_kol' => 'A',
+            'id' => $header->id_invoice_financing,
+            'nama_perusahaan' => $header->debitur->nama_debitur ?? '',
+            'nama_bank' => $header->nama_bank,
+            'no_rekening' => $header->no_rekening,
+            'lampiran_sid' => $header->lampiran_sid,
+            'nilai_kol' => $header->debitur->kol->kol ?? '',
+            'nominal_pinjaman' => $header->total_pinjaman,
+            'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
+            'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
+            'total_bagi_hasil' => $header->total_bagi_hasil,
+            'pembayaran_total' => $header->pembayaran_total ?? null,
+            'persentase_bagi_hasil' => $persentase,
+            'jenis_pembiayaan' => $header->sumber_pembiayaan ?? 'Invoice Financing',
         ];
 
-        // Provide sumber_eksternal list (same shape as used in Livewire create component)
-        $sumber_eksternal = [
-            ['id' => 1, 'nama' => 'Pemberi Dana A'],
-            ['id' => 2, 'nama' => 'Pemberi Dana B'],
-            ['id' => 3, 'nama' => 'Pemberi Dana C'],
-        ];
+        $invoice_financing_data = $header->invoices->map(function($inv) {
+            return [
+                'no_invoice' => $inv->no_invoice,
+                'nama_client' => $inv->nama_client,
+                'nilai_invoice' => $inv->nilai_invoice,
+                'nilai_pinjaman' => $inv->nilai_pinjaman,
+                'nilai_bagi_hasil' => $inv->nilai_bagi_hasil,
+                'invoice_date' => $inv->invoice_date,
+                'due_date' => $inv->due_date,
+                'dokumen_invoice' => $inv->dokumen_invoice,
+                'dokumen_kontrak' => $inv->dokumen_kontrak,
+                'dokumen_so' => $inv->dokumen_so,
+                'dokumen_bast' => $inv->dokumen_bast,
+            ];
+        })->toArray();
 
-        // Banks list
-        $banks = [
-            'BCA','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'
-        ];
+        $po_financing_data = [];
+        $installment_data = [];
+        $factoring_data = [];
 
-        // Tenor options
+        // Try to read enum values for `nama_bank` from DB so we don't keep duplicate hardcoded lists.
+        // Fallback to the previous hardcoded array if query fails or column isn't an enum.
+        try {
+            $banks = [];
+            $column = DB::selectOne("SHOW COLUMNS FROM peminjaman_invoice_financing LIKE 'nama_bank'");
+            if ($column && preg_match('/^enum\((.*)\)$/', $column->Type, $matches)) {
+                $vals = explode(',', $matches[1]);
+                foreach ($vals as $v) {
+                    // strip surrounding quotes and trim
+                    $banks[] = trim($v, "' \t\n\r\0\x0B");
+                }
+            }
+            if (empty($banks)) {
+                // fallback
+                $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+            }
+        } catch (\Throwable $e) {
+            $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        }
         $tenor_pembayaran = [
             ['value' => '3', 'label' => '3 Bulan'],
             ['value' => '6', 'label' => '6 Bulan'],
@@ -44,69 +95,12 @@ class PeminjamanController extends Controller
             ['value' => '12', 'label' => '12 Bulan'],
         ];
 
-        // Minimal sample financing data for included invoice tables
-        $invoice_financing_data = [
-            [
-                'no_invoice' => 'INV-2025-001',
-                'nama_client' => 'PT Maju Jaya',
-                'nilai_invoice' => '15000000',
-                'nilai_pinjaman' => '12000000',
-                'nilai_bagi_hasil' => '300000',
-                'invoice_date' => '2025-01-15',
-                'due_date' => '2025-02-15',
-                'dokumen_invoice' => 'invoice_001.pdf',
-                'dokumen_kontrak' => 'kontrak_001.pdf',
-                'dokumen_so' => 'so_001.pdf',
-                'dokumen_bast' => 'bast_001.pdf',
-            ],
-        ];
-
-        // Sample PO Financing data
-        $po_financing_data = [
-            [
-                'no_invoice' => 'PO-2025-010',
-                'nama_client' => 'CV Sumber Niaga',
-                'nilai_invoice' => '8000000',
-                'nilai_pinjaman' => '7000000',
-                'nilai_bagi_hasil' => '200000',
-                'invoice_date' => '2025-03-10',
-                'due_date' => '2025-04-10',
-                'dokumen_kontrak' => 'kontrak_po_010.pdf',
-                'dokumen_so' => 'so_po_010.pdf',
-                'dokumen_bast' => 'bast_po_010.pdf',
-                'dokumen_lainnya' => 'lainnya_po_010.pdf',
-            ],
-        ];
-
-        // Sample Installment data
-        $installment_data = [
-            [
-                'no_invoice' => 'INST-2025-05',
-                'nama_client' => 'PT Retailindo',
-                'nilai_invoice' => '2500000',
-                'invoice_date' => '2025-05-01',
-                'nama_barang' => 'Mesin Kasir',
-                'dokumen_invoice' => 'invoice_inst_05.pdf',
-                'dokumen_lainnya' => 'lainnya_inst_05.pdf',
-            ],
-        ];
-
-        // Sample Factoring data
-        $factoring_data = [
-            [
-                'no_invoice' => 'FAC-2025-02',
-                'nama_client' => 'PT Ekspor Jaya',
-                'nilai_invoice' => '50000000',
-                'nilai_pinjaman' => '45000000',
-                'nilai_bagi_hasil' => '1500000',
-                'invoice_date' => '2025-02-20',
-                'due_date' => '2025-03-20',
-                'dokumen_invoice' => 'invoice_fac_02.pdf',
-                'dokumen_kontrak' => 'kontrak_fac_02.pdf',
-                'dokumen_so' => 'so_fac_02.pdf',
-                'dokumen_bast' => 'bast_fac_02.pdf',
-            ],
-        ];
+        try {
+            $sumber_eksternal = \App\Models\MasterSumberPendanaanEksternal::orderBy('nama_instansi')->get()
+                ->map(fn($r) => ['id' => $r->id_instansi, 'nama' => $r->nama_instansi])->toArray();
+        } catch (\Throwable $e) {
+            $sumber_eksternal = [];
+        }
 
         return view('livewire.peminjaman.detail', compact(
             'peminjaman', 'sumber_eksternal', 'banks', 'tenor_pembayaran',
@@ -124,7 +118,7 @@ class PeminjamanController extends Controller
     {
         // Sample kontrak data
         $kontrak = [
-            'id_peminjaman' => $id,
+            'id_invoice_financing' => $id,
             'no_kontrak' => 'SKI/FIN/2025/001',
             'tanggal_kontrak' => '22 September 2025',
             'nama_perusahaan' => 'SYNNOVAC CAPITAL',
@@ -150,16 +144,16 @@ class PeminjamanController extends Controller
      */
     public function index()
     {
-        // copy sample data from Livewire\Peminjaman\PeminjamanIndex
-        $peminjaman_data = [
-            ['id' => 1, 'nama_perusahaan' => 'PT Maju Jaya', 'lampiran_sid' => 'sid_001.pdf', 'nilai_kol' => 'A'],
-            ['id' => 2, 'nama_perusahaan' => 'CV Sukses Makmur', 'lampiran_sid' => 'sid_002.pdf', 'nilai_kol' => 'B'],
-            ['id' => 3, 'nama_perusahaan' => 'PT Sejahtera Abadi', 'lampiran_sid' => 'sid_003.pdf', 'nilai_kol' => 'D'],
-            ['id' => 4, 'nama_perusahaan' => 'PT Teknologi Maju', 'lampiran_sid' => 'sid_004.pdf', 'nilai_kol' => 'A'],
-            ['id' => 5, 'nama_perusahaan' => 'CV Digital Solution', 'lampiran_sid' => 'sid_005.pdf', 'nilai_kol' => 'C'],
-            ['id' => 6, 'nama_perusahaan' => 'PT Pelabuhan Indonesia', 'lampiran_sid' => 'sid_006.pdf', 'nilai_kol' => 'A'],
-            ['id' => 7, 'nama_perusahaan' => 'PT Angkasa Pura', 'lampiran_sid' => 'sid_007.pdf', 'nilai_kol' => 'B'],
-        ];
+        $records = PeminjamanInvoiceFinancing::with(['debitur.kol'])->orderBy('created_at','desc')->get();
+        $peminjaman_data = $records->map(function($r) {
+            return [
+                'id' => $r->id_invoice_financing,
+                'nama_perusahaan' => $r->debitur->nama_debitur ?? '',
+                'lampiran_sid' => $r->lampiran_sid,
+                'nilai_kol' => $r->debitur->kol->kol ?? '',
+                'status' => $r->status ?? 'draft',
+            ];
+        })->toArray();
 
         return view('livewire.peminjaman.index', compact('peminjaman_data'));
     }
@@ -169,12 +163,14 @@ class PeminjamanController extends Controller
      */
     public function create()
     {
-        // copy data from Livewire\Peminjaman\PeminjamanCreate
-        $sumber_eksternal = [
-            ['id' => 1, 'nama' => 'Pemberi Dana A'],
-            ['id' => 2, 'nama' => 'Pemberi Dana B'],
-            ['id' => 3, 'nama' => 'Pemberi Dana C'],
-        ];
+        try {
+            $sumber_eksternal = \App\Models\MasterSumberPendanaanEksternal::orderBy('nama_instansi')->get()
+                ->map(function($row) {
+                    return ['id' => $row->id_instansi, 'nama' => $row->nama_instansi];
+                })->toArray();
+        } catch (\Throwable $e) {
+            $sumber_eksternal = [];
+        }
 
         $tenor_pembayaran = [
             ['value' => '3', 'label' => '3 Bulan'],
@@ -191,71 +187,43 @@ class PeminjamanController extends Controller
             ['value' => 'Investasi', 'label' => 'Investasi'],
         ];
 
-        // minimal sample invoice data arrays
-        $invoice_financing_data = [
-            [
-                'no_invoice' => 'INV-2025-001',
-                'nama_client' => 'PT Maju Jaya',
-                'nilai_invoice' => '15000000',
-                'nilai_pinjaman' => '12000000',
-                'nilai_bagi_hasil' => '300000',
-                'invoice_date' => '2025-01-15',
-                'due_date' => '2025-02-15',
-                'dokumen_invoice' => 'invoice_001.pdf',
-                'dokumen_kontrak' => 'kontrak_001.pdf',
-                'dokumen_so' => 'so_001.pdf',
-                'dokumen_bast' => 'bast_001.pdf',
-            ],
-        ];
+        $invoice_financing_data = [];
+        $po_financing_data = [];
+        $installment_data = [];
+        $factoring_data = [];
 
-        $po_financing_data = [
-            [
-                'no_invoice' => 'PO-2025-010',
-                'nama_client' => 'CV Sumber Niaga',
-                'nilai_invoice' => '8000000',
-                'nilai_pinjaman' => '7000000',
-                'nilai_bagi_hasil' => '200000',
-                'invoice_date' => '2025-03-10',
-                'due_date' => '2025-04-10',
-                'dokumen_kontrak' => 'kontrak_po_010.pdf',
-                'dokumen_so' => 'so_po_010.pdf',
-                'dokumen_bast' => 'bast_po_010.pdf',
-                'dokumen_lainnya' => 'lainnya_po_010.pdf',
-            ],
-        ];
+        // Try to read enum values for `nama_bank` from DB so we don't keep duplicate hardcoded lists.
+        // Fallback to a reasonable default if query fails or column isn't an enum.
+        try {
+            $banks = [];
+            $column = DB::selectOne("SHOW COLUMNS FROM peminjaman_invoice_financing LIKE 'nama_bank'");
+            if ($column && preg_match('/^enum\((.*)\)$/', $column->Type, $matches)) {
+                $vals = explode(',', $matches[1]);
+                foreach ($vals as $v) {
+                    $banks[] = trim($v, "' \t\n\r\0\x0B");
+                }
+            }
+            if (empty($banks)) {
+                $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+            }
+        } catch (\Throwable $e) {
+            $banks = ['BCA','BSI','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        }
 
-        $installment_data = [
-            [
-                'no_invoice' => 'INST-2025-05',
-                'nama_client' => 'PT Retailindo',
-                'nilai_invoice' => '2500000',
-                'invoice_date' => '2025-05-01',
-                'nama_barang' => 'Mesin Kasir',
-                'dokumen_invoice' => 'invoice_inst_05.pdf',
-                'dokumen_lainnya' => 'lainnya_inst_05.pdf',
-            ],
-        ];
-
-        $factoring_data = [
-            [
-                'no_invoice' => 'FAC-2025-02',
-                'nama_client' => 'PT Ekspor Jaya',
-                'nilai_invoice' => '50000000',
-                'nilai_pinjaman' => '45000000',
-                'nilai_bagi_hasil' => '1500000',
-                'invoice_date' => '2025-02-20',
-                'due_date' => '2025-03-20',
-                'dokumen_invoice' => 'invoice_fac_02.pdf',
-                'dokumen_kontrak' => 'kontrak_fac_02.pdf',
-                'dokumen_so' => 'so_fac_02.pdf',
-                'dokumen_bast' => 'bast_fac_02.pdf',
-            ],
-        ];
-
-        $banks = ['BCA','Mandiri','BNI','BRI','CIMB Niaga','Danamon','Permata Bank','OCBC NISP','UOB Indonesia','Panin Bank'];
+        $master = null;
+        try {
+            if (auth()->check()) {
+                $userEmail = auth()->user()->email;
+                $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)->with('kol')->first();
+            }
+        } catch (\Throwable $e) {
+            // In case auth or model lookup fails in some contexts (e.g. artisan tinker), we silently ignore
+            // and continue rendering the form without pre-fill.
+            $master = null;
+        }
 
         return view('livewire.peminjaman.create', compact(
-            'sumber_eksternal','tenor_pembayaran','kebutuhan_pinjaman','invoice_financing_data','po_financing_data','installment_data','factoring_data','banks'
+            'sumber_eksternal','tenor_pembayaran','kebutuhan_pinjaman','invoice_financing_data','po_financing_data','installment_data','factoring_data','banks','master'
         ));
     }
 }

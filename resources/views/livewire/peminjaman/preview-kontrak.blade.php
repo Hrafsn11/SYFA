@@ -5,7 +5,7 @@
         <div class="col-12">
             <!-- Button Kembali -->
             <div class="mb-3">
-                <a href="{{ route('peminjaman.detail', $kontrak['id_peminjaman']) }}" class="btn btn-outline-primary">
+                <a href="{{ route('peminjaman.detail', $kontrak['id_invoice_financing']) }}" class="btn btn-outline-primary">
                     <i class="ti ti-arrow-left me-2"></i>
                     Kembali
                 </a>
@@ -224,7 +224,7 @@
                     // Success message
                     console.log('PDF Generated!');
 
-                    // window.open('/peminjaman/{{ $kontrak['id_peminjaman'] }}/download-kontrak', '_blank');
+                    // window.open('/peminjaman/{{ $kontrak['id_invoice_financing'] }}/download-kontrak', '_blank');
                 }, 2000);
             });
         });

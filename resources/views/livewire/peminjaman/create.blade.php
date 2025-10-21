@@ -15,10 +15,10 @@
             <div class="card">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-lg mb-3">
+                            <div class="col-lg mb-3">
                             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                            <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
-                                value="Techno Infinity" required disabled>
+                                            <input type="text" class="form-control non-editable" id="nama_perusahaan" name="nama_perusahaan"
+                                                value="{{ old('nama_perusahaan', optional($master)->nama_debitur ?? 'Techno Infinity') }}" required readonly tabindex="-1">
                         </div>
                     </div>
                     <div class="card border-1 mb-3 shadow-none" id="cardSumberPembiayaan">
@@ -59,17 +59,17 @@
                             <div class="row mb-3">
                                 <div class="col-lg-3 col-sm-12 mb-3">
                                     <label for="selectBank" class="form-label">Nama Bank</label>
-                                    <select class="form-select" id="selectBank" name="nama_bank" required>
+                                    <select class="form-select non-editable select-non-editable" id="selectBank" name="nama_bank" required disabled aria-disabled="true" data-selected="{{ old('nama_bank', optional($master)->nama_bank) }}">
                                         <option value="">Pilih Bank</option>
                                         @foreach ($banks as $bank)
-                                            <option value="{{ $bank }}">{{ $bank }}</option>
+                                            <option value="{{ $bank }}" {{ (old('nama_bank', optional($master)->nama_bank) == $bank) ? 'selected' : '' }}>{{ $bank }} </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="no_rekening" class="form-label">No. Rekening</label>
-                                    <input type="text" class="form-control" id="no_rekening" name="no_rekening"
-                                        placeholder="Masukkan No. Rekening" required>
+                                    <input type="text" class="form-control non-editable" id="no_rekening" name="no_rekening"
+                                        value="{{ old('no_rekening', optional($master)->no_rek) }}" placeholder="Masukkan No. Rekening" required readonly tabindex="-1">
                                 </div>
                                 <div class="col-md-5 mb-3">
                                     <label for="nama_rekening" class="form-label">Nama Rekening</label>
@@ -87,12 +87,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nilai_kol" class="form-label">Nilai KOL</label>
-                                    <input type="text" class="form-control" id="nilai_kol" name="nilai_kol"
-                                        placeholder="Nilai KOL" disabled>
+                                    <input type="text" class="form-control non-editable" id="nilai_kol" name="nilai_kol"
+                                        value="{{ old('nilai_kol', optional($master->kol)->kol ?? '') }}" placeholder="Nilai KOL" readonly tabindex="-1">
                                 </div>
                                 <div class="">
                                     <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
-                                    <input type="text" class="form-control" id="defaultFormControlInput"
+                                    <input type="text" class="form-control" id="defaultFormControlInput" name="tujuan_pembiayaan"
                                         placeholder="Tujuan Pembiayaan" aria-describedby="defaultFormControlHelp" />
                                 </div>
                             </div>
@@ -166,8 +166,8 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
                                         <div class="input-group">
-                                            <input type="number" class="form-control" id="total_bagi_hasil"
-                                                name="total_bagi_hasil" placeholder="2% (Rp. 180.000)" disabled>
+                                            <input type="text" class="form-control input-rupiah non-editable" id="total_bagi_hasil"
+                                                        name="total_bagi_hasil" placeholder="2%" readonly tabindex="-1">
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -184,8 +184,8 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="pembayaran_total"
-                                                name="pembayaran_total" placeholder="Rp. 9.180.000" disabled>
+                                            <input type="text" class="form-control input-rupiah non-editable" id="pembayaran_total"
+                                                name="pembayaran_total" placeholder="" readonly tabindex="-1">
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -295,6 +295,26 @@
             // Initialize Cleave.js untuk format rupiah
             initCleaveRupiah();
 
+            const totalPinjamanEl = document.getElementById('total_pinjaman');
+            const totalBagiHasilEl = document.getElementById('total_bagi_hasil');
+            const pembayaranTotalEl = document.getElementById('pembayaran_total');
+
+            function recalcBagiHasil() {
+                if (!totalPinjamanEl) return;
+                const raw = window.getCleaveRawValue(totalPinjamanEl);
+                const bagi = Math.round(raw * 0.02); // 2%
+                const pembayaran = raw + bagi;
+                window.setCleaveValue(totalBagiHasilEl, 'Rp ' + bagi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaran.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+            }
+
+            if (totalPinjamanEl) {
+                totalPinjamanEl.addEventListener('input', function() {
+                    clearTimeout(totalPinjamanEl._calcTimeout);
+                    totalPinjamanEl._calcTimeout = setTimeout(recalcBagiHasil, 150);
+                });
+            }
+
             // Handle Sumber Pembiayaan Radio
             $('.sumber-pembiayaan-radio').on('change', function() {
                 if ($(this).val() === 'Eksternal') {
@@ -318,6 +338,228 @@
             // Handle Simpan Invoice Button
             $('#btnSimpanInvoice').on('click', function() {
                 saveInvoiceData();
+            });
+        });
+
+        let editInvoiceIndex = -1;
+
+        function saveInvoiceData() {
+            const index = editInvoiceIndex >= 0 ? editInvoiceIndex : invoiceFinancingData.length;
+            const no_invoice = $('#modal_no_invoice').val();
+            const nama_client = $('#modal_nama_client').val();
+            const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice')) || 0;
+            const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman')) || 0;
+            const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math.round(nilai_pinjaman * 0.02);
+            let invoice_date = $('#modal_invoice_date').val();
+            let due_date = $('#modal_due_date').val();
+
+            invoice_date = convertDMYToISO(invoice_date);
+            due_date = convertDMYToISO(due_date);
+
+            const dokumen_invoice_file = document.getElementById('modal_dokumen_invoice').files[0] || null;
+            const dokumen_kontrak_file = document.getElementById('modal_dokumen_kontrak').files[0] || null;
+            const dokumen_so_file = document.getElementById('modal_dokumen_so').files[0] || null;
+            const dokumen_bast_file = document.getElementById('modal_dokumen_bast').files[0] || null;
+
+            // Basic validation
+            if (!no_invoice || nilai_pinjaman <= 0) {
+                alert('No. Invoice dan Nilai Pinjaman wajib diisi dan > 0');
+                return;
+            }
+
+            const payload = {
+                no_invoice: no_invoice,
+                nama_client: nama_client,
+                nilai_invoice: parseFloat(nilai_invoice),
+                nilai_pinjaman: parseFloat(nilai_pinjaman),
+                nilai_bagi_hasil: parseFloat(nilai_bagi_hasil),
+                invoice_date: invoice_date,
+                due_date: due_date,
+                dokumen_invoice_file: dokumen_invoice_file,
+                dokumen_kontrak_file: dokumen_kontrak_file,
+                dokumen_so_file: dokumen_so_file,
+                dokumen_bast_file: dokumen_bast_file,
+            };
+
+            if (editInvoiceIndex >= 0) {
+                // update existing
+                invoiceFinancingData[editInvoiceIndex] = payload;
+                editInvoiceIndex = -1;
+            } else {
+                invoiceFinancingData.push(payload);
+            }
+
+            modalInstance.hide();
+            renderInvoiceTables();
+        }
+
+        function renderInvoiceTables() {
+            // Render Invoice Financing Table tbody
+            const tbody = $('#invoiceFinancingTable tbody');
+            tbody.empty();
+            invoiceFinancingData.forEach(function(inv, idx) {
+                const row = `<tr>
+                    <td>${idx+1}</td>
+                    <td>${inv.no_invoice}</td>
+                    <td>${inv.nama_client || ''}</td>
+                    <td>Rp. ${numberWithThousandSeparator(inv.nilai_invoice || 0)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(inv.nilai_pinjaman || 0)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(inv.nilai_bagi_hasil || 0)}</td>
+                    <td>${inv.invoice_date || ''}</td>
+                    <td>${inv.due_date || ''}</td>
+                    <td>${inv.dokumen_invoice_file ? inv.dokumen_invoice_file.name : ''}</td>
+                    <td>${inv.dokumen_kontrak_file ? inv.dokumen_kontrak_file.name : ''}</td>
+                    <td>${inv.dokumen_so_file ? inv.dokumen_so_file.name : ''}</td>
+                    <td>${inv.dokumen_bast_file ? inv.dokumen_bast_file.name : ''}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-outline-primary btn-edit-invoice" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="#" class="btn btn-sm btn-danger btn-remove-invoice" data-idx="${idx}">Hapus</a>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            // handle remove
+            $('.btn-remove-invoice').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                invoiceFinancingData.splice(idx, 1);
+                renderInvoiceTables();
+            });
+
+            // handle edit
+            $('.btn-edit-invoice').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                const inv = invoiceFinancingData[idx];
+                if (!inv) return;
+
+                $('#modal_no_invoice').val(inv.no_invoice);
+                $('#modal_nama_client').val(inv.nama_client);
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice'), 'Rp ' + numberWithThousandSeparator(inv.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman'), 'Rp ' + numberWithThousandSeparator(inv.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil'), 'Rp ' + numberWithThousandSeparator(inv.nilai_bagi_hasil || 0));
+                $('#modal_invoice_date').val(inv.invoice_date || '');
+                $('#modal_due_date').val(inv.due_date || '');
+
+                // Note: file inputs cannot be pre-filled for security reasons. Inform the user to re-upload if necessary.
+                $('#modal_dokumen_invoice').val('');
+                $('#modal_dokumen_kontrak').val('');
+                $('#modal_dokumen_so').val('');
+                $('#modal_dokumen_bast').val('');
+
+                editInvoiceIndex = idx;
+                modalInstance.show();
+            });
+
+        }
+
+        function numberWithThousandSeparator(x) {
+            if (!x && x !== 0) return '';
+            return parseFloat(x).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        $('#formPeminjaman').on('submit', function(e) {
+            e.preventDefault();
+            if (invoiceFinancingData.length === 0) {
+                if (!confirm('Anda belum menambahkan invoice, lanjutkan menyimpan?')) return;
+            }
+
+            const form = document.getElementById('formPeminjaman');
+            const fd = new FormData(form);
+
+            // Append master id (if available)
+            const masterId = '{{ optional($master)->id_debitur ?? '' }}';
+            if (masterId) fd.set('id_debitur', masterId);
+
+            // Normalize and append header date fields (convert to ISO)
+            const tanggalPencairanRaw = $('#flatpickr-tanggal-pencairan').val();
+            const tanggalPencairanISO = convertDMYToISO(tanggalPencairanRaw);
+            if (tanggalPencairanISO) fd.set('harapan_tanggal_pencairan', tanggalPencairanISO);
+
+            const tanggalPembayaranRaw = $('#flatpickr-tanggal-pembayaran').val();
+            const tanggalPembayaranISO = convertDMYToISO(tanggalPembayaranRaw);
+            if (tanggalPembayaranISO) fd.set('rencana_tgl_pembayaran', tanggalPembayaranISO);
+
+            // include derived readonly totals if present
+            const totalBagi = window.getCleaveRawValue(document.getElementById('total_bagi_hasil')) || 0;
+            const pembayaranTotalRaw = window.getCleaveRawValue(document.getElementById('pembayaran_total')) || 0;
+            fd.set('total_bagi_hasil', totalBagi);
+            fd.set('pembayaran_total', pembayaranTotalRaw);
+
+            // Disabled inputs aren't submitted by forms; include some explicitly
+            const selectedBank = $('#selectBank').val();
+            console.log('DEBUG selectedBank:', selectedBank);
+            if (selectedBank) fd.set('nama_bank', selectedBank);
+            const noRek = $('#no_rekening').val();
+            if (noRek) fd.set('no_rekening', noRek);
+            const nilaiKol = $('#nilai_kol').val();
+            if (nilaiKol) fd.set('nilai_kol', nilaiKol);
+            const namaPerusahaan = $('#nama_perusahaan').val();
+            if (namaPerusahaan) fd.set('nama_perusahaan', namaPerusahaan);
+
+            // Ensure lampiran SID file is appended (FormData(form) should include it but be defensive)
+            const lampiranEl = document.getElementById('lampiran_sid');
+            if (lampiranEl && lampiranEl.files && lampiranEl.files[0]) {
+                fd.append('lampiran_sid', lampiranEl.files[0]);
+            }
+
+            // Ensure sumber pembiayaan eksternal selection is included (select2 may wrap it)
+            const sumberEksternalVal = $('#select2Basic').val();
+            if (sumberEksternalVal) fd.set('sumber_eksternal_id', sumberEksternalVal);
+
+            // normalize sumber pembiayaan value to lowercase
+            const sumberVal = $('input[name="sumber_pembiayaan"]:checked').val();
+            if (sumberVal) fd.set('sumber_pembiayaan', sumberVal.toLowerCase());
+
+            // Append invoices JSON
+            fd.set('invoices', JSON.stringify(invoiceFinancingData.map(i => ({
+                no_invoice: i.no_invoice,
+                nama_client: i.nama_client,
+                nilai_invoice: i.nilai_invoice,
+                nilai_pinjaman: i.nilai_pinjaman,
+                nilai_bagi_hasil: i.nilai_bagi_hasil,
+                invoice_date: i.invoice_date,
+                due_date: i.due_date
+            }))));
+
+            // Append files
+            invoiceFinancingData.forEach(function(inv, idx) {
+                if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv.dokumen_invoice_file);
+                if (inv.dokumen_kontrak_file) fd.append(`files[${idx}][dokumen_kontrak]`, inv.dokumen_kontrak_file);
+                if (inv.dokumen_so_file) fd.append(`files[${idx}][dokumen_so]`, inv.dokumen_so_file);
+                if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv.dokumen_bast_file);
+            });
+
+            // send via AJAX
+            $.ajax({
+                url: '{{ route('peminjaman.invoice.store') }}',
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                headers: { 'X-CSRF-TOKEN': $('input[name="_token"]').val() },
+                beforeSend: function() {
+                    // optional: show loader
+                },
+                success: function(resp) {
+                    if (resp.success) {
+                        alert('Peminjaman berhasil disimpan');
+                        // redirect to detail
+                        if (resp.data && resp.data.id_invoice_financing) {
+                            window.location.href = '/peminjaman/' + resp.data.id_invoice_financing;
+                        } else {
+                            window.location.href = '/peminjaman';
+                        }
+                    } else {
+                        alert('Gagal: ' + (resp.message || 'Unknown error'));
+                    }
+                },
+                error: function(xhr) {
+                    let msg = 'Terjadi kesalahan';
+                    if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                    alert(msg);
+                }
             });
         });
 
@@ -398,7 +640,7 @@
         // Menggunakan pola Vuexy untuk Select2
         function initSelect2Elements() {
             const select2Elements = $('.form-select');
-            if (select2Elements.length) {
+                    if (select2Elements.length) {
                 select2Elements.each(function() {
                     var $this = $(this);
                     $this.wrap('<div class="position-relative"></div>').select2({
@@ -406,6 +648,20 @@
                         dropdownParent: $this.closest('.modal').length ? $this.closest('.modal') : $this
                             .parent()
                     });
+
+                    // If server passed a preselected value, apply it so Select2 renders it
+                    const preselected = $this.data('selected');
+                    if (preselected) {
+                        $this.val(preselected).trigger('change.select2');
+                    }
+
+                    if ($this.hasClass('select-non-editable')) {
+                        $this.prop('disabled', true);
+                        const container = $this.next('.select2-container');
+                        if (container && container.length) {
+                            container.css('pointer-events', 'none').css('opacity', 0.6);
+                        }
+                    }
                 });
             }
         }
@@ -477,5 +733,28 @@
                 });
             }
         }
+
+        function convertDMYToISO(dmy) {
+            if (!dmy) return null;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dmy)) return dmy;
+            const parts = dmy.split('/');
+            if (parts.length === 3) {
+                const d = parts[0].padStart(2, '0');
+                const m = parts[1].padStart(2, '0');
+                const y = parts[2];
+                return `${y}-${m}-${d}`;
+            }
+            return dmy;
+        }
+
+        (function() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .non-editable[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+                .select-non-editable[disabled] + .select2-container { pointer-events: none; opacity: 0.6; }
+            `;
+            document.head.appendChild(style);
+
+        })();
     </script>
 @endpush

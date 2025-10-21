@@ -26,37 +26,44 @@
                                         </thead>
                                         <tbody class="table-border-bottom-0">
                                             <!-- Data will be populated by JavaScript -->
-                                            @foreach ($invoice_financing_data as $index => $invoice)
-                                                <tr>
-                                                    <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $invoice['no_invoice'] }}</td>
-                                                    <td>{{ $invoice['nama_client'] }}</td>
-                                                    <td>Rp.
-                                                        {{ number_format((int) $invoice['nilai_invoice'], 0, ',', '.') }}
-                                                    </td>
-                                                    <td>Rp.
-                                                        {{ number_format((int) $invoice['nilai_pinjaman'], 0, ',', '.') }}
-                                                    </td>
-                                                    <td>Rp.
-                                                        {{ number_format((int) $invoice['nilai_bagi_hasil'], 0, ',', '.') }}
-                                                    </td>
-                                                    <td>{{ \Carbon\Carbon::parse($invoice['invoice_date'])->format('d F Y') }}
-                                                    </td>
-                                                    <td>{{ \Carbon\Carbon::parse($invoice['due_date'])->format('d F Y') }}
-                                                    </td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $invoice['dokumen_invoice'] }}</a>
-                                                    </td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $invoice['dokumen_kontrak'] }}</a>
-                                                    </td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $invoice['dokumen_so'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $invoice['dokumen_bast'] }}</a></td>
-                                                    <td><a href="#"><i class="fas fa-edit"></i></a></td>
-                                                </tr>
-                                            @endforeach
+                                            @if(!empty($invoice_financing_data) && count($invoice_financing_data) > 0)
+                                                @foreach ($invoice_financing_data as $index => $invoice)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{ $invoice['no_invoice'] }}</td>
+                                                        <td>{{ $invoice['nama_client'] }}</td>
+                                                        <td>Rp.
+                                                            {{ number_format((int) $invoice['nilai_invoice'], 0, ',', '.') }}
+                                                        </td>
+                                                        <td>Rp.
+                                                            {{ number_format((int) $invoice['nilai_pinjaman'], 0, ',', '.') }}
+                                                        </td>
+                                                        <td>Rp.
+                                                            {{ number_format((int) $invoice['nilai_bagi_hasil'], 0, ',', '.') }}
+                                                        </td>
+                                                        <td>{{ \Carbon\Carbon::parse($invoice['invoice_date'])->format('d F Y') }}
+                                                        </td>
+                                                        <td>{{ \Carbon\Carbon::parse($invoice['due_date'])->format('d F Y') }}
+                                                        </td>
+                                                        <td><a href="#"
+                                                                class="text-primary">{{ $invoice['dokumen_invoice'] }}</a>
+                                                        </td>
+                                                        <td><a href="#"
+                                                                class="text-primary">{{ $invoice['dokumen_kontrak'] }}</a>
+                                                        </td>
+                                                        <td><a href="#"
+                                                                class="text-primary">{{ $invoice['dokumen_so'] }}</a></td>
+                                                        <td><a href="#"
+                                                                class="text-primary">{{ $invoice['dokumen_bast'] }}</a></td>
+                                                        <td>
+                                                            <a href="#" class="btn btn-sm btn-outline-primary btn-edit-invoice" data-idx="{{ $index }}" title="Edit"><i class="fas fa-edit"></i></a>
+                                                            <a href="#" class="btn btn-sm btn-outline-danger btn-remove-invoice" data-idx="{{ $index }}" title="Hapus">Hapus</a>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <!-- empty body: JS will render rows when user adds invoices -->
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>
