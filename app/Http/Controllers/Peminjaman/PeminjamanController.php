@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Peminjaman;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PeminjamanInvoiceFinancing;
+use App\Models\PeminjamanInstallmentFinancing;
 use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,6 @@ class PeminjamanController extends Controller
     {
         $requestedType = $request->query('type');
 
-        // If caller specified a type explicitly, respect it (helps disambiguate identical numeric ids across tables)
         if ($requestedType === 'invoice') {
             $headerInvoice = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
             if (!$headerInvoice) abort(404);
@@ -31,6 +31,11 @@ class PeminjamanController extends Controller
             if (!$headerPO) abort(404);
             $headerType = 'po';
             $header = $headerPO;
+        } elseif ($requestedType === 'installment') {
+            $headerInst = PeminjamanInstallmentFinancing::with(['debitur.kol','details'])->find($id);
+            if (!$headerInst) abort(404);
+            $headerType = 'installment';
+            $header = $headerInst;
         } else {
             // Backward compatible fallback: try invoice first then PO
             $headerInvoice = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
@@ -95,22 +100,22 @@ class PeminjamanController extends Controller
 
         if ($headerType === 'invoice') {
             $invoice_financing_data = $header->invoices->map(function($inv) {
-            return [
-                'no_invoice' => $inv->no_invoice,
-                'nama_client' => $inv->nama_client,
-                'nilai_invoice' => $inv->nilai_invoice,
-                'nilai_pinjaman' => $inv->nilai_pinjaman,
-                'nilai_bagi_hasil' => $inv->nilai_bagi_hasil,
-                'invoice_date' => $inv->invoice_date,
-                'due_date' => $inv->due_date,
-                'dokumen_invoice' => $inv->dokumen_invoice,
-                'dokumen_kontrak' => $inv->dokumen_kontrak,
-                'dokumen_so' => $inv->dokumen_so,
-                'dokumen_bast' => $inv->dokumen_bast,
-            ];
+                return [
+                    'no_invoice' => $inv->no_invoice,
+                    'nama_client' => $inv->nama_client,
+                    'nilai_invoice' => $inv->nilai_invoice,
+                    'nilai_pinjaman' => $inv->nilai_pinjaman,
+                    'nilai_bagi_hasil' => $inv->nilai_bagi_hasil,
+                    'invoice_date' => $inv->invoice_date,
+                    'due_date' => $inv->due_date,
+                    'dokumen_invoice' => $inv->dokumen_invoice,
+                    'dokumen_kontrak' => $inv->dokumen_kontrak,
+                    'dokumen_so' => $inv->dokumen_so,
+                    'dokumen_bast' => $inv->dokumen_bast,
+                ];
             })->toArray();
-        } else {
-            // Map PO details
+        } elseif ($headerType === 'po') {
+            // Map PO details only when header explicitly a PO
             $po_financing_data = $header->details->map(function($d) {
                 return [
                     'no_kontrak' => $d->no_kontrak,
@@ -129,6 +134,38 @@ class PeminjamanController extends Controller
         }
 
         $installment_data = [];
+        // If header is installment, map header and installment_data accordingly
+        if ($headerType === 'installment') {
+            $peminjaman = [
+                'id' => $header->id_installment,
+                'nama_perusahaan' => $header->debitur?->nama_debitur ?? '',
+                'nama_bank' => $header->nama_bank,
+                'no_rekening' => $header->no_rekening,
+                'lampiran_sid' => $header->lampiran_sid ?? null,
+                'nilai_kol' => $header->debitur?->kol->kol ?? '',
+                'nominal_pinjaman' => $header->total_pinjaman,
+                'tenor_pembayaran' => $header->tenor_pembayaran ?? null,
+                'total_bagi_hasil' => $header->persentase_bagi_hasil ?? null,
+                'pps' => $header->pps ?? null,
+                'sfinance' => $header->sfinance ?? null,
+                'pembayaran_total' => $header->total_pembayaran ?? null,
+                'yang_harus_dibayarkan' => $header->yang_harus_dibayarkan ?? null,
+                'persentase_bagi_hasil' => $header->persentase_bagi_hasil ?? null,
+                'jenis_pembiayaan' => 'Installment',
+            ];
+
+            $installment_data = $header->details->map(function($d) {
+                return [
+                    'no_invoice' => $d->no_invoice,
+                    'nama_client' => $d->nama_client,
+                    'nilai_invoice' => $d->nilai_invoice,
+                    'invoice_date' => $d->invoice_date,
+                    'nama_barang' => $d->nama_barang,
+                    'dokumen_invoice' => $d->dokumen_invoice,
+                    'dokumen_lainnya' => $d->dokumen_lainnya,
+                ];
+            })->toArray();
+        }
         $factoring_data = [];
 
         // Try to read enum values for `nama_bank` from DB so we don't keep duplicate hardcoded lists.
@@ -208,6 +245,7 @@ class PeminjamanController extends Controller
     {
         $invoiceRecords = PeminjamanInvoiceFinancing::with(['debitur.kol'])->get();
         $poRecords = \App\Models\PeminjamanPoFinancing::with(['debitur.kol'])->get();
+        $installmentRecords = PeminjamanInstallmentFinancing::with(['debitur.kol'])->get();
 
         $invoiceData = $invoiceRecords->map(function($r) {
             return [
@@ -231,7 +269,18 @@ class PeminjamanController extends Controller
             ];
         })->toArray();
 
-        $peminjaman_data = array_merge($invoiceData, $poData);
+        $installmentData = $installmentRecords->map(function($r) {
+            return [
+                'id' => $r->id_installment,
+                'type' => 'installment',
+                'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
+                'lampiran_sid' => $r->lampiran_sid ?? null,
+                'nilai_kol' => $r->debitur?->kol->kol ?? '',
+                'status' => $r->status ?? 'draft',
+            ];
+        })->toArray();
+
+    $peminjaman_data = array_merge($invoiceData, $poData, $installmentData);
 
         return view('livewire.peminjaman.index', compact('peminjaman_data'));
     }

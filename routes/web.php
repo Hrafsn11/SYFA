@@ -11,6 +11,7 @@ use App\Livewire\Peminjaman\PeminjamanIndex;
 use App\Livewire\Peminjaman\PeminjamanCreate;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
+use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
 use App\Http\Controllers\PengembalianPinjamanController;
 
 /*
@@ -43,15 +44,14 @@ Route::middleware([
     Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::post('peminjaman/invoice', [PeminjamanInvoiceController::class, 'store'])->name('peminjaman.invoice.store');
-    // PO Financing store route
+    Route::post('peminjaman/installment', [PeminjamanInstallmentFinancingController::class, 'store'])->name('peminjaman.installment.store');
     Route::post('peminjaman/po', [\App\Http\Controllers\Peminjaman\PeminjamanPoFinancingController::class, 'store'])->name('peminjaman.po.store');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
 
 
-    // Detail route for a specific peminjaman record
-    // Config Matrix Pinjaman - blade-based CRUD controller
+  
     Route::get('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'index'])->name('matrixpinjaman');
     Route::post('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'store']);
     Route::get('config-matrix-pinjaman/{id}/edit', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'edit']);

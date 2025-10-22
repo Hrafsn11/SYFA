@@ -123,7 +123,7 @@ class PeminjamanPoFinancingController extends Controller
             'sumber_pembiayaan' => 'required|string',
             'details' => 'required|array|min:1',
         ]);
-        \DB::beginTransaction();
+    DB::beginTransaction();
         try {
             if ($request->hasFile('lampiran_sid')) {
                 $lampiranSidPath = $request->file('lampiran_sid')->store('lampiran_sid', 'public');

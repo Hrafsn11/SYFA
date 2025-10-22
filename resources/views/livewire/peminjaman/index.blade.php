@@ -93,11 +93,12 @@
                                                 <div class="d-flex justify-center align-items-center gap-2">
                                                     @php
                                                         $detailRouteParams = ['id' => $item['id'] ?? $index + 1];
-                                                        if (!empty($item['type'])) {
-                                                            // pass as query param
-                                                            $detailUrl = route('peminjaman.detail', $detailRouteParams) . '?type=' . $item['type'];
-                                                        } else {
-                                                            $detailUrl = route('peminjaman.detail', $detailRouteParams);
+                                                        // Ensure a type is always passed when available from controller mapping.
+                                                        $type = $item['type'] ?? null;
+                                                        $detailUrl = route('peminjaman.detail', $detailRouteParams);
+                                                        if ($type) {
+                                                            // append as query param (keeps backward compatible route)
+                                                            $detailUrl .= '?type=' . $type;
                                                         }
                                                     @endphp
                                                     <a class="btn btn-sm btn-icon btn-text-info rounded-pill waves-effect"
