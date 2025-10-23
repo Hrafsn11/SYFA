@@ -604,6 +604,54 @@
                 modalInstance.hide();
                 renderInstallmentTable();
             }
+            else if (currentJenisPembiayaan === 'Factoring') {
+                const index = editInvoiceIndex >= 0 ? editInvoiceIndex : factoringData.length;
+                const no_kontrak = $('#modal_no_kontrak_fact').val();
+                const nama_client = $('#modal_nama_client_fact').val();
+                const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_fact')) || 0;
+                const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman_fact')) || 0;
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_fact')) || Math.round(nilai_pinjaman * 0.02);
+                let contract_date = $('#modal_contract_date_fact').val();
+                let due_date = $('#modal_due_date_fact').val();
+
+                contract_date = convertDMYToISO(contract_date);
+                due_date = convertDMYToISO(due_date);
+
+                const dokumen_invoice_file = document.getElementById('modal_dokumen_invoice_fact').files[0] || null;
+                const dokumen_kontrak_file = document.getElementById('modal_dokumen_kontrak_fact').files[0] || null;
+                const dokumen_so_file = document.getElementById('modal_dokumen_so_fact').files[0] || null;
+                const dokumen_bast_file = document.getElementById('modal_dokumen_bast_fact').files[0] || null;
+
+                // Basic validation
+                if (!no_kontrak || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
+                    alert('No. Kontrak dan Nilai Invoice wajib diisi dan > 0');
+                    return;
+                }
+
+                const payload = {
+                    no_kontrak: no_kontrak,
+                    nama_client: nama_client,
+                    nilai_invoice: parseFloat(nilai_invoice),
+                    nilai_pinjaman: parseFloat(nilai_pinjaman),
+                    nilai_bagi_hasil: parseFloat(nilai_bagi_hasil),
+                    contract_date: contract_date,
+                    due_date: due_date,
+                    dokumen_invoice_file: dokumen_invoice_file,
+                    dokumen_kontrak_file: dokumen_kontrak_file,
+                    dokumen_so_file: dokumen_so_file,
+                    dokumen_bast_file: dokumen_bast_file,
+                };
+
+                if (editInvoiceIndex >= 0) {
+                    factoringData[editInvoiceIndex] = payload;
+                    editInvoiceIndex = -1;
+                } else {
+                    factoringData.push(payload);
+                }
+
+                modalInstance.hide();
+                renderFactoringTable();
+            }
         }
         function renderPOFinancingTable() {
             const tbody = $('#poFinancingTable tbody');
@@ -716,6 +764,65 @@
                 // File inputs cannot be pre-filled
                 $('#modal_dokumen_invoice_inst').val('');
                 $('#modal_dokumen_lainnya_inst').val('');
+
+                editInvoiceIndex = idx;
+                modalInstance.show();
+            });
+        }
+
+        function renderFactoringTable() {
+            const tbody = $('#factoringTable tbody');
+            tbody.empty();
+            factoringData.forEach(function(f, idx) {
+                const row = `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${f.no_kontrak}</td>
+                    <td>${f.nama_client || ''}</td>
+                    <td>Rp. ${numberWithThousandSeparator(f.nilai_invoice || 0)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(f.nilai_pinjaman || 0)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(f.nilai_bagi_hasil || 0)}</td>
+                    <td>${f.contract_date || ''}</td>
+                    <td>${f.due_date || ''}</td>
+                    <td>${f.dokumen_invoice_file ? f.dokumen_invoice_file.name : ''}</td>
+                    <td>${f.dokumen_kontrak_file ? f.dokumen_kontrak_file.name : ''}</td>
+                    <td>${f.dokumen_so_file ? f.dokumen_so_file.name : ''}</td>
+                    <td>${f.dokumen_bast_file ? f.dokumen_bast_file.name : ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning btn-edit-factoring" data-idx="${idx}">Edit</button>
+                        <button class="btn btn-sm btn-danger btn-remove-factoring" data-idx="${idx}">Hapus</button>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            // handle remove
+            $('.btn-remove-factoring').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                factoringData.splice(idx, 1);
+                renderFactoringTable();
+            });
+
+            // handle edit
+            $('.btn-edit-factoring').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                const f = factoringData[idx];
+                if (!f) return;
+
+                $('#modal_no_kontrak_fact').val(f.no_kontrak);
+                $('#modal_nama_client_fact').val(f.nama_client);
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_bagi_hasil || 0));
+                $('#modal_contract_date_fact').val(f.contract_date || '');
+                $('#modal_due_date_fact').val(f.due_date || '');
+
+                // reset file inputs
+                $('#modal_dokumen_invoice_fact').val('');
+                $('#modal_dokumen_kontrak_fact').val('');
+                $('#modal_dokumen_so_fact').val('');
+                $('#modal_dokumen_bast_fact').val('');
 
                 editInvoiceIndex = idx;
                 modalInstance.show();
@@ -888,6 +995,36 @@
                 postUrl = '{{ route('peminjaman.po.store') }}';
             }
 
+            // Factoring append
+            if (currentJenisPembiayaan === 'Factoring') {
+                factoringData.forEach(function(f, idx) {
+                    fd.append(`details[${idx}][no_kontrak]`, f.no_kontrak || '');
+                    fd.append(`details[${idx}][nama_client]`, f.nama_client || '');
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(f.nilai_invoice || 0));
+                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(f.nilai_pinjaman || 0));
+                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(f.nilai_bagi_hasil || 0));
+                    fd.append(`details[${idx}][kontrak_date]`, f.contract_date || '');
+                    fd.append(`details[${idx}][due_date]`, f.due_date || '');
+
+                    if (f.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, f.dokumen_invoice_file);
+                    if (f.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, f.dokumen_kontrak_file);
+                    if (f.dokumen_so_file) fd.append(`details[${idx}][dokumen_so]`, f.dokumen_so_file);
+                    if (f.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, f.dokumen_bast_file);
+                });
+
+                // compute header totals if not provided
+                let sumInvoice = 0;
+                factoringData.forEach(function(f) { sumInvoice += Number(normalizeNumericForServer(f.nilai_invoice || 0) || 0); });
+                fd.set('total_nominal_yang_dialihkan', normalizeNumericForServer(sumInvoice));
+                // compute total_bagi_hasil as 2% fallback
+                const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
+                fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
+                fd.set('pembayaran_total', normalizeNumericForServer(sumInvoice + bagi));
+                if (!fd.get('status') || fd.get('status') === '') fd.set('status', 'submitted');
+
+                postUrl = '{{ route('peminjaman.factoring.store') }}';
+            }
+
             // Installment append
             if (currentJenisPembiayaan === 'Installment') {
                 installmentData.forEach(function(it, idx) {
@@ -983,7 +1120,8 @@
                             const mapType = {
                                 'Invoice Financing': 'invoice',
                                 'PO Financing': 'po',
-                                'Installment': 'installment'
+                                'Installment': 'installment',
+                                'Factoring': 'factoring'
                             };
 
                             let targetId = null;
