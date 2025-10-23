@@ -242,7 +242,7 @@
                                         <label for="bayar_per_bulan" class="form-label">Yang harus dibayarkan</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control bg-light" id="bayar_per_bulan"
-                                                value="Rp. 3.180.000" disabled>
+                                             disabled>
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -314,6 +314,131 @@
                     totalPinjamanEl._calcTimeout = setTimeout(recalcBagiHasil, 150);
                 });
             }
+
+            // Installment live calculation
+            const nominalPinjamanEl = document.getElementById('nominal_pinjaman');
+            const tenorEl = document.getElementById('tenorPembayaran');
+
+            // If Select2 is used, bind its change event explicitly so recalcInstallment runs
+            try {
+                // use jQuery in case select2 wraps the select
+                $('#tenorPembayaran').on('change.select2', function() {
+                    try { recalcInstallment(); } catch(e) { console.error(e); }
+                });
+            } catch (e) {
+                // ignore if jQuery/select2 not available
+            }
+
+            function formatCurrency(value) {
+                if (value === null || value === undefined || value === '') return '';
+                return 'Rp. ' + numberWithThousandSeparator(Number(value).toFixed(0));
+            }
+
+            function recalcInstallment() {
+                try {
+                    const raw = window.getCleaveRawValue(nominalPinjamanEl) || 0;
+                    const totalPinjamanVal = Number(raw);
+                    // default tenor to 3 months if user hasn't chosen one yet
+                    const tenorVal = tenorEl ? (parseInt(tenorEl.value) || 3) : 3;
+
+                    // Business rules fixed: bagi hasil 10%
+                    const bagiPercent = 10.0;
+                    const totalBagi = Math.round((totalPinjamanVal * (bagiPercent / 100)) * 100) / 100;
+                    const ppsAmount = Math.round(totalBagi * 0.40 * 100) / 100;
+                    const sfinanceAmount = Math.round(totalBagi * 0.60 * 100) / 100;
+                    const totalPembayaranVal = Math.round((totalPinjamanVal + totalBagi) * 100) / 100;
+                    const monthlyPay = tenorVal > 0 ? Math.round((totalPembayaranVal / tenorVal) * 100) / 100 : totalPembayaranVal;
+
+                    // Update UI display fields (they are disabled inputs)
+                    const elPpsDebit = document.getElementById('pps_debit');
+                    const elPpsPercentage = document.getElementById('pps_percentage');
+                    const elSFinance = document.getElementById('s_finance');
+                    const elTotalPembayaran = document.getElementById('total_pembayaran_installment');
+                    const elBayarPerBulan = document.getElementById('bayar_per_bulan');
+
+                    if (elPpsDebit) elPpsDebit.value = `${bagiPercent}% (Rp. ${numberWithThousandSeparator(totalBagi)})`;
+                    if (elPpsPercentage) elPpsPercentage.value = `40% (Rp. ${numberWithThousandSeparator(ppsAmount)})`;
+                    if (elSFinance) elSFinance.value = `60% (Rp. ${numberWithThousandSeparator(sfinanceAmount)})`;
+                    if (elTotalPembayaran) elTotalPembayaran.value = formatCurrency(totalPembayaranVal);
+                    if (elBayarPerBulan) elBayarPerBulan.value = formatCurrency(monthlyPay);
+
+                    // store computed values on element for submit use
+                    nominalPinjamanEl._computed = {
+                        totalPinjaman: totalPinjamanVal,
+                        tenor: tenorVal,
+                        persentase_bagi_hasil: bagiPercent,
+                        pps: ppsAmount,
+                        sfinance: sfinanceAmount,
+                        total_pembayaran: totalPembayaranVal,
+                        yang_harus_dibayarkan: monthlyPay
+                    };
+                } catch (err) {
+                    console.error('recalcInstallment error', err);
+                }
+            }
+
+                // Update nominal_pinjaman from installmentData (sum nilai_invoice) and recalc
+                function updateNominalFromDetails() {
+                    try {
+                        if (!nominalPinjamanEl) return;
+                        let sum = 0;
+                        installmentData.forEach(function(it) {
+                            const v = Number(normalizeNumericForServer(it.nilai_invoice || 0)) || 0;
+                            sum += v;
+                        });
+                        if (typeof window.setCleaveValue === 'function') {
+                            window.setCleaveValue(nominalPinjamanEl, 'Rp ' + numberWithThousandSeparator(sum));
+                        } else {
+                            nominalPinjamanEl.value = sum;
+                        }
+                        // ensure tenor defaults to 3 if not set and force recalc so UI updates
+                        try {
+                            if (tenorEl) {
+                                // set via jQuery so Select2 UI updates and triggers change
+                                try {
+                                    $(tenorEl).val('3').trigger('change');
+                                } catch (_) {
+                                    tenorEl.value = '3';
+                                }
+                            }
+                        } catch (e) {
+                            // ignore
+                        }
+                        recalcInstallment();
+                    } catch (err) {
+                        console.error('updateNominalFromDetails error', err);
+                    }
+                }
+
+            if (nominalPinjamanEl) {
+                nominalPinjamanEl.addEventListener('input', function() {
+                    clearTimeout(nominalPinjamanEl._timeout);
+                    nominalPinjamanEl._timeout = setTimeout(recalcInstallment, 120);
+                });
+            }
+            if (tenorEl) {
+                // Ensure default selection exists on load (use jQuery to keep Select2 in sync)
+                try {
+                    if (!tenorEl.value || tenorEl.value === '') $(tenorEl).val('3').trigger('change');
+                } catch (_) {
+                    if (!tenorEl.value || tenorEl.value === '') tenorEl.value = '3';
+                }
+                tenorEl.addEventListener('change', function() {
+                    recalcInstallment();
+                });
+            }
+
+            // Run recalcInstallment on load to populate fields if nominal already exists
+            setTimeout(function() {
+                try {
+                    // If there are installment details present on load, ensure nominal is populated
+                    updateNominalFromDetails();
+                    // and ensure recalc to reflect default tenor
+                    recalcInstallment();
+                } catch (e) {
+                    // ignore
+                }
+            }, 200);
 
             // Handle Sumber Pembiayaan Radio
             $('.sumber-pembiayaan-radio').on('change', function() {
@@ -440,6 +565,45 @@
                 modalInstance.hide();
                 renderPOFinancingTable();
             }
+            else if (currentJenisPembiayaan === 'Installment') {
+                const index = editInvoiceIndex >= 0 ? editInvoiceIndex : installmentData.length;
+                const no_invoice = $('#modal_no_invoice_inst').val();
+                const nama_client = $('#modal_nama_client_inst').val();
+                const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_inst')) || 0;
+                let invoice_date = $('#modal_invoice_date_inst').val();
+                const nama_barang = $('#modal_nama_barang').val();
+
+                invoice_date = convertDMYToISO(invoice_date);
+
+                const dokumen_invoice_file = document.getElementById('modal_dokumen_invoice_inst').files[0] || null;
+                const dokumen_lainnya_file = document.getElementById('modal_dokumen_lainnya_inst').files[0] || null;
+
+                // Basic validation
+                if (!no_invoice || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
+                    alert('No. Invoice dan Nilai Invoice wajib diisi dan > 0');
+                    return;
+                }
+
+                const payload = {
+                    no_invoice: no_invoice,
+                    nama_client: nama_client,
+                    nilai_invoice: parseFloat(nilai_invoice),
+                    invoice_date: invoice_date,
+                    nama_barang: nama_barang,
+                    dokumen_invoice_file: dokumen_invoice_file,
+                    dokumen_lainnya_file: dokumen_lainnya_file,
+                };
+
+                if (editInvoiceIndex >= 0) {
+                    installmentData[editInvoiceIndex] = payload;
+                    editInvoiceIndex = -1;
+                } else {
+                    installmentData.push(payload);
+                }
+
+                modalInstance.hide();
+                renderInstallmentTable();
+            }
         }
         function renderPOFinancingTable() {
             const tbody = $('#poFinancingTable tbody');
@@ -494,6 +658,64 @@
                 $('#modal_dokumen_so_po').val('');
                 $('#modal_dokumen_bast_po').val('');
                 $('#modal_dokumen_lainnya_po').val('');
+
+                editInvoiceIndex = idx;
+                modalInstance.show();
+            });
+        }
+
+        function renderInstallmentTable() {
+            const tbody = $('#installmentTable tbody');
+            tbody.empty();
+            installmentData.forEach(function(inst, idx) {
+                const row = `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${inst.no_invoice}</td>
+                    <td>${inst.nama_client || ''}</td>
+                    <td>Rp. ${numberWithThousandSeparator(inst.nilai_invoice || 0)}</td>
+                    <td>${inst.invoice_date || ''}</td>
+                    <td>${inst.nama_barang || ''}</td>
+                    <td>${inst.dokumen_invoice_file ? inst.dokumen_invoice_file.name : ''}</td>
+                    <td>${inst.dokumen_lainnya_file ? inst.dokumen_lainnya_file.name : ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning btn-edit-installment" data-idx="${idx}">Edit</button>
+                        <button class="btn btn-sm btn-danger btn-remove-installment" data-idx="${idx}">Hapus</button>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            // After rendering, update header nominal from details so totals follow details
+            try {
+                updateNominalFromDetails();
+            } catch (e) {
+                console.error('renderInstallmentTable updateNominalFromDetails error', e);
+            }
+
+            // handle remove
+            $('.btn-remove-installment').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                installmentData.splice(idx, 1);
+                renderInstallmentTable();
+            });
+
+            // handle edit
+            $('.btn-edit-installment').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                const inst = installmentData[idx];
+                if (!inst) return;
+
+                $('#modal_no_invoice_inst').val(inst.no_invoice);
+                $('#modal_nama_client_inst').val(inst.nama_client);
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_inst'), 'Rp ' + numberWithThousandSeparator(inst.nilai_invoice || 0));
+                $('#modal_invoice_date_inst').val(inst.invoice_date || '');
+                $('#modal_nama_barang').val(inst.nama_barang || '');
+
+                // File inputs cannot be pre-filled
+                $('#modal_dokumen_invoice_inst').val('');
+                $('#modal_dokumen_lainnya_inst').val('');
 
                 editInvoiceIndex = idx;
                 modalInstance.show();
@@ -666,6 +888,39 @@
                 postUrl = '{{ route('peminjaman.po.store') }}';
             }
 
+            // Installment append
+            if (currentJenisPembiayaan === 'Installment') {
+                installmentData.forEach(function(it, idx) {
+                    fd.append(`details[${idx}][no_invoice]`, it.no_invoice || '');
+                    fd.append(`details[${idx}][nama_client]`, it.nama_client || '');
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(it.nilai_invoice || 0));
+                    fd.append(`details[${idx}][invoice_date]`, it.invoice_date || '');
+                    fd.append(`details[${idx}][nama_barang]`, it.nama_barang || '');
+
+                    if (it.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, it.dokumen_invoice_file);
+                    if (it.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, it.dokumen_lainnya_file);
+                });
+
+                postUrl = '{{ route('peminjaman.installment.store') }}';
+            }
+
+            // If posting Installment, ensure header computed fields are present
+            if (currentJenisPembiayaan === 'Installment') {
+                const nominalElForSubmit = document.getElementById('nominal_pinjaman');
+                const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit._computed : null;
+                if (computed) {
+                    fd.set('total_pinjaman', computed.totalPinjaman);
+                    fd.set('tenor_pembayaran', computed.tenor);
+                    fd.set('persentase_bagi_hasil', computed.persentase_bagi_hasil);
+                    fd.set('pps', computed.pps);
+                    fd.set('sfinance', computed.sfinance);
+                    fd.set('total_pembayaran', computed.total_pembayaran);
+                    fd.set('yang_harus_dibayarkan', computed.yang_harus_dibayarkan);
+                } else {
+                    // fallback: if not computed on client, rely on server to compute
+                }
+            }
+
             // If posting PO Financing, ensure required header fields exist
             if (currentJenisPembiayaan === 'PO Financing') {
                 // no_kontrak is required by server; prefer explicit header input if present, otherwise use first detail
@@ -723,13 +978,27 @@
                     if (resp.success) {
                         alert('Peminjaman berhasil disimpan');
                         // redirect to detail
-                        if (resp.data && resp.data.id_invoice_financing) {
-                            window.location.href = '/peminjaman/' + resp.data.id_invoice_financing;
-                        } else if (resp.id) {
-                            // PO controller returns 'id' for header
-                            window.location.href = '/peminjaman/' + resp.id;
+                        if (resp.success) {
+                            // prefer to include explicit type to avoid ambiguous numeric ids across tables
+                            const mapType = {
+                                'Invoice Financing': 'invoice',
+                                'PO Financing': 'po',
+                                'Installment': 'installment'
+                            };
+
+                            let targetId = null;
+                            if (resp.data && resp.data.id_invoice_financing) targetId = resp.data.id_invoice_financing;
+                            else if (resp.id) targetId = resp.id;
+
+                            if (targetId) {
+                                const t = mapType[currentJenisPembiayaan] || null;
+                                const url = '/peminjaman/' + targetId + (t ? ('?type=' + t) : '');
+                                window.location.href = url;
+                            } else {
+                                window.location.href = '/peminjaman';
+                            }
                         } else {
-                            window.location.href = '/peminjaman';
+                            alert('Gagal: ' + (resp.message || 'Unknown error'));
                         }
                     } else {
                         alert('Gagal: ' + (resp.message || 'Unknown error'));
@@ -753,6 +1022,18 @@
                 $('#cardSumberPembiayaan').hide();
                 $('#rowLampiranSID').hide();
                 $('#installmentTable').show();
+                // Ensure tenor default and recalc so monthly payment updates immediately
+                try {
+                    const tEl = document.getElementById('tenorPembayaran');
+                    if (tEl && (!tEl.value || tEl.value === '')) {
+                        tEl.value = '3';
+                    }
+                    // Update nominal from details (sum) and recalc
+                    if (typeof updateNominalFromDetails === 'function') updateNominalFromDetails();
+                    if (typeof recalcInstallment === 'function') recalcInstallment();
+                } catch (e) {
+                    // ignore
+                }
             } else {
                 $('#formNonInstallment').show();
                 $('#formInstallment').hide();
