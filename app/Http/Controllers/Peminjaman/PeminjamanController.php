@@ -235,7 +235,11 @@ class PeminjamanController extends Controller
 
         try {
             $sumber_eksternal = \App\Models\MasterSumberPendanaanEksternal::orderBy('nama_instansi')->get()
-                ->map(fn($r) => ['id' => $r->id_instansi, 'nama' => $r->nama_instansi])->toArray();
+                ->map(fn($r) => [
+                    'id' => $r->id_instansi,
+                    'nama' => $r->nama_instansi,
+                    'persentase_bagi_hasil' => $r->persentase_bagi_hasil ?? 0
+                ])->toArray();
         } catch (\Throwable $e) {
             $sumber_eksternal = [];
         }
@@ -345,7 +349,11 @@ class PeminjamanController extends Controller
         try {
             $sumber_eksternal = \App\Models\MasterSumberPendanaanEksternal::orderBy('nama_instansi')->get()
                 ->map(function($row) {
-                    return ['id' => $row->id_instansi, 'nama' => $row->nama_instansi];
+                    return [
+                        'id' => $row->id_instansi,
+                        'nama' => $row->nama_instansi,
+                        'persentase_bagi_hasil' => $row->persentase_bagi_hasil ?? 0
+                    ];
                 })->toArray();
         } catch (\Throwable $e) {
             $sumber_eksternal = [];
