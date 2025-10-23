@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PeminjamanFactoring;
 use App\Models\FactoringDetail;
 use Illuminate\Support\Facades\DB;
+use App\Services\PeminjamanNumberService;
 
 class PeminjamanFactoringController extends Controller
 {
@@ -36,7 +37,11 @@ class PeminjamanFactoringController extends Controller
         DB::beginTransaction();
         try {
             if (empty($validated['status'])) $validated['status'] = 'submitted';
+            // create header first
             $header = PeminjamanFactoring::create($validated);
+            // generate nomor based on header id
+            $header->nomor_peminjaman = (new PeminjamanNumberService())->generateFromId($header->id_factoring, 'FAC', $header->created_at?->format('Ym'));
+            $header->save();
 
             $details = $request->input('details', []);
             foreach ($details as $i => $detail) {

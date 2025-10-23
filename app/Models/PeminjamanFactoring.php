@@ -25,6 +25,7 @@ class PeminjamanFactoring extends Model
         'pembayaran_total',
         'catatan_lainnya',
         'status',
+        'nomor_peminjaman',
     ];
 
     public function details()

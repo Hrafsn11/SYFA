@@ -13,7 +13,7 @@ class PeminjamanPoFinancing extends Model
         'id_debitur', 'id_instansi', 'no_kontrak', 'nama_bank', 'no_rekening', 'nama_rekening',
         'lampiran_sid', 'tujuan_pembiayaan', 'total_pinjaman', 'harapan_tanggal_pencairan',
         'total_bagi_hasil', 'rencana_tgl_pembayaran', 'pembayaran_total', 'catatan_lainnya',
-        'status', 'sumber_pembiayaan', 'created_by', 'updated_by'
+        'status', 'sumber_pembiayaan', 'created_by', 'updated_by', 'nomor_peminjaman'
     ];
 
     public function details()

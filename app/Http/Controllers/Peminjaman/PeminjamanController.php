@@ -294,6 +294,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_invoice_financing,
                 'type' => 'invoice',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
                 'nilai_kol' => $r->debitur->kol->kol ?? '',
@@ -305,6 +306,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_po_financing,
                 'type' => 'po',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
                 'nilai_kol' => $r->debitur?->kol->kol ?? '',
@@ -316,6 +318,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_installment,
                 'type' => 'installment',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid ?? null,
                 'nilai_kol' => $r->debitur?->kol->kol ?? '',
@@ -329,6 +332,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_factoring,
                 'type' => 'factoring',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid ?? null,
                 'nilai_kol' => $r->debitur?->kol->kol ?? '',

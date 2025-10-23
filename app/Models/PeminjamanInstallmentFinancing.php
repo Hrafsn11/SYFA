@@ -15,7 +15,7 @@ class PeminjamanInstallmentFinancing extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_debitur','nama_bank','no_rekening','nama_rekening','total_pinjaman','tenor_pembayaran','persentase_bagi_hasil','pps','sfinance','total_pembayaran','status','yang_harus_dibayarkan','catatan_lainnya','created_by','updated_by'
+        'id_debitur','nama_bank','no_rekening','nama_rekening','total_pinjaman','tenor_pembayaran','persentase_bagi_hasil','pps','sfinance','total_pembayaran','status','yang_harus_dibayarkan','catatan_lainnya','created_by','updated_by','nomor_peminjaman'
     ];
 
     public function details()
