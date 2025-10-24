@@ -15,10 +15,14 @@ class MasterDebiturDanInvestor extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
+        'user_id',
         'id_kol',
         'nama_debitur',
         'alamat',
         'email',
+        'no_telepon',
+        'status',
+        'deposito',
         'nama_ceo',
         'nama_bank',
         'no_rek',
@@ -28,5 +32,10 @@ class MasterDebiturDanInvestor extends Model
     public function kol()
     {
         return $this->belongsTo(MasterKol::class, 'id_kol', 'id_kol');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }
