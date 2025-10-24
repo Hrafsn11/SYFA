@@ -22,6 +22,14 @@
                                 value="Techno Infinity" required disabled>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-lg mb-3">
+                            <label for="kode_peminjaman" class="form-label">Kode Peminjaman</label>
+                            <select class="form-control select2" name="kode_peminjaman" id="kode_peminjaman" data-placeholder="Pilih Peminjaman">
+                                <option value="">Pilih Peminjaman</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="card border-1 shadow-none mb-4">
                         <div class="card-body">
                             <div class="row mb-3">
@@ -39,7 +47,7 @@
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-2">
                                     <label for="invoice">Invoice Yang Akan Dibayar</label>
-                                    <select name="invoice" id="invoice" class="form-select">
+                                    <select name="invoice" id="invoice" class="form-control select2" data-placeholder="Pilih Invoice">
                                         <option value="">Pilih Invoice</option>
                                     </select>
                                 </div>
@@ -49,25 +57,20 @@
                                         value="Rp.250.000.000" disabled>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-2">
-                                    <label for="nominal_dibayarkan">Nominal Yang Akan Dibayarkan</label>
-                                    <input type="text" class="form-control" id="nominal_dibayarkan"
-                                        name="nominal_dibayarkan" value="Rp.250.000.000">
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="bukti_pembayaran">Bukti Pembayaran</label>
-                                    <input type="file" class="form-control" id="bukti_pembayaran"
-                                        name="bukti_pembayaran">
-                                </div>
-                            </div>
+                            @include('livewire.pengembalian-pinjaman.partials._pengembalian-table')
                         </div>
                     </div>
-
+                    <div class="row">
+                        <div class="col-lg mb-3">
+                            <label for="sisa_utang" class="form-label">Sisa Utang</label>
+                            <input type="text" class="form-control" id="sisa_utang" name="sisa_utang"
+                                value="Rp. 50.000.000" required disabled>
+                        </div>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-lg">
                             <label for="keterangan">Catatan Lainnya</label>
-                            <textarea name="catatan" id="catatan" class="form-control"></textarea>
+                            <textarea name="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan"></textarea>
                         </div>
                     </div>
 
@@ -81,4 +84,39 @@
             </div>
         </div>
     </div>
+
+    @include('livewire.pengembalian-pinjaman.partials._modal-tambah-pengembalian-invoice')
 @endsection
+
+@push('scripts')
+<script>
+    let modalInstance = $('#modalPengembalian');
+    $(document).ready(function() {
+
+        initCleaveRupiah();
+
+        $('#btnTambahPengembalian').on('click', function() {
+            openModal();
+        });
+    });
+
+    function openModal() {
+        
+        $('.modal-form-content').hide();
+
+        $('.modal-form-content input[type="text"]').val('');
+        $('.modal-form-content input[type="file"]').val('');
+
+        $('#modalTitle').text('Tambah Pengembalian Invoice');
+
+        setTimeout(function() {
+            initCleaveRupiah(); 
+        }, 100);
+
+        modalInstance.modal('show');
+
+        console.log(modalInstance);
+        
+    }
+</script>
+@endpush
