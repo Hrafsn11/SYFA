@@ -47,7 +47,19 @@
                                         data-placeholder="Pilih Sumber Pembiayaan Eksternal">
                                         <option value="">Pilih Sumber Pembiayaan</option>
                                         @foreach ($sumber_eksternal as $sumber)
-                                            <option value="{{ $sumber['id'] }}">{{ $sumber['nama'] }}</option>
+                                            @php
+                                                // support both array and object representations
+                                                if (is_array($sumber)) {
+                                                    $percent = $sumber['persentase'] ?? $sumber['bagi_hasil'] ?? $sumber['persentase_bagi_hasil'] ?? 2;
+                                                    $label = $sumber['nama'] ?? $sumber['nama_instansi'] ?? '';
+                                                    $val = $sumber['id'] ?? '';
+                                                } else {
+                                                    $percent = $sumber->persentase ?? $sumber->bagi_hasil ?? $sumber->persentase_bagi_hasil ?? 2;
+                                                    $label = $sumber->nama ?? $sumber->nama_instansi ?? '';
+                                                    $val = $sumber->id ?? $sumber->id_instansi ?? '';
+                                                }
+                                            @endphp
+                                            <option value="{{ $val }}" data-percent="{{ $percent }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -301,9 +313,10 @@
 
             function recalcBagiHasil() {
                 if (!totalPinjamanEl) return;
-                const raw = window.getCleaveRawValue(totalPinjamanEl);
-                const bagi = Math.round(raw * 0.02); // 2%
-                const pembayaran = raw + bagi;
+                const raw = Number(window.getCleaveRawValue(totalPinjamanEl)) || 0;
+                const percent = (typeof window.getBagiPercent === 'function') ? window.getBagiPercent() : 2;
+                const bagi = Math.round(raw * (percent / 100) * 100) / 100;
+                const pembayaran = Math.round((raw + bagi) * 100) / 100;
                 window.setCleaveValue(totalBagiHasilEl, 'Rp ' + bagi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
                 window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaran.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             }
@@ -447,7 +460,63 @@
                 } else {
                     $('#divSumberEksternal').slideUp();
                 }
+                // Recalculate bagi hasil when sumber type changes
+                try { recalcBagiHasil(); } catch (e) {}
             });
+
+            // When external sumber selection changes, recalc bagi hasil
+            $('#select2Basic').on('change', function() {
+                try { recalcBagiHasil(); } catch (e) {}
+                try {
+                } catch (e) {
+                    // suppressed
+                }
+                try {
+                } catch (e) {}
+            });
+
+
+            
+
+            // Helper: get current bagi hasil percent based on sumber selection
+            window.getBagiPercent = function() {
+                try {
+                    const sumberType = $('input[name="sumber_pembiayaan"]:checked').val();
+                    if (sumberType === 'Internal') return 2; // internal fixed 2%
+                    // external: read data-percent from selected option
+                    // When select2 is used, option:selected should still be queryable but also check underlying select value
+                    let p = NaN;
+                    const $sel = $('#select2Basic');
+                    if ($sel && $sel.length) {
+                        // try data on selected option
+                        const opt = $sel.find('option:selected');
+                        if (opt && opt.length) {
+                            p = parseFloat(opt.data('percent'));
+                            if (!isNaN(p)) return p;
+                        }
+                        // try data attribute on select element itself
+                        const sp = parseFloat($sel.data('percent'));
+                        if (!isNaN(sp)) return sp;
+                        // try parsing percent from the option text (e.g., "Name (50%)") as a last resort
+                        const val = $sel.val();
+                        if (val) {
+                            const optByVal = $sel.find('option[value="' + val + '"]');
+                            if (optByVal && optByVal.length) {
+                                const text = optByVal.text() || '';
+                                const m = text.match(/(\d+(?:\.\d+)?)\s*%/);
+                                if (m && m[1]) {
+                                    const parsed = parseFloat(m[1]);
+                                    if (!isNaN(parsed)) return parsed;
+                                }
+                            }
+                        }
+                    }
+                    // suppressed
+                } catch (e) {
+                    // fallback
+                }
+                return 2;
+            };
 
             // Handle Jenis Pembiayaan Radio
             $('.jenis-pembiayaan-radio').on('change', function() {
@@ -464,6 +533,7 @@
             $('#btnSimpanInvoice').on('click', function() {
                 saveInvoiceData();
             });
+
         });
 
         let editInvoiceIndex = -1;
@@ -476,7 +546,8 @@
                 const nama_client = $('#modal_nama_client').val();
                 const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice')) || 0;
                 const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman')) || 0;
-                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math.round(nilai_pinjaman * 0.02);
+                const defaultPercent = getBagiPercent();
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math.round(nilai_pinjaman * (defaultPercent/100));
                 let invoice_date = $('#modal_invoice_date').val();
                 let due_date = $('#modal_due_date').val();
 
@@ -491,6 +562,13 @@
                 // Basic validation
                 if (!no_invoice || nilai_pinjaman <= 0) {
                     alert('No. Invoice dan Nilai Pinjaman wajib diisi dan > 0');
+                    return;
+                }
+
+                // Duplicate check: ensure no_invoice is unique in current invoiceFinancingData
+                const duplicateIndex = invoiceFinancingData.findIndex(function(it) { return it.no_invoice === no_invoice; });
+                if (duplicateIndex !== -1 && (editInvoiceIndex === -1 || duplicateIndex !== editInvoiceIndex)) {
+                    alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
                     return;
                 }
 
@@ -523,7 +601,8 @@
                 const nama_client = $('#modal_nama_client_po').val();
                 const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_po')) || 0;
                 const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman_po')) || 0;
-                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_po')) || Math.round(nilai_pinjaman * 0.02);
+                const defaultPercentPo = getBagiPercent();
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_po')) || Math.round(nilai_pinjaman * (defaultPercentPo/100));
                 let contract_date = $('#modal_contract_date_po').val();
                 let due_date = $('#modal_due_date_po').val();
 
@@ -538,6 +617,13 @@
                 // Basic validation
                 if (!no_kontrak || nilai_pinjaman <= 0) {
                     alert('No. Kontrak dan Nilai Pinjaman wajib diisi dan > 0');
+                    return;
+                }
+
+                // Duplicate check for PO contract numbers (block on save)
+                const dupPo = poFinancingData.findIndex(function(it) { return it.no_kontrak === no_kontrak; });
+                if (dupPo !== -1 && (editInvoiceIndex === -1 || dupPo !== editInvoiceIndex)) {
+                    alert('Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
                     return;
                 }
 
@@ -584,6 +670,13 @@
                     return;
                 }
 
+                // Duplicate check for installment invoices
+                const dupInst = installmentData.findIndex(function(it) { return it.no_invoice === no_invoice; });
+                if (dupInst !== -1 && (editInvoiceIndex === -1 || dupInst !== editInvoiceIndex)) {
+                    alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    return;
+                }
+
                 const payload = {
                     no_invoice: no_invoice,
                     nama_client: nama_client,
@@ -603,6 +696,61 @@
 
                 modalInstance.hide();
                 renderInstallmentTable();
+            }
+            else if (currentJenisPembiayaan === 'Factoring') {
+                const index = editInvoiceIndex >= 0 ? editInvoiceIndex : factoringData.length;
+                const no_kontrak = $('#modal_no_kontrak_fact').val();
+                const nama_client = $('#modal_nama_client_fact').val();
+                const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_fact')) || 0;
+                const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman_fact')) || 0;
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_fact')) || Math.round(nilai_pinjaman * 0.02);
+                let contract_date = $('#modal_contract_date_fact').val();
+                let due_date = $('#modal_due_date_fact').val();
+
+                contract_date = convertDMYToISO(contract_date);
+                due_date = convertDMYToISO(due_date);
+
+                const dokumen_invoice_file = document.getElementById('modal_dokumen_invoice_fact').files[0] || null;
+                const dokumen_kontrak_file = document.getElementById('modal_dokumen_kontrak_fact').files[0] || null;
+                const dokumen_so_file = document.getElementById('modal_dokumen_so_fact').files[0] || null;
+                const dokumen_bast_file = document.getElementById('modal_dokumen_bast_fact').files[0] || null;
+
+                // Basic validation
+                if (!no_kontrak || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
+                    alert('No. Kontrak dan Nilai Invoice wajib diisi dan > 0');
+                    return;
+                }
+
+                // Duplicate check for Factoring contract numbers (block on save)
+                const dupFact = factoringData.findIndex(function(it) { return it.no_kontrak === no_kontrak; });
+                if (dupFact !== -1 && (editInvoiceIndex === -1 || dupFact !== editInvoiceIndex)) {
+                    alert('Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    return;
+                }
+
+                const payload = {
+                    no_kontrak: no_kontrak,
+                    nama_client: nama_client,
+                    nilai_invoice: parseFloat(nilai_invoice),
+                    nilai_pinjaman: parseFloat(nilai_pinjaman),
+                    nilai_bagi_hasil: parseFloat(nilai_bagi_hasil),
+                    contract_date: contract_date,
+                    due_date: due_date,
+                    dokumen_invoice_file: dokumen_invoice_file,
+                    dokumen_kontrak_file: dokumen_kontrak_file,
+                    dokumen_so_file: dokumen_so_file,
+                    dokumen_bast_file: dokumen_bast_file,
+                };
+
+                if (editInvoiceIndex >= 0) {
+                    factoringData[editInvoiceIndex] = payload;
+                    editInvoiceIndex = -1;
+                } else {
+                    factoringData.push(payload);
+                }
+
+                modalInstance.hide();
+                renderFactoringTable();
             }
         }
         function renderPOFinancingTable() {
@@ -722,6 +870,65 @@
             });
         }
 
+        function renderFactoringTable() {
+            const tbody = $('#factoringTable tbody');
+            tbody.empty();
+            factoringData.forEach(function(f, idx) {
+                const row = `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${f.no_kontrak}</td>
+                    <td>${f.nama_client || ''}</td>
+                    <td>Rp. ${numberWithThousandSeparator(f.nilai_invoice || 0)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(f.nilai_pinjaman || 0)}</td>
+                    <td>Rp. ${numberWithThousandSeparator(f.nilai_bagi_hasil || 0)}</td>
+                    <td>${f.contract_date || ''}</td>
+                    <td>${f.due_date || ''}</td>
+                    <td>${f.dokumen_invoice_file ? f.dokumen_invoice_file.name : ''}</td>
+                    <td>${f.dokumen_kontrak_file ? f.dokumen_kontrak_file.name : ''}</td>
+                    <td>${f.dokumen_so_file ? f.dokumen_so_file.name : ''}</td>
+                    <td>${f.dokumen_bast_file ? f.dokumen_bast_file.name : ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning btn-edit-factoring" data-idx="${idx}">Edit</button>
+                        <button class="btn btn-sm btn-danger btn-remove-factoring" data-idx="${idx}">Hapus</button>
+                    </td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            // handle remove
+            $('.btn-remove-factoring').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                factoringData.splice(idx, 1);
+                renderFactoringTable();
+            });
+
+            // handle edit
+            $('.btn-edit-factoring').on('click', function(e) {
+                e.preventDefault();
+                const idx = $(this).data('idx');
+                const f = factoringData[idx];
+                if (!f) return;
+
+                $('#modal_no_kontrak_fact').val(f.no_kontrak);
+                $('#modal_nama_client_fact').val(f.nama_client);
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_bagi_hasil || 0));
+                $('#modal_contract_date_fact').val(f.contract_date || '');
+                $('#modal_due_date_fact').val(f.due_date || '');
+
+                // reset file inputs
+                $('#modal_dokumen_invoice_fact').val('');
+                $('#modal_dokumen_kontrak_fact').val('');
+                $('#modal_dokumen_so_fact').val('');
+                $('#modal_dokumen_bast_fact').val('');
+
+                editInvoiceIndex = idx;
+                modalInstance.show();
+            });
+        }
+
         function renderInvoiceTables() {
             // Render Invoice Financing Table tbody
             const tbody = $('#invoiceFinancingTable tbody');
@@ -823,7 +1030,6 @@
 
             // Disabled inputs aren't submitted by forms; include some explicitly
             const selectedBank = $('#selectBank').val();
-            console.log('DEBUG selectedBank:', selectedBank);
             if (selectedBank) fd.set('nama_bank', selectedBank);
             const noRek = $('#no_rekening').val();
             if (noRek) fd.set('no_rekening', noRek);
@@ -886,6 +1092,36 @@
                 });
 
                 postUrl = '{{ route('peminjaman.po.store') }}';
+            }
+
+            // Factoring append
+            if (currentJenisPembiayaan === 'Factoring') {
+                factoringData.forEach(function(f, idx) {
+                    fd.append(`details[${idx}][no_kontrak]`, f.no_kontrak || '');
+                    fd.append(`details[${idx}][nama_client]`, f.nama_client || '');
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(f.nilai_invoice || 0));
+                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(f.nilai_pinjaman || 0));
+                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(f.nilai_bagi_hasil || 0));
+                    fd.append(`details[${idx}][kontrak_date]`, f.contract_date || '');
+                    fd.append(`details[${idx}][due_date]`, f.due_date || '');
+
+                    if (f.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, f.dokumen_invoice_file);
+                    if (f.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, f.dokumen_kontrak_file);
+                    if (f.dokumen_so_file) fd.append(`details[${idx}][dokumen_so]`, f.dokumen_so_file);
+                    if (f.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, f.dokumen_bast_file);
+                });
+
+                // compute header totals if not provided
+                let sumInvoice = 0;
+                factoringData.forEach(function(f) { sumInvoice += Number(normalizeNumericForServer(f.nilai_invoice || 0) || 0); });
+                fd.set('total_nominal_yang_dialihkan', normalizeNumericForServer(sumInvoice));
+                // compute total_bagi_hasil as 2% fallback
+                const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
+                fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
+                fd.set('pembayaran_total', normalizeNumericForServer(sumInvoice + bagi));
+                if (!fd.get('status') || fd.get('status') === '') fd.set('status', 'submitted');
+
+                postUrl = '{{ route('peminjaman.factoring.store') }}';
             }
 
             // Installment append
@@ -983,7 +1219,8 @@
                             const mapType = {
                                 'Invoice Financing': 'invoice',
                                 'PO Financing': 'po',
-                                'Installment': 'installment'
+                                'Installment': 'installment',
+                                'Factoring': 'factoring'
                             };
 
                             let targetId = null;
@@ -1185,12 +1422,22 @@
                         elem._flatpickr.destroy();
                     }
                     // Reinitialize
-                    elem.flatpickr({
-                        monthSelectorType: 'static',
-                        dateFormat: 'd/m/Y',
-                        altInput: true,
-                        altFormat: 'j F Y'
-                    });
+                        // disable past dates by setting minDate to today
+                        const today = new Date();
+                        today.setHours(0,0,0,0);
+                        elem.flatpickr({
+                            monthSelectorType: 'static',
+                            dateFormat: 'd/m/Y',
+                            altInput: true,
+                            altFormat: 'j F Y',
+                            minDate: today,
+                            disable: [function(date) {
+                                const d = new Date(date);
+                                d.setHours(0,0,0,0);
+                                // disable dates before today
+                                return d < today;
+                            }]
+                        });
                 });
             }
         }

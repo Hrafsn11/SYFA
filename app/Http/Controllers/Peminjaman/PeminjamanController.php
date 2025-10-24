@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PeminjamanInvoiceFinancing;
 use App\Models\PeminjamanInstallmentFinancing;
+use App\Models\PeminjamanFactoring;
 use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Support\Facades\DB;
 
@@ -36,6 +37,11 @@ class PeminjamanController extends Controller
             if (!$headerInst) abort(404);
             $headerType = 'installment';
             $header = $headerInst;
+        } elseif ($requestedType === 'factoring') {
+            $headerFact = PeminjamanFactoring::with(['debitur.kol','details'])->find($id);
+            if (!$headerFact) abort(404);
+            $headerType = 'factoring';
+            $header = $headerFact;
         } else {
             // Backward compatible fallback: try invoice first then PO
             $headerInvoice = PeminjamanInvoiceFinancing::with(['debitur.kol', 'invoices'])->find($id);
@@ -167,6 +173,39 @@ class PeminjamanController extends Controller
             })->toArray();
         }
         $factoring_data = [];
+        if ($headerType === 'factoring') {
+            $peminjaman = [
+                'id' => $header->id_factoring,
+                'nama_perusahaan' => $header->debitur?->nama_debitur ?? '',
+                'nama_bank' => $header->nama_bank,
+                'no_rekening' => $header->no_rekening,
+                'lampiran_sid' => $header->lampiran_sid ?? null,
+                'nilai_kol' => $header->debitur?->kol->kol ?? '',
+                'nominal_pinjaman' => $header->total_nominal_yang_dialihkan,
+                'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
+                'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
+                'total_bagi_hasil' => $header->total_bagi_hasil,
+                'pembayaran_total' => $header->pembayaran_total ?? null,
+                'persentase_bagi_hasil' => $persentase,
+                'jenis_pembiayaan' => 'Factoring',
+            ];
+
+            $factoring_data = $header->details->map(function($d) {
+                return [
+                    'no_kontrak' => $d->no_kontrak,
+                    'nama_client' => $d->nama_client,
+                    'nilai_invoice' => $d->nilai_invoice,
+                    'nilai_pinjaman' => $d->nilai_pinjaman,
+                    'nilai_bagi_hasil' => $d->nilai_bagi_hasil,
+                    'kontrak_date' => $d->kontrak_date,
+                    'due_date' => $d->due_date,
+                    'dokumen_invoice' => $d->dokumen_invoice,
+                    'dokumen_kontrak' => $d->dokumen_kontrak,
+                    'dokumen_so' => $d->dokumen_so,
+                    'dokumen_bast' => $d->dokumen_bast,
+                ];
+            })->toArray();
+        }
 
         // Try to read enum values for `nama_bank` from DB so we don't keep duplicate hardcoded lists.
         // Fallback to the previous hardcoded array if query fails or column isn't an enum.
@@ -196,7 +235,11 @@ class PeminjamanController extends Controller
 
         try {
             $sumber_eksternal = \App\Models\MasterSumberPendanaanEksternal::orderBy('nama_instansi')->get()
-                ->map(fn($r) => ['id' => $r->id_instansi, 'nama' => $r->nama_instansi])->toArray();
+                ->map(fn($r) => [
+                    'id' => $r->id_instansi,
+                    'nama' => $r->nama_instansi,
+                    'persentase_bagi_hasil' => $r->persentase_bagi_hasil ?? 0
+                ])->toArray();
         } catch (\Throwable $e) {
             $sumber_eksternal = [];
         }
@@ -251,6 +294,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_invoice_financing,
                 'type' => 'invoice',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
                 'nilai_kol' => $r->debitur->kol->kol ?? '',
@@ -262,6 +306,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_po_financing,
                 'type' => 'po',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
                 'nilai_kol' => $r->debitur?->kol->kol ?? '',
@@ -273,6 +318,7 @@ class PeminjamanController extends Controller
             return [
                 'id' => $r->id_installment,
                 'type' => 'installment',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid ?? null,
                 'nilai_kol' => $r->debitur?->kol->kol ?? '',
@@ -280,7 +326,21 @@ class PeminjamanController extends Controller
             ];
         })->toArray();
 
-    $peminjaman_data = array_merge($invoiceData, $poData, $installmentData);
+        // Factoring records
+        $factoringRecords = \App\Models\PeminjamanFactoring::with(['debitur.kol'])->get();
+        $factoringData = $factoringRecords->map(function($r) {
+            return [
+                'id' => $r->id_factoring,
+                'type' => 'factoring',
+                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
+                'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
+                'lampiran_sid' => $r->lampiran_sid ?? null,
+                'nilai_kol' => $r->debitur?->kol->kol ?? '',
+                'status' => $r->status ?? 'draft',
+            ];
+        })->toArray();
+
+    $peminjaman_data = array_merge($invoiceData, $poData, $installmentData, $factoringData);
 
         return view('livewire.peminjaman.index', compact('peminjaman_data'));
     }
@@ -293,7 +353,11 @@ class PeminjamanController extends Controller
         try {
             $sumber_eksternal = \App\Models\MasterSumberPendanaanEksternal::orderBy('nama_instansi')->get()
                 ->map(function($row) {
-                    return ['id' => $row->id_instansi, 'nama' => $row->nama_instansi];
+                    return [
+                        'id' => $row->id_instansi,
+                        'nama' => $row->nama_instansi,
+                        'persentase_bagi_hasil' => $row->persentase_bagi_hasil ?? 0
+                    ];
                 })->toArray();
         } catch (\Throwable $e) {
             $sumber_eksternal = [];

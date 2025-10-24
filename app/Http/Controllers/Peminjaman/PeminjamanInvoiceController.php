@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Models\PeminjamanInvoiceFinancing;
 use App\Models\InvoiceFinancing;
+use App\Services\PeminjamanNumberService;
 
 class PeminjamanInvoiceController extends Controller
 {
@@ -62,7 +63,9 @@ class PeminjamanInvoiceController extends Controller
             }
 
             // Create header
-            $header = PeminjamanInvoiceFinancing::create([
+            $numberService = new PeminjamanNumberService();
+
+            $headerData = [
                 'id_debitur' => $id_debitur,
                 'id_instansi' => $id_instansi,
                 'sumber_pembiayaan' => $sumber_pembiayaan,
@@ -76,7 +79,12 @@ class PeminjamanInvoiceController extends Controller
                 'catatan_lainnya' => $request->catatan_lainnya,
                 'status' => 'submitted',
                 'created_by' => auth()->id() ?? null,
-            ]);
+            ];
+
+            // Create header first, then generate nomor based on header id (fallback when sequences table absent)
+            $header = PeminjamanInvoiceFinancing::create($headerData);
+            $header->nomor_peminjaman = (new PeminjamanNumberService())->generateFromId($header->id_invoice_financing, 'INV', $header->created_at?->format('Ym'));
+            $header->save();
 
             $sumPinjaman = 0;
             $sumBagi = 0;

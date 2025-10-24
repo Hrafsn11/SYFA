@@ -8,6 +8,7 @@ use App\Models\PeminjamanPoFinancing;
 use App\Models\PoFinancing;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Services\PeminjamanNumberService;
 
 class PeminjamanPoFinancingController extends Controller
 {
@@ -53,7 +54,11 @@ class PeminjamanPoFinancingController extends Controller
                 $validated['lampiran_sid'] = $lampiranSidPath;
             }
             $validated['created_by'] = auth()->id();
+            // create header first
             $header = PeminjamanPoFinancing::create($validated);
+            // generate nomor based on header id (no sequences table required)
+            $header->nomor_peminjaman = (new PeminjamanNumberService())->generateFromId($header->id_po_financing, 'PO', $header->created_at?->format('Ym'));
+            $header->save();
 
             $details = $request->input('details', []);
             foreach ($details as $i => $detail) {
