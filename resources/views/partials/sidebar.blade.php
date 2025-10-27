@@ -46,6 +46,25 @@
             </a>
         </li>
 
+        <!-- Debitur dan Investor Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Debitur dan Investor</span>
+        </li>
+
+        <li class="menu-item {{ request()->is('debitur-dan-investor*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-user"></i>
+                <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->is('debitur-dan-investor/form-kerja-investor*') ? 'active' : '' }}">
+                    <a href="{{ route('form-kerja-investor.index') }}" class="menu-link">
+                        <div data-i18n="Investor">Investor</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- Master Data Section -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Master Data</span>
