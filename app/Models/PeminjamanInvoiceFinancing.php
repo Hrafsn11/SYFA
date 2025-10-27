@@ -15,7 +15,7 @@ class PeminjamanInvoiceFinancing extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_debitur','id_instansi','sumber_pembiayaan','nama_bank','no_rekening','nama_rekening','lampiran_sid','tujuan_pembiayaan','total_pinjaman','harapan_tanggal_pencairan','total_bagi_hasil','rencana_tgl_pembayaran','pembayaran_total','catatan_lainnya','status','created_by'
+        'id_debitur','id_instansi','sumber_pembiayaan','nama_bank','no_rekening','nama_rekening','lampiran_sid','tujuan_pembiayaan','total_pinjaman','harapan_tanggal_pencairan','total_bagi_hasil','rencana_tgl_pembayaran','pembayaran_total','catatan_lainnya','status','created_by','nomor_peminjaman'
     ];
 
     public function invoices()

@@ -56,6 +56,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="text-center" width="5%">No</th>
+                                        <th class="text-center" widht="5%">Nomor Peminajaman</th>
                                         <th class="text-center">Nama Perusahaan</th>
                                         <th class="text-center">Lampiran SID</th>
                                         <th class="text-center">Nilai Kol</th>
@@ -67,6 +68,7 @@
                                     @forelse($peminjaman_data as $index => $item)
                                         <tr>
                                             <td class="text-center">{{ $index + 1 }}</td>
+                                            <td class="text-center">{{ $item['nomor_peminjaman'] }}</td>
                                             <td class="text-center">
                                                 <span class="fw-semibold">{{ $item['nama_perusahaan'] }}</span>
                                             </td>

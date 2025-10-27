@@ -432,6 +432,66 @@
                                                     </tbody>
                                                 </table>
                                             </div>
+                                        @elseif(!empty($factoring_data) || (($peminjaman['jenis_pembiayaan'] ?? '') === 'Factoring'))
+                                            <h6 class="text-muted mb-3">Data Factoring</h6>
+                                            <div class="table-responsive text-nowrap">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>NO</th>
+                                                            <th>NO. KONTRAK</th>
+                                                            <th>NAMA CLIENT</th>
+                                                            <th>NILAI INVOICE</th>
+                                                            <th>NILAI PINJAMAN</th>
+                                                            <th>NILAI BAGI HASIL</th>
+                                                            <th>KONTRAK DATE</th>
+                                                            <th>DUE DATE</th>
+                                                            <th>DOKUMEN INVOICE</th>
+                                                            <th>DOKUMEN KONTRAK</th>
+                                                            <th>DOKUMEN SO</th>
+                                                            <th>DOKUMEN BAST</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="table-border-bottom-0">
+                                                        @forelse($factoring_data as $idx => $fact)
+                                                            <tr>
+                                                                <td>{{ $idx + 1 }}</td>
+                                                                <td>{{ $fact['no_kontrak'] ?? '-' }}</td>
+                                                                <td>{{ $fact['nama_client'] ?? '-' }}</td>
+                                                                <td>Rp. {{ number_format($fact['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>Rp. {{ number_format($fact['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>Rp. {{ number_format($fact['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>{{ $fact['kontrak_date'] ?? '-' }}</td>
+                                                                <td>{{ $fact['due_date'] ?? '-' }}</td>
+                                                                <td>
+                                                                    @if(!empty($fact['dokumen_invoice']))
+                                                                        <a href="{{ asset('storage/' . $fact['dokumen_invoice']) }}" target="_blank">{{ basename($fact['dokumen_invoice']) }}</a>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if(!empty($fact['dokumen_kontrak']))
+                                                                        <a href="{{ asset('storage/' . $fact['dokumen_kontrak']) }}" target="_blank">{{ basename($fact['dokumen_kontrak']) }}</a>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if(!empty($fact['dokumen_so']))
+                                                                        <a href="{{ asset('storage/' . $fact['dokumen_so']) }}" target="_blank">{{ basename($fact['dokumen_so']) }}</a>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    @if(!empty($fact['dokumen_bast']))
+                                                                        <a href="{{ asset('storage/' . $fact['dokumen_bast']) }}" target="_blank">{{ basename($fact['dokumen_bast']) }}</a>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td colspan="12" class="text-center">Tidak ada data Factoring</td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         @else
                                             <h6 class="text-muted mb-3">Data Invoicing</h6>
 

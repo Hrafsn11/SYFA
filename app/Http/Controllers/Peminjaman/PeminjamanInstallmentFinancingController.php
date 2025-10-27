@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PeminjamanInstallmentFinancing;
 use App\Models\InstallmentFinancing;
 use Illuminate\Support\Facades\Storage;
+use App\Services\PeminjamanNumberService;
 
 class PeminjamanInstallmentFinancingController extends Controller
 {
@@ -39,6 +40,8 @@ class PeminjamanInstallmentFinancingController extends Controller
         $totalPembayaran = round($totalPinjaman + $totalBagiHasil, 2);
         $monthlyPay = $tenor > 0 ? round($totalPembayaran / $tenor, 2) : $totalPembayaran;
 
+        $numberService = new PeminjamanNumberService();
+
         $header = PeminjamanInstallmentFinancing::create([
             'id_debitur' => $validated['id_debitur'],
             'nama_bank' => $request->input('nama_bank'),
@@ -54,6 +57,9 @@ class PeminjamanInstallmentFinancingController extends Controller
             'catatan_lainnya' => $request->input('catatan_lainnya'),
             'created_by' => auth()->id() ?? null,
         ]);
+        // generate nomor based on header id
+        $header->nomor_peminjaman = $numberService->generateFromId($header->id_installment, 'INS', $header->created_at?->format('Ym'));
+        $header->save();
 
         $details = $request->input('details', []);
         foreach ($details as $i => $d) {
