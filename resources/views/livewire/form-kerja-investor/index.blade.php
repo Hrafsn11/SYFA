@@ -28,26 +28,59 @@
                             <th class="text-center">Jumlah Investasi</th>
                             <th class="text-center">Bagi Hasil</th>
                             <th class="text-center">Nominal Bagi Hasil Keseluruhan</th>
+                            <th class="text-center">Status</th>
                             <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <td class="text-center">1</td>
-                        <td>Adam</td>
-                        <td class="text-center">Regular</td>
-                        <td class="text-center">24 Oktober 2025</td>
-                        <td class="text-center">24 Bulan</td>
-                        <td class="text-center">Rp 10.000.000</td>
-                        <td class="text-center">10%</td>
-                        <td class="text-center">Rp 1.000.000</td>
-                        <td class="d-flex justify-content-center align-items-center gap-2">
-                            <a href="{{ route('form-kerja-investor.show') }}">
-                                <i class="ti ti-file-text"></i>
-                            </a>
-                            <button class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect">
-                                <i class="ti ti-edit"></i>
-                            </button>
-                        </td>
+                        @forelse($formKerjaInvestor as $index => $item)
+                            <tr>
+                                <td class="text-center">{{ $index + 1 }}</td>
+                                <td>{{ $item->nama_investor }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-label-{{ $item->deposito === 'reguler' ? 'primary' : 'info' }}">
+                                        {{ ucfirst($item->deposito) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {{ $item->tanggal_pembayaran ? \Carbon\Carbon::parse($item->tanggal_pembayaran)->format('d F Y') : '-' }}
+                                </td>
+                                <td class="text-center">{{ $item->lama_investasi ?? '-' }} Bulan</td>
+                                <td class="text-center">Rp {{ number_format($item->jumlah_investasi, 0, ',', '.') }}</td>
+                                <td class="text-center">{{ $item->bagi_hasil }}%</td>
+                                <td class="text-center">Rp {{ number_format($item->bagi_hasil_keseluruhan, 0, ',', '.') }}</td>
+                                <td class="text-center">
+                                    @if($item->status === 'pending')
+                                        <span class="badge bg-label-warning">Pending</span>
+                                    @elseif($item->status === 'approved')
+                                        <span class="badge bg-label-success">Disetujui</span>
+                                    @elseif($item->status === 'rejected')
+                                        <span class="badge bg-label-danger">Ditolak</span>
+                                    @else
+                                        <span class="badge bg-label-info">Selesai</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center align-items-center gap-2">
+                                        <a href="{{ route('form-kerja-investor.show', $item->id_form_kerja_investor) }}" 
+                                           class="btn btn-sm btn-icon btn-text-info" title="Detail">
+                                            <i class="ti ti-file-text"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-icon btn-text-danger btnHapus" 
+                                                data-id="{{ $item->id_form_kerja_investor }}" title="Hapus">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="text-center py-4">
+                                    <i class="ti ti-inbox display-6 text-muted"></i>
+                                    <p class="text-muted mt-2">Belum ada data pengajuan investasi</p>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -90,8 +123,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="flatpickr-tanggal-pembayaran" class="form-label">Rencana Tanggal
-                                        Pembayaran</label>
+                                    <label for="flatpickr-tanggal-pembayaran" class="form-label">Tanggal Investasi</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control rounded-start flatpickr-date"
                                             placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pembayaran"
@@ -153,9 +185,9 @@
             if (flatpickrDate.length && !flatpickrDate[0]._flatpickr) {
                 flatpickrDate.flatpickr({
                     monthSelectorType: 'static',
-                    dateFormat: 'd/m/Y',
+                    dateFormat: 'Y-m-d', // Format untuk submit ke backend
                     altInput: true,
-                    altFormat: 'j F Y',
+                    altFormat: 'j F Y', // Format tampilan user-friendly
                     locale: {
                         firstDayOfWeek: 1
                     }
@@ -164,12 +196,22 @@
 
             // Handle Modal Open
             $('#btnTambahFormKerjaInvestor').on('click', function() {
-                $form[0].reset();
-                $form.removeClass('was-validated');
-
-                // Get data investor from authenticated user's master data
+                // Check if investor data exists
                 const namaInvestor = '{{ optional($investor)->nama_debitur ?? '' }}';
                 const depositoInvestor = '{{ optional($investor)->deposito ?? '' }}';
+                
+                if (!namaInvestor || !depositoInvestor) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Investor Tidak Ditemukan',
+                        html: 'Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                $form[0].reset();
+                $form.removeClass('was-validated');
 
                 // Set nama investor (disabled)
                 $('#nama_investor').val(namaInvestor);
@@ -285,33 +327,110 @@
                     _token: '{{ csrf_token() }}'
                 };
 
-                console.log('Form Data:', formData);
-
                 // Re-disable deposito radio after getting value
                 $('input[name="deposito"]').prop('disabled', true);
 
-                // TODO: Implement AJAX save
-                // $('#btnSimpanSpinner').removeClass('d-none');
-                // $('#btnSimpanFormKerjaInvestor').prop('disabled', true);
+                // Show loading
+                $('#btnSimpanSpinner').removeClass('d-none');
+                $('#btnSimpanFormKerjaInvestor').prop('disabled', true);
 
-                // $.ajax({
-                //     url: '/form-kerja-investor',
-                //     method: 'POST',
-                //     data: formData,
-                //     success: function(response) {
-                //         if (response.success) {
-                //             $modal.modal('hide');
-                //             // Reload table or show success message
-                //         }
-                //     },
-                //     complete: function() {
-                //         $('#btnSimpanSpinner').addClass('d-none');
-                //         $('#btnSimpanFormKerjaInvestor').prop('disabled', false);
-                //     }
-                // });
+                // Debug: Log form data before sending
+                console.log('Form Data:', formData);
 
-                alert('Data berhasil disimpan (demo mode)');
-                $modal.modal('hide');
+                // AJAX save
+                $.ajax({
+                    url: '{{ route('form-kerja-investor.store') }}',
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $modal.modal('hide');
+                            
+                            // Show success message
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // Reload page to show new data
+                                window.location.reload();
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        // Debug: Log full error response
+                        console.error('Error Response:', xhr.responseJSON);
+                        
+                        let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                        
+                        // Show validation errors if available
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            errorMessage = Object.values(errors).flat().join('\n');
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            html: errorMessage.replace(/\n/g, '<br>')
+                        });
+                    },
+                    complete: function() {
+                        $('#btnSimpanSpinner').addClass('d-none');
+                        $('#btnSimpanFormKerjaInvestor').prop('disabled', false);
+                    }
+                });
+            });
+
+            // Handle Delete Button
+            $(document).on('click', '.btnHapus', function() {
+                const id = $(this).data('id');
+                
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // AJAX delete
+                        $.ajax({
+                            url: `/form-kerja-investor/${id}`,
+                            method: 'DELETE',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Terhapus!',
+                                        text: response.message,
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: 'Terjadi kesalahan saat menghapus data'
+                                });
+                            }
+                        });
+                    }
+                });
             });
         });
     </script>
