@@ -282,7 +282,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-label-danger" data-bs-dismiss="modal">Hapus Data</button>
+                <!-- The delete action is handled by JS (works when editing an existing item) -->
+                <button type="button" class="btn btn-label-danger" id="btnHapusDataModal">Hapus Data</button>
                 <button type="button" class="btn btn-primary" id="btnSimpanInvoice">
                     Simpan Data <i class="ti ti-arrow-right ms-1"></i>
                 </button>
