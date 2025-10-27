@@ -68,21 +68,21 @@
                                     <label for="nama_investor" class="form-label">Nama Investor <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control non-editable" id="nama_investor"
-                                        value="Techno Infinity" required readonly>
+                                        name="nama_investor" placeholder="Nama Investor" required disabled readonly>
                                 </div>
                                 <div class="col-12 mb-3" id="div-deposito">
                                     <label class="form-label">Deposito <span class="text-danger">*</span></label>
                                     <div class="d-flex gap-4">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_reguler" value="reguler" required>
+                                                id="deposito_reguler" value="reguler" required disabled>
                                             <label class="form-check-label" for="deposito_reguler">
                                                 Reguler
                                             </label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_khusus" value="khusus" required>
+                                                id="deposito_khusus" value="khusus" required disabled>
                                             <label class="form-check-label" for="deposito_khusus">
                                                 Khusus
                                             </label>
@@ -167,13 +167,29 @@
                 $form[0].reset();
                 $form.removeClass('was-validated');
 
-                // Reset radio buttons
-                $('input[name="deposito"]').prop('checked', false);
+                // Get data investor from authenticated user's master data
+                const namaInvestor = '{{ optional($investor)->nama_debitur ?? '' }}';
+                const depositoInvestor = '{{ optional($investor)->deposito ?? '' }}';
 
-                // Get nama investor from authenticated user's master data
-                const namaInvestor =
-                    '{{ optional($investor)->nama_debitur ?? (auth()->user()->name ?? 'Investor') }}';
+                // Set nama investor (disabled)
                 $('#nama_investor').val(namaInvestor);
+
+                // Set and check deposito radio (disabled)
+                $('input[name="deposito"]').prop('checked', false).prop('disabled', true);
+                
+                if (depositoInvestor) {
+                    const depositoValue = depositoInvestor.toLowerCase();
+                    $(`input[name="deposito"][value="${depositoValue}"]`).prop('checked', true);
+                    
+                    // Trigger deposito logic
+                    if (depositoValue === 'reguler') {
+                        $('#bagi_hasil').val('10').prop('readonly', true).addClass('non-editable');
+                        $('#bagi_hasil_keseluruhan').prop('readonly', true).addClass('non-editable');
+                    } else if (depositoValue === 'khusus') {
+                        $('#bagi_hasil').val('').prop('readonly', false).removeClass('non-editable');
+                        $('#bagi_hasil_keseluruhan').prop('readonly', false).removeClass('non-editable');
+                    }
+                }
 
                 // Show modal
                 $modal.modal('show');
@@ -186,7 +202,7 @@
                 }, 100);
             });
 
-            // Handle Deposito Radio Change
+            // Handle Deposito Radio Change (disabled by default, but keep for reference)
             $('input[name="deposito"]').on('change', function() {
                 const selectedDeposito = $(this).val();
 
@@ -252,6 +268,9 @@
                     return;
                 }
 
+                // Temporarily enable deposito radio for form submission
+                $('input[name="deposito"]').prop('disabled', false);
+
                 // Get form data
                 const formData = {
                     nama_investor: $('#nama_investor').val(),
@@ -267,6 +286,9 @@
                 };
 
                 console.log('Form Data:', formData);
+
+                // Re-disable deposito radio after getting value
+                $('input[name="deposito"]').prop('disabled', true);
 
                 // TODO: Implement AJAX save
                 // $('#btnSimpanSpinner').removeClass('d-none');
