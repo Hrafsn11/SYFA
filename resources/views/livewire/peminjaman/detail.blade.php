@@ -8,43 +8,84 @@
             </h4>
 
 
-            <!-- Arrow Style Stepper -->
-            <div class="d-flex overflow-auto mb-4 mb-md-5">
-                <div class="stepper-arrow active" data-step="1">
-                    <div class="arrow-number">1</div>
-                    <div class="arrow-text">Pengajuan Pinjaman</div>
-                </div>
-                <div class="stepper-arrow" data-step="2">
-                    <div class="arrow-number">2</div>
-                    <div class="arrow-text">Validasi Dokumen</div>
-                </div>
-                <div class="stepper-arrow" data-step="3">
-                    <div class="arrow-number">3</div>
-                    <div class="arrow-text">Dokumen Tervalidasi</div>
-                </div>
-                <div class="stepper-arrow" data-step="4">
-                    <div class="arrow-number">4</div>
-                    <div class="arrow-text">Persetujuan Debitur</div>
-                </div>
-                <div class="stepper-arrow" data-step="5">
-                    <div class="arrow-number">5</div>
-                    <div class="arrow-text">Validasi Direktur SKI</div>
-                </div>
-                <div class="stepper-arrow" data-step="6">
-                    <div class="arrow-number">6</div>
-                    <div class="arrow-text">Validasi Direktur</div>
-                </div>
-                <div class="stepper-arrow" data-step="7">
-                    <div class="arrow-number">7</div>
-                    <div class="arrow-text">Generate Kontrak</div>
-                </div>
-                <div class="stepper-arrow" data-step="8">
-                    <div class="arrow-number">8</div>
-                    <div class="arrow-text">Upload Dokumen</div>
-                </div>
-                <div class="stepper-arrow" data-step="9">
-                    <div class="arrow-number">9</div>
-                    <div class="arrow-text">Selesai</div>
+            <!-- AStepper -->
+            <div class="stepper-container mb-4">
+                <div class="stepper-wrapper">
+
+                    <div class="stepper-item completed" data-step="1">
+                        <div class="stepper-node">
+                        </div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 1</div>
+                            <div class="step-name">Pengajuan Pinjaman</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item active" data-step="2">
+                        <div class="stepper-node">
+                        </div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 2</div>
+                            <div class="step-name">Validasi Dokumen</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="3">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 3</div>
+                            <div class="step-name">Dokumen Tervalidasi</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="4">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 4</div>
+                            <div class="step-name">Persetujuan Debitur</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="5">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 5</div>
+                            <div class="step-name">validasi CEO SKI</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="6">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 6</div>
+                            <div class="step-name">Validasi Direktur</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="7">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 7</div>
+                            <div class="step-name">Generate Kontrak</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="8">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 8</div>
+                            <div class="step-name">Upload Dokumen Transfer</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="9">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 9</div>
+                            <div class="step-name">Selesai</div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -94,7 +135,8 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
                                             <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
-                                            <button type="button" class="btn btn-primary d-none" id="btnSetujuiPeminjaman">
+                                            <button type="button" class="btn btn-primary d-none"
+                                                id="btnSetujuiPeminjaman">
                                                 <i class="fas fa-check me-2"></i>
                                                 Setujui Peminjaman
                                             </button>
@@ -128,8 +170,9 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Lampiran SID</small>
                                                     <p class="fw-bold mb-0">
-                                                        @if(!empty($peminjaman['lampiran_sid']))
-                                                            <a href="{{ asset('storage/' . $peminjaman['lampiran_sid']) }}" target="_blank">Lihat Lampiran</a>
+                                                        @if (!empty($peminjaman['lampiran_sid']))
+                                                            <a href="{{ asset('storage/' . $peminjaman['lampiran_sid']) }}"
+                                                                target="_blank">Lihat Lampiran</a>
                                                         @else
                                                             -
                                                         @endif
@@ -153,51 +196,71 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nominal
                                                         Pinjaman</small>
-                                                    <p class="mb-0 text-success fw-semibold">Rp. {{ number_format($peminjaman['nominal_pinjaman'] ?? $peminjaman['total_pinjaman'] ?? 0, 0, ',', '.') }}</p>
+                                                    <p class="mb-0 text-success fw-semibold">Rp.
+                                                        {{ number_format($peminjaman['nominal_pinjaman'] ?? ($peminjaman['total_pinjaman'] ?? 0), 0, ',', '.') }}
+                                                    </p>
                                                 </div>
                                             </div>
-                                            @if(($peminjaman['jenis_pembiayaan'] ?? '') === 'Installment')
+                                            @if (($peminjaman['jenis_pembiayaan'] ?? '') === 'Installment')
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Tenor Pembayaran</small>
-                                                        <p class="fw-bold mb-0">{{ $peminjaman['tenor_pembayaran'] ? $peminjaman['tenor_pembayaran'] . ' Bulan' : '-' }}</p>
+                                                        <small class="text-light fw-semibold d-block mb-1">Tenor
+                                                            Pembayaran</small>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ $peminjaman['tenor_pembayaran'] ? $peminjaman['tenor_pembayaran'] . ' Bulan' : '-' }}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                                    <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                        <div class="mb-0">
-                                                            <small class="text-light fw-semibold d-block mb-1">Persentase Bagi Hasil</small>
-                                                            @php
-                                                                $p = $peminjaman['persentase_bagi_hasil'] ?? null;
-                                                                $p_display = '-';
-                                                                if ($p !== null && $p !== '') {
-                                                                    $p_display = rtrim(rtrim(sprintf('%.4f', (float) $p), '0'), '.') . '%';
-                                                                }
-                                                            @endphp
-                                                            <p class="fw-bold mb-0">{{ $p_display }}</p>
-                                                        </div>
+                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                    <div class="mb-0">
+                                                        <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
+                                                            Hasil</small>
+                                                        @php
+                                                            $p = $peminjaman['persentase_bagi_hasil'] ?? null;
+                                                            $p_display = '-';
+                                                            if ($p !== null && $p !== '') {
+                                                                $p_display =
+                                                                    rtrim(
+                                                                        rtrim(sprintf('%.4f', (float) $p), '0'),
+                                                                        '.',
+                                                                    ) . '%';
+                                                            }
+                                                        @endphp
+                                                        <p class="fw-bold mb-0">{{ $p_display }}</p>
                                                     </div>
+                                                </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">PPS</small>
-                                                        <p class="fw-bold mb-0">Rp. {{ number_format($peminjaman['pps'] ?? 0, 0, ',', '.') }}</p>
+                                                        <p class="fw-bold mb-0">Rp.
+                                                            {{ number_format($peminjaman['pps'] ?? 0, 0, ',', '.') }}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">S Finance</small>
-                                                        <p class="fw-bold mb-0">Rp. {{ number_format($peminjaman['sfinance'] ?? 0, 0, ',', '.') }}</p>
+                                                        <small class="text-light fw-semibold d-block mb-1">S
+                                                            Finance</small>
+                                                        <p class="fw-bold mb-0">Rp.
+                                                            {{ number_format($peminjaman['sfinance'] ?? 0, 0, ',', '.') }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Pembayaran Total</small>
-                                                        <p class="mb-0 text-warning fw-semibold">Rp. {{ number_format($peminjaman['pembayaran_total'] ?? 0, 0, ',', '.') }}</p>
+                                                        <small class="text-light fw-semibold d-block mb-1">Pembayaran
+                                                            Total</small>
+                                                        <p class="mb-0 text-warning fw-semibold">Rp.
+                                                            {{ number_format($peminjaman['pembayaran_total'] ?? 0, 0, ',', '.') }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Yang harus dibayarkan / bulan</small>
-                                                        <p class="mb-0 text-warning fw-semibold">Rp. {{ number_format($peminjaman['yang_harus_dibayarkan'] ?? 0, 0, ',', '.') }}</p>
+                                                        <small class="text-light fw-semibold d-block mb-1">Yang harus
+                                                            dibayarkan / bulan</small>
+                                                        <p class="mb-0 text-warning fw-semibold">Rp.
+                                                            {{ number_format($peminjaman['yang_harus_dibayarkan'] ?? 0, 0, ',', '.') }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             @else
@@ -205,8 +268,11 @@
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal
                                                             Pencairan</small>
-                                                        <p class="fw-bold mb-0">{{ !empty($peminjaman['harapan_tanggal_pencairan']) ? 
-                                                            \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->translatedFormat('j F Y') : '-' }}</p>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ !empty($peminjaman['harapan_tanggal_pencairan'])
+                                                                ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->translatedFormat('j F Y')
+                                                                : '-' }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
@@ -220,21 +286,27 @@
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Jenis
                                                             Pembiayaan</small>
-                                                        <p class="fw-bold mb-0">{{ $peminjaman['jenis_pembiayaan'] ?? 'Invoice Financing' }}</p>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ $peminjaman['jenis_pembiayaan'] ?? 'Invoice Financing' }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
                                                             Bayar</small>
-                                                        <p class="fw-bold mb-0">{{ !empty($peminjaman['rencana_tgl_pembayaran']) ? \Carbon\Carbon::parse($peminjaman['rencana_tgl_pembayaran'])->translatedFormat('j F Y') : '-' }}</p>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ !empty($peminjaman['rencana_tgl_pembayaran']) ? \Carbon\Carbon::parse($peminjaman['rencana_tgl_pembayaran'])->translatedFormat('j F Y') : '-' }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Pembayaran
                                                             Total</small>
-                                                        <p class="mb-0 text-warning fw-semibold">Rp. {{ number_format($peminjaman['pembayaran_total'] ?? $peminjaman['total_pembayaran'] ?? 0, 0, ',', '.') }}</p>
+                                                        <p class="mb-0 text-warning fw-semibold">Rp.
+                                                            {{ number_format($peminjaman['pembayaran_total'] ?? ($peminjaman['total_pembayaran'] ?? 0), 0, ',', '.') }}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             @endif
@@ -243,7 +315,7 @@
                                         <hr class="my-3 my-md-4">
 
                                         <!-- Data Invoicing -->
-                                        @if(!empty($installment_data) && ($peminjaman['jenis_pembiayaan'] ?? '') === 'Installment')
+                                        @if (!empty($installment_data) && ($peminjaman['jenis_pembiayaan'] ?? '') === 'Installment')
                                             <h6 class="text-muted mb-3">Data Installment</h6>
                                             <div class="table-responsive text-nowrap">
                                                 <table class="table">
@@ -265,23 +337,28 @@
                                                                 <td>{{ $idx + 1 }}</td>
                                                                 <td>{{ $inst['no_invoice'] ?? '-' }}</td>
                                                                 <td>{{ $inst['nama_client'] ?? '-' }}</td>
-                                                                <td>Rp. {{ number_format($inst['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>Rp.
+                                                                    {{ number_format($inst['nilai_invoice'] ?? 0, 0, ',', '.') }}
+                                                                </td>
                                                                 <td>{{ $inst['invoice_date'] ?? '-' }}</td>
                                                                 <td>{{ $inst['nama_barang'] ?? '-' }}</td>
                                                                 <td>
-                                                                    @if(!empty($inst['dokumen_invoice']))
-                                                                        <a href="{{ asset('storage/' . $inst['dokumen_invoice']) }}" target="_blank">{{ basename($inst['dokumen_invoice']) }}</a>
+                                                                    @if (!empty($inst['dokumen_invoice']))
+                                                                        <a href="{{ asset('storage/' . $inst['dokumen_invoice']) }}"
+                                                                            target="_blank">{{ basename($inst['dokumen_invoice']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($inst['dokumen_lainnya']))
-                                                                        <a href="{{ asset('storage/' . $inst['dokumen_lainnya']) }}" target="_blank">{{ basename($inst['dokumen_lainnya']) }}</a>
+                                                                    @if (!empty($inst['dokumen_lainnya']))
+                                                                        <a href="{{ asset('storage/' . $inst['dokumen_lainnya']) }}"
+                                                                            target="_blank">{{ basename($inst['dokumen_lainnya']) }}</a>
                                                                     @endif
                                                                 </td>
                                                             </tr>
                                                         @empty
                                                             <tr>
-                                                                <td colspan="8" class="text-center">Tidak ada data Installment</td>
+                                                                <td colspan="8" class="text-center">Tidak ada data
+                                                                    Installment</td>
                                                             </tr>
                                                         @endforelse
                                                     </tbody>
@@ -310,35 +387,46 @@
                                                             <tr>
                                                                 <td>{{ $idx + 1 }}</td>
                                                                 <td>{{ $po['no_kontrak'] ?? '-' }}</td>
-                                                                <td>Rp. {{ number_format($po['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>Rp.
+                                                                    {{ number_format($po['nilai_invoice'] ?? 0, 0, ',', '.') }}
+                                                                </td>
                                                                 <td>{{ $po['nama_client'] ?? '-' }}</td>
-                                                                <td>Rp. {{ number_format($po['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
-                                                                <td>Rp. {{ number_format($po['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>Rp.
+                                                                    {{ number_format($po['nilai_pinjaman'] ?? 0, 0, ',', '.') }}
+                                                                </td>
+                                                                <td>Rp.
+                                                                    {{ number_format($po['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}
+                                                                </td>
 
                                                                 <td>
-                                                                    @if(!empty($po['dokumen_kontrak']))
-                                                                        <a href="{{ asset('storage/' . $po['dokumen_kontrak']) }}" target="_blank">{{ basename($po['dokumen_kontrak']) }}</a>
+                                                                    @if (!empty($po['dokumen_kontrak']))
+                                                                        <a href="{{ asset('storage/' . $po['dokumen_kontrak']) }}"
+                                                                            target="_blank">{{ basename($po['dokumen_kontrak']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($po['dokumen_so']))
-                                                                        <a href="{{ asset('storage/' . $po['dokumen_so']) }}" target="_blank">{{ basename($po['dokumen_so']) }}</a>
+                                                                    @if (!empty($po['dokumen_so']))
+                                                                        <a href="{{ asset('storage/' . $po['dokumen_so']) }}"
+                                                                            target="_blank">{{ basename($po['dokumen_so']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($po['dokumen_bast']))
-                                                                        <a href="{{ asset('storage/' . $po['dokumen_bast']) }}" target="_blank">{{ basename($po['dokumen_bast']) }}</a>
+                                                                    @if (!empty($po['dokumen_bast']))
+                                                                        <a href="{{ asset('storage/' . $po['dokumen_bast']) }}"
+                                                                            target="_blank">{{ basename($po['dokumen_bast']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($po['dokumen_lainnya']))
-                                                                        <a href="{{ asset('storage/' . $po['dokumen_lainnya']) }}" target="_blank">{{ basename($po['dokumen_lainnya']) }}</a>
+                                                                    @if (!empty($po['dokumen_lainnya']))
+                                                                        <a href="{{ asset('storage/' . $po['dokumen_lainnya']) }}"
+                                                                            target="_blank">{{ basename($po['dokumen_lainnya']) }}</a>
                                                                     @endif
                                                                 </td>
                                                             </tr>
                                                         @empty
                                                             <tr>
-                                                                <td colspan="9" class="text-center">Tidak ada data PO</td>
+                                                                <td colspan="9" class="text-center">Tidak ada data PO
+                                                                </td>
                                                             </tr>
                                                         @endforelse
                                                     </tbody>
@@ -431,35 +519,46 @@
                                                                 <td>{{ $idx + 1 }}</td>
                                                                 <td>{{ $inv['no_invoice'] }}</td>
                                                                 <td>{{ $inv['nama_client'] }}</td>
-                                                                <td>Rp. {{ number_format($inv['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
-                                                                <td>Rp. {{ number_format($inv['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
-                                                                <td>Rp. {{ number_format($inv['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                                                                <td>Rp.
+                                                                    {{ number_format($inv['nilai_invoice'] ?? 0, 0, ',', '.') }}
+                                                                </td>
+                                                                <td>Rp.
+                                                                    {{ number_format($inv['nilai_pinjaman'] ?? 0, 0, ',', '.') }}
+                                                                </td>
+                                                                <td>Rp.
+                                                                    {{ number_format($inv['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}
+                                                                </td>
                                                                 <td>{{ $inv['invoice_date'] }}</td>
                                                                 <td>{{ $inv['due_date'] }}</td>
                                                                 <td>
-                                                                    @if(!empty($inv['dokumen_invoice']))
-                                                                        <a href="{{ asset('storage/' . $inv['dokumen_invoice']) }}" target="_blank">{{ basename($inv['dokumen_invoice']) }}</a>
+                                                                    @if (!empty($inv['dokumen_invoice']))
+                                                                        <a href="{{ asset('storage/' . $inv['dokumen_invoice']) }}"
+                                                                            target="_blank">{{ basename($inv['dokumen_invoice']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($inv['dokumen_kontrak']))
-                                                                        <a href="{{ asset('storage/' . $inv['dokumen_kontrak']) }}" target="_blank">{{ basename($inv['dokumen_kontrak']) }}</a>
+                                                                    @if (!empty($inv['dokumen_kontrak']))
+                                                                        <a href="{{ asset('storage/' . $inv['dokumen_kontrak']) }}"
+                                                                            target="_blank">{{ basename($inv['dokumen_kontrak']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($inv['dokumen_so']))
-                                                                        <a href="{{ asset('storage/' . $inv['dokumen_so']) }}" target="_blank">{{ basename($inv['dokumen_so']) }}</a>
+                                                                    @if (!empty($inv['dokumen_so']))
+                                                                        <a href="{{ asset('storage/' . $inv['dokumen_so']) }}"
+                                                                            target="_blank">{{ basename($inv['dokumen_so']) }}</a>
                                                                     @endif
                                                                 </td>
                                                                 <td>
-                                                                    @if(!empty($inv['dokumen_bast']))
-                                                                        <a href="{{ asset('storage/' . $inv['dokumen_bast']) }}" target="_blank">{{ basename($inv['dokumen_bast']) }}</a>
+                                                                    @if (!empty($inv['dokumen_bast']))
+                                                                        <a href="{{ asset('storage/' . $inv['dokumen_bast']) }}"
+                                                                            target="_blank">{{ basename($inv['dokumen_bast']) }}</a>
                                                                     @endif
                                                                 </td>
                                                             </tr>
                                                         @empty
                                                             <tr>
-                                                                <td colspan="12" class="text-center">Tidak ada invoice</td>
+                                                                <td colspan="12" class="text-center">Tidak ada invoice
+                                                                </td>
                                                             </tr>
                                                         @endforelse
                                                     </tbody>
@@ -490,8 +589,8 @@
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
-                                                    name="jenis_pembiayaan" value="Invoice & Project Financing"
-                                                    required disabled>
+                                                    name="jenis_pembiayaan" value="Invoice & Project Financing" required
+                                                    disabled>
                                             </div>
 
                                             <div class="card border-1 shadow-none mb-3">
@@ -499,9 +598,9 @@
                                                     <div class="col-lg mb-3">
                                                         <label for="nama_perusahaan" class="form-label">Nama
                                                             Perusahaan</label>
-                                                        <input type="text" class="form-control"
-                                                            id="nama_perusahaan" name="nama_perusahaan"
-                                                            value="Techno Infinity" required disabled>
+                                                        <input type="text" class="form-control" id="nama_perusahaan"
+                                                            name="nama_perusahaan" value="Techno Infinity" required
+                                                            disabled>
                                                     </div>
 
                                                     <div class="col-lg mb-3">
@@ -527,9 +626,8 @@
                                                             Tujuan Pembiayaan
                                                         </label>
                                                         <input type="text" class="form-control" id="tujuan"
-                                                            name="tujuan"
-                                                            value="Kebutuhan Gaji Operasional/Umum Sept" required
-                                                            disabled>
+                                                            name="tujuan" value="Kebutuhan Gaji Operasional/Umum Sept"
+                                                            required disabled>
                                                     </div>
                                                 </div>
                                             </div>
@@ -561,8 +659,8 @@
 
                                             <div class="col-lg mb-3">
                                                 <label for="nisbah" class="form-label">Bagi Hasil (Nisbah)</label>
-                                                <input type="text" class="form-control" id="nisbah"
-                                                    name="nisbah" value="2% flat / bulan" required disabled>
+                                                <input type="text" class="form-control" id="nisbah" name="nisbah"
+                                                    value="2% flat / bulan" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
@@ -579,9 +677,8 @@
                                                 <label for="jaminan" class="form-label">
                                                     Jaminan
                                                 </label>
-                                                <input type="text" class="form-control" id="jaminan"
-                                                    name="jaminan" value="Invoice & Project Financing" required
-                                                    disabled>
+                                                <input type="text" class="form-control" id="jaminan" name="jaminan"
+                                                    value="Invoice & Project Financing" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
@@ -596,7 +693,8 @@
 
                                             <div class="d-flex justify-content-end">
                                                 <button type="submit" class="btn btn-primary" id="btnSimpanKontrak">
-                                                    <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSimpanKontrakSpinner"></span>
+                                                    <span class="spinner-border spinner-border-sm me-2 d-none"
+                                                        id="btnSimpanKontrakSpinner"></span>
                                                     Simpan
                                                 </button>
                                             </div>
@@ -634,7 +732,7 @@
 
             // --- DOM ELEMENT CACHE ---
             const dom = {
-                stepper: document.querySelector('.d-flex.overflow-auto'),
+                stepper: document.querySelector('.stepper-wrapper'),
                 alertPeninjauan: document.getElementById('alertPeninjauan'),
                 activityTab: document.querySelector('[data-bs-target="#activity"]'),
                 detailKontrakTab: document.querySelector('[data-bs-target="#detail-kontrak"]'),
@@ -725,10 +823,15 @@
 
             // --- UI UPDATES ---
             const updateStepper = () => {
-                document.querySelectorAll('.stepper-arrow').forEach((arrow, index) => {
+                document.querySelectorAll('.stepper-item').forEach((item, index) => {
                     const step = index + 1;
-                    arrow.classList.toggle('completed', step < state.currentStep);
-                    arrow.classList.toggle('active', step === state.currentStep);
+                    item.classList.remove('completed', 'active');
+                    
+                    if (step < state.currentStep) {
+                        item.classList.add('completed');
+                    } else if (step === state.currentStep) {
+                        item.classList.add('active');
+                    }
                 });
                 toggleDisplay(dom.buttons.setujuiPeminjaman, state.currentStep === 2);
                 dom.alertPeninjauan.style.display = state.currentStep >= 2 ? 'none' : 'block';
@@ -788,11 +891,11 @@
 
             // --- EVENT HANDLERS ---
             const handleStepperClick = (e) => {
-                const target = e.target.closest('.stepper-arrow');
+                const target = e.target.closest('.stepper-item');
                 if (target) {
                     const step = parseInt(target.dataset.step);
                     goToStep(step);
-                    
+
                     // Auto switch ke tab Detail Kontrak jika step 7
                     if (step === 7) {
                         switchToDetailKontrakTab();
@@ -863,7 +966,7 @@
 
             const handleGenerateKontrakSubmit = (e) => {
                 e.preventDefault();
-                
+
                 const form = e.target;
                 if (!form.checkValidity()) {
                     e.stopPropagation();
@@ -883,10 +986,10 @@
                 setTimeout(() => {
                     btnSimpan.disabled = false;
                     spinner.classList.add('d-none');
-                    
+
                     // Reset form
                     form.classList.remove('was-validated');
-                    
+
                     // Success - pindah ke step 8
                     goToStep(8);
                     switchToActivityTab();
@@ -902,7 +1005,7 @@
             const handlePreviewKontrak = () => {
                 // Get peminjaman ID from current page
                 const peminjamanId = {{ $peminjaman['id'] ?? 1 }};
-                
+
                 // Open preview in new tab
                 window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
             };
@@ -935,7 +1038,7 @@
             // Event listener untuk form Generate Kontrak di Step 7
             const formGenerateKontrak = document.getElementById('formGenerateKontrak');
             formGenerateKontrak?.addEventListener('submit', handleGenerateKontrakSubmit);
-            
+
             const btnBatalKontrak = document.getElementById('btnBatalKontrak');
             btnBatalKontrak?.addEventListener('click', handleBatalKontrak);
 
