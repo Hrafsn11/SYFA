@@ -117,28 +117,30 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nama
                                                         Investor</small>
-                                                    <p class="fw-bold mb-0">Adam</p>
+                                                    <p class="fw-bold mb-0">{{ $formKerjaInvestor->nama_investor }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Jenis
                                                         Deposito</small>
-                                                    <p class="fw-bold mb-0">Regular</p>
+                                                    <p class="fw-bold mb-0">{{ ucfirst($formKerjaInvestor->deposito) }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Tanggal
                                                         Investasi</small>
-                                                    <p class="fw-bold mb-0">15 Oktober 2025</p>
+                                                    <p class="fw-bold mb-0">
+                                                        {{ $formKerjaInvestor->tanggal_pembayaran ? $formKerjaInvestor->tanggal_pembayaran->format('d F Y') : '-' }}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Lama
                                                         Investasi</small>
-                                                    <p class="fw-bold mb-0">1 Bulan</p>
+                                                    <p class="fw-bold mb-0">{{ $formKerjaInvestor->lama_investasi ?? '-' }} Bulan</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -152,21 +154,21 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Jumlah
                                                         Investasi</small>
-                                                    <p class="fw-bold mb-0">Rp 10.000.000</p>
+                                                    <p class="fw-bold mb-0">Rp {{ number_format($formKerjaInvestor->jumlah_investasi, 0, ',', '.') }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
                                                         Hasil</small>
-                                                    <p class="fw-bold mb-0">10%</p>
+                                                    <p class="fw-bold mb-0">{{ $formKerjaInvestor->bagi_hasil }}%</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nominal Bagi Hasil
                                                         Keseluruhan</small>
-                                                    <p class="fw-bold mb-0">Rp 1.000.000</p>
+                                                    <p class="fw-bold mb-0">Rp {{ number_format($formKerjaInvestor->bagi_hasil_keseluruhan, 0, ',', '.') }}</p>
                                                 </div>
                                             </div>
                                         </div>
