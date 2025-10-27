@@ -17,8 +17,10 @@
                     <div class="row">
                         <div class="col-lg mb-3">
                             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                            <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
-                                value="Techno Infinity" required disabled>
+                            <input type="text" class="form-control non-editable" id="nama_perusahaan"
+                                name="nama_perusahaan"
+                                value="{{ old('nama_perusahaan', optional($master)->nama_debitur ?? 'Techno Infinity') }}"
+                                required readonly tabindex="-1">
                         </div>
                     </div>
                     <div class="card border-1 mb-3 shadow-none" id="cardSumberPembiayaan">
@@ -50,16 +52,22 @@
                                             @php
                                                 // support both array and object representations
                                                 if (is_array($sumber)) {
-                                                    $percent = $sumber['persentase'] ?? $sumber['bagi_hasil'] ?? $sumber['persentase_bagi_hasil'] ?? 2;
-                                                    $label = $sumber['nama'] ?? $sumber['nama_instansi'] ?? '';
+                                                    $percent =
+                                                        $sumber['persentase'] ??
+                                                        ($sumber['bagi_hasil'] ??
+                                                            ($sumber['persentase_bagi_hasil'] ?? 2));
+                                                    $label = $sumber['nama'] ?? ($sumber['nama_instansi'] ?? '');
                                                     $val = $sumber['id'] ?? '';
                                                 } else {
-                                                    $percent = $sumber->persentase ?? $sumber->bagi_hasil ?? $sumber->persentase_bagi_hasil ?? 2;
-                                                    $label = $sumber->nama ?? $sumber->nama_instansi ?? '';
-                                                    $val = $sumber->id ?? $sumber->id_instansi ?? '';
+                                                    $percent =
+                                                        $sumber->persentase ??
+                                                        ($sumber->bagi_hasil ?? ($sumber->persentase_bagi_hasil ?? 2));
+                                                    $label = $sumber->nama ?? ($sumber->nama_instansi ?? '');
+                                                    $val = $sumber->id ?? ($sumber->id_instansi ?? '');
                                                 }
                                             @endphp
-                                            <option value="{{ $val }}" data-percent="{{ $percent }}">{{ $label }}</option>
+                                            <option value="{{ $val }}" data-percent="{{ $percent }}">
+                                                {{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -71,17 +79,22 @@
                             <div class="row mb-3">
                                 <div class="col-lg-3 col-sm-12 mb-3">
                                     <label for="selectBank" class="form-label">Nama Bank</label>
-                                    <select class="form-select" id="selectBank" name="nama_bank" required>
+                                    <select class="form-select non-editable select-non-editable" id="selectBank"
+                                        name="nama_bank" required disabled aria-disabled="true"
+                                        data-selected="{{ old('nama_bank', optional($master)->nama_bank) }}">
                                         <option value="">Pilih Bank</option>
                                         @foreach ($banks as $bank)
-                                            <option value="{{ $bank }}">{{ $bank }}</option>
+                                            <option value="{{ $bank }}"
+                                                {{ old('nama_bank', optional($master)->nama_bank) == $bank ? 'selected' : '' }}>
+                                                {{ $bank }} </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label for="no_rekening" class="form-label">No. Rekening</label>
-                                    <input type="text" class="form-control" id="no_rekening" name="no_rekening"
-                                        placeholder="Masukkan No. Rekening" required>
+                                    <input type="text" class="form-control non-editable" id="no_rekening"
+                                        name="no_rekening" value="{{ old('no_rekening', optional($master)->no_rek) }}"
+                                        placeholder="Masukkan No. Rekening" required readonly tabindex="-1">
                                 </div>
                                 <div class="col-md-5 mb-3">
                                     <label for="nama_rekening" class="form-label">Nama Rekening</label>
@@ -100,13 +113,15 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nilai_kol" class="form-label">Nilai KOL</label>
-                                    <input type="text" class="form-control" id="nilai_kol" name="nilai_kol"
-                                        placeholder="Nilai KOL" disabled>
+                                    <input type="text" class="form-control non-editable" id="nilai_kol" name="nilai_kol"
+                                        value="{{ old('nilai_kol', optional($master->kol)->kol ?? '') }}"
+                                        placeholder="Nilai KOL" readonly tabindex="-1">
                                 </div>
                                 <div class="">
                                     <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
                                     <input type="text" class="form-control" id="defaultFormControlInput"
-                                        placeholder="Tujuan Pembiayaan" aria-describedby="defaultFormControlHelp" />
+                                        name="tujuan_pembiayaan" placeholder="Tujuan Pembiayaan"
+                                        aria-describedby="defaultFormControlHelp" />
                                 </div>
                             </div>
 
@@ -179,8 +194,9 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
                                         <div class="input-group">
-                                            <input type="number" class="form-control" id="total_bagi_hasil"
-                                                name="total_bagi_hasil" placeholder="2% (Rp. 180.000)" disabled>
+                                            <input type="text" class="form-control input-rupiah non-editable"
+                                                id="total_bagi_hasil" name="total_bagi_hasil" placeholder="2%" readonly
+                                                tabindex="-1">
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -197,8 +213,9 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="pembayaran_total"
-                                                name="pembayaran_total" placeholder="Rp. 9.180.000" disabled>
+                                            <input type="text" class="form-control input-rupiah non-editable"
+                                                id="pembayaran_total" name="pembayaran_total" placeholder="" readonly
+                                                tabindex="-1">
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -256,7 +273,7 @@
                                         <label for="bayar_per_bulan" class="form-label">Yang harus dibayarkan</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control bg-light" id="bayar_per_bulan"
-                                                value="Rp. 3.180.000" disabled>
+                                                disabled>
                                             <span class="input-group-text">/Bulan</span>
                                         </div>
                                     </div>
@@ -319,8 +336,10 @@
                 const percent = (typeof window.getBagiPercent === 'function') ? window.getBagiPercent() : 2;
                 const bagi = Math.round(raw * (percent / 100) * 100) / 100;
                 const pembayaran = Math.round((raw + bagi) * 100) / 100;
-                window.setCleaveValue(totalBagiHasilEl, 'Rp ' + bagi.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-                window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaran.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                window.setCleaveValue(totalBagiHasilEl, 'Rp ' + bagi.toString().replace(/\B(?=(\d{3})+(?!\d))/g,
+                    ","));
+                window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaran.toString().replace(
+                    /\B(?=(\d{3})+(?!\d))/g, ","));
             }
 
             if (totalPinjamanEl) {
@@ -338,7 +357,11 @@
             try {
                 // use jQuery in case select2 wraps the select
                 $('#tenorPembayaran').on('change.select2', function() {
-                    try { recalcInstallment(); } catch(e) { console.error(e); }
+                    try {
+                        recalcInstallment();
+                    } catch (e) {
+                        console.error(e);
+                    }
                 });
             } catch (e) {
                 // ignore if jQuery/select2 not available
@@ -362,7 +385,8 @@
                     const ppsAmount = Math.round(totalBagi * 0.40 * 100) / 100;
                     const sfinanceAmount = Math.round(totalBagi * 0.60 * 100) / 100;
                     const totalPembayaranVal = Math.round((totalPinjamanVal + totalBagi) * 100) / 100;
-                    const monthlyPay = tenorVal > 0 ? Math.round((totalPembayaranVal / tenorVal) * 100) / 100 : totalPembayaranVal;
+                    const monthlyPay = tenorVal > 0 ? Math.round((totalPembayaranVal / tenorVal) * 100) / 100 :
+                        totalPembayaranVal;
 
                     // Update UI display fields (they are disabled inputs)
                     const elPpsDebit = document.getElementById('pps_debit');
@@ -371,8 +395,10 @@
                     const elTotalPembayaran = document.getElementById('total_pembayaran_installment');
                     const elBayarPerBulan = document.getElementById('bayar_per_bulan');
 
-                    if (elPpsDebit) elPpsDebit.value = `${bagiPercent}% (Rp. ${numberWithThousandSeparator(totalBagi)})`;
-                    if (elPpsPercentage) elPpsPercentage.value = `40% (Rp. ${numberWithThousandSeparator(ppsAmount)})`;
+                    if (elPpsDebit) elPpsDebit.value =
+                        `${bagiPercent}% (Rp. ${numberWithThousandSeparator(totalBagi)})`;
+                    if (elPpsPercentage) elPpsPercentage.value =
+                        `40% (Rp. ${numberWithThousandSeparator(ppsAmount)})`;
                     if (elSFinance) elSFinance.value = `60% (Rp. ${numberWithThousandSeparator(sfinanceAmount)})`;
                     if (elTotalPembayaran) elTotalPembayaran.value = formatCurrency(totalPembayaranVal);
                     if (elBayarPerBulan) elBayarPerBulan.value = formatCurrency(monthlyPay);
@@ -392,38 +418,38 @@
                 }
             }
 
-                // Update nominal_pinjaman from installmentData (sum nilai_invoice) and recalc
-                function updateNominalFromDetails() {
-                    try {
-                        if (!nominalPinjamanEl) return;
-                        let sum = 0;
-                        installmentData.forEach(function(it) {
-                            const v = Number(normalizeNumericForServer(it.nilai_invoice || 0)) || 0;
-                            sum += v;
-                        });
-                        if (typeof window.setCleaveValue === 'function') {
-                            window.setCleaveValue(nominalPinjamanEl, 'Rp ' + numberWithThousandSeparator(sum));
-                        } else {
-                            nominalPinjamanEl.value = sum;
-                        }
-                        // ensure tenor defaults to 3 if not set and force recalc so UI updates
-                        try {
-                            if (tenorEl) {
-                                // set via jQuery so Select2 UI updates and triggers change
-                                try {
-                                    $(tenorEl).val('3').trigger('change');
-                                } catch (_) {
-                                    tenorEl.value = '3';
-                                }
-                            }
-                        } catch (e) {
-                            // ignore
-                        }
-                        recalcInstallment();
-                    } catch (err) {
-                        console.error('updateNominalFromDetails error', err);
+            // Update nominal_pinjaman from installmentData (sum nilai_invoice) and recalc
+            function updateNominalFromDetails() {
+                try {
+                    if (!nominalPinjamanEl) return;
+                    let sum = 0;
+                    installmentData.forEach(function(it) {
+                        const v = Number(normalizeNumericForServer(it.nilai_invoice || 0)) || 0;
+                        sum += v;
+                    });
+                    if (typeof window.setCleaveValue === 'function') {
+                        window.setCleaveValue(nominalPinjamanEl, 'Rp ' + numberWithThousandSeparator(sum));
+                    } else {
+                        nominalPinjamanEl.value = sum;
                     }
+                    // ensure tenor defaults to 3 if not set and force recalc so UI updates
+                    try {
+                        if (tenorEl) {
+                            // set via jQuery so Select2 UI updates and triggers change
+                            try {
+                                $(tenorEl).val('3').trigger('change');
+                            } catch (_) {
+                                tenorEl.value = '3';
+                            }
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                    recalcInstallment();
+                } catch (err) {
+                    console.error('updateNominalFromDetails error', err);
                 }
+            }
 
             if (nominalPinjamanEl) {
                 nominalPinjamanEl.addEventListener('input', function() {
@@ -463,22 +489,24 @@
                     $('#divSumberEksternal').slideUp();
                 }
                 // Recalculate bagi hasil when sumber type changes
-                try { recalcBagiHasil(); } catch (e) {}
+                try {
+                    recalcBagiHasil();
+                } catch (e) {}
             });
 
             // When external sumber selection changes, recalc bagi hasil
             $('#select2Basic').on('change', function() {
-                try { recalcBagiHasil(); } catch (e) {}
                 try {
-                } catch (e) {
+                    recalcBagiHasil();
+                } catch (e) {}
+                try {} catch (e) {
                     // suppressed
                 }
-                try {
-                } catch (e) {}
+                try {} catch (e) {}
             });
 
 
-            
+
 
             // Helper: get current bagi hasil percent based on sumber selection
             window.getBagiPercent = function() {
@@ -549,7 +577,8 @@
                 const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice')) || 0;
                 const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman')) || 0;
                 const defaultPercent = getBagiPercent();
-                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math.round(nilai_pinjaman * (defaultPercent/100));
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil')) || Math
+                    .round(nilai_pinjaman * (defaultPercent / 100));
                 let invoice_date = $('#modal_invoice_date').val();
                 let due_date = $('#modal_due_date').val();
 
@@ -568,7 +597,9 @@
                 }
 
                 // Duplicate check: ensure no_invoice is unique in current invoiceFinancingData
-                const duplicateIndex = invoiceFinancingData.findIndex(function(it) { return it.no_invoice === no_invoice; });
+                const duplicateIndex = invoiceFinancingData.findIndex(function(it) {
+                    return it.no_invoice === no_invoice;
+                });
                 if (duplicateIndex !== -1 && (editInvoiceIndex === -1 || duplicateIndex !== editInvoiceIndex)) {
                     alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
                     return;
@@ -604,7 +635,8 @@
                 const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_po')) || 0;
                 const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman_po')) || 0;
                 const defaultPercentPo = getBagiPercent();
-                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_po')) || Math.round(nilai_pinjaman * (defaultPercentPo/100));
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_po')) ||
+                    Math.round(nilai_pinjaman * (defaultPercentPo / 100));
                 let contract_date = $('#modal_contract_date_po').val();
                 let due_date = $('#modal_due_date_po').val();
 
@@ -623,9 +655,12 @@
                 }
 
                 // Duplicate check for PO contract numbers (block on save)
-                const dupPo = poFinancingData.findIndex(function(it) { return it.no_kontrak === no_kontrak; });
+                const dupPo = poFinancingData.findIndex(function(it) {
+                    return it.no_kontrak === no_kontrak;
+                });
                 if (dupPo !== -1 && (editInvoiceIndex === -1 || dupPo !== editInvoiceIndex)) {
-                    alert('Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    alert(
+                        'Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
                     return;
                 }
 
@@ -652,8 +687,7 @@
 
                 modalInstance.hide();
                 renderPOFinancingTable();
-            }
-            else if (currentJenisPembiayaan === 'Installment') {
+            } else if (currentJenisPembiayaan === 'Installment') {
                 const index = editInvoiceIndex >= 0 ? editInvoiceIndex : installmentData.length;
                 const no_invoice = $('#modal_no_invoice_inst').val();
                 const nama_client = $('#modal_nama_client_inst').val();
@@ -673,7 +707,9 @@
                 }
 
                 // Duplicate check for installment invoices
-                const dupInst = installmentData.findIndex(function(it) { return it.no_invoice === no_invoice; });
+                const dupInst = installmentData.findIndex(function(it) {
+                    return it.no_invoice === no_invoice;
+                });
                 if (dupInst !== -1 && (editInvoiceIndex === -1 || dupInst !== editInvoiceIndex)) {
                     alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
                     return;
@@ -698,14 +734,14 @@
 
                 modalInstance.hide();
                 renderInstallmentTable();
-            }
-            else if (currentJenisPembiayaan === 'Factoring') {
+            } else if (currentJenisPembiayaan === 'Factoring') {
                 const index = editInvoiceIndex >= 0 ? editInvoiceIndex : factoringData.length;
                 const no_kontrak = $('#modal_no_kontrak_fact').val();
                 const nama_client = $('#modal_nama_client_fact').val();
                 const nilai_invoice = window.getCleaveRawValue(document.getElementById('modal_nilai_invoice_fact')) || 0;
                 const nilai_pinjaman = window.getCleaveRawValue(document.getElementById('modal_nilai_pinjaman_fact')) || 0;
-                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_fact')) || Math.round(nilai_pinjaman * 0.02);
+                const nilai_bagi_hasil = window.getCleaveRawValue(document.getElementById('modal_nilai_bagi_hasil_fact')) ||
+                    Math.round(nilai_pinjaman * 0.02);
                 let contract_date = $('#modal_contract_date_fact').val();
                 let due_date = $('#modal_due_date_fact').val();
 
@@ -724,9 +760,12 @@
                 }
 
                 // Duplicate check for Factoring contract numbers (block on save)
-                const dupFact = factoringData.findIndex(function(it) { return it.no_kontrak === no_kontrak; });
+                const dupFact = factoringData.findIndex(function(it) {
+                    return it.no_kontrak === no_kontrak;
+                });
                 if (dupFact !== -1 && (editInvoiceIndex === -1 || dupFact !== editInvoiceIndex)) {
-                    alert('Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    alert(
+                        'Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
                     return;
                 }
 
@@ -755,6 +794,7 @@
                 renderFactoringTable();
             }
         }
+
         function renderPOFinancingTable() {
             const tbody = $('#poFinancingTable tbody');
             tbody.empty();
@@ -797,9 +837,12 @@
 
                 $('#modal_no_kontrak_po').val(po.no_kontrak);
                 $('#modal_nama_client_po').val(po.nama_client);
-                window.setCleaveValue(document.getElementById('modal_nilai_invoice_po'), 'Rp ' + numberWithThousandSeparator(po.nilai_invoice || 0));
-                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_po'), 'Rp ' + numberWithThousandSeparator(po.nilai_pinjaman || 0));
-                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_po'), 'Rp ' + numberWithThousandSeparator(po.nilai_bagi_hasil || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_po'), 'Rp ' +
+                    numberWithThousandSeparator(po.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_po'), 'Rp ' +
+                    numberWithThousandSeparator(po.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_po'), 'Rp ' +
+                    numberWithThousandSeparator(po.nilai_bagi_hasil || 0));
                 $('#modal_contract_date_po').val(po.contract_date || '');
                 $('#modal_due_date_po').val(po.due_date || '');
 
@@ -859,7 +902,8 @@
 
                 $('#modal_no_invoice_inst').val(inst.no_invoice);
                 $('#modal_nama_client_inst').val(inst.nama_client);
-                window.setCleaveValue(document.getElementById('modal_nilai_invoice_inst'), 'Rp ' + numberWithThousandSeparator(inst.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_inst'), 'Rp ' +
+                    numberWithThousandSeparator(inst.nilai_invoice || 0));
                 $('#modal_invoice_date_inst').val(inst.invoice_date || '');
                 $('#modal_nama_barang').val(inst.nama_barang || '');
 
@@ -914,9 +958,12 @@
 
                 $('#modal_no_kontrak_fact').val(f.no_kontrak);
                 $('#modal_nama_client_fact').val(f.nama_client);
-                window.setCleaveValue(document.getElementById('modal_nilai_invoice_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_invoice || 0));
-                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_pinjaman || 0));
-                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_fact'), 'Rp ' + numberWithThousandSeparator(f.nilai_bagi_hasil || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice_fact'), 'Rp ' +
+                    numberWithThousandSeparator(f.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman_fact'), 'Rp ' +
+                    numberWithThousandSeparator(f.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil_fact'), 'Rp ' +
+                    numberWithThousandSeparator(f.nilai_bagi_hasil || 0));
                 $('#modal_contract_date_fact').val(f.contract_date || '');
                 $('#modal_due_date_fact').val(f.due_date || '');
 
@@ -974,9 +1021,12 @@
 
                 $('#modal_no_invoice').val(inv.no_invoice);
                 $('#modal_nama_client').val(inv.nama_client);
-                window.setCleaveValue(document.getElementById('modal_nilai_invoice'), 'Rp ' + numberWithThousandSeparator(inv.nilai_invoice || 0));
-                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman'), 'Rp ' + numberWithThousandSeparator(inv.nilai_pinjaman || 0));
-                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil'), 'Rp ' + numberWithThousandSeparator(inv.nilai_bagi_hasil || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_invoice'), 'Rp ' +
+                    numberWithThousandSeparator(inv.nilai_invoice || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_pinjaman'), 'Rp ' +
+                    numberWithThousandSeparator(inv.nilai_pinjaman || 0));
+                window.setCleaveValue(document.getElementById('modal_nilai_bagi_hasil'), 'Rp ' +
+                    numberWithThousandSeparator(inv.nilai_bagi_hasil || 0));
                 $('#modal_invoice_date').val(inv.invoice_date || '');
                 $('#modal_due_date').val(inv.due_date || '');
 
@@ -1069,10 +1119,13 @@
                 }))));
 
                 invoiceFinancingData.forEach(function(inv, idx) {
-                    if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv.dokumen_invoice_file);
-                    if (inv.dokumen_kontrak_file) fd.append(`files[${idx}][dokumen_kontrak]`, inv.dokumen_kontrak_file);
+                    if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv
+                        .dokumen_invoice_file);
+                    if (inv.dokumen_kontrak_file) fd.append(`files[${idx}][dokumen_kontrak]`, inv
+                        .dokumen_kontrak_file);
                     if (inv.dokumen_so_file) fd.append(`files[${idx}][dokumen_so]`, inv.dokumen_so_file);
-                    if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv.dokumen_bast_file);
+                    if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv
+                        .dokumen_bast_file);
                 });
                 postUrl = '{{ route('peminjaman.invoice.store') }}';
             } else if (currentJenisPembiayaan === 'PO Financing') {
@@ -1080,17 +1133,23 @@
                 poFinancingData.forEach(function(p, idx) {
                     fd.append(`details[${idx}][no_kontrak]`, p.no_kontrak || '');
                     fd.append(`details[${idx}][nama_client]`, p.nama_client || '');
-                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(p.nilai_invoice || 0));
-                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(p.nilai_pinjaman || 0));
-                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(p.nilai_bagi_hasil || 0));
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(p.nilai_invoice ||
+                        0));
+                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(p
+                        .nilai_pinjaman || 0));
+                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(p
+                        .nilai_bagi_hasil || 0));
                     fd.append(`details[${idx}][kontrak_date]`, p.contract_date || '');
                     fd.append(`details[${idx}][due_date]`, p.due_date || '');
 
                     // Append files for each PO detail using keys like details[0][dokumen_kontrak]
-                    if (p.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, p.dokumen_kontrak_file);
+                    if (p.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, p
+                        .dokumen_kontrak_file);
                     if (p.dokumen_so_file) fd.append(`details[${idx}][dokumen_so]`, p.dokumen_so_file);
-                    if (p.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, p.dokumen_bast_file);
-                    if (p.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, p.dokumen_lainnya_file);
+                    if (p.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, p
+                    .dokumen_bast_file);
+                    if (p.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, p
+                        .dokumen_lainnya_file);
                 });
 
                 postUrl = '{{ route('peminjaman.po.store') }}';
@@ -1101,21 +1160,29 @@
                 factoringData.forEach(function(f, idx) {
                     fd.append(`details[${idx}][no_kontrak]`, f.no_kontrak || '');
                     fd.append(`details[${idx}][nama_client]`, f.nama_client || '');
-                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(f.nilai_invoice || 0));
-                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(f.nilai_pinjaman || 0));
-                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(f.nilai_bagi_hasil || 0));
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(f.nilai_invoice ||
+                        0));
+                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(f
+                        .nilai_pinjaman || 0));
+                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(f
+                        .nilai_bagi_hasil || 0));
                     fd.append(`details[${idx}][kontrak_date]`, f.contract_date || '');
                     fd.append(`details[${idx}][due_date]`, f.due_date || '');
 
-                    if (f.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, f.dokumen_invoice_file);
-                    if (f.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, f.dokumen_kontrak_file);
+                    if (f.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, f
+                        .dokumen_invoice_file);
+                    if (f.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, f
+                        .dokumen_kontrak_file);
                     if (f.dokumen_so_file) fd.append(`details[${idx}][dokumen_so]`, f.dokumen_so_file);
-                    if (f.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, f.dokumen_bast_file);
+                    if (f.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, f
+                    .dokumen_bast_file);
                 });
 
                 // compute header totals if not provided
                 let sumInvoice = 0;
-                factoringData.forEach(function(f) { sumInvoice += Number(normalizeNumericForServer(f.nilai_invoice || 0) || 0); });
+                factoringData.forEach(function(f) {
+                    sumInvoice += Number(normalizeNumericForServer(f.nilai_invoice || 0) || 0);
+                });
                 fd.set('total_nominal_yang_dialihkan', normalizeNumericForServer(sumInvoice));
                 // compute total_bagi_hasil as 2% fallback
                 const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
@@ -1131,12 +1198,15 @@
                 installmentData.forEach(function(it, idx) {
                     fd.append(`details[${idx}][no_invoice]`, it.no_invoice || '');
                     fd.append(`details[${idx}][nama_client]`, it.nama_client || '');
-                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(it.nilai_invoice || 0));
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(it
+                        .nilai_invoice || 0));
                     fd.append(`details[${idx}][invoice_date]`, it.invoice_date || '');
                     fd.append(`details[${idx}][nama_barang]`, it.nama_barang || '');
 
-                    if (it.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, it.dokumen_invoice_file);
-                    if (it.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, it.dokumen_lainnya_file);
+                    if (it.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, it
+                        .dokumen_invoice_file);
+                    if (it.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, it
+                        .dokumen_lainnya_file);
                 });
 
                 postUrl = '{{ route('peminjaman.installment.store') }}';
@@ -1145,7 +1215,8 @@
             // If posting Installment, ensure header computed fields are present
             if (currentJenisPembiayaan === 'Installment') {
                 const nominalElForSubmit = document.getElementById('nominal_pinjaman');
-                const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit._computed : null;
+                const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit
+                    ._computed : null;
                 if (computed) {
                     fd.set('total_pinjaman', computed.totalPinjaman);
                     fd.set('tenor_pembayaran', computed.tenor);
@@ -1208,7 +1279,9 @@
                 data: fd,
                 processData: false,
                 contentType: false,
-                headers: { 'X-CSRF-TOKEN': $('input[name="_token"]').val() },
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
                 beforeSend: function() {
                     // optional: show loader
                 },
@@ -1226,7 +1299,8 @@
                             };
 
                             let targetId = null;
-                            if (resp.data && resp.data.id_invoice_financing) targetId = resp.data.id_invoice_financing;
+                            if (resp.data && resp.data.id_invoice_financing) targetId = resp.data
+                                .id_invoice_financing;
                             else if (resp.id) targetId = resp.id;
 
                             if (targetId) {
@@ -1261,6 +1335,18 @@
                 $('#cardSumberPembiayaan').hide();
                 $('#rowLampiranSID').hide();
                 $('#installmentTable').show();
+                // Ensure tenor default and recalc so monthly payment updates immediately
+                try {
+                    const tEl = document.getElementById('tenorPembayaran');
+                    if (tEl && (!tEl.value || tEl.value === '')) {
+                        tEl.value = '3';
+                    }
+                    // Update nominal from details (sum) and recalc
+                    if (typeof updateNominalFromDetails === 'function') updateNominalFromDetails();
+                    if (typeof recalcInstallment === 'function') recalcInstallment();
+                } catch (e) {
+                    // ignore
+                }
             } else {
                 $('#formNonInstallment').show();
                 $('#formInstallment').hide();
@@ -1336,6 +1422,20 @@
                         dropdownParent: $this.closest('.modal').length ? $this.closest('.modal') : $this
                             .parent()
                     });
+
+                    // If server passed a preselected value, apply it so Select2 renders it
+                    const preselected = $this.data('selected');
+                    if (preselected) {
+                        $this.val(preselected).trigger('change.select2');
+                    }
+
+                    if ($this.hasClass('select-non-editable')) {
+                        $this.prop('disabled', true);
+                        const container = $this.next('.select2-container');
+                        if (container && container.length) {
+                            container.css('pointer-events', 'none').css('opacity', 0.6);
+                        }
+                    }
                 });
             }
         }
@@ -1398,24 +1498,55 @@
                         elem._flatpickr.destroy();
                     }
                     // Reinitialize
-                        // disable past dates by setting minDate to today
-                        const today = new Date();
-                        today.setHours(0,0,0,0);
-                        elem.flatpickr({
-                            monthSelectorType: 'static',
-                            dateFormat: 'd/m/Y',
-                            altInput: true,
-                            altFormat: 'j F Y',
-                            minDate: today,
-                            disable: [function(date) {
-                                const d = new Date(date);
-                                d.setHours(0,0,0,0);
-                                // disable dates before today
-                                return d < today;
-                            }]
-                        });
+                    // disable past dates by setting minDate to today
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    elem.flatpickr({
+                        monthSelectorType: 'static',
+                        dateFormat: 'd/m/Y',
+                        altInput: true,
+                        altFormat: 'j F Y',
+                        minDate: today,
+                        disable: [function(date) {
+                            const d = new Date(date);
+                            d.setHours(0, 0, 0, 0);
+                            // disable dates before today
+                            return d < today;
+                        }]
+                    });
                 });
             }
         }
+
+        function convertDMYToISO(dmy) {
+            if (!dmy) return null;
+            if (/^\d{4}-\d{2}-\d{2}$/.test(dmy)) return dmy;
+            const parts = dmy.split('/');
+            if (parts.length === 3) {
+                const d = parts[0].padStart(2, '0');
+                const m = parts[1].padStart(2, '0');
+                const y = parts[2];
+                return `${y}-${m}-${d}`;
+            }
+            return dmy;
+        }
+
+        // Normalize numeric values to plain number string for server (remove currency formatting)
+        function normalizeNumericForServer(v) {
+            if (v === null || typeof v === 'undefined') return '';
+            if (typeof v === 'number') return v.toString();
+            // If Cleave raw getter exists and returned a number-like string, keep digits and dot
+            return String(v).toString().replace(/[^0-9\.\-]+/g, '');
+        }
+
+        (function() {
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .non-editable[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+                .select-non-editable[disabled] + .select2-container { pointer-events: none; opacity: 0.6; }
+            `;
+            document.head.appendChild(style);
+
+        })();
     </script>
 @endpush
