@@ -1,18 +1,16 @@
 <?php
 
+use App\Http\Controllers\FormKerjaInvestorController;
+use App\Http\Controllers\Peminjaman\PeminjamanController;
+use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
+use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
+use App\Http\Controllers\PengembalianPinjamanController;
+use App\Livewire\ConfigMatrixScore;
 use App\Livewire\Dashboard;
+use App\Livewire\PermissionManagement;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
-use App\Livewire\ConfigMatrixScore;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\ConfigMatrixPinjaman;
-use App\Livewire\PermissionManagement;
-use App\Livewire\Peminjaman\PeminjamanIndex;
-use App\Livewire\Peminjaman\PeminjamanCreate;
-use App\Http\Controllers\Peminjaman\PeminjamanController;
-use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
-use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
-use App\Http\Controllers\PengembalianPinjamanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,8 +51,9 @@ Route::middleware([
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
 
+    Route::get('form-kerja-investor', [FormKerjaInvestorController::class, 'index'])->name('form-kerja-investor.index');
+    Route::get('form-kerja-investor/detail', [FormKerjaInvestorController::class, 'show'])->name('form-kerja-investor.show');
 
-  
     Route::get('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'index'])->name('matrixpinjaman');
     Route::post('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'store']);
     Route::get('config-matrix-pinjaman/{id}/edit', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'edit']);
@@ -63,9 +62,9 @@ Route::middleware([
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
     Route::get('master-data/master-data-kol', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('masterdatakol.index');
     Route::get('master-data/sumber-pendanaan-eksternal', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('sumberpendanaaneksternal.index');
-    
+
     // Master Debitur dan Investor
-    Route::prefix('master-data/debitur-investor')->name('master-data.debitur-investor.')->group(function() {
+    Route::prefix('master-data/debitur-investor')->name('master-data.debitur-investor.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'index'])->name('index');
         Route::get('create', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'store'])->name('store');
@@ -78,7 +77,7 @@ Route::middleware([
     });
 
     // Master KOL
-    Route::prefix('master-data/kol')->name('master-data.kol.')->group(function() {
+    Route::prefix('master-data/kol')->name('master-data.kol.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
         Route::get('create', [\App\Http\Controllers\Master\MasterKolController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Master\MasterKolController::class, 'store'])->name('store');
@@ -88,7 +87,7 @@ Route::middleware([
     });
 
     // Master Sumber Pendanaan Eksternal
-    Route::prefix('master-data/sumber-pendanaan-eksternal')->name('master-data.sumber-pendanaan-eksternal.')->group(function() {
+    Route::prefix('master-data/sumber-pendanaan-eksternal')->name('master-data.sumber-pendanaan-eksternal.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('index');
         Route::get('create', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'store'])->name('store');
