@@ -813,19 +813,10 @@
                     <td>${po.dokumen_bast_file ? po.dokumen_bast_file.name : ''}</td>
                     <td>${po.dokumen_lainnya_file ? po.dokumen_lainnya_file.name : ''}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning btn-edit-po" data-idx="${idx}">Edit</button>
-                        <button class="btn btn-sm btn-danger btn-remove-po" data-idx="${idx}">Hapus</button>
+                        <a href="#" class="btn btn-sm btn-outline-primary btn-edit-po" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
                 </tr>`;
                 tbody.append(row);
-            });
-
-            // handle remove
-            $('.btn-remove-po').on('click', function(e) {
-                e.preventDefault();
-                const idx = $(this).data('idx');
-                poFinancingData.splice(idx, 1);
-                renderPOFinancingTable();
             });
 
             // handle edit
@@ -871,8 +862,7 @@
                     <td>${inst.dokumen_invoice_file ? inst.dokumen_invoice_file.name : ''}</td>
                     <td>${inst.dokumen_lainnya_file ? inst.dokumen_lainnya_file.name : ''}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning btn-edit-installment" data-idx="${idx}">Edit</button>
-                        <button class="btn btn-sm btn-danger btn-remove-installment" data-idx="${idx}">Hapus</button>
+                        <a href="#" class="btn btn-sm btn-outline-primary btn-edit-installment" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
                 </tr>`;
                 tbody.append(row);
@@ -884,14 +874,6 @@
             } catch (e) {
                 console.error('renderInstallmentTable updateNominalFromDetails error', e);
             }
-
-            // handle remove
-            $('.btn-remove-installment').on('click', function(e) {
-                e.preventDefault();
-                const idx = $(this).data('idx');
-                installmentData.splice(idx, 1);
-                renderInstallmentTable();
-            });
 
             // handle edit
             $('.btn-edit-installment').on('click', function(e) {
@@ -934,19 +916,10 @@
                     <td>${f.dokumen_so_file ? f.dokumen_so_file.name : ''}</td>
                     <td>${f.dokumen_bast_file ? f.dokumen_bast_file.name : ''}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning btn-edit-factoring" data-idx="${idx}">Edit</button>
-                        <button class="btn btn-sm btn-danger btn-remove-factoring" data-idx="${idx}">Hapus</button>
+                        <a href="#" class="btn btn-sm btn-outline-primary btn-edit-factoring" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
                 </tr>`;
                 tbody.append(row);
-            });
-
-            // handle remove
-            $('.btn-remove-factoring').on('click', function(e) {
-                e.preventDefault();
-                const idx = $(this).data('idx');
-                factoringData.splice(idx, 1);
-                renderFactoringTable();
             });
 
             // handle edit
@@ -998,19 +971,12 @@
                     <td>${inv.dokumen_bast_file ? inv.dokumen_bast_file.name : ''}</td>
                     <td>
                         <a href="#" class="btn btn-sm btn-outline-primary btn-edit-invoice" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
-                        <a href="#" class="btn btn-sm btn-danger btn-remove-invoice" data-idx="${idx}">Hapus</a>
                     </td>
                 </tr>`;
                 tbody.append(row);
             });
 
-            // handle remove
-            $('.btn-remove-invoice').on('click', function(e) {
-                e.preventDefault();
-                const idx = $(this).data('idx');
-                invoiceFinancingData.splice(idx, 1);
-                renderInvoiceTables();
-            });
+            // Note: removal is handled from the modal 'Hapus Data' button now.
 
             // handle edit
             $('.btn-edit-invoice').on('click', function(e) {
@@ -1038,6 +1004,33 @@
 
                 editInvoiceIndex = idx;
                 modalInstance.show();
+            });
+
+            $('#btnHapusDataModal').off('click').on('click', function(e) {
+                e.preventDefault();
+                if (typeof editInvoiceIndex !== 'undefined' && editInvoiceIndex >= 0) {
+                    if (!confirm('Yakin ingin menghapus data ini?')) return;
+                    switch (currentJenisPembiayaan) {
+                        case 'Invoice Financing':
+                            invoiceFinancingData.splice(editInvoiceIndex, 1);
+                            renderInvoiceTables();
+                            break;
+                        case 'PO Financing':
+                            poFinancingData.splice(editInvoiceIndex, 1);
+                            renderPOFinancingTable();
+                            break;
+                        case 'Installment':
+                            installmentData.splice(editInvoiceIndex, 1);
+                            renderInstallmentTable();
+                            break;
+                        case 'Factoring':
+                            factoringData.splice(editInvoiceIndex, 1);
+                            renderFactoringTable();
+                            break;
+                    }
+                    editInvoiceIndex = -1;
+                }
+                if (typeof modalInstance !== 'undefined' && modalInstance) modalInstance.hide();
             });
 
         }

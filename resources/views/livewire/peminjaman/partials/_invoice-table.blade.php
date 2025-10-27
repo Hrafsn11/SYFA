@@ -57,7 +57,6 @@
                                                                 class="text-primary">{{ $invoice['dokumen_bast'] }}</a></td>
                                                         <td>
                                                             <a href="#" class="btn btn-sm btn-outline-primary btn-edit-invoice" data-idx="{{ $index }}" title="Edit"><i class="fas fa-edit"></i></a>
-                                                            <a href="#" class="btn btn-sm btn-outline-danger btn-remove-invoice" data-idx="{{ $index }}" title="Hapus">Hapus</a>
                                                         </td>
                                                     </tr>
                                                 @endforeach
