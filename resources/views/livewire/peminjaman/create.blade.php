@@ -181,9 +181,12 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="bs-datepicker-tanggal-pencairan" class="form-label">Harapan Tanggal
                                             Pencairan</label>
-                                        <input type="text" class="form-control bs-datepicker"
-                                            placeholder="DD/MM/YYYY" id="bs-datepicker-tanggal-pencairan"
-                                            name="tanggal_pencairan" />
+                                        <div class="input-group">
+                                            <input type="text" class="form-control bs-datepicker"
+                                                placeholder="DD/MM/YYYY" id="bs-datepicker-tanggal-pencairan"
+                                                name="tanggal_pencairan" />
+                                            <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -200,9 +203,12 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="bs-datepicker-tanggal-pembayaran" class="form-label">Rencana Tanggal
                                             Pembayaran</label>
-                                        <input type="text" class="form-control bs-datepicker"
-                                            placeholder="DD/MM/YYYY" id="bs-datepicker-tanggal-pembayaran"
-                                            name="tanggal_pembayaran" />
+                                        <div class="input-group">
+                                            <input type="text" class="form-control bs-datepicker"
+                                                placeholder="DD/MM/YYYY" id="bs-datepicker-tanggal-pembayaran"
+                                                name="tanggal_pembayaran" />
+                                            <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                        </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label for="pembayaran_total" class="form-label">Pembayaran Total</label>

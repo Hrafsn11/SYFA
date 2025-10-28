@@ -41,13 +41,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Invoice Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal" id="modal_invoice_date"
-                                placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal" id="modal_invoice_date"
+                                    placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal" id="modal_due_date"
-                                placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal" id="modal_due_date"
+                                    placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -114,13 +120,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Contract Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal"
-                                id="modal_contract_date_po" placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal"
+                                    id="modal_contract_date_po" placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal"
-                                id="modal_due_date_po" placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal"
+                                    id="modal_due_date_po" placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -171,8 +183,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Invoice Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal"
-                                id="modal_invoice_date_inst" placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal"
+                                    id="modal_invoice_date_inst" placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nama Barang</label>
@@ -229,13 +244,19 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Contract Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal"
-                                id="modal_contract_date_fact" placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal"
+                                    id="modal_contract_date_fact" placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
-                            <input type="text" class="form-control bs-datepicker-modal"
-                                id="modal_due_date_fact" placeholder="DD/MM/YYYY">
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker-modal"
+                                    id="modal_due_date_fact" placeholder="DD/MM/YYYY">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
