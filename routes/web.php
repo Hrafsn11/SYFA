@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\ArPerbulanController;
+use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\FormKerjaInvestorController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\PengembalianPinjamanController;
+use App\Http\Controllers\ReportPengembalianController;
 use App\Livewire\ConfigMatrixScore;
 use App\Livewire\Dashboard;
 use App\Livewire\PermissionManagement;
@@ -51,6 +54,11 @@ Route::middleware([
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
 
+    Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
+    Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
+
+    Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
+    
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
         Route::get('/', [FormKerjaInvestorController::class, 'index'])->name('index');
         Route::post('/', [FormKerjaInvestorController::class, 'store'])->name('store');

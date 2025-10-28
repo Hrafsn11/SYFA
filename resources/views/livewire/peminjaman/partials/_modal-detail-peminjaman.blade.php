@@ -38,6 +38,25 @@
                         <div class="card border mb-3 shadow-none">
                             <div class="card-body">
                                 <div class="row">
+                                    <div class="col-12 mb-3" id="div-deviasi">
+                                        <label class="form-label">Deviasi <span class="text-danger">*</span></label>
+                                        <div class="d-flex gap-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi"
+                                                    id="deviasi_ya" value="ya" required>
+                                                <label class="form-check-label" for="deviasi_ya">
+                                                    Ya
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi"
+                                                    id="deviasi_tidak" value="tidak" required>
+                                                <label class="form-check-label" for="deviasi_tidak">
+                                                    Tidak
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="nominalPengajuan" class="form-label">Nominal Pengajuan</label>
                                         <input type="text" class="form-control input-rupiah" id="nominalPengajuan"
@@ -59,7 +78,8 @@
                                         <label for="flatpickr-tanggal-pencairan" class="form-label">Tanggal
                                             Pencairan</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control flatpickr-date-modal rounded-start"
+                                            <input type="text"
+                                                class="form-control flatpickr-date-modal rounded-start"
                                                 placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pencairan" required>
                                             <span class="input-group-text">
                                                 <i class="ti ti-calendar"></i>
@@ -156,14 +176,14 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
-                                        <input type="text" class="form-control input-rupiah" id="editNominalPengajuan"
-                                            value="300000000" disabled>
+                                        <input type="text" class="form-control input-rupiah"
+                                            id="editNominalPengajuan" value="300000000" disabled>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="text" class="form-control input-rupiah" id="editNominalDisetujui"
-                                            disabled>
+                                        <input type="text" class="form-control input-rupiah"
+                                            id="editNominalDisetujui" disabled>
                                     </div>
                                 </div>
 
