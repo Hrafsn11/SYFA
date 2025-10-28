@@ -24,8 +24,8 @@ class DebiturDanInvestorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'id_kol' => 'required|exists:master_kol,id_kol',
-            'nama_debitur' => 'required|string|max:255',
+            'id_kol' => $request->flagging === 'tidak' ? 'required|exists:master_kol,id_kol' : 'nullable|exists:master_kol,id_kol',
+            'nama' => 'required|string|max:255',
             'alamat' => 'nullable|string|max:500',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
@@ -41,16 +41,14 @@ class DebiturDanInvestorController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create User Account
             $user = User::create([
-                'name' => $validated['nama_debitur'],
+                'name' => $validated['nama'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
 
-            // Create Debitur/Investor record
             $validated['user_id'] = $user->id;
-            unset($validated['password']); // Remove password from debitur data
+            unset($validated['password']); 
             
             $debitur = MasterDebiturDanInvestor::create($validated);
             $debitur->load('kol', 'user');
@@ -86,8 +84,8 @@ class DebiturDanInvestorController extends Controller
         $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
         
         $validated = $request->validate([
-            'id_kol' => 'required|exists:master_kol,id_kol',
-            'nama_debitur' => 'required|string|max:255',
+            'id_kol' => $request->flagging === 'tidak' ? 'required|exists:master_kol,id_kol' : 'nullable|exists:master_kol,id_kol',
+            'nama' => 'required|string|max:255',
             'alamat' => 'nullable|string|max:500',
             'email' => 'required|email|max:255|unique:users,email,' . $debitur->user_id,
             'password' => 'nullable|string|min:8|confirmed',
@@ -107,7 +105,7 @@ class DebiturDanInvestorController extends Controller
             if ($debitur->user_id) {
                 $user = User::find($debitur->user_id);
                 if ($user) {
-                    $user->name = $validated['nama_debitur'];
+                    $user->name = $validated['nama'];
                     $user->email = $validated['email'];
                     
                     // Update password only if provided

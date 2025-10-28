@@ -7,7 +7,6 @@
         <i class="ti ti-edit"></i>
     </button>
 
-    {{-- Button History (Hanya untuk Debitur) --}}
     <a href="{{ route('master-data.debitur-investor.history-kol', $id) }}" 
        class="btn btn-sm btn-icon btn-text-info rounded-pill waves-effect" 
        title="Lihat History KOL">

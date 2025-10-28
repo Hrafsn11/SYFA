@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class MasterDebiturSeeder extends Seeder
 {
@@ -18,25 +17,25 @@ class MasterDebiturSeeder extends Seeder
         $rows = [
             [
                 'id_kol' => 1,
-                'nama_debitur' => 'Techno Infinity',
+                'nama' => 'Techno Infinity',
                 'alamat' => 'Bandung',
                 'email' => 'Techno@gmail.com',
                 'nama_ceo' => 'Cahyo',
                 'nama_bank' => 'BCA',
                 'no_rek' => '12345678',
-                    'flagging' => 'ya',
+                'flagging' => 'ya',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'id_kol' => 2,
-                'nama_debitur' => 'Malaka',
+                'nama' => 'Malaka',
                 'alamat' => 'Jakarta',
                 'email' => 'Malaka@gmail.com',
                 'nama_ceo' => 'Budi',
                 'nama_bank' => 'BRI',
                 'no_rek' => '12345678',
-                    'flagging' => 'tidak',
+                'flagging' => 'tidak',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
