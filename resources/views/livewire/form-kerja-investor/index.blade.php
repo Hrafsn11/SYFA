@@ -17,39 +17,7 @@
 
         <div class="card">
             <div class="card-datatable table-responsive">
-                <table class="datatables-history-kol table table-bordered" id="tableHistoryKol">
-                    <thead>
-                        <tr class="">
-                            <th class="text-center">No</th>
-                            <th>Nama Investor</th>
-                            <th class="text-center">Jenis Deposito</th>
-                            <th class="text-center">Tanggal Investasi</th>
-                            <th class="text-center">Lama Investasi</th>
-                            <th class="text-center">Jumlah Investasi</th>
-                            <th class="text-center">Bagi Hasil</th>
-                            <th class="text-center">Nominal Bagi Hasil Keseluruhan</th>
-                            <th class="text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <td class="text-center">1</td>
-                        <td>Adam</td>
-                        <td class="text-center">Regular</td>
-                        <td class="text-center">24 Oktober 2025</td>
-                        <td class="text-center">24 Bulan</td>
-                        <td class="text-center">Rp 10.000.000</td>
-                        <td class="text-center">10%</td>
-                        <td class="text-center">Rp 1.000.000</td>
-                        <td class="d-flex justify-content-center align-items-center gap-2">
-                            <a href="{{ route('form-kerja-investor.show') }}">
-                                <i class="ti ti-file-text"></i>
-                            </a>
-                            <button class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect">
-                                <i class="ti ti-edit"></i>
-                            </button>
-                        </td>
-                    </tbody>
-                </table>
+                <livewire:form-kerja-investor-table />
             </div>
         </div>
 
@@ -63,26 +31,27 @@
 
                     <div class="modal-body">
                         <form id="formTambahFormKerjaInvestor" novalidate>
+                            <input type="hidden" id="editFormKerjaInvestorId" value="">
                             <div class="row">
                                 <div class="col-lg-12 mb-3">
                                     <label for="nama_investor" class="form-label">Nama Investor <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control non-editable" id="nama_investor"
-                                        value="Techno Infinity" required readonly>
+                                        name="nama_investor" placeholder="Nama Investor" required disabled readonly>
                                 </div>
                                 <div class="col-12 mb-3" id="div-deposito">
                                     <label class="form-label">Deposito <span class="text-danger">*</span></label>
                                     <div class="d-flex gap-4">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_reguler" value="reguler" required>
+                                                id="deposito_reguler" value="reguler" required disabled>
                                             <label class="form-check-label" for="deposito_reguler">
                                                 Reguler
                                             </label>
                                         </div>
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_khusus" value="khusus" required>
+                                                id="deposito_khusus" value="khusus" required disabled>
                                             <label class="form-check-label" for="deposito_khusus">
                                                 Khusus
                                             </label>
@@ -90,12 +59,11 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="flatpickr-tanggal-pembayaran" class="form-label">Rencana Tanggal
-                                        Pembayaran</label>
+                                    <label for="bs-datepicker-tanggal-pembayaran" class="form-label">Tanggal
+                                        Investasi</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control rounded-start flatpickr-date"
-                                            placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pembayaran"
-                                            name="tanggal_pembayaran" />
+                                        <input type="text" class="form-control" placeholder="yyyy-mm-dd"
+                                            id="bs-datepicker-tanggal-pembayaran" name="tanggal_pembayaran" />
                                         <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                     </div>
                                 </div>
@@ -111,12 +79,16 @@
                                         name="jumlah_investasi" placeholder="Rp 0" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="bagi_hasil" class="form-label">Bagi Hasil (%)</label>
-                                    <input type="text" class="form-control" id="bagi_hasil"
-                                        placeholder="Masukan bagi hasil" required>
+                                    <label for="bagi_hasil" class="form-label">Bagi Hasil (%)/Tahun</label>
+                                    <input type="number" class="form-control" id="bagi_hasil"
+                                        placeholder="Masukan bagi hasil" min="0" max="100" step="0.01"
+                                        required>
+                                    <small class="text-muted d-none" id="bagi-hasil-hint">
+                                        <i class="ti ti-info-circle"></i> Minimum 7% untuk deposito khusus
+                                    </small>
                                 </div>
                                 <div class="col-lg-12 mb-3">
-                                    <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bagi Hasil Keseluruhan
+                                    <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bagi Hasil Yang Didapat
                                         <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control input-rupiah" id="bagi_hasil_keseluruhan"
                                         placeholder="Rp 0" required>
@@ -125,7 +97,11 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hapus Data</button>
+                        <button type="button" class="btn btn-secondary d-none" id="btnHapusFormKerjaInvestor">
+                            <i class="ti ti-trash me-1"></i>
+                            Hapus Data
+                        </button>
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="button" class="btn btn-primary" id="btnSimpanFormKerjaInvestor">
                             <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSimpanSpinner"></span>
                             Simpan
@@ -137,159 +113,393 @@
     </div>
 @endsection
 
+@push('modals')
+    <div class="modal fade" id="modalConfirmDeleteInvestor" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmDeleteInvestor">
+                        <span class="spinner-border spinner-border-sm me-2 d-none" id="btnDeleteSpinner"></span>
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endpush
+
 @push('scripts')
     <script>
         $(document).ready(function() {
             const $modal = $('#modalFormKerjaInvestor');
+            const $modalDelete = $('#modalConfirmDeleteInvestor');
             const $form = $('#formTambahFormKerjaInvestor');
+            const $btnSimpan = $('#btnSimpanFormKerjaInvestor');
+            const $spinner = $('#btnSimpanSpinner');
+            const namaInvestor = '{{ optional($investor)->nama ?? '' }}';
+            const depositoInvestor = '{{ optional($investor)->deposito ?? '' }}';
+            let deleteInvestorId = null;
 
-            // Initialize Cleave.js untuk format rupiah
-            if (typeof window.initCleaveRupiah === 'function') {
-                window.initCleaveRupiah();
-            }
+            let cleaveInstances = {
+                jumlah_investasi: null,
+                bagi_hasil_keseluruhan: null
+            };
 
-            // Initialize Flatpickr
-            const flatpickrDate = $('#flatpickr-tanggal-pembayaran');
-            if (flatpickrDate.length && !flatpickrDate[0]._flatpickr) {
-                flatpickrDate.flatpickr({
-                    monthSelectorType: 'static',
-                    dateFormat: 'd/m/Y',
-                    altInput: true,
-                    altFormat: 'j F Y',
-                    locale: {
-                        firstDayOfWeek: 1
+            function initCleave() {
+                Object.keys(cleaveInstances).forEach(key => {
+                    if (cleaveInstances[key]) {
+                        cleaveInstances[key].destroy();
+                        cleaveInstances[key] = null;
                     }
+                });
+
+                cleaveInstances.jumlah_investasi = new Cleave('#jumlah_investasi', {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand',
+                    numeralDecimalScale: 0,
+                    prefix: 'Rp ',
+                    rawValueTrimPrefix: true,
+                    noImmediatePrefix: false
+                });
+
+                cleaveInstances.bagi_hasil_keseluruhan = new Cleave('#bagi_hasil_keseluruhan', {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand',
+                    numeralDecimalScale: 0,
+                    prefix: 'Rp ',
+                    rawValueTrimPrefix: true,
+                    noImmediatePrefix: false
                 });
             }
 
-            // Handle Modal Open
-            $('#btnTambahFormKerjaInvestor').on('click', function() {
-                $form[0].reset();
-                $form.removeClass('was-validated');
-
-                // Reset radio buttons
-                $('input[name="deposito"]').prop('checked', false);
-
-                // Get nama investor from authenticated user's master data
-                const namaInvestor =
-                    '{{ optional($investor)->nama_debitur ?? (auth()->user()->name ?? 'Investor') }}';
-                $('#nama_investor').val(namaInvestor);
-
-                // Show modal
-                $modal.modal('show');
-
-                // Reinitialize Cleave after modal shown
-                setTimeout(function() {
-                    if (typeof window.initCleaveRupiah === 'function') {
-                        window.initCleaveRupiah();
-                    }
-                }, 100);
-            });
-
-            // Handle Deposito Radio Change
-            $('input[name="deposito"]').on('change', function() {
-                const selectedDeposito = $(this).val();
-
-                if (selectedDeposito === 'reguler') {
-                    // Deposito Reguler: Bagi Hasil auto 10% (disabled)
-                    $('#bagi_hasil').val('10').prop('readonly', true).addClass('non-editable');
-
-                    // Enable auto-calculate for Nominal Bagi Hasil Keseluruhan
-                    $('#bagi_hasil_keseluruhan').prop('readonly', true).addClass('non-editable');
-
-                    // Trigger calculation
-                    calculateNominalBagiHasil();
-
-                } else if (selectedDeposito === 'khusus') {
-                    // Deposito Khusus: Manual input (enabled)
-                    $('#bagi_hasil').val('').prop('readonly', false).removeClass('non-editable');
-                    $('#bagi_hasil_keseluruhan').prop('readonly', false).removeClass('non-editable');
-
-                    // Clear Nominal Bagi Hasil Keseluruhan
-                    window.setCleaveValue(document.getElementById('bagi_hasil_keseluruhan'), 'Rp 0');
-                }
-            });
-
-            // Handle Jumlah Investasi Input Change (for auto-calculate in Reguler mode)
-            $('#jumlah_investasi').on('input', function() {
-                const selectedDeposito = $('input[name="deposito"]:checked').val();
-                if (selectedDeposito === 'reguler') {
-                    calculateNominalBagiHasil();
-                }
-            });
-
-            // Function to calculate Nominal Bagi Hasil Keseluruhan (Reguler mode only)
-            function calculateNominalBagiHasil() {
-                const selectedDeposito = $('input[name="deposito"]:checked').val();
-
-                if (selectedDeposito !== 'reguler') return;
-
-                // Get raw value from Cleave.js
-                const jumlahInvestasiRaw = window.getCleaveRawValue(document.getElementById('jumlah_investasi')) ||
-                    0;
-                const bagiHasilPercent = parseFloat($('#bagi_hasil').val()) || 0;
-
-                // Calculate: Jumlah Investasi * (Bagi Hasil / 100)
-                const nominalBagiHasil = Math.round(jumlahInvestasiRaw * (bagiHasilPercent / 100));
-
-                // Set calculated value
-                window.setCleaveValue(
-                    document.getElementById('bagi_hasil_keseluruhan'),
-                    'Rp ' + nominalBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                );
+            function getCleaveValue(fieldName) {
+                return cleaveInstances[fieldName] ? parseInt(cleaveInstances[fieldName].getRawValue()) || 0 : 0;
             }
 
-            // Handle Save Button
-            $('#btnSimpanFormKerjaInvestor').on('click', function() {
+            function setCleaveValue(fieldName, value) {
+                const element = document.getElementById(fieldName);
+                if (element && cleaveInstances[fieldName]) {
+                    cleaveInstances[fieldName].setRawValue(value);
+                }
+            }
+
+            $('#bs-datepicker-tanggal-pembayaran').datepicker({
+                format: 'yyyy-mm-dd',
+                todayHighlight: true,
+                autoclose: true,
+                orientation: 'bottom auto'
+            });
+
+            function resetForm() {
+                $form[0].reset();
+                $form.removeClass('was-validated');
+                $('#editFormKerjaInvestorId').val('');
+                $('#modalTambahFormKerjaInvestorLabel').text('Tambah Form Kerja Investor');
+                $('#btnHapusFormKerjaInvestor').addClass('d-none'); // Hide delete button
+                setCleaveValue('jumlah_investasi', 0);
+                setCleaveValue('bagi_hasil_keseluruhan', 0);
+            }
+
+            function setDepositoMode(deposito) {
+                const isReguler = deposito === 'reguler';
+
+                $('#bagi_hasil')
+                    .val(isReguler ? '10' : '')
+                    .prop('readonly', isReguler)
+                    .toggleClass('non-editable', isReguler);
+
+                if (isReguler) {
+                    $('#bagi-hasil-hint').addClass('d-none');
+                } else {
+                    $('#bagi-hasil-hint').removeClass('d-none');
+                }
+
+                $('#bagi_hasil_keseluruhan')
+                    .prop('readonly', true)
+                    .addClass('non-editable');
+
+                calculateBagiHasil();
+            }
+
+            function calculateBagiHasil() {
+                const deposito = $('input[name="deposito"]:checked').val();
+                const jumlah = getCleaveValue('jumlah_investasi');
+                const persen = parseFloat($('#bagi_hasil').val()) || 0;
+                const lama = parseInt($('#lama_investasi').val()) || 0;
+
+                if (jumlah > 0 && persen > 0 && lama > 0) {
+                    const nominal = Math.round((jumlah * persen / 100) / 12 * lama);
+                    setCleaveValue('bagi_hasil_keseluruhan', nominal);
+                } else {
+                    setCleaveValue('bagi_hasil_keseluruhan', 0);
+                }
+            }
+
+            function setLoadingState(loading) {
+                $spinner.toggleClass('d-none', !loading);
+                $btnSimpan.prop('disabled', loading);
+            }
+
+            function validateInvestorData() {
+                if (!namaInvestor || !depositoInvestor) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Investor Tidak Ditemukan',
+                        html: 'Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+                return true;
+            }
+
+            $('#btnTambahFormKerjaInvestor').on('click', function() {
+                if (!validateInvestorData()) return;
+
+                resetForm();
+
+                $('#nama_investor').val(namaInvestor);
+                $('input[name="deposito"]').prop('checked', false).prop('disabled', true);
+
+                const depositoValue = depositoInvestor.toLowerCase();
+                $(`input[name="deposito"][value="${depositoValue}"]`).prop('checked', true);
+                setDepositoMode(depositoValue);
+
+                $modal.modal('show');
+                setTimeout(initCleave, 100);
+            });
+
+            $modal.on('shown.bs.modal', function() {
+                if (!cleaveInstances.jumlah_investasi) {
+                    initCleave();
+                }
+            });
+
+            $modal.on('hidden.bs.modal', function() {
+                resetForm();
+                setLoadingState(false);
+            });
+
+            // Auto-calculate saat input berubah
+            $('#jumlah_investasi').on('input', calculateBagiHasil);
+            $('#bagi_hasil').on('input', calculateBagiHasil);
+            $('#lama_investasi').on('input', calculateBagiHasil);
+
+            // ==================== HAPUS DATA ====================
+            $('#btnHapusFormKerjaInvestor').on('click', function(e) {
+                e.preventDefault();
+                const id = $('#editFormKerjaInvestorId').val();
+                if (!id) return;
+
+                deleteInvestorId = id;
+                $modal.modal('hide');
+                $modalDelete.modal('show');
+            });
+
+            $('#btnConfirmDeleteInvestor').on('click', function() {
+                if (!deleteInvestorId) return;
+
+                $('#btnDeleteSpinner').removeClass('d-none');
+                $(this).prop('disabled', true);
+
+                $.ajax({
+                    url: `/form-kerja-investor/${deleteInvestorId}`,
+                    method: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $modalDelete.modal('hide');
+                            Livewire.dispatch('refreshFormKerjaInvestorTable');
+                            deleteInvestorId = null;
+                        }
+                    },
+                    complete: function() {
+                        $('#btnDeleteSpinner').addClass('d-none');
+                        $('#btnConfirmDeleteInvestor').prop('disabled', false);
+                    }
+                });
+            });
+
+            $modalDelete.on('hidden.bs.modal', function() {
+                deleteInvestorId = null;
+            });
+
+            $btnSimpan.on('click', function() {
                 if (!$form[0].checkValidity()) {
                     $form.addClass('was-validated');
                     return;
                 }
 
-                // Validate deposito selection
                 if (!$('input[name="deposito"]:checked').val()) {
-                    alert('Pilih jenis deposito terlebih dahulu');
+                    Swal.fire({
+                        icon: 'warning',
+                        text: 'Pilih jenis deposito terlebih dahulu'
+                    });
                     return;
                 }
 
-                // Get form data
+                const editId = $('#editFormKerjaInvestorId').val();
+                const isEdit = !!editId;
+
+                $('input[name="deposito"]').prop('disabled', false);
+
                 const formData = {
                     nama_investor: $('#nama_investor').val(),
                     deposito: $('input[name="deposito"]:checked').val(),
-                    tanggal_pembayaran: $('#flatpickr-tanggal-pembayaran').val(),
+                    tanggal_pembayaran: $('#bs-datepicker-tanggal-pembayaran').val(),
                     lama_investasi: $('#lama_investasi').val(),
-                    jumlah_investasi: window.getCleaveRawValue(document.getElementById(
-                        'jumlah_investasi')) || 0,
+                    jumlah_investasi: getCleaveValue('jumlah_investasi'),
                     bagi_hasil: $('#bagi_hasil').val(),
-                    bagi_hasil_keseluruhan: window.getCleaveRawValue(document.getElementById(
-                        'bagi_hasil_keseluruhan')) || 0,
+                    bagi_hasil_keseluruhan: getCleaveValue('bagi_hasil_keseluruhan'),
                     _token: '{{ csrf_token() }}'
                 };
 
-                console.log('Form Data:', formData);
+                if (isEdit) formData._method = 'PUT';
 
-                // TODO: Implement AJAX save
-                // $('#btnSimpanSpinner').removeClass('d-none');
-                // $('#btnSimpanFormKerjaInvestor').prop('disabled', true);
+                $('input[name="deposito"]').prop('disabled', true);
 
-                // $.ajax({
-                //     url: '/form-kerja-investor',
-                //     method: 'POST',
-                //     data: formData,
-                //     success: function(response) {
-                //         if (response.success) {
-                //             $modal.modal('hide');
-                //             // Reload table or show success message
-                //         }
-                //     },
-                //     complete: function() {
-                //         $('#btnSimpanSpinner').addClass('d-none');
-                //         $('#btnSimpanFormKerjaInvestor').prop('disabled', false);
-                //     }
-                // });
+                setLoadingState(true);
 
-                alert('Data berhasil disimpan (demo mode)');
-                $modal.modal('hide');
+                $.ajax({
+                    url: isEdit ? `/form-kerja-investor/${editId}` :
+                        '{{ route('form-kerja-investor.store') }}',
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $modal.modal('hide');
+                            Livewire.dispatch('refreshFormKerjaInvestorTable');
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: isEdit ? 'Data berhasil diupdate' : response
+                                    .message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+
+                        if (xhr.responseJSON?.errors) {
+                            errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
+                                '<br>');
+                        } else if (xhr.responseJSON?.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            html: errorMessage
+                        });
+                    },
+                    complete: function() {
+                        setLoadingState(false);
+                    }
+                });
+            });
+
+            $(document).on('click', '.investor-detail-btn', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+
+                if (id) {
+                    window.location.href = `/form-kerja-investor/${id}`;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'ID tidak ditemukan'
+                    });
+                }
+            });
+
+            $(document).on('click', '.investor-edit-btn', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+
+                if (!id) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'ID tidak ditemukan'
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    url: `/form-kerja-investor/${id}/edit`,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            const d = response.data;
+
+                            resetForm();
+
+                            $('#editFormKerjaInvestorId').val(d.id_form_kerja_investor);
+                            $('#modalTambahFormKerjaInvestorLabel').text(
+                                'Edit Form Kerja Investor');
+
+                            // Show delete button in edit mode
+                            $('#btnHapusFormKerjaInvestor').removeClass('d-none');
+
+                            $('#nama_investor').val(d.nama_investor);
+                            $('#lama_investasi').val(d.lama_investasi);
+                            $('#bagi_hasil').val(d.bagi_hasil);
+
+                            $('input[name="deposito"]').prop('checked', false).prop('disabled',
+                                true);
+                            if (d.deposito) {
+                                const depositoValue = d.deposito.toLowerCase();
+                                $(`input[name="deposito"][value="${depositoValue}"]`).prop(
+                                    'checked', true);
+                                setDepositoMode(depositoValue);
+                            }
+
+                            if (d.tanggal_pembayaran) {
+                                $('#bs-datepicker-tanggal-pembayaran').datepicker('setDate', d
+                                    .tanggal_pembayaran);
+                            }
+
+                            $modal.modal('show');
+
+                            setTimeout(function() {
+                                initCleave();
+
+                                setTimeout(function() {
+                                    if (d.jumlah_investasi) {
+                                        setCleaveValue('jumlah_investasi', d
+                                            .jumlah_investasi);
+                                    }
+                                    if (d.bagi_hasil_keseluruhan) {
+                                        setCleaveValue('bagi_hasil_keseluruhan',
+                                            d.bagi_hasil_keseluruhan);
+                                    }
+                                }, 50);
+                            }, 100);
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Gagal memuat data untuk diedit'
+                        });
+                    }
+                });
             });
         });
     </script>

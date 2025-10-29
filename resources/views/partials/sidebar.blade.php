@@ -34,6 +34,20 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('ar-perbulan*') ? 'active' : '' }}">
+            <a href="{{ route('ar-perbulan.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-archive"></i>
+                <div data-i18n="AR Perbulan">AR Perbulan</div>
+            </a>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('ar-performance*') ? 'active' : '' }}">
+            <a href="{{ route('ar-performance.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-chart-line"></i>
+                <div data-i18n="AR Performance">AR Performance</div>
+            </a>
+        </li>
+
         <!-- Pengembalian Section -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pengembalian</span>
@@ -50,6 +64,13 @@
             <a href="{{ route('debitur-piutang.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-receipt"></i>
                 <div data-i18n="Debitur Piutang">Debitur Piutang</div>
+            </a>
+        </li>
+        
+        <li class="menu-item {{ request()->routeIs('report-pengembalian*') ? 'active' : '' }}">
+            <a href="{{ route('report-pengembalian.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-wallet"></i>
+                <div data-i18n="Report Pengembalian">Report Pengembalian</div>
             </a>
         </li>
 

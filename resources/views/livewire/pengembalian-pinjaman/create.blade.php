@@ -25,7 +25,8 @@
                     <div class="row">
                         <div class="col-lg mb-3">
                             <label for="kode_peminjaman" class="form-label">Kode Peminjaman</label>
-                            <select class="form-control select2" name="kode_peminjaman" id="kode_peminjaman" data-placeholder="Pilih Peminjaman">
+                            <select class="form-control select2" name="kode_peminjaman" id="kode_peminjaman"
+                                data-placeholder="Pilih Peminjaman">
                                 <option value="">Pilih Peminjaman</option>
                             </select>
                         </div>
@@ -46,8 +47,24 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-2">
+                                    <label for="tanggal_pencairan">Tanggal Pencairan</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="tanggal_pencairan"
+                                            name="tanggal_pencairan" value="01-01-2024" disabled>
+                                        <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="lama_pemakaian">Lama Pemakaian</label>
+                                    <input type="text" class="form-control" id="lama_pemakaian" name="lama_pemakaian"
+                                        value="30 Bulan" disabled>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-2">
                                     <label for="invoice">Invoice Yang Akan Dibayar</label>
-                                    <select name="invoice" id="invoice" class="form-control select2" data-placeholder="Pilih Invoice">
+                                    <select name="invoice" id="invoice" class="form-control select2"
+                                        data-placeholder="Pilih Invoice">
                                         <option value="">Pilih Invoice</option>
                                     </select>
                                 </div>
@@ -89,34 +106,34 @@
 @endsection
 
 @push('scripts')
-<script>
-    let modalInstance = $('#modalPengembalian');
-    $(document).ready(function() {
+    <script>
+        let modalInstance = $('#modalPengembalian');
+        $(document).ready(function() {
 
-        initCleaveRupiah();
+            initCleaveRupiah();
 
-        $('#btnTambahPengembalian').on('click', function() {
-            openModal();
+            $('#btnTambahPengembalian').on('click', function() {
+                openModal();
+            });
         });
-    });
 
-    function openModal() {
-        
-        $('.modal-form-content').hide();
+        function openModal() {
 
-        $('.modal-form-content input[type="text"]').val('');
-        $('.modal-form-content input[type="file"]').val('');
+            $('.modal-form-content').hide();
 
-        $('#modalTitle').text('Tambah Pengembalian Invoice');
+            $('.modal-form-content input[type="text"]').val('');
+            $('.modal-form-content input[type="file"]').val('');
 
-        setTimeout(function() {
-            initCleaveRupiah(); 
-        }, 100);
+            $('#modalTitle').text('Tambah Pengembalian Invoice');
 
-        modalInstance.modal('show');
+            setTimeout(function() {
+                initCleaveRupiah();
+            }, 100);
 
-        console.log(modalInstance);
-        
-    }
-</script>
+            modalInstance.modal('show');
+
+            console.log(modalInstance);
+
+        }
+    </script>
 @endpush

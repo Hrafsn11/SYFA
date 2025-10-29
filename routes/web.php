@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\ArPerbulanController;
+use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\FormKerjaInvestorController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\PengembalianPinjamanController;
+use App\Http\Controllers\ReportPengembalianController;
 use App\Livewire\ConfigMatrixScore;
 use App\Livewire\Dashboard;
 use App\Livewire\PermissionManagement;
@@ -51,13 +54,26 @@ Route::middleware([
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
 
-    // Debitur Piutang
     Route::get('debitur-piutang', function () {
         return view('livewire.debitur-piutang.index');
     })->name('debitur-piutang.index');
 
-    Route::get('form-kerja-investor', [FormKerjaInvestorController::class, 'index'])->name('form-kerja-investor.index');
-    Route::get('form-kerja-investor/detail', [FormKerjaInvestorController::class, 'show'])->name('form-kerja-investor.show');
+    Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
+    Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
+
+    Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
+
+    Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
+        Route::get('/', [FormKerjaInvestorController::class, 'index'])->name('index');
+        Route::post('/', [FormKerjaInvestorController::class, 'store'])->name('store');
+        Route::get('{id}', [FormKerjaInvestorController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [FormKerjaInvestorController::class, 'edit'])->name('edit');
+        Route::put('{id}', [FormKerjaInvestorController::class, 'update'])->name('update');
+        Route::delete('{id}', [FormKerjaInvestorController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/update-status', [FormKerjaInvestorController::class, 'updateStatus'])->name('update-status');
+        Route::post('{id}/upload-bukti', [FormKerjaInvestorController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
+        Route::post('{id}/generate-kontrak', [FormKerjaInvestorController::class, 'generateKontrak'])->name('generate-kontrak');
+    });
 
     Route::get('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'index'])->name('matrixpinjaman');
     Route::post('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'store']);
@@ -112,4 +128,4 @@ Route::middleware([
     });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
