@@ -61,19 +61,58 @@ class PeminjamanNumberService
     }
 
     /**
-     * Generate nomor peminjaman using a header id (fallback when no sequence table exists).
-     * Format: PMJ-YYYYMM-000001-TYPE
+     * Generate nomor peminjaman by reading from PengajuanPeminjaman model.
+     * Format: PMJ-YYYYMM-PREFIX-XX
+     * Example: PMJ-202510-INV-01, PMJ-202510-INV-02, etc.
      *
      * @param int $id
-     * @param string $typeCode
+     * @param string $prefix
      * @param string|null $period (YYYYMM) optional
      * @return string
      */
-    public function generateFromId(int $id, string $typeCode, ?string $period = null): string
+    public function generateNumber(string $prefix = '', ?string $period = null): string
     {
-        $period = $period ?? Carbon::now()->format('Ym');
-        $pad = intval(env('PEMINJAMAN_SEQ_LENGTH', 2));
-        $seq = str_pad((string)$id, $pad, '0', STR_PAD_LEFT);
-        return sprintf('PMJ-%s-%s-%s', $period, $seq, strtoupper($typeCode));
+        $period = $period ? preg_replace('/[^0-9]/', '', $period) : date('Ym');
+        $pad = intval(env('PEMINJAMAN_SEQ_LENGTH', 2)); // Default to 2 digits (01, 02, etc.)
+        
+        // Build the pattern to search for: PMJ-202510-INV-%
+        $pattern = 'PMJ-' . $period . '-' . strtoupper($prefix) . '-%';
+        
+        // Query PengajuanPeminjaman to find existing nomor_peminjaman with same pattern
+        $existingNumbers = DB::table('pengajuan_peminjaman')
+            ->where('nomor_peminjaman', 'LIKE', $pattern)
+            ->pluck('nomor_peminjaman')
+            ->filter() // Remove null values
+            ->toArray();
+        
+        if (empty($existingNumbers)) {
+            // No existing numbers found, start from 01
+            $sequence_num = 1;
+        } else {
+            // Extract the last number from existing records
+            $lastNumber = 0;
+            foreach ($existingNumbers as $nomor) {
+                // Extract the last part after the last hyphen
+                $parts = explode('-', $nomor);
+                if (count($parts) >= 4) {
+                    $numberPart = (int) end($parts);
+                    if ($numberPart > $lastNumber) {
+                        $lastNumber = $numberPart;
+                    }
+                }
+            }
+            // Increment by 1
+            $sequence_num = $lastNumber + 1;
+        }
+        
+        $sequence = str_pad((string)$sequence_num, $pad, '0', STR_PAD_LEFT);
+
+        $parts = [];
+        $parts[] = 'PMJ';
+        $parts[] = $period;
+        if (!empty($prefix)) $parts[] = strtoupper($prefix);
+        $parts[] = $sequence;
+
+        return implode('-', $parts);
     }
 }

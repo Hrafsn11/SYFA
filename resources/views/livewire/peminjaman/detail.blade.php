@@ -1004,7 +1004,7 @@
 
             const handlePreviewKontrak = () => {
                 // Get peminjaman ID from current page
-                const peminjamanId = {{ $peminjaman['id'] ?? 1 }};
+                const peminjamanId = @json($peminjaman['id'] ?? 1);
 
                 // Open preview in new tab
                 window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
