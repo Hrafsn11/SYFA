@@ -1,111 +1,119 @@
-<div>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-900">Permission Management</h1>
-                        @can('create permissions')
-                        <button wire:click="create" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            Create Permission
-                        </button>
-                        @endcan
-                    </div>
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Permission Management</h5>
+            @can('create permissions')
+            <button wire:click="create" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Create Permission
+            </button>
+            @endcan
+        </div>
 
-                    <!-- Search -->
-                    <div class="mb-6">
-                        <input wire:model.live="search" type="text" placeholder="Search permissions..." 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
+        <div class="card-body">
+            <!-- Search -->
+            <div class="mb-3">
+                <input wire:model.live="search" type="text" placeholder="Search permissions..." 
+                       class="form-control">
+            </div>
 
-                    <!-- Flash Messages -->
-                    @if (session()->has('message'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                            {{ session('message') }}
-                        </div>
-                    @endif
-
-                    <!-- Permissions Table -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($permissions as $permission)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $permission->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $permission->created_at->format('M d, Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            @can('edit permissions')
-                                            <button wire:click="edit({{ $permission->id }})" 
-                                                    class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                                Edit
-                                            </button>
-                                            @endcan
-                                            @can('delete permissions')
-                                            <button wire:click="delete({{ $permission->id }})" 
-                                                    wire:confirm="Are you sure you want to delete this permission?"
-                                                    class="text-red-600 hover:text-red-900">
-                                                Delete
-                                            </button>
-                                            @endcan
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
-                                            No permissions found.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div class="mt-6">
-                        {{ $permissions->links() }}
-                    </div>
+            <!-- Flash Messages -->
+            @if (session()->has('message'))
+                <div class="alert alert-success alert-dismissible" role="alert">
+                    {{ session('message') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+            @endif
+
+            <!-- Permissions Table -->
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($permissions as $permission)
+                            <tr>
+                                <td>
+                                    <strong>{{ $permission->name }}</strong>
+                                </td>
+                                <td>
+                                    {{ $permission->created_at->format('M d, Y') }}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        @can('edit permissions')
+                                        <button wire:click="edit({{ $permission->id }})" 
+                                                class="btn btn-sm btn-icon btn-primary" 
+                                                title="Edit">
+                                            <i class="ti ti-edit"></i>
+                                        </button>
+                                        @endcan
+                                        @can('delete permissions')
+                                        <button wire:click="delete({{ $permission->id }})" 
+                                                onclick="return confirm('Are you sure you want to delete this permission?')"
+                                                class="btn btn-sm btn-icon btn-danger" 
+                                                title="Delete">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                        @endcan
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="text-center">
+                                    <div class="py-4 text-muted">
+                                        <i class="ti ti-info-circle me-1"></i> No permissions found.
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-3">
+                {{ $permissions->links() }}
             </div>
         </div>
     </div>
 
     <!-- Modal -->
     @if($showModal)
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">
-                    {{ $selectedPermission ? 'Edit Permission' : 'Create Permission' }}
-                </h3>
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ $selectedPermission ? 'Edit Permission' : 'Create Permission' }}
+                    </h5>
+                    <button type="button" wire:click="closeModal" class="btn-close"></button>
+                </div>
                 
                 <form wire:submit.prevent="save">
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
-                            Permission Name
-                        </label>
-                        <input wire:model="name" type="text" id="name"
-                               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                        @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="name">
+                                Permission Name
+                            </label>
+                            <input wire:model="name" type="text" id="name" class="form-control" 
+                                   placeholder="Enter permission name">
+                            @error('name') 
+                                <div class="form-text text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" wire:click="closeModal"
-                                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    <div class="modal-footer">
+                        <button type="button" wire:click="closeModal" class="btn btn-secondary">
                             Cancel
                         </button>
-                        <button type="submit"
-                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        <button type="submit" class="btn btn-primary">
                             {{ $selectedPermission ? 'Update' : 'Create' }}
                         </button>
                     </div>

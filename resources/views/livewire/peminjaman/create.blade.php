@@ -179,11 +179,11 @@
                                             name="total_pinjaman" placeholder="Rp 0">
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="flatpickr-tanggal-pencairan" class="form-label">Harapan Tanggal
+                                        <label for="bs-datepicker-tanggal-pencairan" class="form-label">Harapan Tanggal
                                             Pencairan</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control rounded-start flatpickr-date"
-                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pencairan"
+                                            <input type="text" class="form-control bs-datepicker"
+                                                placeholder="DD/MM/YYYY" id="bs-datepicker-tanggal-pencairan"
                                                 name="tanggal_pencairan" />
                                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                         </div>
@@ -201,11 +201,11 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4 mb-3">
-                                        <label for="flatpickr-tanggal-pembayaran" class="form-label">Rencana Tanggal
+                                        <label for="bs-datepicker-tanggal-pembayaran" class="form-label">Rencana Tanggal
                                             Pembayaran</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control rounded-start flatpickr-date"
-                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pembayaran"
+                                            <input type="text" class="form-control bs-datepicker"
+                                                placeholder="DD/MM/YYYY" id="bs-datepicker-tanggal-pembayaran"
                                                 name="tanggal_pembayaran" />
                                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                         </div>
@@ -321,7 +321,7 @@
 
             initSelect2Elements();
 
-            initFlatpickrElements();
+            initBootstrapDatepicker();
 
             // Initialize Cleave.js untuk format rupiah
             initCleaveRupiah();
@@ -1059,11 +1059,11 @@
             if (masterId) fd.set('id_debitur', masterId);
 
             // Normalize and append header date fields (convert to ISO)
-            const tanggalPencairanRaw = $('#flatpickr-tanggal-pencairan').val();
+            const tanggalPencairanRaw = $('#bs-datepicker-tanggal-pencairan').val();
             const tanggalPencairanISO = convertDMYToISO(tanggalPencairanRaw);
             if (tanggalPencairanISO) fd.set('harapan_tanggal_pencairan', tanggalPencairanISO);
 
-            const tanggalPembayaranRaw = $('#flatpickr-tanggal-pembayaran').val();
+            const tanggalPembayaranRaw = $('#bs-datepicker-tanggal-pembayaran').val();
             const tanggalPembayaranISO = convertDMYToISO(tanggalPembayaranRaw);
             if (tanggalPembayaranISO) fd.set('rencana_tgl_pembayaran', tanggalPembayaranISO);
 
@@ -1394,9 +1394,9 @@
                     break;
             }
 
-            // Initialize flatpickr for modal after showing
+            // Initialize datepicker for modal after showing
             setTimeout(function() {
-                initModalFlatpickr();
+                initModalBootstrapDatepicker();
                 initCleaveRupiah(); // Reinitialize Cleave for modal inputs
             }, 100);
 
@@ -1433,79 +1433,53 @@
             }
         }
 
-        // Menggunakan pola Vuexy untuk Flatpickr
-        function initFlatpickrElements() {
-            const flatpickrDate = document.querySelectorAll('.flatpickr-date');
-            if (flatpickrDate) {
-                flatpickrDate.forEach(function(elem) {
-                    if (!elem._flatpickr) {
-                        // Config khusus untuk tanggal pencairan (minimal 4 hari dari sekarang)
-                        if (elem.id === 'flatpickr-tanggal-pencairan') {
-                            // Hitung tanggal minimal (4 hari dari sekarang)
-                            const minDate = new Date();
-                            minDate.setDate(minDate.getDate() + 4);
+        // Menggunakan pola Vuexy untuk Bootstrap Datepicker
+        function initBootstrapDatepicker() {
+            // Datepicker untuk tanggal pencairan (minimal 4 hari dari sekarang)
+            const pencairanDatepicker = $('#bs-datepicker-tanggal-pencairan');
+            if (pencairanDatepicker.length) {
+                const minDate = new Date();
+                minDate.setDate(minDate.getDate() + 4);
+                
+                pencairanDatepicker.datepicker({
+                    format: 'dd/mm/yyyy',
+                    autoclose: true,
+                    todayHighlight: true,
+                    startDate: minDate,
+                    orientation: 'bottom auto'
+                });
+            }
 
-                            elem.flatpickr({
-                                monthSelectorType: 'static',
-                                dateFormat: 'd/m/Y',
-                                altInput: true,
-                                altFormat: 'j F Y',
-                                minDate: minDate,
-                                disable: [
-                                    function(date) {
-                                        // Disable tanggal kurang dari 4 hari dari sekarang
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        const checkDate = new Date(date);
-                                        checkDate.setHours(0, 0, 0, 0);
-                                        const minDateCheck = new Date(today);
-                                        minDateCheck.setDate(minDateCheck.getDate() + 4);
-                                        return checkDate < minDateCheck;
-                                    }
-                                ],
-                                locale: {
-                                    firstDayOfWeek: 1
-                                }
-                            });
-                        } else {
-                            // Config default untuk flatpickr lainnya
-                            elem.flatpickr({
-                                monthSelectorType: 'static',
-                                dateFormat: 'd/m/Y',
-                                altInput: true,
-                                altFormat: 'j F Y'
-                            });
-                        }
-                    }
+            // Datepicker untuk tanggal pembayaran (default)
+            const pembayaranDatepicker = $('#bs-datepicker-tanggal-pembayaran');
+            if (pembayaranDatepicker.length) {
+                pembayaranDatepicker.datepicker({
+                    format: 'dd/mm/yyyy',
+                    autoclose: true,
+                    todayHighlight: true,
+                    startDate: new Date(),
+                    orientation: 'bottom auto'
                 });
             }
         }
 
-        // Init flatpickr untuk modal
-        function initModalFlatpickr() {
-            const modalFlatpickr = document.querySelectorAll('.flatpickr-modal-date');
-            if (modalFlatpickr) {
-                modalFlatpickr.forEach(function(elem) {
-                    // Destroy existing instance
-                    if (elem._flatpickr) {
-                        elem._flatpickr.destroy();
+        // Init bootstrap datepicker untuk modal
+        function initModalBootstrapDatepicker() {
+            const modalDatepickers = $('.bs-datepicker-modal');
+            if (modalDatepickers.length) {
+                modalDatepickers.each(function() {
+                    const $this = $(this);
+                    // Destroy existing instance if any
+                    if ($this.data('datepicker')) {
+                        $this.datepicker('destroy');
                     }
-                    // Reinitialize
-                    // disable past dates by setting minDate to today
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    elem.flatpickr({
-                        monthSelectorType: 'static',
-                        dateFormat: 'd/m/Y',
-                        altInput: true,
-                        altFormat: 'j F Y',
-                        minDate: today,
-                        disable: [function(date) {
-                            const d = new Date(date);
-                            d.setHours(0, 0, 0, 0);
-                            // disable dates before today
-                            return d < today;
-                        }]
+                    // Initialize with config
+                    $this.datepicker({
+                        format: 'dd/mm/yyyy',
+                        autoclose: true,
+                        todayHighlight: true,
+                        startDate: new Date(),
+                        orientation: 'bottom auto'
                     });
                 });
             }

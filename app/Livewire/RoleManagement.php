@@ -24,11 +24,12 @@ class RoleManagement extends Component
 
     public function render()
     {
-        $roles = Role::when($this->search, function ($query) {
-            $query->where('name', 'like', '%' . $this->search . '%');
-        })->paginate(10);
+        $roles = Role::where('guard_name', 'web')
+            ->when($this->search, function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%');
+            })->paginate(10);
 
-        $allPermissions = Permission::all();
+        $allPermissions = Permission::where('guard_name', 'web')->get();
 
         return view('livewire.role-management', compact('roles', 'allPermissions'))
             ->layout('layouts.app');
@@ -60,11 +61,28 @@ class RoleManagement extends Component
         if ($this->selectedRole) {
             $role = $this->selectedRole;
             $role->update(['name' => $this->name]);
-            $role->syncPermissions($this->permissions);
+            
+            // Get permission names from IDs and sync with web guard
+            $permissionNames = Permission::where('guard_name', 'web')
+                ->whereIn('id', $this->permissions)
+                ->pluck('name')
+                ->toArray();
+            $role->syncPermissions($permissionNames);
+            
             session()->flash('message', 'Role updated successfully!');
         } else {
-            $role = Role::create(['name' => $this->name]);
-            $role->syncPermissions($this->permissions);
+            $role = Role::create([
+                'name' => $this->name,
+                'guard_name' => 'web'
+            ]);
+            
+            // Get permission names from IDs and sync with web guard
+            $permissionNames = Permission::where('guard_name', 'web')
+                ->whereIn('id', $this->permissions)
+                ->pluck('name')
+                ->toArray();
+            $role->syncPermissions($permissionNames);
+            
             session()->flash('message', 'Role created successfully!');
         }
 

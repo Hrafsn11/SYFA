@@ -60,6 +60,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('debitur-piutang*') ? 'active' : '' }}">
+            <a href="{{ route('debitur-piutang.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-receipt"></i>
+                <div data-i18n="Debitur Piutang">Debitur Piutang</div>
+            </a>
+        </li>
+        
         <li class="menu-item {{ request()->routeIs('report-pengembalian*') ? 'active' : '' }}">
             <a href="{{ route('report-pengembalian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-file-text"></i>
@@ -143,5 +150,35 @@
                 <div data-i18n="Config Matrix Score">Config Matrix Score</div>
             </a>
         </li>
+
+        @role('super-admin')
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Access Control</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-settings"></i>
+                <div data-i18n="Roles & Permissions">Roles & Permissions</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <a href="{{ route('users.index') }}" class="menu-link">
+                        <div data-i18n="Users">Users</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                    <a href="{{ route('roles.index') }}" class="menu-link">
+                        <div data-i18n="Roles">Roles</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+                    <a href="{{ route('permissions.index') }}" class="menu-link">
+                        <div data-i18n="Permissions">Permissions</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endrole
     </ul>
 </aside>

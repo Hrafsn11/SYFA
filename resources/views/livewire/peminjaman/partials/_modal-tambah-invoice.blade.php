@@ -42,7 +42,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Invoice Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date" id="modal_invoice_date"
+                                <input type="text" class="form-control bs-datepicker-modal" id="modal_invoice_date"
                                     placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
@@ -50,7 +50,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date" id="modal_due_date"
+                                <input type="text" class="form-control bs-datepicker-modal" id="modal_due_date"
                                     placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
@@ -121,7 +121,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Contract Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date"
+                                <input type="text" class="form-control bs-datepicker-modal"
                                     id="modal_contract_date_po" placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
@@ -129,7 +129,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date"
+                                <input type="text" class="form-control bs-datepicker-modal"
                                     id="modal_due_date_po" placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
@@ -184,7 +184,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Invoice Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date"
+                                <input type="text" class="form-control bs-datepicker-modal"
                                     id="modal_invoice_date_inst" placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
@@ -245,7 +245,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Contract Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date"
+                                <input type="text" class="form-control bs-datepicker-modal"
                                     id="modal_contract_date_fact" placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
@@ -253,7 +253,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control rounded-start flatpickr-modal-date"
+                                <input type="text" class="form-control bs-datepicker-modal"
                                     id="modal_due_date_fact" placeholder="DD/MM/YYYY">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>

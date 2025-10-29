@@ -54,12 +54,16 @@ Route::middleware([
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
 
+    Route::get('debitur-piutang', function () {
+        return view('livewire.debitur-piutang.index');
+    })->name('debitur-piutang.index');
+
     Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
     Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 
     Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
-    
+
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
         Route::get('/', [FormKerjaInvestorController::class, 'index'])->name('index');
         Route::post('/', [FormKerjaInvestorController::class, 'store'])->name('store');
@@ -126,4 +130,4 @@ Route::middleware([
     });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

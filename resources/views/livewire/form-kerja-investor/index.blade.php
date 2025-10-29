@@ -30,6 +30,10 @@
                     </div>
 
                     <div class="modal-body">
+                        <div class="alert alert-warning mb-4" role="alert" id="alertPeninjauan">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Deposito yang masuk setelah tanggal 20, untuk bagi hasil akan dihitung di bulan selanjutnya
+                        </div>
                         <form id="formTambahFormKerjaInvestor" novalidate>
                             <input type="hidden" id="editFormKerjaInvestorId" value="">
                             <div class="row">
@@ -195,7 +199,8 @@
                 format: 'yyyy-mm-dd',
                 todayHighlight: true,
                 autoclose: true,
-                orientation: 'bottom auto'
+                orientation: 'bottom auto',
+                startDate: 'today'
             });
 
             function resetForm() {

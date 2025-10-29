@@ -31,7 +31,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 3</div>
-                            <div class="step-name">Upload Bukti Transfer</div>
+                            <div class="step-name">Validasi CEO SKI</div>
                         </div>
                     </div>
 
@@ -39,7 +39,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 4</div>
-                            <div class="step-name">Generate Kontrak</div>
+                            <div class="step-name">Upload Bukti Transfer</div>
                         </div>
                     </div>
 
@@ -47,6 +47,14 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
+                            <div class="step-name">Generate Kontrak</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="6">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 6</div>
                             <div class="step-name">Selesai</div>
                         </div>
                     </div>
@@ -102,10 +110,16 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
                                             <h5 class="mb-3 mb-md-4">Detail Investasi</h5>
-                                            <button type="button" class="btn btn-primary d-none" id="btnSetujuiPengajuan">
-                                                <i class="fas fa-check me-2"></i>
-                                                Setujui Pengajuan
-                                            </button>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-primary d-none" id="btnSetujuiPengajuan">
+                                                    <i class="fas fa-check me-2"></i>
+                                                    Setujui Pengajuan
+                                                </button>
+                                                <button type="button" class="btn btn-primary d-none" id="btnValidasiCEO">
+                                                    <i class="ti ti-check me-2"></i>
+                                                    Validasi CEO SKI
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <hr class="my-3 my-md-4">
@@ -281,7 +295,35 @@
                                             </div>
                                         </div>
 
-                                        <!-- Step 3: Upload Bukti Transfer -->
+                                        <!-- Step 3: Validasi CEO SKI -->
+                                        <div class="activity-item d-none mt-3 mb-4">
+                                            <div class="row align-items-center">
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="avatar avatar-sm">
+                                                                <span
+                                                                    class="avatar-initial rounded-circle bg-label-info">
+                                                                    <i class="ti ti-user-check"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1">Validasi CEO SKI</h6>
+                                                            <p class="text-muted mb-0 small">
+                                                                Menunggu persetujuan dari CEO SKI.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-center">
+                                                    <small class="text-muted" id="date-step-3">-</small>
+                                                </div>
+                                                <div class="col-6 col-md-3 text-end"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Step 4: Upload Bukti Transfer -->
                                         <div class="activity-item d-none mt-3 mb-4">
                                             <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -302,7 +344,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-3">-</small>
+                                                    <small class="text-muted" id="date-step-4">-</small>
                                                 </div>
                                                 <div class="col-6 col-md-3 text-end">
                                                     <button type="button" class="btn btn-icon btn-sm btn-label-primary"
@@ -313,7 +355,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Step 4: Generate Kontrak -->
+                                        <!-- Step 5: Generate Kontrak -->
                                         <div class="activity-item d-none mt-3 mb-4">
                                             <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -334,7 +376,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-4">-</small>
+                                                    <small class="text-muted" id="date-step-5">-</small>
                                                 </div>
                                                 <div class="col-6 col-md-3 text-end">
                                                     <button type="button" class="btn btn-icon btn-sm btn-label-info"
@@ -345,7 +387,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Step 5: Selesai -->
+                                        <!-- Step 6: Selesai -->
                                         <div class="activity-item d-none mt-3 mb-4">
                                             <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -366,7 +408,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-5">-</small>
+                                                    <small class="text-muted" id="date-step-6">-</small>
                                                 </div>
                                                 <div class="col-6 col-md-3 text-end"></div>
                                             </div>
@@ -478,6 +520,33 @@
         </div>
     </div>
 
+    <!-- Modal Validasi CEO SKI -->
+    <div class="modal fade" id="modalValidasiCEO" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Validasi CEO SKI</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <hr class="my-2">
+                <div class="modal-body">
+                    <h5 class="mb-2">Apakah Anda yakin menyetujui pengajuan investasi ini?</h5>
+                    <p class="mb-0">Dengan menyetujui, pengajuan akan dilanjutkan ke proses upload bukti transfer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btnKonfirmasiCEO">
+                        <i class="ti ti-check me-1"></i>
+                        Setujui
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnTolakCEO">
+                        <i class="ti ti-x me-1"></i>
+                        Tolak
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let currentStep = 1;
@@ -494,12 +563,13 @@
 
                 // Show/hide elements
                 $('#btnSetujuiPengajuan').toggleClass('d-none', currentStep !== 2);
+                $('#btnValidasiCEO').toggleClass('d-none', currentStep !== 3);
                 $('#alertPeninjauan').toggle(currentStep < 2);
 
                 // Detail Kontrak content
-                $('#kontrak-default').toggleClass('d-none', currentStep === 4);
-                $('#kontrak-step4').toggleClass('d-none', currentStep !== 4);
-                if (currentStep === 4) initFlatpickr();
+                $('#kontrak-default').toggleClass('d-none', currentStep === 5);
+                $('#kontrak-step4').toggleClass('d-none', currentStep !== 5);
+                if (currentStep === 5) initFlatpickr();
 
                 // Activity timeline
                 const showTimeline = currentStep >= 2;
@@ -536,7 +606,7 @@
             $('.stepper-wrapper').on('click', '.stepper-item', function() {
                 currentStep = parseInt($(this).data('step'));
                 updateUI();
-                if (currentStep === 4) {
+                if (currentStep === 5) {
                     new bootstrap.Tab($('[data-bs-target="#detail-kontrak"]')[0]).show();
                 }
             });
@@ -576,6 +646,27 @@
                 updateUI();
             });
 
+            // Button Validasi CEO
+            $('#btnValidasiCEO').click(() => {
+                new bootstrap.Modal($('#modalValidasiCEO')[0]).show();
+            });
+
+            $('#btnKonfirmasiCEO').click(() => {
+                bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]).hide();
+                currentStep = 4;
+                updateUI();
+                new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
+            });
+
+            // Button Tolak CEO
+            $('#btnTolakCEO').click(() => {
+                const modalValidasiCEO = bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]);
+                modalValidasiCEO.hide();
+                setTimeout(() => {
+                    new bootstrap.Modal($('#modalHasilReview')[0]).show();
+                }, 300);
+            });
+
             // Upload Bukti
             $('#btnUploadBuktiTransfer').click(() => {
                 new bootstrap.Modal($('#modalUploadBuktiTransfer')[0]).show();
@@ -594,7 +685,7 @@
                     $('#btnUploadSpinner').addClass('d-none');
                     bootstrap.Modal.getInstance($('#modalUploadBuktiTransfer')[0]).hide();
                     $(this).removeClass('was-validated')[0].reset();
-                    currentStep = 4;
+                    currentStep = 5;
                     updateUI();
                     new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
                 }, 1500);
@@ -616,7 +707,7 @@
                     $('#btnSimpanKontrak').prop('disabled', false);
                     $('#btnSimpanKontrakSpinner').addClass('d-none');
                     $(this).removeClass('was-validated');
-                    currentStep = 5;
+                    currentStep = 6;
                     updateUI();
                     new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
                 }, 2000);
