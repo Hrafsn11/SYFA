@@ -1099,7 +1099,7 @@
             if (sumberVal) fd.set('sumber_pembiayaan', sumberVal.toLowerCase());
 
             // Attach detail arrays and files depending on jenis pembiayaan
-            let postUrl = '{{ route('peminjaman.invoice.store') }}';
+            let postUrl = '{{ route('peminjaman.store') }}';
             if (currentJenisPembiayaan === 'Invoice Financing') {
                 fd.set('invoices', JSON.stringify(invoiceFinancingData.map(i => ({
                     no_invoice: i.no_invoice,
@@ -1120,7 +1120,6 @@
                     if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv
                         .dokumen_bast_file);
                 });
-                postUrl = '{{ route('peminjaman.invoice.store') }}';
             } else if (currentJenisPembiayaan === 'PO Financing') {
                 // Append each detail as form fields so PHP/Laravel parses them as array
                 poFinancingData.forEach(function(p, idx) {
@@ -1144,8 +1143,6 @@
                     if (p.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, p
                         .dokumen_lainnya_file);
                 });
-
-                postUrl = '{{ route('peminjaman.po.store') }}';
             }
 
             // Factoring append
@@ -1182,8 +1179,6 @@
                 fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
                 fd.set('pembayaran_total', normalizeNumericForServer(sumInvoice + bagi));
                 if (!fd.get('status') || fd.get('status') === '') fd.set('status', 'submitted');
-
-                postUrl = '{{ route('peminjaman.factoring.store') }}';
             }
 
             // Installment append
@@ -1201,8 +1196,6 @@
                     if (it.dokumen_lainnya_file) fd.append(`details[${idx}][dokumen_lainnya]`, it
                         .dokumen_lainnya_file);
                 });
-
-                postUrl = '{{ route('peminjaman.installment.store') }}';
             }
 
             // If posting Installment, ensure header computed fields are present
