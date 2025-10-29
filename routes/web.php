@@ -51,6 +51,11 @@ Route::middleware([
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
 
+    // Debitur Piutang
+    Route::get('debitur-piutang', function () {
+        return view('livewire.debitur-piutang.index');
+    })->name('debitur-piutang.index');
+
     Route::get('form-kerja-investor', [FormKerjaInvestorController::class, 'index'])->name('form-kerja-investor.index');
     Route::get('form-kerja-investor/detail', [FormKerjaInvestorController::class, 'show'])->name('form-kerja-investor.show');
 

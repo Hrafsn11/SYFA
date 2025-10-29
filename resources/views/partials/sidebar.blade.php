@@ -46,6 +46,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('debitur-piutang*') ? 'active' : '' }}">
+            <a href="{{ route('debitur-piutang.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-receipt"></i>
+                <div data-i18n="Debitur Piutang">Debitur Piutang</div>
+            </a>
+        </li>
+
         <!-- Debitur dan Investor Section -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Debitur dan Investor</span>
