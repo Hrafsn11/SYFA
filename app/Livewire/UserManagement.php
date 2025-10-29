@@ -33,7 +33,7 @@ class UserManagement extends Component
                 ->orWhere('email', 'like', '%' . $this->search . '%');
         })->paginate(10);
 
-        $allRoles = Role::all();
+        $allRoles = Role::where('guard_name', 'web')->get();
 
         return view('livewire.user-management', compact('users', 'allRoles'))
             ->layout('layouts.app');

@@ -21,9 +21,10 @@ class PermissionManagement extends Component
 
     public function render()
     {
-        $permissions = Permission::when($this->search, function ($query) {
-            $query->where('name', 'like', '%' . $this->search . '%');
-        })->paginate(10);
+        $permissions = Permission::where('guard_name', 'web')
+            ->when($this->search, function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%');
+            })->paginate(10);
 
         return view('livewire.permission-management', compact('permissions'))
             ->layout('layouts.app');
@@ -56,7 +57,10 @@ class PermissionManagement extends Component
             $permission->update(['name' => $this->name]);
             session()->flash('message', 'Permission updated successfully!');
         } else {
-            Permission::create(['name' => $this->name]);
+            Permission::create([
+                'name' => $this->name,
+                'guard_name' => 'web'
+            ]);
             session()->flash('message', 'Permission created successfully!');
         }
 
