@@ -30,6 +30,7 @@ class MasterDebiturDanInvestor extends Model
         'nama_bank',
         'no_rek',
         'flagging',
+        'tanda_tangan',
     ];
 
     protected $casts = [

@@ -5,10 +5,6 @@
         <div class="row">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold py-3 mb-4">Report Pengembalian</h4>
-                <button class="btn btn-primary">
-                    <i class="fa fa-plus me-2"></i>
-                    Tambah Report
-                </button>
             </div>
 
             <div class="card">

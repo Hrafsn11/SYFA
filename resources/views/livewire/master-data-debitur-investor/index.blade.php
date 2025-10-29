@@ -160,6 +160,14 @@
                                 <div class="invalid-feedback">KOL perusahaan wajib dipilih</div>
                             </div>
 
+                            <!-- Upload Tanda Tangan (Hanya untuk Debitur) -->
+                            <div class="col-12 mb-3" id="div-tanda-tangan">
+                                <label class="form-label">Upload Tanda Tangan Debitur</label>
+                                <input type="file" class="form-control" id="tanda_tangan" name="tanda_tangan" accept="image/jpeg,image/png,image/jpg">
+                                <small class="text-muted">Maximum upload file size: 2 MB. (Type File: jpg, png, jpeg)</small>
+                                <div class="invalid-feedback">File tanda tangan tidak valid</div>
+                            </div>
+
                             <!-- Password -->
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password <span class="text-danger"
@@ -282,6 +290,7 @@
                     $('#div-nama-ceo').hide();
                     $('#div-alamat').hide();
                     $('#div-kol').hide();
+                    $('#div-tanda-tangan').hide(); 
                     $('#label-nama').text('Nama Investor');
                     $('#nama').attr('placeholder', 'Masukkan Nama Investor');
                     $('#id_kol').prop('required', false);
@@ -292,6 +301,7 @@
                     $('#div-nama-ceo').show();
                     $('#div-alamat').show();
                     $('#div-kol').show();
+                    $('#div-tanda-tangan').show();
                     $('#label-nama').text('Nama Perusahaan');
                     $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
                     $('#id_kol').prop('required', true);
@@ -309,6 +319,9 @@
                 $('#password_confirmation').prop('required', true);
                 $('#password-required').show();
                 $('#password-confirm-required').show();
+                
+                // Reset tanda tangan
+                $('#tanda_tangan').val('');
 
                 if (currentTabType === 'investor') {
                     $('#modalTambahDebiturLabel').text('Tambah Investor');
@@ -317,6 +330,7 @@
                     $('#div-nama-ceo').hide();
                     $('#div-alamat').hide();
                     $('#div-kol').hide();
+                    $('#div-tanda-tangan').hide();
                     $('#label-nama').text('Nama Investor');
                     $('#nama').attr('placeholder', 'Masukkan Nama Investor');
                     $('#id_kol').prop('required', false);
@@ -328,16 +342,17 @@
                     $('#div-nama-ceo').show();
                     $('#div-alamat').show();
                     $('#div-kol').show();
+                    $('#div-tanda-tangan').show(); // Show tanda tangan untuk debitur
                     $('#label-nama').text('Nama Perusahaan');
                     $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
                     $('#id_kol').prop('required', true);
-                    
+
                     // Set KOL 0 sebagai default dan disable
                     const defaultKolId = @json($kol->firstWhere('kol', 0)?->id_kol ?? $kol->first()?->id_kol);
                     $('#id_kol').val(defaultKolId).trigger('change');
                     $('#id_kol').prop('disabled', true);
                     $('#kol-info-text').show();
-                    
+
                     $('input[name="deposito"]').prop('checked', false);
                 }
 
@@ -390,6 +405,7 @@
                                 $('#div-nama-ceo').hide();
                                 $('#div-alamat').hide();
                                 $('#div-kol').hide();
+                                $('#div-tanda-tangan').hide(); 
                                 $('#label-nama').text('Nama Investor');
                                 $('#nama').attr('placeholder', 'Masukkan Nama Investor');
                                 $('#id_kol').prop('required', false);
@@ -399,6 +415,7 @@
                                 $('#div-nama-ceo').show();
                                 $('#div-alamat').show();
                                 $('#div-kol').show();
+                                $('#div-tanda-tangan').show(); 
                                 $('#label-nama').text('Nama Perusahaan');
                                 $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
                                 $('#id_kol').prop('required', true);
@@ -503,6 +520,25 @@
                     }
                 }
 
+                // Validate file size if uploaded
+                const fileInput = $('#tanda_tangan')[0];
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const maxSize = 2 * 1024 * 1024; // 2MB
+                    
+                    if (file.size > maxSize) {
+                        alert('Ukuran file tanda tangan maksimal 2 MB');
+                        return;
+                    }
+                    
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        alert('Tipe file harus JPG, JPEG, atau PNG');
+                        return;
+                    }
+                }
+
                 // Enable KOL sebelum validasi agar bisa disubmit
                 $('#id_kol').prop('disabled', false);
 
@@ -514,29 +550,37 @@
                 const id = $('#editDebiturId').val();
                 const flagging = $('#hiddenFlagging').val();
 
-                const formData = {
-                    id_kol: $('#id_kol').val() || null,
-                    nama: $('#nama').val(),
-                    nama_ceo: $('#nama_ceo').val() || null,
-                    alamat: $('#alamat').val() || null,
-                    email: $('#email').val() || null,
-                    no_telepon: $('#no_telepon').val() || null,
-                    status: 'active',
-                    deposito: (flagging === 'ya') ? $('input[name="deposito"]:checked').val() || null :
-                        null,
-                    nama_bank: $('#nama_bank').val() || null,
-                    no_rek: $('#no_rek').val() || null,
-                    flagging: flagging,
-                    _token: '{{ csrf_token() }}'
-                };
-
+                // Use FormData for file upload
+                const formData = new FormData();
+                formData.append('id_kol', $('#id_kol').val() || '');
+                formData.append('nama', $('#nama').val());
+                formData.append('nama_ceo', $('#nama_ceo').val() || '');
+                formData.append('alamat', $('#alamat').val() || '');
+                formData.append('email', $('#email').val() || '');
+                formData.append('no_telepon', $('#no_telepon').val() || '');
+                formData.append('status', 'active');
+                formData.append('deposito', (flagging === 'ya') ? $('input[name="deposito"]:checked').val() || '' : '');
+                formData.append('nama_bank', $('#nama_bank').val() || '');
+                formData.append('no_rek', $('#no_rek').val() || '');
+                formData.append('flagging', flagging);
+                formData.append('_token', '{{ csrf_token() }}');
+                
+                // Append file if uploaded
+                if (fileInput.files.length > 0) {
+                    formData.append('tanda_tangan', fileInput.files[0]);
+                }
+                
                 if (password) {
-                    formData.password = password;
-                    formData.password_confirmation = passwordConfirm;
+                    formData.append('password', password);
+                    formData.append('password_confirmation', passwordConfirm);
                 }
 
                 const url = id ? `/master-data/debitur-investor/${id}` : '/master-data/debitur-investor';
-                const method = id ? 'PUT' : 'POST';
+                const method = id ? 'POST' : 'POST'; 
+                
+                if (id) {
+                    formData.append('_method', 'PUT');
+                }
 
                 $('#btnSimpanSpinner').removeClass('d-none');
                 $(this).prop('disabled', true);
@@ -545,11 +589,13 @@
                     url: url,
                     method: method,
                     data: formData,
+                    processData: false, // Important for FormData
+                    contentType: false, // Important for FormData
                     success: function(response) {
                         if (response.success) {
                             $modal.modal('hide');
 
-                            if (formData.flagging === 'ya') {
+                            if (flagging === 'ya') {
                                 Livewire.dispatch('refreshInvestorTable');
                             } else {
                                 Livewire.dispatch('refreshDebiturTable');
