@@ -34,7 +34,7 @@ class DebiturTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama_debitur', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging');
     }
 
     public function columns(): array
@@ -52,7 +52,7 @@ class DebiturTable extends DataTableComponent
                 ->html()
                 ->excludeFromColumnSelect(),
 
-            Column::make('Nama Perusahaan', 'nama_debitur')
+            Column::make('Nama Perusahaan', 'nama')
                 ->sortable()
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')

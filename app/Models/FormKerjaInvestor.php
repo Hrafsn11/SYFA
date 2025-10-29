@@ -40,9 +40,7 @@ class FormKerjaInvestor extends Model
         'bagi_hasil_keseluruhan' => 'decimal:2',
     ];
 
-    /**
-     * Relationship: FormKerjaInvestor belongsTo MasterDebiturDanInvestor
-     */
+ 
     public function investor()
     {
         return $this->belongsTo(MasterDebiturDanInvestor::class, 'id_debitur', 'id_debitur');

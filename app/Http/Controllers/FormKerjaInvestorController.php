@@ -17,21 +17,14 @@ class FormKerjaInvestorController extends Controller
     public function index()
     {
         $investor = null;
-        $formKerjaInvestor = collect();
         
         if (Auth::check()) {
             $investor = MasterDebiturDanInvestor::where('user_id', Auth::id())
                 ->where('flagging', 'ya')
                 ->first();
-                
-            if ($investor) {
-                $formKerjaInvestor = FormKerjaInvestor::where('id_debitur', $investor->id_debitur)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-            }
         }
         
-        return view('livewire.form-kerja-investor.index', compact('investor', 'formKerjaInvestor'));
+        return view('livewire.form-kerja-investor.index', compact('investor'));
     }
 
     /**
@@ -57,13 +50,28 @@ class FormKerjaInvestorController extends Controller
             'bagi_hasil_keseluruhan' => 'required|numeric|min:0',
         ]);
 
+        if ($validated['deposito'] === 'khusus' && $validated['bagi_hasil'] < 7) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bagi hasil minimum untuk deposito khusus adalah 7%',
+                'errors' => [
+                    'bagi_hasil' => ['Bagi hasil minimum untuk deposito khusus adalah 7%']
+                ]
+            ], 422);
+        }
+
         try {
             DB::beginTransaction();
 
-            // Get investor data
             $investor = MasterDebiturDanInvestor::where('user_id', Auth::id())
                 ->where('flagging', 'ya')
                 ->firstOrFail();
+
+            $bagiHasilKeseluruhan = $this->calculateBagiHasil(
+                $validated['jumlah_investasi'],
+                $validated['bagi_hasil'],
+                $validated['lama_investasi']
+            );
 
             // Create form kerja investor
             $formKerjaInvestor = FormKerjaInvestor::create([
@@ -74,7 +82,7 @@ class FormKerjaInvestorController extends Controller
                 'lama_investasi' => $validated['lama_investasi'],
                 'jumlah_investasi' => $validated['jumlah_investasi'],
                 'bagi_hasil' => $validated['bagi_hasil'],
-                'bagi_hasil_keseluruhan' => $validated['bagi_hasil_keseluruhan'],
+                'bagi_hasil_keseluruhan' => $bagiHasilKeseluruhan,
                 'status' => 'pending',
             ]);
 
@@ -96,6 +104,19 @@ class FormKerjaInvestorController extends Controller
     }
 
     /**
+     * Calculate Bagi Hasil Keseluruhan
+     * (Jumlah Investasi × Bagi Hasil%) / 12 × Lama Investasi
+     */
+    private function calculateBagiHasil($jumlahInvestasi, $bagiHasilPersen, $lamaInvestasi)
+    {
+        if ($jumlahInvestasi <= 0 || $bagiHasilPersen <= 0 || $lamaInvestasi <= 0) {
+            return 0;
+        }
+
+        return round(($jumlahInvestasi * $bagiHasilPersen / 100) / 12 * $lamaInvestasi);
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show($id)
@@ -109,25 +130,67 @@ class FormKerjaInvestorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(FormKerjaInvestor $formKerjaInvestor)
+    public function edit($id)
     {
-        //
+        try {
+            $formKerjaInvestor = FormKerjaInvestor::with('investor')->findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $formKerjaInvestor
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $formKerjaInvestor = FormKerjaInvestor::findOrFail($id);
 
         $validated = $request->validate([
+            'nama_investor' => 'sometimes|string|max:255',
+            'deposito' => 'sometimes|in:reguler,khusus',
+            'tanggal_pembayaran' => 'nullable|date',
+            'lama_investasi' => 'nullable|integer|min:1',
+            'jumlah_investasi' => 'sometimes|numeric|min:0',
+            'bagi_hasil' => 'sometimes|numeric|min:0|max:100',
+            'bagi_hasil_keseluruhan' => 'sometimes|numeric|min:0',
             'status' => 'sometimes|in:pending,approved,rejected,completed',
             'alasan_penolakan' => 'nullable|string',
         ]);
 
+        $deposito = $validated['deposito'] ?? $formKerjaInvestor->deposito;
+        $bagiHasil = $validated['bagi_hasil'] ?? $formKerjaInvestor->bagi_hasil;
+        
+        if ($deposito === 'khusus' && $bagiHasil < 7) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bagi hasil minimum untuk deposito khusus adalah 7%',
+                'errors' => [
+                    'bagi_hasil' => ['Bagi hasil minimum untuk deposito khusus adalah 7%']
+                ]
+            ], 422);
+        }
+
         try {
+            DB::beginTransaction();
+            
+            if (isset($validated['jumlah_investasi']) || isset($validated['bagi_hasil']) || isset($validated['lama_investasi'])) {
+                $validated['bagi_hasil_keseluruhan'] = $this->calculateBagiHasil(
+                    $validated['jumlah_investasi'] ?? $formKerjaInvestor->jumlah_investasi,
+                    $validated['bagi_hasil'] ?? $formKerjaInvestor->bagi_hasil,
+                    $validated['lama_investasi'] ?? $formKerjaInvestor->lama_investasi
+                );
+            }
+            
             $formKerjaInvestor->update($validated);
+            
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -136,6 +199,7 @@ class FormKerjaInvestorController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()

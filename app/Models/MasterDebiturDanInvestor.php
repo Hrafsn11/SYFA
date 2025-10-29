@@ -10,14 +10,17 @@ class MasterDebiturDanInvestor extends Model
     use HasFactory;
 
     protected $table = 'master_debitur_dan_investor';
+
     protected $primaryKey = 'id_debitur';
+
     public $incrementing = true;
+
     protected $keyType = 'int';
 
     protected $fillable = [
         'user_id',
         'id_kol',
-        'nama_debitur',
+        'nama',
         'alamat',
         'email',
         'no_telepon',
@@ -26,7 +29,13 @@ class MasterDebiturDanInvestor extends Model
         'nama_ceo',
         'nama_bank',
         'no_rek',
-        'flagging'
+        'flagging',
+    ];
+
+    protected $casts = [
+        'flagging' => 'string',
+        'status' => 'string',
+        'deposito' => 'string',
     ];
 
     public function kol()
@@ -37,5 +46,15 @@ class MasterDebiturDanInvestor extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function Debitur($query)
+    {
+        return $query->where('flagging', 'tidak');
+    }
+
+    public function Investor($query)
+    {
+        return $query->where('flagging', 'ya');
     }
 }

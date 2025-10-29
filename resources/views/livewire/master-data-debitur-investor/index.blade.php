@@ -69,23 +69,45 @@
                         <input type="hidden" id="hiddenFlagging" value="tidak">
 
                         <div class="row">
-                            <!-- Nama Perusahaan -->
+                            <!-- Nama Perusahaan / Nama Investor -->
                             <div class="col-12 mb-3">
-                                <label for="nama_debitur" class="form-label">Nama Perusahaan <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="nama_debitur"
+                                <label for="nama" class="form-label">
+                                    <span id="label-nama">Nama Perusahaan</span> <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nama"
                                     placeholder="Masukkan Nama Perusahaan" required>
-                                <div class="invalid-feedback">Nama perusahaan wajib diisi</div>
+                                <div class="invalid-feedback">Nama wajib diisi</div>
                             </div>
 
-                            <!-- Nama CEO -->
-                            <div class="col-12 mb-3">
+                            <!-- Deposito (Khusus Investor) -->
+                            <div class="col-12 mb-3" id="div-deposito" style="display: none;">
+                                <label class="form-label">Deposito</label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="deposito" id="deposito_reguler"
+                                            value="reguler">
+                                        <label class="form-check-label" for="deposito_reguler">
+                                            Reguler
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="deposito" id="deposito_khusus"
+                                            value="khusus">
+                                        <label class="form-check-label" for="deposito_khusus">
+                                            Khusus
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nama CEO (Hanya untuk Debitur) -->
+                            <div class="col-12 mb-3" id="div-nama-ceo">
                                 <label for="nama_ceo" class="form-label">Nama CEO</label>
                                 <input type="text" class="form-control" id="nama_ceo" placeholder="Masukkan Nama CEO">
                             </div>
 
-                            <!-- Alamat Perusahaan -->
-                            <div class="col-12 mb-3">
+                            <!-- Alamat Perusahaan (Hanya untuk Debitur) -->
+                            <div class="col-12 mb-3" id="div-alamat">
                                 <label for="alamat" class="form-label">Alamat Perusahaan</label>
                                 <textarea class="form-control" id="alamat" rows="2" placeholder="Masukkan alamat perusahaan"></textarea>
                             </div>
@@ -102,55 +124,6 @@
                                 <label for="no_telepon" class="form-label">No. Telepon</label>
                                 <input type="text" class="form-control" id="no_telepon"
                                     placeholder="Masukkan no telepon">
-                            </div>
-
-                            <!-- Password -->
-                            <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password <span class="text-danger" id="password-required">*</span></label>
-                                <input type="password" class="form-control" id="password" 
-                                    placeholder="Masukkan password" autocomplete="new-password">
-                                <div class="invalid-feedback">Password wajib diisi minimal 8 karakter</div>
-                                <small class="text-muted">Minimal 8 karakter</small>
-                            </div>
-
-                            <!-- Confirm Password -->
-                            <div class="col-md-6 mb-3">
-                                <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span></label>
-                                <input type="password" class="form-control" id="password_confirmation" 
-                                    placeholder="Konfirmasi password" autocomplete="new-password">
-                                <div class="invalid-feedback">Password tidak cocok</div>
-                            </div>
-
-                            <!-- KOL Perusahaan -->
-                            <div class="col-12 mb-3">
-                                <label for="id_kol" class="form-label">KOL Perusahaan <span
-                                        class="text-danger">*</span></label>
-                                <select id="id_kol" class="form-select" required>
-                                    <option value="">Pilih KOL</option>
-                                    @foreach ($kol as $kolItem)
-                                        <option value="{{ $kolItem->id_kol }}">{{ $kolItem->kol }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback">KOL perusahaan wajib dipilih</div>
-                            </div>
-
-                            <!-- Deposito (Khusus Investor) -->
-                            <div class="col-12 mb-3" id="div-deposito" style="display: none;">
-                                <label class="form-label">Deposito</label>
-                                <div class="d-flex gap-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="deposito" id="deposito_reguler" value="reguler">
-                                        <label class="form-check-label" for="deposito_reguler">
-                                            Reguler
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="deposito" id="deposito_khusus" value="khusus">
-                                        <label class="form-check-label" for="deposito_khusus">
-                                            Khusus
-                                        </label>
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Nama Bank -->
@@ -170,6 +143,42 @@
                                 <input type="text" class="form-control" id="no_rek"
                                     placeholder="Masukkan no rekening">
                             </div>
+
+                            <!-- KOL Perusahaan (Hanya untuk Debitur) -->
+                            <div class="col-12 mb-3" id="div-kol">
+                                <label for="id_kol" class="form-label">KOL Perusahaan <span
+                                        class="text-danger">*</span></label>
+                                <select id="id_kol" class="form-select" required>
+                                    <option value="">Pilih KOL</option>
+                                    @foreach ($kol as $kolItem)
+                                        <option value="{{ $kolItem->id_kol }}">{{ $kolItem->kol }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted" id="kol-info-text" style="display: none;">
+                                    <i class="ti ti-info-circle"></i> Debitur baru otomatis mendapat KOL 0
+                                </small>
+                                <div class="invalid-feedback">KOL perusahaan wajib dipilih</div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password <span class="text-danger"
+                                        id="password-required">*</span></label>
+                                <input type="password" class="form-control" id="password"
+                                    placeholder="Masukkan password" autocomplete="new-password">
+                                <div class="invalid-feedback">Password wajib diisi minimal 8 karakter</div>
+                                <small class="text-muted">Minimal 8 karakter</small>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="password_confirmation" class="form-label">Konfirmasi Password <span
+                                        class="text-danger" id="password-confirm-required">*</span></label>
+                                <input type="password" class="form-control" id="password_confirmation"
+                                    placeholder="Konfirmasi password" autocomplete="new-password">
+                                <div class="invalid-feedback">Password tidak cocok</div>
+                            </div>
+
                         </div>
                     </form>
                 </div>
@@ -269,11 +278,23 @@
                 if (currentTabType === 'investor') {
                     $('#btnTambahText').text('Investor');
                     $('#hiddenFlagging').val('ya');
-                    $('#div-deposito').show(); 
+                    $('#div-deposito').show();
+                    $('#div-nama-ceo').hide();
+                    $('#div-alamat').hide();
+                    $('#div-kol').hide();
+                    $('#label-nama').text('Nama Investor');
+                    $('#nama').attr('placeholder', 'Masukkan Nama Investor');
+                    $('#id_kol').prop('required', false);
                 } else {
                     $('#btnTambahText').text('Debitur');
                     $('#hiddenFlagging').val('tidak');
-                    $('#div-deposito').hide(); 
+                    $('#div-deposito').hide();
+                    $('#div-nama-ceo').show();
+                    $('#div-alamat').show();
+                    $('#div-kol').show();
+                    $('#label-nama').text('Nama Perusahaan');
+                    $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
+                    $('#id_kol').prop('required', true);
                 }
             }
 
@@ -283,12 +304,7 @@
                 $('#editDebiturId').val('');
                 $('#nama_bank').val('').trigger('change');
                 $('#btnHapusDataModal').hide();
-                
-                const defaultKolId = @json($kol->firstWhere('kol', 0)?->id_kol ?? $kol->first()?->id_kol);
-                $('#id_kol').val(defaultKolId).trigger('change');
-                $('#id_kol').prop('disabled', true);
-                $('#kol-info-text').show();
-                
+
                 $('#password').prop('required', true);
                 $('#password_confirmation').prop('required', true);
                 $('#password-required').show();
@@ -297,11 +313,31 @@
                 if (currentTabType === 'investor') {
                     $('#modalTambahDebiturLabel').text('Tambah Investor');
                     $('#hiddenFlagging').val('ya');
-                    $('#div-deposito').show(); 
+                    $('#div-deposito').show();
+                    $('#div-nama-ceo').hide();
+                    $('#div-alamat').hide();
+                    $('#div-kol').hide();
+                    $('#label-nama').text('Nama Investor');
+                    $('#nama').attr('placeholder', 'Masukkan Nama Investor');
+                    $('#id_kol').prop('required', false);
+                    $('#id_kol').val('').trigger('change');
                 } else {
                     $('#modalTambahDebiturLabel').text('Tambah Debitur');
                     $('#hiddenFlagging').val('tidak');
-                    $('#div-deposito').hide(); 
+                    $('#div-deposito').hide();
+                    $('#div-nama-ceo').show();
+                    $('#div-alamat').show();
+                    $('#div-kol').show();
+                    $('#label-nama').text('Nama Perusahaan');
+                    $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
+                    $('#id_kol').prop('required', true);
+                    
+                    // Set KOL 0 sebagai default dan disable
+                    const defaultKolId = @json($kol->firstWhere('kol', 0)?->id_kol ?? $kol->first()?->id_kol);
+                    $('#id_kol').val(defaultKolId).trigger('change');
+                    $('#id_kol').prop('disabled', true);
+                    $('#kol-info-text').show();
+                    
                     $('input[name="deposito"]').prop('checked', false);
                 }
 
@@ -321,25 +357,26 @@
                         if (response.success && response.data) {
                             const d = response.data;
                             $('#editDebiturId').val(d.id_debitur);
-                            $('#nama_debitur').val(d.nama_debitur);
+                            $('#nama').val(d.nama);
                             $('#nama_ceo').val(d.nama_ceo);
                             $('#alamat').val(d.alamat);
                             $('#email').val(d.email);
                             $('#no_telepon').val(d.no_telepon);
-                            
+
                             $('input[name="deposito"]').prop('checked', false);
                             if (d.deposito) {
-                                $(`input[name="deposito"][value="${d.deposito}"]`).prop('checked', true);
+                                $(`input[name="deposito"][value="${d.deposito}"]`).prop(
+                                    'checked', true);
                             }
-                            
+
                             $('#id_kol').prop('disabled', false);
                             $('#id_kol').val(d.id_kol).trigger('change');
                             $('#kol-info-text').hide();
-                            
+
                             $('#nama_bank').val(d.nama_bank).trigger('change');
                             $('#no_rek').val(d.no_rek);
                             $('#hiddenFlagging').val(d.flagging);
-                            
+
                             $('#password').val('');
                             $('#password_confirmation').val('');
                             $('#password').prop('required', false);
@@ -347,17 +384,27 @@
                             $('#password-required').hide();
                             $('#password-confirm-required').hide();
 
-                            const title = d.flagging === 'ya' ? 'Edit Investor' :
-                            'Edit Debitur';
-                            $('#modalTambahDebiturLabel').text(title);
+                            if (d.flagging === 'ya') {
+                                $('#modalTambahDebiturLabel').text('Edit Investor');
+                                $('#div-deposito').show();
+                                $('#div-nama-ceo').hide();
+                                $('#div-alamat').hide();
+                                $('#div-kol').hide();
+                                $('#label-nama').text('Nama Investor');
+                                $('#nama').attr('placeholder', 'Masukkan Nama Investor');
+                                $('#id_kol').prop('required', false);
+                            } else {
+                                $('#modalTambahDebiturLabel').text('Edit Debitur');
+                                $('#div-deposito').hide();
+                                $('#div-nama-ceo').show();
+                                $('#div-alamat').show();
+                                $('#div-kol').show();
+                                $('#label-nama').text('Nama Perusahaan');
+                                $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
+                                $('#id_kol').prop('required', true);
+                            }
 
                             $('#btnHapusDataModal').show();
-                    
-                            if (d.flagging === 'ya') {
-                                $('#div-deposito').show();
-                            } else {
-                                $('#div-deposito').hide();
-                            }
 
                             $modal.modal('show');
                         }
@@ -380,8 +427,8 @@
                 if (!id) return;
 
                 deleteDebiturId = id;
-                $modal.modal('hide'); 
-                $modalDelete.modal('show'); 
+                $modal.modal('hide');
+                $modalDelete.modal('show');
             });
 
             $(document).on('click', '.debitur-toggle-status-btn', function(e) {
@@ -441,23 +488,24 @@
             $('#btnSimpanDebitur').on('click', function() {
                 const password = $('#password').val();
                 const passwordConfirm = $('#password_confirmation').val();
-                
+
                 if (password || passwordConfirm) {
                     if (password.length < 8) {
                         $('#password').addClass('is-invalid');
                         alert('Password minimal 8 karakter');
                         return;
                     }
-                    
+
                     if (password !== passwordConfirm) {
                         $('#password_confirmation').addClass('is-invalid');
                         alert('Password dan Konfirmasi Password tidak cocok');
                         return;
                     }
                 }
-                
+
+                // Enable KOL sebelum validasi agar bisa disubmit
                 $('#id_kol').prop('disabled', false);
-                
+
                 if (!$form[0].checkValidity()) {
                     $form.addClass('was-validated');
                     return;
@@ -467,20 +515,21 @@
                 const flagging = $('#hiddenFlagging').val();
 
                 const formData = {
-                    id_kol: $('#id_kol').val(),
-                    nama_debitur: $('#nama_debitur').val(),
+                    id_kol: $('#id_kol').val() || null,
+                    nama: $('#nama').val(),
                     nama_ceo: $('#nama_ceo').val() || null,
                     alamat: $('#alamat').val() || null,
                     email: $('#email').val() || null,
                     no_telepon: $('#no_telepon').val() || null,
-                    status: 'active', 
-                    deposito: (flagging === 'ya') ? $('input[name="deposito"]:checked').val() || null : null, // ✅ Get radio value
+                    status: 'active',
+                    deposito: (flagging === 'ya') ? $('input[name="deposito"]:checked').val() || null :
+                        null,
                     nama_bank: $('#nama_bank').val() || null,
                     no_rek: $('#no_rek').val() || null,
                     flagging: flagging,
                     _token: '{{ csrf_token() }}'
                 };
-                
+
                 if (password) {
                     formData.password = password;
                     formData.password_confirmation = passwordConfirm;
