@@ -34,7 +34,7 @@ class DebiturTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging', 'tanda_tangan');
     }
 
     public function columns(): array
@@ -112,6 +112,22 @@ class DebiturTable extends DataTableComponent
                         return '<div class="text-center"><span class="badge bg-success">Active</span></div>';
                     } else {
                         return '<div class="text-center"><span class="badge bg-secondary">Non Active</span></div>';
+                    }
+                })
+                ->html(),
+
+            Column::make('Tanda Tangan', 'tanda_tangan')
+                ->sortable()
+                ->format(function ($value) {
+                    if ($value) {
+                        $filename = basename($value);
+                        return '<div class="text-center">
+                            <a href="/storage/' . $value . '" target="_blank" class="text-primary text-decoration-none">
+                                <i class="ti ti-file-text me-1"></i>
+                            </a>
+                        </div>';
+                    } else {
+                        return '<div class="text-center"><span class="text-muted">-</span></div>';
                     }
                 })
                 ->html(),

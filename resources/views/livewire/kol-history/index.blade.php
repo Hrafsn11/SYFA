@@ -11,7 +11,7 @@
                 <h4 class="fw-bold mb-0">History KOL</h4>
                 
                 <div style="width: 200px;">
-                    <div class="input-group input-group-sm">
+                    <div class="input-group input-group-md">
                         <input type="text" 
                                class="form-control" 
                                placeholder="Pilih Tahun"
@@ -39,75 +39,33 @@
                     <tbody>
                         <tr>
                             <td class="text-center">1</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
+                            <td>{{ $debitur->nama }}</td>
                             <td class="text-center">Januari 2025</td>
                             <td class="text-center"><span>KOL 1</span></td>
                         </tr>
                         <tr>
                             <td class="text-center">2</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
+                            <td>{{ $debitur->nama }}</td>
                             <td class="text-center">Februari 2025</td>
                             <td class="text-center"><span>KOL 1</span></td>
                         </tr>
                         <tr>
                             <td class="text-center">3</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
+                            <td>{{ $debitur->nama }}</td>
                             <td class="text-center">Maret 2025</td>
                             <td class="text-center"><span>KOL 2</span></td>
                         </tr>
                         <tr>
                             <td class="text-center">4</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
+                            <td>{{ $debitur->nama }}</td>
                             <td class="text-center">April 2025</td>
                             <td class="text-center"><span>KOL 2</span></td>
                         </tr>
                         <tr>
                             <td class="text-center">5</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
+                            <td>{{ $debitur->nama }}</td>
                             <td class="text-center">Mei 2025</td>
                             <td class="text-center"><span>KOL 2</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">6</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">Juni 2025</td>
-                            <td class="text-center"><span>KOL 3</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">7</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">Juli 2025</td>
-                            <td class="text-center"><span>KOL 3</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">8</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">Agustus 2025</td>
-                            <td class="text-center"><span>KOL 3</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">9</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">September 2025</td>
-                            <td class="text-center"><span>KOL 4</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">10</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">Oktober 2025</td>
-                            <td class="text-center"><span>KOL 4</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">11</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">November 2025</td>
-                            <td class="text-center"><span>KOL 5</span></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center">12</td>
-                            <td>{{ $debitur->nama_debitur }}</td>
-                            <td class="text-center">Desember 2025</td>
-                            <td class="text-center"><span>KOL 5</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -162,7 +120,7 @@
                     emptyTable: "Tidak ada data yang tersedia",
                     zeroRecords: "Data tidak ditemukan"
                 },
-                order: [[2, 'asc']], 
+                order: [[1, 'desc']], 
                 columnDefs: [
                     {
                         targets: 0, 

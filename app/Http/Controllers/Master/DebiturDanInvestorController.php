@@ -9,6 +9,7 @@ use App\Models\MasterKol;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DebiturDanInvestorController extends Controller
 {
@@ -35,11 +36,20 @@ class DebiturDanInvestorController extends Controller
             'nama_ceo' => 'nullable|string|max:255',
             'nama_bank' => 'nullable|string|in:BCA,BSI,Mandiri,BRI,BNI,Danamon,Permata Bank,OCBC,Panin Bank,UOB Indonesia,CIMB Niaga',
             'no_rek' => 'nullable|string|max:100',
-            'flagging' => 'nullable|string|in:ya,tidak'
+            'flagging' => 'nullable|string|in:ya,tidak',
+            'tanda_tangan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // 2MB max
         ]);
 
         try {
             DB::beginTransaction();
+
+            // Handle file upload
+            if ($request->hasFile('tanda_tangan')) {
+                $file = $request->file('tanda_tangan');
+                $filename = 'tanda_tangan_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('tanda_tangan', $filename, 'public');
+                $validated['tanda_tangan'] = $path;
+            }
 
             $user = User::create([
                 'name' => $validated['nama'],
@@ -95,11 +105,25 @@ class DebiturDanInvestorController extends Controller
             'nama_ceo' => 'nullable|string|max:255',
             'nama_bank' => 'nullable|string|in:BCA,BSI,Mandiri,BRI,BNI,Danamon,Permata Bank,OCBC,Panin Bank,UOB Indonesia,CIMB Niaga',
             'no_rek' => 'nullable|string|max:100',
-            'flagging' => 'nullable|string|in:ya,tidak'
+            'flagging' => 'nullable|string|in:ya,tidak',
+            'tanda_tangan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // 2MB max
         ]);
 
         try {
             DB::beginTransaction();
+
+            // Handle file upload
+            if ($request->hasFile('tanda_tangan')) {
+                // Delete old file if exists
+                if ($debitur->tanda_tangan && \Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                    \Storage::disk('public')->delete($debitur->tanda_tangan);
+                }
+                
+                $file = $request->file('tanda_tangan');
+                $filename = 'tanda_tangan_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('tanda_tangan', $filename, 'public');
+                $validated['tanda_tangan'] = $path;
+            }
 
             // Update user if exists
             if ($debitur->user_id) {
@@ -170,5 +194,30 @@ class DebiturDanInvestorController extends Controller
         return view('livewire.kol-history.index', [
             'debitur' => $debitur
         ]);
+    }
+
+    public function deleteSignature($id)
+    {
+        try {
+            $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
+            
+            // Delete file if exists
+            if ($debitur->tanda_tangan && \Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                \Storage::disk('public')->delete($debitur->tanda_tangan);
+            }
+            
+            // Update database
+            $debitur->update(['tanda_tangan' => null]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tanda tangan berhasil dihapus'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus tanda tangan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

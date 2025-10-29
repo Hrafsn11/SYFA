@@ -62,7 +62,7 @@
 
         <li class="menu-item {{ request()->routeIs('report-pengembalian*') ? 'active' : '' }}">
             <a href="{{ route('report-pengembalian.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-wallet"></i>
+                <i class="menu-icon tf-icons ti ti-file-text"></i>
                 <div data-i18n="Report Pengembalian">Report Pengembalian</div>
             </a>
         </li>
@@ -74,7 +74,7 @@
 
         <li class="menu-item {{ request()->is('debitur-dan-investor*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-user"></i>
+                <i class="menu-icon tf-icons ti ti-id-badge"></i>
                 <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
             </a>
             <ul class="menu-sub">

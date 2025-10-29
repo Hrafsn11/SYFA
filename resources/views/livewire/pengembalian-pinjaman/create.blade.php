@@ -42,7 +42,7 @@
                                 <div class="col-md-6">
                                     <label for="total_bagi_hasil">Total Bagi Hasil</label>
                                     <input type="text" class="form-control" id="total_bagi_hasil" name="total_bagi_hasil"
-                                        value="2% (Rp.50.000.000)" disabled>
+                                        value="2% (Rp.5.000.000)" disabled>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -78,10 +78,15 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-lg mb-3">
-                            <label for="sisa_utang" class="form-label">Sisa Utang</label>
+                        <div class="col-md-6 mb-3">
+                            <label for="sisa_utang" class="form-label">Sisa Bayar Pokok</label>
                             <input type="text" class="form-control" id="sisa_utang" name="sisa_utang"
-                                value="Rp. 50.000.000" required disabled>
+                                value="Rp. 205.000.000" required disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
+                            <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil"
+                                value="Rp. 0" required disabled>
                         </div>
                     </div>
                     <div class="row mb-3">
