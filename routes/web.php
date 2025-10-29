@@ -56,6 +56,7 @@ Route::middleware([
 
     Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
     Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
+    Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 
     Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
     
