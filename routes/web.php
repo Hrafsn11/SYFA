@@ -1,19 +1,21 @@
 <?php
 
+use App\Livewire\Dashboard;
+use App\Livewire\RoleManagement;
+use App\Livewire\UserManagement;
+use App\Livewire\ConfigMatrixScore;
+use Illuminate\Support\Facades\Route;
+use App\Livewire\PermissionManagement;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\FormKerjaInvestorController;
-use App\Http\Controllers\Peminjaman\PeminjamanController;
-use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
-use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
-use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\ReportPengembalianController;
-use App\Livewire\ConfigMatrixScore;
-use App\Livewire\Dashboard;
-use App\Livewire\PermissionManagement;
-use App\Livewire\RoleManagement;
-use App\Livewire\UserManagement;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PengembalianPinjamanController;
+use App\Http\Controllers\Peminjaman\PeminjamanController;
+use App\Http\Controllers\PenyaluranDanaInvestasiController;
+use App\Http\Controllers\RencanaPenagihanDepositoController;
+use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
+use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,8 +46,7 @@ Route::middleware([
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
     Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
-    // Route::post('peminjaman/invoice', [PeminjamanInvoiceController::class, 'store'])->name('peminjaman.invoice.store');
-    Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+    Route::post('peminjaman/invoice', [PeminjamanInvoiceController::class, 'store'])->name('peminjaman.invoice.store');
     Route::post('peminjaman/installment', [PeminjamanInstallmentFinancingController::class, 'store'])->name('peminjaman.installment.store');
     Route::post('peminjaman/po', [\App\Http\Controllers\Peminjaman\PeminjamanPoFinancingController::class, 'store'])->name('peminjaman.po.store');
     Route::post('peminjaman/factoring', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'store'])->name('peminjaman.factoring.store');
@@ -64,6 +65,14 @@ Route::middleware([
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 
     Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
+
+    Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
+
+    // Rencana Penagihan Deposito
+    Route::prefix('rencana-penagihan-deposito')->name('rencana-penagihan-deposito.')->group(function () {
+        Route::get('ski', [RencanaPenagihanDepositoController::class, 'ski'])->name('ski');
+        Route::get('penerima-dana', [RencanaPenagihanDepositoController::class, 'penerimaDana'])->name('penerima-dana');
+    });
 
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
         Route::get('/', [FormKerjaInvestorController::class, 'index'])->name('index');
