@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="mb-4 d-flex justify-content-between align-items-center">
-                    <h4 class="fw-bold">AR Debitur Piutang</h4>
+                    <h4 class="fw-bold">Kertas Kerja Investor SFinance</h4></h4>
                 </div>
             </div>
         </div>
@@ -47,47 +47,42 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th class="text-center" width="5%">No</th>
-                                            <th class="text-center">Nama Debitur</th>
-                                            <th class="text-center">Objek Jaminan</th>
-                                            <th class="text-center">Tanggal Peminjaman Pengajuan</th>
-                                            <th class="text-center">Nilai Pinjaman Yang Di Ajukan</th>
-                                            <th class="text-center">Nilai Pinjaman Yang Dicairkan</th>
+                                            <th class="text-center">Tanggal Uang Masuk</th>
+                                            <th class="text-center">Deposito</th>
+                                            <th class="text-center">Deposan</th>
+                                            <th class="text-center">Nominal Deposan</th>
+                                            <th class="text-center">Nominal Deposit</th>
                                             <th class="text-center">Tanggal Pencairan</th>
-                                            <th class="text-center">Masa Penggunaan</th>
-                                            <th class="text-center">Nilai Bagi Hasil Object Debitur</th>
-                                            <th class="text-center">Nilai Yang Harus Dibayar Debitur</th>
+                                            <th class="text-center">Lama Deposito (Bulan)</th>
+                                            <th class="text-center">Bagi Hasil (%PA)</th>
+                                            <th class="text-center">Bagi Hasil Nominal</th>
+                                            <th class="text-center">Bagi Hasil Per Nominal</th>
+                                            <th class="text-center">Bagi Hasil (%Bulan)</th>
+                                            <th class="text-center">Bagi Hasil (COF/Bulan)</th>
+                                            <th class="text-center">CFO/Akhir Periode</th>
                                             <th class="text-center">Status</th>
-                                            <th class="text-center">Tanggal Bayar</th>
-                                            <th class="text-center">Lamanya Pinjaman</th>
-                                            <th class="text-center">Nilai Bayar</th>
-                                            <th class="text-center">Total Sisa Pokok + Bagi Hasil</th>
-                                            <th class="text-center">Total Kurang Bayar Bagi Hasil</th>
-                                            <th class="text-center">Nilai Pokok Januari Dan Nilai Pokok Yang Belum Bayar Sama Sekali</th>
-                                            <th class="text-center">% Bagi Hasil</th>
-                                            <th class="text-center">Bagi Hasil Perbulan</th>
+                                            <th class="text-center">Tanggal Pengembalian</th>
+                                           
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td class="text-center">1</td>
-                                            <td>Ahmad Supriadi</td>
-                                            <td>Emas 10 gram</td>
                                             <td class="text-center">01/01/2024</td>
-                                            <td class="text-center">Rp 5.000.000</td>
-                                            <td class="text-center">Rp 4.800.000</td>
-                                            <td class="text-center">05/01/2024</td>
-                                            <td class="text-center">6 Bulan</td>
-                                            <td class="text-center">Rp 600.000</td>
-                                            <td class="text-center">Rp 5.400.000</td>
+                                            <td class="text-center">D001</td>
+                                            <td class="text-center">Joji</td>
+                                            <td class="text-center">Rp 10.000.000</td>
+                                            <td class="text-center">Rp 10.000.000</td>
+                                            <td class="text-center">01/01/2025</td>
+                                            <td class="text-center">12</td>
+                                            <td class="text-center">8%</td>
+                                            <td class="text-center">Rp 800.000</td>
+                                            <td class="text-center">Rp 80.000</td>
+                                            <td class="text-center">0.67%</td>
+                                            <td class="text-center">Rp 66.667</td>
+                                            <td class="text-center">Rp 10.800.000</td>
                                             <td class="text-center">Aktif</td>
-                                            <td class="text-center">-</td>
-                                            <td class="text-center">-</td>
-                                            <td class="text-center">-</td>
-                                            <td class="text-center">Rp 5.400.000</td>
-                                            <td class="text-center">Rp 600.000</td>
-                                            <td class="text-center">Rp 4.800.000</td>
-                                            <td class="text-center">12%</td>
-                                            <td class="text-center">Rp 100.000</td>
+                                            <td class="text-center">01/01/2025</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -95,7 +90,7 @@
 
                             <!-- Tabel 2 dengan Select Period -->
                             <div class="table-container">
-                                <div class="mb-3" style="width: 250px;">
+                                <div class="mb-3" style="width: 200px;">
                                     <div class="input-group input-group-md">
                                         <input type="text" class="form-control" placeholder="Select Period"
                                             id="flatpickr-tahun-pencarian" name="tahun_pencarian" />
@@ -108,18 +103,13 @@
                                 <table class="datatables-basic table border-top">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-center">Tanggal Bayar</th>
-                                            <th class="text-center">Nilai Bayar </th>
-                                            <th class="text-center">Nilai Pembayaran Pokok </th>
-                                            <th class="text-center">Nilai Pokok Bulan Selanjutnya </th>
+                                            <th class="text-center ">Januari</th>
+                                           
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="text-center">15/01/2025</td>
-                                            <td class="text-center">Rp 1.000.000</td>
-                                            <td class="text-center">Rp 800.000</td>
-                                            <td class="text-center">Rp 4.000.000</td>
+                                            <td class="text-center">Rp 10.000.000</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -133,18 +123,20 @@
                                 <table class="datatables-basic table border-top">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-center">Subtotal Sisa Pokok Dan Bagi Hasil</th>
-                                            <th class="text-center">Pokok</th>
-                                            <th class="text-center">Sisa Bagi Hasil</th>
-                                            <th class="text-center">Telat Hari</th>
+                                            <th class="text-center">Pengembalian Pokok Deposito</th>
+                                            <th class="text-center">Pengembalian Bagi Hasil Deposito</th>
+                                            <th class="text-center">Sisa Pokok Belum Dikembalikan</th>
+                                            <th class="text-center">Sisa Bagi Hasil Belum Dikembalikan</th>
+                                            <th class="text-center">Total Belum Dikembalikan</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="text-center">Rp 4.600.000</td>
+                                            <td class="text-center">Rp 1.000.000</td>
+                                            <td class="text-center">Rp 800.000</td>
                                             <td class="text-center">Rp 4.000.000</td>
-                                            <td class="text-center">Rp 600.000</td>
-                                            <td class="text-center">0</td>
+                                            <td class="text-center">Rp 3.200.000</td>
+                                            <td class="text-center">Rp 7.200.000</td>
                                         </tr>
                                     </tbody>
                                 </table>

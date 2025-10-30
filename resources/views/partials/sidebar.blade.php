@@ -13,7 +13,7 @@
 
     <div class="menu-inner-shadow"></div>
 
-    <ul class="menu-inner py-1">
+    <ul class="menu-inner py-1 mb-3">
         <!-- Dashboard -->
         <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
             <a href="{{ route('dashboard') }}" class="menu-link">
@@ -66,7 +66,7 @@
                 <div data-i18n="Debitur Piutang">Debitur Piutang</div>
             </a>
         </li>
-        
+
         <li class="menu-item {{ request()->routeIs('report-pengembalian*') ? 'active' : '' }}">
             <a href="{{ route('report-pengembalian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-file-text"></i>
@@ -88,6 +88,31 @@
                 <li class="menu-item {{ request()->is('debitur-dan-investor/form-kerja-investor*') ? 'active' : '' }}">
                     <a href="{{ route('form-kerja-investor.index') }}" class="menu-link">
                         <div data-i18n="Investor">Investor</div>
+                    </a>
+                </li>
+
+                <li
+                    class="menu-item {{ request()->is('debitur-dan-investor/report-penyaluran-dana-investasi*') ? 'active' : '' }}">
+                    <a href="{{ route('report-penyaluran-dana-investasi.index') }}" class="menu-link">
+                        <div data-i18n="Report Penyaluran Dana Investasi">Report Penyaluran Dana Investasi</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->is('rencana-penagihan-deposito/ski*') ? 'active' : '' }}">
+                    <a href="{{ route('rencana-penagihan-deposito.ski') }}" class="menu-link">
+                        <div data-i18n="Penagihan Deposito SKI">Penagihan Deposito SKI</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->is('rencana-penagihan-deposito/penerima-dana*') ? 'active' : '' }}">
+                    <a href="{{ route('rencana-penagihan-deposito.penerima-dana') }}" class="menu-link">
+                        <div data-i18n="Penagihan Deposito Penerima Dana">Penagihan Deposito Penerima Dana</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->is('kertas-kerja-investor-sfinance*') ? 'active' : '' }}">
+                    <a href="{{ route('kertas-kerja-investor-sfinance.index') }}" class="menu-link">
+                        <div data-i18n="Kertas Kerja Investor SFinance">Kertas Kerja Investor SFinance</div>
                     </a>
                 </li>
             </ul>
@@ -130,7 +155,7 @@
                     </a>
                 </li>
             </ul>
-        </li>   
+        </li>
 
         <!-- Configuration Section -->
         <li class="menu-header small text-uppercase">
@@ -152,33 +177,34 @@
         </li>
 
         @role('super-admin')
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Access Control</span>
-        </li>
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Access Control</span>
+            </li>
 
-        <li class="menu-item {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'open' : '' }}">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-settings"></i>
-                <div data-i18n="Roles & Permissions">Roles & Permissions</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                    <a href="{{ route('users.index') }}" class="menu-link">
-                        <div data-i18n="Users">Users</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                    <a href="{{ route('roles.index') }}" class="menu-link">
-                        <div data-i18n="Roles">Roles</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
-                    <a href="{{ route('permissions.index') }}" class="menu-link">
-                        <div data-i18n="Permissions">Permissions</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <li
+                class="menu-item {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons ti ti-settings"></i>
+                    <div data-i18n="Roles & Permissions">Roles & Permissions</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                        <a href="{{ route('users.index') }}" class="menu-link">
+                            <div data-i18n="Users">Users</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                        <a href="{{ route('roles.index') }}" class="menu-link">
+                            <div data-i18n="Roles">Roles</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+                        <a href="{{ route('permissions.index') }}" class="menu-link">
+                            <div data-i18n="Permissions">Permissions</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
         @endrole
     </ul>
 </aside>

@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="mb-4 d-flex justify-content-between align-items-center">
-                    <h4 class="fw-bold">Kerja Investor</h4>
+                    <h4 class="fw-bold">Pengajuan Investor</h4>
                     <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
                         id="btnTambahFormKerjaInvestor">
                         <i class="fa-solid fa-plus"></i>
@@ -25,7 +25,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTambahFormKerjaInvestorLabel">Tambah Form Kerja Investor</h5>
+                        <h5 class="modal-title" id="modalTambahFormKerjaInvestorLabel">Tambah Form Pengajuan Investor</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
@@ -94,8 +94,8 @@
                                 <div class="col-lg-12 mb-3">
                                     <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bagi Hasil Yang Didapat
                                         <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control input-rupiah" id="bagi_hasil_keseluruhan"
-                                        placeholder="Rp 0" required>
+                                    <input type="text" class="form-control input-rupiah non-editable" id="bagi_hasil_keseluruhan"
+                                        placeholder="Rp 0" required disabled readonly>
                                 </div>
                             </div>
                         </form>
@@ -207,8 +207,8 @@
                 $form[0].reset();
                 $form.removeClass('was-validated');
                 $('#editFormKerjaInvestorId').val('');
-                $('#modalTambahFormKerjaInvestorLabel').text('Tambah Form Kerja Investor');
-                $('#btnHapusFormKerjaInvestor').addClass('d-none'); // Hide delete button
+                $('#modalTambahFormKerjaInvestorLabel').text('Tambah Form Pengajuan Investor');
+                $('#btnHapusFormKerjaInvestor').addClass('d-none'); 
                 setCleaveValue('jumlah_investasi', 0);
                 setCleaveValue('bagi_hasil_keseluruhan', 0);
             }
@@ -227,7 +227,13 @@
                     $('#bagi-hasil-hint').removeClass('d-none');
                 }
 
+                $('#bagi_hasil')
+                    .prop('disabled', isReguler)
+                    .prop('readonly', false)
+                    .toggleClass('non-editable', isReguler);
+
                 $('#bagi_hasil_keseluruhan')
+                    .prop('disabled', true)
                     .prop('readonly', true)
                     .addClass('non-editable');
 
