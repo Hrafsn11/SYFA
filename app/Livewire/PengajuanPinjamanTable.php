@@ -83,11 +83,13 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center"><strong>'.($value ?: '-').'</strong></div>')
                 ->html(),
                 
-            Column::make('Nama Perusahaan', 'debitur.nama_debitur')
-                ->sortable()
-                ->searchable()
-                ->format(fn ($value) => '<div class="text-start">'.($value ?: '-').'</div>')
-                ->html(),
+            Column::make('Nama Perusahaan')
+                ->label(function ($row) {
+                    $namaDebitur = $row->debitur->nama_debitur ?? '-';
+                    return '<div class="text-start">'.$namaDebitur.'</div>';
+                })
+                ->html()
+                ->searchable(),
                 
             Column::make('Jenis Pembiayaan', 'jenis_pembiayaan')
                 ->sortable()
