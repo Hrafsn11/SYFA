@@ -16,6 +16,7 @@ use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
+use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,7 +68,7 @@ Route::middleware([
     Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
-
+    Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');    
     // Rencana Penagihan Deposito
     Route::prefix('rencana-penagihan-deposito')->name('rencana-penagihan-deposito.')->group(function () {
         Route::get('ski', [RencanaPenagihanDepositoController::class, 'ski'])->name('ski');

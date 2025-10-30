@@ -109,6 +109,12 @@
                         <div data-i18n="Penagihan Deposito Penerima Dana">Penagihan Deposito Penerima Dana</div>
                     </a>
                 </li>
+
+                <li class="menu-item {{ request()->is('kertas-kerja-investor-sfinance*') ? 'active' : '' }}">
+                    <a href="{{ route('kertas-kerja-investor-sfinance.index') }}" class="menu-link">
+                        <div data-i18n="Kertas Kerja Investor SFinance">Kertas Kerja Investor SFinance</div>
+                    </a>
+                </li>
             </ul>
         </li>
 
