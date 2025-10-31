@@ -3,12 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 
 class PeminjamanPoFinancing extends Model
 {
+    use HasUlids;
+
     protected $table = 'peminjaman_po_financing';
     protected $primaryKey = 'id_po_financing';
-    public $incrementing = true;
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
         'id_debitur', 'id_instansi', 'no_kontrak', 'nama_bank', 'no_rekening', 'nama_rekening',
         'lampiran_sid', 'tujuan_pembiayaan', 'total_pinjaman', 'harapan_tanggal_pencairan',

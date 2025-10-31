@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FactoringDetail extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $table = 'factoring_financing';
     protected $primaryKey = 'id_factoring_detail';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'id_factoring',

@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class FormKerjaInvestor extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $table = 'form_kerja_investor';
     protected $primaryKey = 'id_form_kerja_investor';
-    public $incrementing = true;
-    protected $keyType = 'int';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'id_debitur',

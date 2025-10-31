@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MasterDebiturDanInvestor extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $table = 'master_debitur_dan_investor';
 
     protected $primaryKey = 'id_debitur';
 
-    public $incrementing = true;
+    public $incrementing = false;
 
-    protected $keyType = 'int';
+    protected $keyType = 'string';
 
     protected $fillable = [
         'user_id',

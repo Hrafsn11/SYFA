@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Permission\Models\Permission as SpatiePermission;
 
-class PengembalianPinjaman extends Model
+class Permission extends SpatiePermission
 {
     use HasFactory, HasUlids;
 
-    protected $table = 'pengembalian_pinjamen';
+    protected $table = 'permissions';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
-    public $incrementing = false;
 }
