@@ -14,6 +14,13 @@ return new class extends Migration
     {
         Schema::dropAllTables();
 
+        // migration table
+        Schema::create('migrations', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('migration');
+            $table->integer('batch');
+        });
+
         // users table
         Schema::create('users', function (Blueprint $table) {
             $table->ulid('id')->primary();
@@ -242,7 +249,7 @@ return new class extends Migration
             $table->ulid('id_kol')->nullable();
 
             $table->string('nama', 255);
-            $table->enum('flagging', ['ya', 'tidak'])->default('tidak')->after('nama_debitur');
+            $table->enum('flagging', ['ya', 'tidak'])->default('tidak');
             $table->string('tanda_tangan', 255)->nullable();
 
             $table->string('alamat', 255)->nullable();

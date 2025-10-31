@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\MasterSumberPendanaanEksternal;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -20,7 +21,7 @@ class MasterSumberPendanaanEksternalSeeder extends Seeder
         ];
 
         foreach ($rows as $r) {
-            DB::table('master_sumber_pendanaan_eksternal')->insert($r);
+            MasterSumberPendanaanEksternal::create($r);
         }
     }
 }

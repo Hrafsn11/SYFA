@@ -2,10 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
-use App\Models\MasterDebiturDanInvestor;
 use App\Models\MasterKol;
+use Illuminate\Support\Str;
+use Illuminate\Database\Seeder;
+use App\Models\MasterDebiturDanInvestor;
 
 class MasterDebiturSeeder extends Seeder
 {
@@ -29,6 +30,7 @@ class MasterDebiturSeeder extends Seeder
                 'flagging' => 'tidak' 
             ],
             [
+                'id_debitur' => strtolower((string) Str::ulid()),
                 'user_id' => $superAdmin->id,
                 'id_kol' => MasterKol::where('kol', 0)->first()?->id_kol ?? 1,
                 'nama' => 'Super Admin',
@@ -51,6 +53,7 @@ class MasterDebiturSeeder extends Seeder
                 'flagging' => 'ya' 
             ],
             [
+                'id_debitur' => strtolower((string) Str::ulid()),
                 'user_id' => $superAdmin->id,
                 'id_kol' => MasterKol::where('kol', 0)->first()?->id_kol ?? 1, 
                 'nama' => 'Super Admin',
