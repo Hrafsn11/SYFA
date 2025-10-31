@@ -19,7 +19,7 @@
                             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
                             <input type="text" class="form-control non-editable" id="nama_perusahaan"
                                 name="nama_perusahaan"
-                                value="{{ old('nama_perusahaan', optional($master)->nama_debitur ?? 'Techno Infinity') }}"
+                                value="{{ old('nama_perusahaan', optional($master)->nama ?? 'Techno Infinity') }}"
                                 required readonly tabindex="-1">
                         </div>
                     </div>

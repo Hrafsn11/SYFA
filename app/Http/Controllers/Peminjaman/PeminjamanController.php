@@ -382,6 +382,11 @@ class PeminjamanController extends Controller
 
         $validated = $request->validate($rules);
 
+        if($validated['jenis_pembiayaan'] === 'Factoring' || $validated['jenis_pembiayaan'] === 'Installment'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = null;
+        }
+
         // Normalize date inputs that may come as d/m/Y
         $normalizeDate = function($value) {
             if (empty($value)) return null;
@@ -422,7 +427,7 @@ class PeminjamanController extends Controller
             $invoices = $details = $request->input('details', []);
         }
 
-        if (empty($validated['status'])) $validated['status'] = 'submitted';
+        if (empty($validated['status'])) $validated['status'] = 'Draft';
 
         DB::beginTransaction();
         try {
