@@ -602,7 +602,7 @@
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
-                                                    name="jenis_pembiayaan" value="Invoice & Project Financing" required
+                                                    name="jenis_pembiayaan" value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required
                                                     disabled>
                                             </div>
 
@@ -612,7 +612,7 @@
                                                         <label for="nama_perusahaan" class="form-label">Nama
                                                             Perusahaan</label>
                                                         <input type="text" class="form-control" id="nama_perusahaan"
-                                                            name="nama_perusahaan" value="Techno Infinity" required
+                                                            name="nama_perusahaan" value="{{ $peminjaman['nama_perusahaan'] ?? 'N/A' }}" required
                                                             disabled>
                                                     </div>
 
@@ -621,7 +621,7 @@
                                                             Nama Pimpinan
                                                         </label>
                                                         <input type="text" class="form-control" id="nama_pimpinan"
-                                                            name="nama_pimpinan" value="Cahyo" required disabled>
+                                                            name="nama_pimpinan" value="{{ $peminjaman['nama_ceo'] ?? 'N/A' }}" required disabled>
                                                     </div>
 
                                                     <div class="col-lg mb-3">
@@ -630,7 +630,7 @@
                                                         </label>
                                                         <input type="text" class="form-control" id="alamat"
                                                             name="alamat"
-                                                            value="Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia"
+                                                            value="{{ $peminjaman['alamat'] ?? 'N/A' }}"
                                                             required disabled>
                                                     </div>
 
@@ -639,41 +639,45 @@
                                                             Tujuan Pembiayaan
                                                         </label>
                                                         <input type="text" class="form-control" id="tujuan"
-                                                            name="tujuan" value="Kebutuhan Gaji Operasional/Umum Sept"
+                                                            name="tujuan" value="{{ $peminjaman['tujuan_pembiayaan'] ?? 'N/A' }}"
                                                             required disabled>
                                                     </div>
                                                 </div>
                                             </div>
 
+                                            @php
+                                                $nilaiPembiayaan = $latestHistory->nominal_yang_disetujui ?? $header->total_pinjaman ?? 0;
+                                            @endphp
+
                                             <div class="row mb-3">
                                                 <div class="col-md-6 mb-2">
                                                     <label for="nilai_pembiayaan">Nilai Pembiayaan</label>
                                                     <input type="text" class="form-control" id="nilai_pembiayaan"
-                                                        name="nilai_pembiayaan" value="Rp.250.000.000" disabled>
+                                                        name="nilai_pembiayaan" value="Rp. {{ number_format($nilaiPembiayaan, 0, ',', '.') }}" disabled>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="hutang_pokok">Hutang Pokok</label>
                                                     <input type="text" class="form-control" id="hutang_pokok"
-                                                        name="hutang_pokok" value="Rp.250.000.000" disabled>
+                                                        name="hutang_pokok" value="Rp. {{ number_format($nilaiPembiayaan, 0, ',', '.') }}" disabled>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6 mb-2">
                                                     <label for="tenor">Tenor Pembiayaan</label>
                                                     <input type="text" class="form-control" id="tenor"
-                                                        name="tenor" value="1 Bulan" disabled>
+                                                        name="tenor" value="{{ $header->tenor_pembayaran ?? 1 }} Bulan" disabled>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="biaya_admin">Biaya Administrasi</label>
                                                     <input type="text" class="form-control" id="biaya_admin"
-                                                        name="biaya_admin" value="Rp.0.00" disabled>
+                                                        name="biaya_admin" value="Rp. 0" disabled>
                                                 </div>
                                             </div>
 
                                             <div class="col-lg mb-3">
                                                 <label for="nisbah" class="form-label">Bagi Hasil (Nisbah)</label>
                                                 <input type="text" class="form-control" id="nisbah" name="nisbah"
-                                                    value="2% flat / bulan" required disabled>
+                                                    value="{{ $header->persentase_bagi_hasil ?? 2 }}% flat / bulan" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
@@ -691,21 +695,39 @@
                                                     Jaminan
                                                 </label>
                                                 <input type="text" class="form-control" id="jaminan" name="jaminan"
-                                                    value="Invoice & Project Financing" required disabled>
+                                                    value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
                                                 <label for="ttd_debitur" class="form-label">
                                                     Tanda Tangan Debitur
                                                 </label>
-                                                <input type="file" class="form-control" id="ttd_debitur" required>
-                                                <div class="invalid-feedback">
-                                                    Silakan pilih file untuk diupload.
-                                                </div>
+                                                @if($peminjaman['tanda_tangan'])
+                                                    <div class="border rounded p-3 bg-light">
+                                                        <img src="{{ asset('storage/' . $peminjaman['tanda_tangan']) }}" 
+                                                             alt="Tanda Tangan Debitur" 
+                                                             class="img-fluid" 
+                                                             style="max-height: 150px; max-width: 100%;">
+                                                        <small class="text-muted d-block mt-2">
+                                                            <i class="ti ti-info-circle me-1"></i>
+                                                            Tanda tangan dari data master debitur
+                                                        </small>
+                                                    </div>
+                                                @else
+                                                    <div class="border rounded p-3 text-center bg-light">
+                                                        <i class="ti ti-signature text-muted mb-2" style="font-size: 2rem;"></i>
+                                                        <p class="text-muted mb-0">Tanda tangan debitur tidak tersedia</p>
+                                                        <small class="text-muted">Silakan update tanda tangan di data master debitur</small>
+                                                    </div>
+                                                @endif
                                             </div>
 
-                                            <div class="d-flex justify-content-end">
-                                                <button type="submit" class="btn btn-primary" id="btnSimpanKontrak">
+                                            <div class="d-flex justify-content-between">
+                                                <button type="button" class="btn btn-outline-primary" id="btnPreviewKontrak">
+                                                    <i class="ti ti-eye me-2"></i>
+                                                    Preview Kontrak
+                                                </button>
+                                                <button type="button" class="btn btn-primary" onclick="approval(this)" data-status="Generate Kontrak" id="btnSimpanKontrak">
                                                     <span class="spinner-border spinner-border-sm me-2 d-none"
                                                         id="btnSimpanKontrakSpinner"></span>
                                                     Simpan

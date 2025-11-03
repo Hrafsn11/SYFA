@@ -32,6 +32,7 @@ class HistoryStatusPengajuanPinjaman extends Model
         'reject_by',
         'approve_by',
         'current_step',
+        'devisasi',
     ];
 
 
@@ -55,6 +56,14 @@ class HistoryStatusPengajuanPinjaman extends Model
      * Get the user who submitted step 1.
      */
     public function submitBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'submit_step1_by', 'id');
+    }
+
+    /**
+     * Get the user who submitted (alias for submitBy).
+     */
+    public function submittedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submit_step1_by', 'id');
     }

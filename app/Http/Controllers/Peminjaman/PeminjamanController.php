@@ -40,6 +40,9 @@ class PeminjamanController extends Controller
             'id' => $header->id_pengajuan_peminjaman,
             'nomor_peminjaman' => $header->nomor_peminjaman,
             'nama_perusahaan' => $header->debitur->nama ?? '',
+            'nama_ceo' => $header->debitur->nama_ceo ?? '',
+            'alamat' => $header->debitur->alamat ?? '',
+            'tanda_tangan' => $header->debitur->tanda_tangan ?? null,
             'nama_bank' => $header->nama_bank,
             'no_rekening' => $header->no_rekening,
             'nama_rekening' => $header->nama_rekening,
@@ -69,6 +72,12 @@ class PeminjamanController extends Controller
         $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $header->id_pengajuan_peminjaman)
             ->orderBy('created_at', 'desc')
             ->first();
+
+        // Get all history records for activity timeline
+        $allHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $header->id_pengajuan_peminjaman)
+            ->orderBy('created_at', 'desc')
+            ->with(['approvedBy', 'rejectedBy', 'submittedBy'])
+            ->get();
         
         $currentStep = 1; // Default to step 1
         if ($latestHistory) {
@@ -184,7 +193,7 @@ class PeminjamanController extends Controller
         return view('livewire.peminjaman.detail', compact(
             'peminjaman', 'sumber_eksternal', 'banks', 'tenor_pembayaran',
             'invoice_financing_data', 'po_financing_data', 'installment_data', 'factoring_data',
-            'latestHistory'
+            'latestHistory', 'allHistory'
         ));
     }
 
@@ -196,24 +205,44 @@ class PeminjamanController extends Controller
      */
     public function previewKontrak($id)
     {
-        // Sample kontrak data
+        // Get pengajuan data from database with debitur relationship
+        $pengajuan = PengajuanPeminjaman::with('debitur')
+            ->where('id_pengajuan_peminjaman', $id)
+            ->first();
+        
+        if (!$pengajuan) {
+            abort(404, 'Pengajuan peminjaman tidak ditemukan');
+        }
+        
+
+
+        // Get latest approved nominal from history
+        $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $id)
+            ->whereNotNull('nominal_yang_disetujui')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Generate contract number
+        $no_kontrak = 'SKI/FIN/' . date('Y') . '/' . str_pad($pengajuan->id_pengajuan_peminjaman, 3, '0', STR_PAD_LEFT);
+        
+        // Prepare kontrak data from database
         $kontrak = [
-            'id_invoice_financing' => $id,
-            'no_kontrak' => 'SKI/FIN/2025/001',
-            'tanggal_kontrak' => '22 September 2025',
+            'id_peminjaman' => $id,
+            'no_kontrak' => $no_kontrak,
+            'tanggal_kontrak' => now()->format('d F Y'),
             'nama_perusahaan' => 'SYNNOVAC CAPITAL',
-            'nama_debitur' => 'Techno Infinity',
-            'nama_pimpinan' => 'Cahyo',
-            'alamat' => 'Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia',
-            'tujuan_pembiayaan' => 'Kebutuhan Gaji Operasional/Umum Sept',
-            'jenis_pembiayaan' => 'Invoice & Project Financing',
-            'nilai_pembiayaan' => 'Rp. 250.000.000',
-            'hutang_pokok' => 'Rp. 250.000.000',
-            'tenor' => '1 Bulan',
-            'biaya_admin' => 'Rp. 0.00',
-            'nisbah' => '2% flat / bulan',
+            'nama_debitur' => $pengajuan->debitur->nama ?? 'N/A',
+            'nama_pimpinan' => $pengajuan->debitur->nama_ceo ?? 'N/A',
+            'alamat' => $pengajuan->debitur->alamat ?? 'N/A',
+            'tujuan_pembiayaan' => $pengajuan->tujuan_pembiayaan ?? 'N/A',
+            'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
+            'nilai_pembiayaan' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
+            'hutang_pokok' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
+            'tenor' => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
+            'biaya_admin' => 'Rp. 0',
+            'nisbah' => ($pengajuan->persentase_bagi_hasil ?? 2) . '% flat / bulan',
             'denda_keterlambatan' => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
-            'jaminan' => 'Invoice & Project Financing',
+            'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
         ];
 
         return view('livewire.peminjaman.preview-kontrak', compact('kontrak'));
@@ -674,7 +703,8 @@ class PeminjamanController extends Controller
             'Disetujui oleh CEO SKI',
             'Ditolak oleh CEO SKI',
             'Disetujui oleh Direktur SKI',
-            'Ditolak oleh Direktur SKI'
+            'Ditolak oleh Direktur SKI',
+            'Generate Kontrak'
         ];
         if (!in_array($status, $validStatuses)) {
             return response()->json(['success' => false, 'message' => 'Status tidak valid'], 400);
@@ -815,6 +845,10 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Ditolak oleh Direktur SKI') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_direktur');
+            } elseif ($status === 'Generate Kontrak') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan') ?? 'Kontrak berhasil digenerate';
+                $historyData['current_step'] = 7;
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);
