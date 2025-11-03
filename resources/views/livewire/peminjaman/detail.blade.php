@@ -578,6 +578,91 @@
                                                 </table>
                                             </div>
                                         @endif
+
+                                        <!-- Upload/View Dokumen Section -->
+                                        @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan')
+                                            <!-- Upload Form - Show only when status is NOT 'Dana Sudah Dicairkan' -->
+                                            <div class="mt-5" id="uploadDokumenSection">
+                                                <hr class="my-4">
+                                                <h6 class="text-dark mb-3">Upload Dokumen Transfer</h6>
+                                                
+                                                <div class="card border-1 shadow-none">
+                                                    <div class="card-body">
+                                                        <form id="formUploadDokumenTransfer" class="row g-3">
+                                                            <div class="col-12">
+                                                                <label for="dokumenTransfer" class="form-label">
+                                                                    <i class="ti ti-upload me-2"></i>
+                                                                    Dokumen Transfer <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="file" class="form-control" id="dokumenTransfer" 
+                                                                       name="dokumen_transfer" 
+                                                                       accept=".pdf,.jpg,.jpeg,.png" required>
+                                                                <div class="form-text">Format: PDF, JPG, PNG (Max: 2MB)</div>
+                                                            </div>
+                                                            
+                                                            <div class="col-12">
+                                                                <div class="d-flex justify-content-end">
+                                                                    <button type="button" class="btn btn-success" 
+                                                                            onclick="approval(this)" 
+                                                                            data-status="Dana Sudah Dicairkan"
+                                                                            id="btnUploadDokumen">
+                                                                        <i class="ti ti-upload me-2"></i>
+                                                                        Upload Dokumen
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <!-- Document View - Show when status is 'Dana Sudah Dicairkan' -->
+                                            <div class="mt-5" id="viewDokumenSection">
+                                                <hr class="my-4">
+                                                <h6 class="text-dark mb-3">Dokumen Bukti Transfer</h6>
+                                                
+                                                <div class="card border-1 shadow-none">
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-12">
+                                                                <label class="form-label">
+                                                                    <i class="ti ti-file-check me-2"></i>
+                                                                    Dokumen Transfer yang Sudah Diupload
+                                                                </label>
+                                                                @if(!empty($peminjaman['upload_bukti_transfer']))
+                                                                    <div class="border rounded p-3 bg-light">
+                                                                        <div class="d-flex align-items-center justify-content-between">
+                                                                            <div>
+                                                                                <i class="ti ti-file-text me-2 text-primary"></i>
+                                                                                <strong>{{ basename($peminjaman['upload_bukti_transfer']) }}</strong>
+                                                                                <br>
+                                                                                <small class="text-muted">
+                                                                                    <i class="ti ti-calendar me-1"></i>
+                                                                                    Diupload pada: {{ now()->translatedFormat('j F Y H:i') }}
+                                                                                </small>
+                                                                            </div>
+                                                                            <a href="{{ asset('storage/' . $peminjaman['upload_bukti_transfer']) }}" 
+                                                                               target="_blank" 
+                                                                               class="btn btn-outline-primary btn-sm">
+                                                                                <i class="ti ti-eye me-2"></i>
+                                                                                Lihat Dokumen
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                @else
+                                                                    <div class="border rounded p-3 text-center bg-light">
+                                                                        <i class="ti ti-file-x text-muted mb-2" style="font-size: 2rem;"></i>
+                                                                        <p class="text-muted mb-0">Dokumen transfer belum tersedia</p>
+                                                                        <small class="text-muted">Status sudah dicairkan namun dokumen tidak ditemukan</small>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <!-- End Upload/View Dokumen Section -->
                                     </div>
                                     <!-- End Konten Default -->
                                 </div>
@@ -786,7 +871,6 @@
                     tolakPinjaman: document.getElementById('btnTolakPinjaman'),
                     editPencairan: document.querySelectorAll(
                         '#btnEditPencairan'), // Menggunakan querySelectorAll
-                    uploadDokumen: document.getElementById('btnUploadDokumen'),
                 },
                 forms: {
                     pencairan: document.getElementById('formPencairanDana'),
@@ -1333,7 +1417,7 @@
             dom.buttons.tolakPinjaman?.addEventListener('click', () => {
                 switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
             });
-            dom.buttons.uploadDokumen?.addEventListener('click', () => dom.modals.upload.show());
+            // Removed uploadDokumen event listener - now using inline form instead of modal
             dom.buttons.persetujuanDebitur?.addEventListener('click', handlePersetujuanDebiturShow);
             dom.buttons.persetujuanCEO?.addEventListener('click', () => dom.modals.persetujuanCEO.show());
             dom.buttons.persetujuanDirektur?.addEventListener('click', () => dom.modals.persetujuanDirektur.show());
@@ -1457,16 +1541,45 @@
                 requestData = { ...requestData, ...window.rejectionRequestData };
                 delete window.rejectionRequestData;
             }
+
+            // Special handling for file uploads (Dana Sudah Dicairkan)
+            let requestBody, requestHeaders;
+            if (status === 'Dana Sudah Dicairkan') {
+                // Use FormData for file upload
+                const formData = new FormData();
+                
+                // Add all request data to FormData
+                Object.keys(requestData).forEach(key => {
+                    formData.append(key, requestData[key]);
+                });
+                
+                // Add file if selected
+                const dokumenTransferInput = document.getElementById('dokumenTransfer');
+                if (dokumenTransferInput && dokumenTransferInput.files.length > 0) {
+                    formData.append('dokumen_transfer', dokumenTransferInput.files[0]);
+                }
+                
+                requestBody = formData;
+                requestHeaders = {
+                    'X-CSRF-TOKEN': requestData._token,
+                    'Accept': 'application/json'
+                    // Don't set Content-Type for FormData, let browser set it with boundary
+                };
+            } else {
+                // Use JSON for other requests
+                requestBody = JSON.stringify(requestData);
+                requestHeaders = {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': requestData._token,
+                    'Accept': 'application/json'
+                };
+            }
             
             // Make AJAX call to approval endpoint
             fetch(`/peminjaman/${peminjamanId}/approval`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': requestData._token,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(requestData)
+                headers: requestHeaders,
+                body: requestBody
             })
             .then(response => response.json())
             .then(data => {
@@ -1529,5 +1642,56 @@
                 });
             });
         }
+
+        // Global function untuk preview kontrak dari activity tab
+        function previewKontrakActivity() {
+            const peminjamanId = @json($peminjaman['id'] ?? 1);
+            // Open preview in new tab
+            window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
+        }
+
+        // Validasi upload dokumen transfer
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnUploadDokumen = document.getElementById('btnUploadDokumen');
+            const dokumenTransferInput = document.getElementById('dokumenTransfer');
+            
+            if (btnUploadDokumen && dokumenTransferInput) {
+                btnUploadDokumen.addEventListener('click', function(e) {
+                    // Check if file is selected
+                    if (!dokumenTransferInput.files || dokumenTransferInput.files.length === 0) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        Swal.fire({
+                            title: 'File Diperlukan!',
+                            text: 'Silakan pilih dokumen transfer terlebih dahulu.',
+                            icon: 'warning',
+                            confirmButtonColor: '#f39c12',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        return false;
+                    }
+                    
+                    // Validate file size (5MB max)
+                    const file = dokumenTransferInput.files[0];
+                    if (file.size > 5 * 1024 * 1024) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        Swal.fire({
+                            title: 'File Terlalu Besar!',
+                            text: 'Ukuran file maksimal 5MB.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        return false;
+                    }
+                });
+            }
+        });
+
     </script>
 @endsection

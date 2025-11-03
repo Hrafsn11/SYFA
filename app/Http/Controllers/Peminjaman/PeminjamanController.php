@@ -66,6 +66,8 @@ class PeminjamanController extends Controller
             'yang_harus_dibayarkan' => $header->yang_harus_dibayarkan,
             // Factoring specific fields
             'total_nominal_yang_dialihkan' => $header->total_nominal_yang_dialihkan,
+            // Upload fields
+            'upload_bukti_transfer' => $header->upload_bukti_transfer,
         ];
 
         // Get current step from latest history record
@@ -93,7 +95,7 @@ class PeminjamanController extends Controller
                     'Disetujui oleh CEO SKI' => 5,
                     'Disetujui oleh Direktur SKI' => 6,
                     'Generate Kontrak' => 7,
-                    'Dana Dicairkan' => 8,
+                    'Dana Sudah Dicairkan' => 8,
                 ];
                 
                 $currentStep = $statusToStep[$latestHistory->status] ?? 1;
@@ -698,6 +700,7 @@ class PeminjamanController extends Controller
             'Dokumen Tervalidasi', 
             'Validasi Ditolak', 
             'Dana Dicairkan',
+            'Dana Sudah Dicairkan',
             'Debitur Setuju',
             'Pengajuan Ditolak Debitur',
             'Disetujui oleh CEO SKI',
@@ -849,6 +852,16 @@ class PeminjamanController extends Controller
                 $historyData['approve_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan') ?? 'Kontrak berhasil digenerate';
                 $historyData['current_step'] = 7;
+            } elseif ($status === 'Dana Sudah Dicairkan') {
+                // Handle file upload for dokumen transfer
+                if ($request->hasFile('dokumen_transfer')) {
+                    $path = $request->file('dokumen_transfer')->store('peminjaman/bukti_transfer', 'public');
+                    $peminjaman->upload_bukti_transfer = $path;
+                    $peminjaman->save();
+                }
+
+                $historyData['approve_by'] = auth()->id();
+                $historyData['current_step'] = 8;
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);
@@ -897,6 +910,7 @@ class PeminjamanController extends Controller
             'Disetujui oleh Direktur SKI' => 'Pengajuan telah disetujui oleh Direktur SKI.',
             'Ditolak oleh Direktur SKI' => 'Pengajuan Anda ditolak oleh Direktur SKI.',
             'Generate Kontrak' => 'Kontrak berhasil digenerate.',
+            'Dana Sudah Dicairkan' => 'Dokumen transfer berhasil diupload.',
         ];
 
         return $messages[$status] ?? 'Status berhasil diupdate!';

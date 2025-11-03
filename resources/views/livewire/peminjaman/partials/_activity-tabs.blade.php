@@ -98,7 +98,7 @@
                                     <i class="ti ti-edit"></i>
                                 </button>
                             @elseif($history->status == 'Generate Kontrak')
-                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Preview Kontrak">
+                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Preview Kontrak" onclick="previewKontrakActivity()">
                                     <i class="ti ti-file-text"></i>
                                 </button>
                             @elseif($history->status == 'Upload Dokumen')
