@@ -44,40 +44,8 @@
             </div>
         </div>
 
-        <!-- Step 3: Dokumen Tervalidasi -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-3">
-            <div class="row align-items-center">
-                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="flex-shrink-0">
-                            <div class="avatar avatar-sm">
-                                <span class="avatar-initial rounded-circle bg-label-primary"><i
-                                        class="ti ti-file-text"></i></span>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">Draft: Dokumen Tervalidasi <i class="ti ti-arrow-right mx-1"></i> Pengajuan
-                                Disetujui
-                            </h6>
-                            <p class="text-muted mb-0 small">Pengajuan telah terkirim.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3 text-center">
-                    <small class="text-muted" id="date-step-3">-</small>
-                </div>
-                <div class="col-6 col-md-3 text-end">
-                    <button type="button" class="btn btn-icon btn-sm btn-label-primary" id="btnEditPencairan"
-                        title="Edit">
-                        <i class="ti ti-edit"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <!-- Step 4: Persetujuan Debitur -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-4">
+        <div class="activity-item d-none mt-3 mb-4" id="activity-step-3">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <div class="d-flex align-items-start gap-3">
@@ -108,7 +76,7 @@
         </div>
 
         <!-- Step 5: Validasi Direktur SKI -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-5">
+        <div class="activity-item d-none mt-3 mb-4" id="activity-step-4">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <div class="d-flex align-items-start gap-3">
@@ -141,7 +109,7 @@
         </div>
 
         <!-- Step 6: Validasi Direktur -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-6">
+        <div class="activity-item d-none mt-3 mb-4" id="activity-step-5">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <div class="d-flex align-items-start gap-3">
@@ -173,7 +141,7 @@
         </div>
 
         <!-- Step 7: Generate Kontrak -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-7">
+        <div class="activity-item d-none mt-3 mb-4" id="activity-step-6">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <div class="d-flex align-items-start gap-3">
@@ -204,7 +172,7 @@
         </div>
 
         <!-- Step 8: Upload Dokumen -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-8">
+        <div class="activity-item d-none mt-3 mb-4" id="activity-step-7">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <div class="d-flex align-items-start gap-3">
@@ -235,7 +203,7 @@
         </div>
 
         <!-- Step 9: Selesai -->
-        <div class="activity-item d-none mt-3 mb-4" id="activity-step-9">
+        <div class="activity-item d-none mt-3 mb-4" id="activity-step-8">
             <div class="row align-items-center">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                     <div class="d-flex align-items-start gap-3">

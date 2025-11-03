@@ -54,6 +54,7 @@ Route::middleware([
     Route::post('peminjaman/factoring', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'store'])->name('peminjaman.factoring.store');
     Route::put('peminjaman/factoring/{id}', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'update'])->name('peminjaman.factoring.update');
     Route::delete('peminjaman/factoring/{id}', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'destroy'])->name('peminjaman.factoring.destroy');
+    Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');

@@ -34,6 +34,7 @@
                 </div>
                 <form id="formPencairanDana">
                     <div class="modal-body">
+                        <!-- <input type="hidden" name="status" value="Dokumen Tervalidasi"> -->
                         <!-- Card Data Nominal dan Tanggal -->
                         <div class="card border mb-3 shadow-none">
                             <div class="card-body">
@@ -65,7 +66,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <label for="nominalDisetujui" class="form-label">Nominal Disetujui</label>
-                                        <input type="text" class="form-control input-rupiah" id="nominalDisetujui"
+                                        <input type="text" name="nominal_yang_disetujui" class="form-control input-rupiah" id="nominalDisetujui"
                                             placeholder="Rp 0" required>
                                         <div class="invalid-feedback">
                                             Silakan isi nominal yang disetujui.
@@ -79,7 +80,7 @@
                                             Pencairan</label>
                                         <div class="input-group">
                                             <input type="text"
-                                                class="form-control flatpickr-date-modal rounded-start"
+                                                class="form-control flatpickr-date-modal rounded-start" name="tanggal_pencairan"
                                                 placeholder="DD/MM/YYYY" id="flatpickr-tanggal-pencairan" required>
                                             <span class="input-group-text">
                                                 <i class="ti ti-calendar"></i>
@@ -110,7 +111,7 @@
                         <div class="card border shadow-none">
                             <div class="card-body">
                                 <label for="catatanLainnya" class="form-label">Catatan Lainnya</label>
-                                <textarea class="form-control" id="catatanLainnya" rows="4"
+                                <textarea name="catatan_validasi_dokumen_disetujui" class="form-control" id="catatanLainnya" rows="4"
                                     placeholder="Berikan catatan tambahan jika diperlukan"></textarea>
                             </div>
                         </div>
@@ -140,7 +141,8 @@
                 <form id="formHasilReview">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <input type="text" class="form-control" id="hasilReview"
+                            <label for="hasilReview" class="form-label">Catatan Penolakan <span class="text-danger">*</span></label>
+                            <input type="text" name="catatan_validasi_dokumen_ditolak" class="form-control" id="hasilReview"
                                 placeholder="Berikan catatan alasan penolakan" required>
                             <div class="invalid-feedback">
                                 Silakan isi hasil review terlebih dahulu.
@@ -151,7 +153,7 @@
                         <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
                             Batal
                         </button>
-                        <button type="submit" class="btn btn-success">
+                        <button type="button" class="btn btn-success" data-status="Validasi Ditolak" onclick="approval(this)">
                             Kirim
                         </button>
                     </div>
@@ -257,6 +259,126 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Persetujuan Debitur -->
+    <div class="modal fade" id="modalPersetujuanDebitur" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Persetujuan Debitur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPersetujuanDebitur">
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Silakan berikan keputusan Anda terkait pengajuan peminjaman ini.
+                        </div>
+                        
+                        <!-- Card Catatan -->
+                        <div class="card border shadow-none">
+                            <div class="card-body">
+                                <label for="catatanPersetujuanDebitur" class="form-label">Catatan</label>
+                                <textarea name="catatan_persetujuan_debitur" class="form-control" id="catatanPersetujuanDebitur" rows="4"
+                                    placeholder="Berikan catatan terkait keputusan Anda" required></textarea>
+                                <div class="invalid-feedback">
+                                    Silakan isi catatan terlebih dahulu.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="btnTolakDebitur">
+                            <i class="ti ti-x me-2"></i>Tolak
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="ti ti-check me-2"></i>Setujui
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Persetujuan CEO SKI -->
+    <div class="modal fade" id="modalPersetujuanCEO" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Persetujuan CEO SKI</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPersetujuanCEO">
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Silakan berikan keputusan CEO terkait pengajuan peminjaman ini.
+                        </div>
+                        
+                        <!-- Card Catatan -->
+                        <div class="card border shadow-none">
+                            <div class="card-body">
+                                <label for="catatanPersetujuanCEO" class="form-label">Catatan CEO</label>
+                                <textarea name="catatan_persetujuan_ceo" class="form-control" id="catatanPersetujuanCEO" rows="4"
+                                    placeholder="Berikan catatan terkait keputusan CEO" required></textarea>
+                                <div class="invalid-feedback">
+                                    Silakan isi catatan terlebih dahulu.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="btnTolakCEO">
+                            <i class="ti ti-x me-2"></i>Tolak
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="ti ti-check me-2"></i>Setujui
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Persetujuan Direktur SKI -->
+    <div class="modal fade" id="modalPersetujuanDirektur" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Persetujuan Direktur SKI</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPersetujuanDirektur">
+                    <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <i class="ti ti-info-circle me-2"></i>
+                            Silakan berikan keputusan Direktur terkait pengajuan peminjaman ini.
+                        </div>
+                        
+                        <!-- Card Catatan -->
+                        <div class="card border shadow-none">
+                            <div class="card-body">
+                                <label for="catatanPersetujuanDirektur" class="form-label">Catatan Direktur</label>
+                                <textarea name="catatan_persetujuan_direktur" class="form-control" id="catatanPersetujuanDirektur" rows="4"
+                                    placeholder="Berikan catatan terkait keputusan Direktur" required></textarea>
+                                <div class="invalid-feedback">
+                                    Silakan isi catatan terlebih dahulu.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="btnTolakDirektur">
+                            <i class="ti ti-x me-2"></i>Tolak
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="ti ti-check me-2"></i>Setujui
+                        </button>
                     </div>
                 </form>
             </div>

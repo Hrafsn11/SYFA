@@ -12,7 +12,7 @@
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
 
-                    <div class="stepper-item completed" data-step="1">
+                    <div class="stepper-item" data-step="1">
                         <div class="stepper-node">
                         </div>
                         <div class="stepper-content">
@@ -21,7 +21,7 @@
                         </div>
                     </div>
 
-                    <div class="stepper-item active" data-step="2">
+                    <div class="stepper-item" data-step="2">
                         <div class="stepper-node">
                         </div>
                         <div class="stepper-content">
@@ -34,7 +34,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 3</div>
-                            <div class="step-name">Dokumen Tervalidasi</div>
+                            <div class="step-name">Persetujuan Debitur</div>
                         </div>
                     </div>
 
@@ -42,7 +42,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 4</div>
-                            <div class="step-name">Persetujuan Debitur</div>
+                            <div class="step-name">Validasi CEO SKI</div>
                         </div>
                     </div>
 
@@ -50,7 +50,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
-                            <div class="step-name">validasi CEO SKI</div>
+                            <div class="step-name">Validasi Direktur</div>
                         </div>
                     </div>
 
@@ -58,7 +58,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 6</div>
-                            <div class="step-name">Validasi Direktur</div>
+                            <div class="step-name">Generate Kontrak</div>
                         </div>
                     </div>
 
@@ -66,7 +66,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 7</div>
-                            <div class="step-name">Generate Kontrak</div>
+                            <div class="step-name">Upload Dokumen Transfer</div>
                         </div>
                     </div>
 
@@ -74,14 +74,6 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 8</div>
-                            <div class="step-name">Upload Dokumen Transfer</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="9">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 9</div>
                             <div class="step-name">Selesai</div>
                         </div>
                     </div>
@@ -135,11 +127,32 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
                                             <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
-                                            <button type="button" class="btn btn-primary d-none"
-                                                id="btnSetujuiPeminjaman">
-                                                <i class="fas fa-check me-2"></i>
-                                                Setujui Peminjaman
-                                            </button>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-success" onclick="approval(this)" data-status="Submit Dokumen">
+                                                    <i class="fas fa-paper-plane me-2"></i>
+                                                    Submit Pengajuan
+                                                </button>
+                                                <button type="button" class="btn btn-primary d-none"
+                                                    id="btnSetujuiPeminjaman">
+                                                    <i class="fas fa-check me-2"></i>
+                                                    Setujui Peminjaman
+                                                </button>
+                                                <button type="button" class="btn btn-success d-none"
+                                                    id="btnPersetujuanDebitur">
+                                                    <i class="fas fa-user-check me-2"></i>
+                                                    Setujui (Debitur)
+                                                </button>
+                                                <button type="button" class="btn btn-warning d-none"
+                                                    id="btnPersetujuanCEO">
+                                                    <i class="fas fa-crown me-2"></i>
+                                                    Setujui (CEO SKI)
+                                                </button>
+                                                <button type="button" class="btn btn-info d-none"
+                                                    id="btnPersetujuanDirektur">
+                                                    <i class="fas fa-briefcase me-2"></i>
+                                                    Setujui (Direktur SKI)
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <hr class="my-3 my-md-4">
@@ -582,7 +595,7 @@
                                     </div>
 
                                     <!-- Konten Step 7: Generate Kontrak -->
-                                    <div id="kontrak-step7" class="d-none">
+                                    <div id="kontrak-step6" class="d-none">
                                         <h5 class="mb-4">Generate Kontrak Peminjaman</h5>
                                         <form action="" id="formGenerateKontrak">
                                             <div class="col-lg mb-3">
@@ -721,7 +734,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // --- STATE MANAGEMENT ---
             const state = {
-                currentStep: 1,
+                currentStep: @json($peminjaman['current_step'] ?? 1),
                 totalSteps: 9,
                 pencairanData: {
                     nominalDisetujui: '',
@@ -743,7 +756,11 @@
                 },
                 buttons: {
                     setujuiPeminjaman: document.getElementById('btnSetujuiPeminjaman'),
+                    submitPengajuan: document.querySelector('button[data-status="Submit Dokumen"]'),
                     konfirmasiSetuju: document.getElementById('btnKonfirmasiSetuju'),
+                    persetujuanDebitur: document.getElementById('btnPersetujuanDebitur'),
+                    persetujuanCEO: document.getElementById('btnPersetujuanCEO'),
+                    persetujuanDirektur: document.getElementById('btnPersetujuanDirektur'),
                     tolakPinjaman: document.getElementById('btnTolakPinjaman'),
                     editPencairan: document.querySelectorAll(
                         '#btnEditPencairan'), // Menggunakan querySelectorAll
@@ -754,6 +771,9 @@
                     review: document.getElementById('formHasilReview'),
                     edit: document.getElementById('formEditPencairan'),
                     upload: document.getElementById('formUploadDokumen'),
+                    persetujuanDebitur: document.getElementById('formPersetujuanDebitur'),
+                    persetujuanCEO: document.getElementById('formPersetujuanCEO'),
+                    persetujuanDirektur: document.getElementById('formPersetujuanDirektur'),
                 },
                 modals: {
                     persetujuan: new bootstrap.Modal(document.getElementById('modalPersetujuanPinjaman')),
@@ -761,6 +781,9 @@
                     review: new bootstrap.Modal(document.getElementById('modalHasilReview')),
                     edit: new bootstrap.Modal(document.getElementById('modalEditPencairan')),
                     upload: new bootstrap.Modal(document.getElementById('modalUploadDokumen')),
+                    persetujuanDebitur: new bootstrap.Modal(document.getElementById('modalPersetujuanDebitur')),
+                    persetujuanCEO: new bootstrap.Modal(document.getElementById('modalPersetujuanCEO')),
+                    persetujuanDirektur: new bootstrap.Modal(document.getElementById('modalPersetujuanDirektur')),
                 },
                 inputs: {
                     nominalPengajuan: document.getElementById('nominalPengajuan'),
@@ -825,32 +848,62 @@
             const updateStepper = () => {
                 document.querySelectorAll('.stepper-item').forEach((item, index) => {
                     const step = index + 1;
-                    item.classList.remove('completed', 'active');
+                    item.classList.remove('completed', 'active', 'disabled');
                     
                     if (step < state.currentStep) {
                         item.classList.add('completed');
+                        item.style.cursor = 'default'; // Not clickable
+                        item.style.pointerEvents = 'none'; // Disable all pointer events
                     } else if (step === state.currentStep) {
                         item.classList.add('active');
+                        item.style.cursor = 'default'; // Not clickable
+                        item.style.pointerEvents = 'none'; // Disable all pointer events
+                    } else {
+                        item.classList.add('disabled');
+                        item.style.cursor = 'default'; // Not clickable
+                        item.style.opacity = '0.5'; // Visual indicator
+                        item.style.pointerEvents = 'none'; // Disable all pointer events
+                    }
+                    
+                    // Control connector line visibility using CSS
+                    if (step >= state.currentStep) {
+                        // Hide line after current step (no line to future steps)
+                        item.style.setProperty('--connector-display', 'none');
+                    } else {
+                        // Show line for completed steps
+                        item.style.setProperty('--connector-display', 'block');
                     }
                 });
-                toggleDisplay(dom.buttons.setujuiPeminjaman, state.currentStep === 2);
-                dom.alertPeninjauan.style.display = state.currentStep >= 2 ? 'none' : 'block';
+                // Control button visibility based on current status, not just step
+                const currentStatus = @json($peminjaman['status'] ?? 'Draft');
+                
+                // Show buttons only when appropriate for the current status
+                toggleDisplay(dom.buttons.submitPengajuan, currentStatus === 'Draft');
+                toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
+                toggleDisplay(dom.buttons.persetujuanDebitur, currentStatus === 'Dokumen Tervalidasi');
+                toggleDisplay(dom.buttons.persetujuanCEO, currentStatus === 'Debitur Setuju');
+                toggleDisplay(dom.buttons.persetujuanDirektur, currentStatus === 'Disetujui oleh CEO SKI');
+                
+                // Show alert starting from Submit Dokumen status and Debitur Setuju status
+                const showAlert = currentStatus === 'Submit Dokumen' || currentStatus === 'Debitur Setuju';
+                dom.alertPeninjauan.style.display = showAlert ? 'block' : 'none';
+                
                 updateDetailKontrakContent(); // Update konten tab Detail Kontrak
                 updateActivityTimeline();
             };
 
             const updateDetailKontrakContent = () => {
                 const kontrakDefault = document.getElementById('kontrak-default');
-                const kontrakStep7 = document.getElementById('kontrak-step7');
+                const kontrakStep6 = document.getElementById('kontrak-step6');
 
-                if (state.currentStep === 7) {
-                    // Step 7: Tampilkan form Generate Kontrak
+                if (state.currentStep === 6) {
+                    // Step 6: Tampilkan form Generate Kontrak
                     toggleDisplay(kontrakDefault, false);
-                    toggleDisplay(kontrakStep7, true);
+                    toggleDisplay(kontrakStep6, true);
                 } else {
                     // Step lainnya: Tampilkan konten default
                     toggleDisplay(kontrakDefault, true);
-                    toggleDisplay(kontrakStep7, false);
+                    toggleDisplay(kontrakStep6, false);
                 }
             };
 
@@ -891,16 +944,10 @@
 
             // --- EVENT HANDLERS ---
             const handleStepperClick = (e) => {
-                const target = e.target.closest('.stepper-item');
-                if (target) {
-                    const step = parseInt(target.dataset.step);
-                    goToStep(step);
-
-                    // Auto switch ke tab Detail Kontrak jika step 7
-                    if (step === 7) {
-                        switchToDetailKontrakTab();
-                    }
-                }
+                // Disable all stepper clicks
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             };
 
             const handlePencairanSubmit = (e) => {
@@ -910,15 +957,170 @@
                     dom.forms.pencairan.classList.add('was-validated');
                     return;
                 }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.pencairan);
+                const deviasi = formData.get('deviasi');
+                const nominalDisetujui = formData.get('nominal_yang_disetujui') || dom.inputs.nominalDisetujui.value;
+                const tanggalPencairan = formData.get('tanggal_pencairan') || dom.inputs.tanggalPencairan.value;
+                const catatan = formData.get('catatan_validasi_dokumen_disetujui') || dom.inputs.catatanLainnya.value.trim();
+
+                // Create button-like object for approval function
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Dokumen Tervalidasi';
+                        return null;
+                    },
+                    textContent: 'Submit Pencairan Dana',
+                    innerHTML: 'Submit Pencairan Dana <i class="fas fa-arrow-right ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request variables for backend
+                window.pencairanRequestData = {
+                    status: 'Dokumen Tervalidasi',
+                    validasi_dokumen: 'disetujui',
+                    deviasi: deviasi,
+                    nominal_yang_disetujui: nominalDisetujui.replace(/\D/g, ''), // Remove non-numeric characters
+                    tanggal_pencairan: tanggalPencairan,
+                    catatan_validasi_dokumen_disetujui: catatan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0], // Current date in Y-m-d format
+                    submit_step1_by: @json(auth()->id()),
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Store data in state for potential reuse
                 Object.assign(state.pencairanData, {
-                    nominalDisetujui: dom.inputs.nominalDisetujui.value,
-                    tanggalPencairan: dom.inputs.tanggalPencairan.value,
-                    catatan: dom.inputs.catatanLainnya.value.trim(),
+                    nominalDisetujui: nominalDisetujui,
+                    tanggalPencairan: tanggalPencairan,
+                    catatan: catatan,
                 });
+
+                // Close modal first
                 dom.modals.pencairan.hide();
                 resetForm(dom.forms.pencairan);
-                goToStep(4);
-                switchToActivityTab();
+
+                // Call approval function with enhanced data
+                approval(approvalButton);
+            };
+
+            const handlePersetujuanDebiturSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.persetujuanDebitur.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.persetujuanDebitur.classList.add('was-validated');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.persetujuanDebitur);
+                const catatan = formData.get('catatan_persetujuan_debitur');
+
+                // Create button-like object for approval
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Debitur Setuju';
+                        return null;
+                    },
+                    textContent: 'Debitur Setuju',
+                    innerHTML: 'Debitur Setuju <i class="fas fa-check ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data
+                window.persetujuanDebiturRequestData = {
+                    status: 'Debitur Setuju',
+                    catatan_persetujuan_debitur: catatan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Close modal and call approval function
+                dom.modals.persetujuanDebitur.hide();
+                resetForm(dom.forms.persetujuanDebitur);
+                approval(approvalButton);
+            };
+
+            const handlePersetujuanCEOSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.persetujuanCEO.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.persetujuanCEO.classList.add('was-validated');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.persetujuanCEO);
+                const catatan = formData.get('catatan_persetujuan_ceo');
+
+                // Create button-like object for approval
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Disetujui oleh CEO SKI';
+                        return null;
+                    },
+                    textContent: 'Disetujui oleh CEO SKI',
+                    innerHTML: 'Disetujui oleh CEO SKI <i class="fas fa-check ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data
+                window.persetujuanCEORequestData = {
+                    status: 'Disetujui oleh CEO SKI',
+                    catatan_persetujuan_ceo: catatan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Close modal and call approval function
+                dom.modals.persetujuanCEO.hide();
+                resetForm(dom.forms.persetujuanCEO);
+                approval(approvalButton);
+            };
+
+            const handlePersetujuanDirekturSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.persetujuanDirektur.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.persetujuanDirektur.classList.add('was-validated');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.persetujuanDirektur);
+                const catatan = formData.get('catatan_persetujuan_direktur');
+
+                // Create button-like object for approval
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Disetujui oleh Direktur SKI';
+                        return null;
+                    },
+                    textContent: 'Disetujui oleh Direktur SKI',
+                    innerHTML: 'Disetujui oleh Direktur SKI <i class="fas fa-check ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data
+                window.persetujuanDirekturRequestData = {
+                    status: 'Disetujui oleh Direktur SKI',
+                    catatan_persetujuan_direktur: catatan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Close modal and call approval function
+                dom.modals.persetujuanDirektur.hide();
+                resetForm(dom.forms.persetujuanDirektur);
+                approval(approvalButton);
             };
 
             const handleReviewSubmit = (e) => {
@@ -931,6 +1133,62 @@
                 dom.modals.review.hide();
                 resetForm(dom.forms.review);
                 goToStep(1);
+            };
+
+            const handleRejection = (status, catatanField) => {
+                // Get the active modal and its form
+                let activeModal, activeForm, catatan;
+                
+                if (status === 'Pengajuan Ditolak Debitur') {
+                    activeModal = dom.modals.persetujuanDebitur;
+                    activeForm = dom.forms.persetujuanDebitur;
+                    catatan = document.getElementById('catatanPersetujuanDebitur').value.trim();
+                } else if (status === 'Ditolak oleh CEO SKI') {
+                    activeModal = dom.modals.persetujuanCEO;
+                    activeForm = dom.forms.persetujuanCEO;
+                    catatan = document.getElementById('catatanPersetujuanCEO').value.trim();
+                } else if (status === 'Ditolak oleh Direktur SKI') {
+                    activeModal = dom.modals.persetujuanDirektur;
+                    activeForm = dom.forms.persetujuanDirektur;
+                    catatan = document.getElementById('catatanPersetujuanDirektur').value.trim();
+                }
+
+                // Validate catatan is not empty
+                if (!catatan) {
+                    alert('Silakan isi catatan terlebih dahulu sebelum menolak.');
+                    return;
+                }
+
+                // Create button-like object for rejection
+                const rejectionButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return status;
+                        return null;
+                    },
+                    textContent: status,
+                    innerHTML: status + ' <i class="fas fa-times ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data based on status
+                let requestData = {
+                    status: status,
+                    reject_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Add specific catatan field
+                requestData[catatanField] = catatan;
+
+                // Store in global variable for approval function
+                window.rejectionRequestData = requestData;
+
+                // Close modal and call approval function
+                activeModal.hide();
+                resetForm(activeForm);
+                approval(rejectionButton);
             };
 
             const handleEditPencairanShow = () => {
@@ -1025,6 +1283,14 @@
                 switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
             });
             dom.buttons.uploadDokumen?.addEventListener('click', () => dom.modals.upload.show());
+            dom.buttons.persetujuanDebitur?.addEventListener('click', () => dom.modals.persetujuanDebitur.show());
+            dom.buttons.persetujuanCEO?.addEventListener('click', () => dom.modals.persetujuanCEO.show());
+            dom.buttons.persetujuanDirektur?.addEventListener('click', () => dom.modals.persetujuanDirektur.show());
+
+            // Event listeners for rejection buttons
+            document.getElementById('btnTolakDebitur')?.addEventListener('click', () => handleRejection('Pengajuan Ditolak Debitur', 'catatan_persetujuan_debitur'));
+            document.getElementById('btnTolakCEO')?.addEventListener('click', () => handleRejection('Ditolak oleh CEO SKI', 'catatan_persetujuan_ceo'));
+            document.getElementById('btnTolakDirektur')?.addEventListener('click', () => handleRejection('Ditolak oleh Direktur SKI', 'catatan_persetujuan_direktur'));
 
             dom.buttons.editPencairan.forEach(btn => {
                 btn.addEventListener('click', handleEditPencairanShow);
@@ -1034,6 +1300,9 @@
             dom.forms.review?.addEventListener('submit', handleReviewSubmit);
             dom.forms.edit?.addEventListener('submit', handleEditPencairanSubmit);
             dom.forms.upload?.addEventListener('submit', handleUploadSubmit);
+            dom.forms.persetujuanDebitur?.addEventListener('submit', handlePersetujuanDebiturSubmit);
+            dom.forms.persetujuanCEO?.addEventListener('submit', handlePersetujuanCEOSubmit);
+            dom.forms.persetujuanDirektur?.addEventListener('submit', handlePersetujuanDirekturSubmit);
 
             // Event listener untuk form Generate Kontrak di Step 7
             const formGenerateKontrak = document.getElementById('formGenerateKontrak');
@@ -1046,9 +1315,168 @@
             const btnPreviewKontrak = document.getElementById('btnPreviewKontrak');
             btnPreviewKontrak?.addEventListener('click', handlePreviewKontrak);
 
+            // Initialize stepper based on backend data
             updateStepper();
             initCleaveRupiah();
 
+            // Make updateStepper available globally for approval function
+            window.updateStepperGlobal = (newStep) => {
+                state.currentStep = newStep;
+                updateStepper();
+            };
+
         });
+
+        // Add CSS for stepper connector lines
+        const style = document.createElement('style');
+        style.textContent = `
+            .stepper-item::after {
+                display: var(--connector-display, block) !important;
+            }
+            .stepper-item:not(.completed):not(.active)::after {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // General approval function (global scope)
+        function approval(button) {
+            // Get data from button attributes
+            const status = button.getAttribute('data-status');
+            const buttonText = button.textContent.trim();
+            const peminjamanId = @json($peminjaman['id'] ?? 1);
+            
+            // Dynamic text based on button
+            const actionText = buttonText.toLowerCase();
+            
+            // Show loading state directly without confirmation
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            
+            // Show loading SweetAlert
+            Swal.fire({
+                title: 'Memproses...',
+                text: `Sedang memproses ${actionText}`,
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Prepare data to send
+            let requestData = {
+                status: status,
+                action: buttonText,
+                catatan: '', // You can add a catatan field if needed
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            };
+
+            // Handle "Validasi Ditolak" - get catatan from the form
+            if (status === 'Validasi Ditolak') {
+                const catatanInput = document.getElementById('hasilReview');
+                if (catatanInput) {
+                    requestData.catatan_validasi_dokumen_ditolak = catatanInput.value.trim();
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalHasilReview'));
+                    if (modal) modal.hide();
+                }
+            }
+
+            // Merge specific request data based on button text
+            if (window.pencairanRequestData && buttonText === 'Submit Pencairan Dana') {
+                requestData = { ...requestData, ...window.pencairanRequestData };
+                delete window.pencairanRequestData;
+            } else if (window.persetujuanDebiturRequestData && buttonText === 'Debitur Setuju') {
+                requestData = { ...requestData, ...window.persetujuanDebiturRequestData };
+                delete window.persetujuanDebiturRequestData;
+            } else if (window.persetujuanCEORequestData && buttonText === 'Disetujui oleh CEO SKI') {
+                requestData = { ...requestData, ...window.persetujuanCEORequestData };
+                delete window.persetujuanCEORequestData;
+            } else if (window.persetujuanDirekturRequestData && buttonText === 'Disetujui oleh Direktur SKI') {
+                requestData = { ...requestData, ...window.persetujuanDirekturRequestData };
+                delete window.persetujuanDirekturRequestData;
+            } else if (window.rejectionRequestData && (
+                buttonText === 'Pengajuan Ditolak Debitur' || 
+                buttonText === 'Ditolak oleh CEO SKI' || 
+                buttonText === 'Ditolak oleh Direktur SKI'
+            )) {
+                requestData = { ...requestData, ...window.rejectionRequestData };
+                delete window.rejectionRequestData;
+            }
+            
+            // Make AJAX call to approval endpoint
+            fetch(`/peminjaman/${peminjamanId}/approval`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': requestData._token,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button state
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                if (data.success) {
+                    // Update current status and step if provided
+                    if (data.status) {
+                        // Get alert element directly (since dom is scoped to DOMContentLoaded)
+                        const alertElement = document.getElementById('alertPeninjauan');
+                        
+                        // Update alert visibility based on new status
+                        const showAlert = data.status === 'Submit Dokumen' || data.status === 'Debitur Setuju';
+                        if (alertElement) {
+                            alertElement.style.display = showAlert ? 'block' : 'none';
+                        }
+                        
+                        // Update stepper if current_step is provided
+                        if (data.current_step && window.updateStepperGlobal) {
+                            window.updateStepperGlobal(data.current_step);
+                        }
+                    }
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: data.message || `${buttonText} berhasil diproses!`,
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload page to reflect changes
+                        window.location.reload();
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: data.message || 'Terjadi kesalahan saat memproses approval.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                // Reset button state on error
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan jaringan. Silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
     </script>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Peminjaman;
 
 use App\Http\Controllers\Controller;
 use App\Models\BuktiPeminjaman;
+use App\Models\HistoryStatusPengajuanPinjaman;
 use Illuminate\Http\Request;
 use App\Models\PeminjamanInvoiceFinancing;
 use App\Models\PeminjamanInstallmentFinancing;
@@ -14,6 +15,7 @@ use App\Models\Peminjaman;
 use App\Models\PengajuanPeminjaman;
 use App\Services\PeminjamanNumberService;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
@@ -37,7 +39,7 @@ class PeminjamanController extends Controller
         $peminjaman = [
             'id' => $header->id_pengajuan_peminjaman,
             'nomor_peminjaman' => $header->nomor_peminjaman,
-            'nama_perusahaan' => $header->debitur->nama_debitur ?? '',
+            'nama_perusahaan' => $header->debitur->nama ?? '',
             'nama_bank' => $header->nama_bank,
             'no_rekening' => $header->no_rekening,
             'nama_rekening' => $header->nama_rekening,
@@ -62,6 +64,34 @@ class PeminjamanController extends Controller
             // Factoring specific fields
             'total_nominal_yang_dialihkan' => $header->total_nominal_yang_dialihkan,
         ];
+
+        // Get current step from latest history record
+        $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $header->id_pengajuan_peminjaman)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        $currentStep = 1; // Default to step 1
+        if ($latestHistory) {
+            // Use current_step from history if available, otherwise map from status
+            if ($latestHistory->current_step) {
+                $currentStep = $latestHistory->current_step;
+            } else {
+                // Fallback mapping for older records without current_step
+                $statusToStep = [
+                    'Submit Dokumen' => 2,
+                    'Dokumen Tervalidasi' => 3,
+                    'Debitur Setuju' => 4,
+                    'Disetujui oleh CEO SKI' => 5,
+                    'Disetujui oleh Direktur SKI' => 6,
+                    'Generate Kontrak' => 7,
+                    'Dana Dicairkan' => 8,
+                ];
+                
+                $currentStep = $statusToStep[$latestHistory->status] ?? 1;
+            }
+        }
+        
+        $peminjaman['current_step'] = $currentStep;
 
         // Get all bukti peminjaman (details) for this pengajuan
         $details_data = $header->buktiPeminjaman->map(function($bukti) use ($header) {
@@ -607,5 +637,158 @@ class PeminjamanController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }   
+    }
+    
+    function approval(Request $request, $id)
+    {
+        $peminjaman = PengajuanPeminjaman::find($id);
+        if (!$peminjaman) {
+            return response()->json(['success' => false, 'message' => 'Peminjaman not found'], 404);
+        }
+
+        // Get the status from request
+        $status = $request->input('status');
+        $action = $request->input('action', '');
+        
+        // Validate status
+        $validStatuses = [
+            'Submit Dokumen', 
+            'Dokumen Tervalidasi', 
+            'Validasi Ditolak', 
+            'Dana Dicairkan',
+            'Debitur Setuju',
+            'Pengajuan Ditolak Debitur',
+            'Disetujui oleh CEO SKI',
+            'Ditolak oleh CEO SKI',
+            'Disetujui oleh Direktur SKI',
+            'Ditolak oleh Direktur SKI'
+        ];
+        if (!in_array($status, $validStatuses)) {
+            return response()->json(['success' => false, 'message' => 'Status tidak valid'], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update peminjaman status
+            $peminjaman->status = $status;
+            $peminjaman->save();
+
+            // Create history record
+            $historyData = [
+                'id_pengajuan_peminjaman' => $peminjaman->id_pengajuan_peminjaman,
+                'id_config_matrix_peminjaman' => $request->input('id_config_matrix_peminjaman'),
+                'date' => $request->input('date') ?: now()->format('Y-m-d'),
+                'status' => $status,
+            ];
+
+            if ($status === 'Submit Dokumen') {   
+                $historyData['submit_step1_by'] = auth()->id();
+                $historyData['current_step'] = 2;
+            }
+
+            // Handle approval-specific data
+
+            if ($status === 'Dokumen Tervalidasi') {
+                $historyData['validasi_dokumen'] = 'disetujui';
+                $historyData['approve_by'] = auth()->id();
+                $historyData['devisasi'] = $request->input('deviasi');
+
+                $nominalDisetujui = preg_replace('/[^0-9.]/', '', $request->input('nominal_yang_disetujui'));
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+                
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+                
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_validasi_dokumen_disetujui');
+                $historyData['current_step'] = 3;
+            } elseif ($status === 'Validasi Ditolak') {
+                $historyData['validasi_dokumen'] = 'ditolak';
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_validasi_dokumen_ditolak');
+                $historyData['current_step'] = 1; // Reset to step 1 when validation is rejected
+            } elseif ($status === 'Debitur Setuju') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
+                $historyData['current_step'] = 4;
+            } elseif ($status === 'Pengajuan Ditolak Debitur') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
+            } elseif ($status === 'Disetujui oleh CEO SKI') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['catatan_persetujuan_ceo'] = $request->input('catatan_persetujuan_ceo');
+                $historyData['current_step'] = 5;
+            } elseif ($status === 'Ditolak oleh CEO SKI') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_persetujuan_ceo'] = $request->input('catatan_persetujuan_ceo');
+            } elseif ($status === 'Disetujui oleh Direktur SKI') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['catatan_persetujuan_direktur'] = $request->input('catatan_persetujuan_direktur');
+                $historyData['current_step'] = 6;
+            } elseif ($status === 'Ditolak oleh Direktur SKI') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_persetujuan_direktur'] = $request->input('catatan_persetujuan_direktur');
+            }
+
+            HistoryStatusPengajuanPinjaman::create($historyData);
+
+            DB::commit();
+
+            // Return success response with appropriate message
+            $message = $this->getStatusMessage($status, $action);
+            return response()->json([
+                'success' => true, 
+                'message' => $message,
+                'status' => $peminjaman->status,
+                'current_step' => $historyData['current_step'] ?? null,
+                'data' => [
+                    'id' => $peminjaman->id_pengajuan_peminjaman,
+                    'status' => $peminjaman->status,
+                    'current_step' => $historyData['current_step'] ?? null,
+                    'approved_by' => $peminjaman->approved_by ?? null,
+                    'rejected_by' => $peminjaman->rejected_by ?? null,
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Approval Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false, 
+                'message' => 'Terjadi kesalahan saat memproses approval: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get appropriate message based on status and action
+     */
+    private function getStatusMessage($status, $action)
+    {
+        $messages = [
+            'Submit Dokumen' => 'Dokumen berhasil disubmit untuk review!',
+            'Dokumen Tervalidasi' => 'Dokumen berhasil divalidasi',
+            'Validasi Ditolak' => 'Dokumen ditolak. Silakan perbaiki dan submit ulang.',
+            'Pengajuan Ditolak Debitur' => 'Pengajuan Anda ditolak oleh debitur.',
+            'Debitur Setuju' => 'Debitur telah menyetujui pengajuan Anda.',
+            'Disetujui oleh CEO SKI' => 'Pengajuan telah disetujui oleh CEO SKI.',
+            'Ditolak oleh CEO SKI' => 'Pengajuan Anda ditolak oleh CEO SKI.',
+            'Disetujui oleh Direktur SKI' => 'Pengajuan telah disetujui oleh Direktur SKI.',
+            'Ditolak oleh Direktur SKI' => 'Pengajuan Anda ditolak oleh Direktur SKI.',
+            'Generate Kontrak' => 'Kontrak berhasil digenerate.',
+        ];
+
+        return $messages[$status] ?? 'Status berhasil diupdate!';
+    }
 }
