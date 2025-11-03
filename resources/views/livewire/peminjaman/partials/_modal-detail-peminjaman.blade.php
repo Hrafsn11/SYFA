@@ -61,7 +61,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="nominalPengajuan" class="form-label">Nominal Pengajuan</label>
                                         <input type="text" class="form-control input-rupiah" id="nominalPengajuan"
-                                            value="300000000" disabled>
+                                            value="Rp {{ number_format(intval($peminjaman['nominal_pinjaman'] ?? 0), 0, ',', '.') }}" disabled>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
@@ -97,7 +97,7 @@
                                         <div class="input-group">
                                             <input type="text" class="form-control rounded-start"
                                                 placeholder="DD/MM/YYYY" id="flatpickr-tanggal-harapan"
-                                                value="24/08/2024" disabled>
+                                                value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
                                             <span class="input-group-text">
                                                 <i class="ti ti-calendar"></i>
                                             </span>
@@ -179,13 +179,13 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
                                         <input type="text" class="form-control input-rupiah"
-                                            id="editNominalPengajuan" value="300000000" disabled>
+                                            id="editNominalPengajuan" value="Rp {{ number_format(intval($peminjaman['nominal_pinjaman'] ?? 0), 0, ',', '.') }}" disabled>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
                                         <input type="text" class="form-control input-rupiah"
-                                            id="editNominalDisetujui" disabled>
+                                            id="editNominalDisetujui" value="@if($peminjaman['nominal_yang_disetujui'])Rp {{ number_format(intval($peminjaman['nominal_yang_disetujui']), 0, ',', '.') }}@endif" disabled>
                                     </div>
                                 </div>
 
@@ -194,7 +194,7 @@
                                         <label for="editTanggalPencairan" class="form-label">Tanggal Pencairan</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" placeholder="DD/MM/YYYY"
-                                                id="editTanggalPencairan" disabled>
+                                                id="editTanggalPencairan" value="{{ $peminjaman['tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
                                             <span class="input-group-text">
                                                 <i class="ti ti-calendar"></i>
                                             </span>
@@ -206,7 +206,7 @@
                                             Diharapkan</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" placeholder="DD/MM/YYYY"
-                                                id="editTanggalHarapan" value="24/08/2024" disabled>
+                                                id="editTanggalHarapan" value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
                                             <span class="input-group-text">
                                                 <i class="ti ti-calendar"></i>
                                             </span>
@@ -280,7 +280,51 @@
                             Silakan berikan keputusan Anda terkait pengajuan peminjaman ini.
                         </div>
                         
-                        <!-- Card Catatan -->
+                        <!-- Card Data Nominal dan Tanggal -->
+                        <div class="card border mb-3 shadow-none">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="debiturNominalPengajuan" class="form-label">Nominal Pengajuan</label>
+                                        <input type="text" class="form-control"
+                                            id="debiturNominalPengajuan" value="{{ $peminjaman['nominal_pinjaman'] ? 'Rp ' . number_format(intval($peminjaman['nominal_pinjaman']), 0, ',', '.') : 'Rp 0' }}" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="debiturNominalDisetujui" class="form-label">Nominal Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="debiturNominalDisetujui" value="{{ isset($latestHistory) && $latestHistory['nominal_yang_disetujui'] ? 'Rp ' . number_format(intval($latestHistory['nominal_yang_disetujui']), 0, ',', '.') : 'Rp 0' }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="debiturTanggalPencairan" class="form-label">Tanggal Pencairan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="debiturTanggalPencairan" value="{{ $peminjaman['tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['tanggal_pencairan'])->format('d/m/Y') : '' }}" readonly>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="debiturTanggalHarapan" class="form-label">Tanggal Pencairan yang
+                                            Diharapkan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="debiturTanggalHarapan" value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Catatan - Only editable field -->
                         <div class="card border shadow-none">
                             <div class="card-body">
                                 <label for="catatanPersetujuanDebitur" class="form-label">Catatan</label>
@@ -320,7 +364,51 @@
                             Silakan berikan keputusan CEO terkait pengajuan peminjaman ini.
                         </div>
                         
-                        <!-- Card Catatan -->
+                        <!-- Card Data Nominal dan Tanggal -->
+                        <div class="card border mb-3 shadow-none">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ceoNominalPengajuan" class="form-label">Nominal Pengajuan</label>
+                                        <input type="text" class="form-control"
+                                            id="ceoNominalPengajuan" value="{{ $peminjaman['nominal_pinjaman'] ? 'Rp ' . number_format(intval($peminjaman['nominal_pinjaman']), 0, ',', '.') : 'Rp 0' }}" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ceoNominalDisetujui" class="form-label">Nominal Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="ceoNominalDisetujui" value="{{ isset($latestHistory) && $latestHistory['nominal_yang_disetujui'] ? 'Rp ' . number_format(intval($latestHistory['nominal_yang_disetujui']), 0, ',', '.') : 'Rp 0' }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="ceoTanggalPencairan" class="form-label">Tanggal Pencairan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="ceoTanggalPencairan" value="{{ isset($latestHistory) && $latestHistory['tanggal_pencairan'] ? \Carbon\Carbon::parse($latestHistory['tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="ceoTanggalHarapan" class="form-label">Tanggal Pencairan yang
+                                            Diharapkan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="ceoTanggalHarapan" value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Catatan - Only editable field -->
                         <div class="card border shadow-none">
                             <div class="card-body">
                                 <label for="catatanPersetujuanCEO" class="form-label">Catatan CEO</label>

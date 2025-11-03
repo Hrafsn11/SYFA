@@ -93,6 +93,18 @@ class PeminjamanController extends Controller
         
         $peminjaman['current_step'] = $currentStep;
 
+        // Add latest history data (nominal disetujui and tanggal pencairan from latest update)
+        if ($latestHistory) {
+            $peminjaman['nominal_yang_disetujui'] = $latestHistory->nominal_yang_disetujui;
+            $peminjaman['tanggal_pencairan'] = $latestHistory->tanggal_pencairan;
+            
+            // Debug: log the actual values
+            // dd($peminjaman['nominal_yang_disetujui']);
+        } else {
+            $peminjaman['nominal_yang_disetujui'] = null;
+            $peminjaman['tanggal_pencairan'] = null;
+        }
+
         // Get all bukti peminjaman (details) for this pengajuan
         $details_data = $header->buktiPeminjaman->map(function($bukti) use ($header) {
             $baseData = [
@@ -171,7 +183,8 @@ class PeminjamanController extends Controller
 
         return view('livewire.peminjaman.detail', compact(
             'peminjaman', 'sumber_eksternal', 'banks', 'tenor_pembayaran',
-            'invoice_financing_data', 'po_financing_data', 'installment_data', 'factoring_data'
+            'invoice_financing_data', 'po_financing_data', 'installment_data', 'factoring_data',
+            'latestHistory'
         ));
     }
 
@@ -693,7 +706,13 @@ class PeminjamanController extends Controller
                 $historyData['approve_by'] = auth()->id();
                 $historyData['devisasi'] = $request->input('deviasi');
 
-                $nominalDisetujui = preg_replace('/[^0-9.]/', '', $request->input('nominal_yang_disetujui'));
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
                 $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
                 
                 $tanggalPencairan = $request->input('tanggal_pencairan');
@@ -719,7 +738,33 @@ class PeminjamanController extends Controller
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_validasi_dokumen_ditolak');
                 $historyData['current_step'] = 1; // Reset to step 1 when validation is rejected
             } elseif ($status === 'Debitur Setuju') {
+
                 $historyData['approve_by'] = auth()->id();
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+
+
                 $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
                 $historyData['current_step'] = 4;
             } elseif ($status === 'Pengajuan Ditolak Debitur') {
@@ -727,18 +772,49 @@ class PeminjamanController extends Controller
                 $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
             } elseif ($status === 'Disetujui oleh CEO SKI') {
                 $historyData['approve_by'] = auth()->id();
-                $historyData['catatan_persetujuan_ceo'] = $request->input('catatan_persetujuan_ceo');
-                $historyData['current_step'] = 5;
+                
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+                
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+                
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_ceo');
+                
+                // Check nominal untuk menentukan current_step
+                if ($historyData['nominal_yang_disetujui'] < 300000000) {
+                    $historyData['current_step'] = 6; // Langsung ke step 6 jika < 300 juta
+                } else {
+                    $historyData['current_step'] = 5; // Ke step 5 (Direktur Approval) jika >= 300 juta
+                }
             } elseif ($status === 'Ditolak oleh CEO SKI') {
                 $historyData['reject_by'] = auth()->id();
-                $historyData['catatan_persetujuan_ceo'] = $request->input('catatan_persetujuan_ceo');
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_ceo');
             } elseif ($status === 'Disetujui oleh Direktur SKI') {
                 $historyData['approve_by'] = auth()->id();
-                $historyData['catatan_persetujuan_direktur'] = $request->input('catatan_persetujuan_direktur');
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_direktur');
                 $historyData['current_step'] = 6;
             } elseif ($status === 'Ditolak oleh Direktur SKI') {
                 $historyData['reject_by'] = auth()->id();
-                $historyData['catatan_persetujuan_direktur'] = $request->input('catatan_persetujuan_direktur');
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_direktur');
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);

@@ -140,17 +140,17 @@
                                                 <button type="button" class="btn btn-success d-none"
                                                     id="btnPersetujuanDebitur">
                                                     <i class="fas fa-user-check me-2"></i>
-                                                    Setujui (Debitur)
+                                                    Setujui
                                                 </button>
                                                 <button type="button" class="btn btn-warning d-none"
                                                     id="btnPersetujuanCEO">
                                                     <i class="fas fa-crown me-2"></i>
-                                                    Setujui (CEO SKI)
+                                                    Setujui
                                                 </button>
                                                 <button type="button" class="btn btn-info d-none"
                                                     id="btnPersetujuanDirektur">
                                                     <i class="fas fa-briefcase me-2"></i>
-                                                    Setujui (Direktur SKI)
+                                                    Setujui
                                                 </button>
                                             </div>
                                         </div>
@@ -796,6 +796,14 @@
                     editTanggalPencairan: document.getElementById('editTanggalPencairan'),
                     editTanggalHarapan: document.getElementById('editTanggalHarapan'),
                     editCatatanLainnya: document.getElementById('editCatatanLainnya'),
+                    debiturNominalPengajuan: document.getElementById('debiturNominalPengajuan'),
+                    debiturNominalDisetujui: document.getElementById('debiturNominalDisetujui'),
+                    debiturTanggalPencairan: document.getElementById('debiturTanggalPencairan'),
+                    debiturTanggalHarapan: document.getElementById('debiturTanggalHarapan'),
+                    ceoNominalPengajuan: document.getElementById('ceoNominalPengajuan'),
+                    ceoNominalDisetujui: document.getElementById('ceoNominalDisetujui'),
+                    ceoTanggalPencairan: document.getElementById('ceoTanggalPencairan'),
+                    ceoTanggalHarapan: document.getElementById('ceoTanggalHarapan'),
                 }
             };
 
@@ -882,7 +890,10 @@
                 toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
                 toggleDisplay(dom.buttons.persetujuanDebitur, currentStatus === 'Dokumen Tervalidasi');
                 toggleDisplay(dom.buttons.persetujuanCEO, currentStatus === 'Debitur Setuju');
-                toggleDisplay(dom.buttons.persetujuanDirektur, currentStatus === 'Disetujui oleh CEO SKI');
+                
+                // Special logic for Persetujuan Direktur: jangan tampilkan jika step 6 dan status bukan "Disetujui oleh Direktur SKI"
+                const showPersetujuanDirektur = currentStatus === 'Disetujui oleh CEO SKI' && !(state.currentStep === 6 && currentStatus !== 'Disetujui oleh Direktur SKI');
+                toggleDisplay(dom.buttons.persetujuanDirektur, showPersetujuanDirektur);
                 
                 // Show alert starting from Submit Dokumen status and Debitur Setuju status
                 const showAlert = currentStatus === 'Submit Dokumen' || currentStatus === 'Debitur Setuju';
@@ -1017,6 +1028,10 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanDebitur);
                 const catatan = formData.get('catatan_persetujuan_debitur');
+                
+                // Get additional data from readonly fields
+                const nominalDisetujui = dom.inputs.debiturNominalDisetujui?.value || '';
+                const tanggalPencairan = dom.inputs.debiturTanggalPencairan?.value || '';
 
                 // Create button-like object for approval
                 const approvalButton = {
@@ -1033,6 +1048,8 @@
                 window.persetujuanDebiturRequestData = {
                     status: 'Debitur Setuju',
                     catatan_persetujuan_debitur: catatan,
+                    nominal_yang_disetujui: nominalDisetujui,
+                    tanggal_pencairan: tanggalPencairan,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
@@ -1056,6 +1073,10 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanCEO);
                 const catatan = formData.get('catatan_persetujuan_ceo');
+                
+                // Get additional data from readonly fields
+                const nominalDisetujui = dom.inputs.ceoNominalDisetujui?.value || '';
+                const tanggalPencairan = dom.inputs.ceoTanggalPencairan?.value || '';
 
                 // Create button-like object for approval
                 const approvalButton = {
@@ -1072,6 +1093,8 @@
                 window.persetujuanCEORequestData = {
                     status: 'Disetujui oleh CEO SKI',
                     catatan_persetujuan_ceo: catatan,
+                    nominal_yang_disetujui: nominalDisetujui,
+                    tanggal_pencairan: tanggalPencairan,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
@@ -1192,12 +1215,16 @@
             };
 
             const handleEditPencairanShow = () => {
-                dom.inputs.editNominalPengajuan.value = '300000000';
-                dom.inputs.editTanggalHarapan.value = '24/08/2024';
-                dom.inputs.editNominalDisetujui.value = state.pencairanData.nominalDisetujui;
-                dom.inputs.editTanggalPencairan.value = state.pencairanData.tanggalPencairan;
+                // Most fields are now populated directly from database in HTML
+                // Only set the editable catatan field from state
                 dom.inputs.editCatatanLainnya.value = state.pencairanData.catatan;
                 dom.modals.edit.show();
+            };
+
+            const handlePersetujuanDebiturShow = () => {
+                // Fields are now populated directly from database in HTML
+                // Just show the modal
+                dom.modals.persetujuanDebitur.show();
             };
 
             const handleEditPencairanSubmit = (e) => {
@@ -1274,8 +1301,10 @@
             dom.buttons.konfirmasiSetuju?.addEventListener('click', () => {
                 switchModal(dom.modals.persetujuan, dom.modals.pencairan, () => {
                     resetForm(dom.forms.pencairan);
-                    dom.inputs.nominalPengajuan.value = '300000000';
-                    dom.inputs.tanggalHarapan.value = '24/08/2024';
+                    const nominalPinjaman = @json($peminjaman['nominal_pinjaman'] ?? 0);
+                    dom.inputs.nominalPengajuan.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominalPinjaman);
+                    const harapanTanggal = @json($peminjaman['harapan_tanggal_pencairan'] ?? null);
+                    dom.inputs.tanggalHarapan.value = harapanTanggal ? new Date(harapanTanggal).toLocaleDateString('en-GB') : '';
                     initFlatpickr();
                 });
             });
@@ -1283,7 +1312,7 @@
                 switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
             });
             dom.buttons.uploadDokumen?.addEventListener('click', () => dom.modals.upload.show());
-            dom.buttons.persetujuanDebitur?.addEventListener('click', () => dom.modals.persetujuanDebitur.show());
+            dom.buttons.persetujuanDebitur?.addEventListener('click', handlePersetujuanDebiturShow);
             dom.buttons.persetujuanCEO?.addEventListener('click', () => dom.modals.persetujuanCEO.show());
             dom.buttons.persetujuanDirektur?.addEventListener('click', () => dom.modals.persetujuanDirektur.show());
 
