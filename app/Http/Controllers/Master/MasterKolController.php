@@ -8,15 +8,15 @@ use App\Models\MasterKol;
 
 class MasterKolController extends Controller
 {
-    public function index()
-    {
-        return view('livewire.master-data-kol.index');
-    }
+    // public function index()
+    // {
+    //     return view('livewire.master-data-kol.index');
+    // }
 
-    public function create()
-    {
+    // public function create()
+    // {
         
-    }
+    // }
 
     public function store(Request $request)
     {

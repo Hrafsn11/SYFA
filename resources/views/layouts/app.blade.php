@@ -245,8 +245,8 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout);
-        document.addEventListener('livewire:navigated', window.initializeVuexyLayout);
+        document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout());
+        document.addEventListener('livewire:navigated', window.initializeVuexyLayout());
         document.addEventListener('livewire:load', () => {
             window.initializeVuexyLayout();
             if (window.Livewire?.hook) {
@@ -254,11 +254,20 @@
                     window.initializeVuexyLayout();
                 });
             }
+
+            window.addEventListener('after-action', event => {
+                const callbackName = event.detail.callback;
+                const payload = event.detail.payload || {};
+
+                if (typeof window[callbackName] === 'function') {
+                    window[callbackName](payload);
+                }
+            });
         });
     </script>
     
     {{-- ✅ CRITICAL: Livewire Scripts HARUS sebelum Rappasoft --}}
-    @livewireScripts
+    @livewireScriptConfig
     
     {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
     @rappasoftTableScripts

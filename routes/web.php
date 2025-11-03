@@ -39,7 +39,9 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('dashboard', Dashboard::class)->name('dashboard');
+
+    require __DIR__ . '/livewire_route.php';
+
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
@@ -113,8 +115,7 @@ Route::middleware([
 
     // Master KOL
     Route::prefix('master-data/kol')->name('master-data.kol.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
-        Route::get('create', [\App\Http\Controllers\Master\MasterKolController::class, 'create'])->name('create');
+        // Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Master\MasterKolController::class, 'store'])->name('store');
         Route::get('{id}/edit', [\App\Http\Controllers\Master\MasterKolController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\MasterKolController::class, 'update'])->name('update');

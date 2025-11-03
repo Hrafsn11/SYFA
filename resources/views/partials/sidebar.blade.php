@@ -1,6 +1,6 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     <div class="app-brand demo">
-        <a href="{{ route('dashboard') }}" class="app-brand-link">
+        <a href="{{ route('dashboard.index') }}" class="app-brand-link">
             <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40" />
             <span class="app-brand-text demo menu-text fw-bold">SYFA</span>
         </a>
@@ -15,8 +15,8 @@
 
     <ul class="menu-inner py-1 mb-3">
         <!-- Dashboard -->
-        <li class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-            <a href="{{ route('dashboard') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
+            <a wire:navigate.hover href="{{ route('dashboard.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-smart-home"></i>
                 <div data-i18n="Dashboard">Dashboard</div>
             </a>
@@ -123,35 +123,30 @@
             <span class="menu-header-text">Master Data</span>
         </li>
 
-        <li class="menu-item {{ request()->is('master-data*') ? 'open' : '' }}">
+        <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-database"></i>
                 <div data-i18n="Master Data">Master Data</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item {{ request()->is('master-data/kol*') ? 'active' : '' }}">
-                    <a href="{{ route('master-data.kol.index') }}" class="menu-link">
+                <li class="menu-item">
+                    <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
                         <div data-i18n="KOL">KOL</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('master-data/sumber-pendanaan-eksternal*') ? 'active' : '' }}">
-                    <a href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
+                <li class="menu-item">
+                    <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
                         <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('master-data/debitur-investor*') ? 'active' : '' }}">
-                    <a href="{{ route('master-data.debitur-investor.index') }}" class="menu-link">
+                <li class="menu-item">
+                    <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}" class="menu-link">
                         <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
-                    <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
+                <li class="menu-item">
+                    <a wire:navigate.hover href="{{ route('master-data.master-karyawan-ski.index') }}" class="menu-link">
                         <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
-                    </a>
-                </li>
-                <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
-                    <a href="#" class="menu-link">
-                        <div data-i18n="Menu Lainnya">Menu Lainnya</div>
                     </a>
                 </li>
             </ul>
