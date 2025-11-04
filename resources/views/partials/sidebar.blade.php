@@ -144,11 +144,11 @@
                         <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                     </a>
                 </li>
-                <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
+                {{-- <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
                     <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
                         <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
                     </a>
-                </li>
+                </li> --}}
                 <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
                     <a href="#" class="menu-link">
                         <div data-i18n="Menu Lainnya">Menu Lainnya</div>
