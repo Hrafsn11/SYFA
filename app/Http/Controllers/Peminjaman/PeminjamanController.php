@@ -918,4 +918,70 @@ class PeminjamanController extends Controller
 
         return $messages[$status] ?? 'Status berhasil diupdate!';
     }
+
+    /**
+     * Get history detail by ID
+     *
+     * @param  int  $historyId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getHistoryDetail($historyId)
+    {
+        try {
+            $history = HistoryStatusPengajuanPinjaman::with(['approvedBy', 'rejectedBy', 'submittedBy'])
+                ->find($historyId);
+
+            if (!$history) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'History tidak ditemukan'
+                ], 404);
+            }
+
+            // Format the history data for response
+            $historyData = [
+                'id_history_status_pengajuan_pinjaman' => $history->id_history_status_pengajuan_pinjaman,
+                'id_pengajuan_peminjaman' => $history->id_pengajuan_peminjaman,
+                'status' => $history->status,
+                'nominal_yang_disetujui' => $history->nominal_yang_disetujui,
+                'tanggal_pencairan' => $history->tanggal_pencairan,
+                'catatan_validasi_dokumen_disetujui' => $history->catatan_validasi_dokumen_disetujui,
+                'catatan_validasi_dokumen_ditolak' => $history->catatan_validasi_dokumen_ditolak,
+                'catatan_persetujuan_debitur' => $history->catatan_persetujuan_debitur,
+                'devisasi' => $history->devisasi,
+                'date' => $history->date,
+                'created_at' => $history->created_at,
+                'updated_at' => $history->updated_at,
+                // User information
+                'approved_by' => $history->approvedBy ? [
+                    'id' => $history->approvedBy->id,
+                    'name' => $history->approvedBy->name,
+                    'email' => $history->approvedBy->email,
+                ] : null,
+                'rejected_by' => $history->rejectedBy ? [
+                    'id' => $history->rejectedBy->id,
+                    'name' => $history->rejectedBy->name,
+                    'email' => $history->rejectedBy->email,
+                ] : null,
+                'submitted_by' => $history->submittedBy ? [
+                    'id' => $history->submittedBy->id,
+                    'name' => $history->submittedBy->name,
+                    'email' => $history->submittedBy->email,
+                ] : null,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'History detail berhasil diambil',
+                'history' => $historyData
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Get History Detail Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil detail history: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

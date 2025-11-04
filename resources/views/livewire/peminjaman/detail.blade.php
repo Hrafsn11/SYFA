@@ -1646,6 +1646,88 @@
             window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
         }
 
+        // Global function untuk show history detail
+        function showHistory(historyId) {
+            // Show loading state
+            Swal.fire({
+                title: 'Memuat Data...',
+                text: 'Sedang mengambil detail histori',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Make AJAX request to get history details
+            fetch(`/peminjaman/history/${historyId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+                
+                if (data.success) {
+                    // Populate modal with history data
+                    populateEditPencairanModal(data.history);
+                    
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('modalEditPencairan'));
+                    modal.show();
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Gagal mengambil data histori',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan jaringan. Silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+
+        // Function to populate edit pencairan modal with history data
+        function populateEditPencairanModal(history) {
+            // Populate readonly fields with history data
+            if (history.nominal_yang_disetujui) {
+                document.getElementById('editNominalDisetujui').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(history.nominal_yang_disetujui);
+            }
+            
+            if (history.tanggal_pencairan) {
+                const date = new Date(history.tanggal_pencairan);
+                document.getElementById('editTanggalPencairan').value = date.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric'
+                });
+            }
+            
+            // Populate editable catatan field
+            const catatanField = document.getElementById('editCatatanLainnya');
+            if (catatanField && history.catatan_validasi_dokumen_disetujui) {
+                catatanField.value = history.catatan_validasi_dokumen_disetujui;
+            }
+
+            // Store history ID for potential updates
+            document.getElementById('modalEditPencairan').setAttribute('data-history-id', history.id_history_status_pengajuan_pinjaman);
+        }
+
         // Validasi upload dokumen transfer
         document.addEventListener('DOMContentLoaded', function() {
             const btnUploadDokumen = document.getElementById('btnUploadDokumen');

@@ -94,8 +94,9 @@
                         </div>
                         <div class="col-6 col-md-3 text-end">
                             @if($history->status == 'Dokumen Tervalidasi' || $history->status == 'Debitur Setuju' || $history->status == 'Disetujui oleh CEO SKI' || $history->status == 'Disetujui oleh Direktur SKI')
-                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Detail">
-                                    <i class="ti ti-edit"></i>
+                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Detail" 
+                                        onclick="showHistory('{{ $history->id_history_status_pengajuan_pinjaman }}')">
+                                    <i class="ti ti-file"></i>
                                 </button>
                             @elseif($history->status == 'Generate Kontrak')
                                 <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Preview Kontrak" onclick="previewKontrakActivity()">

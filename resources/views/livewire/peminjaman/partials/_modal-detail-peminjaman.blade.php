@@ -167,7 +167,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Konfirmasi Pencairan Dana</h5>
+                    <h5 class="modal-title">Detail Konfirmasi Pencairan Dana</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="formEditPencairan">
@@ -178,8 +178,8 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
-                                        <input type="text" class="form-control input-rupiah"
-                                            id="editNominalPengajuan" value="Rp {{ number_format(intval($peminjaman['nominal_pinjaman'] ?? 0), 0, ',', '.') }}" disabled>
+                                        <input type="text" class="form-control"
+                                            id="editNominalPengajuan" value="{{ isset($peminjaman['nominal_pinjaman']) && $peminjaman['nominal_pinjaman'] ? 'Rp ' . number_format($peminjaman['nominal_pinjaman'], 0, ',', '.') : 'Rp 0' }}" disabled>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
@@ -221,17 +221,9 @@
                             <div class="card-body">
                                 <label for="editCatatanLainnya" class="form-label">Catatan Lainnya</label>
                                 <textarea class="form-control" id="editCatatanLainnya" rows="4"
-                                    placeholder="Berikan catatan tambahan jika diperlukan"></textarea>
+                                    placeholder="Berikan catatan tambahan jika diperlukan" disabled></textarea>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-                            Tolak
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            Terima
-                        </button>
                     </div>
                 </form>
             </div>
