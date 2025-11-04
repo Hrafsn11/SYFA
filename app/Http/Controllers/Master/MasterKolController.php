@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Master;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\MasterKol;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\MasterKolRequest;
 
 class MasterKolController extends Controller
 {
@@ -18,15 +19,15 @@ class MasterKolController extends Controller
         
     // }
 
-    public function store(Request $request)
+    public function store(MasterKolRequest $request)
     {
-        $data = $request->validate([
-            'kol' => 'required|integer',
-            'persentase_pencairan' => 'nullable|numeric|min:0|max:100',
-            'jmlh_hari_keterlambatan' => 'nullable|integer',
-        ]);
+        // $data = $request->validate([
+        //     'kol' => 'required|integer',
+        //     'persentase_pencairan' => 'nullable|numeric|min:0|max:100',
+        //     'jmlh_hari_keterlambatan' => 'nullable|integer',
+        // ]);
 
-        $kol = MasterKol::create($data);
+        $kol = MasterKol::create($request->validated());
 
         return response()->json([
             'success' => true,

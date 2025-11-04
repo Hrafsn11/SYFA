@@ -247,6 +247,19 @@
 
         document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout());
         document.addEventListener('livewire:navigated', window.initializeVuexyLayout());
+
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('after-action', (event) => {
+                const callbackName = event[0].callback;
+                const payload = event[0].payload || {};
+
+                if (typeof window[callbackName] === 'function') {
+                    window[callbackName](payload);
+                }
+                
+            });
+        });
+
         document.addEventListener('livewire:load', () => {
             window.initializeVuexyLayout();
             if (window.Livewire?.hook) {
@@ -254,15 +267,6 @@
                     window.initializeVuexyLayout();
                 });
             }
-
-            window.addEventListener('after-action', event => {
-                const callbackName = event.detail.callback;
-                const payload = event.detail.payload || {};
-
-                if (typeof window[callbackName] === 'function') {
-                    window[callbackName](payload);
-                }
-            });
         });
     </script>
     

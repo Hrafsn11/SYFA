@@ -20,39 +20,39 @@
         </div>
     </div>
     {{-- Modal Tambah/Edit KOL --}}
-    <div class="modal fade" id="modalTambahKOL" tabindex="-1">
+    <div class="modal fade" id="modalTambahKOL" tabindex="-1" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTambahKOLLabel">Tambah KOL</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form wire:submit="saveData('master-data.kol.store', 'afterAction')" :function-callback="afterAction">
+                <form wire:submit="saveData('master-data.kol.store', 'afterAction')">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="kol" class="form-label">KOL <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="kol" placeholder="Masukkan KOL" wire:model="formData.kol">
-                            @error('kol')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" class="form-control" id="kol" placeholder="Masukkan KOL" wire:model.blur="form_data.kol">
+                            @error('form_data.kol')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="mb-3">
                             <label for="persentase_keterlambatan" class="form-label">
                                 Persentase Pencairan <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="persentase_keterlambatan" placeholder="Masukkan Persentase Pencairan" wire:model="formData.persentase_pencairan">
-                            @error('persentase_pencairan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" class="form-control" id="persentase_keterlambatan" placeholder="Masukkan Persentase Pencairan" wire:model.blur="form_data.persentase_pencairan">
+                            @error('form_data.persentase_pencairan')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                         <div class="mb-3">
                             <label for="tanggal_tenggat" class="form-label">
                                 Jumlah Hari Keterlambatan <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="tanggal_tenggat" placeholder="Masukkan Jumlah Hari Keterlambatan" wire:model="formData.jmlh_hari_keterlambatan">
-                            @error('jmlh_hari_keterlambatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <input type="text" class="form-control" id="tanggal_tenggat" placeholder="Masukkan Jumlah Hari Keterlambatan" wire:model.blur="form_data.jmlh_hari_keterlambatan">
+                            @error('form_data.jmlh_hari_keterlambatan')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">
-                            <span class="spinner-border spinner-border-sm me-2" wire:loading></span>
+                            <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="saveData"></span>
                             Simpan
                         </button>
                     </div>
@@ -89,8 +89,13 @@
 {{-- script  --}}
 <script>
     function afterAction(payload) {
-        Livewire.dispatch('refreshKolTable');
-        $('.modal').modal('hide');
+        console.log('masuk');
+        console.log(payload);
+        
+        // modal harus di close setelah action selesai terlebih dahulu
+        // $('.modal').modal('hide');
+        // baru jalankan action lain
+        // Livewire.dispatch('refreshKolTable');
     }
 </script>
 @endpush

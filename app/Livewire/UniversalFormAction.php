@@ -23,14 +23,16 @@ class UniversalFormAction extends Component
             [$controllerClass, $method] = $this->resolveRouteAction($routeName);
             $result = $this->callController($controllerClass, $method);
             
-            $this->dispatchBrowserEvent('after-action', [
+            $this->dispatch('after-action', [
                 'callback' => $params['callback'] ?? null,
                 'payload' => $result,
             ]);
 
         } catch (ValidationException $e) {
+            dd('masuk sini');
             $this->setErrorBag($e->validator->errors());
         } catch (\Throwable $e) {
+            dd('masuk sini 2');
             $this->addError('general', $e->getMessage());
         }
     }
