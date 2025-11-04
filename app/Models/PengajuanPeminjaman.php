@@ -49,12 +49,12 @@ class PengajuanPeminjaman extends Model
 
     public function debitur()
     {
-        return $this->belongsTo(MasterDebiturDanInvestor::class, 'id_debitur', 'id_debitur');
+        return $this->belongsTo(MasterDebiturDanInvestor::class, 'id_debitur', 'id_debitur')->where('flagging', 'tidak')->where('status', 'active');
     }
 
     public function instansi()
     {
-        return $this->belongsTo(MasterSumberPendanaanEksternal::class, 'id_instansi', 'id_instansi');
+        return $this->belongsTo(MasterSumberPendanaanEksternal::class, 'id_instansi', 'id_instansi')->where('flagging', 'ya')->where('status', 'active');
     }
 
     public function buktiPeminjaman()

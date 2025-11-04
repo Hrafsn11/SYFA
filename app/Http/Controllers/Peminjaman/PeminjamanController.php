@@ -374,7 +374,7 @@ class PeminjamanController extends Controller
         try {
             if (auth()->check()) {
                 $userEmail = auth()->user()->email;
-                $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)->with('kol')->first();
+                $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)->where('flagging', 'tidak')->where('status', 'active')->with('kol')->first();
             }
         } catch (\Throwable $e) {
             // In case auth or model lookup fails in some contexts (e.g. artisan tinker), we silently ignore
