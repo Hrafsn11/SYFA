@@ -580,7 +580,7 @@
                                         @endif
 
                                         <!-- Upload/View Dokumen Section -->
-                                        @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan')
+                                        @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan' && $peminjaman['current_step'] == 7)
                                             <!-- Upload Form - Show only when status is NOT 'Dana Sudah Dicairkan' -->
                                             <div class="mt-5" id="uploadDokumenSection">
                                                 <hr class="my-4">
@@ -625,10 +625,6 @@
                                                     <div class="card-body">
                                                         <div class="row g-3">
                                                             <div class="col-12">
-                                                                <label class="form-label">
-                                                                    <i class="ti ti-file-check me-2"></i>
-                                                                    Dokumen Transfer yang Sudah Diupload
-                                                                </label>
                                                                 @if(!empty($peminjaman['upload_bukti_transfer']))
                                                                     <div class="border rounded p-3 bg-light">
                                                                         <div class="d-flex align-items-center justify-content-between">

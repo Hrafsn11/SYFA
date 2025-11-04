@@ -293,7 +293,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="debiturNominalDisetujui" class="form-label">Nominal Disetujui</label>
                                         <input type="text" class="form-control"
-                                            id="debiturNominalDisetujui" value="{{ isset($latestHistory) && $latestHistory['nominal_yang_disetujui'] ? 'Rp ' . number_format(intval($latestHistory['nominal_yang_disetujui']), 0, ',', '.') : 'Rp 0' }}" required>
+                                            id="debiturNominalDisetujui" value="{{ isset($latestHistory) && $latestHistory['nominal_yang_disetujui'] ? 'Rp ' . number_format(intval($latestHistory['nominal_yang_disetujui']), 0, ',', '.') : 'Rp 0' }}" required readonly>
                                     </div>
                                 </div>
 

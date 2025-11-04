@@ -99,7 +99,7 @@
                                 <div class="col-md-5 mb-3">
                                     <label for="nama_rekening" class="form-label">Nama Rekening</label>
                                     <input type="text" class="form-control" id="nama_rekening" name="nama_rekening"
-                                        placeholder="Masukkan Nama Rekening" required>
+                                        placeholder="Masukkan Nama Rekening">
                                 </div>
                             </div>
 

@@ -737,7 +737,7 @@ class PeminjamanController extends Controller
             if ($status === 'Dokumen Tervalidasi') {
                 $historyData['validasi_dokumen'] = 'disetujui';
                 $historyData['approve_by'] = auth()->id();
-                $historyData['devisasi'] = $request->input('deviasi');
+                $historyData['deviasi'] = $request->input('deviasi');
 
                 $nominalDisetujui = $request->input('nominal_yang_disetujui');
                 // Remove Rp, spaces, and dots (thousands separator), keep only numbers
@@ -802,7 +802,8 @@ class PeminjamanController extends Controller
                 $historyData['current_step'] = 4;
             } elseif ($status === 'Pengajuan Ditolak Debitur') {
                 $historyData['reject_by'] = auth()->id();
-                $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_debitur');
+                $historyData['current_step'] = 8;
             } elseif ($status === 'Disetujui oleh CEO SKI') {
                 $historyData['approve_by'] = auth()->id();
                 
@@ -841,6 +842,7 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Ditolak oleh CEO SKI') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_ceo');
+                $historyData['current_step'] = 1;
             } elseif ($status === 'Disetujui oleh Direktur SKI') {
                 $historyData['approve_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_direktur');
@@ -848,6 +850,7 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Ditolak oleh Direktur SKI') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_direktur');
+                $historyData['current_step'] = 8;
             } elseif ($status === 'Generate Kontrak') {
                 $historyData['approve_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan') ?? 'Kontrak berhasil digenerate';
