@@ -408,7 +408,11 @@ class PeminjamanController extends Controller
             $rules['invoices'] = 'required|string';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
-            $rules['id_instansi'] = 'required|integer';
+            if($request->sumber_pembiayaan === 'eksternal'){
+                $rules['id_instansi'] = 'required|integer';
+            }else{
+                $rules['id_instansi'] = 'nullable';
+            }
             $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
@@ -430,7 +434,11 @@ class PeminjamanController extends Controller
             
         } elseif ($jenisPembiayaan === 'PO Financing') {
             $rules['details'] = 'required|array|min:1';
-            $rules['id_instansi'] = 'required|integer';
+            if($request->sumber_pembiayaan === 'eksternal'){
+                $rules['id_instansi'] = 'required|integer';
+            }else{
+                $rules['id_instansi'] = 'nullable';
+            }
             $rules['no_kontrak'] = 'nullable|string';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
