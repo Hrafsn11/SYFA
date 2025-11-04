@@ -85,7 +85,7 @@ class PengajuanPinjamanTable extends DataTableComponent
                 
             Column::make('Nama Perusahaan')
                 ->label(function ($row) {
-                    $namaDebitur = $row->debitur->nama_debitur ?? '-';
+                    $namaDebitur = $row->debitur->nama ?? '-';
                     return '<div class="text-start">'.$namaDebitur.'</div>';
                 })
                 ->html()
@@ -137,8 +137,8 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->searchable()
                 ->format(function ($value) {
                     $badgeClass = match($value) {
-                        'submitted' => 'bg-primary',
-                        'approved' => 'bg-success',
+                        'Draft' => 'bg-warning text-dark',
+                        'Submitted' => 'bg-success',
                         'rejected' => 'bg-danger',
                         'pending' => 'bg-warning text-dark',
                         'disbursed' => 'bg-info',
