@@ -12,7 +12,7 @@
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
 
-                    <div class="stepper-item completed" data-step="1">
+                    <div class="stepper-item" data-step="1">
                         <div class="stepper-node">
                         </div>
                         <div class="stepper-content">
@@ -21,7 +21,7 @@
                         </div>
                     </div>
 
-                    <div class="stepper-item active" data-step="2">
+                    <div class="stepper-item" data-step="2">
                         <div class="stepper-node">
                         </div>
                         <div class="stepper-content">
@@ -34,7 +34,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 3</div>
-                            <div class="step-name">Dokumen Tervalidasi</div>
+                            <div class="step-name">Persetujuan Debitur</div>
                         </div>
                     </div>
 
@@ -42,7 +42,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 4</div>
-                            <div class="step-name">Persetujuan Debitur</div>
+                            <div class="step-name">Validasi CEO SKI</div>
                         </div>
                     </div>
 
@@ -50,7 +50,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
-                            <div class="step-name">validasi CEO SKI</div>
+                            <div class="step-name">Validasi Direktur</div>
                         </div>
                     </div>
 
@@ -58,7 +58,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 6</div>
-                            <div class="step-name">Validasi Direktur</div>
+                            <div class="step-name">Generate Kontrak</div>
                         </div>
                     </div>
 
@@ -66,7 +66,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 7</div>
-                            <div class="step-name">Generate Kontrak</div>
+                            <div class="step-name">Upload Dokumen Transfer</div>
                         </div>
                     </div>
 
@@ -74,14 +74,6 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 8</div>
-                            <div class="step-name">Upload Dokumen Transfer</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="9">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 9</div>
                             <div class="step-name">Selesai</div>
                         </div>
                     </div>
@@ -135,11 +127,32 @@
                                         <div
                                             class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
                                             <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
-                                            <button type="button" class="btn btn-primary d-none"
-                                                id="btnSetujuiPeminjaman">
-                                                <i class="fas fa-check me-2"></i>
-                                                Setujui Peminjaman
-                                            </button>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-success" onclick="approval(this)" data-status="Submit Dokumen">
+                                                    <i class="fas fa-paper-plane me-2"></i>
+                                                    Submit Pengajuan
+                                                </button>
+                                                <button type="button" class="btn btn-primary d-none"
+                                                    id="btnSetujuiPeminjaman">
+                                                    <i class="fas fa-check me-2"></i>
+                                                    Setujui Peminjaman
+                                                </button>
+                                                <button type="button" class="btn btn-success d-none"
+                                                    id="btnPersetujuanDebitur">
+                                                    <i class="fas fa-user-check me-2"></i>
+                                                    Setujui
+                                                </button>
+                                                <button type="button" class="btn btn-warning d-none"
+                                                    id="btnPersetujuanCEO">
+                                                    <i class="fas fa-crown me-2"></i>
+                                                    Setujui
+                                                </button>
+                                                <button type="button" class="btn btn-info d-none"
+                                                    id="btnPersetujuanDirektur">
+                                                    <i class="fas fa-briefcase me-2"></i>
+                                                    Setujui
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <hr class="my-3 my-md-4">
@@ -565,6 +578,87 @@
                                                 </table>
                                             </div>
                                         @endif
+
+                                        <!-- Upload/View Dokumen Section -->
+                                        @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan' && $peminjaman['current_step'] == 7)
+                                            <!-- Upload Form - Show only when status is NOT 'Dana Sudah Dicairkan' -->
+                                            <div class="mt-5" id="uploadDokumenSection">
+                                                <hr class="my-4">
+                                                <h6 class="text-dark mb-3">Upload Dokumen Transfer</h6>
+                                                
+                                                <div class="card border-1 shadow-none">
+                                                    <div class="card-body">
+                                                        <form id="formUploadDokumenTransfer" class="row g-3">
+                                                            <div class="col-12">
+                                                                <label for="dokumenTransfer" class="form-label">
+                                                                    <i class="ti ti-upload me-2"></i>
+                                                                    Dokumen Transfer <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="file" class="form-control" id="dokumenTransfer" 
+                                                                       name="dokumen_transfer" 
+                                                                       accept=".pdf,.jpg,.jpeg,.png" required>
+                                                                <div class="form-text">Format: PDF, JPG, PNG (Max: 2MB)</div>
+                                                            </div>
+                                                            
+                                                            <div class="col-12">
+                                                                <div class="d-flex justify-content-end">
+                                                                    <button type="button" class="btn btn-success" 
+                                                                            onclick="approval(this)" 
+                                                                            data-status="Dana Sudah Dicairkan"
+                                                                            id="btnUploadDokumen">
+                                                                        <i class="ti ti-upload me-2"></i>
+                                                                        Upload Dokumen
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <!-- Document View - Show when status is 'Dana Sudah Dicairkan' -->
+                                            <div class="mt-5" id="viewDokumenSection">
+                                                <hr class="my-4">
+                                                <h6 class="text-dark mb-3">Dokumen Bukti Transfer</h6>
+                                                
+                                                <div class="card border-1 shadow-none">
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-12">
+                                                                @if(!empty($peminjaman['upload_bukti_transfer']))
+                                                                    <div class="border rounded p-3 bg-light">
+                                                                        <div class="d-flex align-items-center justify-content-between">
+                                                                            <div>
+                                                                                <i class="ti ti-file-text me-2 text-primary"></i>
+                                                                                <strong>{{ basename($peminjaman['upload_bukti_transfer']) }}</strong>
+                                                                                <br>
+                                                                                <small class="text-muted">
+                                                                                    <i class="ti ti-calendar me-1"></i>
+                                                                                    Diupload pada: {{ now()->translatedFormat('j F Y H:i') }}
+                                                                                </small>
+                                                                            </div>
+                                                                            <a href="{{ asset('storage/' . $peminjaman['upload_bukti_transfer']) }}" 
+                                                                               target="_blank" 
+                                                                               class="btn btn-outline-primary btn-sm">
+                                                                                <i class="ti ti-eye me-2"></i>
+                                                                                Lihat Dokumen
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                @else
+                                                                    <div class="border rounded p-3 text-center bg-light">
+                                                                        <i class="ti ti-file-x text-muted mb-2" style="font-size: 2rem;"></i>
+                                                                        <p class="text-muted mb-0">Dokumen transfer belum tersedia</p>
+                                                                        <small class="text-muted">Status sudah dicairkan namun dokumen tidak ditemukan</small>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <!-- End Upload/View Dokumen Section -->
                                     </div>
                                     <!-- End Konten Default -->
                                 </div>
@@ -582,14 +676,14 @@
                                     </div>
 
                                     <!-- Konten Step 7: Generate Kontrak -->
-                                    <div id="kontrak-step7" class="d-none">
+                                    <div id="kontrak-step6" class="d-none">
                                         <h5 class="mb-4">Generate Kontrak Peminjaman</h5>
                                         <form action="" id="formGenerateKontrak">
                                             <div class="col-lg mb-3">
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
-                                                    name="jenis_pembiayaan" value="Invoice & Project Financing" required
+                                                    name="jenis_pembiayaan" value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required
                                                     disabled>
                                             </div>
 
@@ -599,7 +693,7 @@
                                                         <label for="nama_perusahaan" class="form-label">Nama
                                                             Perusahaan</label>
                                                         <input type="text" class="form-control" id="nama_perusahaan"
-                                                            name="nama_perusahaan" value="Techno Infinity" required
+                                                            name="nama_perusahaan" value="{{ $peminjaman['nama_perusahaan'] ?? 'N/A' }}" required
                                                             disabled>
                                                     </div>
 
@@ -608,7 +702,7 @@
                                                             Nama Pimpinan
                                                         </label>
                                                         <input type="text" class="form-control" id="nama_pimpinan"
-                                                            name="nama_pimpinan" value="Cahyo" required disabled>
+                                                            name="nama_pimpinan" value="{{ $peminjaman['nama_ceo'] ?? 'N/A' }}" required disabled>
                                                     </div>
 
                                                     <div class="col-lg mb-3">
@@ -617,7 +711,7 @@
                                                         </label>
                                                         <input type="text" class="form-control" id="alamat"
                                                             name="alamat"
-                                                            value="Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia"
+                                                            value="{{ $peminjaman['alamat'] ?? 'N/A' }}"
                                                             required disabled>
                                                     </div>
 
@@ -626,41 +720,45 @@
                                                             Tujuan Pembiayaan
                                                         </label>
                                                         <input type="text" class="form-control" id="tujuan"
-                                                            name="tujuan" value="Kebutuhan Gaji Operasional/Umum Sept"
+                                                            name="tujuan" value="{{ $peminjaman['tujuan_pembiayaan'] ?? 'N/A' }}"
                                                             required disabled>
                                                     </div>
                                                 </div>
                                             </div>
 
+                                            @php
+                                                $nilaiPembiayaan = $latestHistory->nominal_yang_disetujui ?? $header->total_pinjaman ?? 0;
+                                            @endphp
+
                                             <div class="row mb-3">
                                                 <div class="col-md-6 mb-2">
                                                     <label for="nilai_pembiayaan">Nilai Pembiayaan</label>
                                                     <input type="text" class="form-control" id="nilai_pembiayaan"
-                                                        name="nilai_pembiayaan" value="Rp.250.000.000" disabled>
+                                                        name="nilai_pembiayaan" value="Rp. {{ number_format($nilaiPembiayaan, 0, ',', '.') }}" disabled>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="hutang_pokok">Hutang Pokok</label>
                                                     <input type="text" class="form-control" id="hutang_pokok"
-                                                        name="hutang_pokok" value="Rp.250.000.000" disabled>
+                                                        name="hutang_pokok" value="Rp. {{ number_format($nilaiPembiayaan, 0, ',', '.') }}" disabled>
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6 mb-2">
                                                     <label for="tenor">Tenor Pembiayaan</label>
                                                     <input type="text" class="form-control" id="tenor"
-                                                        name="tenor" value="1 Bulan" disabled>
+                                                        name="tenor" value="{{ $header->tenor_pembayaran ?? 1 }} Bulan" disabled>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="biaya_admin">Biaya Administrasi</label>
                                                     <input type="text" class="form-control" id="biaya_admin"
-                                                        name="biaya_admin" value="Rp.0.00" disabled>
+                                                        name="biaya_admin" value="Rp. 0" disabled>
                                                 </div>
                                             </div>
 
                                             <div class="col-lg mb-3">
                                                 <label for="nisbah" class="form-label">Bagi Hasil (Nisbah)</label>
                                                 <input type="text" class="form-control" id="nisbah" name="nisbah"
-                                                    value="2% flat / bulan" required disabled>
+                                                    value="{{ $header->persentase_bagi_hasil ?? 2 }}% flat / bulan" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
@@ -678,21 +776,39 @@
                                                     Jaminan
                                                 </label>
                                                 <input type="text" class="form-control" id="jaminan" name="jaminan"
-                                                    value="Invoice & Project Financing" required disabled>
+                                                    value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
                                                 <label for="ttd_debitur" class="form-label">
                                                     Tanda Tangan Debitur
                                                 </label>
-                                                <input type="file" class="form-control" id="ttd_debitur" required>
-                                                <div class="invalid-feedback">
-                                                    Silakan pilih file untuk diupload.
-                                                </div>
+                                                @if($peminjaman['tanda_tangan'])
+                                                    <div class="border rounded p-3 bg-light">
+                                                        <img src="{{ asset('storage/' . $peminjaman['tanda_tangan']) }}" 
+                                                             alt="Tanda Tangan Debitur" 
+                                                             class="img-fluid" 
+                                                             style="max-height: 150px; max-width: 100%;">
+                                                        <small class="text-muted d-block mt-2">
+                                                            <i class="ti ti-info-circle me-1"></i>
+                                                            Tanda tangan dari data master debitur
+                                                        </small>
+                                                    </div>
+                                                @else
+                                                    <div class="border rounded p-3 text-center bg-light">
+                                                        <i class="ti ti-signature text-muted mb-2" style="font-size: 2rem;"></i>
+                                                        <p class="text-muted mb-0">Tanda tangan debitur tidak tersedia</p>
+                                                        <small class="text-muted">Silakan update tanda tangan di data master debitur</small>
+                                                    </div>
+                                                @endif
                                             </div>
 
-                                            <div class="d-flex justify-content-end">
-                                                <button type="submit" class="btn btn-primary" id="btnSimpanKontrak">
+                                            <div class="d-flex justify-content-between">
+                                                <button type="button" class="btn btn-outline-primary" id="btnPreviewKontrak">
+                                                    <i class="ti ti-eye me-2"></i>
+                                                    Preview Kontrak
+                                                </button>
+                                                <button type="button" class="btn btn-primary" onclick="approval(this)" data-status="Generate Kontrak" id="btnSimpanKontrak">
                                                     <span class="spinner-border spinner-border-sm me-2 d-none"
                                                         id="btnSimpanKontrakSpinner"></span>
                                                     Simpan
@@ -721,7 +837,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // --- STATE MANAGEMENT ---
             const state = {
-                currentStep: 1,
+                currentStep: @json($peminjaman['current_step'] ?? 1),
                 totalSteps: 9,
                 pencairanData: {
                     nominalDisetujui: '',
@@ -743,17 +859,23 @@
                 },
                 buttons: {
                     setujuiPeminjaman: document.getElementById('btnSetujuiPeminjaman'),
+                    submitPengajuan: document.querySelector('button[data-status="Submit Dokumen"]'),
                     konfirmasiSetuju: document.getElementById('btnKonfirmasiSetuju'),
+                    persetujuanDebitur: document.getElementById('btnPersetujuanDebitur'),
+                    persetujuanCEO: document.getElementById('btnPersetujuanCEO'),
+                    persetujuanDirektur: document.getElementById('btnPersetujuanDirektur'),
                     tolakPinjaman: document.getElementById('btnTolakPinjaman'),
                     editPencairan: document.querySelectorAll(
                         '#btnEditPencairan'), // Menggunakan querySelectorAll
-                    uploadDokumen: document.getElementById('btnUploadDokumen'),
                 },
                 forms: {
                     pencairan: document.getElementById('formPencairanDana'),
                     review: document.getElementById('formHasilReview'),
                     edit: document.getElementById('formEditPencairan'),
                     upload: document.getElementById('formUploadDokumen'),
+                    persetujuanDebitur: document.getElementById('formPersetujuanDebitur'),
+                    persetujuanCEO: document.getElementById('formPersetujuanCEO'),
+                    persetujuanDirektur: document.getElementById('formPersetujuanDirektur'),
                 },
                 modals: {
                     persetujuan: new bootstrap.Modal(document.getElementById('modalPersetujuanPinjaman')),
@@ -761,6 +883,9 @@
                     review: new bootstrap.Modal(document.getElementById('modalHasilReview')),
                     edit: new bootstrap.Modal(document.getElementById('modalEditPencairan')),
                     upload: new bootstrap.Modal(document.getElementById('modalUploadDokumen')),
+                    persetujuanDebitur: new bootstrap.Modal(document.getElementById('modalPersetujuanDebitur')),
+                    persetujuanCEO: new bootstrap.Modal(document.getElementById('modalPersetujuanCEO')),
+                    persetujuanDirektur: new bootstrap.Modal(document.getElementById('modalPersetujuanDirektur')),
                 },
                 inputs: {
                     nominalPengajuan: document.getElementById('nominalPengajuan'),
@@ -773,6 +898,14 @@
                     editTanggalPencairan: document.getElementById('editTanggalPencairan'),
                     editTanggalHarapan: document.getElementById('editTanggalHarapan'),
                     editCatatanLainnya: document.getElementById('editCatatanLainnya'),
+                    debiturNominalPengajuan: document.getElementById('debiturNominalPengajuan'),
+                    debiturNominalDisetujui: document.getElementById('debiturNominalDisetujui'),
+                    debiturTanggalPencairan: document.getElementById('debiturTanggalPencairan'),
+                    debiturTanggalHarapan: document.getElementById('debiturTanggalHarapan'),
+                    ceoNominalPengajuan: document.getElementById('ceoNominalPengajuan'),
+                    ceoNominalDisetujui: document.getElementById('ceoNominalDisetujui'),
+                    ceoTanggalPencairan: document.getElementById('ceoTanggalPencairan'),
+                    ceoTanggalHarapan: document.getElementById('ceoTanggalHarapan'),
                 }
             };
 
@@ -825,32 +958,65 @@
             const updateStepper = () => {
                 document.querySelectorAll('.stepper-item').forEach((item, index) => {
                     const step = index + 1;
-                    item.classList.remove('completed', 'active');
+                    item.classList.remove('completed', 'active', 'disabled');
                     
                     if (step < state.currentStep) {
                         item.classList.add('completed');
+                        item.style.cursor = 'default'; // Not clickable
+                        item.style.pointerEvents = 'none'; // Disable all pointer events
                     } else if (step === state.currentStep) {
                         item.classList.add('active');
+                        item.style.cursor = 'default'; // Not clickable
+                        item.style.pointerEvents = 'none'; // Disable all pointer events
+                    } else {
+                        item.classList.add('disabled');
+                        item.style.cursor = 'default'; // Not clickable
+                        item.style.opacity = '0.5'; // Visual indicator
+                        item.style.pointerEvents = 'none'; // Disable all pointer events
+                    }
+                    
+                    // Control connector line visibility using CSS
+                    if (step >= state.currentStep) {
+                        // Hide line after current step (no line to future steps)
+                        item.style.setProperty('--connector-display', 'none');
+                    } else {
+                        // Show line for completed steps
+                        item.style.setProperty('--connector-display', 'block');
                     }
                 });
-                toggleDisplay(dom.buttons.setujuiPeminjaman, state.currentStep === 2);
-                dom.alertPeninjauan.style.display = state.currentStep >= 2 ? 'none' : 'block';
+                // Control button visibility based on current status, not just step
+                const currentStatus = @json($peminjaman['status'] ?? 'Draft');
+                
+                // Show buttons only when appropriate for the current status
+                toggleDisplay(dom.buttons.submitPengajuan, currentStatus === 'Draft');
+                toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
+                toggleDisplay(dom.buttons.persetujuanDebitur, currentStatus === 'Dokumen Tervalidasi');
+                toggleDisplay(dom.buttons.persetujuanCEO, currentStatus === 'Debitur Setuju');
+                
+                // Special logic for Persetujuan Direktur: jangan tampilkan jika step 6 dan status bukan "Disetujui oleh Direktur SKI"
+                const showPersetujuanDirektur = currentStatus === 'Disetujui oleh CEO SKI' && !(state.currentStep === 6 && currentStatus !== 'Disetujui oleh Direktur SKI');
+                toggleDisplay(dom.buttons.persetujuanDirektur, showPersetujuanDirektur);
+                
+                // Show alert starting from Submit Dokumen status and Debitur Setuju status
+                const showAlert = currentStatus === 'Submit Dokumen' || currentStatus === 'Debitur Setuju';
+                dom.alertPeninjauan.style.display = showAlert ? 'block' : 'none';
+                
                 updateDetailKontrakContent(); // Update konten tab Detail Kontrak
                 updateActivityTimeline();
             };
 
             const updateDetailKontrakContent = () => {
                 const kontrakDefault = document.getElementById('kontrak-default');
-                const kontrakStep7 = document.getElementById('kontrak-step7');
+                const kontrakStep6 = document.getElementById('kontrak-step6');
 
-                if (state.currentStep === 7) {
-                    // Step 7: Tampilkan form Generate Kontrak
+                if (state.currentStep === 6) {
+                    // Step 6: Tampilkan form Generate Kontrak
                     toggleDisplay(kontrakDefault, false);
-                    toggleDisplay(kontrakStep7, true);
+                    toggleDisplay(kontrakStep6, true);
                 } else {
                     // Step lainnya: Tampilkan konten default
                     toggleDisplay(kontrakDefault, true);
-                    toggleDisplay(kontrakStep7, false);
+                    toggleDisplay(kontrakStep6, false);
                 }
             };
 
@@ -891,16 +1057,10 @@
 
             // --- EVENT HANDLERS ---
             const handleStepperClick = (e) => {
-                const target = e.target.closest('.stepper-item');
-                if (target) {
-                    const step = parseInt(target.dataset.step);
-                    goToStep(step);
-
-                    // Auto switch ke tab Detail Kontrak jika step 7
-                    if (step === 7) {
-                        switchToDetailKontrakTab();
-                    }
-                }
+                // Disable all stepper clicks
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             };
 
             const handlePencairanSubmit = (e) => {
@@ -910,15 +1070,182 @@
                     dom.forms.pencairan.classList.add('was-validated');
                     return;
                 }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.pencairan);
+                const deviasi = formData.get('deviasi');
+                const nominalDisetujui = formData.get('nominal_yang_disetujui') || dom.inputs.nominalDisetujui.value;
+                const tanggalPencairan = formData.get('tanggal_pencairan') || dom.inputs.tanggalPencairan.value;
+                const catatan = formData.get('catatan_validasi_dokumen_disetujui') || dom.inputs.catatanLainnya.value.trim();
+
+                // Create button-like object for approval function
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Dokumen Tervalidasi';
+                        return null;
+                    },
+                    textContent: 'Submit Pencairan Dana',
+                    innerHTML: 'Submit Pencairan Dana <i class="fas fa-arrow-right ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request variables for backend
+                window.pencairanRequestData = {
+                    status: 'Dokumen Tervalidasi',
+                    validasi_dokumen: 'disetujui',
+                    deviasi: deviasi,
+                    nominal_yang_disetujui: nominalDisetujui.replace(/\D/g, ''), // Remove non-numeric characters
+                    tanggal_pencairan: tanggalPencairan,
+                    catatan_validasi_dokumen_disetujui: catatan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0], // Current date in Y-m-d format
+                    submit_step1_by: @json(auth()->id()),
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Store data in state for potential reuse
                 Object.assign(state.pencairanData, {
-                    nominalDisetujui: dom.inputs.nominalDisetujui.value,
-                    tanggalPencairan: dom.inputs.tanggalPencairan.value,
-                    catatan: dom.inputs.catatanLainnya.value.trim(),
+                    nominalDisetujui: nominalDisetujui,
+                    tanggalPencairan: tanggalPencairan,
+                    catatan: catatan,
                 });
+
+                // Close modal first
                 dom.modals.pencairan.hide();
                 resetForm(dom.forms.pencairan);
-                goToStep(4);
-                switchToActivityTab();
+
+                // Call approval function with enhanced data
+                approval(approvalButton);
+            };
+
+            const handlePersetujuanDebiturSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.persetujuanDebitur.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.persetujuanDebitur.classList.add('was-validated');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.persetujuanDebitur);
+                const catatan = formData.get('catatan_persetujuan_debitur');
+                
+                // Get additional data from readonly fields
+                const nominalDisetujui = dom.inputs.debiturNominalDisetujui?.value || '';
+                const tanggalPencairan = dom.inputs.debiturTanggalPencairan?.value || '';
+
+                // Create button-like object for approval
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Debitur Setuju';
+                        return null;
+                    },
+                    textContent: 'Debitur Setuju',
+                    innerHTML: 'Debitur Setuju <i class="fas fa-check ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data
+                window.persetujuanDebiturRequestData = {
+                    status: 'Debitur Setuju',
+                    catatan_persetujuan_debitur: catatan,
+                    nominal_yang_disetujui: nominalDisetujui,
+                    tanggal_pencairan: tanggalPencairan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Close modal and call approval function
+                dom.modals.persetujuanDebitur.hide();
+                resetForm(dom.forms.persetujuanDebitur);
+                approval(approvalButton);
+            };
+
+            const handlePersetujuanCEOSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.persetujuanCEO.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.persetujuanCEO.classList.add('was-validated');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.persetujuanCEO);
+                const catatan = formData.get('catatan_persetujuan_ceo');
+                
+                // Get additional data from readonly fields
+                const nominalDisetujui = dom.inputs.ceoNominalDisetujui?.value || '';
+                const tanggalPencairan = dom.inputs.ceoTanggalPencairan?.value || '';
+
+                // Create button-like object for approval
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Disetujui oleh CEO SKI';
+                        return null;
+                    },
+                    textContent: 'Disetujui oleh CEO SKI',
+                    innerHTML: 'Disetujui oleh CEO SKI <i class="fas fa-check ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data
+                window.persetujuanCEORequestData = {
+                    status: 'Disetujui oleh CEO SKI',
+                    catatan_persetujuan_ceo: catatan,
+                    nominal_yang_disetujui: nominalDisetujui,
+                    tanggal_pencairan: tanggalPencairan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Close modal and call approval function
+                dom.modals.persetujuanCEO.hide();
+                resetForm(dom.forms.persetujuanCEO);
+                approval(approvalButton);
+            };
+
+            const handlePersetujuanDirekturSubmit = (e) => {
+                e.preventDefault();
+                if (!dom.forms.persetujuanDirektur.checkValidity()) {
+                    e.stopPropagation();
+                    dom.forms.persetujuanDirektur.classList.add('was-validated');
+                    return;
+                }
+
+                // Collect form data
+                const formData = new FormData(dom.forms.persetujuanDirektur);
+                const catatan = formData.get('catatan_persetujuan_direktur');
+
+                // Create button-like object for approval
+                const approvalButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return 'Disetujui oleh Direktur SKI';
+                        return null;
+                    },
+                    textContent: 'Disetujui oleh Direktur SKI',
+                    innerHTML: 'Disetujui oleh Direktur SKI <i class="fas fa-check ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data
+                window.persetujuanDirekturRequestData = {
+                    status: 'Disetujui oleh Direktur SKI',
+                    catatan_persetujuan_direktur: catatan,
+                    approve_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Close modal and call approval function
+                dom.modals.persetujuanDirektur.hide();
+                resetForm(dom.forms.persetujuanDirektur);
+                approval(approvalButton);
             };
 
             const handleReviewSubmit = (e) => {
@@ -933,13 +1260,73 @@
                 goToStep(1);
             };
 
+            const handleRejection = (status, catatanField) => {
+                // Get the active modal and its form
+                let activeModal, activeForm, catatan;
+                
+                if (status === 'Pengajuan Ditolak Debitur') {
+                    activeModal = dom.modals.persetujuanDebitur;
+                    activeForm = dom.forms.persetujuanDebitur;
+                    catatan = document.getElementById('catatanPersetujuanDebitur').value.trim();
+                } else if (status === 'Ditolak oleh CEO SKI') {
+                    activeModal = dom.modals.persetujuanCEO;
+                    activeForm = dom.forms.persetujuanCEO;
+                    catatan = document.getElementById('catatanPersetujuanCEO').value.trim();
+                } else if (status === 'Ditolak oleh Direktur SKI') {
+                    activeModal = dom.modals.persetujuanDirektur;
+                    activeForm = dom.forms.persetujuanDirektur;
+                    catatan = document.getElementById('catatanPersetujuanDirektur').value.trim();
+                }
+
+                // Validate catatan is not empty
+                if (!catatan) {
+                    alert('Silakan isi catatan terlebih dahulu sebelum menolak.');
+                    return;
+                }
+
+                // Create button-like object for rejection
+                const rejectionButton = {
+                    getAttribute: (attr) => {
+                        if (attr === 'data-status') return status;
+                        return null;
+                    },
+                    textContent: status,
+                    innerHTML: status + ' <i class="fas fa-times ms-2"></i>',
+                    disabled: false
+                };
+
+                // Prepare request data based on status
+                let requestData = {
+                    status: status,
+                    reject_by: @json(auth()->id()),
+                    date: new Date().toISOString().split('T')[0],
+                    id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
+                    _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                };
+
+                // Add specific catatan field
+                requestData[catatanField] = catatan;
+
+                // Store in global variable for approval function
+                window.rejectionRequestData = requestData;
+
+                // Close modal and call approval function
+                activeModal.hide();
+                resetForm(activeForm);
+                approval(rejectionButton);
+            };
+
             const handleEditPencairanShow = () => {
-                dom.inputs.editNominalPengajuan.value = '300000000';
-                dom.inputs.editTanggalHarapan.value = '24/08/2024';
-                dom.inputs.editNominalDisetujui.value = state.pencairanData.nominalDisetujui;
-                dom.inputs.editTanggalPencairan.value = state.pencairanData.tanggalPencairan;
+                // Most fields are now populated directly from database in HTML
+                // Only set the editable catatan field from state
                 dom.inputs.editCatatanLainnya.value = state.pencairanData.catatan;
                 dom.modals.edit.show();
+            };
+
+            const handlePersetujuanDebiturShow = () => {
+                // Fields are now populated directly from database in HTML
+                // Just show the modal
+                dom.modals.persetujuanDebitur.show();
             };
 
             const handleEditPencairanSubmit = (e) => {
@@ -1016,15 +1403,25 @@
             dom.buttons.konfirmasiSetuju?.addEventListener('click', () => {
                 switchModal(dom.modals.persetujuan, dom.modals.pencairan, () => {
                     resetForm(dom.forms.pencairan);
-                    dom.inputs.nominalPengajuan.value = '300000000';
-                    dom.inputs.tanggalHarapan.value = '24/08/2024';
+                    const nominalPinjaman = @json($peminjaman['nominal_pinjaman'] ?? 0);
+                    dom.inputs.nominalPengajuan.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominalPinjaman);
+                    const harapanTanggal = @json($peminjaman['harapan_tanggal_pencairan'] ?? null);
+                    dom.inputs.tanggalHarapan.value = harapanTanggal ? new Date(harapanTanggal).toLocaleDateString('en-GB') : '';
                     initFlatpickr();
                 });
             });
             dom.buttons.tolakPinjaman?.addEventListener('click', () => {
                 switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
             });
-            dom.buttons.uploadDokumen?.addEventListener('click', () => dom.modals.upload.show());
+            // Removed uploadDokumen event listener - now using inline form instead of modal
+            dom.buttons.persetujuanDebitur?.addEventListener('click', handlePersetujuanDebiturShow);
+            dom.buttons.persetujuanCEO?.addEventListener('click', () => dom.modals.persetujuanCEO.show());
+            dom.buttons.persetujuanDirektur?.addEventListener('click', () => dom.modals.persetujuanDirektur.show());
+
+            // Event listeners for rejection buttons
+            document.getElementById('btnTolakDebitur')?.addEventListener('click', () => handleRejection('Pengajuan Ditolak Debitur', 'catatan_persetujuan_debitur'));
+            document.getElementById('btnTolakCEO')?.addEventListener('click', () => handleRejection('Ditolak oleh CEO SKI', 'catatan_persetujuan_ceo'));
+            document.getElementById('btnTolakDirektur')?.addEventListener('click', () => handleRejection('Ditolak oleh Direktur SKI', 'catatan_persetujuan_direktur'));
 
             dom.buttons.editPencairan.forEach(btn => {
                 btn.addEventListener('click', handleEditPencairanShow);
@@ -1034,6 +1431,9 @@
             dom.forms.review?.addEventListener('submit', handleReviewSubmit);
             dom.forms.edit?.addEventListener('submit', handleEditPencairanSubmit);
             dom.forms.upload?.addEventListener('submit', handleUploadSubmit);
+            dom.forms.persetujuanDebitur?.addEventListener('submit', handlePersetujuanDebiturSubmit);
+            dom.forms.persetujuanCEO?.addEventListener('submit', handlePersetujuanCEOSubmit);
+            dom.forms.persetujuanDirektur?.addEventListener('submit', handlePersetujuanDirekturSubmit);
 
             // Event listener untuk form Generate Kontrak di Step 7
             const formGenerateKontrak = document.getElementById('formGenerateKontrak');
@@ -1046,9 +1446,330 @@
             const btnPreviewKontrak = document.getElementById('btnPreviewKontrak');
             btnPreviewKontrak?.addEventListener('click', handlePreviewKontrak);
 
+            // Initialize stepper based on backend data
             updateStepper();
             initCleaveRupiah();
 
+            // Make updateStepper available globally for approval function
+            window.updateStepperGlobal = (newStep) => {
+                state.currentStep = newStep;
+                updateStepper();
+            };
+
         });
+
+        // Add CSS for stepper connector lines
+        const style = document.createElement('style');
+        style.textContent = `
+            .stepper-item::after {
+                display: var(--connector-display, block) !important;
+            }
+            .stepper-item:not(.completed):not(.active)::after {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // General approval function (global scope)
+        function approval(button) {
+            // Get data from button attributes
+            const status = button.getAttribute('data-status');
+            const buttonText = button.textContent.trim();
+            const peminjamanId = @json($peminjaman['id'] ?? 1);
+            
+            // Dynamic text based on button
+            const actionText = buttonText.toLowerCase();
+            
+            // Show loading state directly without confirmation
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            
+            // Show loading SweetAlert
+            Swal.fire({
+                title: 'Memproses...',
+                text: `Sedang memproses ${actionText}`,
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Prepare data to send
+            let requestData = {
+                status: status,
+                action: buttonText,
+                catatan: '', // You can add a catatan field if needed
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            };
+
+            // Handle "Validasi Ditolak" - get catatan from the form
+            if (status === 'Validasi Ditolak') {
+                const catatanInput = document.getElementById('hasilReview');
+                if (catatanInput) {
+                    requestData.catatan_validasi_dokumen_ditolak = catatanInput.value.trim();
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalHasilReview'));
+                    if (modal) modal.hide();
+                }
+            }
+
+            // Merge specific request data based on button text
+            if (window.pencairanRequestData && buttonText === 'Submit Pencairan Dana') {
+                requestData = { ...requestData, ...window.pencairanRequestData };
+                delete window.pencairanRequestData;
+            } else if (window.persetujuanDebiturRequestData && buttonText === 'Debitur Setuju') {
+                requestData = { ...requestData, ...window.persetujuanDebiturRequestData };
+                delete window.persetujuanDebiturRequestData;
+            } else if (window.persetujuanCEORequestData && buttonText === 'Disetujui oleh CEO SKI') {
+                requestData = { ...requestData, ...window.persetujuanCEORequestData };
+                delete window.persetujuanCEORequestData;
+            } else if (window.persetujuanDirekturRequestData && buttonText === 'Disetujui oleh Direktur SKI') {
+                requestData = { ...requestData, ...window.persetujuanDirekturRequestData };
+                delete window.persetujuanDirekturRequestData;
+            } else if (window.rejectionRequestData && (
+                buttonText === 'Pengajuan Ditolak Debitur' || 
+                buttonText === 'Ditolak oleh CEO SKI' || 
+                buttonText === 'Ditolak oleh Direktur SKI'
+            )) {
+                requestData = { ...requestData, ...window.rejectionRequestData };
+                delete window.rejectionRequestData;
+            }
+
+            // Special handling for file uploads (Dana Sudah Dicairkan)
+            let requestBody, requestHeaders;
+            if (status === 'Dana Sudah Dicairkan') {
+                // Use FormData for file upload
+                const formData = new FormData();
+                
+                // Add all request data to FormData
+                Object.keys(requestData).forEach(key => {
+                    formData.append(key, requestData[key]);
+                });
+                
+                // Add file if selected
+                const dokumenTransferInput = document.getElementById('dokumenTransfer');
+                if (dokumenTransferInput && dokumenTransferInput.files.length > 0) {
+                    formData.append('dokumen_transfer', dokumenTransferInput.files[0]);
+                }
+                
+                requestBody = formData;
+                requestHeaders = {
+                    'X-CSRF-TOKEN': requestData._token,
+                    'Accept': 'application/json'
+                    // Don't set Content-Type for FormData, let browser set it with boundary
+                };
+            } else {
+                // Use JSON for other requests
+                requestBody = JSON.stringify(requestData);
+                requestHeaders = {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': requestData._token,
+                    'Accept': 'application/json'
+                };
+            }
+            
+            // Make AJAX call to approval endpoint
+            fetch(`/peminjaman/${peminjamanId}/approval`, {
+                method: 'POST',
+                headers: requestHeaders,
+                body: requestBody
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button state
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                if (data.success) {
+                    // Update current status and step if provided
+                    if (data.status) {
+                        // Get alert element directly (since dom is scoped to DOMContentLoaded)
+                        const alertElement = document.getElementById('alertPeninjauan');
+                        
+                        // Update alert visibility based on new status
+                        const showAlert = data.status === 'Submit Dokumen' || data.status === 'Debitur Setuju';
+                        if (alertElement) {
+                            alertElement.style.display = showAlert ? 'block' : 'none';
+                        }
+                        
+                        // Update stepper if current_step is provided
+                        if (data.current_step && window.updateStepperGlobal) {
+                            window.updateStepperGlobal(data.current_step);
+                        }
+                    }
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: data.message || `${buttonText} berhasil diproses!`,
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        // Reload page to reflect changes
+                        window.location.reload();
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: data.message || 'Terjadi kesalahan saat memproses approval.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                // Reset button state on error
+                button.disabled = false;
+                button.innerHTML = originalText;
+                
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan jaringan. Silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+
+        // Global function untuk preview kontrak dari activity tab
+        function previewKontrakActivity() {
+            const peminjamanId = @json($peminjaman['id'] ?? 1);
+            // Open preview in new tab
+            window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
+        }
+
+        // Global function untuk show history detail
+        function showHistory(historyId) {
+            // Show loading state
+            Swal.fire({
+                title: 'Memuat Data...',
+                text: 'Sedang mengambil detail histori',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Make AJAX request to get history details
+            fetch(`/peminjaman/history/${historyId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+                
+                if (data.success) {
+                    // Populate modal with history data
+                    populateEditPencairanModal(data.history);
+                    
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('modalEditPencairan'));
+                    modal.show();
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Gagal mengambil data histori',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan jaringan. Silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                });
+            });
+        }
+
+        // Function to populate edit pencairan modal with history data
+        function populateEditPencairanModal(history) {
+            // Populate readonly fields with history data
+            if (history.nominal_yang_disetujui) {
+                document.getElementById('editNominalDisetujui').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(history.nominal_yang_disetujui);
+            }
+            
+            if (history.tanggal_pencairan) {
+                const date = new Date(history.tanggal_pencairan);
+                document.getElementById('editTanggalPencairan').value = date.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit', 
+                    year: 'numeric'
+                });
+            }
+            
+            // Populate editable catatan field
+            const catatanField = document.getElementById('editCatatanLainnya');
+            if (catatanField && history.catatan_validasi_dokumen_disetujui) {
+                catatanField.value = history.catatan_validasi_dokumen_disetujui;
+            }
+
+            // Store history ID for potential updates
+            document.getElementById('modalEditPencairan').setAttribute('data-history-id', history.id_history_status_pengajuan_pinjaman);
+        }
+
+        // Validasi upload dokumen transfer
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnUploadDokumen = document.getElementById('btnUploadDokumen');
+            const dokumenTransferInput = document.getElementById('dokumenTransfer');
+            
+            if (btnUploadDokumen && dokumenTransferInput) {
+                btnUploadDokumen.addEventListener('click', function(e) {
+                    // Check if file is selected
+                    if (!dokumenTransferInput.files || dokumenTransferInput.files.length === 0) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        Swal.fire({
+                            title: 'File Diperlukan!',
+                            text: 'Silakan pilih dokumen transfer terlebih dahulu.',
+                            icon: 'warning',
+                            confirmButtonColor: '#f39c12',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        return false;
+                    }
+                    
+                    // Validate file size (5MB max)
+                    const file = dokumenTransferInput.files[0];
+                    if (file.size > 5 * 1024 * 1024) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        Swal.fire({
+                            title: 'File Terlalu Besar!',
+                            text: 'Ukuran file maksimal 5MB.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        return false;
+                    }
+                });
+            }
+        });
+
     </script>
 @endsection

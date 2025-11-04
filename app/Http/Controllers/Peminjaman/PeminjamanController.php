@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Peminjaman;
 
 use App\Http\Controllers\Controller;
 use App\Models\BuktiPeminjaman;
+use App\Models\HistoryStatusPengajuanPinjaman;
 use Illuminate\Http\Request;
 use App\Models\PeminjamanInvoiceFinancing;
 use App\Models\PeminjamanInstallmentFinancing;
@@ -14,6 +15,7 @@ use App\Models\Peminjaman;
 use App\Models\PengajuanPeminjaman;
 use App\Services\PeminjamanNumberService;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PeminjamanController extends Controller
 {
@@ -37,7 +39,10 @@ class PeminjamanController extends Controller
         $peminjaman = [
             'id' => $header->id_pengajuan_peminjaman,
             'nomor_peminjaman' => $header->nomor_peminjaman,
-            'nama_perusahaan' => $header->debitur->nama_debitur ?? '',
+            'nama_perusahaan' => $header->debitur->nama ?? '',
+            'nama_ceo' => $header->debitur->nama_ceo ?? '',
+            'alamat' => $header->debitur->alamat ?? '',
+            'tanda_tangan' => $header->debitur->tanda_tangan ?? null,
             'nama_bank' => $header->nama_bank,
             'no_rekening' => $header->no_rekening,
             'nama_rekening' => $header->nama_rekening,
@@ -61,7 +66,55 @@ class PeminjamanController extends Controller
             'yang_harus_dibayarkan' => $header->yang_harus_dibayarkan,
             // Factoring specific fields
             'total_nominal_yang_dialihkan' => $header->total_nominal_yang_dialihkan,
+            // Upload fields
+            'upload_bukti_transfer' => $header->upload_bukti_transfer,
         ];
+
+        // Get current step from latest history record
+        $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $header->id_pengajuan_peminjaman)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Get all history records for activity timeline
+        $allHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $header->id_pengajuan_peminjaman)
+            ->orderBy('created_at', 'desc')
+            ->with(['approvedBy', 'rejectedBy', 'submittedBy'])
+            ->get();
+        
+        $currentStep = 1; // Default to step 1
+        if ($latestHistory) {
+            // Use current_step from history if available, otherwise map from status
+            if ($latestHistory->current_step) {
+                $currentStep = $latestHistory->current_step;
+            } else {
+                // Fallback mapping for older records without current_step
+                $statusToStep = [
+                    'Submit Dokumen' => 2,
+                    'Dokumen Tervalidasi' => 3,
+                    'Debitur Setuju' => 4,
+                    'Disetujui oleh CEO SKI' => 5,
+                    'Disetujui oleh Direktur SKI' => 6,
+                    'Generate Kontrak' => 7,
+                    'Dana Sudah Dicairkan' => 8,
+                ];
+                
+                $currentStep = $statusToStep[$latestHistory->status] ?? 1;
+            }
+        }
+        
+        $peminjaman['current_step'] = $currentStep;
+
+        // Add latest history data (nominal disetujui and tanggal pencairan from latest update)
+        if ($latestHistory) {
+            $peminjaman['nominal_yang_disetujui'] = $latestHistory->nominal_yang_disetujui;
+            $peminjaman['tanggal_pencairan'] = $latestHistory->tanggal_pencairan;
+            
+            // Debug: log the actual values
+            // dd($peminjaman['nominal_yang_disetujui']);
+        } else {
+            $peminjaman['nominal_yang_disetujui'] = null;
+            $peminjaman['tanggal_pencairan'] = null;
+        }
 
         // Get all bukti peminjaman (details) for this pengajuan
         $details_data = $header->buktiPeminjaman->map(function($bukti) use ($header) {
@@ -141,7 +194,8 @@ class PeminjamanController extends Controller
 
         return view('livewire.peminjaman.detail', compact(
             'peminjaman', 'sumber_eksternal', 'banks', 'tenor_pembayaran',
-            'invoice_financing_data', 'po_financing_data', 'installment_data', 'factoring_data'
+            'invoice_financing_data', 'po_financing_data', 'installment_data', 'factoring_data',
+            'latestHistory', 'allHistory'
         ));
     }
 
@@ -153,24 +207,44 @@ class PeminjamanController extends Controller
      */
     public function previewKontrak($id)
     {
-        // Sample kontrak data
+        // Get pengajuan data from database with debitur relationship
+        $pengajuan = PengajuanPeminjaman::with('debitur')
+            ->where('id_pengajuan_peminjaman', $id)
+            ->first();
+        
+        if (!$pengajuan) {
+            abort(404, 'Pengajuan peminjaman tidak ditemukan');
+        }
+        
+
+
+        // Get latest approved nominal from history
+        $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $id)
+            ->whereNotNull('nominal_yang_disetujui')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Generate contract number
+        $no_kontrak = 'SKI/FIN/' . date('Y') . '/' . str_pad($pengajuan->id_pengajuan_peminjaman, 3, '0', STR_PAD_LEFT);
+        
+        // Prepare kontrak data from database
         $kontrak = [
-            'id_invoice_financing' => $id,
-            'no_kontrak' => 'SKI/FIN/2025/001',
-            'tanggal_kontrak' => '22 September 2025',
+            'id_peminjaman' => $id,
+            'no_kontrak' => $no_kontrak,
+            'tanggal_kontrak' => now()->format('d F Y'),
             'nama_perusahaan' => 'SYNNOVAC CAPITAL',
-            'nama_debitur' => 'Techno Infinity',
-            'nama_pimpinan' => 'Cahyo',
-            'alamat' => 'Gd. Permata Kuningan Lantai 17 Unit 07 Jl. Kuningan Mulia',
-            'tujuan_pembiayaan' => 'Kebutuhan Gaji Operasional/Umum Sept',
-            'jenis_pembiayaan' => 'Invoice & Project Financing',
-            'nilai_pembiayaan' => 'Rp. 250.000.000',
-            'hutang_pokok' => 'Rp. 250.000.000',
-            'tenor' => '1 Bulan',
-            'biaya_admin' => 'Rp. 0.00',
-            'nisbah' => '2% flat / bulan',
+            'nama_debitur' => $pengajuan->debitur->nama ?? 'N/A',
+            'nama_pimpinan' => $pengajuan->debitur->nama_ceo ?? 'N/A',
+            'alamat' => $pengajuan->debitur->alamat ?? 'N/A',
+            'tujuan_pembiayaan' => $pengajuan->tujuan_pembiayaan ?? 'N/A',
+            'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
+            'nilai_pembiayaan' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
+            'hutang_pokok' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
+            'tenor' => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
+            'biaya_admin' => 'Rp. 0',
+            'nisbah' => ($pengajuan->persentase_bagi_hasil ?? 2) . '% flat / bulan',
             'denda_keterlambatan' => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
-            'jaminan' => 'Invoice & Project Financing',
+            'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
         ];
 
         return view('livewire.peminjaman.preview-kontrak', compact('kontrak'));
@@ -300,7 +374,7 @@ class PeminjamanController extends Controller
         try {
             if (auth()->check()) {
                 $userEmail = auth()->user()->email;
-                $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)->with('kol')->first();
+                $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)->where('flagging', 'tidak')->where('status', 'active')->with('kol')->first();
             }
         } catch (\Throwable $e) {
             // In case auth or model lookup fails in some contexts (e.g. artisan tinker), we silently ignore
@@ -607,5 +681,307 @@ class PeminjamanController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }   
+    }
+    
+    function approval(Request $request, $id)
+    {
+        $peminjaman = PengajuanPeminjaman::find($id);
+        if (!$peminjaman) {
+            return response()->json(['success' => false, 'message' => 'Peminjaman not found'], 404);
+        }
+
+        // Get the status from request
+        $status = $request->input('status');
+        $action = $request->input('action', '');
+        
+        // Validate status
+        $validStatuses = [
+            'Submit Dokumen', 
+            'Dokumen Tervalidasi', 
+            'Validasi Ditolak', 
+            'Dana Dicairkan',
+            'Dana Sudah Dicairkan',
+            'Debitur Setuju',
+            'Pengajuan Ditolak Debitur',
+            'Disetujui oleh CEO SKI',
+            'Ditolak oleh CEO SKI',
+            'Disetujui oleh Direktur SKI',
+            'Ditolak oleh Direktur SKI',
+            'Generate Kontrak'
+        ];
+        if (!in_array($status, $validStatuses)) {
+            return response()->json(['success' => false, 'message' => 'Status tidak valid'], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update peminjaman status
+            $peminjaman->status = $status;
+            $peminjaman->save();
+
+            // Create history record
+            $historyData = [
+                'id_pengajuan_peminjaman' => $peminjaman->id_pengajuan_peminjaman,
+                'id_config_matrix_peminjaman' => $request->input('id_config_matrix_peminjaman'),
+                'date' => $request->input('date') ?: now()->format('Y-m-d'),
+                'status' => $status,
+            ];
+
+            if ($status === 'Submit Dokumen') {   
+                $historyData['submit_step1_by'] = auth()->id();
+                $historyData['current_step'] = 2;
+            }
+
+            // Handle approval-specific data
+
+            if ($status === 'Dokumen Tervalidasi') {
+                $historyData['validasi_dokumen'] = 'disetujui';
+                $historyData['approve_by'] = auth()->id();
+                $historyData['deviasi'] = $request->input('deviasi');
+
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+                
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+                
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_validasi_dokumen_disetujui');
+                $historyData['current_step'] = 3;
+            } elseif ($status === 'Validasi Ditolak') {
+                $historyData['validasi_dokumen'] = 'ditolak';
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_validasi_dokumen_ditolak');
+                $historyData['current_step'] = 1; // Reset to step 1 when validation is rejected
+            } elseif ($status === 'Debitur Setuju') {
+
+                $historyData['approve_by'] = auth()->id();
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+
+
+                $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
+                $historyData['current_step'] = 4;
+            } elseif ($status === 'Pengajuan Ditolak Debitur') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_debitur');
+                $historyData['current_step'] = 8;
+            } elseif ($status === 'Disetujui oleh CEO SKI') {
+                $historyData['approve_by'] = auth()->id();
+                
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+                
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+                
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_ceo');
+                
+                // Check nominal untuk menentukan current_step
+                if ($historyData['nominal_yang_disetujui'] < 300000000) {
+                    $historyData['current_step'] = 6; // Langsung ke step 6 jika < 300 juta
+                } else {
+                    $historyData['current_step'] = 5; // Ke step 5 (Direktur Approval) jika >= 300 juta
+                }
+            } elseif ($status === 'Ditolak oleh CEO SKI') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_ceo');
+                $historyData['current_step'] = 1;
+            } elseif ($status === 'Disetujui oleh Direktur SKI') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_direktur');
+                $historyData['current_step'] = 6;
+            } elseif ($status === 'Ditolak oleh Direktur SKI') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_direktur');
+                $historyData['current_step'] = 8;
+            } elseif ($status === 'Generate Kontrak') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan') ?? 'Kontrak berhasil digenerate';
+                $historyData['current_step'] = 7;
+            } elseif ($status === 'Dana Sudah Dicairkan') {
+                // Handle file upload for dokumen transfer
+                if ($request->hasFile('dokumen_transfer')) {
+                    $path = $request->file('dokumen_transfer')->store('peminjaman/bukti_transfer', 'public');
+                    $peminjaman->upload_bukti_transfer = $path;
+                    $peminjaman->save();
+                }
+
+                $historyData['approve_by'] = auth()->id();
+                $historyData['current_step'] = 8;
+            }
+
+            HistoryStatusPengajuanPinjaman::create($historyData);
+
+            DB::commit();
+
+            // Return success response with appropriate message
+            $message = $this->getStatusMessage($status, $action);
+            return response()->json([
+                'success' => true, 
+                'message' => $message,
+                'status' => $peminjaman->status,
+                'current_step' => $historyData['current_step'] ?? null,
+                'data' => [
+                    'id' => $peminjaman->id_pengajuan_peminjaman,
+                    'status' => $peminjaman->status,
+                    'current_step' => $historyData['current_step'] ?? null,
+                    'approved_by' => $peminjaman->approved_by ?? null,
+                    'rejected_by' => $peminjaman->rejected_by ?? null,
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Approval Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false, 
+                'message' => 'Terjadi kesalahan saat memproses approval: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get appropriate message based on status and action
+     */
+    private function getStatusMessage($status, $action)
+    {
+        $messages = [
+            'Submit Dokumen' => 'Dokumen berhasil disubmit untuk review!',
+            'Dokumen Tervalidasi' => 'Dokumen berhasil divalidasi',
+            'Validasi Ditolak' => 'Dokumen ditolak. Silakan perbaiki dan submit ulang.',
+            'Pengajuan Ditolak Debitur' => 'Pengajuan Anda ditolak oleh debitur.',
+            'Debitur Setuju' => 'Debitur telah menyetujui pengajuan Anda.',
+            'Disetujui oleh CEO SKI' => 'Pengajuan telah disetujui oleh CEO SKI.',
+            'Ditolak oleh CEO SKI' => 'Pengajuan Anda ditolak oleh CEO SKI.',
+            'Disetujui oleh Direktur SKI' => 'Pengajuan telah disetujui oleh Direktur SKI.',
+            'Ditolak oleh Direktur SKI' => 'Pengajuan Anda ditolak oleh Direktur SKI.',
+            'Generate Kontrak' => 'Kontrak berhasil digenerate.',
+            'Dana Sudah Dicairkan' => 'Dokumen transfer berhasil diupload.',
+        ];
+
+        return $messages[$status] ?? 'Status berhasil diupdate!';
+    }
+
+    /**
+     * Get history detail by ID
+     *
+     * @param  int  $historyId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getHistoryDetail($historyId)
+    {
+        try {
+            $history = HistoryStatusPengajuanPinjaman::with(['approvedBy', 'rejectedBy', 'submittedBy'])
+                ->find($historyId);
+
+            if (!$history) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'History tidak ditemukan'
+                ], 404);
+            }
+
+            // Format the history data for response
+            $historyData = [
+                'id_history_status_pengajuan_pinjaman' => $history->id_history_status_pengajuan_pinjaman,
+                'id_pengajuan_peminjaman' => $history->id_pengajuan_peminjaman,
+                'status' => $history->status,
+                'nominal_yang_disetujui' => $history->nominal_yang_disetujui,
+                'tanggal_pencairan' => $history->tanggal_pencairan,
+                'catatan_validasi_dokumen_disetujui' => $history->catatan_validasi_dokumen_disetujui,
+                'catatan_validasi_dokumen_ditolak' => $history->catatan_validasi_dokumen_ditolak,
+                'catatan_persetujuan_debitur' => $history->catatan_persetujuan_debitur,
+                'devisasi' => $history->devisasi,
+                'date' => $history->date,
+                'created_at' => $history->created_at,
+                'updated_at' => $history->updated_at,
+                // User information
+                'approved_by' => $history->approvedBy ? [
+                    'id' => $history->approvedBy->id,
+                    'name' => $history->approvedBy->name,
+                    'email' => $history->approvedBy->email,
+                ] : null,
+                'rejected_by' => $history->rejectedBy ? [
+                    'id' => $history->rejectedBy->id,
+                    'name' => $history->rejectedBy->name,
+                    'email' => $history->rejectedBy->email,
+                ] : null,
+                'submitted_by' => $history->submittedBy ? [
+                    'id' => $history->submittedBy->id,
+                    'name' => $history->submittedBy->name,
+                    'email' => $history->submittedBy->email,
+                ] : null,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'History detail berhasil diambil',
+                'history' => $historyData
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Get History Detail Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil detail history: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
