@@ -50,9 +50,7 @@
                                             <th class="text-center">Tanggal Uang Masuk</th>
                                             <th class="text-center">Deposito</th>
                                             <th class="text-center">Deposan</th>
-                                            <th class="text-center">Nominal Deposan</th>
                                             <th class="text-center">Nominal Deposit</th>
-                                            <th class="text-center">Tanggal Pencairan</th>
                                             <th class="text-center">Lama Deposito (Bulan)</th>
                                             <th class="text-center">Bagi Hasil (%PA)</th>
                                             <th class="text-center">Bagi Hasil Nominal</th>
@@ -68,21 +66,19 @@
                                     <tbody>
                                         <tr>
                                             <td class="text-center">1</td>
-                                            <td class="text-center">01/01/2024</td>
-                                            <td class="text-center">D001</td>
-                                            <td class="text-center">Joji</td>
+                                            <td class="text-center">01-01-2024</td>
+                                            <td class="text-center">Deposito A</td>
+                                            <td class="text-center">Deposan A</td>
                                             <td class="text-center">Rp 10.000.000</td>
-                                            <td class="text-center">Rp 10.000.000</td>
-                                            <td class="text-center">01/01/2025</td>
-                                            <td class="text-center">12</td>
-                                            <td class="text-center">8%</td>
-                                            <td class="text-center">Rp 800.000</td>
-                                            <td class="text-center">Rp 80.000</td>
-                                            <td class="text-center">0.67%</td>
-                                            <td class="text-center">Rp 66.667</td>
-                                            <td class="text-center">Rp 10.800.000</td>
+                                            <td class="text-center">3 Bulan</td>
+                                            <td class="text-center">5%</td>
+                                            <td class="text-center">Rp 500.000</td>
+                                            <td class="text-center">Rp 1.666.667</td>
+                                            <td class="text-center">10%</td>
+                                            <td class="text-center">Rp 100.000</td>
+                                            <td class="text-center">Rp 100.000</td>
                                             <td class="text-center">Aktif</td>
-                                            <td class="text-center">01/01/2025</td>
+                                            <td class="text-center">01-04-2024</td>
                                         </tr>
                                     </tbody>
                                 </table>
