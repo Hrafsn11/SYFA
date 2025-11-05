@@ -42,6 +42,7 @@ class PeminjamanController extends Controller
             'nama_perusahaan' => $header->debitur->nama ?? '',
             'nama_ceo' => $header->debitur->nama_ceo ?? '',
             'alamat' => $header->debitur->alamat ?? '',
+            'instansi' => $header->instansi?->nama_instansi ?? null,
             'tanda_tangan' => $header->debitur->tanda_tangan ?? null,
             'nama_bank' => $header->nama_bank,
             'no_rekening' => $header->no_rekening,
@@ -408,7 +409,11 @@ class PeminjamanController extends Controller
             $rules['invoices'] = 'required|string';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
-            $rules['id_instansi'] = 'required|integer';
+            if($request->sumber_pembiayaan === 'eksternal'){
+                $rules['id_instansi'] = 'required|integer';
+            }else{
+                $rules['id_instansi'] = 'nullable';
+            }
             $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
@@ -430,7 +435,11 @@ class PeminjamanController extends Controller
             
         } elseif ($jenisPembiayaan === 'PO Financing') {
             $rules['details'] = 'required|array|min:1';
-            $rules['id_instansi'] = 'required|integer';
+            if($request->sumber_pembiayaan === 'eksternal'){
+                $rules['id_instansi'] = 'required|integer';
+            }else{
+                $rules['id_instansi'] = 'nullable';
+            }
             $rules['no_kontrak'] = 'nullable|string';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
@@ -931,6 +940,8 @@ class PeminjamanController extends Controller
             $history = HistoryStatusPengajuanPinjaman::with(['approvedBy', 'rejectedBy', 'submittedBy'])
                 ->find($historyId);
 
+            $historyNominal = HistoryStatusPengajuanPinjaman::where('id_history_status_pengajuan_pinjaman', $historyId)->where('status', 'Dokumen Tervalidasi')->latest()->first();
+
             if (!$history) {
                 return response()->json([
                     'success' => false,
@@ -943,11 +954,10 @@ class PeminjamanController extends Controller
                 'id_history_status_pengajuan_pinjaman' => $history->id_history_status_pengajuan_pinjaman,
                 'id_pengajuan_peminjaman' => $history->id_pengajuan_peminjaman,
                 'status' => $history->status,
-                'nominal_yang_disetujui' => $history->nominal_yang_disetujui,
-                'tanggal_pencairan' => $history->tanggal_pencairan,
+                'nominal_yang_disetujui' => $historyNominal ? $historyNominal->nominal_yang_disetujui : null,
+                'tanggal_pencairan' => $historyNominal ? $historyNominal->tanggal_pencairan : null,
                 'catatan_validasi_dokumen_disetujui' => $history->catatan_validasi_dokumen_disetujui,
                 'catatan_validasi_dokumen_ditolak' => $history->catatan_validasi_dokumen_ditolak,
-                'catatan_persetujuan_debitur' => $history->catatan_persetujuan_debitur,
                 'devisasi' => $history->devisasi,
                 'date' => $history->date,
                 'created_at' => $history->created_at,
