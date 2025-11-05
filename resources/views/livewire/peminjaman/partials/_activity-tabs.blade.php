@@ -93,7 +93,7 @@
                             </small>
                         </div>
                         <div class="col-6 col-md-3 text-end">
-                            @if($history->status == 'Dokumen Tervalidasi' || $history->status == 'Debitur Setuju' || $history->status == 'Disetujui oleh CEO SKI' || $history->status == 'Disetujui oleh Direktur SKI')
+                            @if($history->status != 'Generate Kontrak' && $history->status != 'Dana Dicairkan' && $history->status != 'Submit Dokumen' && $history->status != 'Upload Dokumen')
                                 <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Detail" 
                                         onclick="showHistory('{{ $history->id_history_status_pengajuan_pinjaman }}')">
                                     <i class="ti ti-file"></i>
