@@ -276,6 +276,15 @@
                                                         </p>
                                                     </div>
                                                 </div>
+                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                    <div class="mb-0">
+                                                        <small class="text-light fw-semibold d-block mb-1">Sumber
+                                                            Pembiayaan</small>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ $peminjaman['sumber_pembiayaan'] ?? '-' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             @else
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
@@ -301,6 +310,23 @@
                                                             Pembiayaan</small>
                                                         <p class="fw-bold mb-0">
                                                             {{ $peminjaman['jenis_pembiayaan'] ?? 'Invoice Financing' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                    <div class="mb-0">
+                                                        <small class="text-light fw-semibold d-block mb-1">Sumber
+                                                            Pembiayaan</small>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ ucFirst($peminjaman['sumber_pembiayaan'] ?? '-') }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
+                                                    <div class="mb-0">
+                                                        <small class="text-light fw-semibold d-block mb-1">Instansi</small>
+                                                        <p class="fw-bold mb-0">
+                                                            {{ $peminjaman['instansi'] ?? '-' }}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -615,7 +641,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        @else
+                                        @elseif($peminjaman['current_step'] == 8)
                                             <!-- Document View - Show when status is 'Dana Sudah Dicairkan' -->
                                             <div class="mt-5" id="viewDokumenSection">
                                                 <hr class="my-4">
@@ -1722,6 +1748,10 @@
             const catatanField = document.getElementById('editCatatanLainnya');
             if (catatanField && history.catatan_validasi_dokumen_disetujui) {
                 catatanField.value = history.catatan_validasi_dokumen_disetujui;
+            }else if ((catatanField && history.catatan_validasi_dokumen_ditolak)) {
+                catatanField.value = history.catatan_validasi_dokumen_ditolak;
+            } else {
+                catatanField.value = '';
             }
 
             // Store history ID for potential updates
