@@ -31,7 +31,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 3</div>
-                            <div class="step-name">Persetujuan Investor</div>
+                            <div class="step-name">Validasi CEO SKI</div>
                         </div>
                     </div>
 
@@ -39,7 +39,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 4</div>
-                            <div class="step-name">Validasi CEO SKI</div>
+                            <div class="step-name">Upload Bukti Transfer</div>
                         </div>
                     </div>
 
@@ -47,7 +47,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
-                            <div class="step-name">Validasi Direktur</div>
+                            <div class="step-name">Generate Kontrak</div>
                         </div>
                     </div>
 
@@ -55,22 +55,6 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 6</div>
-                            <div class="step-name">Upload Bukti Transfer</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="7">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 7</div>
-                            <div class="step-name">Generate Kontrak</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="8">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 8</div>
                             <div class="step-name">Selesai</div>
                         </div>
                     </div>
@@ -78,11 +62,30 @@
                 </div>
             </div>
 
+            @if($investasi['status'] === 'Draft')
+            <div class="alert alert-info mb-4" role="alert" id="alertDraft">
+                <i class="fas fa-info-circle me-2"></i>
+                Pengajuan investasi masih dalam status <strong>Draft</strong>. Silakan klik tombol <strong>"Submit Pengajuan"</strong> untuk melanjutkan proses verifikasi.
+            </div>
+            @elseif($investasi['status'] === 'Ditolak')
+                @if($investasi['current_step'] == 1)
+                <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Pengajuan investasi Anda <strong>Ditolak pada Validasi Bagi Hasil</strong>. Anda dapat mengedit dan submit ulang pengajuan dengan memperbaiki data yang diperlukan.
+                </div>
+                @elseif($investasi['current_step'] == 6)
+                <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Pengajuan investasi Anda <strong>Ditolak oleh CEO SKI</strong>. Proses investasi telah ditutup dan tidak dapat diajukan ulang.
+                </div>
+                @endif
+            @else
             <div class="alert alert-warning mb-4" role="alert" id="alertPeninjauan">
                 <i class="fas fa-info-circle me-2"></i>
                 Pengajuan Investasi Anda sedang kami tinjau. Harap tunggu beberapa saat hingga proses verifikasi
                 selesai.
             </div>
+            @endif
 
             <div class="row">
                 <div class="col-12">
@@ -127,9 +130,13 @@
                                             class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
                                             <h5 class="mb-3 mb-md-4">Detail Investasi</h5>
                                             <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-success d-none" id="btnSubmitPengajuan">
+                                                    <i class="fas fa-paper-plane me-2"></i>
+                                                    Submit Pengajuan
+                                                </button>
                                                 <button type="button" class="btn btn-primary d-none" id="btnSetujuiPengajuan">
                                                     <i class="fas fa-check me-2"></i>
-                                                    Setujui Pengajuan
+                                                    Validasi Bagi Hasil
                                                 </button>
                                                 <button type="button" class="btn btn-primary d-none" id="btnValidasiCEO">
                                                     <i class="ti ti-check me-2"></i>
@@ -147,14 +154,14 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nama
                                                         Investor</small>
-                                                    <p class="fw-bold mb-0">{{ $formKerjaInvestor->nama_investor }}</p>
+                                                    <p class="fw-bold mb-0">{{ $investasi['nama_investor'] ?? '-' }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Jenis
                                                         Deposito</small>
-                                                    <p class="fw-bold mb-0">{{ ucfirst($formKerjaInvestor->deposito) }}</p>
+                                                    <p class="fw-bold mb-0">{{ ucfirst($investasi['deposito'] ?? '-') }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
@@ -162,7 +169,7 @@
                                                     <small class="text-light fw-semibold d-block mb-1">Tanggal
                                                         Investasi</small>
                                                     <p class="fw-bold mb-0">
-                                                        {{ $formKerjaInvestor->tanggal_pembayaran ? $formKerjaInvestor->tanggal_pembayaran->format('d F Y') : '-' }}
+                                                        {{ $investasi['tanggal_investasi'] ? \Carbon\Carbon::parse($investasi['tanggal_investasi'])->format('d F Y') : '-' }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -170,7 +177,7 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Lama
                                                         Investasi</small>
-                                                    <p class="fw-bold mb-0">{{ $formKerjaInvestor->lama_investasi ?? '-' }} Bulan</p>
+                                                    <p class="fw-bold mb-0">{{ $investasi['lama_investasi'] ?? '-' }} Bulan</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -184,21 +191,21 @@
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Jumlah
                                                         Investasi</small>
-                                                    <p class="fw-bold mb-0">Rp {{ number_format($formKerjaInvestor->jumlah_investasi, 0, ',', '.') }}</p>
+                                                    <p class="fw-bold mb-0">Rp {{ number_format($investasi['jumlah_investasi'] ?? 0, 0, ',', '.') }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
                                                         Hasil</small>
-                                                    <p class="fw-bold mb-0">{{ $formKerjaInvestor->bagi_hasil }}%</p>
+                                                    <p class="fw-bold mb-0">{{ $investasi['bagi_hasil_pertahun'] ?? 0 }}%</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Nominal Bagi Hasil
                                                         Keseluruhan</small>
-                                                    <p class="fw-bold mb-0">Rp {{ number_format($formKerjaInvestor->bagi_hasil_keseluruhan, 0, ',', '.') }}</p>
+                                                    <p class="fw-bold mb-0">Rp {{ number_format($investasi['nominal_bagi_hasil_yang_didapatkan'] ?? 0, 0, ',', '.') }}</p>
                                                 </div>
                                             </div>
                                         </div>
@@ -283,21 +290,20 @@
                                     <!-- Timeline Container - hanya muncul dari step 2 -->
                                     <div class="d-none" id="timeline-container">
                                         <!-- Step 2: Validasi Bagi Hasil -->
-                                        <div class="activity-item d-none mb-4">
+                                        <div class="activity-item activity-step-2 d-none mb-4">
                                             <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
                                                             <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-warning">
+                                                                <span class="avatar-initial rounded-circle bg-label-warning step-2-icon">
                                                                     <i class="ti ti-report-search"></i>
                                                                 </span>
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Validasi Bagi Hasil</h6>
-                                                            <p class="text-muted mb-0 small">
+                                                            <h6 class="mb-1 step-2-title">Validasi Bagi Hasil</h6>
+                                                            <p class="text-muted mb-0 small step-2-desc">
                                                                 Pengajuan sedang dalam proses validasi. Harap menunggu
                                                                 hingga proses selesai.
                                                             </p>
@@ -312,21 +318,20 @@
                                         </div>
 
                                         <!-- Step 3: Validasi CEO SKI -->
-                                        <div class="activity-item d-none mt-3 mb-4">
+                                        <div class="activity-item activity-step-3 d-none mt-3 mb-4">
                                             <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
                                                             <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-info">
+                                                                <span class="avatar-initial rounded-circle bg-label-info step-3-icon">
                                                                     <i class="ti ti-user-check"></i>
                                                                 </span>
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Validasi CEO SKI</h6>
-                                                            <p class="text-muted mb-0 small">
+                                                            <h6 class="mb-1 step-3-title">Validasi CEO SKI</h6>
+                                                            <p class="text-muted mb-0 small step-3-desc">
                                                                 Menunggu persetujuan dari CEO SKI.
                                                             </p>
                                                         </div>
@@ -444,13 +449,13 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Persetujuan Investasi</h5>
+                    <h5 class="modal-title">Validasi Bagi Hasil</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <hr class="my-2">
                 <div class="modal-body">
-                    <h5 class="mb-2">Apakah anda yakin menyetujui Pengajuan Investasi?</h5>
-                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui pengajuan investasi.</p>
+                    <h5 class="mb-2">Apakah anda yakin menyetujui Bagi Hasil Investasi ini?</h5>
+                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk menolak.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="btnKonfirmasiSetuju">
@@ -565,10 +570,15 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let currentStep = 1;
+            const investasiId = '{{ $investasi['id'] }}';
+            const currentStatus = '{{ $investasi['status'] }}';
+            let currentStep = {{ $investasi['current_step'] ?? 1 }};
+
+         
 
             // Update UI berdasarkan step
             function updateUI() {
+                
                 // Update stepper
                 document.querySelectorAll('.stepper-item').forEach((item, index) => {
                     const step = index + 1;
@@ -577,10 +587,27 @@
                     else if (step === currentStep) item.classList.add('active');
                 });
 
-                // Show/hide elements
-                $('#btnSetujuiPengajuan').toggleClass('d-none', currentStep !== 2);
-                $('#btnValidasiCEO').toggleClass('d-none', currentStep !== 3);
-                $('#alertPeninjauan').toggle(currentStep < 2);
+                // Show/hide buttons based on status
+                // Submit button: show if Draft OR (Ditolak AND Step 1)
+                const showSubmitBtn = currentStatus === 'Draft' || (currentStatus === 'Ditolak' && currentStep === 1);
+                $('#btnSubmitPengajuan').toggleClass('d-none', !showSubmitBtn);
+                $('#btnSetujuiPengajuan').toggleClass('d-none', currentStep !== 2 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
+                $('#btnValidasiCEO').toggleClass('d-none', currentStep !== 3 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
+                
+                // Show/hide alerts
+                if (currentStatus === 'Draft') {
+                    $('#alertDraft').show();
+                    $('#alertDitolak').hide();
+                    $('#alertPeninjauan').hide();
+                } else if (currentStatus === 'Ditolak') {
+                    $('#alertDraft').hide();
+                    $('#alertDitolak').show();
+                    $('#alertPeninjauan').hide();
+                } else {
+                    $('#alertDraft').hide();
+                    $('#alertDitolak').hide();
+                    $('#alertPeninjauan').toggle(currentStep < 6);
+                }
 
                 // Detail Kontrak content
                 $('#kontrak-default').toggleClass('d-none', currentStep === 5);
@@ -588,7 +615,7 @@
                 if (currentStep === 5) initFlatpickr();
 
                 // Activity timeline
-                const showTimeline = currentStep >= 2;
+                const showTimeline = currentStep >= 2 && currentStatus !== 'Draft';
                 $('#activity-empty').toggleClass('d-none', showTimeline);
                 $('#timeline-container').toggleClass('d-none', !showTimeline);
 
@@ -598,11 +625,29 @@
                         month: 'short',
                         year: 'numeric'
                     });
+                    
                     $('.activity-item').each(function(index) {
                         const step = index + 2;
                         $(this).toggleClass('d-none', step > currentStep);
                         $(this).find(`#date-step-${step}`).text(date);
                     });
+
+                    // Update tampilan jika ditolak
+                    if (currentStatus === 'Ditolak') {
+                        if (currentStep === 1) {
+                            // Ditolak di Step 2, kembali ke Step 1
+                            $('.activity-step-2 .step-2-icon').removeClass('bg-label-warning').addClass('bg-label-danger');
+                            $('.activity-step-2 .step-2-icon i').removeClass('ti-report-search').addClass('ti-x');
+                            $('.activity-step-2 .step-2-title').text('Validasi Bagi Hasil - Ditolak');
+                            $('.activity-step-2 .step-2-desc').text('Pengajuan ditolak. Silakan perbaiki dan submit ulang.');
+                        } else if (currentStep === 6) {
+                            // Ditolak di Step 3, langsung ke Step 6
+                            $('.activity-step-3 .step-3-icon').removeClass('bg-label-info').addClass('bg-label-danger');
+                            $('.activity-step-3 .step-3-icon i').removeClass('ti-user-check').addClass('ti-x');
+                            $('.activity-step-3 .step-3-title').text('Validasi CEO SKI - Ditolak');
+                            $('.activity-step-3 .step-3-desc').text('Pengajuan ditolak oleh CEO SKI. Proses investasi ditutup.');
+                        }
+                    }
                 }
             }
 
@@ -618,28 +663,92 @@
                 }
             }
 
-            // Stepper click
-            $('.stepper-wrapper').on('click', '.stepper-item', function() {
-                currentStep = parseInt($(this).data('step'));
-                updateUI();
-                if (currentStep === 5) {
-                    new bootstrap.Tab($('[data-bs-target="#detail-kontrak"]')[0]).show();
-                }
+            // Stepper click - DISABLED (stepper hanya mengikuti step dari database)
+            // $('.stepper-wrapper').on('click', '.stepper-item', function() {
+            //     currentStep = parseInt($(this).data('step'));
+            //     updateUI();
+            //     if (currentStep === 5) {
+            //         new bootstrap.Tab($('[data-bs-target="#detail-kontrak"]')[0]).show();
+            //     }
+            // });
+
+            // Button Submit Pengajuan
+            $('#btnSubmitPengajuan').click(function() {
+                $.ajax({
+                    url: `/pengajuan-investasi/${investasiId}/approval`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: 'Submit Dokumen'
+                    },
+                    beforeSend: function() {
+                        $('#btnSubmitPengajuan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Mengirim...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Pengajuan investasi berhasil di-submit.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                            $('#btnSubmitPengajuan').prop('disabled', false).html('<i class="fas fa-paper-plane me-2"></i>Submit Pengajuan');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Terjadi kesalahan saat submit pengajuan.', 'error');
+                        $('#btnSubmitPengajuan').prop('disabled', false).html('<i class="fas fa-paper-plane me-2"></i>Submit Pengajuan');
+                    }
+                });
             });
 
-            // Button Setujui
+            // Button Setujui Pengajuan (Step 2: Validasi Bagi Hasil)
             $('#btnSetujuiPengajuan').click(() => {
                 new bootstrap.Modal($('#modalPersetujuanInvestasi')[0]).show();
             });
 
-            $('#btnKonfirmasiSetuju').click(() => {
-                bootstrap.Modal.getInstance($('#modalPersetujuanInvestasi')[0]).hide();
-                currentStep = 3;
-                updateUI();
-                new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
+            $('#btnKonfirmasiSetuju').click(function() {
+                const modal = bootstrap.Modal.getInstance($('#modalPersetujuanInvestasi')[0]);
+                
+                $.ajax({
+                    url: `/pengajuan-investasi/${investasiId}/approval`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: 'Dokumen Tervalidasi',
+                        validasi_bagi_hasil: 'disetujui'
+                    },
+                    beforeSend: function() {
+                        $('#btnKonfirmasiSetuju').prop('disabled', true).text('Memproses...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            modal.hide();
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Pengajuan investasi berhasil disetujui.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                            $('#btnKonfirmasiSetuju').prop('disabled', false).text('Setuju');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Terjadi kesalahan saat menyetujui pengajuan.', 'error');
+                        $('#btnKonfirmasiSetuju').prop('disabled', false).text('Setuju');
+                    }
+                });
             });
 
-            // Button Tolak
+            // Button Tolak (Step 2: Validasi Bagi Hasil)
             $('#btnTolakInvestasi').click(() => {
                 const modalPersetujuan = bootstrap.Modal.getInstance($('#modalPersetujuanInvestasi')[0]);
                 modalPersetujuan.hide();
@@ -648,7 +757,7 @@
                 }, 300);
             });
 
-            // Form Review
+            // Form Review (Penolakan)
             $('#formHasilReview').submit(function(e) {
                 e.preventDefault();
                 if (!this.checkValidity()) {
@@ -656,28 +765,93 @@
                     $(this).addClass('was-validated');
                     return;
                 }
-                bootstrap.Modal.getInstance($('#modalHasilReview')[0]).hide();
-                $(this).removeClass('was-validated')[0].reset();
-                currentStep = 1;
-                updateUI();
+
+                const alasanPenolakan = $('#hasilReview').val();
+
+                $.ajax({
+                    url: `/pengajuan-investasi/${investasiId}/approval`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: 'Ditolak',
+                        validasi_bagi_hasil: 'ditolak',
+                        catatan: alasanPenolakan
+                    },
+                    beforeSend: function() {
+                        $('#formHasilReview button[type="submit"]').prop('disabled', true).text('Mengirim...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            bootstrap.Modal.getInstance($('#modalHasilReview')[0]).hide();
+                            $('#formHasilReview').removeClass('was-validated')[0].reset();
+                            
+                            Swal.fire({
+                                title: 'Pengajuan Ditolak',
+                                text: 'Pengajuan investasi telah ditolak.',
+                                icon: 'info',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                            $('#formHasilReview button[type="submit"]').prop('disabled', false).text('Kirim');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Terjadi kesalahan saat menolak pengajuan.', 'error');
+                        $('#formHasilReview button[type="submit"]').prop('disabled', false).text('Kirim');
+                    }
+                });
             });
 
-            // Button Validasi CEO
+            // Button Validasi CEO (Step 3)
             $('#btnValidasiCEO').click(() => {
                 new bootstrap.Modal($('#modalValidasiCEO')[0]).show();
             });
 
-            $('#btnKonfirmasiCEO').click(() => {
-                bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]).hide();
-                currentStep = 4;
-                updateUI();
-                new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
+            $('#btnKonfirmasiCEO').click(function() {
+                const modal = bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]);
+                
+                $.ajax({
+                    url: `/pengajuan-investasi/${investasiId}/approval`,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: 'Disetujui oleh CEO SKI'
+                    },
+                    beforeSend: function() {
+                        $('#btnKonfirmasiCEO').prop('disabled', true).html('<i class="ti ti-check me-1"></i>Memproses...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            modal.hide();
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Pengajuan investasi berhasil disetujui oleh CEO.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                            $('#btnKonfirmasiCEO').prop('disabled', false).html('<i class="ti ti-check me-1"></i>Setujui');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Terjadi kesalahan saat menyetujui pengajuan.', 'error');
+                        $('#btnKonfirmasiCEO').prop('disabled', false).html('<i class="ti ti-check me-1"></i>Setujui');
+                    }
+                });
             });
 
-            // Button Tolak CEO
+            // Button Tolak CEO (Step 3 - akan langsung ke Step 6/Selesai)
             $('#btnTolakCEO').click(() => {
                 const modalValidasiCEO = bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]);
                 modalValidasiCEO.hide();
+                
+                // Tunggu sebentar sebelum membuka modal hasil review
                 setTimeout(() => {
                     new bootstrap.Modal($('#modalHasilReview')[0]).show();
                 }, 300);
