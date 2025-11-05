@@ -776,8 +776,8 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label for="biaya_admin">Biaya Administrasi</label>
-                                                    <input type="text" class="form-control" id="biaya_admin"
-                                                        name="biaya_admin" value="Rp. 0" disabled>
+                                                    <input type="text" class="form-control input-rupiah" id="biaya_admin"
+                                                        name="biaya_administrasi" placeholder="Rp 0">
                                                 </div>
                                             </div>
 
