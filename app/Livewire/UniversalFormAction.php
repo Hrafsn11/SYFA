@@ -6,6 +6,7 @@ use ReflectionMethod;
 use Livewire\Component;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
@@ -42,6 +43,15 @@ class UniversalFormAction
 
         } catch (ValidationException $e) {
             $this->instanceLivewire->setErrorBag($e->validator->errors());
+
+            // modifikasi name error
+            $errorsArray = [];
+            foreach ($e->validator->errors()->toArray() as $key => $value) {
+                $errorsArray["form_data." . $key] = $value;
+            }
+            // end modifikasi
+
+            $this->instanceLivewire->dispatch('fail-validation', $errorsArray);
         } catch (\Throwable $e) {
             $this->instanceLivewire->dispatch('show-error', message: $e->getMessage());
             $this->instanceLivewire->addError('general', $e->getMessage());
@@ -69,6 +79,7 @@ class UniversalFormAction
 
         } catch (ValidationException $e) {
             $this->instanceLivewire->setErrorBag($e->validator->errors());
+            $this->instanceLivewire->dispatch('fail-validation', $e->validator->errors()->toArray());
         } catch (\Throwable $e) {
             $this->instanceLivewire->dispatch('show-error', message: $e->getMessage());
             $this->instanceLivewire->addError('general', $e->getMessage());
@@ -94,60 +105,61 @@ class UniversalFormAction
 
     protected function callController(string $controllerClass, string $method, array $params = [])
     {
-        if (!class_exists($controllerClass)) {
-            throw new \Exception("Controller {$controllerClass} tidak ditemukan.");
-        }
-
-        $instance = app($controllerClass);
-        $reflector = new ReflectionMethod($controllerClass, $method);
-        $arguments = [];     
-
-        foreach ($reflector->getParameters() as $key => $param) {
-            $type = $param->getType()?->getName();
-
-            // Jika parameter adalah FormRequest
-            if ($type && is_subclass_of($type, FormRequest::class)) {
-                $baseRequest = Request::create('/', 'POST', $this->formData);
-                $formRequest = $type::createFrom($baseRequest);
-                $formRequest->setContainer(app());
-                $formRequest->setRedirector(app('redirect'));
-                $formRequest->validateResolved();
-
-                $validated = $formRequest->validated();
-                $formRequest->merge($validated);
-
-                $arguments[] = $formRequest;
-
-                continue;
-            }
-
-            // Jika parameter ada di $params (misal 'id' => 5)
-            if (array_key_exists($param->getName(), $params)) {
-                $arguments[] = $params[$param->getName()];
-                continue;
-            }
-
-            // Jika punya default value
-            if ($param->isDefaultValueAvailable()) {
-                $arguments[] = $param->getDefaultValue();
-                continue;
-            }
-
-            // Kalau tidak ditemukan apapun, kasih null
-            $arguments[] = null;
-        }
-
         try {
+            if (!class_exists($controllerClass)) {
+                throw new \Exception("Controller {$controllerClass} tidak ditemukan.");
+            }
+
+            $instance = app($controllerClass);
+            $reflector = new ReflectionMethod($controllerClass, $method);
+            $arguments = [];     
+
+            foreach ($reflector->getParameters() as $key => $param) {
+                $type = $param->getType()?->getName();
+
+                // Jika parameter adalah FormRequest
+                if ($type && is_subclass_of($type, FormRequest::class)) {
+                    $baseRequest = Request::create('/', 'POST', $this->formData);
+                    $formRequest = $type::createFrom($baseRequest);
+                    $formRequest->setContainer(app());
+                    $formRequest->setRedirector(app('redirect'));
+                    
+                    // validation
+                    $validator = Validator::make($this->formData, $formRequest->rules(), $formRequest->messages());
+                    if ($validator->fails()) {
+                        throw new ValidationException($validator);
+                    }
+                    // end validation
+                    
+                    $formRequest->merge($this->formData);
+                    $formRequest->validateResolved();
+
+                    $arguments[] = $formRequest;
+
+                    continue;
+                }
+
+                // Jika parameter ada di $params (misal 'id' => 5)
+                if (array_key_exists($param->getName(), $params)) {
+                    $arguments[] = $params[$param->getName()];
+                    continue;
+                }
+
+                // Jika punya default value
+                if ($param->isDefaultValueAvailable()) {
+                    $arguments[] = $param->getDefaultValue();
+                    continue;
+                }
+
+                // Kalau tidak ditemukan apapun, kasih null
+                $arguments[] = null;
+            }
+
             return $reflector->invokeArgs($instance, $arguments);
         } catch (ValidationException $e) {
-            $this->instanceLivewire->setErrorBag($e->validator->errors());
-            return null;
+            throw $e;
         } catch (\Throwable $e) {
             throw $e;
         }
     }
-    // public function render()
-    // {
-    //     return view('livewire.universal-form-action');
-    // }
 }

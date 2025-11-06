@@ -14,11 +14,6 @@ class MasterKol extends Component
 
     use HasUniversalFormAction, HasValidate;
 
-    public function updated($property, $value)
-    {
-        $this->validateOnly($property);
-    }
-
     public function render()
     {
         return view('livewire.master-data.master-kol')
