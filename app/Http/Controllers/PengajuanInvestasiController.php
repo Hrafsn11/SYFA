@@ -414,20 +414,19 @@ class PengajuanInvestasiController extends Controller
         $pengajuan = PengajuanInvestasi::findOrFail($id);
 
         $validated = $request->validate([
-            'bukti_transfer' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'keterangan_bukti' => 'nullable|string',
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         try {
             DB::beginTransaction();
 
-            if ($request->hasFile('bukti_transfer')) {
+            if ($request->hasFile('file')) {
                 // Delete old file if exists
                 if ($pengajuan->upload_bukti_transfer) {
                     Storage::disk('public')->delete($pengajuan->upload_bukti_transfer);
                 }
 
-                $file = $request->file('bukti_transfer');
+                $file = $request->file('file');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $path = $file->storeAs('bukti_transfer_investasi', $filename, 'public');
 
@@ -438,14 +437,14 @@ class PengajuanInvestasiController extends Controller
 
                 // Update status to next step (Step 5: Generate Kontrak)
                 $pengajuan->update([
-                    'status' => 'Bukti Transfer Uploaded',
+                    'status' => 'Dana Sudah Dicairkan',
                     'current_step' => 5,
                 ]);
 
                 // Create history
                 HistoryStatusPengajuanInvestor::create([
                     'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
-                    'status' => 'Bukti Transfer Uploaded',
+                    'status' => 'Dana Sudah Dicairkan',
                     'date' => now()->toDateString(),
                     'time' => now()->toTimeString(),
                     'current_step' => 5,
