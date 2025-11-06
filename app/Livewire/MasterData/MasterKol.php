@@ -3,7 +3,7 @@
 namespace App\Livewire\MasterData;
 
 use Livewire\Component;
-use App\Livewire\Traits\HasSaveData;
+use App\Livewire\Traits\HasUniversalFormAction;
 use App\Livewire\Traits\HasValidate;
 use App\Http\Requests\MasterKolRequest;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,7 +12,7 @@ class MasterKol extends Component
 {    
     private string $validateClass = MasterKolRequest::class;
 
-    use HasSaveData, HasValidate;
+    use HasUniversalFormAction, HasValidate;
 
     public function updated($property, $value)
     {

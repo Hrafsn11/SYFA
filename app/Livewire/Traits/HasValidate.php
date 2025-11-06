@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Traits;
 
+use Illuminate\Validation\ValidationException;
+
 trait HasValidate
 {
     protected function rules()
@@ -32,5 +34,14 @@ trait HasValidate
         }
 
         return $validateMessage;
+    }
+
+
+    public function exception($e, $stopPropagation) {
+        // ngurus validation
+        if ($e instanceof ValidationException) {
+            $errorBag = $e->validator->errors()->toArray();
+            $this->dispatch('fail-validation', $errorBag);
+        }
     }
 }

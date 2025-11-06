@@ -44,6 +44,7 @@
     <link rel="stylesheet"
         href="{{ asset('assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css') }}" />
     <link rel="stylesheet"
@@ -138,6 +139,7 @@
     <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/cleavejs/cleave.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
     @stack('vendor-scripts')
     <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
 
@@ -248,18 +250,6 @@
         document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout());
         document.addEventListener('livewire:navigated', window.initializeVuexyLayout());
 
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('after-action', (event) => {
-                const callbackName = event[0].callback;
-                const payload = event[0].payload || {};
-
-                if (typeof window[callbackName] === 'function') {
-                    window[callbackName](payload);
-                }
-                
-            });
-        });
-
         document.addEventListener('livewire:load', () => {
             window.initializeVuexyLayout();
             if (window.Livewire?.hook) {
@@ -276,6 +266,8 @@
     {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
     @rappasoftTableScripts
     @rappasoftTableThirdPartyScripts
+
+    <script src="{{ asset('js/content.js') }}"></script>
     
     {{-- Custom page scripts --}}
     @stack('scripts')

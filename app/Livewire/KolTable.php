@@ -2,14 +2,19 @@
 
 namespace App\Livewire;
 
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\MasterKol;
+use App\Livewire\Traits\HasUniversalFormAction;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class KolTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
+
     protected $model = MasterKol::class;
-    protected $listeners = ['refreshKolTable' => '$refresh'];
+    protected $listeners = [
+        'refreshKolTable' => '$refresh'
+    ];
 
     public function configure(): void
     {

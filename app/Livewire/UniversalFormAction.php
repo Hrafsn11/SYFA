@@ -4,36 +4,74 @@ namespace App\Livewire;
 
 use ReflectionMethod;
 use Livewire\Component;
-use Livewire\Attributes\On;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
 
-class UniversalFormAction extends Component
+class UniversalFormAction
 {
     public $formData = [];
 
-    #[On('universal-save-data')]
+    protected $instanceLivewire;
+
+    public function __construct($instanceLivewire = null)
+    {
+        $this->instanceLivewire = $instanceLivewire;
+    }
+
     public function saveData($params)
     {
         try {
-            [$routeName, $this->formData] = [$params['route'], $params['formData']];
+            [$routeName, $params, $this->formData] = [$params['route'], $params['params'], $params['formData']];
 
             [$controllerClass, $method] = $this->resolveRouteAction($routeName);
-            $result = $this->callController($controllerClass, $method);
+
+            $callback = null;
+            if (isset($params['callback'])) {
+                $callback = $params['callback'];
+                unset($params['callback']);
+            }
+
+            $result = $this->callController($controllerClass, $method, $params);
             
-            $this->dispatch('after-action', [
-                'callback' => $params['callback'] ?? null,
+            $this->instanceLivewire->dispatch('after-action', [
+                'callback' => $callback,
                 'payload' => $result,
             ]);
 
         } catch (ValidationException $e) {
-            dd('masuk sini');
-            $this->setErrorBag($e->validator->errors());
+            $this->instanceLivewire->setErrorBag($e->validator->errors());
         } catch (\Throwable $e) {
-            dd('masuk sini 2');
-            $this->addError('general', $e->getMessage());
+            $this->instanceLivewire->dispatch('show-error', message: $e->getMessage());
+            $this->instanceLivewire->addError('general', $e->getMessage());
+        }
+    }
+
+    public function loadData($params)
+    {
+        try {
+            [$routeName, $params] = [$params['route'], $params['params']];
+            [$controllerClass, $method] = $this->resolveRouteAction($routeName);
+
+            $callback = null;
+            if (isset($params['callback'])) {
+                $callback = $params['callback'];
+                unset($params['callback']);
+            }
+
+            $result = $this->callController($controllerClass, $method, $params);
+
+            $this->instanceLivewire->dispatch('after-get-data', [
+                'callback' => $callback ?? null,
+                'payload' => $result->original,
+            ]);
+
+        } catch (ValidationException $e) {
+            $this->instanceLivewire->setErrorBag($e->validator->errors());
+        } catch (\Throwable $e) {
+            $this->instanceLivewire->dispatch('show-error', message: $e->getMessage());
+            $this->instanceLivewire->addError('general', $e->getMessage());
         }
     }
 
@@ -41,24 +79,20 @@ class UniversalFormAction extends Component
     {
         $route = Route::getRoutes()->getByName($routeName);
 
-        // dd($route);
-
         if (!$route) {
             throw new \Exception("Route '{$routeName}' tidak ditemukan.");
         }
 
         $action = $route->getActionName();
 
-        // Biasanya formatnya: App\Http\Controllers\UserController@store
         if (str_contains($action, '@')) {
             return explode('@', $action);
         }
 
-        // Jika pakai single-action controller (__invoke)
         return [$action, '__invoke'];
     }
 
-    protected function callController(string $controllerClass, string $method)
+    protected function callController(string $controllerClass, string $method, array $params = [])
     {
         if (!class_exists($controllerClass)) {
             throw new \Exception("Controller {$controllerClass} tidak ditemukan.");
@@ -66,33 +100,54 @@ class UniversalFormAction extends Component
 
         $instance = app($controllerClass);
         $reflector = new ReflectionMethod($controllerClass, $method);
+        $arguments = [];     
 
-        foreach ($reflector->getParameters() as $param) {
+        foreach ($reflector->getParameters() as $key => $param) {
             $type = $param->getType()?->getName();
 
-            if (is_subclass_of($type, FormRequest::class)) {
-                $formRequest = app($type);
-                $validated = Validator::make($this->formData, $formRequest->rules())->validate();
+            // Jika parameter adalah FormRequest
+            if ($type && is_subclass_of($type, FormRequest::class)) {
+                $baseRequest = Request::create('/', 'POST', $this->formData);
+                $formRequest = $type::createFrom($baseRequest);
+                $formRequest->setContainer(app());
+                $formRequest->setRedirector(app('redirect'));
+                $formRequest->validateResolved();
+
+                $validated = $formRequest->validated();
                 $formRequest->merge($validated);
 
-                return $instance->$method($formRequest);
+                $arguments[] = $formRequest;
+
+                continue;
             }
+
+            // Jika parameter ada di $params (misal 'id' => 5)
+            if (array_key_exists($param->getName(), $params)) {
+                $arguments[] = $params[$param->getName()];
+                continue;
+            }
+
+            // Jika punya default value
+            if ($param->isDefaultValueAvailable()) {
+                $arguments[] = $param->getDefaultValue();
+                continue;
+            }
+
+            // Kalau tidak ditemukan apapun, kasih null
+            $arguments[] = null;
         }
 
-        $request = request()->merge($this->formData);
         try {
-            $result = $instance->$method($request); // ini akan jalankan validasi
-            // jika validasi sukses, $result berisi $data dari validate()
-            return $result;
+            return $reflector->invokeArgs($instance, $arguments);
         } catch (ValidationException $e) {
-            // jika validasi gagal, bisa tangkap error di Livewire
-            $this->setErrorBag($e->validator->errors());
+            $this->instanceLivewire->setErrorBag($e->validator->errors());
             return null;
+        } catch (\Throwable $e) {
+            throw $e;
         }
     }
-
-    public function render()
-    {
-        return view('livewire.universal-form-action');
-    }
+    // public function render()
+    // {
+    //     return view('livewire.universal-form-action');
+    // }
 }

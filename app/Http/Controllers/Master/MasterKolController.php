@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Master;
 
+use App\Helpers\Response;
 use App\Models\MasterKol;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -21,47 +22,21 @@ class MasterKolController extends Controller
 
     public function store(MasterKolRequest $request)
     {
-        // $data = $request->validate([
-        //     'kol' => 'required|integer',
-        //     'persentase_pencairan' => 'nullable|numeric|min:0|max:100',
-        //     'jmlh_hari_keterlambatan' => 'nullable|integer',
-        // ]);
-
-        $kol = MasterKol::create($request->validated());
-
-        return response()->json([
-            'success' => true,
-            'message' => 'KOL berhasil ditambahkan',
-            'data' => $kol->toArray()
-        ]);
+        MasterKol::create($request->validated());
+        return Response::success(null, 'KOL berhasil ditambahkan');
     }
 
     public function edit($id)
     {
         $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        return response()->json([
-            'success' => true,
-            'data' => $kol->toArray()
-        ]);
+        return Response::success($kol, 'KOL berhasil diambil');
     }
 
-    public function update(Request $request, $id)
+    public function update(MasterKolRequest $request, $id)
     {
         $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        $data = $request->validate([
-            'kol' => 'required|integer',
-            'persentase_pencairan' => 'nullable|numeric|min:0|max:100',
-            'jmlh_hari_keterlambatan' => 'nullable|integer',
-        ]);
-
-        $kol->update($data);
-        $kol->refresh();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'KOL berhasil diupdate',
-            'data' => $kol->toArray()
-        ]);
+        $kol->update($request->validated());
+        return Response::success(null, 'KOL berhasil diupdate');
     }
 
     public function destroy($id)
