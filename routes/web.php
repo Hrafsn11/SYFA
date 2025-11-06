@@ -81,16 +81,33 @@ Route::middleware([
         Route::get('penerima-dana', [RencanaPenagihanDepositoController::class, 'penerimaDana'])->name('penerima-dana');
     });
 
+    // Form Kerja Investor Routes (Legacy - redirect to pengajuan-investasi)
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
-        Route::get('/', [FormKerjaInvestorController::class, 'index'])->name('index');
-        Route::post('/', [FormKerjaInvestorController::class, 'store'])->name('store');
-        Route::get('{id}', [FormKerjaInvestorController::class, 'show'])->name('show');
-        Route::get('{id}/edit', [FormKerjaInvestorController::class, 'edit'])->name('edit');
-        Route::put('{id}', [FormKerjaInvestorController::class, 'update'])->name('update');
-        Route::delete('{id}', [FormKerjaInvestorController::class, 'destroy'])->name('destroy');
-        Route::post('{id}/update-status', [FormKerjaInvestorController::class, 'updateStatus'])->name('update-status');
-        Route::post('{id}/upload-bukti', [FormKerjaInvestorController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
-        Route::post('{id}/generate-kontrak', [FormKerjaInvestorController::class, 'generateKontrak'])->name('generate-kontrak');
+        Route::get('/', [\App\Http\Controllers\PengajuanInvestasiController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\PengajuanInvestasiController::class, 'store'])->name('store');
+        Route::get('{id}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [\App\Http\Controllers\PengajuanInvestasiController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/update-status', [\App\Http\Controllers\PengajuanInvestasiController::class, 'updateStatus'])->name('update-status');
+        Route::post('{id}/upload-bukti', [\App\Http\Controllers\PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
+        Route::post('{id}/generate-kontrak', [\App\Http\Controllers\PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
+    });
+
+    // Pengajuan Investasi Routes
+    Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PengajuanInvestasiController::class, 'index'])->name('index');
+        Route::get('create', [\App\Http\Controllers\PengajuanInvestasiController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\PengajuanInvestasiController::class, 'store'])->name('store');
+        Route::get('{id}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [\App\Http\Controllers\PengajuanInvestasiController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/approval', [\App\Http\Controllers\PengajuanInvestasiController::class, 'approval'])->name('approval');
+        Route::get('history/{historyId}', [\App\Http\Controllers\PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history.detail');
+        Route::post('{id}/update-status', [\App\Http\Controllers\PengajuanInvestasiController::class, 'updateStatus'])->name('update-status');
+        Route::post('{id}/upload-bukti', [\App\Http\Controllers\PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
+        Route::post('{id}/generate-kontrak', [\App\Http\Controllers\PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
     });
 
     Route::get('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'index'])->name('matrixpinjaman');

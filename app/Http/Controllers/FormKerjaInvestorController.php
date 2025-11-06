@@ -24,7 +24,7 @@ class FormKerjaInvestorController extends Controller
                 ->first();
         }
         
-        return view('livewire.form-kerja-investor.index', compact('investor'));
+        return view('livewire.pengajuan-investasi.index', compact('investor'));
     }
 
     /**
@@ -124,7 +124,7 @@ class FormKerjaInvestorController extends Controller
         $formKerjaInvestor = FormKerjaInvestor::with('investor')
             ->findOrFail($id);
 
-        return view('livewire.form-kerja-investor.detail', compact('formKerjaInvestor'));
+        return view('livewire.pengajuan-investasi.detail', compact('formKerjaInvestor'));
     }
 
     /**
