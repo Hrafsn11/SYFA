@@ -59,6 +59,7 @@ class PengajuanPinjamanTable extends DataTableComponent
                     'pengajuan_peminjaman.total_pinjaman', 
                     'pengajuan_peminjaman.total_bagi_hasil', 
                     'pengajuan_peminjaman.status', 
+                    'pengajuan_peminjaman.is_active', 
                     'pengajuan_peminjaman.harapan_tanggal_pencairan', 
                     'pengajuan_peminjaman.created_at',
                     'pengajuan_peminjaman.lampiran_sid');
@@ -149,7 +150,11 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->html(),
                 
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.peminjaman.partials.table-actions', ['id' => $row->id_pengajuan_peminjaman])->render())
+                ->label(fn ($row) => view('livewire.peminjaman.partials.table-actions', [
+                    'id' => $row->id_pengajuan_peminjaman,
+                    'status' => $row->status,
+                    'is_active' => $row->is_active
+                ])->render())
                 ->html()
                 ->excludeFromColumnSelect(),
         ];
