@@ -1014,7 +1014,10 @@
                 const currentStatus = @json($peminjaman['status'] ?? 'Draft');
                 
                 // Show buttons only when appropriate for the current status
-                toggleDisplay(dom.buttons.submitPengajuan, currentStatus === 'Draft');
+                // Submit Pengajuan button: muncul jika status Draft atau Validasi Ditolak
+                const showSubmitPengajuan = currentStatus === 'Draft' || currentStatus === 'Validasi Ditolak';
+                toggleDisplay(dom.buttons.submitPengajuan, showSubmitPengajuan);
+                
                 toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
                 toggleDisplay(dom.buttons.persetujuanDebitur, currentStatus === 'Dokumen Tervalidasi');
                 toggleDisplay(dom.buttons.persetujuanCEO, currentStatus === 'Debitur Setuju');
