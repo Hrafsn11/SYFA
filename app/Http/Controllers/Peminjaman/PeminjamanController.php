@@ -6,15 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\BuktiPeminjaman;
 use App\Models\HistoryStatusPengajuanPinjaman;
 use Illuminate\Http\Request;
-use App\Models\PeminjamanInvoiceFinancing;
-use App\Models\PeminjamanInstallmentFinancing;
-use App\Models\PeminjamanFactoring;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\MasterSumberPendanaanEksternal;
 use App\Models\Peminjaman;
 use App\Models\PengajuanPeminjaman;
 use App\Services\PeminjamanNumberService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class PeminjamanController extends Controller
@@ -256,26 +254,13 @@ class PeminjamanController extends Controller
      */
     public function index()
     {
-        $invoiceRecords = PeminjamanInvoiceFinancing::with(['debitur.kol'])->get();
-        $poRecords = \App\Models\PeminjamanPoFinancing::with(['debitur.kol'])->get();
-        $installmentRecords = PeminjamanInstallmentFinancing::with(['debitur.kol'])->get();
+        // Get all pengajuan peminjaman with debitur and kol relationships
+        $peminjamanRecords = PengajuanPeminjaman::with(['debitur.kol'])->get();
 
-        $invoiceData = $invoiceRecords->map(function($r) {
+        $peminjaman_data = $peminjamanRecords->map(function($r) {
             return [
-                'id' => $r->id_invoice_financing,
-                'type' => 'invoice',
-                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
-                'nama_perusahaan' => $r->debitur->nama_debitur ?? '',
-                'lampiran_sid' => $r->lampiran_sid,
-                'nilai_kol' => $r->debitur->kol->kol ?? '',
-                'status' => $r->status ?? 'draft',
-            ];
-        })->toArray();
-
-        $poData = $poRecords->map(function($r) {
-            return [
-                'id' => $r->id_po_financing,
-                'type' => 'po',
+                'id' => $r->id_pengajuan_peminjaman,
+                'type' => $r->jenis_pembiayaan ?? 'peminjaman',
                 'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
                 'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
                 'lampiran_sid' => $r->lampiran_sid,
@@ -283,34 +268,6 @@ class PeminjamanController extends Controller
                 'status' => $r->status ?? 'draft',
             ];
         })->toArray();
-
-        $installmentData = $installmentRecords->map(function($r) {
-            return [
-                'id' => $r->id_installment,
-                'type' => 'installment',
-                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
-                'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
-                'lampiran_sid' => $r->lampiran_sid ?? null,
-                'nilai_kol' => $r->debitur?->kol->kol ?? '',
-                'status' => $r->status ?? 'draft',
-            ];
-        })->toArray();
-
-        // Factoring records
-        $factoringRecords = \App\Models\PeminjamanFactoring::with(['debitur.kol'])->get();
-        $factoringData = $factoringRecords->map(function($r) {
-            return [
-                'id' => $r->id_factoring,
-                'type' => 'factoring',
-                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
-                'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
-                'lampiran_sid' => $r->lampiran_sid ?? null,
-                'nilai_kol' => $r->debitur?->kol->kol ?? '',
-                'status' => $r->status ?? 'draft',
-            ];
-        })->toArray();
-
-    $peminjaman_data = array_merge($invoiceData, $poData, $installmentData, $factoringData);
 
         return view('livewire.peminjaman.index', compact('peminjaman_data'));
     }
@@ -898,7 +855,7 @@ class PeminjamanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Approval Error: ' . $e->getMessage());
+            Log::error('Approval Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false, 
                 'message' => 'Terjadi kesalahan saat memproses approval: ' . $e->getMessage()
@@ -987,7 +944,7 @@ class PeminjamanController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Get History Detail Error: ' . $e->getMessage());
+            Log::error('Get History Detail Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil detail history: ' . $e->getMessage()

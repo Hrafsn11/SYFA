@@ -15,7 +15,6 @@ use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
-use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 
 /*
@@ -48,12 +47,6 @@ Route::middleware([
     Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
-    // Route::post('peminjaman/invoice', [PeminjamanInvoiceController::class, 'store'])->name('peminjaman.invoice.store');
-    Route::post('peminjaman/installment', [PeminjamanInstallmentFinancingController::class, 'store'])->name('peminjaman.installment.store');
-    Route::post('peminjaman/po', [\App\Http\Controllers\Peminjaman\PeminjamanPoFinancingController::class, 'store'])->name('peminjaman.po.store');
-    Route::post('peminjaman/factoring', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'store'])->name('peminjaman.factoring.store');
-    Route::put('peminjaman/factoring/{id}', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'update'])->name('peminjaman.factoring.update');
-    Route::delete('peminjaman/factoring/{id}', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'destroy'])->name('peminjaman.factoring.destroy');
     Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
     Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
 

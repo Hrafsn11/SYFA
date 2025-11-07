@@ -142,6 +142,10 @@
                                                     <i class="ti ti-check me-2"></i>
                                                     Validasi CEO SKI
                                                 </button>
+                                                <button type="button" class="btn btn-primary d-none" id="btnUploadBukti">
+                                                    <i class="ti ti-upload me-2"></i>
+                                                    Upload Bukti Transfer
+                                                </button>
                                             </div>
                                         </div>
 
@@ -276,8 +280,9 @@
 
                                     <hr class="my-3">
 
-                                    <!-- Empty state untuk step 1 -->
-                                    <div id="activity-empty" class="text-center py-5">
+                                    @if($histories->isEmpty())
+                                    <!-- Empty state jika belum ada history -->
+                                    <div class="text-center py-5">
                                         <div class="mb-3">
                                             <i class="ti ti-clipboard-list display-4 text-muted"></i>
                                         </div>
@@ -286,155 +291,134 @@
                                             Aktivitas akan muncul setelah proses validasi dimulai.
                                         </p>
                                     </div>
-
-                                    <!-- Timeline Container - hanya muncul dari step 2 -->
-                                    <div class="d-none" id="timeline-container">
-                                        <!-- Step 2: Validasi Bagi Hasil -->
-                                        <div class="activity-item activity-step-2 d-none mb-4">
-                                            <div class="row align-items-center">
+                                    @else
+                                    <!-- Timeline dari database -->
+                                    <div class="timeline">
+                                        @foreach($histories->reverse() as $history)
+                                        <div class="activity-item mb-4">
+                                            <div class="row align-items-start">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
                                                             <div class="avatar avatar-sm">
-                                                                <span class="avatar-initial rounded-circle bg-label-warning step-2-icon">
-                                                                    <i class="ti ti-report-search"></i>
-                                                                </span>
+                                                                @if($history->status == 'Draft')
+                                                                    <span class="avatar-initial rounded-circle bg-label-secondary">
+                                                                        <i class="ti ti-pencil"></i>
+                                                                    </span>
+                                                                @elseif($history->status == 'Submit Dokumen')
+                                                                    <span class="avatar-initial rounded-circle bg-label-info">
+                                                                        <i class="ti ti-send"></i>
+                                                                    </span>
+                                                                @elseif($history->status == 'Dokumen Tervalidasi')
+                                                                    <span class="avatar-initial rounded-circle bg-label-success">
+                                                                        <i class="ti ti-check"></i>
+                                                                    </span>
+                                                                @elseif($history->status == 'Ditolak')
+                                                                    <span class="avatar-initial rounded-circle bg-label-danger">
+                                                                        <i class="ti ti-x"></i>
+                                                                    </span>
+                                                                @elseif($history->status == 'Disetujui oleh CEO SKI')
+                                                                    <span class="avatar-initial rounded-circle bg-label-success">
+                                                                        <i class="ti ti-user-check"></i>
+                                                                    </span>
+                                                                @elseif($history->status == 'Dana Sudah Dicairkan')
+                                                                    <span class="avatar-initial rounded-circle bg-label-primary">
+                                                                        <i class="ti ti-file-upload"></i>
+                                                                    </span>
+                                                                @elseif($history->status == 'Selesai')
+                                                                    <span class="avatar-initial rounded-circle bg-label-success">
+                                                                        <i class="ti ti-check-circle"></i>
+                                                                    </span>
+                                                                @else
+                                                                    <span class="avatar-initial rounded-circle bg-label-primary">
+                                                                        <i class="ti ti-clock"></i>
+                                                                    </span>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-1 step-2-title">Validasi Bagi Hasil</h6>
-                                                            <p class="text-muted mb-0 small step-2-desc">
-                                                                Pengajuan sedang dalam proses validasi. Harap menunggu
-                                                                hingga proses selesai.
+                                                            <h6 class="mb-1">
+                                                                @if($history->status == 'Draft')
+                                                                    Draft Pengajuan
+                                                                @elseif($history->status == 'Submit Dokumen')
+                                                                    Dokumen Disubmit
+                                                                @elseif($history->status == 'Dokumen Tervalidasi')
+                                                                    Validasi Bagi Hasil - Disetujui
+                                                                @elseif($history->status == 'Ditolak')
+                                                                    @if($history->current_step == 2)
+                                                                        Validasi Bagi Hasil - Ditolak
+                                                                    @elseif($history->current_step == 3)
+                                                                        Validasi CEO SKI - Ditolak
+                                                                    @else
+                                                                        Pengajuan Ditolak
+                                                                    @endif
+                                                                @elseif($history->status == 'Disetujui oleh CEO SKI')
+                                                                    Validasi CEO SKI - Disetujui
+                                                                @elseif($history->status == 'Dana Sudah Dicairkan')
+                                                                    Upload Bukti Transfer
+                                                                @elseif($history->status == 'Selesai')
+                                                                    Proses Selesai
+                                                                @else
+                                                                    {{ $history->status }}
+                                                                @endif
+                                                            </h6>
+                                                            <p class="text-muted mb-0 small">
+                                                                @if($history->status == 'Draft')
+                                                                    Pengajuan investasi dibuat sebagai draft.
+                                                                @elseif($history->status == 'Submit Dokumen')
+                                                                    Dokumen pengajuan berhasil disubmit untuk validasi.
+                                                                @elseif($history->status == 'Dokumen Tervalidasi')
+                                                                    Bagi hasil telah divalidasi dan disetujui.
+                                                                @elseif($history->status == 'Ditolak')
+                                                                    @if($history->catatan_validasi_dokumen_ditolak)
+                                                                        <span class="text-danger fw-semibold">Alasan: </span>{{ $history->catatan_validasi_dokumen_ditolak }}
+                                                                    @else
+                                                                        Pengajuan ditolak.
+                                                                    @endif
+                                                                @elseif($history->status == 'Disetujui oleh CEO SKI')
+                                                                    Pengajuan telah disetujui oleh CEO SKI.
+                                                                @elseif($history->status == 'Dana Sudah Dicairkan')
+                                                                    Bukti transfer investasi telah diupload.
+                                                                @elseif($history->status == 'Selesai')
+                                                                    Proses investasi telah selesai.
+                                                                @else
+                                                                    {{ $history->status }}
+                                                                @endif
                                                             </p>
+                                                            @if($history->submittedBy)
+                                                                <small class="text-muted">
+                                                                </small>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-2">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end"></div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 3: Validasi CEO SKI -->
-                                        <div class="activity-item activity-step-3 d-none mt-3 mb-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span class="avatar-initial rounded-circle bg-label-info step-3-icon">
-                                                                    <i class="ti ti-user-check"></i>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1 step-3-title">Validasi CEO SKI</h6>
-                                                            <p class="text-muted mb-0 small step-3-desc">
-                                                                Menunggu persetujuan dari CEO SKI.
-                                                            </p>
-                                                        </div>
+                                                <div class="col-12 col-md-6 text-md-end">
+                                                    <div class="d-flex flex-column align-items-md-end gap-2">
+                                                        <small class="text-muted">
+                                                            @if($history->date && $history->time)
+                                                                {{ \Carbon\Carbon::parse($history->date)->format('d M Y') }}, {{ \Carbon\Carbon::parse($history->time)->format('H:i') }}
+                                                            @elseif($history->date)
+                                                                {{ \Carbon\Carbon::parse($history->date)->format('d M Y, H:i') }}
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </small>
+                                                        @if($history->status == 'Dana Sudah Dicairkan' && $investasi['upload_bukti_transfer'])
+                                                            <button type="button" class="btn btn-sm btn-primary" onclick="previewBuktiTransfer('{{ asset('storage/' . $investasi['upload_bukti_transfer']) }}')">
+                                                                <i class="ti ti-eye me-1"></i>
+                                                                Lihat Bukti
+                                                            </button>
+                                                        @endif
                                                     </div>
                                                 </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-3">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end"></div>
                                             </div>
+                                            @if(!$loop->last)
+                                                <hr class="my-3">
+                                            @endif
                                         </div>
-
-                                        <!-- Step 4: Upload Bukti Transfer -->
-                                        <div class="activity-item d-none mt-3 mb-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-primary">
-                                                                    <i class="ti ti-file-upload"></i>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Upload Bukti Transfer</h6>
-                                                            <p class="text-muted mb-0 small">Bukti transfer investasi
-                                                                telah terkirim.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-4">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-primary"
-                                                        id="btnUploadBuktiTransfer" title="Upload">
-                                                        <i class="ti ti-upload"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 5: Generate Kontrak -->
-                                        <div class="activity-item d-none mt-3 mb-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-success">
-                                                                    <i class="ti ti-file-text"></i>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Kontrak Investasi</h6>
-                                                            <p class="text-muted mb-0 small">Kontrak investasi telah
-                                                                dibuat.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-5">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end">
-                                                    <button type="button" class="btn btn-icon btn-sm btn-label-info"
-                                                        id="btnPreviewKontrak" title="Preview">
-                                                        <i class="ti ti-eye"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Step 6: Selesai -->
-                                        <div class="activity-item d-none mt-3 mb-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-12 col-md-6 mb-3 mb-md-0">
-                                                    <div class="d-flex align-items-start gap-3">
-                                                        <div class="flex-shrink-0">
-                                                            <div class="avatar avatar-sm">
-                                                                <span
-                                                                    class="avatar-initial rounded-circle bg-label-success">
-                                                                    <i class="ti ti-check"></i>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Proses Selesai</h6>
-                                                            <p class="text-muted mb-0 small">Investasi Anda telah
-                                                                diproses.</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-center">
-                                                    <small class="text-muted" id="date-step-6">-</small>
-                                                </div>
-                                                <div class="col-6 col-md-3 text-end"></div>
-                                            </div>
-                                        </div>
+                                        @endforeach
                                     </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -522,10 +506,6 @@
                                 Pilih file bukti transfer
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="keteranganBukti" class="form-label">Keterangan</label>
-                            <textarea class="form-control" id="keteranganBukti" rows="2" placeholder="Keterangan tambahan (opsional)"></textarea>
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -568,7 +548,48 @@
         </div>
     </div>
 
+    <!-- Modal Preview Bukti Transfer -->
+    <div class="modal fade" id="modalPreviewBukti" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Preview Bukti Transfer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="previewImage" src="" alt="Bukti Transfer" class="img-fluid d-none" style="max-height: 70vh;">
+                    <iframe id="previewPdf" src="" class="d-none" style="width: 100%; height: 70vh;" frameborder="0"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <a id="downloadBukti" href="" download class="btn btn-primary">
+                        <i class="ti ti-download me-1"></i>
+                        Download
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Preview Bukti Transfer
+        function previewBuktiTransfer(fileUrl) {
+            const modal = new bootstrap.Modal($('#modalPreviewBukti')[0]);
+            const extension = fileUrl.split('.').pop().toLowerCase();
+            
+            $('#previewImage').addClass('d-none');
+            $('#previewPdf').addClass('d-none');
+            $('#downloadBukti').attr('href', fileUrl);
+            
+            if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                $('#previewImage').attr('src', fileUrl).removeClass('d-none');
+            } else if (extension === 'pdf') {
+                $('#previewPdf').attr('src', fileUrl).removeClass('d-none');
+            }
+            
+            modal.show();
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const investasiId = '{{ $investasi['id'] }}';
             const currentStatus = '{{ $investasi['status'] }}';
@@ -593,6 +614,7 @@
                 $('#btnSubmitPengajuan').toggleClass('d-none', !showSubmitBtn);
                 $('#btnSetujuiPengajuan').toggleClass('d-none', currentStep !== 2 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
                 $('#btnValidasiCEO').toggleClass('d-none', currentStep !== 3 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
+                $('#btnUploadBukti').toggleClass('d-none', currentStep !== 4 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
                 
                 // Show/hide alerts
                 if (currentStatus === 'Draft') {
@@ -614,41 +636,8 @@
                 $('#kontrak-step4').toggleClass('d-none', currentStep !== 5);
                 if (currentStep === 5) initFlatpickr();
 
-                // Activity timeline
-                const showTimeline = currentStep >= 2 && currentStatus !== 'Draft';
-                $('#activity-empty').toggleClass('d-none', showTimeline);
-                $('#timeline-container').toggleClass('d-none', !showTimeline);
-
-                if (showTimeline) {
-                    const date = new Date().toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                    });
-                    
-                    $('.activity-item').each(function(index) {
-                        const step = index + 2;
-                        $(this).toggleClass('d-none', step > currentStep);
-                        $(this).find(`#date-step-${step}`).text(date);
-                    });
-
-                    // Update tampilan jika ditolak
-                    if (currentStatus === 'Ditolak') {
-                        if (currentStep === 1) {
-                            // Ditolak di Step 2, kembali ke Step 1
-                            $('.activity-step-2 .step-2-icon').removeClass('bg-label-warning').addClass('bg-label-danger');
-                            $('.activity-step-2 .step-2-icon i').removeClass('ti-report-search').addClass('ti-x');
-                            $('.activity-step-2 .step-2-title').text('Validasi Bagi Hasil - Ditolak');
-                            $('.activity-step-2 .step-2-desc').text('Pengajuan ditolak. Silakan perbaiki dan submit ulang.');
-                        } else if (currentStep === 6) {
-                            // Ditolak di Step 3, langsung ke Step 6
-                            $('.activity-step-3 .step-3-icon').removeClass('bg-label-info').addClass('bg-label-danger');
-                            $('.activity-step-3 .step-3-icon i').removeClass('ti-user-check').addClass('ti-x');
-                            $('.activity-step-3 .step-3-title').text('Validasi CEO SKI - Ditolak');
-                            $('.activity-step-3 .step-3-desc').text('Pengajuan ditolak oleh CEO SKI. Proses investasi ditutup.');
-                        }
-                    }
-                }
+                // Activity timeline is now rendered from database histories in blade template
+                // No need for JavaScript logic here
             }
 
             // Init flatpickr
@@ -857,8 +846,8 @@
                 }, 300);
             });
 
-            // Upload Bukti
-            $('#btnUploadBuktiTransfer').click(() => {
+            // Button Upload Bukti (Step 4)
+            $('#btnUploadBukti').click(() => {
                 new bootstrap.Modal($('#modalUploadBuktiTransfer')[0]).show();
             });
 
@@ -870,15 +859,46 @@
                     return;
                 }
 
-                $('#btnUploadSpinner').removeClass('d-none');
-                setTimeout(() => {
-                    $('#btnUploadSpinner').addClass('d-none');
-                    bootstrap.Modal.getInstance($('#modalUploadBuktiTransfer')[0]).hide();
-                    $(this).removeClass('was-validated')[0].reset();
-                    currentStep = 5;
-                    updateUI();
-                    new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
-                }, 1500);
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('status', 'Dana Sudah Dicairkan');
+                formData.append('file', $('#fileBuktiTransfer')[0].files[0]);
+
+                $.ajax({
+                    url: `/pengajuan-investasi/${investasiId}/upload-bukti`,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $('#formUploadBuktiTransfer button[type="submit"]').prop('disabled', true);
+                        $('#btnUploadSpinner').removeClass('d-none');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            bootstrap.Modal.getInstance($('#modalUploadBuktiTransfer')[0]).hide();
+                            $('#formUploadBuktiTransfer').removeClass('was-validated')[0].reset();
+                            
+                            Swal.fire({
+                                title: 'Berhasil!',
+                                text: 'Bukti transfer berhasil diupload.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                            $('#formUploadBuktiTransfer button[type="submit"]').prop('disabled', false);
+                            $('#btnUploadSpinner').addClass('d-none');
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Terjadi kesalahan saat upload bukti transfer.', 'error');
+                        $('#formUploadBuktiTransfer button[type="submit"]').prop('disabled', false);
+                        $('#btnUploadSpinner').addClass('d-none');
+                    }
+                });
             });
 
             // Generate Kontrak
