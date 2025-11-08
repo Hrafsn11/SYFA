@@ -43,15 +43,7 @@ class UniversalFormAction
 
         } catch (ValidationException $e) {
             $this->instanceLivewire->setErrorBag($e->validator->errors());
-
-            // modifikasi name error
-            $errorsArray = [];
-            foreach ($e->validator->errors()->toArray() as $key => $value) {
-                $errorsArray["form_data." . $key] = $value;
-            }
-            // end modifikasi
-
-            $this->instanceLivewire->dispatch('fail-validation', $errorsArray);
+            $this->instanceLivewire->dispatch('fail-validation', $e->validator->errors()->toArray());
         } catch (\Throwable $e) {
             $this->instanceLivewire->dispatch('show-error', message: $e->getMessage());
             $this->instanceLivewire->addError('general', $e->getMessage());

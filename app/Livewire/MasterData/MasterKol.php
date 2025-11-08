@@ -16,13 +16,21 @@ class MasterKol extends Component
     public $kol;
     public $persentase_pencairan;
     public $jmlh_hari_keterlambatan;
-    
 
     public function render()
     {
         return view('livewire.master-data.master-kol')
         ->layout('layouts.app', [
             'title' => 'Master Kol'
-        ]);
+        ]); 
+    }
+
+    public function setterFormData()
+    {
+        $this->form_data = [
+            'kol' => $this->kol,
+            'persentase_pencairan' => $this->persentase_pencairan,
+            'jmlh_hari_keterlambatan' => $this->jmlh_hari_keterlambatan,
+        ];
     }
 }

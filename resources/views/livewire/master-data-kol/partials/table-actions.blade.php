@@ -13,8 +13,8 @@
             type="button" 
             data-id="{{ $id }}" 
             title="Hapus">
-        <i class="ti ti-trash" wire:loading.remove wire:target='saveData("master-data.kol.destroy", @json(["id" => $id, "callback" => "afterAction"]))'></i>
-        <span class="spinner-border spinner-border-sm" wire:loading wire:target='saveData("master-data.kol.destroy", @json(["id" => $id, "callback" => "afterAction"]))'></span>
+        <i class="ti ti-trash"></i>
+        <span class="spinner-border spinner-border-sm"></span>
     </button>
 </div>
 

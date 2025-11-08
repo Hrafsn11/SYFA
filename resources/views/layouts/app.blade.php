@@ -267,7 +267,7 @@
     @rappasoftTableScripts
     @rappasoftTableThirdPartyScripts
 
-    <script src="{{ asset('js/content.js') }}"></script>
+    <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
     
     {{-- Custom page scripts --}}
     @stack('scripts')
