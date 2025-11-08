@@ -7,11 +7,16 @@
                 <i class="tf-icons ti ti-arrow-left me-1"></i>
                 Kembali
             </a>
-            <h4 class="fw-bold">Menu Pengajuan Peminjaman</h4>
+            <h4 class="fw-bold">{{ isset($isEdit) && $isEdit ? 'Edit' : 'Menu' }} Pengajuan Peminjaman {{ isset($pengajuan) ? '- ' . ($pengajuan->nomor_peminjaman ?? 'Draft') : '' }}</h4>
         </div>
 
-        <form action="#" method="POST" enctype="multipart/form-data" id="formPeminjaman">
+        <form action="{{ isset($isEdit) && $isEdit ? route('peminjaman.update', $pengajuan->id_pengajuan_peminjaman) : '#' }}" 
+              method="POST" enctype="multipart/form-data" id="formPeminjaman">
             @csrf
+            @if(isset($isEdit) && $isEdit)
+                @method('PUT')
+                <input type="hidden" name="id_debitur" value="{{ $pengajuan->id_debitur }}">
+            @endif
             <div class="card">
                 <div class="card-body">
                     <div class="row">
@@ -19,7 +24,7 @@
                             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
                             <input type="text" class="form-control non-editable" id="nama_perusahaan"
                                 name="nama_perusahaan"
-                                value="{{ old('nama_perusahaan', optional($master)->nama_debitur ?? 'Techno Infinity') }}"
+                                value="{{ old('nama_perusahaan', optional($master)->nama ?? 'Techno Infinity') }}"
                                 required readonly tabindex="-1">
                         </div>
                     </div>
@@ -30,21 +35,24 @@
                                 <div class="d-flex">
                                     <div class="form-check me-3">
                                         <input name="sumber_pembiayaan" class="form-check-input sumber-pembiayaan-radio"
-                                            type="radio" value="Eksternal" id="sumber_eksternal" checked required>
+                                            type="radio" value="Eksternal" id="sumber_eksternal" 
+                                            {{ (isset($pengajuan) && strtolower($pengajuan->sumber_pembiayaan ?? '') == 'eksternal') || !isset($pengajuan) ? 'checked' : '' }} required>
                                         <label class="form-check-label" for="sumber_eksternal">
                                             Eksternal
                                         </label>
                                     </div>
                                     <div class="form-check">
                                         <input name="sumber_pembiayaan" class="form-check-input sumber-pembiayaan-radio"
-                                            type="radio" value="Internal" id="sumber_internal" required>
+                                            type="radio" value="Internal" id="sumber_internal" 
+                                            {{ isset($pengajuan) && strtolower($pengajuan->sumber_pembiayaan ?? '') == 'internal' ? 'checked' : '' }} required>
                                         <label class="form-check-label" for="sumber_internal">
                                             Internal
                                         </label>
                                     </div>
                                 </div>
 
-                                <div class="mt-2" id="divSumberEksternal" style="display: block;">
+                                <div class="mt-2" id="divSumberEksternal" 
+                                     style="display: {{ (isset($pengajuan) && strtolower($pengajuan->sumber_pembiayaan ?? '') == 'internal') ? 'none' : 'block' }};">
                                     <select id="select2Basic" name="sumber_eksternal_id" class="form-select"
                                         data-placeholder="Pilih Sumber Pembiayaan Eksternal">
                                         <option value="">Pilih Sumber Pembiayaan</option>
@@ -66,7 +74,8 @@
                                                     $val = $sumber->id ?? ($sumber->id_instansi ?? '');
                                                 }
                                             @endphp
-                                            <option value="{{ $val }}" data-percent="{{ $percent }}">
+                                            <option value="{{ $val }}" data-percent="{{ $percent }}" 
+                                                {{ isset($pengajuan) && $pengajuan->id_instansi == $val ? 'selected' : '' }}>
                                                 {{ $label }}</option>
                                         @endforeach
                                     </select>
@@ -81,11 +90,11 @@
                                     <label for="selectBank" class="form-label">Nama Bank</label>
                                     <select class="form-select non-editable select-non-editable" id="selectBank"
                                         name="nama_bank" required disabled aria-disabled="true"
-                                        data-selected="{{ old('nama_bank', optional($master)->nama_bank) }}">
+                                        data-selected="{{ old('nama_bank', isset($isEdit) && $isEdit ? ($pengajuan->nama_bank ?? optional($master)->nama_bank) : optional($master)->nama_bank) }}">
                                         <option value="">Pilih Bank</option>
                                         @foreach ($banks as $bank)
                                             <option value="{{ $bank }}"
-                                                {{ old('nama_bank', optional($master)->nama_bank) == $bank ? 'selected' : '' }}>
+                                                {{ old('nama_bank', isset($isEdit) && $isEdit ? ($pengajuan->nama_bank ?? optional($master)->nama_bank) : optional($master)->nama_bank) == $bank ? 'selected' : '' }}>
                                                 {{ $bank }} </option>
                                         @endforeach
                                     </select>
@@ -93,13 +102,14 @@
                                 <div class="col-md-4 mb-3">
                                     <label for="no_rekening" class="form-label">No. Rekening</label>
                                     <input type="text" class="form-control non-editable" id="no_rekening"
-                                        name="no_rekening" value="{{ old('no_rekening', optional($master)->no_rek) }}"
+                                        name="no_rekening" value="{{ old('no_rekening', isset($isEdit) && $isEdit ? ($pengajuan->no_rekening ?? optional($master)->no_rek) : optional($master)->no_rek) }}"
                                         placeholder="Masukkan No. Rekening" required readonly tabindex="-1">
                                 </div>
                                 <div class="col-md-5 mb-3">
                                     <label for="nama_rekening" class="form-label">Nama Rekening</label>
                                     <input type="text" class="form-control" id="nama_rekening" name="nama_rekening"
-                                        placeholder="Masukkan Nama Rekening" required>
+                                        value="{{ old('nama_rekening', isset($isEdit) && $isEdit ? $pengajuan->nama_rekening : '') }}"
+                                        placeholder="Masukkan Nama Rekening">
                                 </div>
                             </div>
 
@@ -109,18 +119,24 @@
                                     <input class="form-control" type="file" id="lampiran_sid" name="lampiran_sid">
                                     <div class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls,
                                         png,
-                                        rar, zip)</div>
+                                        rar, zip)
+                                        @if(isset($isEdit) && $isEdit && $pengajuan->lampiran_sid)
+                                            <br><small>File saat ini: <a href="{{ Storage::url($pengajuan->lampiran_sid) }}" target="_blank">Lihat File</a></small>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="nilai_kol" class="form-label">Nilai KOL</label>
                                     <input type="text" class="form-control non-editable" id="nilai_kol" name="nilai_kol"
-                                        value="{{ old('nilai_kol', optional($master->kol)->kol ?? '') }}"
+                                        value="{{ old('nilai_kol', isset($isEdit) && $isEdit ? $pengajuan->nilai_kol : (optional($master->kol)->kol ?? '')) }}"
                                         placeholder="Nilai KOL" readonly tabindex="-1">
                                 </div>
                                 <div class="">
                                     <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
                                     <input type="text" class="form-control" id="defaultFormControlInput"
-                                        name="tujuan_pembiayaan" placeholder="Tujuan Pembiayaan"
+                                        name="tujuan_pembiayaan" 
+                                        value="{{ old('tujuan_pembiayaan', isset($isEdit) && $isEdit ? $pengajuan->tujuan_pembiayaan : '') }}"
+                                        placeholder="Tujuan Pembiayaan"
                                         aria-describedby="defaultFormControlHelp" />
                                 </div>
                             </div>
@@ -131,7 +147,8 @@
                                     <div class="d-flex">
                                         <div class="form-check me-3">
                                             <input name="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio"
-                                                type="radio" value="Invoice Financing" id="invoice_financing" checked
+                                                type="radio" value="Invoice Financing" id="invoice_financing" 
+                                                {{ old('jenis_pembiayaan', isset($isEdit) && $isEdit ? $pengajuan->jenis_pembiayaan : 'Invoice Financing') == 'Invoice Financing' ? 'checked' : '' }}
                                                 required>
                                             <label class="form-check-label" for="invoice_financing">
                                                 Invoice Financing
@@ -139,21 +156,27 @@
                                         </div>
                                         <div class="form-check me-3">
                                             <input name="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio"
-                                                type="radio" value="PO Financing" id="po_financing" required>
+                                                type="radio" value="PO Financing" id="po_financing"
+                                                {{ old('jenis_pembiayaan', isset($isEdit) && $isEdit ? $pengajuan->jenis_pembiayaan : '') == 'PO Financing' ? 'checked' : '' }}
+                                                required>
                                             <label class="form-check-label" for="po_financing">
                                                 PO Financing
                                             </label>
                                         </div>
                                         <div class="form-check me-3">
                                             <input name="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio"
-                                                type="radio" value="Installment" id="installment" required>
+                                                type="radio" value="Installment" id="installment"
+                                                {{ old('jenis_pembiayaan', isset($isEdit) && $isEdit ? $pengajuan->jenis_pembiayaan : '') == 'Installment' ? 'checked' : '' }}
+                                                required>
                                             <label class="form-check-label" for="installment">
                                                 Installment
                                             </label>
                                         </div>
                                         <div class="form-check">
                                             <input name="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio"
-                                                type="radio" value="Factoring" id="factoring" required>
+                                                type="radio" value="Factoring" id="factoring"
+                                                {{ old('jenis_pembiayaan', isset($isEdit) && $isEdit ? $pengajuan->jenis_pembiayaan : '') == 'Factoring' ? 'checked' : '' }}
+                                                required>
                                             <label class="form-check-label" for="factoring">
                                                 Factoring
                                             </label>
@@ -286,14 +309,20 @@
                         <div class="col-md-12">
                             <label for="catatan_lainnya" class="form-label">Catatan Lainnya</label>
                             <textarea class="form-control" id="catatan_lainnya" name="catatan_lainnya" rows="3"
-                                placeholder="Masukkan Catatan"></textarea>
+                                placeholder="Masukkan Catatan">{{ isset($pengajuan) ? $pengajuan->catatan_lainnya : '' }}</textarea>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end">
+                    <div class="d-flex justify-content-end gap-2">
+                        @if(isset($isEdit) && $isEdit)
+                            <a href="{{ route('peminjaman') }}" class="btn btn-outline-secondary">
+                                <i class="ti ti-x me-1"></i>
+                                Batal
+                            </a>
+                        @endif
                         <button type="submit" class="btn btn-primary">
-                            <span class="align-middle">Simpan Data</span>
-                            <i class="tf-icons ti ti-arrow-right ms-1"></i>
+                            <i class="ti ti-{{ isset($isEdit) && $isEdit ? 'device-floppy' : 'check' }} me-1"></i>
+                            <span class="align-middle">{{ isset($isEdit) && $isEdit ? 'Update' : 'Simpan' }} Data</span>
                         </button>
                     </div>
 
@@ -308,13 +337,14 @@
 @push('scripts')
     <script>
         // Data storage for invoice tables
-        let invoiceFinancingData = [];
-        let poFinancingData = [];
-        let installmentData = [];
-        let factoringData = [];
-        let currentJenisPembiayaan = 'Invoice Financing';
+        let invoiceFinancingData = @json($invoice_financing_data ?? []);
+        let poFinancingData = @json($po_financing_data ?? []);
+        let installmentData = @json($installment_data ?? []);
+        let factoringData = @json($factoring_data ?? []);
+        let currentJenisPembiayaan = '{{ isset($pengajuan) ? $pengajuan->jenis_pembiayaan : "Invoice Financing" }}';
+        let currentSumberPembiayaan = '{{ isset($pengajuan) ? $pengajuan->sumber_pembiayaan : "Eksternal" }}';
+        const isEdit = {{ isset($isEdit) && $isEdit ? 'true' : 'false' }};
         let modalInstance;
-        let currentSumberPembiayaan = 'Eksternal';
 
         $(document).ready(function() {
             modalInstance = new bootstrap.Modal(document.getElementById('modalTambahInvoice'));
@@ -325,6 +355,58 @@
 
             // Initialize Cleave.js untuk format rupiah
             initCleaveRupiah();
+
+            // Pre-fill data in edit mode
+            @if(isset($isEdit) && $isEdit && isset($pengajuan))
+                // Fill total pinjaman
+                @if($pengajuan->total_pinjaman)
+                    window.setCleaveValue(document.getElementById('total_pinjaman'), 'Rp {{ number_format($pengajuan->total_pinjaman, 0, ',', '.') }}');
+                @endif
+                
+                // Fill harapan tanggal pencairan
+                @if($pengajuan->harapan_tanggal_pencairan)
+                    $('#bs-datepicker-tanggal-pencairan').val('{{ \Carbon\Carbon::parse($pengajuan->harapan_tanggal_pencairan)->format('d/m/Y') }}');
+                @endif
+                
+                // Fill total bagi hasil
+                @if($pengajuan->total_bagi_hasil)
+                    window.setCleaveValue(document.getElementById('total_bagi_hasil'), 'Rp {{ number_format($pengajuan->total_bagi_hasil, 0, ',', '.') }}');
+                @endif
+                
+                // Fill rencana tanggal pembayaran
+                @if($pengajuan->rencana_tgl_pembayaran)
+                    $('#bs-datepicker-tanggal-pembayaran').val('{{ \Carbon\Carbon::parse($pengajuan->rencana_tgl_pembayaran)->format('d/m/Y') }}');
+                @endif
+                
+                // Fill pembayaran total
+                @if($pengajuan->pembayaran_total)
+                    window.setCleaveValue(document.getElementById('pembayaran_total'), 'Rp {{ number_format($pengajuan->pembayaran_total, 0, ',', '.') }}');
+                @endif
+                
+                // Fill installment specific fields
+                @if($pengajuan->jenis_pembiayaan == 'Installment')
+                    @if($pengajuan->tenor_pembayaran)
+                        $('#tenorPembayaran').val('{{ $pengajuan->tenor_pembayaran }}').trigger('change');
+                    @endif
+                    @if($pengajuan->persentase_bagi_hasil)
+                        $('#persentase_bagi_hasil').val('{{ $pengajuan->persentase_bagi_hasil }}');
+                    @endif
+                    @if($pengajuan->pps)
+                        window.setCleaveValue(document.getElementById('pps'), 'Rp {{ number_format($pengajuan->pps, 0, ',', '.') }}');
+                    @endif
+                    @if($pengajuan->s_finance)
+                        window.setCleaveValue(document.getElementById('s_finance'), 'Rp {{ number_format($pengajuan->s_finance, 0, ',', '.') }}');
+                    @endif
+                    @if($pengajuan->yang_harus_dibayarkan)
+                        window.setCleaveValue(document.getElementById('yang_harus_dibayarkan'), 'Rp {{ number_format($pengajuan->yang_harus_dibayarkan, 0, ',', '.') }}');
+                    @endif
+                @endif
+                
+                // Fill factoring specific fields
+                @if($pengajuan->jenis_pembiayaan == 'Factoring' && $pengajuan->total_nominal_yang_dialihkan)
+                    window.setCleaveValue(document.getElementById('total_nominal_yang_dialihkan'), 'Rp {{ number_format($pengajuan->total_nominal_yang_dialihkan, 0, ',', '.') }}');
+                @endif
+            @endif
 
             const totalPinjamanEl = document.getElementById('total_pinjaman');
             const totalBagiHasilEl = document.getElementById('total_bagi_hasil');
@@ -563,6 +645,11 @@
             $('#btnSimpanInvoice').on('click', function() {
                 saveInvoiceData();
             });
+
+            // For edit mode, render tables from loaded data
+            if (isEdit) {
+                renderInvoiceTables();
+            }
 
         });
 
@@ -978,8 +1065,8 @@
 
             // Note: removal is handled from the modal 'Hapus Data' button now.
 
-            // handle edit
-            $('.btn-edit-invoice').on('click', function(e) {
+            // handle edit - using event delegation for dynamically added elements
+            $(document).on('click', '.btn-edit-invoice', function(e) {
                 e.preventDefault();
                 const idx = $(this).data('idx');
                 const inv = invoiceFinancingData[idx];
@@ -1067,6 +1154,10 @@
             const tanggalPembayaranISO = convertDMYToISO(tanggalPembayaranRaw);
             if (tanggalPembayaranISO) fd.set('rencana_tgl_pembayaran', tanggalPembayaranISO);
 
+            // Clean and set total_pinjaman (remove Rp prefix and formatting)
+            const totalPinjamanRaw = window.getCleaveRawValue(document.getElementById('total_pinjaman')) || 0;
+            fd.set('total_pinjaman', totalPinjamanRaw);
+
             // include derived readonly totals if present
             const totalBagi = window.getCleaveRawValue(document.getElementById('total_bagi_hasil')) || 0;
             const pembayaranTotalRaw = window.getCleaveRawValue(document.getElementById('pembayaran_total')) || 0;
@@ -1099,17 +1190,24 @@
             if (sumberVal) fd.set('sumber_pembiayaan', sumberVal.toLowerCase());
 
             // Attach detail arrays and files depending on jenis pembiayaan
-            let postUrl = '{{ route('peminjaman.store') }}';
+            // Set URL based on edit or create mode
+            let postUrl = isEdit ? '{{ isset($pengajuan) ? route('peminjaman.update', $pengajuan->id_pengajuan_peminjaman) : '' }}' : '{{ route('peminjaman.store') }}';
+            
             if (currentJenisPembiayaan === 'Invoice Financing') {
-                fd.set('invoices', JSON.stringify(invoiceFinancingData.map(i => ({
-                    no_invoice: i.no_invoice,
-                    nama_client: i.nama_client,
-                    nilai_invoice: i.nilai_invoice,
-                    nilai_pinjaman: i.nilai_pinjaman,
-                    nilai_bagi_hasil: i.nilai_bagi_hasil,
-                    invoice_date: i.invoice_date,
-                    due_date: i.due_date
-                }))));
+                // Normalize invoice data before sending
+                const normalizedInvoices = invoiceFinancingData.map(i => {
+                    return {
+                        no_invoice: i.no_invoice,
+                        nama_client: i.nama_client,
+                        nilai_invoice: normalizeNumericForServer(i.nilai_invoice),
+                        nilai_pinjaman: normalizeNumericForServer(i.nilai_pinjaman),
+                        nilai_bagi_hasil: normalizeNumericForServer(i.nilai_bagi_hasil),
+                        invoice_date: i.invoice_date,
+                        due_date: i.due_date
+                    };
+                });
+                
+                fd.set('invoices', JSON.stringify(normalizedInvoices));
 
                 invoiceFinancingData.forEach(function(inv, idx) {
                     if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv
@@ -1204,15 +1302,20 @@
                 const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit
                     ._computed : null;
                 if (computed) {
-                    fd.set('total_pinjaman', computed.totalPinjaman);
+                    fd.set('total_pinjaman', normalizeNumericForServer(computed.totalPinjaman));
                     fd.set('tenor_pembayaran', computed.tenor);
                     fd.set('persentase_bagi_hasil', computed.persentase_bagi_hasil);
-                    fd.set('pps', computed.pps);
-                    fd.set('sfinance', computed.sfinance);
-                    fd.set('total_pembayaran', computed.total_pembayaran);
-                    fd.set('yang_harus_dibayarkan', computed.yang_harus_dibayarkan);
+                    fd.set('pps', normalizeNumericForServer(computed.pps));
+                    fd.set('sfinance', normalizeNumericForServer(computed.sfinance));
+                    fd.set('total_pembayaran', normalizeNumericForServer(computed.total_pembayaran));
+                    fd.set('yang_harus_dibayarkan', normalizeNumericForServer(computed.yang_harus_dibayarkan));
                 } else {
                     // fallback: if not computed on client, rely on server to compute
+                    // But still clean the nominal_pinjaman value
+                    if (nominalElForSubmit) {
+                        const cleanNominal = window.getCleaveRawValue(nominalElForSubmit) || 0;
+                        fd.set('total_pinjaman', normalizeNumericForServer(cleanNominal));
+                    }
                 }
             }
 
@@ -1255,7 +1358,16 @@
                 }
 
                 // Ensure status provided
-                if (!fd.get('status')) fd.set('status', 'submitted');
+                if (!fd.get('status')) {
+                    // In edit mode, preserve existing status; in create mode, set to 'submitted'
+                    const defaultStatus = isEdit ? '{{ $pengajuan->status ?? "submitted" }}' : 'submitted';
+                    fd.set('status', defaultStatus);
+                }
+                
+                // Add _method for PUT request in edit mode
+                if (isEdit) {
+                    fd.append('_method', 'PUT');
+                }
             }
 
             // send via AJAX
@@ -1272,41 +1384,39 @@
                     // optional: show loader
                 },
                 success: function(resp) {
-                    if (resp.success) {
-                        alert('Peminjaman berhasil disimpan');
-                        // redirect to detail
-                        if (resp.success) {
-                            // prefer to include explicit type to avoid ambiguous numeric ids across tables
-                            const mapType = {
-                                'Invoice Financing': 'invoice',
-                                'PO Financing': 'po',
-                                'Installment': 'installment',
-                                'Factoring': 'factoring'
-                            };
-
-                            let targetId = null;
-                            if (resp.data && resp.data.id_invoice_financing) targetId = resp.data
-                                .id_invoice_financing;
-                            else if (resp.id) targetId = resp.id;
-
-                            if (targetId) {
-                                const t = mapType[currentJenisPembiayaan] || null;
-                                const url = '/peminjaman/' + targetId + (t ? ('?type=' + t) : '');
-                                window.location.href = url;
-                            } else {
-                                window.location.href = '/peminjaman';
-                            }
-                        } else {
-                            alert('Gagal: ' + (resp.message || 'Unknown error'));
-                        }
+                    if (resp.success || resp.message) {
+                        const message = isEdit ? 'Pengajuan pinjaman berhasil diupdate!' : 'Peminjaman berhasil disimpan!';
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: message,
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = '{{ route("peminjaman") }}';
+                        });
                     } else {
-                        alert('Gagal: ' + (resp.message || 'Unknown error'));
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: resp.message || 'Terjadi kesalahan',
+                            confirmButtonText: 'OK'
+                        });
                     }
                 },
                 error: function(xhr) {
                     let msg = 'Terjadi kesalahan';
                     if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                    alert(msg);
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        msg += ':\n' + Object.values(errors).flat().join('\n');
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: msg,
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });

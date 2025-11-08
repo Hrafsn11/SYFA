@@ -11,15 +11,15 @@
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
 
-                    <div class="stepper-item completed" data-step="1">
+                    <div class="stepper-item" data-step="1">
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 1</div>
-                            <div class="step-name">Pengajuan Investor</div>
+                            <div class="step-name">Pengajuan Investasi</div>
                         </div>
                     </div>
 
-                    <div class="stepper-item active" data-step="2">
+                    <div class="stepper-item" data-step="2">
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 2</div>
@@ -31,7 +31,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 3</div>
-                            <div class="step-name">Validasi CEO SKI</div>
+                            <div class="step-name">Persetujuan Investor</div>
                         </div>
                     </div>
 
@@ -39,7 +39,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 4</div>
-                            <div class="step-name">Upload Bukti Transfer</div>
+                            <div class="step-name">Validasi CEO SKI</div>
                         </div>
                     </div>
 
@@ -47,7 +47,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
-                            <div class="step-name">Generate Kontrak</div>
+                            <div class="step-name">Validasi Direktur</div>
                         </div>
                     </div>
 
@@ -55,6 +55,22 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 6</div>
+                            <div class="step-name">Upload Bukti Transfer</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="7">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 7</div>
+                            <div class="step-name">Generate Kontrak</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="8">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 8</div>
                             <div class="step-name">Selesai</div>
                         </div>
                     </div>
