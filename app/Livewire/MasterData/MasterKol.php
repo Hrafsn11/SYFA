@@ -10,9 +10,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class MasterKol extends Component
 {    
-    private string $validateClass = MasterKolRequest::class;
-
     use HasUniversalFormAction, HasValidate;
+    private string $validateClass = MasterKolRequest::class;
+    
+    public $kol;
+    public $persentase_pencairan;
+    public $jmlh_hari_keterlambatan;
+    
 
     public function render()
     {

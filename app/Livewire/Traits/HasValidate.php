@@ -6,6 +6,11 @@ use Illuminate\Validation\ValidationException;
 
 trait HasValidate
 {
+    public function updated($name, $value)
+    {
+        $this->validateOnly($name); 
+    }
+
     protected function rules()
     {
         $validatorClass = $this->validateClass;
@@ -13,10 +18,10 @@ trait HasValidate
         $validate = new $validatorClass();
         $validate = $validate->rules();
 
-        foreach ($validate as $key => $rule) {
-            $validate["form_data.$key"] = $rule;
-            unset($validate[$key]);
-        }
+        // foreach ($validate as $key => $rule) {
+        //     $validate["form_data.$key"] = $rule;
+        //     unset($validate[$key]);
+        // }
 
         return $validate;
     }
@@ -28,10 +33,10 @@ trait HasValidate
         $validate = new $validatorClass();
         $validateMessage = $validate->messages();
 
-        foreach ($validateMessage as $key => $rule) {
-            $validateMessage["form_data.$key"] = $rule;
-            unset($validateMessage[$key]);
-        }
+        // foreach ($validateMessage as $key => $rule) {
+        //     $validateMessage["form_data.$key"] = $rule;
+        //     unset($validateMessage[$key]);
+        // }
 
         return $validateMessage;
     }
