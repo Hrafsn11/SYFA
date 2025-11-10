@@ -31,21 +31,21 @@
                     <div class="modal-body">
                         <div class="mb-3 form-group">
                             <label for="kol" class="form-label">KOL <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="kol" placeholder="Masukkan KOL" wire:model.live="kol">
+                            <input type="text" class="form-control" id="kol" placeholder="Masukkan KOL" wire:model.blur="kol">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
                             <label for="persentase_keterlambatan" class="form-label">
                                 Persentase Pencairan <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="persentase_keterlambatan" placeholder="Masukkan Persentase Pencairan" wire:model.live="persentase_pencairan">
+                            <input type="text" class="form-control" id="persentase_keterlambatan" placeholder="Masukkan Persentase Pencairan" wire:model.blur="persentase_pencairan">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
                             <label for="tanggal_tenggat" class="form-label">
                                 Jumlah Hari Keterlambatan <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="tanggal_tenggat" placeholder="Masukkan Jumlah Hari Keterlambatan" wire:model.live="jmlh_hari_keterlambatan">
+                            <input type="text" class="form-control" id="tanggal_tenggat" placeholder="Masukkan Jumlah Hari Keterlambatan" wire:model.blur="jmlh_hari_keterlambatan">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -87,6 +87,11 @@
         @this.set('persentase_pencairan', data.persentase_pencairan);
         @this.set('jmlh_hari_keterlambatan', data.jmlh_hari_keterlambatan);
     }
+
+    $('.modal').on('hide.bs.modal', function() {
+        $(this).find('form').attr('wire:submit', `{!! $urlAction["store_master_kol"] !!}`);
+        $(this).find('.modal-title').text('Tambah KOL');
+    });
 
     $(document).on('click', '.kol-delete-btn', function(e) {
         e.preventDefault();

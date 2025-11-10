@@ -2,6 +2,7 @@
 
 namespace App\Livewire\MasterData;
 
+use App\Attributes\FieldInput;
 use Livewire\Component;
 use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
@@ -12,11 +13,13 @@ class SumberPendanaanEksternal extends Component
     use HasUniversalFormAction, HasValidate;
     private string $validateClass = MasterSumberPendanaanEksternalRequest::class;
 
-    public $nama_instansi;
-    public $persentase_bagi_hasil;
+    #[FieldInput]
+    public $nama_instansi, $persentase_bagi_hasil;
 
     public function mount() {
         $this->setUrlSaveData('store_pendanaan', 'master-data.sumber-pendanaan-eksternal.store', ["callback" => "afterAction"]);
+        $this->setUrlSaveData('update_pendanaan', 'master-data.sumber-pendanaan-eksternal.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
+        $this->setUrlSaveData('delete_pendanaan', 'master-data.sumber-pendanaan-eksternal.destroy', ["id" => "id_placeholder", "callback" => "afterAction"]);
     }
 
     public function render()
