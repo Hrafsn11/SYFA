@@ -20,6 +20,7 @@ class MasterKol extends Component
     public function mount() {
         $this->setUrlSaveData('store_master_kol', 'master-data.kol.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_master_kol', 'master-data.kol.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
+        $this->setUrlSaveData('delete_master_kol', 'master-data.kol.destroy', ["id" => "id_placeholder", "callback" => "afterAction"]);
     }
 
     public function render()

@@ -12,14 +12,14 @@ trait HasUniversalFormAction
     public function setUrlSaveData($nameVariable, $routeName, array $params = [])
     {
         $paramsJson = json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $this->urlAction[$nameVariable] = "saveData('{$routeName}', {$paramsJson})";
+        $this->urlAction[$nameVariable] = 'saveData("'.$routeName.'", '.$paramsJson.')';
         return $this->urlAction[$nameVariable];
     }
 
     public function setUrlLoadData($nameVariable, $routeName, array $params = [])
     {
         $paramsJson = json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $this->urlAction[$nameVariable] = "loadDataForm('{$routeName}', {$paramsJson})";
+        $this->urlAction[$nameVariable] = 'loadDataForm("'.$routeName.'", '.$paramsJson.')';
         return $this->urlAction[$nameVariable];
     }
 

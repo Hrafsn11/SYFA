@@ -102,10 +102,4 @@ class KolTable extends DataTableComponent
                 ->excludeFromColumnSelect(),
         ];
     }
-
-    public function afterLoadData($payload)
-    {  
-        $payload = $payload->data;
-        $this->setUrlSaveData('update_kol', 'master-data.kol.update', ['id' => $payload->id_kol, 'callback' => 'afterAction']);
-    }
 }
