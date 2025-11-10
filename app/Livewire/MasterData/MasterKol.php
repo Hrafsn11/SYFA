@@ -3,26 +3,31 @@
 namespace App\Livewire\MasterData;
 
 use Livewire\Component;
-use App\Livewire\Traits\HasUniversalFormAction;
+use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasValidate;
 use App\Http\Requests\MasterKolRequest;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Livewire\Traits\HasUniversalFormAction;
 
 class MasterKol extends Component
 {    
     use HasUniversalFormAction, HasValidate;
     private string $validateClass = MasterKolRequest::class;
     
-    public $kol;
-    public $persentase_pencairan;
-    public $jmlh_hari_keterlambatan;
+    #[FieldInput]
+    public $kol, $persentase_pencairan, $jmlh_hari_keterlambatan;
+
+    public function mount() {
+        $this->setUrlSaveData('store_master_kol', 'master-data.kol.store', ["callback" => "afterAction"]);
+        $this->setUrlSaveData('update_master_kol', 'master-data.kol.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
+    }
 
     public function render()
     {
         return view('livewire.master-data.master-kol')
         ->layout('layouts.app', [
             'title' => 'Master Kol'
-        ]); 
+        ]);
     }
 
     public function setterFormData()

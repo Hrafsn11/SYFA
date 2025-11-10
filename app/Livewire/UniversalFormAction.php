@@ -41,6 +41,8 @@ class UniversalFormAction
                 'payload' => $result,
             ]);
 
+            return (object) $result->original;
+
         } catch (ValidationException $e) {
             $this->instanceLivewire->setErrorBag($e->validator->errors());
             $this->instanceLivewire->dispatch('fail-validation', $e->validator->errors()->toArray());
@@ -68,6 +70,8 @@ class UniversalFormAction
                 'callback' => $callback ?? null,
                 'payload' => $result->original,
             ]);
+
+            return (object) $result->original;
 
         } catch (ValidationException $e) {
             $this->instanceLivewire->setErrorBag($e->validator->errors());

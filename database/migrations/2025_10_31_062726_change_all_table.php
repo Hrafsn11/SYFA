@@ -12,14 +12,26 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::dropAllTables();
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        $tables = collect(DB::select('SHOW TABLES'))
+            ->map(fn($table) => array_values((array)$table)[0])
+            ->reject(fn($name) => $name === 'migrations');
+        // Hapus semua tabel kecuali 'migrations'
+        foreach ($tables as $table) {
+            if ($table !== 'migrations') {
+                Schema::dropIfExists($table);
+            }
+        }
 
         // migration table
-        Schema::create('migrations', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('migration');
-            $table->integer('batch');
-        });
+        if (!Schema::hasTable('migrations')) {
+            Schema::create('migrations', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('migration');
+                $table->integer('batch');
+            });
+        }
 
         // users table
         Schema::create('users', function (Blueprint $table) {

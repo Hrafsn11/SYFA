@@ -444,16 +444,16 @@ function errorFormater(keyError) {
 $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
     let form = $(this).find('form');
 
-    form.trigger('reset');
-    form.find('.select2').val(null).trigger('change');
-    form.find('.select2_custom').val(null).trigger('change');
+    // form.trigger('reset');
+    // form.find('.select2').val(null).trigger('change');
+    // form.find('.select2_custom').val(null).trigger('change');
     form.find('.is-invalid').removeClass('is-invalid');
     form.find('.invalid-feedback').html(null).removeClass('d-block');
     // form.find('[data-repeater-item]').slice(1).empty();
-    form.find('[data-repeater-list]').each(function () {
-        $(this).find('[data-repeater-item]').slice(1).empty();
-    });
-    form.find('.current-file').remove();
+    // form.find('[data-repeater-list]').each(function () {
+    //     $(this).find('[data-repeater-item]').slice(1).empty();
+    // });
+    // form.find('.current-file').remove();
 
     // reset flatpickr
     // form.find('.flatpickr-date').val(null).trigger('change');
@@ -462,6 +462,12 @@ $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
     //     altFormat: 'j F Y',
     //     dateFormat: 'Y-m-d'
     // });
+});
+
+$('.modal:not(.custom-reset)').on('show.bs.modal', function () {
+    let form = $(this).find('form');
+    form.find('.is-invalid').removeClass('is-invalid');
+    form.find('.invalid-feedback').html(null).removeClass('d-block');
 });
 
 // // Triggered every update status button
@@ -608,6 +614,10 @@ function tooltip() {
 // }
 
 document.addEventListener('livewire:init', () => {
+    $('.modal').on('hide.bs.modal', function () {
+        Livewire.dispatch('close-modal');
+    });
+
     Livewire.on('after-action', (event) => {
         const callbackName = event[0].callback;
         const payload = event[0]?.payload?.original || {};

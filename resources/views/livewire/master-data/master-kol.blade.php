@@ -14,20 +14,20 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-datatable">
-                    <livewire:kol-table />
+                    <livewire:kol-table/>
                 </div>
             </div>
         </div>
     </div>
     {{-- Modal Tambah/Edit KOL --}}
-    <div class="modal fade" id="modalTambahKOL" tabindex="-1" wire:ignore>
+    <div class="modal fade" id="modalTambahKOL" wire:ignore>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tambah KOL</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form wire:submit='saveData("master-data.kol.store", @json(["callback" => "afterAction"]))'>
+                <form wire:submit='{!! $urlAction['store_master_kol'] !!}'>
                     <div class="modal-body">
                         <div class="mb-3 form-group">
                             <label for="kol" class="form-label">KOL <span class="text-danger">*</span></label>
@@ -60,30 +60,6 @@
             </div>
         </div>
     </div>
-
-    {{-- Modal Confirm Delete --}}
-    <div class="modal fade" id="modalConfirmDeleteKOL" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form wire:submit='saveData("master-data.kol.store", @json([]))'>
-                    <div class="modal-body">
-                        <p class="mb-0">Apakah Anda yakin ingin menghapus KOL ini? Tindakan ini tidak dapat dibatalkan.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-danger" id="btnConfirmDeleteKOL">
-                            <span class="spinner-border spinner-border-sm me-2 d-none" id="btnDeleteSpinner"></span>
-                            Hapus
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </div>
 
 @push('scripts')
@@ -100,18 +76,16 @@
         const modal = $('#modalTambahKOL');
         const form = modal.find('form');
 
-        form.attr('wire:submit', `saveData("master-data.kol.update", {"id":"id_placeholder", "callback":"afterAction"})`.replace('"id_placeholder"', '"' + data.id_kol + '"'));
+        form.attr('wire:submit', `{!! $urlAction["update_master_kol"] !!}`.replace('id_placeholder', data.id_kol));
 
         // ubah title modal
         modal.find('.modal-title').text('Edit KOL');
         // tampilkan modal
         modal.modal('show');
 
-        @this.set('form_data', {
-            kol: data.kol,
-            persentase_pencairan: data.persentase_pencairan,
-            jmlh_hari_keterlambatan: data.jmlh_hari_keterlambatan,
-        });
+        @this.set('kol', data.kol);
+        @this.set('persentase_pencairan', data.persentase_pencairan);
+        @this.set('jmlh_hari_keterlambatan', data.jmlh_hari_keterlambatan);
     }
 
     $(document).on('click', '.kol-delete-btn', function(e) {

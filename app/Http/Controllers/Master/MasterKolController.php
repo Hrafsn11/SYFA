@@ -22,8 +22,12 @@ class MasterKolController extends Controller
 
     public function store(MasterKolRequest $request)
     {
-        MasterKol::create($request->validated());
-        return Response::success(null, 'KOL berhasil ditambahkan');
+        try {
+            MasterKol::create($request->validated());
+            return Response::success(null, 'KOL berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function edit($id)
@@ -34,19 +38,23 @@ class MasterKolController extends Controller
 
     public function update(MasterKolRequest $request, $id)
     {
-        $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        $kol->update($request->validated());
-        return Response::success(null, 'KOL berhasil diupdate');
+        try {
+            $kol = MasterKol::where('id_kol', $id)->firstOrFail();
+            $kol->update($request->validated());
+            return Response::success(null, 'KOL berhasil diupdate');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function destroy($id)
     {
-        $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        $kol->delete();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'KOL berhasil dihapus'
-        ]);
+        try {
+            $kol = MasterKol::where('id_kol', $id)->firstOrFail();
+            $kol->delete();
+            return Response::success(null, 'KOL berhasil dihapus');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 }
