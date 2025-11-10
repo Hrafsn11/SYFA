@@ -18,7 +18,7 @@
                                 <th class="text-center">Due date</th>
                                 <th class="text-center">hari keterlambatan</th>
                                 <th class="text-center">total bulan pemakaian</th>
-                                <th class="text-center">nilai total bulan pengembalian</th>
+                                <th class="text-center">nilai total pengembalian</th>
                             </tr>
                         </thead>
                         <tbody>
