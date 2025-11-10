@@ -12,6 +12,7 @@ class RoleManagement extends Component
     use WithPagination;
 
     public $name = '';
+    public $restriction = '';
     public $permissions = [];
     public $selectedRole = null;
     public $showModal = false;
@@ -19,6 +20,7 @@ class RoleManagement extends Component
 
     protected $rules = [
         'name' => 'required|string|max:255|unique:roles,name',
+        'restriction' => 'nullable|in:0,1',
         'permissions' => 'array',
     ];
 
@@ -29,7 +31,11 @@ class RoleManagement extends Component
                 $query->where('name', 'like', '%' . $this->search . '%');
             })->paginate(10);
 
-        $allPermissions = Permission::where('guard_name', 'web')->get();
+        $allPermissions = Permission::all()->mapToGroups(function ($permission) {
+            [$group, $action] = explode('.', $permission->name);
+            return [$group => ['id' => $permission->id, 'name' => $action]];
+        });
+
 
         return view('livewire.role-management', compact('roles', 'allPermissions'))
             ->layout('layouts.app');
@@ -43,9 +49,11 @@ class RoleManagement extends Component
 
     public function edit($roleId)
     {
+
         $role = Role::findOrFail($roleId);
         $this->selectedRole = $role;
         $this->name = $role->name;
+        $this->restriction = $role->restriction ?? 1;
         $this->permissions = $role->permissions->pluck('id')->toArray();
         $this->showModal = true;
     }
@@ -60,11 +68,13 @@ class RoleManagement extends Component
 
         if ($this->selectedRole) {
             $role = $this->selectedRole;
-            $role->update(['name' => $this->name]);
+            $role->update([
+                'name' => $this->name,
+                'restriction' => $this->restriction
+            ]);
             
-            // Get permission names from IDs and sync with web guard
-            $permissionNames = Permission::where('guard_name', 'web')
-                ->whereIn('id', $this->permissions)
+            // Convert permission IDs to names for syncing
+            $permissionNames = Permission::whereIn('id', $this->permissions)
                 ->pluck('name')
                 ->toArray();
             $role->syncPermissions($permissionNames);
@@ -73,12 +83,12 @@ class RoleManagement extends Component
         } else {
             $role = Role::create([
                 'name' => $this->name,
+                'restriction' => $this->restriction,
                 'guard_name' => 'web'
             ]);
             
-            // Get permission names from IDs and sync with web guard
-            $permissionNames = Permission::where('guard_name', 'web')
-                ->whereIn('id', $this->permissions)
+            // Convert permission IDs to names for syncing
+            $permissionNames = Permission::whereIn('id', $this->permissions)
                 ->pluck('name')
                 ->toArray();
             $role->syncPermissions($permissionNames);
@@ -112,6 +122,7 @@ class RoleManagement extends Component
     private function resetForm()
     {
         $this->name = '';
+        $this->restriction = '';
         $this->permissions = [];
         $this->selectedRole = null;
         $this->resetErrorBag();
