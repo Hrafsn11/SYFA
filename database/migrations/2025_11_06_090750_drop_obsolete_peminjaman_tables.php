@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Disable foreign key checks temporarily
+        Schema::disableForeignKeyConstraints();
+        
         Schema::dropIfExists('peminjaman_invoice_financing');
         Schema::dropIfExists('invoice_financing');
         Schema::dropIfExists('peminjaman_po_financing');
@@ -19,6 +22,9 @@ return new class extends Migration
         Schema::dropIfExists('installment_financing');
         Schema::dropIfExists('peminjaman_factoring');
         Schema::dropIfExists('factoring_financing');
+        
+        // Re-enable foreign key checks
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
