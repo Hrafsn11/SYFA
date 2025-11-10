@@ -198,8 +198,8 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">Total
                                             Pinjaman</label>
-                                        <input type="text" class="form-control input-rupiah" id="total_pinjaman"
-                                            name="total_pinjaman" placeholder="Rp 0">
+                                        <input type="text" class="form-control input-rupiah non-editable" id="total_pinjaman"
+                                            name="total_pinjaman" placeholder="Rp 0" readonly tabindex="-1">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="bs-datepicker-tanggal-pencairan" class="form-label">Harapan Tanggal
@@ -251,7 +251,7 @@
                                     <div class="col-md-6">
                                         <label for="nominal_pinjaman" class="form-label">Total Pinjaman</label>
                                         <input type="text" class="form-control input-rupiah" id="nominal_pinjaman"
-                                            name="nominal_pinjaman" placeholder="Rp 0">
+                                            name="nominal_pinjaman" placeholder="Rp 0" readonly>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="tenorPembayaran" class="form-label">Tenor Pembayaran</label>
@@ -412,24 +412,8 @@
             const totalBagiHasilEl = document.getElementById('total_bagi_hasil');
             const pembayaranTotalEl = document.getElementById('pembayaran_total');
 
-            function recalcBagiHasil() {
-                if (!totalPinjamanEl) return;
-                const raw = Number(window.getCleaveRawValue(totalPinjamanEl)) || 0;
-                const percent = (typeof window.getBagiPercent === 'function') ? window.getBagiPercent() : 2;
-                const bagi = Math.round(raw * (percent / 100) * 100) / 100;
-                const pembayaran = Math.round((raw + bagi) * 100) / 100;
-                window.setCleaveValue(totalBagiHasilEl, 'Rp ' + bagi.toString().replace(/\B(?=(\d{3})+(?!\d))/g,
-                    ","));
-                window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaran.toString().replace(
-                    /\B(?=(\d{3})+(?!\d))/g, ","));
-            }
-
-            if (totalPinjamanEl) {
-                totalPinjamanEl.addEventListener('input', function() {
-                    clearTimeout(totalPinjamanEl._calcTimeout);
-                    totalPinjamanEl._calcTimeout = setTimeout(recalcBagiHasil, 150);
-                });
-            }
+            // Total Pinjaman and Total Bagi Hasil are now auto-calculated from modal data
+            // No manual calculation needed here, they are updated by updateTotalFrom* functions
 
             // Installment live calculation
             const nominalPinjamanEl = document.getElementById('nominal_pinjaman');
@@ -570,17 +554,13 @@
                 } else {
                     $('#divSumberEksternal').slideUp();
                 }
-                // Recalculate bagi hasil when sumber type changes
-                try {
-                    recalcBagiHasil();
-                } catch (e) {}
+                // No need to recalc - totals are calculated from modal data
             });
 
-            // When external sumber selection changes, recalc bagi hasil
+            // When external sumber selection changes, update getBagiPercent for modal calculations
             $('#select2Basic').on('change', function() {
-                try {
-                    recalcBagiHasil();
-                } catch (e) {}
+                // The getBagiPercent() function will return updated percentage
+                // This affects modal calculations, not main form totals
                 try {} catch (e) {
                     // suppressed
                 }
@@ -649,6 +629,16 @@
             // For edit mode, render tables from loaded data
             if (isEdit) {
                 renderInvoiceTables();
+                // Update totals on load based on current jenis pembiayaan
+                setTimeout(function() {
+                    if (currentJenisPembiayaan === 'Invoice Financing') {
+                        updateTotalFromInvoiceFinancing();
+                    } else if (currentJenisPembiayaan === 'PO Financing') {
+                        updateTotalFromPOFinancing();
+                    } else if (currentJenisPembiayaan === 'Factoring') {
+                        updateTotalFromFactoring();
+                    }
+                }, 300);
             }
 
         });
@@ -715,6 +705,7 @@
 
                 modalInstance.hide();
                 renderInvoiceTables();
+                updateTotalFromInvoiceFinancing(); // Update totals after saving
             } else if (currentJenisPembiayaan === 'PO Financing') {
                 const index = editInvoiceIndex >= 0 ? editInvoiceIndex : poFinancingData.length;
                 const no_kontrak = $('#modal_no_kontrak_po').val();
@@ -774,6 +765,7 @@
 
                 modalInstance.hide();
                 renderPOFinancingTable();
+                updateTotalFromPOFinancing(); // Update totals after saving
             } else if (currentJenisPembiayaan === 'Installment') {
                 const index = editInvoiceIndex >= 0 ? editInvoiceIndex : installmentData.length;
                 const no_invoice = $('#modal_no_invoice_inst').val();
@@ -879,6 +871,103 @@
 
                 modalInstance.hide();
                 renderFactoringTable();
+                updateTotalFromFactoring(); // Update totals after saving
+            }
+        }
+
+        // Update total pinjaman and bagi hasil from Invoice Financing data
+        function updateTotalFromInvoiceFinancing() {
+            try {
+                let totalPinjaman = 0;
+                let totalBagiHasil = 0;
+
+                invoiceFinancingData.forEach(function(inv) {
+                    totalPinjaman += Number(inv.nilai_pinjaman) || 0;
+                    totalBagiHasil += Number(inv.nilai_bagi_hasil) || 0;
+                });
+
+                const totalPinjamanEl = document.getElementById('total_pinjaman');
+                const totalBagiHasilEl = document.getElementById('total_bagi_hasil');
+                const pembayaranTotalEl = document.getElementById('pembayaran_total');
+
+                if (totalPinjamanEl) {
+                    window.setCleaveValue(totalPinjamanEl, 'Rp ' + totalPinjaman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+                if (totalBagiHasilEl) {
+                    window.setCleaveValue(totalBagiHasilEl, 'Rp ' + totalBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+                if (pembayaranTotalEl) {
+                    const pembayaranTotal = totalPinjaman + totalBagiHasil;
+                    window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaranTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+
+                console.log('Invoice Financing Totals Updated:', { totalPinjaman, totalBagiHasil });
+            } catch (e) {
+                console.error('Error updating Invoice Financing totals:', e);
+            }
+        }
+
+        // Update total pinjaman and bagi hasil from PO Financing data
+        function updateTotalFromPOFinancing() {
+            try {
+                let totalPinjaman = 0;
+                let totalBagiHasil = 0;
+
+                poFinancingData.forEach(function(po) {
+                    totalPinjaman += Number(po.nilai_pinjaman) || 0;
+                    totalBagiHasil += Number(po.nilai_bagi_hasil) || 0;
+                });
+
+                const totalPinjamanEl = document.getElementById('total_pinjaman');
+                const totalBagiHasilEl = document.getElementById('total_bagi_hasil');
+                const pembayaranTotalEl = document.getElementById('pembayaran_total');
+
+                if (totalPinjamanEl) {
+                    window.setCleaveValue(totalPinjamanEl, 'Rp ' + totalPinjaman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+                if (totalBagiHasilEl) {
+                    window.setCleaveValue(totalBagiHasilEl, 'Rp ' + totalBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+                if (pembayaranTotalEl) {
+                    const pembayaranTotal = totalPinjaman + totalBagiHasil;
+                    window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaranTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+
+                console.log('PO Financing Totals Updated:', { totalPinjaman, totalBagiHasil });
+            } catch (e) {
+                console.error('Error updating PO Financing totals:', e);
+            }
+        }
+
+        // Update total pinjaman and bagi hasil from Factoring data
+        function updateTotalFromFactoring() {
+            try {
+                let totalPinjaman = 0;
+                let totalBagiHasil = 0;
+
+                factoringData.forEach(function(fact) {
+                    totalPinjaman += Number(fact.nilai_pinjaman) || 0;
+                    totalBagiHasil += Number(fact.nilai_bagi_hasil) || 0;
+                });
+
+                const totalPinjamanEl = document.getElementById('total_pinjaman');
+                const totalBagiHasilEl = document.getElementById('total_bagi_hasil');
+                const pembayaranTotalEl = document.getElementById('pembayaran_total');
+
+                if (totalPinjamanEl) {
+                    window.setCleaveValue(totalPinjamanEl, 'Rp ' + totalPinjaman.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+                if (totalBagiHasilEl) {
+                    window.setCleaveValue(totalBagiHasilEl, 'Rp ' + totalBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+                if (pembayaranTotalEl) {
+                    const pembayaranTotal = totalPinjaman + totalBagiHasil;
+                    window.setCleaveValue(pembayaranTotalEl, 'Rp ' + pembayaranTotal.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                }
+
+                console.log('Factoring Totals Updated:', { totalPinjaman, totalBagiHasil });
+            } catch (e) {
+                console.error('Error updating Factoring totals:', e);
             }
         }
 
@@ -1101,10 +1190,12 @@
                         case 'Invoice Financing':
                             invoiceFinancingData.splice(editInvoiceIndex, 1);
                             renderInvoiceTables();
+                            updateTotalFromInvoiceFinancing(); // Update totals after delete
                             break;
                         case 'PO Financing':
                             poFinancingData.splice(editInvoiceIndex, 1);
                             renderPOFinancingTable();
+                            updateTotalFromPOFinancing(); // Update totals after delete
                             break;
                         case 'Installment':
                             installmentData.splice(editInvoiceIndex, 1);
@@ -1113,6 +1204,7 @@
                         case 'Factoring':
                             factoringData.splice(editInvoiceIndex, 1);
                             renderFactoringTable();
+                            updateTotalFromFactoring(); // Update totals after delete
                             break;
                     }
                     editInvoiceIndex = -1;
@@ -1497,13 +1589,79 @@
                     break;
             }
 
-            // Initialize datepicker for modal after showing
             setTimeout(function() {
                 initModalBootstrapDatepicker();
-                initCleaveRupiah(); // Reinitialize Cleave for modal inputs
+                initCleaveRupiah(); 
+                // Re-initialize event listeners after a slight delay to ensure Cleave is ready
+                setTimeout(function() {
+                    initModalBagiHasilCalculation();
+                    console.log('Modal bagi hasil calculation initialized');
+                }, 200);
             }, 100);
 
             modalInstance.show();
+        }
+
+        function initModalBagiHasilCalculation() {
+            console.log('Setting up bagi hasil calculation listeners...');
+            
+            $('#modal_nilai_pinjaman').off('input keyup').on('input keyup', function() {
+                try {
+                    console.log('Invoice Financing nilai pinjaman changed');
+                    const nilaiPinjaman = window.getCleaveRawValue(this) || 0;
+                    console.log('Nilai Pinjaman:', nilaiPinjaman);
+                    
+                    const bagiPercent = window.getBagiPercent();
+                    console.log('Bagi Percent:', bagiPercent);
+                    
+                    const nilaiBagiHasil = Math.round(nilaiPinjaman * (bagiPercent / 100));
+                    console.log('Nilai Bagi Hasil:', nilaiBagiHasil);
+                    
+                    const bagiHasilEl = document.getElementById('modal_nilai_bagi_hasil');
+                    if (bagiHasilEl) {
+                        window.setCleaveValue(bagiHasilEl, 'Rp ' + nilaiBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                        console.log('Bagi hasil updated for Invoice Financing');
+                    }
+                } catch (e) {
+                    console.error('Error calculating Invoice Financing bagi hasil:', e);
+                }
+            });
+
+            $('#modal_nilai_pinjaman_po').off('input keyup').on('input keyup', function() {
+                try {
+                    console.log('PO Financing nilai pinjaman changed');
+                    const nilaiPinjaman = window.getCleaveRawValue(this) || 0;
+                    const bagiPercent = window.getBagiPercent();
+                    const nilaiBagiHasil = Math.round(nilaiPinjaman * (bagiPercent / 100));
+                    
+                    const bagiHasilEl = document.getElementById('modal_nilai_bagi_hasil_po');
+                    if (bagiHasilEl) {
+                        window.setCleaveValue(bagiHasilEl, 'Rp ' + nilaiBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                        console.log('Bagi hasil updated for PO Financing');
+                    }
+                } catch (e) {
+                    console.error('Error calculating PO Financing bagi hasil:', e);
+                }
+            });
+
+            $('#modal_nilai_pinjaman_fact').off('input keyup').on('input keyup', function() {
+                try {
+                    console.log('Factoring nilai pinjaman changed');
+                    const nilaiPinjaman = window.getCleaveRawValue(this) || 0;
+                    const bagiPercent = window.getBagiPercent();
+                    const nilaiBagiHasil = Math.round(nilaiPinjaman * (bagiPercent / 100));
+                    
+                    const bagiHasilEl = document.getElementById('modal_nilai_bagi_hasil_fact');
+                    if (bagiHasilEl) {
+                        window.setCleaveValue(bagiHasilEl, 'Rp ' + nilaiBagiHasil.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                        console.log('Bagi hasil updated for Factoring');
+                    }
+                } catch (e) {
+                    console.error('Error calculating Factoring bagi hasil:', e);
+                }
+            });
+            
+            console.log('All bagi hasil listeners set up successfully');
         }
 
 
