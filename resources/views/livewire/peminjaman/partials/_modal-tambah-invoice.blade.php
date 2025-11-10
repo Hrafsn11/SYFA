@@ -34,8 +34,11 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nilai Bagi Hasil</label>
-                            <input type="text" class="form-control input-rupiah" id="modal_nilai_bagi_hasil"
-                                placeholder="Rp 0">
+                            <div class="input-group">
+                                <input type="text" class="form-control input-rupiah non-editable" id="modal_nilai_bagi_hasil"
+                                    placeholder="Rp 0" readonly tabindex="-1">
+                                <span class="input-group-text">/Bulan</span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -113,8 +116,11 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nilai Bagi Hasil</label>
-                            <input type="text" class="form-control input-rupiah" id="modal_nilai_bagi_hasil_po"
-                                placeholder="Rp 0">
+                            <div class="input-group">
+                                <input type="text" class="form-control input-rupiah non-editable" id="modal_nilai_bagi_hasil_po"
+                                    placeholder="Rp 0" readonly tabindex="-1">
+                                <span class="input-group-text">/Bulan</span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -230,15 +236,18 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Nilai Pinjaman</label>
                             <input type="text" class="form-control input-rupiah" id="modal_nilai_pinjaman_fact"
                                 placeholder="Rp 0">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label">Nilai Bagi Hasil</label>
-                            <input type="text" class="form-control input-rupiah" id="modal_nilai_bagi_hasil_fact"
-                                placeholder="Rp 0">
+                            <div class="input-group">
+                                <input type="text" class="form-control input-rupiah non-editable" id="modal_nilai_bagi_hasil_fact"
+                                    placeholder="Rp 0" readonly tabindex="-1">
+                                <span class="input-group-text">/Bulan</span>
+                            </div>
                         </div>
                     </div>
                     <div class="row mb-3">
