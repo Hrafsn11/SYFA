@@ -190,7 +190,7 @@ class PeminjamanController extends Controller
         } catch (\Throwable $e) {
             $sumber_eksternal = [];
         }
-
+        
         return view('livewire.peminjaman.detail', compact(
             'peminjaman', 'sumber_eksternal', 'banks', 'tenor_pembayaran',
             'invoice_financing_data', 'po_financing_data', 'installment_data', 'factoring_data',
@@ -1172,7 +1172,6 @@ class PeminjamanController extends Controller
             'Submit Dokumen', 
             'Dokumen Tervalidasi', 
             'Validasi Ditolak', 
-            'Dana Dicairkan',
             'Dana Sudah Dicairkan',
             'Debitur Setuju',
             'Pengajuan Ditolak Debitur',
@@ -1180,7 +1179,9 @@ class PeminjamanController extends Controller
             'Ditolak oleh CEO SKI',
             'Disetujui oleh Direktur SKI',
             'Ditolak oleh Direktur SKI',
-            'Generate Kontrak'
+            'Generate Kontrak',
+            'Menunggu Konfirmasi Debitur',
+            'Konfirmasi Ditolak Debitur'
         ];
         if (!in_array($status, $validStatuses)) {
             return response()->json(['success' => false, 'message' => 'Status tidak valid'], 400);
@@ -1276,7 +1277,7 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Pengajuan Ditolak Debitur') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_debitur');
-                $historyData['current_step'] = 8;
+                $historyData['current_step'] = 9;
             } elseif ($status === 'Disetujui oleh CEO SKI') {
                 $historyData['approve_by'] = auth()->id();
                 
@@ -1323,12 +1324,12 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Ditolak oleh Direktur SKI') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_direktur');
-                $historyData['current_step'] = 8;
+                $historyData['current_step'] = 9;
             } elseif ($status === 'Generate Kontrak') {
                 $historyData['approve_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan') ?? 'Kontrak berhasil digenerate';
                 $historyData['current_step'] = 7;
-            } elseif ($status === 'Dana Sudah Dicairkan') {
+            } elseif ($status === 'Menunggu Konfirmasi Debitur') {
                 // Handle file upload for dokumen transfer
                 if ($request->hasFile('dokumen_transfer')) {
                     $path = $request->file('dokumen_transfer')->store('peminjaman/bukti_transfer', 'public');
@@ -1338,6 +1339,13 @@ class PeminjamanController extends Controller
 
                 $historyData['approve_by'] = auth()->id();
                 $historyData['current_step'] = 8;
+            } elseif ($status === 'Konfirmasi Ditolak Debitur') {
+                $historyData['reject_by'] = auth()->id();
+                $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_konfirmasi_debitur_ditolak');
+                $historyData['current_step'] = 7;
+            } elseif ($status === 'Dana Sudah Dicairkan') {
+                $historyData['approve_by'] = auth()->id();
+                $historyData['current_step'] = 9;
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);
@@ -1386,7 +1394,9 @@ class PeminjamanController extends Controller
             'Disetujui oleh Direktur SKI' => 'Pengajuan telah disetujui oleh Direktur SKI.',
             'Ditolak oleh Direktur SKI' => 'Pengajuan Anda ditolak oleh Direktur SKI.',
             'Generate Kontrak' => 'Kontrak berhasil digenerate.',
-            'Dana Sudah Dicairkan' => 'Dokumen transfer berhasil diupload.',
+            'Menunggu Konfirmasi Debitur' => 'Upload bukti transfer berhasil. Menunggu konfirmasi dari debitur.',
+            'Konfirmasi Ditolak Debitur' => 'Debitur menolak konfirmasi bukti transfer.',
+            'Dana Sudah Dicairkan' => 'Debitur telah mengkonfirmasi bukti transfer.',
         ];
 
         return $messages[$status] ?? 'Status berhasil diupdate!';
@@ -1404,7 +1414,7 @@ class PeminjamanController extends Controller
             $history = HistoryStatusPengajuanPinjaman::with(['approvedBy', 'rejectedBy', 'submittedBy'])
                 ->find($historyId);
 
-            $historyNominal = HistoryStatusPengajuanPinjaman::where('id_history_status_pengajuan_pinjaman', $historyId)->where('status', 'Dokumen Tervalidasi')->latest()->first();
+            $historyNominal = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $history->id_pengajuan_peminjaman)->where('status', 'Dokumen Tervalidasi')->latest()->first();
 
             if (!$history) {
                 return response()->json([
@@ -1422,7 +1432,7 @@ class PeminjamanController extends Controller
                 'tanggal_pencairan' => $historyNominal ? $historyNominal->tanggal_pencairan : null,
                 'catatan_validasi_dokumen_disetujui' => $history->catatan_validasi_dokumen_disetujui,
                 'catatan_validasi_dokumen_ditolak' => $history->catatan_validasi_dokumen_ditolak,
-                'devisasi' => $history->devisasi,
+                'deviasi' => $historyNominal ? $historyNominal->deviasi : null,
                 'date' => $history->date,
                 'created_at' => $history->created_at,
                 'updated_at' => $history->updated_at,
