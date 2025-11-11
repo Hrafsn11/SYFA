@@ -15,7 +15,7 @@ return new class extends Migration
             $table->ulid('id_pengajuan_investasi')->primary();
             
             // Foreign Keys
-            $table->unsignedInteger('id_debitur_dan_investor');
+            $table->ulid('id_debitur_dan_investor');
             
             // Main fields
             $table->string('nama_investor');
@@ -34,8 +34,8 @@ return new class extends Migration
             $table->integer('current_step')->default(1);
             
             // Audit fields
-            $table->unsignedBigInteger('created_by')->nullable();
-            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->ulid('created_by')->nullable();
+            $table->ulid('updated_by')->nullable();
             $table->timestamps();
             
             // Foreign Key Constraints

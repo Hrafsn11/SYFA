@@ -2,14 +2,19 @@
 
 namespace App\Livewire;
 
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\MasterKol;
+use App\Livewire\Traits\HasUniversalFormAction;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class KolTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
+
     protected $model = MasterKol::class;
-    protected $listeners = ['refreshKolTable' => '$refresh'];
+    protected $listeners = [
+        'refreshKolTable' => '$refresh'
+    ];
 
     public function configure(): void
     {
@@ -89,7 +94,10 @@ class KolTable extends DataTableComponent
                 ->html(),
             
             Column::make("Aksi")
-                ->label(fn($row) => view('livewire.master-data-kol.partials.table-actions', ['id' => $row->id_kol]))
+                ->label(function ($row) {
+                    $this->setUrlLoadData('get_data_' . $row->id_kol, 'master-data.kol.edit', ['id' => $row->id_kol, 'callback' => 'editData']);
+                    return view('livewire.master-data-kol.partials.table-actions', ['id' => $row->id_kol])->render();
+                })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];

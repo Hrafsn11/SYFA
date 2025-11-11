@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PengembalianPinjaman extends Model
+class Role extends SpatieRole
 {
     use HasFactory, HasUlids;
 
-    protected $table = 'pengembalian_pinjamen';
+    protected $table = 'roles';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
-    public $incrementing = false;
 }

@@ -1,9 +1,9 @@
 import "./bootstrap";
-import Alpine from "alpinejs";
+import { Livewire, Alpine } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import flatpickr from "flatpickr";
 import '../../vendor/rappasoft/laravel-livewire-tables/resources/imports/laravel-livewire-tables-all.js';
 
-// // Prevent initializing Alpine if another copy (vendor/template) already added it
+// Prevent initializing Alpine if another copy (vendor/template) already added it
 // if (!window.Alpine) {
 // 	window.Alpine = Alpine;
 // 	Alpine.start();
@@ -18,7 +18,6 @@ import '../../vendor/rappasoft/laravel-livewire-tables/resources/imports/laravel
 // 	}
 // }
 
-
-
+Livewire.start();
 // Initialize flatpickr for datepicker
 

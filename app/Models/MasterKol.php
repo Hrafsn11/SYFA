@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MasterKol extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
 
     protected $table = 'master_kol';
     protected $primaryKey = 'id_kol';
-    public $incrementing = true;
-    protected $keyType = 'int';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'kol','persentase_pencairan','jmlh_hari_keterlambatan'
@@ -43,10 +44,10 @@ class MasterKol extends Model
             return '1-29 Hari';
         }
         if ($d <= 59) {
-            return '30–59 Hari';
+            return '30-59 Hari';
         }
         if ($d <= 179) {
-            return '60–179 Hari';
+            return '60-179 Hari';
         }
         return '≥180 Hari';
     }

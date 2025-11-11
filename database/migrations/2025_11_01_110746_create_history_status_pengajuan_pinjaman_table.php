@@ -15,7 +15,7 @@ return new class extends Migration
             $table->ulid('id_history_status_pengajuan_pinjaman')->primary();
 
             $table->ulid('id_pengajuan_peminjaman');
-            $table->unsignedInteger('id_config_matrix_peminjaman')->nullable();
+            $table->ulid('id_config_matrix_peminjaman')->nullable();
 
             // Fields
             $table->string('submit_step1_by')->nullable();

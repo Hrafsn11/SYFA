@@ -38,7 +38,9 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('dashboard', Dashboard::class)->name('dashboard');
+
+    require __DIR__ . '/livewire_route.php';
+
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
@@ -110,7 +112,6 @@ Route::middleware([
     Route::delete('config-matrix-pinjaman/{id}', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'destroy']);
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
     Route::get('master-data/master-data-kol', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('masterdatakol.index');
-    Route::get('master-data/sumber-pendanaan-eksternal', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('sumberpendanaaneksternal.index');
 
     // Master Debitur dan Investor
     Route::prefix('master-data/debitur-investor')->name('master-data.debitur-investor.')->group(function () {
@@ -128,8 +129,7 @@ Route::middleware([
 
     // Master KOL
     Route::prefix('master-data/kol')->name('master-data.kol.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
-        Route::get('create', [\App\Http\Controllers\Master\MasterKolController::class, 'create'])->name('create');
+        // Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Master\MasterKolController::class, 'store'])->name('store');
         Route::get('{id}/edit', [\App\Http\Controllers\Master\MasterKolController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\MasterKolController::class, 'update'])->name('update');
@@ -138,8 +138,6 @@ Route::middleware([
 
     // Master Sumber Pendanaan Eksternal
     Route::prefix('master-data/sumber-pendanaan-eksternal')->name('master-data.sumber-pendanaan-eksternal.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('index');
-        Route::get('create', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'store'])->name('store');
         Route::get('{id}/edit', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'update'])->name('update');

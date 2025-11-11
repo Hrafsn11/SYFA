@@ -44,14 +44,12 @@
     <link rel="stylesheet"
         href="{{ asset('assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css') }}" />
     <link rel="stylesheet"
         href="{{ asset('assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/jquery-timepicker/jquery-timepicker.css') }}" />
-
-    <!-- SweetAlert2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <!-- Page CSS -->
     @stack('styles')
@@ -139,6 +137,7 @@
     <script src="{{ asset('assets/vendor/libs/select2/select2.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/bootstrap-select/bootstrap-select.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/cleavejs/cleave.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
     @stack('vendor-scripts')
     <script src="{{ asset('assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js') }}"></script>
 
@@ -158,9 +157,6 @@
 
     <script src="{{ asset('assets/js/form-wizard-numbered.js') }}"></script>
     <script src="{{ asset('assets/js/form-wizard-validation.js') }}"></script>
-
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
     <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
@@ -248,8 +244,9 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout);
-        document.addEventListener('livewire:navigated', window.initializeVuexyLayout);
+        document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout());
+        document.addEventListener('livewire:navigated', window.initializeVuexyLayout());
+
         document.addEventListener('livewire:load', () => {
             window.initializeVuexyLayout();
             if (window.Livewire?.hook) {
@@ -261,11 +258,13 @@
     </script>
     
     {{-- ✅ CRITICAL: Livewire Scripts HARUS sebelum Rappasoft --}}
-    @livewireScripts
+    @livewireScriptConfig
     
     {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
     @rappasoftTableScripts
     @rappasoftTableThirdPartyScripts
+
+    <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
     
     {{-- Custom page scripts --}}
     @stack('scripts')

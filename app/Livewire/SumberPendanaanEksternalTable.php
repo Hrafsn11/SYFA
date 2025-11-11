@@ -3,11 +3,13 @@
 namespace App\Livewire;
 
 use App\Models\MasterSumberPendanaanEksternal;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class SumberPendanaanEksternalTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
     protected $model = MasterSumberPendanaanEksternal::class;
 
     protected $listeners = ['refreshSumberPendanaanEksternalTable' => '$refresh'];
@@ -76,7 +78,11 @@ class SumberPendanaanEksternalTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ? $value.'%' : '-').'</div>')
                 ->html(),
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.master-sumber-pendanaan-eksternal.partials.table-actions', ['id' => $row->id_instansi]))
+                ->label(function ($row) {
+                    $this->setUrlLoadData('get_data_' . $row->id_instansi, 'master-data.sumber-pendanaan-eksternal.edit', ['id' => $row->id_instansi, 'callback' => 'editData']);
+
+                    return view('livewire.master-sumber-pendanaan-eksternal.partials.table-actions', ['id' => $row->id_instansi])->render();
+                })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];
