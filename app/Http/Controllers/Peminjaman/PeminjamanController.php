@@ -31,7 +31,7 @@ class PeminjamanController extends Controller
         
         $headerType = strtolower(str_replace(' ', '_', $header->jenis_pembiayaan ?? 'invoice_financing'));
 
-        $persentase = $header->instansi?->persentase_bagi_hasil ?? null;
+        $persentase = $header->persentase_bagi_hasil ?? ($header->instansi?->persentase_bagi_hasil ?? null);
 
         // Unified peminjaman data structure
         $peminjaman = [
@@ -469,7 +469,7 @@ class PeminjamanController extends Controller
         
         // Build validation rules (same as store method)
         $rules = [
-            'id_debitur' => 'required|integer',
+            'id_debitur' => 'required|string|size:26', // ULID format
             'nama_bank' => 'nullable|string',
             'no_rekening' => 'nullable|string',
             'nama_rekening' => 'nullable|string',
@@ -483,7 +483,7 @@ class PeminjamanController extends Controller
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
             if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|integer';
+                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
             }else{
                 $rules['id_instansi'] = 'nullable';
             }
@@ -508,7 +508,7 @@ class PeminjamanController extends Controller
         } elseif ($jenisPembiayaan === 'PO Financing') {
             $rules['details'] = 'required|array|min:1';
             if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|integer';
+                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
             }else{
                 $rules['id_instansi'] = 'nullable';
             }
@@ -526,7 +526,7 @@ class PeminjamanController extends Controller
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
             if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|integer';
+                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
             }else{
                 $rules['id_instansi'] = 'nullable';
             }
@@ -843,7 +843,7 @@ class PeminjamanController extends Controller
         
         // Build validation rules based on jenis_pembiayaan
         $rules = [
-            'id_debitur' => 'required|integer',
+            'id_debitur' => 'required|string|size:26', // ULID format
             'nama_bank' => 'nullable|string',
             'no_rekening' => 'nullable|string',
             'nama_rekening' => 'nullable|string',
@@ -857,7 +857,7 @@ class PeminjamanController extends Controller
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
             if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|integer';
+                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
             }else{
                 $rules['id_instansi'] = 'nullable';
             }
@@ -883,7 +883,7 @@ class PeminjamanController extends Controller
         } elseif ($jenisPembiayaan === 'PO Financing') {
             $rules['details'] = 'required|array|min:1';
             if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|integer';
+                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
             }else{
                 $rules['id_instansi'] = 'nullable';
             }
@@ -989,6 +989,15 @@ class PeminjamanController extends Controller
             );
             $peminjaman->save();
             
+            // Determine bagi hasil percentage based on sumber pembiayaan (before loop for efficiency)
+            $persentaseBagiHasil = 2.0; // default for internal
+            if ($peminjaman->sumber_pembiayaan === 'eksternal' && $peminjaman->id_instansi) {
+                $instansi = MasterSumberPendanaanEksternal::find($peminjaman->id_instansi);
+                if ($instansi && $instansi->persentase_bagi_hasil) {
+                    $persentaseBagiHasil = floatval($instansi->persentase_bagi_hasil);
+                }
+            }
+            
             $sumPinjaman = 0;
             $sumBagi = 0;
 
@@ -1017,13 +1026,11 @@ class PeminjamanController extends Controller
     
                     if ($nilai_pinjaman > $nilai_invoice) {
                         $fieldName = $validated['jenis_pembiayaan'] === 'Invoice Financing' ? 'invoice' : 'detail';
-                        throw new \Exception("Nilai pinjaman cannot exceed nilai invoice for {$fieldName} {$no}");
-                    }
+                    throw new \Exception("Nilai pinjaman cannot exceed nilai invoice for {$fieldName} {$no}");
                 }
+            }
 
-                $nilai_bagi = round($nilai_pinjaman * 0.02, 2);
-
-                $dok_invoice_path = null;
+            $nilai_bagi = round($nilai_pinjaman * ($persentaseBagiHasil / 100), 2);                $dok_invoice_path = null;
                 $dok_kontrak_path = null;
                 $dok_so_path = null;
                 $dok_bast_path = null;
@@ -1137,14 +1144,18 @@ class PeminjamanController extends Controller
                     $manualClean = preg_replace('/[^0-9\.]/', '', $manualTotal);
                     $manualValue = floatval($manualClean);
                     $peminjaman->total_pinjaman = $manualValue;
-                    // compute bagi hasil using same rate as invoice rows (2%)
-                    $peminjaman->total_bagi_hasil = round($manualValue * 0.02, 2);
+                    
+                    // compute bagi hasil using the correct percentage (already calculated before loop)
+                    $peminjaman->total_bagi_hasil = round($manualValue * ($persentaseBagiHasil / 100), 2);
                     $peminjaman->pembayaran_total = $peminjaman->total_pinjaman + $peminjaman->total_bagi_hasil;
                 } else {
                     $peminjaman->total_pinjaman = $sumPinjaman;
                     $peminjaman->total_bagi_hasil = $sumBagi;
                     $peminjaman->pembayaran_total = $sumPinjaman + $sumBagi;
                 }
+                
+                // Store persentase bagi hasil for non-Installment financing types
+                $peminjaman->persentase_bagi_hasil = $persentaseBagiHasil;
             }
             $peminjaman->save();
 

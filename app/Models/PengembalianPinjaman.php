@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 class PengembalianPinjaman extends Model
 {
     use HasFactory, HasUlids;
-    protected $table = 'pengembalian_pinjamen';
-    protected $primaryKey = 'id';
+    protected $table = 'pengembalian_pinjaman';
+    protected $primaryKey = 'ulid';
     protected $keyType = 'string';
     public $incrementing = false;
-    
+
     protected $fillable = [
         'id_pengajuan_peminjaman',
         'nama_perusahaan',
@@ -47,6 +47,6 @@ class PengembalianPinjaman extends Model
 
     public function pengembalianInvoices()
     {
-        return $this->hasMany(PengembalianInvoice::class, 'id_pengembalian', 'id');
+        return $this->hasMany(PengembalianInvoice::class, 'id_pengembalian', 'ulid');
     }
 }

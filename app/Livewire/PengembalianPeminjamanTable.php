@@ -15,14 +15,14 @@ class PengembalianPeminjamanTable extends DataTableComponent
 
     public function configure(): void
     {
-        $this->setPrimaryKey('id')
+        $this->setPrimaryKey('ulid')
             ->setSearchEnabled()
             ->setSearchPlaceholder('Cari pengembalian pinjaman...')
             ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id', 'desc')
+            ->setDefaultSort('ulid', 'desc')
             ->setTableAttributes([
                 'class' => 'table table-hover',
             ])
@@ -41,14 +41,22 @@ class PengembalianPeminjamanTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return PengembalianPinjaman::query()
+        $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+        
+        $query = PengembalianPinjaman::query()
             ->with('pengajuanPeminjaman')
-            ->whereIn('id_pengajuan_peminjaman', function($query) {
-                $query->select('id_pengajuan_peminjaman')
-                    ->from('pengajuan_peminjaman')
-                    ->where('id_debitur', Auth::id());
-            })
             ->select('pengembalian_pinjaman.*');
+        if ($debitur) {
+            $query->whereIn('id_pengajuan_peminjaman', function($subQuery) use ($debitur) {
+                $subQuery->select('id_pengajuan_peminjaman')
+                    ->from('pengajuan_peminjaman')
+                    ->where('id_debitur', $debitur->id_debitur);
+            });
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+        
+        return $query;
     }
 
     public function columns(): array
@@ -125,7 +133,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
 
             // Column::make('Aksi')
             //     ->label(fn ($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
-            //         'id' => $row->id
+            //         'id' => $row->ulid
             //     ])->render())
             //     ->html()
             //     ->excludeFromColumnSelect(),

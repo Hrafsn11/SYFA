@@ -24,6 +24,6 @@ class PengembalianInvoice extends Model
 
     public function pengembalianPinjaman()
     {
-        return $this->belongsTo(PengembalianPinjaman::class, 'id_pengembalian', 'id');
+        return $this->belongsTo(PengembalianPinjaman::class, 'id_pengembalian', 'ulid');
     }
 }

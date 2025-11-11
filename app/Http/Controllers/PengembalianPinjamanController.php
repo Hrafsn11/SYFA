@@ -22,7 +22,17 @@ class PengembalianPinjamanController extends Controller
      */
     public function create()
     {
-        $pengajuanPeminjaman = PengajuanPeminjaman::where('id_debitur', Auth::id())
+
+        $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+        
+        if (!$debitur) {
+            return view('livewire.pengembalian-pinjaman.create', [
+                'pengajuanPeminjaman' => collect([]),
+                'namaPerusahaan' => Auth::user()->name ?? ''
+            ]);
+        }
+
+        $pengajuanPeminjaman = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
             ->where('status', 'Dana Sudah Dicairkan')
             ->with(['buktiPeminjaman:id_bukti_peminjaman,id_pengajuan_peminjaman,no_invoice,nilai_invoice,nilai_pinjaman,nilai_bagi_hasil'])
             ->select('id_pengajuan_peminjaman', 'nomor_peminjaman', 'total_pinjaman', 'total_bagi_hasil', 'harapan_tanggal_pencairan')
@@ -50,7 +60,7 @@ class PengembalianPinjamanController extends Controller
                 return $item;
             });
 
-        $namaPerusahaan = Auth::user()->name;
+        $namaPerusahaan = $debitur->nama ?? Auth::user()->name;
 
         return view('livewire.pengembalian-pinjaman.create', compact('pengajuanPeminjaman', 'namaPerusahaan'));
     }
@@ -128,7 +138,7 @@ class PengembalianPinjamanController extends Controller
                 }
 
                 \App\Models\PengembalianInvoice::create([
-                    'id_pengembalian' => $pengembalian->id,
+                    'id_pengembalian' => $pengembalian->ulid,
                     'nominal_yg_dibayarkan' => $item['nominal'],
                     'bukti_pembayaran' => $filePath,
                 ]);

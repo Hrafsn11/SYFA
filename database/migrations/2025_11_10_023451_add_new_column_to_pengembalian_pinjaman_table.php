@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pengembalian_pinjaman', function (Blueprint $table) {
-            $table->ulid('id_pengajuan_peminjaman')->after('id');
+            $table->ulid('id_pengajuan_peminjaman')->after('ulid');
             $table->foreign('id_pengajuan_peminjaman')
                   ->references('id_pengajuan_peminjaman')
                   ->on('pengajuan_peminjaman')

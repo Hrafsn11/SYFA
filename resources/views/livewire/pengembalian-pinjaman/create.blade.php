@@ -61,7 +61,7 @@
                                     <label for="tanggal_pencairan">Tanggal Pencairan</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="tanggal_pencairan"
-                                            name="tanggal_pencairan" value="01-01-2024" disabled>
+                                            name="tanggal_pencairan" readonly>
                                         <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                     </div>
                                 </div>
@@ -128,7 +128,7 @@
         let totalBagiHasil = 0;
         let lamaPemakaianHari = 0;
         let nominalInvoiceTerpilih = 0;
-        let nomorInvoiceTerpilih = ''; // Nomor invoice yang dipilih user
+        let nomorInvoiceTerpilih = ''; 
 
         $(document).ready(function() {
             initCleaveRupiah();

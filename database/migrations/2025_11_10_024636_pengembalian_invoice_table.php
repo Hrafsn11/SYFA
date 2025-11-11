@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('pengembalian_invoice', function (Blueprint $table) {
             $table->id('id_pengembalian_invoice');
-            $table->unsignedBigInteger('id_pengembalian');
+            $table->ulid('id_pengembalian');
             $table->foreign('id_pengembalian')
-                  ->references('id')
+                  ->references('ulid')
                   ->on('pengembalian_pinjaman')
                   ->onDelete('cascade');
             $table->decimal('nominal_yg_dibayarkan', 15, 2)->default(0);
