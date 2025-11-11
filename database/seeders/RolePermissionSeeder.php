@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\Permission;
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -27,32 +27,54 @@ class RolePermissionSeeder extends Seeder
             // This is safe to ignore as the cache will be cleared when needed
         }
 
+        // Delete all existing permissions first
+        Permission::query()->delete();
+
     // Create permissions (idempotent)
     $permissions = [
             // User Management
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
+            'users.view',
+            'users.add',
+            'users.edit',
+            'users.delete',
 
             // Role Management
-            'view roles',
-            'create roles',
-            'edit roles',
-            'delete roles',
+            'roles.view',
+            'roles.add',
+            'roles.edit',
+            'roles.delete',
 
             // Permission Management
-            'view permissions',
-            'create permissions',
-            'edit permissions',
-            'delete permissions',
+            'permissions.view',
+            'permissions.add',
+            'permissions.edit',
+            'permissions.delete',
 
             // Dashboard
-            'view dashboard',
+            'dashboard.view',
 
             // Settings
-            'view settings',
-            'edit settings',
+            'settings.view',
+            'settings.edit',
+
+            // Master Data Management
+            'master_data.view',
+            'master_data.add',
+            'master_data.edit',
+            'master_data.delete',
+
+            // Peminjaman Management
+            'peminjaman_dana.view',
+            'peminjaman_dana.add',
+            'peminjaman_dana.edit',
+            'peminjaman_dana.active/non_active',
+            'peminjaman_dana.pengajuan_peminjaman',
+            'peminjaman_dana.validasi_dokumen',
+            'peminjaman_dana.persetujuan_debitur',
+            'peminjaman_dana.validasi_ceo_ski',
+            'peminjaman_dana.validasi_direktur',
+            'peminjaman_dana.generate_kontrak',
+            'peminjaman_dana.upload_dokumen_transfer',
         ];
 
         foreach ($permissions as $permission) {
@@ -61,30 +83,72 @@ class RolePermissionSeeder extends Seeder
 
         // Create roles and assign permissions (idempotent)
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        // Remove all previous permissions before syncing
+        $superAdminRole->permissions()->detach();
         $superAdminRole->syncPermissions(Permission::all());
 
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        // Remove all previous permissions before syncing
+        $adminRole->permissions()->detach();
         $adminRole->syncPermissions([
-            'view users',
-            'create users',
-            'edit users',
-            'view roles',
-            'view permissions',
-            'view dashboard',
-            'view settings',
+            'users.view',
+            'users.add',
+            'users.edit',
+            'roles.view',
+            'permissions.view',
+            'dashboard.view',
+            'settings.view',
         ]);
 
         $moderatorRole = Role::firstOrCreate(['name' => 'moderator']);
+        // Remove all previous permissions before syncing
+        $moderatorRole->permissions()->detach();
         $moderatorRole->syncPermissions([
-            'view users',
-            'edit users',
-            'view dashboard',
+            'users.view',
+            'users.edit',
+            'dashboard.view',
         ]);
 
         $userRole = Role::firstOrCreate(['name' => 'user']);
+        // Remove all previous permissions before syncing
+        $userRole->permissions()->detach();
         $userRole->syncPermissions([
-            'view dashboard',
+            'dashboard.view',
         ]);
+
+        $debiturRole = Role::firstOrCreate(['name' => 'Debitur', 'restriction' => 0]);
+
+        $debiturRole->permissions()->detach();
+        $debiturRole->syncPermissions([
+            'peminjaman_dana.view',
+            'peminjaman_dana.add',
+            'peminjaman_dana.edit',
+            'peminjaman_dana.pengajuan_peminjaman',
+            'peminjaman_dana.persetujuan_debitur',
+        ]);
+
+        $financeRole = Role::firstOrCreate(['name' => 'Finance SKI', 'restriction' => 0]);
+        $financeRole->permissions()->detach();
+        $financeRole->syncPermissions([
+            'peminjaman_dana.view',
+            'peminjaman_dana.validasi_dokumen',
+            'peminjaman_dana.upload_dokumen_transfer',
+        ]);
+
+        $ceoRole = Role::firstOrCreate(['name' => 'CEO SKI', 'restriction' => 0]);
+        $ceoRole->permissions()->detach();
+        $ceoRole->syncPermissions([
+            'peminjaman_dana.view',
+            'peminjaman_dana.validasi_ceo_ski',
+        ]);
+
+        $direkturRole = Role::firstOrCreate(['name' => 'Direktur SKI', 'restriction' => 0]);
+        $direkturRole->permissions()->detach();
+        $direkturRole->syncPermissions([
+            'peminjaman_dana.view',
+            'peminjaman_dana.validasi_direktur',
+        ]);
+
 
         // Create a super admin user (idempotent)
         $superAdmin = User::firstOrCreate([

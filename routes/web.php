@@ -15,7 +15,6 @@ use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
-use App\Http\Controllers\Peminjaman\PeminjamanInstallmentFinancingController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 
 /*
@@ -39,7 +38,9 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('dashboard', Dashboard::class)->name('dashboard');
+
+    require __DIR__ . '/livewire_route.php';
+
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
@@ -50,12 +51,6 @@ Route::middleware([
     Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
-    // Route::post('peminjaman/invoice', [PeminjamanInvoiceController::class, 'store'])->name('peminjaman.invoice.store');
-    Route::post('peminjaman/installment', [PeminjamanInstallmentFinancingController::class, 'store'])->name('peminjaman.installment.store');
-    Route::post('peminjaman/po', [\App\Http\Controllers\Peminjaman\PeminjamanPoFinancingController::class, 'store'])->name('peminjaman.po.store');
-    Route::post('peminjaman/factoring', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'store'])->name('peminjaman.factoring.store');
-    Route::put('peminjaman/factoring/{id}', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'update'])->name('peminjaman.factoring.update');
-    Route::delete('peminjaman/factoring/{id}', [\App\Http\Controllers\Peminjaman\PeminjamanFactoringController::class, 'destroy'])->name('peminjaman.factoring.destroy');
     Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
     Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
     Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
@@ -118,7 +113,6 @@ Route::middleware([
     Route::delete('config-matrix-pinjaman/{id}', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'destroy']);
     Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
     Route::get('master-data/master-data-kol', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('masterdatakol.index');
-    Route::get('master-data/sumber-pendanaan-eksternal', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('sumberpendanaaneksternal.index');
 
     // Master Debitur dan Investor
     Route::prefix('master-data/debitur-investor')->name('master-data.debitur-investor.')->group(function () {
@@ -136,8 +130,7 @@ Route::middleware([
 
     // Master KOL
     Route::prefix('master-data/kol')->name('master-data.kol.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
-        Route::get('create', [\App\Http\Controllers\Master\MasterKolController::class, 'create'])->name('create');
+        // Route::get('/', [\App\Http\Controllers\Master\MasterKolController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Master\MasterKolController::class, 'store'])->name('store');
         Route::get('{id}/edit', [\App\Http\Controllers\Master\MasterKolController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\MasterKolController::class, 'update'])->name('update');
@@ -146,8 +139,6 @@ Route::middleware([
 
     // Master Sumber Pendanaan Eksternal
     Route::prefix('master-data/sumber-pendanaan-eksternal')->name('master-data.sumber-pendanaan-eksternal.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'index'])->name('index');
-        Route::get('create', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'store'])->name('store');
         Route::get('{id}/edit', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\MasterSumberPendanaanEksternalController::class, 'update'])->name('update');

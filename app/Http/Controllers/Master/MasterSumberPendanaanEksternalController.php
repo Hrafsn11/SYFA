@@ -2,70 +2,56 @@
 
 namespace App\Http\Controllers\Master;
 
+use App\Helpers\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\MasterSumberPendanaanEksternalRequest;
 use App\Models\MasterSumberPendanaanEksternal;
 use Illuminate\Http\Request;
 
 class MasterSumberPendanaanEksternalController extends Controller
 {
-    public function index()
-    {
-        return view('livewire.master-sumber-pendanaan-eksternal.index');
-    }
+    // public function index()
+    // {
+    //     return view('livewire.master-sumber-pendanaan-eksternal.index');
+    // }
 
     public function create() {}
 
-    public function store(Request $request)
+    public function store(MasterSumberPendanaanEksternalRequest $request)
     {
-        $data = $request->validate([
-            'nama_instansi' => 'required|string|max:255',
-            'persentase_bagi_hasil' => 'nullable|integer|min:0|max:100',
-        ]);
-
-        $item = MasterSumberPendanaanEksternal::create($data);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sumber Pendanaan berhasil ditambahkan',
-            'data' => $item->toArray()
-        ]);
+        try {
+            MasterSumberPendanaanEksternal::create($request->validated());
+            return Response::success(null, 'Sumber Pendanaan berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function edit($id)
     {
         $item = MasterSumberPendanaanEksternal::where('id_instansi', $id)->firstOrFail();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $item->toArray()
-        ]);
+        return Response::success($item, 'Sumber Pendanaan berhasil diambil');
     }
 
-    public function update(Request $request, $id)
+    public function update(MasterSumberPendanaanEksternalRequest $request, $id)
     {
-        $item = MasterSumberPendanaanEksternal::where('id_instansi', $id)->firstOrFail();
-        $data = $request->validate([
-            'nama_instansi' => 'required|string|max:255',
-            'persentase_bagi_hasil' => 'nullable|integer|min:0|max:100',
-        ]);
-        $item->update($data);
-        $item->refresh();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sumber Pendanaan berhasil diupdate',
-            'data' => $item->toArray()
-        ]);
+        try {
+            $item = MasterSumberPendanaanEksternal::where('id_instansi', $id)->firstOrFail();
+            $item->update($request->validated());
+            return Response::success(null, 'Sumber Pendanaan berhasil diupdate');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function destroy($id)
     {
-        $item = MasterSumberPendanaanEksternal::where('id_instansi', $id)->firstOrFail();
-        $item->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Sumber Pendanaan berhasil dihapus'
-        ]);
+        try {
+            $item = MasterSumberPendanaanEksternal::where('id_instansi', $id)->firstOrFail();
+            $item->delete();
+            return Response::success(null , 'Sumber Pendanaan berhasil dihapus');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 }

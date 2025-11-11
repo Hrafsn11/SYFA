@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class PengembalianPinjaman extends Model
 {
-    use HasFactory;
-
-    protected $table = 'pengembalian_pinjaman';
+    use HasFactory, HasUlids;
+    protected $table = 'pengembalian_pinjamen';
     protected $primaryKey = 'id';
+    protected $keyType = 'string';
+    public $incrementing = false;
     
     protected $fillable = [
         'id_pengajuan_peminjaman',

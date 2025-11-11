@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\MasterKol;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +30,7 @@ class MasterKolSeeder extends Seeder
         ];
 
         foreach ($rows as $r) {
-            DB::table('master_kol')->insert($r);
+            MasterKol::create($r);
         }
     }
 }

@@ -2,75 +2,59 @@
 
 namespace App\Http\Controllers\Master;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Helpers\Response;
 use App\Models\MasterKol;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\MasterKolRequest;
 
 class MasterKolController extends Controller
 {
-    public function index()
-    {
-        return view('livewire.master-data-kol.index');
-    }
+    // public function index()
+    // {
+    //     return view('livewire.master-data-kol.index');
+    // }
 
-    public function create()
-    {
+    // public function create()
+    // {
         
-    }
+    // }
 
-    public function store(Request $request)
+    public function store(MasterKolRequest $request)
     {
-        $data = $request->validate([
-            'kol' => 'required|integer',
-            'persentase_pencairan' => 'nullable|numeric|min:0|max:100',
-            'jmlh_hari_keterlambatan' => 'nullable|integer',
-        ]);
-
-        $kol = MasterKol::create($data);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'KOL berhasil ditambahkan',
-            'data' => $kol->toArray()
-        ]);
+        try {
+            MasterKol::create($request->validated());
+            return Response::success(null, 'KOL berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function edit($id)
     {
         $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        return response()->json([
-            'success' => true,
-            'data' => $kol->toArray()
-        ]);
+        return Response::success($kol, 'KOL berhasil diambil');
     }
 
-    public function update(Request $request, $id)
+    public function update(MasterKolRequest $request, $id)
     {
-        $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        $data = $request->validate([
-            'kol' => 'required|integer',
-            'persentase_pencairan' => 'nullable|numeric|min:0|max:100',
-            'jmlh_hari_keterlambatan' => 'nullable|integer',
-        ]);
-
-        $kol->update($data);
-        $kol->refresh();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'KOL berhasil diupdate',
-            'data' => $kol->toArray()
-        ]);
+        try {
+            $kol = MasterKol::where('id_kol', $id)->firstOrFail();
+            $kol->update($request->validated());
+            return Response::success(null, 'KOL berhasil diupdate');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function destroy($id)
     {
-        $kol = MasterKol::where('id_kol', $id)->firstOrFail();
-        $kol->delete();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'KOL berhasil dihapus'
-        ]);
+        try {
+            $kol = MasterKol::where('id_kol', $id)->firstOrFail();
+            $kol->delete();
+            return Response::success(null, 'KOL berhasil dihapus');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 }
