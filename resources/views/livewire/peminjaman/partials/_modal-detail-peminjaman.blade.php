@@ -176,12 +176,32 @@
                         <div class="card border mb-3 shadow-none">
                             <div class="card-body">
                                 <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Deviasi</label>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi" id="deviasiYa" value="Ya" disabled>
+                                                <label class="form-check-label" for="deviasiYa">
+                                                    <i class="ti ti-check-circle text-success me-1"></i>
+                                                    Ya
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi" id="deviasiTidak" value="Tidak" disabled>
+                                                <label class="form-check-label" for="deviasiTidak">
+                                                    <i class="ti ti-x-circle text-danger me-1"></i>
+                                                    Tidak
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalPengajuan" class="form-label">Nominal Pengajuan</label>
                                         <input type="text" class="form-control"
                                             id="editNominalPengajuan" value="{{ isset($peminjaman['nominal_pinjaman']) && $peminjaman['nominal_pinjaman'] ? 'Rp ' . number_format($peminjaman['nominal_pinjaman'], 0, ',', '.') : 'Rp 0' }}" disabled>
                                     </div>
-
                                     <div class="col-md-6 mb-3">
                                         <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
                                         <input type="text" class="form-control input-rupiah"
@@ -461,6 +481,46 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tolak Debitur (Step 8) -->
+    <div class="modal fade" id="modalTolakDebitur" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        Tolak Konfirmasi Debitur
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formTolakDebitur">
+                        <div class="mb-3">
+                            <label for="catatanPenolakan" class="form-label">
+                                Catatan Penolakan <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="catatanPenolakan" name="catatan_konfirmasi_debitur_ditolak" 
+                                      rows="5" placeholder="Masukkan alasan penolakan..." required></textarea>
+                            <div class="form-text">Jelaskan alasan penolakan konfirmasi debitur</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" 
+                            onclick="approvalWithNote(this)" 
+                            data-status="Konfirmasi Ditolak Debitur" 
+                            data-form="formTolakDebitur">
+                        <i class="fas fa-check me-2"></i>
+                        Tolak Konfirmasi
+                    </button>
+                </div>
             </div>
         </div>
     </div>
