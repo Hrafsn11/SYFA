@@ -29,12 +29,4 @@ class SumberPendanaanEksternal extends Component
             'title' => 'Master Sumber Pendanaan Eksternal'
         ]);
     }
-
-    public function setterFormData()
-    {
-        $this->form_data = [
-            'nama_instansi' => $this->nama_instansi,
-            'persentase_bagi_hasil' => $this->persentase_bagi_hasil
-        ];
-    }
 }

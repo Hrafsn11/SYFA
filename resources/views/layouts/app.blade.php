@@ -10,6 +10,7 @@
 
     <title>{{ config('app.name', 'SYFA') }}</title>
 
+    @assets
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
 
@@ -50,14 +51,13 @@
     <link rel="stylesheet"
         href="{{ asset('assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/jquery-timepicker/jquery-timepicker.css') }}" />
-
-    <!-- Page CSS -->
-    @stack('styles')
-
-    <!-- Helpers -->
+    
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('assets/vendor/js/template-customizer.js') }}"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
+    @endassets
+
+    <!-- Helpers -->
 
     <!-- Adds the Core Table Styles -->
     @rappasoftTableStyles
@@ -67,6 +67,8 @@
 
     <!-- Styles -->
     @livewireStyles
+    <!-- Page CSS -->
+    @stack('styles')
 
     <!-- Scripts -->
     {{-- @vite([ 'resources/js/app.js']) --}}
@@ -121,6 +123,14 @@
 
     @stack('modals')
 
+    {{-- ✅ CRITICAL: Livewire Scripts HARUS sebelum Rappasoft --}}
+    @livewireScriptConfig
+    
+    {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
+    @rappasoftTableScripts
+    @rappasoftTableThirdPartyScripts
+    
+    @assets
     <!-- Core JS -->
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/popper/popper.js') }}"></script>
@@ -157,9 +167,12 @@
 
     <script src="{{ asset('assets/js/form-wizard-numbered.js') }}"></script>
     <script src="{{ asset('assets/js/form-wizard-validation.js') }}"></script>
-
-    <!-- Main JS -->
     <script src="{{ asset('assets/js/main.js') }}"></script>
+    @endassets
+    <!-- Main JS -->
+
+    <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
+    
 
     <!-- Cleave.js Rupiah Helper -->
     <script>
@@ -210,62 +223,11 @@
         };
     </script>
 
-    <script>
-        window.initializeVuexyLayout = function() {
-            if (typeof Menu === 'undefined') {
-                return;
-            }
-
-            const layoutMenu = document.getElementById('layout-menu');
-            if (!layoutMenu) {
-                return;
-            }
-
-            if (window.menu && typeof window.menu.destroy === 'function') {
-                window.menu.destroy();
-            }
-
-            window.menu = new Menu(layoutMenu, {
-                orientation: layoutMenu.classList.contains('menu-horizontal') ? 'horizontal' : 'vertical',
-                closeChildren: layoutMenu.classList.contains('menu-horizontal')
-            });
-
-            if (window.Helpers?.initSidebarToggle) {
-                window.Helpers.initSidebarToggle();
-            }
-
-            if (typeof bootstrap !== 'undefined') {
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
-                    if (!el.dataset.tooltipInitialized) {
-                        new bootstrap.Tooltip(el);
-                        el.dataset.tooltipInitialized = 'true';
-                    }
-                });
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', window.initializeVuexyLayout());
-        document.addEventListener('livewire:navigated', window.initializeVuexyLayout());
-
-        document.addEventListener('livewire:load', () => {
-            window.initializeVuexyLayout();
-            if (window.Livewire?.hook) {
-                window.Livewire.hook('message.processed', () => {
-                    window.initializeVuexyLayout();
-                });
-            }
+    <script type="module">
+        document.addEventListener('livewire:navigated', () => {
+            window.initVuexy?.();
         });
-    </script>
-    
-    {{-- ✅ CRITICAL: Livewire Scripts HARUS sebelum Rappasoft --}}
-    @livewireScriptConfig
-    
-    {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
-    @rappasoftTableScripts
-    @rappasoftTableThirdPartyScripts
-
-    <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
-    
+    </script>    
     {{-- Custom page scripts --}}
     @stack('scripts')
 </body>

@@ -62,7 +62,7 @@
     </div>
 </div>
 
-@push('scripts')
+@script
 {{-- script  --}}
 <script>
     function afterAction(payload) {
@@ -108,4 +108,4 @@
         });
     });
 </script>
-@endpush
+@endscript

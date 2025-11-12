@@ -1,12 +1,8 @@
-window.initVuexy = function() {    
-    /**
+/**
  * Main
  */
 
 'use strict';
-
-window.Helpers.destroy();
-window.Helpers.init();
 
 window.isRtl = window.Helpers.isRtl();
 window.isDarkStyle = window.Helpers.isDarkStyle();
@@ -44,7 +40,6 @@ if (document.getElementById('layout-menu')) {
 
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
   layoutMenuEl.forEach(function (element) {
-    new Menu(element, {_unbindEvents: true});
     menu = new Menu(element, {
       orientation: isHorizontalLayout ? 'horizontal' : 'vertical',
       closeChildren: isHorizontalLayout ? true : false,
@@ -672,5 +667,3 @@ if (typeof $ !== 'undefined') {
     }
   });
 }
-
-};
