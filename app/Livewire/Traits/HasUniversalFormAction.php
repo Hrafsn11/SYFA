@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Traits;
 
+use App\Attributes\FieldInput;
 use App\Livewire\UniversalFormAction;
 
 trait HasUniversalFormAction
@@ -31,6 +32,10 @@ trait HasUniversalFormAction
 
         if (method_exists($this, 'setterFormData')) {
             $this->setterFormData();
+        } else {
+            foreach ($this->getUniversalFieldInputs() as $key => $value) {
+                $this->form_data[$value] = $this->{$value};
+            }
         }
 
         $payload = (new UniversalFormAction($this))->saveData([
@@ -58,5 +63,16 @@ trait HasUniversalFormAction
         if (method_exists($this, 'afterLoadData')) {
             $this->afterLoadData($payload);
         }
+    }
+
+    private function getUniversalFieldInputs(): array
+    {
+        $reflection = new \ReflectionClass($this);
+
+        return collect($reflection->getProperties())
+            ->filter(fn($p) => $p->getAttributes(FieldInput::class))
+            ->map(fn($p) => $p->getName())
+            ->values()
+            ->all();
     }
 }

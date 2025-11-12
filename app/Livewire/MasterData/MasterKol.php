@@ -6,7 +6,6 @@ use Livewire\Component;
 use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasValidate;
 use App\Http\Requests\MasterKolRequest;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Livewire\Traits\HasUniversalFormAction;
 
 class MasterKol extends Component
@@ -29,14 +28,5 @@ class MasterKol extends Component
         ->layout('layouts.app', [
             'title' => 'Master Kol'
         ]);
-    }
-
-    public function setterFormData()
-    {
-        $this->form_data = [
-            'kol' => $this->kol,
-            'persentase_pencairan' => $this->persentase_pencairan,
-            'jmlh_hari_keterlambatan' => $this->jmlh_hari_keterlambatan,
-        ];
     }
 }

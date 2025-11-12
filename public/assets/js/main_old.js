@@ -1,5 +1,4 @@
-window.initVuexy = function() {    
-    /**
+/**
  * Main
  */
 
@@ -41,7 +40,6 @@ if (document.getElementById('layout-menu')) {
 
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
   layoutMenuEl.forEach(function (element) {
-    // new Menu(element, {_unbindEvents: true});
     menu = new Menu(element, {
       orientation: isHorizontalLayout ? 'horizontal' : 'vertical',
       closeChildren: isHorizontalLayout ? true : false,
@@ -60,8 +58,7 @@ if (document.getElementById('layout-menu')) {
   // Initialize menu togglers and bind click on each
   let menuToggler = document.querySelectorAll('.layout-menu-toggle');
   menuToggler.forEach(item => {
-    $(item).off('click')
-    .on('click', function (event) {
+    item.addEventListener('click', event => {
       event.preventDefault();
       window.Helpers.toggleCollapsed();
       // Enable menu state with local storage support if enableMenuLocalStorage = true from config.js
@@ -79,7 +76,7 @@ if (document.getElementById('layout-menu')) {
           }
         } catch (e) {}
       }
-    })
+    });
   });
 
   // Menu swipe gesture
@@ -670,5 +667,3 @@ if (typeof $ !== 'undefined') {
     }
   });
 }
-
-};

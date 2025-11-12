@@ -22,7 +22,7 @@
     </div>
 
     {{-- Modal Tambah/Edit Sumber Pendanaan --}}
-    <div class="modal fade" id="modalTambahSumberPendanaan" tabindex="-1" wire:ignore>
+    <div class="modal fade" id="modalTambahSumberPendanaan" wire:ignore>
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -55,7 +55,7 @@
     </div>
 </div>
 
-@push('scripts')
+@script
 <script>
     function afterAction(payload) {
         Livewire.dispatch('refreshSumberPendanaanEksternalTable');
@@ -99,4 +99,4 @@
         });
     });
 </script>
-@endpush
+@endscript
