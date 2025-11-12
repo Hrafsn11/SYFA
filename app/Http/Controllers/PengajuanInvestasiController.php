@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Response;
 use App\Models\PengajuanInvestasi;
 use App\Models\HistoryStatusPengajuanInvestor;
 use App\Models\MasterDebiturDanInvestor;
+use App\Http\Requests\PengajuanInvestasiRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -42,38 +44,23 @@ class PengajuanInvestasiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PengajuanInvestasiRequest $request)
     {
-        $validated = $request->validate([
-            'id_debitur_dan_investor' => 'required|exists:master_debitur_dan_investor,id_debitur',
-            'nama_investor' => 'required|string|max:255',
-            'deposito' => 'required|in:Reguler,Khusus',
-            'tanggal_investasi' => 'required|date',
-            'lama_investasi' => 'required|integer|min:1',
-            'jumlah_investasi' => 'required|numeric|min:0',
-            'bagi_hasil_pertahun' => 'required|integer|min:0|max:100',
-        ]);
-
         try {
             DB::beginTransaction();
+
+            $validated = $request->validated();
 
             // Calculate nominal bagi hasil
             $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
 
-            $pengajuan = PengajuanInvestasi::create([
-                'id_debitur_dan_investor' => $validated['id_debitur_dan_investor'],
-                'nama_investor' => $validated['nama_investor'],
-                'deposito' => $validated['deposito'],
-                'tanggal_investasi' => $validated['tanggal_investasi'],
-                'lama_investasi' => $validated['lama_investasi'],
-                'jumlah_investasi' => $validated['jumlah_investasi'],
-                'bagi_hasil_pertahun' => $validated['bagi_hasil_pertahun'],
+            $pengajuan = PengajuanInvestasi::create(array_merge($validated, [
                 'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
                 'status' => 'Draft',
                 'current_step' => 1,
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
-            ]);
+            ]));
 
             // Create initial history record
             HistoryStatusPengajuanInvestor::create([
@@ -87,17 +74,10 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan investasi berhasil dibuat!',
-                'data' => $pengajuan,
-            ]);
+            return Response::success($pengajuan, 'Pengajuan investasi berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal membuat pengajuan investasi: ' . $e->getMessage(),
-            ], 500);
+            return Response::errorCatch($e, 'Gagal membuat pengajuan investasi');
         }
     }
 
@@ -141,16 +121,9 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
-            
-            return response()->json([
-                'success' => true,
-                'data' => $pengajuan,
-            ]);
+            return Response::success($pengajuan, 'Data pengajuan investasi berhasil diambil');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil data: ' . $e->getMessage(),
-            ], 500);
+            return Response::errorCatch($e, 'Gagal mengambil data');
         }
     }
 
@@ -159,21 +132,13 @@ class PengajuanInvestasiController extends Controller
      */
     public function approval(Request $request, $id)
     {
-        $pengajuan = PengajuanInvestasi::findOrFail($id);
-        $status = $request->input('status');
-        
         try {
+            $pengajuan = PengajuanInvestasi::findOrFail($id);
+            $status = $request->input('status');
+            
             DB::beginTransaction();
 
             // Determine next step based on status
-            // NEW: 6 steps total (removed Persetujuan Investor & Validasi Direktur)
-            // Step 1: Pengajuan Investasi
-            // Step 2: Validasi Bagi Hasil
-            // Step 3: Validasi CEO SKI
-            // Step 4: Upload Bukti Transfer
-            // Step 5: Generate Kontrak
-            // Step 6: Selesai
-            
             // Special handling for rejection
             if ($status === 'Ditolak') {
                 // If rejected at Step 2 (Validasi Bagi Hasil) -> back to Step 1 (can resubmit)
@@ -245,18 +210,13 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Status berhasil diperbarui!',
+            return Response::success([
                 'status' => $status,
                 'current_step' => $currentStep,
-            ]);
+            ], 'Status berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui status: ' . $e->getMessage(),
-            ], 500);
+            return Response::errorCatch($e, 'Gagal memperbarui status');
         }
     }
 
@@ -269,66 +229,38 @@ class PengajuanInvestasiController extends Controller
             $history = HistoryStatusPengajuanInvestor::with(['submittedBy', 'approvedBy', 'rejectedBy'])
                                                      ->findOrFail($historyId);
 
-            return response()->json([
-                'success' => true,
-                'history' => $history,
-            ]);
+            return Response::success($history, 'Data histori berhasil diambil');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengambil data histori: ' . $e->getMessage(),
-            ], 500);
+            return Response::errorCatch($e, 'Gagal mengambil data histori');
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(PengajuanInvestasiRequest $request, $id)
     {
-        $pengajuan = PengajuanInvestasi::findOrFail($id);
-
-        $validated = $request->validate([
-            'id_debitur_dan_investor' => 'required|exists:master_debitur_dan_investor,id_debitur',
-            'nama_investor' => 'required|string|max:255',
-            'deposito' => 'required|in:Reguler,Khusus',
-            'tanggal_investasi' => 'required|date',
-            'lama_investasi' => 'required|integer|min:1',
-            'jumlah_investasi' => 'required|numeric|min:0',
-            'bagi_hasil_pertahun' => 'required|integer|min:0|max:100',
-        ]);
-
         try {
+            $pengajuan = PengajuanInvestasi::findOrFail($id);
+            
             DB::beginTransaction();
+
+            $validated = $request->validated();
 
             // Recalculate nominal bagi hasil
             $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
 
-            $pengajuan->update([
-                'id_debitur_dan_investor' => $validated['id_debitur_dan_investor'],
-                'nama_investor' => $validated['nama_investor'],
-                'deposito' => $validated['deposito'],
-                'tanggal_investasi' => $validated['tanggal_investasi'],
-                'lama_investasi' => $validated['lama_investasi'],
-                'jumlah_investasi' => $validated['jumlah_investasi'],
-                'bagi_hasil_pertahun' => $validated['bagi_hasil_pertahun'],
+            $pengajuan->update(array_merge($validated, [
                 'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
                 'updated_by' => Auth::id(),
-            ]);
+            ]));
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan investasi berhasil diperbarui!',
-                'data' => $pengajuan,
-            ]);
+            return Response::success($pengajuan, 'Pengajuan investasi berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui pengajuan investasi: ' . $e->getMessage(),
-            ], 500);
+            return Response::errorCatch($e, 'Gagal memperbarui pengajuan investasi');
         }
     }
 
@@ -347,31 +279,22 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan->delete();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengajuan investasi berhasil dihapus!',
-            ]);
+            return Response::success(null, 'Pengajuan investasi berhasil dihapus!');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus pengajuan investasi: ' . $e->getMessage(),
-            ], 500);
+            return Response::errorCatch($e, 'Gagal menghapus pengajuan investasi');
         }
     }
 
     /**
      * Update status (approve/reject)
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(PengajuanInvestasiRequest $request, $id)
     {
-        $pengajuan = PengajuanInvestasi::findOrFail($id);
-
-        $validated = $request->validate([
-            'status' => 'required|string',
-            'catatan' => 'nullable|string',
-        ]);
-
         try {
+            $pengajuan = PengajuanInvestasi::findOrFail($id);
+
+            $validated = $request->validated();
+
             DB::beginTransaction();
 
             $pengajuan->update([
@@ -391,33 +314,23 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Status berhasil diperbarui!',
-                'data' => $pengajuan
-            ]);
-
+            return Response::success($pengajuan, 'Status berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui status: ' . $e->getMessage()
-            ], 500);
+            return Response::errorCatch($e, 'Gagal memperbarui status');
         }
     }
 
     /**
      * Upload bukti transfer
      */
-    public function uploadBuktiTransfer(Request $request, $id)
+    public function uploadBuktiTransfer(PengajuanInvestasiRequest $request, $id)
     {
-        $pengajuan = PengajuanInvestasi::findOrFail($id);
-
-        $validated = $request->validate([
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
-
         try {
+            $pengajuan = PengajuanInvestasi::findOrFail($id);
+
+            $validated = $request->validated();
+
             DB::beginTransaction();
 
             if ($request->hasFile('file')) {
@@ -454,35 +367,23 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Bukti transfer berhasil diupload',
-                'data' => $pengajuan
-            ]);
-
+            return Response::success($pengajuan, 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            return Response::errorCatch($e, 'Terjadi kesalahan saat upload bukti transfer');
         }
     }
 
     /**
      * Generate kontrak
      */
-    public function generateKontrak(Request $request, $id)
+    public function generateKontrak(PengajuanInvestasiRequest $request, $id)
     {
-        $pengajuan = PengajuanInvestasi::findOrFail($id);
-
-        $validated = $request->validate([
-            'nomor_kontrak' => 'required|string|max:255',
-            'tanggal_kontrak' => 'required|date',
-            'catatan_kontrak' => 'nullable|string',
-        ]);
-
         try {
+            $pengajuan = PengajuanInvestasi::findOrFail($id);
+
+            $validated = $request->validated();
+
             DB::beginTransaction();
 
             // Update status to completed (Step 6: Selesai)
@@ -504,18 +405,10 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Kontrak berhasil digenerate',
-                'data' => $pengajuan
-            ]);
-
+            return Response::success($pengajuan, 'Kontrak berhasil digenerate');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            return Response::errorCatch($e, 'Terjadi kesalahan saat generate kontrak');
         }
     }
 }

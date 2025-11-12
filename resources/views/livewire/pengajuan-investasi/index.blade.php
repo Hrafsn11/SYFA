@@ -158,43 +158,46 @@
                 bagi_hasil_keseluruhan: null
             };
 
-            function initCleave() {
+            const showError = (message, title = 'Error!') => {
+                Swal.fire({ icon: 'error', title, html: message });
+            };
+
+            const showSuccess = (message, title = 'Berhasil!', timer = 2000) => {
+                Swal.fire({ icon: 'success', title, text: message, timer, showConfirmButton: false });
+            };
+
+            const showWarning = (html, title = 'Perhatian') => {
+                Swal.fire({ icon: 'warning', title, html, confirmButtonText: 'OK' });
+            };
+
+            const setLoadingState = (loading) => {
+                $spinner.toggleClass('d-none', !loading);
+                $btnSimpan.prop('disabled', loading);
+            };
+
+            const cleaveConfig = {
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: 0,
+                prefix: 'Rp ',
+                rawValueTrimPrefix: true,
+                noImmediatePrefix: false
+            };
+
+            const initCleave = () => {
                 Object.keys(cleaveInstances).forEach(key => {
-                    if (cleaveInstances[key]) {
-                        cleaveInstances[key].destroy();
-                        cleaveInstances[key] = null;
-                    }
+                    cleaveInstances[key]?.destroy();
+                    cleaveInstances[key] = new Cleave(`#${key}`, cleaveConfig);
                 });
+            };
 
-                cleaveInstances.jumlah_investasi = new Cleave('#jumlah_investasi', {
-                    numeral: true,
-                    numeralThousandsGroupStyle: 'thousand',
-                    numeralDecimalScale: 0,
-                    prefix: 'Rp ',
-                    rawValueTrimPrefix: true,
-                    noImmediatePrefix: false
-                });
-
-                cleaveInstances.bagi_hasil_keseluruhan = new Cleave('#bagi_hasil_keseluruhan', {
-                    numeral: true,
-                    numeralThousandsGroupStyle: 'thousand',
-                    numeralDecimalScale: 0,
-                    prefix: 'Rp ',
-                    rawValueTrimPrefix: true,
-                    noImmediatePrefix: false
-                });
-            }
-
-            function getCleaveValue(fieldName) {
+            const getCleaveValue = (fieldName) => {
                 return cleaveInstances[fieldName] ? parseInt(cleaveInstances[fieldName].getRawValue()) || 0 : 0;
-            }
+            };
 
-            function setCleaveValue(fieldName, value) {
-                const element = document.getElementById(fieldName);
-                if (element && cleaveInstances[fieldName]) {
-                    cleaveInstances[fieldName].setRawValue(value);
-                }
-            }
+            const setCleaveValue = (fieldName, value) => {
+                cleaveInstances[fieldName]?.setRawValue(value);
+            };
 
             $('#bs-datepicker-tanggal-pembayaran').datepicker({
                 format: 'yyyy-mm-dd',
@@ -204,74 +207,47 @@
                 startDate: 'today'
             });
 
-            function resetForm() {
+            const resetForm = () => {
                 $form[0].reset();
                 $form.removeClass('was-validated');
                 $('#editFormKerjaInvestorId').val('');
                 $('#modalTambahFormKerjaInvestorLabel').text('Tambah Pengajuan Investasi');
-                $('#btnHapusFormKerjaInvestor').addClass('d-none'); 
+                $('#btnHapusFormKerjaInvestor').addClass('d-none');
                 setCleaveValue('jumlah_investasi', 0);
                 setCleaveValue('bagi_hasil_keseluruhan', 0);
-            }
+            };
 
-            function setDepositoMode(deposito) {
+            const validateInvestorData = () => {
+                if (!namaInvestor || !depositoInvestor) {
+                    showWarning('Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.', 'Data Investor Tidak Ditemukan');
+                    return false;
+                }
+                return true;
+            };
+
+            const setDepositoMode = (deposito) => {
                 const isReguler = deposito === 'reguler';
-
                 $('#bagi_hasil')
                     .val(isReguler ? '10' : '')
                     .prop('readonly', isReguler)
-                    .toggleClass('non-editable', isReguler);
-
-                if (isReguler) {
-                    $('#bagi-hasil-hint').addClass('d-none');
-                } else {
-                    $('#bagi-hasil-hint').removeClass('d-none');
-                }
-
-                $('#bagi_hasil')
                     .prop('disabled', isReguler)
-                    .prop('readonly', false)
                     .toggleClass('non-editable', isReguler);
 
-                $('#bagi_hasil_keseluruhan')
-                    .prop('disabled', true)
-                    .prop('readonly', true)
-                    .addClass('non-editable');
-
+                $('#bagi-hasil-hint').toggleClass('d-none', isReguler);
+                $('#bagi_hasil_keseluruhan').prop('disabled', true).prop('readonly', true).addClass('non-editable');
                 calculateBagiHasil();
-            }
+            };
 
-            function calculateBagiHasil() {
-                const deposito = $('input[name="deposito"]:checked').val();
+            const calculateBagiHasil = () => {
                 const jumlah = getCleaveValue('jumlah_investasi');
                 const persen = parseFloat($('#bagi_hasil').val()) || 0;
                 const lama = parseInt($('#lama_investasi').val()) || 0;
 
-                if (jumlah > 0 && persen > 0 && lama > 0) {
-                    const nominal = Math.round((jumlah * persen / 100) / 12 * lama);
-                    setCleaveValue('bagi_hasil_keseluruhan', nominal);
-                } else {
-                    setCleaveValue('bagi_hasil_keseluruhan', 0);
-                }
-            }
-
-            function setLoadingState(loading) {
-                $spinner.toggleClass('d-none', !loading);
-                $btnSimpan.prop('disabled', loading);
-            }
-
-            function validateInvestorData() {
-                if (!namaInvestor || !depositoInvestor) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Data Investor Tidak Ditemukan',
-                        html: 'Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.',
-                        confirmButtonText: 'OK'
-                    });
-                    return false;
-                }
-                return true;
-            }
+                const nominal = (jumlah > 0 && persen > 0 && lama > 0) 
+                    ? Math.round((jumlah * persen / 100) / 12 * lama) 
+                    : 0;
+                setCleaveValue('bagi_hasil_keseluruhan', nominal);
+            };
 
             $('#btnTambahFormKerjaInvestor').on('click', function() {
                 if (!validateInvestorData()) return;
@@ -306,7 +282,6 @@
             $('#bagi_hasil').on('input', calculateBagiHasil);
             $('#lama_investasi').on('input', calculateBagiHasil);
 
-            // ==================== HAPUS DATA ====================
             $('#btnHapusFormKerjaInvestor').on('click', function(e) {
                 e.preventDefault();
                 const id = $('#editFormKerjaInvestorId').val();
@@ -326,17 +301,16 @@
                 $.ajax({
                     url: `/pengajuan-investasi/${deleteInvestorId}`,
                     method: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        if (response.success) {
+                    data: { _token: '{{ csrf_token() }}' },
+                    success: (response) => {
+                        if (!response.error) {
                             $modalDelete.modal('hide');
                             Livewire.dispatch('refreshPengajuanInvestasiTable');
+                            showSuccess(response.message || 'Data berhasil dihapus');
                             deleteInvestorId = null;
                         }
                     },
-                    complete: function() {
+                    complete: () => {
                         $('#btnDeleteSpinner').addClass('d-none');
                         $('#btnConfirmDeleteInvestor').prop('disabled', false);
                     }
@@ -354,36 +328,26 @@
                 }
 
                 if (!$('input[name="deposito"]:checked').val()) {
-                    Swal.fire({
-                        icon: 'warning',
-                        text: 'Pilih jenis deposito terlebih dahulu'
-                    });
+                    showWarning('Pilih jenis deposito terlebih dahulu');
                     return;
                 }
 
                 const idDebitur = $('#id_debitur_dan_investor').val();
                 if (!idDebitur) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Data Investor Tidak Ditemukan',
-                        text: 'ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.'
-                    });
+                    showWarning('ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.', 'Data Investor Tidak Ditemukan');
                     return;
                 }
 
                 const editId = $('#editFormKerjaInvestorId').val();
                 const isEdit = !!editId;
+                const depositoValue = $('input[name="deposito"]:checked').val();
 
                 $('input[name="deposito"]').prop('disabled', false);
-
-                // Capitalize first letter for deposito value (Reguler/Khusus)
-                const depositoValue = $('input[name="deposito"]:checked').val();
-                const depositoCapitalized = depositoValue ? depositoValue.charAt(0).toUpperCase() + depositoValue.slice(1) : '';
 
                 const formData = {
                     id_debitur_dan_investor: idDebitur,
                     nama_investor: $('#nama_investor').val(),
-                    deposito: depositoCapitalized,
+                    deposito: depositoValue.charAt(0).toUpperCase() + depositoValue.slice(1),
                     tanggal_investasi: $('#bs-datepicker-tanggal-pembayaran').val(),
                     lama_investasi: $('#lama_investasi').val(),
                     jumlah_investasi: getCleaveValue('jumlah_investasi'),
@@ -392,141 +356,88 @@
                 };
 
                 if (isEdit) formData._method = 'PUT';
-
                 $('input[name="deposito"]').prop('disabled', true);
-
                 setLoadingState(true);
 
                 $.ajax({
-                    url: isEdit ? `/pengajuan-investasi/${editId}` :
-                        '{{ route('pengajuan-investasi.store') }}',
+                    url: isEdit ? `/pengajuan-investasi/${editId}` : '{{ route('pengajuan-investasi.store') }}',
                     method: 'POST',
                     data: formData,
-                    success: function(response) {
-                        if (response.success) {
+                    success: (response) => {
+                        if (!response.error) {
                             $modal.modal('hide');
                             Livewire.dispatch('refreshPengajuanInvestasiTable');
-
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: isEdit ? 'Data berhasil diupdate' : response
-                                    .message,
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
+                            showSuccess(response.message || (isEdit ? 'Data berhasil diupdate' : 'Data berhasil ditambahkan'));
                         }
                     },
-                    error: function(xhr) {
-                        let errorMessage = 'Terjadi kesalahan saat menyimpan data';
-
-                        if (xhr.responseJSON?.errors) {
-                            errorMessage = Object.values(xhr.responseJSON.errors).flat().join(
-                                '<br>');
-                        } else if (xhr.responseJSON?.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            html: errorMessage
-                        });
+                    error: (xhr) => {
+                        const errorMessage = xhr.responseJSON?.errors 
+                            ? Object.values(xhr.responseJSON.errors).flat().join('<br>')
+                            : xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
+                        showError(errorMessage, 'Gagal!');
                     },
-                    complete: function() {
-                        setLoadingState(false);
-                    }
+                    complete: () => setLoadingState(false)
                 });
             });
 
-            $(document).on('click', '.investor-detail-btn', function(e) {
+            $(document).on('click', '.investor-detail-btn', (e) => {
                 e.preventDefault();
-                const id = $(this).data('id');
-
-                if (id) {
-                    window.location.href = `/pengajuan-investasi/${id}`;
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'ID tidak ditemukan'
-                    });
-                }
+                const id = $(e.currentTarget).data('id');
+                id ? window.location.href = `/pengajuan-investasi/${id}` : showError('ID tidak ditemukan');
             });
 
-            $(document).on('click', '.investor-edit-btn', function(e) {
+            $(document).on('click', '.investor-edit-btn', (e) => {
                 e.preventDefault();
-                const id = $(this).data('id');
-
+                const id = $(e.currentTarget).data('id');
+                
                 if (!id) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'ID tidak ditemukan'
-                    });
+                    showError('ID tidak ditemukan');
                     return;
                 }
 
                 $.ajax({
                     url: `/pengajuan-investasi/${id}/edit`,
                     method: 'GET',
-                    success: function(response) {
-                        if (response.success && response.data) {
+                    success: (response) => {
+                        if (!response.error && response.data) {
                             const d = response.data;
-
                             resetForm();
 
+                            // Set form values
                             $('#editFormKerjaInvestorId').val(d.id_pengajuan_investasi);
                             $('#id_debitur_dan_investor').val(d.id_debitur_dan_investor);
-                            $('#modalTambahFormKerjaInvestorLabel').text(
-                                'Edit Pengajuan Investasi');
-
-                            // Show delete button in edit mode
+                            $('#modalTambahFormKerjaInvestorLabel').text('Edit Pengajuan Investasi');
                             $('#btnHapusFormKerjaInvestor').removeClass('d-none');
-
                             $('#nama_investor').val(d.nama_investor);
                             $('#lama_investasi').val(d.lama_investasi);
                             $('#bagi_hasil').val(d.bagi_hasil_pertahun);
 
-                            $('input[name="deposito"]').prop('checked', false).prop('disabled',
-                                true);
+                            // Set deposito
+                            $('input[name="deposito"]').prop('checked', false).prop('disabled', true);
                             if (d.deposito) {
                                 const depositoValue = d.deposito.toLowerCase();
-                                $(`input[name="deposito"][value="${depositoValue}"]`).prop(
-                                    'checked', true);
+                                $(`input[name="deposito"][value="${depositoValue}"]`).prop('checked', true);
                                 setDepositoMode(depositoValue);
                             }
 
+                            // Set date
                             if (d.tanggal_investasi) {
-                                $('#bs-datepicker-tanggal-pembayaran').datepicker('setDate', d
-                                    .tanggal_investasi);
+                                $('#bs-datepicker-tanggal-pembayaran').datepicker('setDate', d.tanggal_investasi);
                             }
 
                             $modal.modal('show');
 
-                            setTimeout(function() {
+                            // Init Cleave & set values after modal shown
+                            setTimeout(() => {
                                 initCleave();
-
-                                setTimeout(function() {
-                                    if (d.jumlah_investasi) {
-                                        setCleaveValue('jumlah_investasi', d
-                                            .jumlah_investasi);
-                                    }
-                                    if (d.nominal_bagi_hasil_yang_didapatkan) {
-                                        setCleaveValue('bagi_hasil_keseluruhan',
-                                            d.nominal_bagi_hasil_yang_didapatkan);
-                                    }
+                                setTimeout(() => {
+                                    setCleaveValue('jumlah_investasi', d.jumlah_investasi || 0);
+                                    setCleaveValue('bagi_hasil_keseluruhan', d.nominal_bagi_hasil_yang_didapatkan || 0);
                                 }, 50);
                             }, 100);
                         }
                     },
-                    error: function(xhr) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: 'Gagal memuat data untuk diedit'
-                        });
-                    }
+                    error: () => showError('Gagal memuat data untuk diedit', 'Gagal!')
                 });
             });
         });
