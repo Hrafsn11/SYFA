@@ -9,9 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 class PengembalianPinjaman extends Model
 {
     use HasFactory, HasUlids;
+
     protected $table = 'pengembalian_pinjaman';
+
     protected $primaryKey = 'ulid';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [

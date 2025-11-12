@@ -24,17 +24,21 @@ class PengembalianPinjamanController extends Controller
     {
 
         $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
-        
-        if (!$debitur) {
+
+        if (! $debitur) {
             return view('livewire.pengembalian-pinjaman.create', [
                 'pengajuanPeminjaman' => collect([]),
-                'namaPerusahaan' => Auth::user()->name ?? ''
+                'namaPerusahaan' => Auth::user()->name ?? '',
             ]);
         }
 
         $pengajuanPeminjaman = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
             ->where('status', 'Dana Sudah Dicairkan')
-            ->with(['buktiPeminjaman:id_bukti_peminjaman,id_pengajuan_peminjaman,no_invoice,nilai_invoice,nilai_pinjaman,nilai_bagi_hasil'])
+            ->with(['buktiPeminjaman' => function ($query) {
+                $query->select('id_bukti_peminjaman', 'id_pengajuan_peminjaman', 'no_invoice', 'nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil', 'due_date')
+                    ->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')
+                    ->orderBy('due_date', 'asc');
+            }])
             ->select('id_pengajuan_peminjaman', 'nomor_peminjaman', 'total_pinjaman', 'total_bagi_hasil', 'harapan_tanggal_pencairan')
             ->get()
             ->map(function ($item) {
@@ -54,6 +58,7 @@ class PengembalianPinjamanController extends Controller
                         'nilai_invoice' => (float) $b->nilai_invoice,
                         'nilai_pinjaman' => (float) $b->nilai_pinjaman,
                         'nilai_bagi_hasil' => (float) $b->nilai_bagi_hasil,
+                        'due_date' => $b->due_date,
                     ];
                 })->toArray();
 
