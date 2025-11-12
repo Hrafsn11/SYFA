@@ -224,7 +224,15 @@
     </script>
 
     <script type="module">
-        document.addEventListener('livewire:navigated', () => {
+        document.addEventListener('livewire:navigated', () => {            
+            window.Helpers.destroy();
+            window.Helpers.init();
+            // Update layout after page load
+            if (document.readyState === 'complete') Helpers.update();else document.addEventListener('DOMContentLoaded', function onContentLoaded() {
+                Helpers.update();
+                document.removeEventListener('DOMContentLoaded', onContentLoaded);
+            });
+
             window.initVuexy?.();
         });
     </script>    

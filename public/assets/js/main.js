@@ -5,9 +5,6 @@ window.initVuexy = function() {
 
 'use strict';
 
-window.Helpers.destroy();
-window.Helpers.init();
-
 window.isRtl = window.Helpers.isRtl();
 window.isDarkStyle = window.Helpers.isDarkStyle();
 let menu,
@@ -44,7 +41,7 @@ if (document.getElementById('layout-menu')) {
 
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
   layoutMenuEl.forEach(function (element) {
-    new Menu(element, {_unbindEvents: true});
+    // new Menu(element, {_unbindEvents: true});
     menu = new Menu(element, {
       orientation: isHorizontalLayout ? 'horizontal' : 'vertical',
       closeChildren: isHorizontalLayout ? true : false,
@@ -63,7 +60,8 @@ if (document.getElementById('layout-menu')) {
   // Initialize menu togglers and bind click on each
   let menuToggler = document.querySelectorAll('.layout-menu-toggle');
   menuToggler.forEach(item => {
-    item.addEventListener('click', event => {
+    $(item).off('click')
+    .on('click', function (event) {
       event.preventDefault();
       window.Helpers.toggleCollapsed();
       // Enable menu state with local storage support if enableMenuLocalStorage = true from config.js
@@ -81,7 +79,7 @@ if (document.getElementById('layout-menu')) {
           }
         } catch (e) {}
       }
-    });
+    })
   });
 
   // Menu swipe gesture
