@@ -376,3 +376,15 @@
   color: var(--stepper-status-active);
   font-weight: 600;
 }
+
+.form-control[readonly] {
+  background-color: #e9ecef;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.form-control[readonly]:focus {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  box-shadow: none;
+}

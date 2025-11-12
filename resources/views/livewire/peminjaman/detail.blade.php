@@ -74,6 +74,14 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 8</div>
+                            <div class="step-name">Konfirmasi Debitur</div>
+                        </div>
+                    </div>
+
+                    <div class="stepper-item" data-step="9">
+                        <div class="stepper-node"></div>
+                        <div class="stepper-content">
+                            <div class="step-label">STEP 9</div>
                             <div class="step-name">Selesai</div>
                         </div>
                     </div>
@@ -151,6 +159,17 @@
                                                     id="btnPersetujuanDirektur">
                                                     <i class="fas fa-briefcase me-2"></i>
                                                     Setujui
+                                                </button>
+                                                <!-- Step 8: Konfirmasi Debitur buttons -->
+                                                <button type="button" class="btn btn-success d-none"
+                                                    id="btnTerimaDebitur" onclick="approval(this)" data-status="Dana Sudah Dicairkan">
+                                                    <i class="fas fa-check me-2"></i>
+                                                    Terima
+                                                </button>
+                                                <button type="button" class="btn btn-danger d-none"
+                                                    id="btnKonfirmasiTolakDebitur" data-bs-toggle="modal" data-bs-target="#modalTolakDebitur">
+                                                    <i class="fas fa-times me-2"></i>
+                                                    Tolak
                                                 </button>
                                             </div>
                                         </div>
@@ -301,7 +320,18 @@
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
                                                             Hasil</small>
-                                                        <p class="fw-bold mb-0">2%</p>
+                                                        @php
+                                                            $p = $peminjaman['persentase_bagi_hasil'] ?? null;
+                                                            $p_display = '-';
+                                                            if ($p !== null && $p !== '') {
+                                                                $p_display =
+                                                                    rtrim(
+                                                                        rtrim(sprintf('%.4f', (float) $p), '0'),
+                                                                        '.',
+                                                                    ) . '%';
+                                                            }
+                                                        @endphp
+                                                        <p class="fw-bold mb-0">{{ $p_display }}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
@@ -630,8 +660,8 @@
                                                                 <div class="d-flex justify-content-end">
                                                                     <button type="button" class="btn btn-success" 
                                                                             onclick="approval(this)" 
-                                                                            data-status="Dana Sudah Dicairkan"
-                                                                            id="btnUploadDokumen">
+                                                                            data-status="Menunggu Konfirmasi Debitur"
+                                                                            id="btnUploadDokumen" disabled>
                                                                         <i class="ti ti-upload me-2"></i>
                                                                         Upload Dokumen
                                                                     </button>
@@ -641,7 +671,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        @elseif($peminjaman['current_step'] == 8)
+                                        @elseif($peminjaman['current_step'] == 8 || $peminjaman['current_step'] == 9)
                                             <!-- Document View - Show when status is 'Dana Sudah Dicairkan' -->
                                             <div class="mt-5" id="viewDokumenSection">
                                                 <hr class="my-4">
@@ -868,7 +898,8 @@
                 pencairanData: {
                     nominalDisetujui: '',
                     tanggalPencairan: '',
-                    catatan: ''
+                    catatan: '',
+                    deviasi: '',
                 },
             };
 
@@ -1059,7 +1090,8 @@
                 const currentDate = getFormattedDate();
                 dom.timeline.items.forEach((item, index) => {
                     const step = index + 2; // Timeline items start from step 2
-                    const shouldShow = step <= state.currentStep;
+                    // Show all activity items regardless of current step
+                    const shouldShow = true; // Always show all history items
                     toggleDisplay(item, shouldShow);
                     if (shouldShow) {
                         const dateEl = item.querySelector(`#date-step-${step}`);
@@ -1138,6 +1170,7 @@
                     nominalDisetujui: nominalDisetujui,
                     tanggalPencairan: tanggalPencairan,
                     catatan: catatan,
+                    deviasi: deviasi,
                 });
 
                 // Close modal first
@@ -1348,7 +1381,7 @@
             const handleEditPencairanShow = () => {
                 // Most fields are now populated directly from database in HTML
                 // Only set the editable catatan field from state
-                dom.inputs.editCatatanLainnya.value = state.pencairanData.catatan;
+                // dom.inputs.editCatatanLainnya.value = state.pencairanData.catatan;
                 dom.modals.edit.show();
             };
 
@@ -1487,7 +1520,7 @@
 
         });
 
-        // Add CSS for stepper connector lines
+        // Add CSS for stepper connector lines and modal fixes
         const style = document.createElement('style');
         style.textContent = `
             .stepper-item::after {
@@ -1495,6 +1528,17 @@
             }
             .stepper-item:not(.completed):not(.active)::after {
                 display: none !important;
+            }
+            
+            /* Fix SweetAlert z-index to appear in front of Bootstrap modals */
+            .swal-modal-front {
+                z-index: 9999 !important;
+            }
+            .swal2-container {
+                z-index: 9999 !important;
+            }
+            .swal2-backdrop {
+                z-index: 9998 !important;
             }
         `;
         document.head.appendChild(style);
@@ -1561,7 +1605,8 @@
             } else if (window.rejectionRequestData && (
                 buttonText === 'Pengajuan Ditolak Debitur' || 
                 buttonText === 'Ditolak oleh CEO SKI' || 
-                buttonText === 'Ditolak oleh Direktur SKI'
+                buttonText === 'Ditolak oleh Direktur SKI' ||
+                buttonText === 'Tolak Konfirmasi'
             )) {
                 requestData = { ...requestData, ...window.rejectionRequestData };
                 delete window.rejectionRequestData;
@@ -1569,7 +1614,7 @@
 
             // Special handling for file uploads (Dana Sudah Dicairkan)
             let requestBody, requestHeaders;
-            if (status === 'Dana Sudah Dicairkan') {
+            if (status === 'Menunggu Konfirmasi Debitur') {
                 // Use FormData for file upload
                 const formData = new FormData();
                 
@@ -1747,6 +1792,22 @@
                 });
             }
             
+            // Populate deviasi radio buttons
+            const deviasiYa = document.getElementById('deviasiYa');
+            const deviasiTidak = document.getElementById('deviasiTidak');
+                                    
+            if (history.deviasi) {
+                if (history.deviasi.toLowerCase() === 'ya') {
+                    deviasiYa.checked = true;
+                } else if (history.deviasi.toLowerCase() === 'tidak') {
+                    deviasiTidak.checked = true;
+                }
+            } else {
+                // Reset radio buttons if no deviasi data
+                deviasiYa.checked = false;
+                deviasiTidak.checked = false;
+            }
+            
             // Populate editable catatan field
             const catatanField = document.getElementById('editCatatanLainnya');
             if (catatanField && history.catatan_validasi_dokumen_disetujui) {
@@ -1767,6 +1828,60 @@
             const dokumenTransferInput = document.getElementById('dokumenTransfer');
             
             if (btnUploadDokumen && dokumenTransferInput) {
+                // Real-time validation on file input change
+                dokumenTransferInput.addEventListener('change', function() {
+                    validateFileInput();
+                });
+                
+                // Function to validate file and enable/disable button
+                function validateFileInput() {
+                    const file = dokumenTransferInput.files[0];
+                    
+                    if (!file) {
+                        btnUploadDokumen.disabled = true;
+                        return;
+                    }
+                    
+                    // Validate file size (2MB max as per UI text)
+                    if (file.size > 2 * 1024 * 1024) {
+                        btnUploadDokumen.disabled = true;
+                        
+                        Swal.fire({
+                            title: 'File Terlalu Besar!',
+                            text: 'Ukuran file maksimal 2MB.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        // Clear the input
+                        dokumenTransferInput.value = '';
+                        return;
+                    }
+                    
+                    // Validate file type
+                    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                    if (!allowedTypes.includes(file.type)) {
+                        btnUploadDokumen.disabled = true;
+                        
+                        Swal.fire({
+                            title: 'Format File Tidak Valid!',
+                            text: 'Silakan pilih file dengan format PDF, JPG, atau PNG.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        // Clear the input
+                        dokumenTransferInput.value = '';
+                        return;
+                    }
+                    
+                    // All validations passed, enable button
+                    btnUploadDokumen.disabled = false;
+                }
+                
+                // Additional validation on button click
                 btnUploadDokumen.addEventListener('click', function(e) {
                     // Check if file is selected
                     if (!dokumenTransferInput.files || dokumenTransferInput.files.length === 0) {
@@ -1784,15 +1899,15 @@
                         return false;
                     }
                     
-                    // Validate file size (5MB max)
+                    // Validate file size (2MB max)
                     const file = dokumenTransferInput.files[0];
-                    if (file.size > 5 * 1024 * 1024) {
+                    if (file.size > 2 * 1024 * 1024) {
                         e.preventDefault();
                         e.stopPropagation();
                         
                         Swal.fire({
                             title: 'File Terlalu Besar!',
-                            text: 'Ukuran file maksimal 5MB.',
+                            text: 'Ukuran file maksimal 2MB.',
                             icon: 'error',
                             confirmButtonColor: '#dc3545',
                             confirmButtonText: 'OK'
@@ -1802,6 +1917,75 @@
                     }
                 });
             }
+        });
+
+        // Function for approval with notes (for rejection modal)
+        function approvalWithNote(button) {
+            const formId = button.getAttribute('data-form');
+            const status = button.getAttribute('data-status');
+            const form = document.getElementById(formId);
+            
+            if (!form) {
+                console.error('Form not found:', formId);
+                return;
+            }
+            
+            const formData = new FormData(form);
+            const catatan = formData.get('catatan_konfirmasi_debitur_ditolak');
+            
+            if (!catatan || catatan.trim() === '') {
+                Swal.fire({
+                    title: 'Catatan Diperlukan!',
+                    text: 'Silakan isi catatan penolakan terlebih dahulu.',
+                    icon: 'warning',
+                    confirmButtonColor: '#f39c12',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'swal-modal-front'
+                    },
+                    backdrop: true,
+                    allowOutsideClick: true
+                });
+                return;
+            }
+            
+            // Store rejection data globally for the approval function to use
+            window.rejectionRequestData = {
+                catatan_konfirmasi_debitur_ditolak: catatan
+            };
+            
+            // Call the existing approval function directly
+            approval(button);
+            
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('modalTolakDebitur'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+
+        // Add step 8 button visibility logic to the existing updateButtons function
+        function updateButtonsForStep8() {
+            const currentStep = parseInt('{{ $peminjaman["current_step"] ?? 1 }}');
+            const status = '{{ $peminjaman["status"] ?? "" }}';
+            
+            // Hide all step 8 buttons by default
+            const btnTerimaDebitur = document.getElementById('btnTerimaDebitur');
+            const btnKonfirmasiTolakDebitur = document.getElementById('btnKonfirmasiTolakDebitur');
+            
+            if (btnTerimaDebitur) btnTerimaDebitur.classList.add('d-none');
+            if (btnKonfirmasiTolakDebitur) btnKonfirmasiTolakDebitur.classList.add('d-none');
+            
+            // Show step 8 buttons when appropriate
+            if (currentStep === 8 && status === 'Menunggu Konfirmasi Debitur') {
+                if (btnTerimaDebitur) btnTerimaDebitur.classList.remove('d-none');
+                if (btnKonfirmasiTolakDebitur) btnKonfirmasiTolakDebitur.classList.remove('d-none');
+            }
+        }
+
+        // Call the step 8 update function on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateButtonsForStep8();
         });
 
     </script>

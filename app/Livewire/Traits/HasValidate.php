@@ -47,14 +47,14 @@ trait HasValidate
     public function resetForm()
     {
         $this->isResetting = true;
-        foreach ($this->getFieldInputs() as $field) {
+        foreach ($this->getValidateFieldInputs() as $field) {
             $this->reset($field);
         }
         $this->resetValidation();
         $this->isResetting = false;
     }
 
-    private function getFieldInputs(): array
+    private function getValidateFieldInputs(): array
     {
         $reflection = new \ReflectionClass($this);
 
