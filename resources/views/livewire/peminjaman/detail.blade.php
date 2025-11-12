@@ -320,7 +320,18 @@
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
                                                             Hasil</small>
-                                                        <p class="fw-bold mb-0">2%</p>
+                                                        @php
+                                                            $p = $peminjaman['persentase_bagi_hasil'] ?? null;
+                                                            $p_display = '-';
+                                                            if ($p !== null && $p !== '') {
+                                                                $p_display =
+                                                                    rtrim(
+                                                                        rtrim(sprintf('%.4f', (float) $p), '0'),
+                                                                        '.',
+                                                                    ) . '%';
+                                                            }
+                                                        @endphp
+                                                        <p class="fw-bold mb-0">{{ $p_display }}</p>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
