@@ -57,6 +57,7 @@ Route::middleware([
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
+    Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
 
     Route::get('debitur-piutang', function () {
         return view('livewire.debitur-piutang.index');

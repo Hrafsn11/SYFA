@@ -12,15 +12,9 @@
                     <th>AKSI</th>
                 </tr>
             </thead>
-            <tbody class="table-border-bottom-0">
-                <tr>
-                    <td>1</td>
-                    <td>Rp. 50.000.000</td>
-                    <td><a href="#">Lihat Bukti Pembayaran</a></td>
-                    <th>
-                        <a href="#" class="btn btn-sm btn-outline-primary btn-edit-pengembalian" data-idx="1" title="Edit"><i class="fas fa-edit"></i></a>
-                        <a href="#" class="btn btn-sm btn-outline-danger btn-remove-pengembalian" data-idx="1" title="Hapus"><i class="fas fa-trash"></i></a>
-                    </th>
+            <tbody class="table-border-bottom-0" id="pengembalianTableBody">
+                <tr id="emptyRow">
+                    <td colspan="4" class="text-center text-muted">Belum ada data pengembalian</td>
                 </tr>
             </tbody>
         </table>

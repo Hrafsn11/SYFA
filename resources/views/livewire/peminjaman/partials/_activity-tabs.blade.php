@@ -17,7 +17,7 @@
     @else
         <!-- Timeline Container - menampilkan data dari database -->
         <div id="timeline-container">
-            @foreach($allHistory as $history)
+            @foreach($allHistory as $key => $history)
                 <div class="activity-item mb-4">
                     <div class="row align-items-center">
                         <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -26,17 +26,22 @@
                                     <div class="avatar avatar-sm">
                                         @php
                                             $statusConfig = [
-                                                'Submit Dokumen' => ['icon' => 'ti-report-search', 'color' => 'warning'],
-                                                'Dokumen Tervalidasi' => ['icon' => 'ti-file-text', 'color' => 'primary'],
+                                                'Submit Dokumen' => ['icon' => 'ti-send', 'color' => 'warning'],
+                                                'Dokumen Tervalidasi' => ['icon' => 'ti-circle-check', 'color' => 'success'],
                                                 'Validasi Ditolak' => ['icon' => 'ti-circle-x', 'color' => 'danger'],
-                                                'Debitur Setuju' => ['icon' => 'ti-file-text', 'color' => 'primary'],
+                                                'Debitur Setuju' => ['icon' => 'ti-user-check', 'color' => 'success'],
                                                 'Pengajuan Ditolak Debitur' => ['icon' => 'ti-user-x', 'color' => 'danger'],
-                                                'Disetujui oleh CEO SKI' => ['icon' => 'ti-file-text', 'color' => 'primary'],
+                                                'Disetujui oleh CEO SKI' => ['icon' => 'ti-crown', 'color' => 'success'],
                                                 'Ditolak oleh CEO SKI' => ['icon' => 'ti-crown-off', 'color' => 'danger'],
-                                                'Disetujui oleh Direktur SKI' => ['icon' => 'ti-file-text', 'color' => 'primary'],
+                                                'Disetujui oleh Direktur SKI' => ['icon' => 'ti-building-bank', 'color' => 'success'],
                                                 'Ditolak oleh Direktur SKI' => ['icon' => 'ti-building-bank', 'color' => 'danger'],
-                                                'Generate Kontrak' => ['icon' => 'ti-file-text', 'color' => 'primary'],
-                                                'Dana Dicairkan' => ['icon' => 'ti-circle-check', 'color' => 'success'],
+                                                'Generate Kontrak' => ['icon' => 'ti-file-certificate', 'color' => 'info'],
+                                                'Upload Dokumen' => ['icon' => 'ti-upload', 'color' => 'info'],
+                                                'Menunggu Konfirmasi Debitur' => ['icon' => 'ti-clock', 'color' => 'warning'],
+                                                'Dana Sudah Dicairkan' => ['icon' => 'ti-wallet', 'color' => 'success'],
+                                                'Konfirmasi Disetujui Debitur' => ['icon' => 'ti-file-check', 'color' => 'success'],
+                                                'Konfirmasi Ditolak Debitur' => ['icon' => 'ti-file-x', 'color' => 'danger'],
+                                                'Dana Dicairkan' => ['icon' => 'ti-cash', 'color' => 'success'],
                                             ];
                                             $config = $statusConfig[$history->status] ?? ['icon' => 'ti-circle', 'color' => 'secondary'];
                                         @endphp
@@ -54,28 +59,64 @@
                                                 $description = 'Pengajuan sedang dalam proses validasi.';
                                                 break;
                                             case 'Dokumen Tervalidasi':
-                                                $displayText = 'Draft: Dokumen Tervalidasi <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui';
-                                                $description = 'Pengajuan telah terkirim.';
+                                                $displayText = 'Dokumen Tervalidasi';
+                                                $description = 'Dokumen telah divalidasi dan disetujui.';
+                                                break;
+                                            case 'Validasi Ditolak':
+                                                $displayText = 'Validasi Ditolak';
+                                                $description = 'Dokumen ditolak pada tahap validasi.';
                                                 break;
                                             case 'Debitur Setuju':
-                                                $displayText = 'Draft: Persetujuan Debitur <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui';
-                                                $description = 'Pengajuan telah terkirim.';
+                                                $displayText = 'Persetujuan Debitur';
+                                                $description = 'Debitur telah menyetujui pengajuan.';
+                                                break;
+                                            case 'Pengajuan Ditolak Debitur':
+                                                $displayText = 'Ditolak Debitur';
+                                                $description = 'Pengajuan ditolak oleh debitur.';
                                                 break;
                                             case 'Disetujui oleh CEO SKI':
-                                                $displayText = 'Draft: Validasi CEO SKI <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui';
-                                                $description = 'Pengajuan telah terkirim.';
+                                                $displayText = 'Disetujui CEO SKI';
+                                                $description = 'Pengajuan disetujui oleh CEO SKI.';
+                                                break;
+                                            case 'Ditolak oleh CEO SKI':
+                                                $displayText = 'Ditolak CEO SKI';
+                                                $description = 'Pengajuan ditolak oleh CEO SKI.';
                                                 break;
                                             case 'Disetujui oleh Direktur SKI':
-                                                $displayText = 'Draft: Validasi Direktur SKI <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui';
-                                                $description = 'Pengajuan telah terkirim.';
+                                                $displayText = 'Disetujui Direktur SKI';
+                                                $description = 'Pengajuan disetujui oleh Direktur SKI.';
+                                                break;
+                                            case 'Ditolak oleh Direktur SKI':
+                                                $displayText = 'Ditolak Direktur SKI';
+                                                $description = 'Pengajuan ditolak oleh Direktur SKI.';
                                                 break;
                                             case 'Generate Kontrak':
-                                                $displayText = 'Draft: Generate Kontrak <i class="ti ti-arrow-right mx-1"></i> Pengajuan Disetujui';
-                                                $description = 'Pengajuan telah terkirim.';
+                                                $displayText = 'Generate Kontrak';
+                                                $description = 'Kontrak peminjaman telah digenerate.';
+                                                break;
+                                            case 'Upload Dokumen':
+                                                $displayText = 'Upload Dokumen Transfer';
+                                                $description = 'Dokumen bukti transfer telah diupload.';
+                                                break;
+                                            case 'Menunggu Konfirmasi Debitur':
+                                                $displayText = 'Menunggu Konfirmasi Debitur';
+                                                $description = 'Menunggu konfirmasi penerimaan dari debitur.';
+                                                break;
+                                            case 'Dana Sudah Dicairkan':
+                                                $displayText = 'Dana Sudah Dicairkan';
+                                                $description = 'Dana telah dicairkan dan diterima debitur.';
+                                                break;
+                                            case 'Konfirmasi Disetujui Debitur':
+                                                $displayText = 'Konfirmasi Disetujui Debitur';
+                                                $description = 'Bukti transfer disetujui oleh debitur.';
+                                                break;
+                                            case 'Konfirmasi Ditolak Debitur':
+                                                $displayText = 'Konfirmasi Ditolak Debitur';
+                                                $description = 'Bukti transfer ditolak oleh debitur.';
                                                 break;
                                             case 'Dana Dicairkan':
-                                                $displayText = 'Selesai';
-                                                $description = 'Proses pengajuan pinjaman telah selesai.';
+                                                $displayText = 'Dana Dicairkan';
+                                                $description = 'Proses pencairan dana telah selesai.';
                                                 break;
                                             default:
                                                 $displayText = $history->status;
@@ -93,7 +134,7 @@
                             </small>
                         </div>
                         <div class="col-6 col-md-3 text-end">
-                            @if($history->status != 'Generate Kontrak' && $history->status != 'Dana Dicairkan' && $history->status != 'Submit Dokumen' && $history->status != 'Upload Dokumen')
+                            @if($history->status != 'Generate Kontrak' && $history->status != 'Dana Sudah Dicairkan' && $history->status != 'Submit Dokumen' && $history->status != 'Upload Dokumen' && $history->status != 'Menunggu Konfirmasi Debitur')
                                 <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Detail" 
                                         onclick="showHistory('{{ $history->id_history_status_pengajuan_pinjaman }}')">
                                     <i class="ti ti-file"></i>
@@ -113,6 +154,4 @@
             @endforeach
         </div>
     @endif
-
-
 </div>
