@@ -963,6 +963,10 @@
                     ceoNominalDisetujui: document.getElementById('ceoNominalDisetujui'),
                     ceoTanggalPencairan: document.getElementById('ceoTanggalPencairan'),
                     ceoTanggalHarapan: document.getElementById('ceoTanggalHarapan'),
+                    direkturNominalPengajuan: document.getElementById('direkturNominalPengajuan'),
+                    direkturNominalDisetujui: document.getElementById('direkturNominalDisetujui'),
+                    direkturTanggalPencairan: document.getElementById('direkturTanggalPencairan'),
+                    direkturTanggalHarapan: document.getElementById('direkturTanggalHarapan'),
                 }
             };
 
@@ -1192,6 +1196,7 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanDebitur);
                 const catatan = formData.get('catatan_persetujuan_debitur');
+                const deviasi = formData.get('deviasi'); // Get deviasi from hidden input
                 
                 // Get additional data from readonly fields
                 const nominalDisetujui = dom.inputs.debiturNominalDisetujui?.value || '';
@@ -1214,6 +1219,7 @@
                     catatan_persetujuan_debitur: catatan,
                     nominal_yang_disetujui: nominalDisetujui,
                     tanggal_pencairan: tanggalPencairan,
+                    deviasi: deviasi,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
@@ -1237,6 +1243,7 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanCEO);
                 const catatan = formData.get('catatan_persetujuan_ceo');
+                const deviasi = formData.get('deviasi'); // Get deviasi from hidden input
                 
                 // Get additional data from readonly fields
                 const nominalDisetujui = dom.inputs.ceoNominalDisetujui?.value || '';
@@ -1259,6 +1266,7 @@
                     catatan_persetujuan_ceo: catatan,
                     nominal_yang_disetujui: nominalDisetujui,
                     tanggal_pencairan: tanggalPencairan,
+                    deviasi: deviasi,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
@@ -1282,6 +1290,11 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanDirektur);
                 const catatan = formData.get('catatan_persetujuan_direktur');
+                const deviasi = formData.get('deviasi'); // Get deviasi from hidden input
+                
+                // Get additional data from readonly fields
+                const nominalDisetujui = dom.inputs.direkturNominalDisetujui?.value || '';
+                const tanggalPencairan = dom.inputs.direkturTanggalPencairan?.value || '';
 
                 // Create button-like object for approval
                 const approvalButton = {
@@ -1298,6 +1311,9 @@
                 window.persetujuanDirekturRequestData = {
                     status: 'Disetujui oleh Direktur SKI',
                     catatan_persetujuan_direktur: catatan,
+                    nominal_yang_disetujui: nominalDisetujui,
+                    tanggal_pencairan: tanggalPencairan,
+                    deviasi: deviasi,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),

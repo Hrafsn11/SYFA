@@ -75,6 +75,53 @@
 
     <!-- Custom CSS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Custom Readonly Styles -->
+    <style>
+        /* Make readonly text inputs and textareas look like disabled elements */
+        input[type="text"][readonly], 
+        input[type="email"][readonly], 
+        input[type="password"][readonly], 
+        input[type="number"][readonly], 
+        input[type="tel"][readonly], 
+        input[type="url"][readonly],
+        textarea[readonly] {
+            background-color: #f3f2f3 !important;
+            color: #6c757d !important;
+            cursor: default !important;
+            border-color: #ced4da !important;
+            color: #acaab1 !important;
+        }
+        
+        /* Readonly form controls with Bootstrap classes for text inputs and textareas */
+        .form-control[readonly] {
+            background-color: #f3f2f3 !important;
+            color: #acaab1 !important;
+            cursor: default !important;
+            border-color: #ced4da !important;
+        }
+        
+        /* Input groups with readonly text inputs */
+        .input-group .form-control[readonly] {
+            background-color: #f3f2f3 !important;
+            border-color: #ced4da !important;
+        }
+        
+        /* Input group text for readonly inputs */
+        .input-group .form-control[readonly] ~ .input-group-text {
+            background-color: #f3f2f3 !important;
+            color: #acaab1 !important;
+            border-color: #ced4da !important;
+        }
+        
+        /* Flatpickr readonly inputs */
+        .flatpickr-input[readonly] {
+            background-color: #f3f2f3 !important;
+            color: #acaab1 !important;
+            cursor: default !important;
+            border-color: #ced4da !important;
+        }
+    </style>
 </head>
 
 <body>

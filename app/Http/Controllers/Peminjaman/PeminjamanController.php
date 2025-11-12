@@ -1285,6 +1285,7 @@ class PeminjamanController extends Controller
 
                 $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
                 $historyData['current_step'] = 4;
+                $historyData['deviasi'] = $request->input('deviasi');
             } elseif ($status === 'Pengajuan Ditolak Debitur') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_debitur');
@@ -1300,7 +1301,7 @@ class PeminjamanController extends Controller
                 // Replace comma with dot for proper decimal parsing if exists
                 $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
                 $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
-                
+                $historyData['deviasi'] = $request->input('deviasi');
                 $tanggalPencairan = $request->input('tanggal_pencairan');
                 if ($tanggalPencairan) {
                     try {
@@ -1330,6 +1331,32 @@ class PeminjamanController extends Controller
                 $historyData['current_step'] = 1;
             } elseif ($status === 'Disetujui oleh Direktur SKI') {
                 $historyData['approve_by'] = auth()->id();
+                
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+                $historyData['deviasi'] = $request->input('deviasi');
+                
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+                
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_direktur');
                 $historyData['current_step'] = 6;
             } elseif ($status === 'Ditolak oleh Direktur SKI') {
