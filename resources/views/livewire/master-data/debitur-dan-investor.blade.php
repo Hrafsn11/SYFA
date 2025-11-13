@@ -129,7 +129,9 @@
                                 <label for="nama_bank" class="form-label">Nama Bank</label>
                                 <select id="nama_bank" class="form-select">
                                     <option value="">Pilih Bank</option>
-                                    <option value="BCA">BCA</option>
+                                    @foreach ($banks as $b)
+                                        <option value="{{ $b }}">{{ $b }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -146,8 +148,9 @@
                                         class="text-danger">*</span></label>
                                 <select id="id_kol" class="form-select" required>
                                     <option value="">Pilih KOL</option>
-                                    <option value="0">0</option>
-                                   
+                                    @foreach ($kol as $kolItem)
+                                        <option value="{{ $kolItem->id_kol }}">{{ $kolItem->kol }}</option>
+                                    @endforeach
                                 </select>
                                 <small class="text-muted" id="kol-info-text" style="display: none;">
                                     <i class="ti ti-info-circle"></i> Debitur baru otomatis mendapat KOL 0
