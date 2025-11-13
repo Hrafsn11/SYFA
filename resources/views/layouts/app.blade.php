@@ -79,47 +79,23 @@
     <!-- Custom Readonly Styles -->
     <style>
         /* Make readonly text inputs and textareas look like disabled elements */
-        input[type="text"][readonly], 
-        input[type="email"][readonly], 
-        input[type="password"][readonly], 
-        input[type="number"][readonly], 
-        input[type="tel"][readonly], 
-        input[type="url"][readonly],
-        textarea[readonly] {
-            background-color: #f3f2f3 !important;
-            color: #6c757d !important;
-            cursor: default !important;
-            border-color: #ced4da !important;
-            color: #acaab1 !important;
-        }
-        
-        /* Readonly form controls with Bootstrap classes for text inputs and textareas */
-        .form-control[readonly] {
+        /* EXCLUDING flatpickr inputs (flatpickr adds readonly by default for calendar selection) */
+        .form-control[readonly]:not(.flatpickr-input):not(.flatpickr-date-modal) {
             background-color: #f3f2f3 !important;
             color: #acaab1 !important;
             cursor: default !important;
             border-color: #ced4da !important;
         }
         
-        /* Input groups with readonly text inputs */
-        .input-group .form-control[readonly] {
-            background-color: #f3f2f3 !important;
-            border-color: #ced4da !important;
-        }
-        
-        /* Input group text for readonly inputs */
-        .input-group .form-control[readonly] ~ .input-group-text {
-            background-color: #f3f2f3 !important;
-            color: #acaab1 !important;
-            border-color: #ced4da !important;
-        }
-        
-        /* Flatpickr readonly inputs */
-        .flatpickr-input[readonly] {
-            background-color: #f3f2f3 !important;
-            color: #acaab1 !important;
-            cursor: default !important;
-            border-color: #ced4da !important;
+        /* Ensure flatpickr inputs remain white/editable looking even with readonly attribute */
+        .form-control.flatpickr-input,
+        .form-control.flatpickr-date-modal,
+        input.flatpickr-input,
+        input.flatpickr-date-modal {
+            background-color: #fff !important;
+            color: #697a8d !important;
+            cursor: text !important;
+            border-color: #d9dee3 !important;
         }
     </style>
 </head>
