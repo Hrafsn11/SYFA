@@ -123,7 +123,7 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->searchable()
                 ->format(function ($value, $row) {
                     $kol = $row->debitur->kol->kol ?? null;
-                    $displayValue = $kol ? $kol : ($value ? $value : '-');
+                    $displayValue = isset($kol) ? $kol : '-';
                     
                     if ($displayValue === '-') {
                         return '<div class="text-center"><span class="text-muted">-</span></div>';

@@ -27,12 +27,14 @@
             <span class="menu-header-text">Peminjaman</span>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('peminjaman*') ? 'active' : '' }}">
-            <a href="{{ route('peminjaman') }}" class="menu-link">
-                <i class="menu-icon tf-icons ti ti-briefcase"></i>
-                <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
-            </a>
-        </li>
+        @can('peminjaman_dana.view')
+            <li class="menu-item {{ request()->routeIs('peminjaman*') ? 'active' : '' }}">
+                <a href="{{ route('peminjaman') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-briefcase"></i>
+                    <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
+                </a>
+            </li>
+        @endcan
 
         <li class="menu-item {{ request()->routeIs('ar-perbulan*') ? 'active' : '' }}">
             <a href="{{ route('ar-perbulan.index') }}" class="menu-link">
@@ -123,39 +125,41 @@
             <span class="menu-header-text">Master Data</span>
         </li>
 
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-database"></i>
-                <div data-i18n="Master Data">Master Data</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
-                        <div data-i18n="KOL">KOL</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
-                        <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}" class="menu-link">
-                        <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
-                    </a>
-                </li>
-                {{-- <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
-                    <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
-                        <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
-                    </a>
-                </li> --}}
-                <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
-                    <a href="#" class="menu-link">
-                        <div data-i18n="Menu Lainnya">Menu Lainnya</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+        @can('master_data.view')
+            <li class="menu-item">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons ti ti-database"></i>
+                    <div data-i18n="Master Data">Master Data</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item">
+                        <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
+                            <div data-i18n="KOL">KOL</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
+                            <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
+                        <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}" class="menu-link">
+                            <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
+                        </a>
+                    </li>
+                    {{-- <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
+                        <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
+                            <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
+                        </a>
+                    </li> --}}
+                    <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
+                        <a href="#" class="menu-link">
+                            <div data-i18n="Menu Lainnya">Menu Lainnya</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        @endcan
 
         <!-- Configuration Section -->
         <li class="menu-header small text-uppercase">

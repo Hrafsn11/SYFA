@@ -172,6 +172,46 @@ class RolePermissionSeeder extends Seeder
             $admin->assignRole('admin');
         }
 
+        $debitur = User::firstOrCreate([
+            'email' => 'debitur@example.com',
+        ], [
+            'name' => 'Debitur User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $debitur->hasRole('Debitur')) {
+            $debitur->assignRole('Debitur');
+        }
+
+        $finance = User::firstOrCreate([
+            'email' => 'finance@example.com',
+        ], [
+            'name' => 'Finance User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $finance->hasRole('Finance SKI')) {
+            $finance->assignRole('Finance SKI');
+        }
+
+        $ceo = User::firstOrCreate([
+            'email' => 'ceo@example.com',
+        ], [
+            'name' => 'CEO User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $ceo->hasRole('CEO SKI')) {
+            $ceo->assignRole('CEO SKI');
+        }
+
+        $direktur = User::firstOrCreate([
+            'email' => 'direktur@example.com',
+        ], [
+            'name' => 'Direktur User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $direktur->hasRole('Direktur SKI')) {
+            $direktur->assignRole('Direktur SKI');
+        }
+
         // Restore the original cache driver
         config(['cache.default' => $originalCacheDriver]);
     }

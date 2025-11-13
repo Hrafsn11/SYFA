@@ -3,11 +3,13 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Debitur dan Investor</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                    id="btnTambahDebitur">
-                    <i class="fa-solid fa-plus"></i>
-                    <span id="btnTambahText">Debitur</span>
-                </button>
+                @can('master_data.add')
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        id="btnTambahDebitur">
+                        <i class="fa-solid fa-plus"></i>
+                        <span id="btnTambahText">Debitur</span>
+                    </button>
+                @endcan
             </div>
         </div>
     </div>
@@ -127,9 +129,7 @@
                                 <label for="nama_bank" class="form-label">Nama Bank</label>
                                 <select id="nama_bank" class="form-select">
                                     <option value="">Pilih Bank</option>
-                                    @foreach ($banks as $b)
-                                        <option value="{{ $b }}">{{ $b }}</option>
-                                    @endforeach
+                                    <option value="BCA">BCA</option>
                                 </select>
                             </div>
 
@@ -146,9 +146,8 @@
                                         class="text-danger">*</span></label>
                                 <select id="id_kol" class="form-select" required>
                                     <option value="">Pilih KOL</option>
-                                    @foreach ($kol as $kolItem)
-                                        <option value="{{ $kolItem->id_kol }}">{{ $kolItem->kol }}</option>
-                                    @endforeach
+                                    <option value="0">0</option>
+                                   
                                 </select>
                                 <small class="text-muted" id="kol-info-text" style="display: none;">
                                     <i class="ti ti-info-circle"></i> Debitur baru otomatis mendapat KOL 0

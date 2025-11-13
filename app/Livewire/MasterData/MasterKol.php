@@ -7,16 +7,20 @@ use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasValidate;
 use App\Http\Requests\MasterKolRequest;
 use App\Livewire\Traits\HasUniversalFormAction;
+use App\Http\Traits\HandlesPermissions;
 
 class MasterKol extends Component
 {    
-    use HasUniversalFormAction, HasValidate;
+    use HasUniversalFormAction, HasValidate, HandlesPermissions;
     private string $validateClass = MasterKolRequest::class;
     
     #[FieldInput]
     public $kol, $persentase_pencairan, $jmlh_hari_keterlambatan;
 
     public function mount() {
+        // Use the middleware trait to check permission
+        $this->checkPermission('master_data.view', 'You do not have permission to view this page.');
+        
         $this->setUrlSaveData('store_master_kol', 'master-data.kol.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_master_kol', 'master-data.kol.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
         $this->setUrlSaveData('delete_master_kol', 'master-data.kol.destroy', ["id" => "id_placeholder", "callback" => "afterAction"]);
