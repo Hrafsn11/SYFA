@@ -425,7 +425,7 @@ class PeminjamanController extends Controller
             try {
                 if (auth()->check()) {
                     $userEmail = auth()->user()->email;
-                    $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)
+                    $master = MasterDebiturDanInvestor::where('email', $userEmail)
                         ->where('flagging', 'tidak')
                         ->where('status', 'active')
                         ->with('kol')
@@ -541,6 +541,18 @@ class PeminjamanController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        if($jenisPembiayaan === 'Installment'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 10;
+        }
+        
+        if($jenisPembiayaan === 'Factoring'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 2;
+        }
 
         DB::beginTransaction();
         try {
@@ -912,9 +924,19 @@ class PeminjamanController extends Controller
 
         $validated = $request->validate($rules);
 
-        if($validated['jenis_pembiayaan'] === 'Factoring' || $validated['jenis_pembiayaan'] === 'Installment'){
+
+        //set bagi hasil installment 10%
+        if($validated['jenis_pembiayaan'] === 'Installment'){
             $validated['id_instansi'] = null;
-            $validated['sumber_pembiayaan'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 10;
+        }
+        
+        //set bagi hasil factoring 2%
+        if($validated['jenis_pembiayaan'] === 'Factoring'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 2;
         }
 
         // Normalize date inputs that may come as d/m/Y

@@ -14,9 +14,10 @@
 
         <div class="card">
             <div class="card-body">
-                <form action="{{ route('pengembalian.store') }}" method="POST" id="formPengembalian" enctype="multipart/form-data">
+                <form action="{{ route('pengembalian.store') }}" method="POST" id="formPengembalian"
+                    enctype="multipart/form-data">
                     @csrf
-                    
+
                     <div class="row">
                         <div class="col-lg mb-3">
                             <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
@@ -32,10 +33,14 @@
                                 <option value="">Pilih Peminjaman</option>
                                 @foreach ($pengajuanPeminjaman as $item)
                                     <option value="{{ $item->id_pengajuan_peminjaman }}"
-                                            data-total-pinjaman="{{ $item->total_pinjaman }}"
-                                            data-total-bagi-hasil="{{ $item->total_bagi_hasil }}"
-                                            data-tanggal-pencairan="{{ $item->harapan_tanggal_pencairan }}"
-                                            data-invoices="{{ json_encode($item->invoices_json) }}">
+                                        data-total-pinjaman="{{ $item->total_pinjaman }}"
+                                        data-total-bagi-hasil="{{ $item->total_bagi_hasil }}"
+                                        data-tanggal-pencairan="{{ $item->harapan_tanggal_pencairan }}"
+                                        data-jenis-pembiayaan="{{ $item->jenis_pembiayaan }}"
+                                        data-invoices="{{ json_encode($item->invoices_json) }}"
+                                        data-tenor-pembayaran="{{ $item->tenor_pembayaran_value ?? 0 }}"
+                                        data-yang-harus-dibayarkan="{{ $item->yang_harus_dibayarkan_value ?? 0 }}"
+                                        data-tanggal-pencairan-real="{{ $item->tanggal_pencairan_real ?? $item->harapan_tanggal_pencairan }}">
                                         {{ $item->nomor_peminjaman }}
                                     </option>
                                 @endforeach
@@ -48,12 +53,12 @@
                                 <div class="col-md-6 mb-2">
                                     <label for="total_pinjaman">Total Pinjaman</label>
                                     <input type="text" class="form-control" id="total_pinjaman" name="total_pinjaman"
-                                     readonly>
+                                        readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="total_bagi_hasil">Total Bagi Hasil</label>
                                     <input type="text" class="form-control" id="total_bagi_hasil" name="total_bagi_hasil"
-                                     readonly>
+                                        readonly>
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -68,23 +73,39 @@
                                 <div class="col-md-6">
                                     <label for="lama_pemakaian">Lama Pemakaian</label>
                                     <input type="text" class="form-control" id="lama_pemakaian" name="lama_pemakaian"
-                                    readonly>
+                                        readonly>
                                 </div>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-2">
-                                    <label for="invoice">Invoice Yang Akan Dibayar</label>
+                                    <label for="invoice" id="labelInvoice">Invoice Yang Akan Dibayar</label>
                                     <select name="invoice" id="invoice" class="form-control select2"
                                         data-placeholder="Pilih Invoice">
                                         <option value="">Pilih Invoice</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="nominal_invoice">Nominal Invoice</label>
+                                    <label for="nominal_invoice" id="labelNominalInvoice">Nominal Invoice</label>
                                     <input type="text" class="form-control" id="nominal_invoice" name="nominal_invoice"
-                                    readonly>
+                                        readonly>
                                 </div>
                             </div>
+
+                            <!-- Khusus Installment -->
+                            <div class="row mb-3" id="installmentFields" style="display: none;">
+                                <div class="col-md-6 mb-2">
+                                    <label for="bulan_pembayaran">Bulan Pembayaran</label>
+                                    <select name="bulan_pembayaran" id="bulan_pembayaran" class="form-control select2"
+                                        data-placeholder="Pilih Bulan">
+                                        <option value="">Pilih Bulan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="yang_harus_dibayarkan">Yang Harus Dibayar Bulan Ini</label>
+                                    <input type="text" class="form-control" id="yang_harus_dibayarkan" name="yang_harus_dibayarkan" readonly>
+                                </div>
+                            </div>
+
                             @include('livewire.pengembalian-pinjaman.partials._pengembalian-table')
                         </div>
                     </div>
@@ -95,7 +116,8 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
-                            <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil" readonly>
+                            <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil"
+                                readonly>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -128,7 +150,11 @@
         let totalBagiHasil = 0;
         let lamaPemakaianHari = 0;
         let nominalInvoiceTerpilih = 0;
-        let nomorInvoiceTerpilih = ''; 
+        let nomorInvoiceTerpilih = '';
+        let currentJenisPembiayaan = '';
+        let tenorPembayaran = 0;
+        let yangHarusDibayarkanPerBulan = 0;
+        let tanggalPencairanReal = '';
 
         $(document).ready(function() {
             initCleaveRupiah();
@@ -138,11 +164,12 @@
         function initEventListeners() {
             $('#kode_peminjaman').on('change', handlePeminjamanChange);
             $('#invoice').on('change', handleInvoiceChange);
+            $('#bulan_pembayaran').on('change', handleBulanPembayaranChange);
             $('#btnTambahPengembalian').on('click', openModal);
             $('#btnSimpanPengembalianInvoice').on('click', savePengembalian);
             $('#modalPengembalian').on('hidden.bs.modal', resetModal);
             $('#formPengembalian').on('submit', handleFormSubmit);
-            
+
             $(document).on('click', '.btn-edit-pengembalian', handleEdit);
             $(document).on('click', '.btn-remove-pengembalian', handleDelete);
             $('#bukti_pembayaran').on('change', handleFileInputChange);
@@ -150,7 +177,7 @@
 
         function handlePeminjamanChange() {
             const selected = $(this).find(':selected');
-            
+
             if (!selected.val()) {
                 resetForm();
                 return;
@@ -160,54 +187,174 @@
                 totalPinjaman: parseFloat(selected.data('total-pinjaman')),
                 totalBagiHasil: parseFloat(selected.data('total-bagi-hasil')),
                 tanggalPencairan: selected.data('tanggal-pencairan'),
-                invoices: selected.data('invoices')
+                jenisPembiayaan: selected.data('jenis-pembiayaan'),
+                invoices: selected.data('invoices'),
+                tenorPembayaran: parseInt(selected.data('tenor-pembayaran')) || 0,
+                yangHarusDibayarkan: parseFloat(selected.data('yang-harus-dibayarkan')) || 0,
+                tanggalPencairanReal: selected.data('tanggal-pencairan-real') || selected.data('tanggal-pencairan')
             };
 
             totalPinjaman = data.totalPinjaman;
             totalBagiHasil = data.totalBagiHasil;
+            currentJenisPembiayaan = data.jenisPembiayaan;
+            tenorPembayaran = data.tenorPembayaran;
+            yangHarusDibayarkanPerBulan = data.yangHarusDibayarkan;
+            tanggalPencairanReal = data.tanggalPencairanReal;
 
             fillFormData(data);
+            updateLabels(data.jenisPembiayaan);
+            toggleInstallmentFields(data.jenisPembiayaan);
+            
+            if (data.jenisPembiayaan === 'Installment') {
+                populateBulanPembayaran(data.tenorPembayaran);
+            }
+            
             calculateSisa();
+        }
+
+        function updateLabels(jenisPembiayaan) {
+            // Update label sesuai jenis pembiayaan (Invoice Financing, PO Financing, Factoring)
+            if (jenisPembiayaan === 'Invoice Financing') {
+                $('#labelInvoice').text('Invoice Yang Akan Dibayar');
+                $('#labelNominalInvoice').text('Nominal Invoice');
+            } else if (jenisPembiayaan === 'PO Financing' || jenisPembiayaan === 'Factoring') {
+                $('#labelInvoice').text('Kontrak Yang Akan Dibayar');
+                $('#labelNominalInvoice').text('Nominal Kontrak');
+            } else if (jenisPembiayaan === 'Installment') {
+                $('#labelInvoice').text('Invoice (Referensi)');
+                $('#labelNominalInvoice').text('Nominal Invoice');
+            } else {
+                $('#labelInvoice').text('Yang Akan Dibayar');
+                $('#labelNominalInvoice').text('Nominal');
+            }
+        }
+        
+        function toggleInstallmentFields(jenisPembiayaan) {
+            if (jenisPembiayaan === 'Installment') {
+                $('#installmentFields').show();
+                $('#invoice').closest('.row').find('.col-md-6').first().find('label').append(' <small class="text-muted">(Opsional)</small>');
+            } else {
+                $('#installmentFields').hide();
+                $('#bulan_pembayaran').val('').trigger('change');
+                $('#yang_harus_dibayarkan').val('');
+            }
+        }
+        
+        function populateBulanPembayaran(tenor) {
+            const $select = $('#bulan_pembayaran');
+            $select.empty().append('<option value="">Pilih Bulan</option>');
+            
+            if (tenor > 0) {
+                // Cari bulan yang sudah dibayar
+                const bulanDibayar = []; // TODO: Query dari database bulan mana yang sudah lunas
+                
+                for (let i = 1; i <= tenor; i++) {
+                    const bulanLabel = `Bulan ke-${i}`;
+                    if (!bulanDibayar.includes(bulanLabel)) {
+                        $select.append(`<option value="${bulanLabel}">${bulanLabel}</option>`);
+                    }
+                }
+            }
+            
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+            $select.select2({ placeholder: 'Pilih Bulan Pembayaran' });
+        }
+        
+        function handleBulanPembayaranChange() {
+            const selected = $(this).find(':selected');
+            const bulanLabel = selected.val();
+            
+            if (!bulanLabel) {
+                $('#yang_harus_dibayarkan').val('');
+                nominalInvoiceTerpilih = 0;
+                nomorInvoiceTerpilih = '';
+                return;
+            }
+            
+            // Ambil bulan ke berapa (extract angka dari "Bulan ke-1")
+            const bulanKe = parseInt(bulanLabel.replace('Bulan ke-', ''));
+            
+            // Rumus: Bulan pertama = yang_harus_dibayarkan + bagi_hasil, bulan lainnya = yang_harus_dibayarkan saja
+            let nominalBulanIni = yangHarusDibayarkanPerBulan;
+            if (bulanKe === 1) {
+                nominalBulanIni = yangHarusDibayarkanPerBulan + totalBagiHasil;
+            }
+            
+            // Bulatkan untuk menghilangkan desimal
+            nominalBulanIni = Math.round(nominalBulanIni);
+            
+            $('#yang_harus_dibayarkan').val(formatRupiah(nominalBulanIni));
+            nominalInvoiceTerpilih = nominalBulanIni;
+            nomorInvoiceTerpilih = bulanLabel;
         }
 
         function fillFormData(data) {
             $('#total_pinjaman').val(formatRupiah(data.totalPinjaman));
             $('#total_bagi_hasil').val(formatRupiah(data.totalBagiHasil));
-            $('#tanggal_pencairan').val(formatDate(data.tanggalPencairan));
-            $('#lama_pemakaian').val(calculateDuration(data.tanggalPencairan));
+            
+            // Untuk Installment, gunakan tanggal_pencairan_real dari history
+            const tanggalPencairan = data.jenisPembiayaan === 'Installment' ? data.tanggalPencairanReal : data.tanggalPencairan;
+            $('#tanggal_pencairan').val(formatDate(tanggalPencairan));
+            
+            // Untuk Installment, lama pemakaian = tenor_pembayaran (dalam bulan), bukan hitung dari tanggal
+            if (data.jenisPembiayaan === 'Installment') {
+                $('#lama_pemakaian').val(data.tenorPembayaran + ' Bulan');
+                lamaPemakaianHari = data.tenorPembayaran * 30; // Konversi bulan ke hari (approx)
+            } else {
+                $('#lama_pemakaian').val(calculateDuration(tanggalPencairan));
+            }
 
             populateInvoiceSelect(data.invoices);
         }
 
         function populateInvoiceSelect(invoices) {
             const $select = $('#invoice');
-            $select.empty().append('<option value="">Pilih Invoice</option>');
+            
+            // Update placeholder sesuai jenis pembiayaan
+            let placeholder = 'Pilih Invoice';
+            if (currentJenisPembiayaan === 'PO Financing' || currentJenisPembiayaan === 'Factoring') {
+                placeholder = 'Pilih Kontrak';
+            }
+            
+            $select.empty().append(`<option value="">${placeholder}</option>`);
 
             if (invoices && invoices.length > 0) {
                 invoices.forEach(invoice => {
-                    const val = invoice.id ?? invoice.no_invoice;
-                    const nilai = invoice.nilai_invoice ?? 
-                                 (invoice.nilai_pinjaman && invoice.nilai_bagi_hasil ? 
-                                  (invoice.nilai_pinjaman + invoice.nilai_bagi_hasil) : null);
-                    
-                    $select.append(`<option value="${val}" data-nilai-invoice="${nilai}">${invoice.no_invoice}</option>`);
+                    $select.append(
+                        `<option value="${invoice.id}" 
+                                 data-nilai-invoice="${invoice.nilai}"
+                                 data-nilai-asli="${invoice.nilai_asli || invoice.nilai}"
+                                 data-sudah-dibayar="${invoice.sudah_dibayar || 0}">
+                            ${invoice.label}
+                         </option>`
+                    );
                 });
+            } else {
+                const jenisLabel = (currentJenisPembiayaan === 'PO Financing' || currentJenisPembiayaan === 'Factoring') ? 'kontrak' : 'invoice';
+                $select.append(`<option value="" disabled>Semua ${jenisLabel} sudah lunas</option>`);
             }
 
             if ($select.hasClass('select2-hidden-accessible')) {
                 $select.select2('destroy');
             }
-            $select.select2({ placeholder: 'Pilih Invoice' });
+            $select.select2({
+                placeholder: placeholder
+            });
         }
 
         function handleInvoiceChange() {
             const selected = $(this).find(':selected');
             const nilai = parseFloat(selected.data('nilai-invoice')) || 0;
-            const noInvoice = selected.text().trim();
+            const nilaiAsli = parseFloat(selected.data('nilai-asli')) || nilai;
+            const sudahDibayar = parseFloat(selected.data('sudah-dibayar')) || 0;
             
+            const labelText = selected.text().trim();
+
             nominalInvoiceTerpilih = nilai;
-            nomorInvoiceTerpilih = noInvoice; // Simpan nomor invoice
-            
+            nomorInvoiceTerpilih = labelText;
+
             if (nilai > 0) {
                 $('#nominal_invoice').val(formatRupiah(nilai));
             } else {
@@ -221,9 +368,9 @@
             $('#nominal_yang_dibayarkan').val('');
             $('#bukti_pembayaran').val('');
             $('#currentFileInfo').hide();
-            
+
             clearFileInputDisplay();
-            
+
             setTimeout(initCleaveRupiah, 100);
             modalInstance.modal('show');
         }
@@ -233,9 +380,9 @@
             $('#nominal_yang_dibayarkan').val('');
             $('#bukti_pembayaran').val('');
             $('#currentFileInfo').hide();
-            
+
             clearFileInputDisplay();
-            
+
             if (window.cleaveNominal) {
                 window.cleaveNominal.destroy();
             }
@@ -247,19 +394,53 @@
             const fileInput = $('#bukti_pembayaran')[0];
 
             if (!nominalInput || nominalInput.trim() === '' || nominalInput === 'Rp 0') {
-                alert('Nominal yang dibayarkan harus diisi');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Nominal yang dibayarkan harus diisi'
+                });
                 return;
             }
 
             if (!fileInput.files[0] && editingIndex === null) {
-                alert('Bukti pembayaran harus diupload');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Bukti pembayaran harus diupload'
+                });
                 return;
             }
 
             const nominal = parseFloat(nominalInput.replace(/[^0-9]/g, ''));
-            
+
             if (nominal <= 0 || isNaN(nominal)) {
-                alert('Nominal yang dibayarkan tidak valid');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Nominal yang dibayarkan tidak valid'
+                });
+                return;
+            }
+
+            // Validasi: Pembayaran tidak boleh melebihi sisa nominal invoice/kontrak
+            if (nominal > nominalInvoiceTerpilih) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nominal Melebihi Sisa',
+                    html: `Pembayaran tidak boleh lebih dari sisa nominal<br><strong>${formatRupiah(nominalInvoiceTerpilih)}</strong>`,
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+            
+            // Validasi khusus Installment: Harus bayar TEPAT sesuai yang harus dibayarkan
+            if (currentJenisPembiayaan === 'Installment' && Math.round(nominal) !== Math.round(nominalInvoiceTerpilih)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nominal Tidak Sesuai',
+                    html: `Untuk pembayaran Installment, Anda harus membayar <strong>TEPAT</strong><br><strong>${formatRupiah(nominalInvoiceTerpilih)}</strong>`,
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
 
@@ -283,7 +464,7 @@
 
         function handleFileInputChange() {
             const fileName = $(this).val().split('\\').pop();
-            
+
             if (fileName) {
                 $(this).next('.text-muted').text('File dipilih: ' + fileName);
             } else {
@@ -301,7 +482,9 @@
             tbody.empty();
 
             if (pengembalianData.length === 0) {
-                tbody.append('<tr id="emptyRow"><td colspan="4" class="text-center text-muted">Belum ada data pengembalian</td></tr>');
+                tbody.append(
+                    '<tr id="emptyRow"><td colspan="4" class="text-center text-muted">Belum ada data pengembalian</td></tr>'
+                );
                 return;
             }
 
@@ -326,29 +509,29 @@
 
         function handleEdit(e) {
             e.preventDefault();
-            
+
             editingIndex = $(this).data('idx');
             const data = pengembalianData[editingIndex];
 
             $('#modalTitle').text('Edit Pengembalian Invoice');
             $('#bukti_pembayaran').val('');
-            
+
             clearFileInputDisplay();
-            
+
             if (data.fileName) {
                 $('#currentFileName').text(data.fileName);
                 $('#currentFileInfo').show();
             } else {
                 $('#currentFileInfo').hide();
             }
-            
+
             $('#nominal_yang_dibayarkan').val(data.nominal);
-            
+
             setTimeout(function() {
                 if (window.cleaveNominal) {
                     window.cleaveNominal.destroy();
                 }
-                
+
                 window.cleaveNominal = new Cleave('#nominal_yang_dibayarkan', {
                     numeral: true,
                     numeralThousandsGroupStyle: 'thousand',
@@ -358,13 +541,13 @@
                     noImmediatePrefix: false
                 });
             }, 100);
-            
+
             modalInstance.modal('show');
         }
 
         function handleDelete(e) {
             e.preventDefault();
-            
+
             if (confirm('Yakin ingin menghapus data ini?')) {
                 const index = $(this).data('idx');
                 pengembalianData.splice(index, 1);
@@ -375,7 +558,8 @@
 
         function calculateSisa() {
             const totalDibayar = pengembalianData.reduce((sum, item) => sum + item.nominal, 0);
-            
+
+            // Rumus: Pembayaran diprioritaskan ke bagi hasil terlebih dahulu, baru ke pokok
             let sisaBagiHasil = totalBagiHasil;
             let sisaBayarPokok = totalPinjaman;
 
@@ -396,11 +580,12 @@
         function calculateDuration(startDate) {
             const start = new Date(startDate);
             const now = new Date();
-            
-            // Hitung total hari untuk database
+
+            // Hitung total hari dari tanggal pencairan sampai sekarang
             const diffTime = Math.abs(now - start);
             lamaPemakaianHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
+
+            // Format ke Tahun, Bulan, Hari untuk display
             let years = now.getFullYear() - start.getFullYear();
             let months = now.getMonth() - start.getMonth();
             let days = now.getDate() - start.getDate();
@@ -439,21 +624,31 @@
         function resetForm() {
             $('#total_pinjaman, #total_bagi_hasil, #tanggal_pencairan, #lama_pemakaian, #nominal_invoice').val('');
             $('#invoice').empty().append('<option value="">Pilih Invoice</option>');
+            $('#bulan_pembayaran').empty().append('<option value="">Pilih Bulan</option>');
+            $('#yang_harus_dibayarkan').val('');
             $('#sisa_utang, #sisa_bagi_hasil').val('');
-            
+
             pengembalianData = [];
             totalPinjaman = 0;
             totalBagiHasil = 0;
             lamaPemakaianHari = 0;
             nominalInvoiceTerpilih = 0;
             nomorInvoiceTerpilih = '';
-            
+            currentJenisPembiayaan = '';
+            tenorPembayaran = 0;
+            yangHarusDibayarkanPerBulan = 0;
+            tanggalPencairanReal = '';
+
+            $('#labelInvoice').text('Invoice Yang Akan Dibayar');
+            $('#labelNominalInvoice').text('Nominal Invoice');
+            $('#installmentFields').hide();
+
             renderTable();
         }
 
         function handleFormSubmit(e) {
             e.preventDefault();
-            
+
             const kodePeminjaman = $('#kode_peminjaman').val();
 
             if (!kodePeminjaman) {
@@ -483,11 +678,17 @@
             formData.append('tanggal_pencairan', $('#tanggal_pencairan').val());
             formData.append('lama_pemakaian', lamaPemakaianHari);
             formData.append('nominal_invoice', nominalInvoiceTerpilih);
-            formData.append('invoice_dibayarkan', nomorInvoiceTerpilih); // Nomor invoice yang dipilih
+            formData.append('invoice_dibayarkan', nomorInvoiceTerpilih);
             formData.append('sisa_utang', $('#sisa_utang').val().replace(/[^0-9]/g, ''));
             formData.append('sisa_bagi_hasil', $('#sisa_bagi_hasil').val().replace(/[^0-9]/g, ''));
             formData.append('catatan', $('#catatan').val() || '');
             
+            // Khusus untuk Installment
+            if (currentJenisPembiayaan === 'Installment') {
+                formData.append('bulan_pembayaran', $('#bulan_pembayaran').val());
+                formData.append('yang_harus_dibayarkan', yangHarusDibayarkanPerBulan);
+            }
+
             pengembalianData.forEach((item, index) => {
                 formData.append(`pengembalian_invoices[${index}][nominal]`, item.nominal);
                 if (item.file) {
@@ -496,7 +697,7 @@
             });
 
             $.ajax({
-                url: '{{ route("pengembalian.store") }}',
+                url: '{{ route('pengembalian.store') }}',
                 method: 'POST',
                 data: formData,
                 processData: false,
@@ -512,33 +713,55 @@
                     });
                 },
                 success: function(response) {
-                    if (response.success) {
+                    if (response.error === false || response.success === true) {
                         Swal.fire({
                             icon: 'success',
                             title: 'Berhasil',
-                            text: response.message,
+                            text: response.message || 'Data berhasil disimpan',
                             showConfirmButton: false,
                             timer: 1500
                         }).then(() => {
-                            window.location.href = response.redirect;
+                            if (typeof Livewire !== 'undefined') {
+                                Livewire.dispatch('refreshPengembalianPeminjamanTable');
+                            }
+
+                            const redirectUrl = response.data?.redirect || response.redirect ||
+                                '{{ route('pengembalian.index') }}';
+                            window.location.href = redirectUrl;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Perhatian',
+                            text: response.message || 'Terjadi kesalahan',
                         });
                     }
                 },
                 error: function(xhr) {
+                    Swal.close();
+
                     let errorMessage = 'Terjadi kesalahan saat menyimpan data';
-                    
-                    if (xhr.status === 422 && xhr.responseJSON.errors) {
-                        const errors = xhr.responseJSON.errors;
-                        let errorList = '<ul class="text-left">';
-                        Object.keys(errors).forEach(key => {
-                            errorList += `<li>${errors[key][0]}</li>`;
-                        });
-                        errorList += '</ul>';
-                        errorMessage = errorList;
-                    } else if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
+
+                    if (xhr.status === 422) {
+                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            let errorList = '<ul class="text-start">';
+                            Object.keys(errors).forEach(key => {
+                                errorList += `<li>${errors[key][0]}</li>`;
+                            });
+                            errorList += '</ul>';
+                            errorMessage = errorList;
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                    } else if (xhr.status === 500) {
+                        errorMessage = xhr.responseJSON?.message || 'Terjadi kesalahan pada server';
+                    } else if (xhr.status === 0) {
+                        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                    } else {
+                        errorMessage = xhr.responseJSON?.message || `Error ${xhr.status}: ${xhr.statusText}`;
                     }
-                    
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',

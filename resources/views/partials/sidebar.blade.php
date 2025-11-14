@@ -135,12 +135,14 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
+                    <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
+                        class="menu-link">
                         <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}" class="menu-link">
+                    <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}"
+                        class="menu-link">
                         <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                     </a>
                 </li>

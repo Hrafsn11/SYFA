@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pengembalian_invoice', function (Blueprint $table) {
-            $table->id('id_pengembalian_invoice');
-            $table->ulid('id_pengembalian');
+            $table->ulid('id_pengembalian_invoice')->primary();
+            $table->string('id_pengembalian', 26);
             $table->foreign('id_pengembalian')
                   ->references('ulid')
                   ->on('pengembalian_pinjaman')
