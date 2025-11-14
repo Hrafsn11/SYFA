@@ -591,6 +591,13 @@ class PeminjamanController extends Controller
                 'yang_harus_dibayarkan' => isset($validated['yang_harus_dibayarkan']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['yang_harus_dibayarkan']) : null,
                 'total_nominal_yang_dialihkan' => isset($validated['total_nominal_yang_dialihkan']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['total_nominal_yang_dialihkan']) : null,
                 'updated_by' => auth()->id(),
+                'status' => 'Draft',
+            ]);
+
+            $historyPengajuan = HistoryStatusPengajuanPinjaman::create([
+                'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
+                'status' => 'Draft',
+                'current_step' => 1,
             ]);
 
             // Get existing bukti peminjaman to preserve file paths if no new files uploaded

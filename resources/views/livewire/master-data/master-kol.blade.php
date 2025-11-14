@@ -3,10 +3,12 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">KOL</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3" data-bs-toggle="modal" data-bs-target="#modalTambahKOL" id="btnTambahKOL">
-                    <i class="fa-solid fa-plus"></i>
-                    KOL
-                </button>
+                @can('master_data.add')
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3" data-bs-toggle="modal" data-bs-target="#modalTambahKOL" id="btnTambahKOL">
+                        <i class="fa-solid fa-plus"></i>
+                        KOL
+                    </button>
+                @endcan
             </div>
         </div>
     </div>
