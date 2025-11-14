@@ -76,18 +76,18 @@
 
         <!-- Debitur dan Investor Section -->
         <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Debitur dan Investor</span>
+            <span class="menu-header-text">Investasi</span>
         </li>
 
         <li class="menu-item {{ request()->is('debitur-dan-investor*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-id-badge"></i>
-                <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
+                <div data-i18n="Pengajuan Investasi">Pengajuan Investasi</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('debitur-dan-investor/form-kerja-investor*') ? 'active' : '' }}">
-                    <a href="{{ route('form-kerja-investor.index') }}" class="menu-link">
-                        <div data-i18n="Investor">Investor</div>
+            <a wire:navigate.hover href="{{ route('form-kerja-investor.index') }}" class="menu-link">
+                        <div data-i18n="Investasi">Investasi</div>
                     </a>
                 </li>
 

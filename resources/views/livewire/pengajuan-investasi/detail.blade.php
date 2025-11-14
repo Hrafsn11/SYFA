@@ -674,10 +674,10 @@
                         $('#btnSubmitPengajuan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Mengirim...');
                     },
                     success: function(response) {
-                        if (response.success) {
+                        if (!response.error) {
                             Swal.fire({
                                 title: 'Berhasil!',
-                                text: 'Pengajuan investasi berhasil di-submit.',
+                                text: response.message || 'Pengajuan investasi berhasil di-submit.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
@@ -715,11 +715,11 @@
                         $('#btnKonfirmasiSetuju').prop('disabled', true).text('Memproses...');
                     },
                     success: function(response) {
-                        if (response.success) {
+                        if (!response.error) {
                             modal.hide();
                             Swal.fire({
                                 title: 'Berhasil!',
-                                text: 'Pengajuan investasi berhasil disetujui.',
+                                text: response.message || 'Pengajuan investasi berhasil disetujui.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
@@ -770,13 +770,13 @@
                         $('#formHasilReview button[type="submit"]').prop('disabled', true).text('Mengirim...');
                     },
                     success: function(response) {
-                        if (response.success) {
+                        if (!response.error) {
                             bootstrap.Modal.getInstance($('#modalHasilReview')[0]).hide();
                             $('#formHasilReview').removeClass('was-validated')[0].reset();
                             
                             Swal.fire({
                                 title: 'Pengajuan Ditolak',
-                                text: 'Pengajuan investasi telah ditolak.',
+                                text: response.message || 'Pengajuan investasi telah ditolak.',
                                 icon: 'info',
                                 confirmButtonText: 'OK'
                             }).then(() => {
@@ -813,11 +813,11 @@
                         $('#btnKonfirmasiCEO').prop('disabled', true).html('<i class="ti ti-check me-1"></i>Memproses...');
                     },
                     success: function(response) {
-                        if (response.success) {
+                        if (!response.error) {
                             modal.hide();
                             Swal.fire({
                                 title: 'Berhasil!',
-                                text: 'Pengajuan investasi berhasil disetujui oleh CEO.',
+                                text: response.message || 'Pengajuan investasi berhasil disetujui oleh CEO.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
@@ -875,13 +875,13 @@
                         $('#btnUploadSpinner').removeClass('d-none');
                     },
                     success: function(response) {
-                        if (response.success) {
+                        if (!response.error) {
                             bootstrap.Modal.getInstance($('#modalUploadBuktiTransfer')[0]).hide();
                             $('#formUploadBuktiTransfer').removeClass('was-validated')[0].reset();
                             
                             Swal.fire({
                                 title: 'Berhasil!',
-                                text: 'Bukti transfer berhasil diupload.',
+                                text: response.message || 'Bukti transfer berhasil diupload.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
