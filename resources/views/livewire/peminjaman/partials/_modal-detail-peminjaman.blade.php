@@ -286,6 +286,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="formPersetujuanDebitur">
+                    <input type="hidden" name="deviasi" value="{{ isset($latestHistory->deviasi) ? $latestHistory->deviasi : '' }}" id="hiddenDeviasiDebitur">
                     <div class="modal-body">
                         <div class="alert alert-info mb-3">
                             <i class="ti ti-info-circle me-2"></i>
@@ -295,6 +296,29 @@
                         <!-- Card Data Nominal dan Tanggal -->
                         <div class="card border mb-3 shadow-none">
                             <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Deviasi</label>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi_debitur" id="deviasiDebiturYa" value="Ya" 
+                                                       {{ isset($latestHistory->deviasi) && strtolower($latestHistory->deviasi) == 'ya' ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="deviasiDebiturYa">
+                                                    <i class="ti ti-check-circle text-success me-1"></i>
+                                                    Ya
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi_debitur" id="deviasiDebiturTidak" value="Tidak" 
+                                                       {{ isset($latestHistory->deviasi) && strtolower($latestHistory->deviasi) == 'tidak' ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="deviasiDebiturTidak">
+                                                    <i class="ti ti-x-circle text-danger me-1"></i>
+                                                    Tidak
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="debiturNominalPengajuan" class="form-label">Nominal Pengajuan</label>
@@ -370,6 +394,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="formPersetujuanCEO">
+                    <input type="hidden" name="deviasi" value="{{ isset($latestHistory->deviasi) ? $latestHistory->deviasi : '' }}" id="hiddenDeviasiCEO">
                     <div class="modal-body">
                         <div class="alert alert-info mb-3">
                             <i class="ti ti-info-circle me-2"></i>
@@ -379,6 +404,29 @@
                         <!-- Card Data Nominal dan Tanggal -->
                         <div class="card border mb-3 shadow-none">
                             <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Deviasi</label>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi_ceo" id="deviasiCEOYa" value="Ya" 
+                                                       {{ isset($latestHistory->deviasi) && strtolower($latestHistory->deviasi) == 'ya' ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="deviasiCEOYa">
+                                                    <i class="ti ti-check-circle text-success me-1"></i>
+                                                    Ya
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi_ceo" id="deviasiCEOTidak" value="Tidak" 
+                                                       {{ isset($latestHistory->deviasi) && strtolower($latestHistory->deviasi) == 'tidak' ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="deviasiCEOTidak">
+                                                    <i class="ti ti-x-circle text-danger me-1"></i>
+                                                    Tidak
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="ceoNominalPengajuan" class="form-label">Nominal Pengajuan</label>
@@ -454,13 +502,81 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="formPersetujuanDirektur">
+                    <input type="hidden" name="deviasi" value="{{ isset($latestHistory->deviasi) ? $latestHistory->deviasi : '' }}" id="hiddenDeviasiDirektur">
                     <div class="modal-body">
                         <div class="alert alert-info mb-3">
                             <i class="ti ti-info-circle me-2"></i>
                             Silakan berikan keputusan Direktur terkait pengajuan peminjaman ini.
                         </div>
                         
-                        <!-- Card Catatan -->
+                        <!-- Card Data Nominal dan Tanggal -->
+                        <div class="card border mb-3 shadow-none">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Deviasi</label>
+                                        <div class="d-flex gap-3 align-items-center">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi_direktur" id="deviasiDirekturYa" value="Ya" 
+                                                       {{ isset($latestHistory->deviasi) && strtolower($latestHistory->deviasi) == 'ya' ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="deviasiDirekturYa">
+                                                    <i class="ti ti-check-circle text-success me-1"></i>
+                                                    Ya
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="deviasi_direktur" id="deviasiDirekturTidak" value="Tidak" 
+                                                       {{ isset($latestHistory->deviasi) && strtolower($latestHistory->deviasi) == 'tidak' ? 'checked' : '' }} disabled>
+                                                <label class="form-check-label" for="deviasiDirekturTidak">
+                                                    <i class="ti ti-x-circle text-danger me-1"></i>
+                                                    Tidak
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="direkturNominalPengajuan" class="form-label">Nominal Pengajuan</label>
+                                        <input type="text" class="form-control"
+                                            id="direkturNominalPengajuan" value="{{ $peminjaman['nominal_pinjaman'] ? 'Rp ' . number_format(intval($peminjaman['nominal_pinjaman']), 0, ',', '.') : 'Rp 0' }}" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="direkturNominalDisetujui" class="form-label">Nominal Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="direkturNominalDisetujui" value="{{ isset($latestHistory) && $latestHistory['nominal_yang_disetujui'] ? 'Rp ' . number_format(intval($latestHistory['nominal_yang_disetujui']), 0, ',', '.') : 'Rp 0' }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <label for="direkturTanggalPencairan" class="form-label">Tanggal Pencairan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="direkturTanggalPencairan" value="{{ isset($latestHistory) && $latestHistory['tanggal_pencairan'] ? \Carbon\Carbon::parse($latestHistory['tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="direkturTanggalHarapan" class="form-label">Tanggal Pencairan yang
+                                            Diharapkan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" placeholder="DD/MM/YYYY"
+                                                id="direkturTanggalHarapan" value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Catatan - Only editable field -->
                         <div class="card border shadow-none">
                             <div class="card-body">
                                 <label for="catatanPersetujuanDirektur" class="form-label">Catatan Direktur</label>

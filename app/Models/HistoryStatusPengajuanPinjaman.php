@@ -32,7 +32,7 @@ class HistoryStatusPengajuanPinjaman extends Model
         'reject_by',
         'approve_by',
         'current_step',
-        'devisasi',
+        'deviasi',
     ];
 
 

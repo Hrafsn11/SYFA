@@ -55,7 +55,7 @@
     </div>
 </div>
 
-@script
+@push('scripts')
 <script>
     function afterAction(payload) {
         Livewire.dispatch('refreshSumberPendanaanEksternalTable');
@@ -99,4 +99,4 @@
         });
     });
 </script>
-@endscript
+@endpush
