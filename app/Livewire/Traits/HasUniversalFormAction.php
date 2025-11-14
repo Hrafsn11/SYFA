@@ -32,10 +32,12 @@ trait HasUniversalFormAction
 
         if (method_exists($this, 'setterFormData')) {
             $this->setterFormData();
+        
         } else {
             foreach ($this->getUniversalFieldInputs() as $key => $value) {
                 $this->form_data[$value] = $this->{$value};
             }
+
         }
 
         $payload = (new UniversalFormAction($this))->saveData([
