@@ -2,7 +2,7 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">User Management</h5>
-            @can('create users')
+            @can('users.add')
             <button wire:click="create" class="btn btn-primary">
                 <i class="ti ti-plus me-1"></i> Create User
             </button>
@@ -64,14 +64,14 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-2">
-                                        @can('edit users')
+                                        @can('users.edit')
                                         <button wire:click="edit({{ $user->id }})" 
                                                 class="btn btn-sm btn-icon btn-primary" 
                                                 title="Edit">
                                             <i class="ti ti-edit"></i>
                                         </button>
                                         @endcan
-                                        @can('delete users')
+                                        @can('users.delete')
                                         @if(!$user->hasRole('super-admin'))
                                         <button wire:click="delete({{ $user->id }})" 
                                                 onclick="return confirm('Are you sure you want to delete this user?')"

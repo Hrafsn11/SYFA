@@ -3,10 +3,12 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Sumber Pendanaan Eksternal</h4>
+                @can('master_data.add')
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3" data-bs-toggle="modal" data-bs-target="#modalTambahSumberPendanaan" id="btnTambahSumberPendanaan">
                     <i class="fa-solid fa-plus"></i>
                     Sumber Pendanaan
                 </button>
+                @endcan
             </div>
         </div>
     </div>

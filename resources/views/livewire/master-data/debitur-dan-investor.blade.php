@@ -3,11 +3,13 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Debitur dan Investor</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                    id="btnTambahDebitur">
-                    <i class="fa-solid fa-plus"></i>
-                    <span id="btnTambahText">Debitur</span>
-                </button>
+                @can('master_data.add')
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        id="btnTambahDebitur">
+                        <i class="fa-solid fa-plus"></i>
+                        <span id="btnTambahText">Debitur</span>
+                    </button>
+                @endcan
             </div>
         </div>
     </div>
