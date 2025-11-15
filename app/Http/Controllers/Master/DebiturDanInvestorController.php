@@ -2,54 +2,42 @@
 
 namespace App\Http\Controllers\Master;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\MasterDebiturDanInvestor;
-use App\Models\MasterKol;
+use App\Helpers\Response;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Models\MasterKol;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Models\MasterDebiturDanInvestor;
+use App\Http\Requests\DebiturDanInvestorRequest;
 
 class DebiturDanInvestorController extends Controller
 {
-    public function index()
-    {
-        $kol = MasterKol::orderBy('id_kol', 'asc')->get();
-        $banks = [
-            'BCA','BSI','Mandiri','BRI','BNI','Danamon','Permata Bank','OCBC','Panin Bank','UOB Indonesia','CIMB Niaga'
-        ];
-        return view('livewire.master-data-debitur-investor.index', compact('kol','banks'));
-    }
+    // public function index()
+    // {
+    //     $kol = MasterKol::orderBy('id_kol', 'asc')->get();
+    //     $banks = [
+    //         'BCA','BSI','Mandiri','BRI','BNI','Danamon','Permata Bank','OCBC','Panin Bank','UOB Indonesia','CIMB Niaga'
+    //     ];
+    //     return view('livewire.master-data-debitur-investor.index', compact('kol','banks'));
+    // }
 
-    public function store(Request $request)
+    public function store(DebiturDanInvestorRequest $request)
     {
-        $validated = $request->validate([
-            'id_kol' => $request->flagging === 'tidak' ? 'required|exists:master_kol,id_kol' : 'nullable|exists:master_kol,id_kol',
-            'nama' => 'required|string|max:255',
-            'alamat' => 'nullable|string|max:500',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'no_telepon' => 'nullable|string|max:20',
-            'status' => 'nullable|string|in:active,non active',
-            'deposito' => 'nullable|string|in:reguler,khusus',
-            'nama_ceo' => 'nullable|string|max:255',
-            'nama_bank' => 'nullable|string|in:BCA,BSI,Mandiri,BRI,BNI,Danamon,Permata Bank,OCBC,Panin Bank,UOB Indonesia,CIMB Niaga',
-            'no_rek' => 'nullable|string|max:100',
-            'flagging' => 'nullable|string|in:ya,tidak',
-            'tanda_tangan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // 2MB max
-        ]);
-
+        // dd('masuk');
         try {
+            $validated = $request->validated();
+
             DB::beginTransaction();
 
+            $file = null;
             // Handle file upload
-            if ($request->hasFile('tanda_tangan')) {
-                $file = $request->file('tanda_tangan');
-                $filename = 'tanda_tangan_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('tanda_tangan', $filename, 'public');
-                $validated['tanda_tangan'] = $path;
+            if ($request->tanda_tangan) {
+                $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
             }
+            $validated['tanda_tangan'] = $file;
 
             $user = User::create([
                 'name' => $validated['nama'],
@@ -65,17 +53,10 @@ class DebiturDanInvestorController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Debitur berhasil ditambahkan dan akun pengguna dibuat',
-                'data' => $debitur->toArray()
-            ]);
+            return Response::success(null, 'Debitur berhasil ditambahkan dan akun pengguna dibuat');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menambahkan debitur: ' . $e->getMessage()
-            ], 500);
+            return Response::errorCatch($e);
         }
     }
 
@@ -83,47 +64,27 @@ class DebiturDanInvestorController extends Controller
     {
         $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->with('kol')->firstOrFail();
         
-        return response()->json([
-            'success' => true,
-            'data' => $debitur->toArray()
-        ]);
+        return Response::success($debitur->toArray(), 'Debitur berhasil ditemukan');
     }
 
-    public function update(Request $request, $id)
+    public function update(DebiturDanInvestorRequest $request, $id)
     {
         $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
-        
-        $validated = $request->validate([
-            'id_kol' => $request->flagging === 'tidak' ? 'required|exists:master_kol,id_kol' : 'nullable|exists:master_kol,id_kol',
-            'nama' => 'required|string|max:255',
-            'alamat' => 'nullable|string|max:500',
-            'email' => 'required|email|max:255|unique:users,email,' . $debitur->user_id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'no_telepon' => 'nullable|string|max:20',
-            'status' => 'nullable|string|in:active,non active',
-            'deposito' => 'nullable|string|in:reguler,khusus',
-            'nama_ceo' => 'nullable|string|max:255',
-            'nama_bank' => 'nullable|string|in:BCA,BSI,Mandiri,BRI,BNI,Danamon,Permata Bank,OCBC,Panin Bank,UOB Indonesia,CIMB Niaga',
-            'no_rek' => 'nullable|string|max:100',
-            'flagging' => 'nullable|string|in:ya,tidak',
-            'tanda_tangan' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // 2MB max
-        ]);
+        $validated = $request->validated();
 
         try {
             DB::beginTransaction();
 
-            // Handle file upload
-            if ($request->hasFile('tanda_tangan')) {
-                // Delete old file if exists
-                if ($debitur->tanda_tangan && \Storage::disk('public')->exists($debitur->tanda_tangan)) {
-                    \Storage::disk('public')->delete($debitur->tanda_tangan);
-                }
-                
-                $file = $request->file('tanda_tangan');
-                $filename = 'tanda_tangan_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('tanda_tangan', $filename, 'public');
-                $validated['tanda_tangan'] = $path;
+            $file = $debitur->tanda_tangan;
+            if (Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                Storage::disk('public')->delete($debitur->tanda_tangan);
             }
+
+            // Handle file upload
+            if ($request->tanda_tangan) {
+                $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
+            }
+            $validated['tanda_tangan'] = $file;
 
             // Update user if exists
             if ($debitur->user_id) {
@@ -164,13 +125,17 @@ class DebiturDanInvestorController extends Controller
 
     public function destroy($id)
     {
-        $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
-        $debitur->delete();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Debitur berhasil dihapus'
-        ]);
+        try {
+            $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
+            if (Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                Storage::disk('public')->delete($debitur->tanda_tangan);
+            }
+            $debitur->delete();
+
+            return Response::success(null, 'Debitur berhasil dihapus');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function toggleStatus($id)
@@ -202,8 +167,8 @@ class DebiturDanInvestorController extends Controller
             $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
             
             // Delete file if exists
-            if ($debitur->tanda_tangan && \Storage::disk('public')->exists($debitur->tanda_tangan)) {
-                \Storage::disk('public')->delete($debitur->tanda_tangan);
+            if ($debitur->tanda_tangan && Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                Storage::disk('public')->delete($debitur->tanda_tangan);
             }
             
             // Update database

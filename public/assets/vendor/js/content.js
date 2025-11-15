@@ -34,17 +34,7 @@ function initAllComponents() {
     initSelect2();
     initPopOver();
     initTooltips();
-    // initFormRepeater();
-    // initDataFilter();
-    // initSubmitButton();
     initFlatpickr();
-}
-
-function initSubmitButton() {
-    $('button.submit').each(function () {
-        $(this).prop('disabled', false);
-    }
-    );
 }
 
 function initFlatpickr() {
@@ -108,22 +98,44 @@ function initSelect2(element = null, data = null) {
         return;
     }
 
+    const possibleAttrs = [
+        'wire\\:model',
+        'wire\\:model\\.live',
+        'wire\\:model\\.lazy',
+        'wire\\:model\\.blur',
+        'wire\\:model\\.debounce.500ms',
+        'wire\\:model\\.defer'
+    ];
+
     $('select.select2').each(function () {
-        if ($(this).hasClass("select2-hidden-accessible")) {
-            $(this).removeClass('select2-hidden-accessible').next('.select2-container').remove();
-            $(this).removeAttr('data-select2-id tabindex aria-hidden');
-            $(this).parent().removeAttr('data-select2-id');
+        let element = $(this);
+        if (element.hasClass("select2-hidden-accessible")) {
+            element.removeClass('select2-hidden-accessible').next('.select2-container').remove();
+            element.removeAttr('data-select2-id tabindex aria-hidden');
+            element.parent().removeAttr('data-select2-id');
         }
 
-        if (!$(this).parent().hasClass('position-relative')) $(this).wrap('<div class="position-relative w-100"></div>');
+        if (!element.parent().hasClass('position-relative')) element.wrap('<div class="position-relative w-100"></div>');
 
-        $(this).select2({
-            tags: $(this).attr('data-tags') === 'true' ?? false,
-            allowClear: $(this).attr('data-allow-clear') === 'true' ?? false,
-            placeholder: $(this).attr('data-placeholder') ?? null,
+        element.select2({
+            tags: element.attr('data-tags') === 'true' ?? false,
+            allowClear: element.attr('data-allow-clear') === 'true' ?? false,
+            placeholder: element.attr('data-placeholder') ?? null,
             dropdownAutoWidth: true,
             width: '100%',
-            dropdownParent: $(this).parent(),
+            dropdownParent: element.parent(),
+        });
+
+        element.on('change', function () {
+            let changed = $(this);
+            var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
+            found = found.replace(/\\/g, '');
+            var valueAttr = found ? element.attr(found) : null;
+            var value = element.val();
+            console.log(found, valueAttr, changed, value);
+            // console.log(valueAttr, value, changed.closest('[wire\\:id]').attr('wire:id'));
+            
+            Livewire.find(changed.closest('[wire\\:id]').attr('wire:id')).set(valueAttr, value);
         });
     });
 }
@@ -341,213 +353,6 @@ function showSweetAlert(config) {
     });
 }
 
-// $(document).on("submit", ".default-form", function (event) {
-//     event.preventDefault();
-//     var button = $(this).find(":submit");
-//     btnBlock(button);
-//     store_data(this, button);
-// });
-
-/***
- * Function to store data
- * @param content
- * @param button
- * @returns {void}
- * */
-// function store_data(content, button) {
-//     $("input").blur();
-
-//     $(content).find('.is-invalid').removeClass('is-invalid');
-//     $(content).find('.invalid-feedback').html(null).removeClass('d-block');
-
-//     let form_data = new FormData(content);
-//     let action = $(content).attr("action");
-//     let callback = $(content).attr("function-callback") ?? null;
-
-//     $.ajax({
-//         url: action,
-//         type: "POST",
-//         data: form_data,
-//         processData: false, // tell jQuery not to process the data
-//         contentType: false, // tell jQuery not to set contentType
-//         cache: false,
-//         success: function (response) {
-//             btnBlock(button, false);
-//             if (!response.error) {                
-//                 if (
-//                     (response.data == null) ||
-//                     (response.data != null && !response.data.ignore_alert)
-//                 ) {
-//                     showSweetAlert({
-//                         title: response?.data?.title ?? 'Berhasil!',
-//                         text: response.message,
-//                         icon: response?.data?.icon ?? 'success',
-//                         showConfirmButton: response?.data?.showConfirmButton
-//                     });                   
-//                 }
-
-//                 if (typeof window[callback] === "function") window[callback](response);
-//             } else {
-//                 showSweetAlert({
-//                     title: 'Failed!',
-//                     text: response.message,
-//                     icon: 'error'
-//                 });
-//             }
-//         },
-//         error: (xhr, status, error) => {
-//             btnBlock(button, false);
-//             let res = xhr.responseJSON;
-//             if (res.errors) {
-//                 $.each(res.errors, function (key, value) {
-//                     key = errorFormater(key);
-
-//                     //find closest flatpickr input and add invalid
-//                     if ($(`[name="${key}"]`).hasClass('flatpickr')) {
-//                         $(`[name="${key}"]`).parents('.form-group').find('.flatpickr').addClass('is-invalid');
-//                     }
-
-//                     if ($(`[name="${key}"]`, content).length > 0) {
-//                         $(`[name="${key}"]`, content).addClass('is-invalid');
-//                         $(`[name="${key}"]`, content).parents('.form-group').find('.invalid-feedback').html(value[0]).addClass('d-block');
-//                         $('html, body').scrollTop($(`[name="${key}"]`).offset().top-100);
-//                     } else {
-//                         $(`[name^="${key}"]`, content).addClass('is-invalid');
-//                         $(`[name^="${key}"]`, content).parents('.form-group').find('.invalid-feedback').html(value[0]).addClass('d-block');
-//                         $('html, body').scrollTop($(`[name^="${key}"]`).offset().top-100);
-//                     }
-//                 });
-//             } else {
-//                 showSweetAlert({
-//                     title: 'Failed!',
-//                     text: res.message,
-//                     icon: 'error'
-//                 });
-//             }
-//         },
-//     }).always(function () {
-//         btnBlock(button, false);
-//     });
-// }
-
-// response formater
-
-function errorFormater(keyError) {
-    const newKey = keyError.split('.').reduce((acc, segment, index) => {
-        return index === 0 ? segment : `${acc}[${segment}]`;
-      }, '');
-      
-    return newKey;
-}
-
-// Triggered on modal hide
-$('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
-    let form = $(this).find('form');
-
-    // form.trigger('reset');
-    // form.find('.select2').val(null).trigger('change');
-    // form.find('.select2_custom').val(null).trigger('change');
-    form.find('.is-invalid').removeClass('is-invalid');
-    form.find('.invalid-feedback').html(null).removeClass('d-block');
-    // form.find('[data-repeater-item]').slice(1).empty();
-    // form.find('[data-repeater-list]').each(function () {
-    //     $(this).find('[data-repeater-item]').slice(1).empty();
-    // });
-    // form.find('.current-file').remove();
-
-    // reset flatpickr
-    // form.find('.flatpickr-date').val(null).trigger('change');
-    // form.find('.flatpickr-date').flatpickr({
-    //     altInput: true,
-    //     altFormat: 'j F Y',
-    //     dateFormat: 'Y-m-d'
-    // });
-});
-
-$('.modal:not(.custom-reset)').on('show.bs.modal', function () {
-    let form = $(this).find('form');
-    form.find('.is-invalid').removeClass('is-invalid');
-    form.find('.invalid-feedback').html(null).removeClass('d-block');
-});
-
-// // Triggered every update status button
-// $(document).on('click', '.update-status', function () {
-//     let url = $(this).data('url');
-//     let dataFunction = $(this).attr('data-function');
-
-//     sweetAlertConfirm({
-//         title: 'Are you sure?',
-//         text: 'You are about to change the status of this data!',
-//         icon: 'warning',
-//         confirmButtonText: 'Yes, I do!',
-//         cancelButtonText: 'No, cancel!',
-//     }, function () {
-//         $.ajax({
-//             url: url,
-//             type: "POST",
-//             headers: {
-//                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-//             },
-//             success: function (response) {
-//                 if (!response.error) {
-//                     showSweetAlert({
-//                         title: response?.data?.title ?? 'Berhasil!',
-//                         text: response.message,
-//                         icon: response?.data?.icon ?? 'success',
-//                         showConfirmButton: response?.data?.showConfirmButton
-//                     });
-
-//                     if (typeof window[dataFunction] === "function") window[dataFunction](response);
-//                 } else {
-//                     showSweetAlert({
-//                         title: 'Failed!',
-//                         text: response.message,
-//                         icon: 'error'
-//                     });
-//                 }
-//             },
-//             error: function (xhr, status, error) {
-//                 let res = xhr.responseJSON;
-//                 showSweetAlert({
-//                     title: 'Failed!',
-//                     text: res.message,
-//                     icon: 'error'
-//                 });
-//             }
-//         });
-//     });
-// });
-
-// /***
-//  * Function to filter input value
-//  * @returns {void}
-//  */
-// function initDataFilter(){
-//     let inputs = document.querySelectorAll('input[data-filter]');
-//     for (let input of inputs) {
-//     let state = {
-//         value: input.value,
-//         start: input.selectionStart,
-//         end: input.selectionEnd,
-//         pattern: RegExp('^' + input.dataset.filter + '$')
-//     };
-
-//     input.addEventListener('input', event => {
-//         if (state.pattern.test(input.value)) {
-//         state.value = input.value;
-//         } else {
-//         input.value = state.value;
-//         input.setSelectionRange(state.start, state.end);
-//         }
-//     });
-
-//     input.addEventListener('keydown', event => {
-//         state.start = input.selectionStart;
-//         state.end = input.selectionEnd;
-//     });
-//     }
-// }
-
 /***
  * Function to show tooltip filter
  * @returns {void}
@@ -579,43 +384,19 @@ function tooltip() {
   $("#tooltip-filter").attr("data-bs-original-title", filter);
 }
 
-/***
- * Function to insert value to modal form
- * @param response
- * @param modal
- * @returns {void}
- */
-// function insertEditValue(response, modal){
-//     $.each(response, function(key, value) {
-//         let element = modal.find(`#${key}`);
-//         if (element.is('select') && element.find('option').length <= 1) {
-//             let interval = setInterval(() => {
-//                 if (element.children('option').length > 1) {
-//                     element.val(value).trigger('change');
-//                     clearInterval(interval);
-//                 }
-//             }, 10);
-//         } else if (element.is('input[type="radio"]')) {
-//             modal.find(`input[name="${key}"][value="${value}"]`).prop('checked', true);
-//         } else if (element.is('input[type="checkbox"]')) {
-//             let values = JSON.parse(value);
-//             values.forEach(val => {
-//                 modal.find(`[value="${val}"]`).prop('checked', true);
-//             });
-//         } else if (element.is('input[type="file"]')) {
-//             if(value) {
-//                 let link = `<a href="${value}" target="_blank" class="d-block mt-2 current-file"><small>Lihat Current File</small></a>`;
-//                 element.after(link);
-//             }
-//         } else {
-//             element.val(value).trigger('change');
-//         }
-//     });
-// }
-
 document.addEventListener('livewire:init', () => {
-    $('.modal').on('hide.bs.modal', function () {
+    // Triggered on modal hide
+    $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
         Livewire.dispatch('close-modal');
+        let form = $(this).find('form');
+        form.find('.is-invalid').removeClass('is-invalid');
+        form.find('.invalid-feedback').html(null).removeClass('d-block');   
+    });
+
+    $('.modal:not(.custom-reset)').on('show.bs.modal', function () {
+        let form = $(this).find('form');
+        form.find('.is-invalid').removeClass('is-invalid');
+        form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
 
     Livewire.on('after-action', (event) => {

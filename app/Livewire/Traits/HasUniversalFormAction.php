@@ -3,7 +3,9 @@
 namespace App\Livewire\Traits;
 
 use App\Attributes\FieldInput;
+use Illuminate\Http\UploadedFile;
 use App\Livewire\UniversalFormAction;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HasUniversalFormAction
 {       
@@ -35,6 +37,19 @@ trait HasUniversalFormAction
         } else {
             foreach ($this->getUniversalFieldInputs() as $key => $value) {
                 $this->form_data[$value] = $this->{$value};
+            }
+        }
+
+        foreach ($this->form_data as $key => $value) {
+            if ($value instanceof TemporaryUploadedFile) {
+                $file = new UploadedFile(
+                    $this->form_data[$key]->getRealPath(),
+                    $this->form_data[$key]->getClientOriginalName(),
+                    $this->form_data[$key]->getMimeType(),
+                    null,
+                    true // penting! tandai sebagai "test file" agar laravel menerimanya
+                );
+                $this->form_data[$key] = $file;
             }
         }
 
