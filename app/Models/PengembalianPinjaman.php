@@ -9,9 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 class PengembalianPinjaman extends Model
 {
     use HasFactory, HasUlids;
+
     protected $table = 'pengembalian_pinjaman';
+
     protected $primaryKey = 'ulid';
+
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -23,6 +27,8 @@ class PengembalianPinjaman extends Model
         'tanggal_pencairan',
         'lama_pemakaian',
         'invoice_dibayarkan',
+        'bulan_pembayaran',
+        'yang_harus_dibayarkan',
         'nominal_invoice',
         'sisa_bayar_pokok',
         'sisa_bagi_hasil',
@@ -34,6 +40,7 @@ class PengembalianPinjaman extends Model
         'total_pinjaman' => 'decimal:2',
         'total_bagi_hasil' => 'decimal:2',
         'nominal_invoice' => 'decimal:2',
+        'yang_harus_dibayarkan' => 'decimal:2',
         'sisa_bayar_pokok' => 'decimal:2',
         'sisa_bagi_hasil' => 'decimal:2',
         'tanggal_pencairan' => 'date',
@@ -48,5 +55,10 @@ class PengembalianPinjaman extends Model
     public function pengembalianInvoices()
     {
         return $this->hasMany(PengembalianInvoice::class, 'id_pengembalian', 'ulid');
+    }
+
+    public function reportPengembalian()
+    {
+        return $this->hasMany(ReportPengembalian::class, 'id_pengembalian', 'ulid');
     }
 }

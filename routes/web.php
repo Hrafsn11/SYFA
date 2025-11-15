@@ -32,18 +32,22 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Authenticated routes with Jetstream
+// Authenticated routes with Jetstream and Permission handling
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
+    'checkPermission', // Add permission handling middleware
 ])->group(function () {
 
     require __DIR__ . '/livewire_route.php';
 
+    // User Management Routes - Example with permission middleware
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
+    
+    // Peminjaman Routes
     Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
     Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
@@ -67,7 +71,7 @@ Route::middleware([
     Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 
-    Route::get('report-pengembalian', [ReportPengembalianController::class, 'index'])->name('report-pengembalian.index');
+    Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');    

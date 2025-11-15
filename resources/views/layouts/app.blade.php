@@ -75,6 +75,29 @@
 
     <!-- Custom CSS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Custom Readonly Styles -->
+    <style>
+        /* Make readonly text inputs and textareas look like disabled elements */
+        /* EXCLUDING flatpickr inputs (flatpickr adds readonly by default for calendar selection) */
+        .form-control[readonly]:not(.flatpickr-input):not(.flatpickr-date-modal) {
+            background-color: #f3f2f3 !important;
+            color: #acaab1 !important;
+            cursor: default !important;
+            border-color: #ced4da !important;
+        }
+        
+        /* Ensure flatpickr inputs remain white/editable looking even with readonly attribute */
+        .form-control.flatpickr-input,
+        .form-control.flatpickr-date-modal,
+        input.flatpickr-input,
+        input.flatpickr-date-modal {
+            background-color: #fff !important;
+            color: #697a8d !important;
+            cursor: text !important;
+            border-color: #d9dee3 !important;
+        }
+    </style>
 </head>
 
 <body>

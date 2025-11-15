@@ -415,16 +415,16 @@
             // Total Pinjaman and Total Bagi Hasil are now auto-calculated from modal data
             // No manual calculation needed here, they are updated by updateTotalFrom* functions
 
-            // Installment live calculation
-            const nominalPinjamanEl = document.getElementById('nominal_pinjaman');
-            const tenorEl = document.getElementById('tenorPembayaran');
+            // Installment live calculation - Store in window for global access
+            window.nominalPinjamanEl = document.getElementById('nominal_pinjaman');
+            window.tenorEl = document.getElementById('tenorPembayaran');
 
             // If Select2 is used, bind its change event explicitly so recalcInstallment runs
             try {
                 // use jQuery in case select2 wraps the select
                 $('#tenorPembayaran').on('change.select2', function() {
                     try {
-                        recalcInstallment();
+                        window.recalcInstallment();
                     } catch (e) {
                         console.error(e);
                     }
@@ -433,17 +433,22 @@
                 // ignore if jQuery/select2 not available
             }
 
-            function formatCurrency(value) {
+            // Define formatCurrency in window scope for global access
+            window.formatCurrency = function(value) {
                 if (value === null || value === undefined || value === '') return '';
                 return 'Rp. ' + numberWithThousandSeparator(Number(value).toFixed(0));
-            }
+            };
 
-            function recalcInstallment() {
+            // Define recalcInstallment in window scope for global access
+            window.recalcInstallment = function() {
                 try {
-                    const raw = window.getCleaveRawValue(nominalPinjamanEl) || 0;
+                    console.log('🧮 recalcInstallment called');
+                    const raw = window.getCleaveRawValue(window.nominalPinjamanEl) || 0;
                     const totalPinjamanVal = Number(raw);
+                    console.log('💵 Total Pinjaman Value:', totalPinjamanVal);
                     // default tenor to 3 months if user hasn't chosen one yet
-                    const tenorVal = tenorEl ? (parseInt(tenorEl.value) || 3) : 3;
+                    const tenorVal = window.tenorEl ? (parseInt(window.tenorEl.value) || 3) : 3;
+                    console.log('📅 Tenor Value:', tenorVal);
 
                     // Business rules fixed: bagi hasil 10%
                     const bagiPercent = 10.0;
@@ -453,6 +458,14 @@
                     const totalPembayaranVal = Math.round((totalPinjamanVal + totalBagi) * 100) / 100;
                     const monthlyPay = tenorVal > 0 ? Math.round((totalPembayaranVal / tenorVal) * 100) / 100 :
                         totalPembayaranVal;
+
+                    console.log('📊 Calculations:', {
+                        totalBagi,
+                        ppsAmount,
+                        sfinanceAmount,
+                        totalPembayaranVal,
+                        monthlyPay
+                    });
 
                     // Update UI display fields (they are disabled inputs)
                     const elPpsDebit = document.getElementById('pps_debit');
@@ -466,56 +479,66 @@
                     if (elPpsPercentage) elPpsPercentage.value =
                         `40% (Rp. ${numberWithThousandSeparator(ppsAmount)})`;
                     if (elSFinance) elSFinance.value = `60% (Rp. ${numberWithThousandSeparator(sfinanceAmount)})`;
-                    if (elTotalPembayaran) elTotalPembayaran.value = formatCurrency(totalPembayaranVal);
-                    if (elBayarPerBulan) elBayarPerBulan.value = formatCurrency(monthlyPay);
+                    if (elTotalPembayaran) elTotalPembayaran.value = window.formatCurrency(totalPembayaranVal);
+                    if (elBayarPerBulan) elBayarPerBulan.value = window.formatCurrency(monthlyPay);
+
+                    console.log('✅ UI fields updated successfully');
 
                     // store computed values on element for submit use
-                    nominalPinjamanEl._computed = {
-                        totalPinjaman: totalPinjamanVal,
-                        tenor: tenorVal,
-                        persentase_bagi_hasil: bagiPercent,
-                        pps: ppsAmount,
-                        sfinance: sfinanceAmount,
-                        total_pembayaran: totalPembayaranVal,
-                        yang_harus_dibayarkan: monthlyPay
-                    };
+                    if (window.nominalPinjamanEl) {
+                        window.nominalPinjamanEl._computed = {
+                            totalPinjaman: totalPinjamanVal,
+                            tenor: tenorVal,
+                            persentase_bagi_hasil: bagiPercent,
+                            pps: ppsAmount,
+                            sfinance: sfinanceAmount,
+                            total_pembayaran: totalPembayaranVal,
+                            yang_harus_dibayarkan: monthlyPay
+                        };
+                    }
                 } catch (err) {
                     console.error('recalcInstallment error', err);
                 }
-            }
+            };
 
             // Update nominal_pinjaman from installmentData (sum nilai_invoice) and recalc
-            function updateNominalFromDetails() {
+            // Define in window scope for global access
+            window.updateNominalFromDetails = function() {
                 try {
-                    if (!nominalPinjamanEl) return;
+                    console.log('🔄 updateNominalFromDetails called, installmentData:', installmentData);
+                    if (!window.nominalPinjamanEl) {
+                        console.warn('⚠️ nominalPinjamanEl not found!');
+                        return;
+                    }
                     let sum = 0;
                     installmentData.forEach(function(it) {
                         const v = Number(normalizeNumericForServer(it.nilai_invoice || 0)) || 0;
                         sum += v;
                     });
+                    console.log('💰 Sum of nilai_invoice:', sum);
                     if (typeof window.setCleaveValue === 'function') {
-                        window.setCleaveValue(nominalPinjamanEl, 'Rp ' + numberWithThousandSeparator(sum));
+                        window.setCleaveValue(window.nominalPinjamanEl, 'Rp ' + numberWithThousandSeparator(sum));
                     } else {
-                        nominalPinjamanEl.value = sum;
+                        window.nominalPinjamanEl.value = sum;
                     }
                     // ensure tenor defaults to 3 if not set and force recalc so UI updates
                     try {
-                        if (tenorEl) {
+                        if (window.tenorEl) {
                             // set via jQuery so Select2 UI updates and triggers change
                             try {
-                                $(tenorEl).val('3').trigger('change');
+                                $(window.tenorEl).val('3').trigger('change');
                             } catch (_) {
-                                tenorEl.value = '3';
+                                window.tenorEl.value = '3';
                             }
                         }
                     } catch (e) {
                         // ignore
                     }
-                    recalcInstallment();
+                    window.recalcInstallment();
                 } catch (err) {
                     console.error('updateNominalFromDetails error', err);
                 }
-            }
+            };
 
             if (nominalPinjamanEl) {
                 nominalPinjamanEl.addEventListener('input', function() {
@@ -535,15 +558,17 @@
                 });
             }
 
-            // Run recalcInstallment on load to populate fields if nominal already exists
+            // Run recalcInstallment on load to populate fields if nominal already exists (only for Installment)
             setTimeout(function() {
                 try {
-                    // If there are installment details present on load, ensure nominal is populated
-                    updateNominalFromDetails();
-                    // and ensure recalc to reflect default tenor
-                    recalcInstallment();
+                    if (currentJenisPembiayaan === 'Installment') {
+                        // If there are installment details present on load, ensure nominal is populated
+                        window.updateNominalFromDetails();
+                        // and ensure recalc to reflect default tenor
+                        window.recalcInstallment();
+                    }
                 } catch (e) {
-                    // ignore
+                    console.error('Initial recalcInstallment error', e);
                 }
             }, 200);
 
@@ -637,6 +662,9 @@
                         updateTotalFromPOFinancing();
                     } else if (currentJenisPembiayaan === 'Factoring') {
                         updateTotalFromFactoring();
+                    } else if (currentJenisPembiayaan === 'Installment') {
+                        // Update nominal and recalculate for Installment
+                        window.updateNominalFromDetails();
                     }
                 }, 300);
             }
@@ -813,6 +841,9 @@
 
                 modalInstance.hide();
                 renderInstallmentTable();
+                
+                // IMPORTANT: Update nominal pinjaman and recalculate after adding installment data
+                window.updateNominalFromDetails();
             } else if (currentJenisPembiayaan === 'Factoring') {
                 const index = editInvoiceIndex >= 0 ? editInvoiceIndex : factoringData.length;
                 const no_kontrak = $('#modal_no_kontrak_fact').val();
@@ -1046,7 +1077,7 @@
 
             // After rendering, update header nominal from details so totals follow details
             try {
-                updateNominalFromDetails();
+                window.updateNominalFromDetails();
             } catch (e) {
                 console.error('renderInstallmentTable updateNominalFromDetails error', e);
             }
@@ -1337,6 +1368,11 @@
 
             // Factoring append
             if (currentJenisPembiayaan === 'Factoring') {
+                // Force-set financing source to internal with 2% fixed rate
+                fd.set('sumber_pembiayaan', 'internal');
+                fd.set('id_instansi', '');
+                fd.set('persentase_bagi_hasil', '2');
+
                 factoringData.forEach(function(f, idx) {
                     fd.append(`details[${idx}][no_kontrak]`, f.no_kontrak || '');
                     fd.append(`details[${idx}][nama_client]`, f.nama_client || '');
@@ -1390,13 +1426,17 @@
 
             // If posting Installment, ensure header computed fields are present
             if (currentJenisPembiayaan === 'Installment') {
+                // Force set sumber_pembiayaan to internal and persentase to 10%
+                fd.set('sumber_pembiayaan', 'internal');
+                fd.set('id_instansi', '');
+                fd.set('persentase_bagi_hasil', '10');
+                
                 const nominalElForSubmit = document.getElementById('nominal_pinjaman');
                 const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit
                     ._computed : null;
                 if (computed) {
                     fd.set('total_pinjaman', normalizeNumericForServer(computed.totalPinjaman));
                     fd.set('tenor_pembayaran', computed.tenor);
-                    fd.set('persentase_bagi_hasil', computed.persentase_bagi_hasil);
                     fd.set('pps', normalizeNumericForServer(computed.pps));
                     fd.set('sfinance', normalizeNumericForServer(computed.sfinance));
                     fd.set('total_pembayaran', normalizeNumericForServer(computed.total_pembayaran));
@@ -1530,8 +1570,8 @@
                         tEl.value = '3';
                     }
                     // Update nominal from details (sum) and recalc
-                    if (typeof updateNominalFromDetails === 'function') updateNominalFromDetails();
-                    if (typeof recalcInstallment === 'function') recalcInstallment();
+                    if (typeof window.updateNominalFromDetails === 'function') window.updateNominalFromDetails();
+                    if (typeof window.recalcInstallment === 'function') window.recalcInstallment();
                 } catch (e) {
                     // ignore
                 }

@@ -74,6 +74,7 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.validasi_ceo_ski',
             'peminjaman_dana.validasi_direktur',
             'peminjaman_dana.generate_kontrak',
+            'perminjaman_dana.konfirmasi_debitur',
             'peminjaman_dana.upload_dokumen_transfer',
         ];
 
@@ -125,6 +126,7 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.edit',
             'peminjaman_dana.pengajuan_peminjaman',
             'peminjaman_dana.persetujuan_debitur',
+            'perminjaman_dana.konfirmasi_debitur',
         ]);
 
         $financeRole = Role::firstOrCreate(['name' => 'Finance SKI', 'restriction' => 0]);
@@ -170,6 +172,46 @@ class RolePermissionSeeder extends Seeder
         ]);
         if (! $admin->hasRole('admin')) {
             $admin->assignRole('admin');
+        }
+
+        $debitur = User::firstOrCreate([
+            'email' => 'debitur@example.com',
+        ], [
+            'name' => 'Debitur User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $debitur->hasRole('Debitur')) {
+            $debitur->assignRole('Debitur');
+        }
+
+        $finance = User::firstOrCreate([
+            'email' => 'finance@example.com',
+        ], [
+            'name' => 'Finance User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $finance->hasRole('Finance SKI')) {
+            $finance->assignRole('Finance SKI');
+        }
+
+        $ceo = User::firstOrCreate([
+            'email' => 'ceo@example.com',
+        ], [
+            'name' => 'CEO User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $ceo->hasRole('CEO SKI')) {
+            $ceo->assignRole('CEO SKI');
+        }
+
+        $direktur = User::firstOrCreate([
+            'email' => 'direktur@example.com',
+        ], [
+            'name' => 'Direktur User',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $direktur->hasRole('Direktur SKI')) {
+            $direktur->assignRole('Direktur SKI');
         }
 
         // Restore the original cache driver

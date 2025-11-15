@@ -425,7 +425,7 @@ class PeminjamanController extends Controller
             try {
                 if (auth()->check()) {
                     $userEmail = auth()->user()->email;
-                    $master = \App\Models\MasterDebiturDanInvestor::where('email', $userEmail)
+                    $master = MasterDebiturDanInvestor::where('email', $userEmail)
                         ->where('flagging', 'tidak')
                         ->where('status', 'active')
                         ->with('kol')
@@ -542,6 +542,18 @@ class PeminjamanController extends Controller
 
         $validated = $request->validate($rules);
 
+        if($jenisPembiayaan === 'Installment'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 10;
+        }
+        
+        if($jenisPembiayaan === 'Factoring'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 2;
+        }
+
         DB::beginTransaction();
         try {
             // Handle file upload for lampiran_sid
@@ -579,6 +591,13 @@ class PeminjamanController extends Controller
                 'yang_harus_dibayarkan' => isset($validated['yang_harus_dibayarkan']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['yang_harus_dibayarkan']) : null,
                 'total_nominal_yang_dialihkan' => isset($validated['total_nominal_yang_dialihkan']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['total_nominal_yang_dialihkan']) : null,
                 'updated_by' => auth()->id(),
+                'status' => 'Draft',
+            ]);
+
+            $historyPengajuan = HistoryStatusPengajuanPinjaman::create([
+                'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
+                'status' => 'Draft',
+                'current_step' => 1,
             ]);
 
             // Get existing bukti peminjaman to preserve file paths if no new files uploaded
@@ -912,9 +931,19 @@ class PeminjamanController extends Controller
 
         $validated = $request->validate($rules);
 
-        if($validated['jenis_pembiayaan'] === 'Factoring' || $validated['jenis_pembiayaan'] === 'Installment'){
+
+        //set bagi hasil installment 10%
+        if($validated['jenis_pembiayaan'] === 'Installment'){
             $validated['id_instansi'] = null;
-            $validated['sumber_pembiayaan'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 10;
+        }
+        
+        //set bagi hasil factoring 2%
+        if($validated['jenis_pembiayaan'] === 'Factoring'){
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['persentase_bagi_hasil'] = 2;
         }
 
         // Normalize date inputs that may come as d/m/Y
@@ -1285,6 +1314,7 @@ class PeminjamanController extends Controller
 
                 $historyData['catatan_persetujuan_debitur'] = $request->input('catatan_persetujuan_debitur');
                 $historyData['current_step'] = 4;
+                $historyData['deviasi'] = $request->input('deviasi');
             } elseif ($status === 'Pengajuan Ditolak Debitur') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_debitur');
@@ -1300,7 +1330,7 @@ class PeminjamanController extends Controller
                 // Replace comma with dot for proper decimal parsing if exists
                 $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
                 $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
-                
+                $historyData['deviasi'] = $request->input('deviasi');
                 $tanggalPencairan = $request->input('tanggal_pencairan');
                 if ($tanggalPencairan) {
                     try {
@@ -1330,6 +1360,32 @@ class PeminjamanController extends Controller
                 $historyData['current_step'] = 1;
             } elseif ($status === 'Disetujui oleh Direktur SKI') {
                 $historyData['approve_by'] = auth()->id();
+                
+                $nominalDisetujui = $request->input('nominal_yang_disetujui');
+                // Remove Rp, spaces, and dots (thousands separator), keep only numbers
+                $nominalDisetujui = preg_replace('/[Rp\s\.]/', '', $nominalDisetujui);
+                // Remove any remaining non-numeric characters except commas (decimal separator)
+                $nominalDisetujui = preg_replace('/[^0-9,]/', '', $nominalDisetujui);
+                // Replace comma with dot for proper decimal parsing if exists
+                $nominalDisetujui = str_replace(',', '.', $nominalDisetujui);
+                $historyData['nominal_yang_disetujui'] = floatval($nominalDisetujui);
+                $historyData['deviasi'] = $request->input('deviasi');
+                
+                $tanggalPencairan = $request->input('tanggal_pencairan');
+                if ($tanggalPencairan) {
+                    try {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $tanggalPencairan)) {
+                            $historyData['tanggal_pencairan'] = Carbon::createFromFormat('d/m/Y', $tanggalPencairan)->format('Y-m-d');
+                        } else {
+                            $historyData['tanggal_pencairan'] = Carbon::parse($tanggalPencairan)->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {
+                        $historyData['tanggal_pencairan'] = null;
+                    }
+                } else {
+                    $historyData['tanggal_pencairan'] = null;
+                }
+                
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_persetujuan_direktur');
                 $historyData['current_step'] = 6;
             } elseif ($status === 'Ditolak oleh Direktur SKI') {

@@ -6,37 +6,43 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PengembalianInvoice extends Model
+class ReportPengembalian extends Model
 {
-    use HasFactory;
-    
-    protected $table = 'pengembalian_invoice';
-    protected $primaryKey = 'id_pengembalian_invoice';
-    
+    use HasFactory, HasUlids;
+
+    protected $table = 'report_pengembalian';
+
+    protected $primaryKey = 'id_report_pengembalian';
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
+
     protected $fillable = [
         'id_pengembalian',
-        'nominal_yg_dibayarkan',
-        'bukti_pembayaran',
+        'nomor_peminjaman',
+        'nomor_invoice',
+        'due_date',
+        'hari_keterlambatan',
+        'total_bulan_pemakaian',
+        'nilai_total_pengembalian',
     ];
 
     protected $casts = [
-        'nominal_yg_dibayarkan' => 'decimal:2',
+        'due_date' => 'date',
+        'total_bulan_pemakaian' => 'integer',
+        'nilai_total_pengembalian' => 'decimal:2',
     ];
 
     public function pengembalianPinjaman()
     {
         return $this->belongsTo(PengembalianPinjaman::class, 'id_pengembalian', 'ulid');
     }
-    
-    public function pengembalian()
-    {
-        return $this->belongsTo(PengembalianPinjaman::class, 'id_pengembalian', 'ulid');
-    }
 
-    public function reportPengembalian()
+    public function pengembalianInvoices()
     {
         return $this->hasManyThrough(
-            ReportPengembalian::class,
+            PengembalianInvoice::class,
             PengembalianPinjaman::class,
             'ulid',
             'id_pengembalian',

@@ -136,41 +136,54 @@
                                             class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2">
                                             <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
                                             <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-success" onclick="approval(this)" data-status="Submit Dokumen">
-                                                    <i class="fas fa-paper-plane me-2"></i>
-                                                    Submit Pengajuan
-                                                </button>
-                                                <button type="button" class="btn btn-primary d-none"
-                                                    id="btnSetujuiPeminjaman">
-                                                    <i class="fas fa-check me-2"></i>
-                                                    Setujui Peminjaman
-                                                </button>
-                                                <button type="button" class="btn btn-success d-none"
-                                                    id="btnPersetujuanDebitur">
-                                                    <i class="fas fa-user-check me-2"></i>
-                                                    Setujui
-                                                </button>
-                                                <button type="button" class="btn btn-warning d-none"
-                                                    id="btnPersetujuanCEO">
-                                                    <i class="fas fa-crown me-2"></i>
-                                                    Setujui
-                                                </button>
-                                                <button type="button" class="btn btn-info d-none"
-                                                    id="btnPersetujuanDirektur">
-                                                    <i class="fas fa-briefcase me-2"></i>
-                                                    Setujui
-                                                </button>
+                                                @can('peminjaman_dana.pengajuan_peminjaman')
+                                                    <button type="button" class="btn btn-success" onclick="approval(this)" data-status="Submit Dokumen">
+                                                        <i class="fas fa-paper-plane me-2"></i>
+                                                        Submit Pengajuan
+                                                    </button>
+                                                @endcan
+
+                                                @can('peminjaman_dana.validasi_dokumen')
+                                                    <button type="button" class="btn btn-primary d-none"
+                                                        id="btnSetujuiPeminjaman">
+                                                        <i class="fas fa-check me-2"></i>
+                                                        Setujui Peminjaman
+                                                    </button>
+                                                @endcan
+                                                @can('peminjaman_dana.persetujuan_debitur')
+                                                    <button type="button" class="btn btn-success d-none"
+                                                        id="btnPersetujuanDebitur">
+                                                        <i class="fas fa-user-check me-2"></i>
+                                                        Setujui
+                                                    </button>
+                                                @endcan
+                                                @can('peminjaman_dana.validasi_ceo_ski')
+                                                    <button type="button" class="btn btn-warning d-none"
+                                                        id="btnPersetujuanCEO">
+                                                        <i class="fas fa-crown me-2"></i>
+                                                        Setujui
+                                                    </button>
+                                                @endcan
+                                                @can('peminjaman_dana.persetujuan_direktur')
+                                                    <button type="button" class="btn btn-info d-none"
+                                                        id="btnPersetujuanDirektur">
+                                                        <i class="fas fa-briefcase me-2"></i>
+                                                        Setujui
+                                                    </button>
+                                                @endcan
                                                 <!-- Step 8: Konfirmasi Debitur buttons -->
-                                                <button type="button" class="btn btn-success d-none"
-                                                    id="btnTerimaDebitur" onclick="approval(this)" data-status="Dana Sudah Dicairkan">
-                                                    <i class="fas fa-check me-2"></i>
-                                                    Terima
-                                                </button>
-                                                <button type="button" class="btn btn-danger d-none"
-                                                    id="btnKonfirmasiTolakDebitur" data-bs-toggle="modal" data-bs-target="#modalTolakDebitur">
-                                                    <i class="fas fa-times me-2"></i>
-                                                    Tolak
-                                                </button>
+                                                @can('peminjaman_dana.konfirmasi_debitur')
+                                                    <button type="button" class="btn btn-success d-none"
+                                                        id="btnTerimaDebitur" onclick="approval(this)" data-status="Dana Sudah Dicairkan">
+                                                        <i class="fas fa-check me-2"></i>
+                                                        Terima
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger d-none"
+                                                        id="btnKonfirmasiTolakDebitur" data-bs-toggle="modal" data-bs-target="#modalTolakDebitur">
+                                                        <i class="fas fa-times me-2"></i>
+                                                        Tolak
+                                                    </button>
+                                                @endcan
                                             </div>
                                         </div>
 
@@ -636,6 +649,7 @@
                                         @endif
 
                                         <!-- Upload/View Dokumen Section -->
+                                        
                                         @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan' && $peminjaman['current_step'] == 7)
                                             <!-- Upload Form - Show only when status is NOT 'Dana Sudah Dicairkan' -->
                                             <div class="mt-5" id="uploadDokumenSection">
@@ -645,6 +659,7 @@
                                                 <div class="card border-1 shadow-none">
                                                     <div class="card-body">
                                                         <form id="formUploadDokumenTransfer" class="row g-3">
+                                                            @can('peminjaman_dana.upload_dokumen_transfer')
                                                             <div class="col-12">
                                                                 <label for="dokumenTransfer" class="form-label">
                                                                     <i class="ti ti-upload me-2"></i>
@@ -667,6 +682,7 @@
                                                                     </button>
                                                                 </div>
                                                             </div>
+                                                            @endcan
                                                         </form>
                                                     </div>
                                                 </div>
@@ -864,11 +880,13 @@
                                                     <i class="ti ti-eye me-2"></i>
                                                     Preview Kontrak
                                                 </button>
-                                                <button type="button" class="btn btn-primary" onclick="approval(this)" data-status="Generate Kontrak" id="btnSimpanKontrak">
-                                                    <span class="spinner-border spinner-border-sm me-2 d-none"
-                                                        id="btnSimpanKontrakSpinner"></span>
-                                                    Simpan
-                                                </button>
+                                                @can('peminjaman_dana.generate_kontrak')
+                                                    <button type="button" class="btn btn-primary" onclick="approval(this)" data-status="Generate Kontrak" id="btnSimpanKontrak">
+                                                        <span class="spinner-border spinner-border-sm me-2 d-none"
+                                                            id="btnSimpanKontrakSpinner"></span>
+                                                        Simpan
+                                                    </button>
+                                                @endcan
                                             </div>
                                         </form>
                                     </div>
@@ -963,6 +981,10 @@
                     ceoNominalDisetujui: document.getElementById('ceoNominalDisetujui'),
                     ceoTanggalPencairan: document.getElementById('ceoTanggalPencairan'),
                     ceoTanggalHarapan: document.getElementById('ceoTanggalHarapan'),
+                    direkturNominalPengajuan: document.getElementById('direkturNominalPengajuan'),
+                    direkturNominalDisetujui: document.getElementById('direkturNominalDisetujui'),
+                    direkturTanggalPencairan: document.getElementById('direkturTanggalPencairan'),
+                    direkturTanggalHarapan: document.getElementById('direkturTanggalHarapan'),
                 }
             };
 
@@ -1192,6 +1214,7 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanDebitur);
                 const catatan = formData.get('catatan_persetujuan_debitur');
+                const deviasi = formData.get('deviasi'); // Get deviasi from hidden input
                 
                 // Get additional data from readonly fields
                 const nominalDisetujui = dom.inputs.debiturNominalDisetujui?.value || '';
@@ -1214,6 +1237,7 @@
                     catatan_persetujuan_debitur: catatan,
                     nominal_yang_disetujui: nominalDisetujui,
                     tanggal_pencairan: tanggalPencairan,
+                    deviasi: deviasi,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
@@ -1237,6 +1261,7 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanCEO);
                 const catatan = formData.get('catatan_persetujuan_ceo');
+                const deviasi = formData.get('deviasi'); // Get deviasi from hidden input
                 
                 // Get additional data from readonly fields
                 const nominalDisetujui = dom.inputs.ceoNominalDisetujui?.value || '';
@@ -1259,6 +1284,7 @@
                     catatan_persetujuan_ceo: catatan,
                     nominal_yang_disetujui: nominalDisetujui,
                     tanggal_pencairan: tanggalPencairan,
+                    deviasi: deviasi,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),
@@ -1282,6 +1308,11 @@
                 // Collect form data
                 const formData = new FormData(dom.forms.persetujuanDirektur);
                 const catatan = formData.get('catatan_persetujuan_direktur');
+                const deviasi = formData.get('deviasi'); // Get deviasi from hidden input
+                
+                // Get additional data from readonly fields
+                const nominalDisetujui = dom.inputs.direkturNominalDisetujui?.value || '';
+                const tanggalPencairan = dom.inputs.direkturTanggalPencairan?.value || '';
 
                 // Create button-like object for approval
                 const approvalButton = {
@@ -1298,6 +1329,9 @@
                 window.persetujuanDirekturRequestData = {
                     status: 'Disetujui oleh Direktur SKI',
                     catatan_persetujuan_direktur: catatan,
+                    nominal_yang_disetujui: nominalDisetujui,
+                    tanggal_pencairan: tanggalPencairan,
+                    deviasi: deviasi,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0],
                     id_pengajuan_peminjaman: @json($peminjaman['id'] ?? 1),

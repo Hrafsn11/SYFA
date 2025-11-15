@@ -7,16 +7,20 @@ use Livewire\Component;
 use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\MasterSumberPendanaanEksternalRequest;
+use App\Http\Traits\HandlesPermissions;
 
 class SumberPendanaanEksternal extends Component
 {
-    use HasUniversalFormAction, HasValidate;
+    use HasUniversalFormAction, HasValidate, HandlesPermissions;
     private string $validateClass = MasterSumberPendanaanEksternalRequest::class;
 
     #[FieldInput]
     public $nama_instansi, $persentase_bagi_hasil;
 
     public function mount() {
+
+        $this->checkPermission('master_data.view', 'You do not have permission to view this page.');
+
         $this->setUrlSaveData('store_pendanaan', 'master-data.sumber-pendanaan-eksternal.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_pendanaan', 'master-data.sumber-pendanaan-eksternal.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
         $this->setUrlSaveData('delete_pendanaan', 'master-data.sumber-pendanaan-eksternal.destroy', ["id" => "id_placeholder", "callback" => "afterAction"]);
