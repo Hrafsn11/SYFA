@@ -166,8 +166,8 @@
             <span class="menu-header-text">Configuration</span>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('matrixpinjaman') ? 'active' : '' }}">
-            <a href="{{ route('matrixpinjaman') }}" class="menu-link">
+        <li class="menu-item {{ request()->routeIs('config-matrix-pinjaman.index') ? 'active' : '' }}">
+            <a wire:navigate.hover href="{{ route('config-matrix-pinjaman.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-building"></i>
                 <div data-i18n="Config Matrix Pinjaman">Config Matrix Pinjaman</div>
             </a>

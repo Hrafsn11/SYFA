@@ -132,8 +132,6 @@ function initSelect2(element = null, data = null) {
             found = found.replace(/\\/g, '');
             var valueAttr = found ? element.attr(found) : null;
             var value = element.val();
-            console.log(found, valueAttr, changed, value);
-            // console.log(valueAttr, value, changed.closest('[wire\\:id]').attr('wire:id'));
             
             Livewire.find(changed.closest('[wire\\:id]').attr('wire:id')).set(valueAttr, value);
         });
