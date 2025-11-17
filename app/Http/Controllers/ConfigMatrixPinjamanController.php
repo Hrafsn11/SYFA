@@ -2,83 +2,61 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Helpers\Response;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\ConfigMatrixPinjaman;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\ConfigMatrixPinjamanRequest;
 
 class ConfigMatrixPinjamanController extends Controller
 {
-    public function index()
-    {
-        return view('livewire.config-matrix-pinjaman.index');
-    }
+    // public function index()
+    // {
+    //     return view('livewire.config-matrix-pinjaman.index');
+    // }
 
-    public function store(Request $request)
+    public function store(ConfigMatrixPinjamanRequest $request)
     {
-        $v = Validator::make($request->all(), [
-            'nominal' => 'required|numeric|min:0',
-            'approve_oleh' => 'required|string|max:255'
-        ]);
-        
-        if ($v->fails()) {
-            return response()->json(['success' => false, 'errors' => $v->errors()], 422);
+        try {
+            $data = $request->validated();
+            ConfigMatrixPinjaman::create($data);
+
+            return Response::success(null, 'Matrix Pinjaman berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
         }
-
-        $m = ConfigMatrixPinjaman::create([
-            'nominal' => $request->input('nominal'),
-            'approve_oleh' => $request->input('approve_oleh'),
-        ]);
-
-        return response()->json([
-            'success' => true,
-        ]);
     }
 
     public function edit($id)
     {
         $m = ConfigMatrixPinjaman::where('id_matrix_pinjaman', $id)->firstOrFail();
-        
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id_matrix_pinjaman' => $m->id_matrix_pinjaman,
-                'nominal' => $m->nominal,
-                'approve_oleh' => $m->approve_oleh
-            ]
-        ]);
+        return Response::success($m, 'Matrix Pinjaman berhasil diambil');
     }
 
-    public function update(Request $request, $id)
+    public function update(ConfigMatrixPinjamanRequest $request, $id)
     {
-        $m = ConfigMatrixPinjaman::where('id_matrix_pinjaman', $id)->firstOrFail();
-        
-        $v = Validator::make($request->all(), [
-            'nominal' => 'required|numeric|min:0',
-            'approve_oleh' => 'required|string|max:255'
-        ]);
-        
-        if ($v->fails()) {
-            return response()->json(['success' => false, 'errors' => $v->errors()], 422);
+        try {
+            $m = ConfigMatrixPinjaman::where('id_matrix_pinjaman', $id)->firstOrFail();
+            $m->update([
+                'nominal' => $request->input('nominal'),
+                'approve_oleh' => $request->input('approve_oleh'),
+            ]);
+
+            return Response::success(null, 'Matrix Pinjaman berhasil diupdate');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
         }
-
-        $m->update([
-            'nominal' => $request->input('nominal'),
-            'approve_oleh' => $request->input('approve_oleh'),
-        ]);
-
-        return response()->json([
-            'success' => true,
-        ]);
     }
 
     public function destroy($id)
     {
-        $m = ConfigMatrixPinjaman::where('id_matrix_pinjaman', $id)->firstOrFail();
-        $m->delete();
-        
-        return response()->json([
-            'success' => true,
-        ]);
+        try {
+            $m = ConfigMatrixPinjaman::where('id_matrix_pinjaman', $id)->firstOrFail();
+            $m->delete();
+            return Response::success(null, 'Matrix Pinjaman berhasil dihapus');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 }

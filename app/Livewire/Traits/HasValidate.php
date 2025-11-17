@@ -4,12 +4,11 @@ namespace App\Livewire\Traits;
 
 use Livewire\Attributes\On;
 use App\Attributes\FieldInput;
+use Livewire\Attributes\Renderless;
 use Illuminate\Validation\ValidationException;
 
 trait HasValidate
 {
-    private bool $isResetting = false;
-
     public function updated($name, $value)
     {
         $this->validateOnly($name); 
@@ -44,14 +43,13 @@ trait HasValidate
     }
 
     #[On('close-modal')]
+    #[Renderless]
     public function resetForm()
     {
-        $this->isResetting = true;
         foreach ($this->getValidateFieldInputs() as $field) {
             $this->reset($field);
         }
         $this->resetValidation();
-        $this->isResetting = false;
     }
 
     private function getValidateFieldInputs(): array

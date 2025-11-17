@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
-use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\ConfigMatrixPinjaman;
+use App\Livewire\Traits\HasUniversalFormAction;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class ConfigMatrixPinjamanTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
+
     protected $model = ConfigMatrixPinjaman::class;
     protected $listeners = ['refreshConfigMatrixTable' => '$refresh'];
 
@@ -50,6 +53,8 @@ class ConfigMatrixPinjamanTable extends DataTableComponent
                 }),
             Column::make("Aksi")
                 ->label(function($row) {
+                    $this->setUrlLoadData('get_data_' . $row->id_matrix_pinjaman, 'config-matrix-pinjaman.edit', ['id' => $row->id_matrix_pinjaman, 'callback' => 'editData']);
+
                     return view('livewire.config-matrix-pinjaman.partials.table-actions', [
                         'id' => $row->id_matrix_pinjaman
                     ]);

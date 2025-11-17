@@ -1,4 +1,4 @@
-<div>
+<div wire:ignore>
     <div class="row">
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -22,7 +22,7 @@
         </div>
     </div>
     {{-- Modal Tambah/Edit KOL --}}
-    <div class="modal fade" id="modalTambahKOL" wire:ignore>
+    <div class="modal fade" id="modalTambahKOL">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
