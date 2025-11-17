@@ -26,9 +26,9 @@ $(document).on('keyup change paste', 'form input, form select, form textarea', f
     $(this).parents(".form-group").find(".invalid-feedback").html(null).removeClass("d-block");
 });
 
-$(document).ready(function () {
-    initAllComponents();
-});
+// $(document).ready(function () {
+//     initAllComponents();
+// });
 
 function initAllComponents() {
     initSelect2();
@@ -382,7 +382,9 @@ function tooltip() {
   $("#tooltip-filter").attr("data-bs-original-title", filter);
 }
 
-document.addEventListener('livewire:init', () => {
+document.addEventListener('livewire:navigated', () => {
+    initAllComponents();
+
     // Triggered on modal hide
     $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
         Livewire.dispatch('close-modal');
@@ -391,13 +393,15 @@ document.addEventListener('livewire:init', () => {
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
 
-    $('.modal:not(.custom-reset)').on('show.bs.modal', function () {
+    $('.modal:not(.custom-reset)').on('show.bs.modal', function () {        
         let form = $(this).find('form');
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
+});
 
-    Livewire.on('after-action', (event) => {
+document.addEventListener('livewire:init', () => {
+    Livewire.on('after-action', (event) => {        
         const callbackName = event[0].callback;
         const payload = event[0]?.payload?.original || {};
 
@@ -430,13 +434,13 @@ document.addEventListener('livewire:init', () => {
     Livewire.on('fail-validation', (payload) => {
         item = payload[0];
         const key = Object.keys(item);
-        let input;
+        let inputs;
         let messages;
 
         key.forEach(k => {
             messages = item[k];
             // Cari elemen yang punya wire:model (atau .live / .blur / .debounce dll) dengan nilai key
-            input = document.querySelector(
+            inputs = document.querySelectorAll(
                 `[wire\\:model="${k}"],
                 [wire\\:model\\.live="${k}"],
                 [wire\\:model\\.lazy="${k}"],
@@ -445,17 +449,23 @@ document.addEventListener('livewire:init', () => {
                 [wire\\:model\\.defer="${k}"]`
             );
 
-            if (input) {
-                // contoh: tambahkan border merah
-                input.classList.add('is-invalid');
-                $el = $(input);
-                $el.addClass('is-invalid');
+            if (inputs.length > 0) {
+                inputs.forEach(input => {
+                    // tambahkan border merah
+                    input.classList.add('is-invalid');
 
-                $parentEl = $el.closest('.form-group');
-                $parentEl.find('.invalid-feedback').addClass('d-block').html(messages[0]);
+                    // versi jQuery
+                    const $el = $(input);
+                    $el.addClass('is-invalid');
+
+                    const $parentEl = $el.closest('.form-group');
+                    $parentEl.find('.invalid-feedback')
+                        .addClass('d-block')
+                        .html(messages[0]);
+                });
             } else {
                 console.warn(`Elemen dengan wire:model=${k} tidak ditemukan`);
-            }// Cari elemen yang punya wire:model (atau .live / .blur / .debounce dll) dengan nilai key
+            }
         });
     });
 });
