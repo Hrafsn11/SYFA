@@ -191,11 +191,40 @@
     <script src="{{ asset('assets/js/form-wizard-numbered.js') }}"></script>
     <script src="{{ asset('assets/js/form-wizard-validation.js') }}"></script>
     <script src="{{ asset('assets/js/main.js') }}"></script>
+
+    <script>
+        function updateNProgressPosition() {
+            const sidebar = document.querySelector('#layout-menu');
+            const bar = document.querySelector('#nprogress .bar');
+
+            if (!sidebar || !bar) return;
+
+            const width = sidebar.offsetWidth;
+
+            bar.style.left = width + 'px';
+            bar.style.width = `calc(100% - ${width}px)`;
+        }
+
+        document.addEventListener('menu:collapsed', updateNProgressPosition);
+        document.addEventListener('menu:expanded', updateNProgressPosition);
+
+        document.addEventListener('livewire:navigated', () => { 
+            window.Helpers.destroy();
+            window.Helpers.init();
+            // Update layout after page load
+            if (document.readyState === 'complete') Helpers.update();else document.addEventListener('DOMContentLoaded', function onContentLoaded() {
+                Helpers.update();
+                document.removeEventListener('DOMContentLoaded', onContentLoaded);
+            });            
+            window.initVuexy?.();
+
+            updateNProgressPosition();
+        });
+    </script>
+    
+    <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
     @endassets
     <!-- Main JS -->
-
-    <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
-    
 
     <!-- Cleave.js Rupiah Helper -->
     <script>
@@ -244,20 +273,6 @@
             // Reinitialize
             window.initCleaveRupiah();
         };
-    </script>
-
-    <script type="module">
-        document.addEventListener('livewire:navigated', () => {            
-            window.Helpers.destroy();
-            window.Helpers.init();
-            // Update layout after page load
-            if (document.readyState === 'complete') Helpers.update();else document.addEventListener('DOMContentLoaded', function onContentLoaded() {
-                Helpers.update();
-                document.removeEventListener('DOMContentLoaded', onContentLoaded);
-            });
-
-            window.initVuexy?.();
-        });
     </script>    
     {{-- Custom page scripts --}}
     @stack('scripts')
