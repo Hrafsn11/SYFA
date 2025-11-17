@@ -111,7 +111,7 @@
                         <!-- Password -->
                         <div class="col-md-6 mb-3 form-group">
                             <label for="password" class="form-label">Password <span class="text-danger" id="password-required">*</span></label>
-                            <input type="password" class="form-control" id="password" placeholder="Masukkan password" wire:model="password" autocomplete="new-password">
+                            <input type="password" class="form-control" id="password" placeholder="Masukkan password" wire:model.blur="password" autocomplete="new-password">
                             <div class="invalid-feedback"></div>
                             <small class="text-muted">Minimal 8 karakter</small>
                         </div>
@@ -119,7 +119,7 @@
                         <!-- Confirm Password -->
                         <div class="col-md-6 mb-3 form-group">
                             <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span></label>
-                            <input type="password" class="form-control" id="password_confirmation" wire:model="password_confirmation" placeholder="Konfirmasi password" autocomplete="new-password">
+                            <input type="password" class="form-control" id="password_confirmation" wire:model.blur="password_confirmation" placeholder="Konfirmasi password" autocomplete="new-password">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>

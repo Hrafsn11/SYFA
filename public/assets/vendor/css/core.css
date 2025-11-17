@@ -89,10 +89,10 @@
   --bs-tertiary-bg: rgba(47, 43, 61, 0.1);
   --bs-tertiary-bg-rgb: 47, 43, 61;
   --bs-heading-color: #444050;
-  --bs-link-color: #7367f0;
+  --bs-link-color: #13ABAB;
   --bs-link-color-rgb: 115, 103, 240;
   --bs-link-decoration: none;
-  --bs-link-hover-color: #685dd8;
+  --bs-link-hover-color: #13ABAB;
   --bs-link-hover-color-rgb: 104, 93, 216;
   --bs-code-color: #e83e8c;
   --bs-highlight-color: #6d6b77;
@@ -9331,7 +9331,7 @@ div:not(.nav-align-left):not(.nav-align-right) > .nav-tabs {
 .nav-pills .nav-item .nav-link:not(.active):hover {
   border-bottom: none;
   padding-bottom: 0.5435rem;
-  background-color: #e9e7fd;
+  background-color: rgba(47, 43, 61, 0.06) !important;
 }
 .nav-pills ~ .tab-content {
   box-shadow: 0 0.1875rem 0.75rem 0 rgba(47, 43, 61, 0.14);
