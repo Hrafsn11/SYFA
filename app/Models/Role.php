@@ -13,4 +13,5 @@ class Role extends SpatieRole
     protected $table = 'roles';
     protected $primaryKey = 'id';
     protected $keyType = 'string';
+    public $incrementing = false;
 }
