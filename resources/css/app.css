@@ -388,3 +388,9 @@
   border-color: #ced4da;
   box-shadow: none;
 }
+
+#nprogress .bar {
+    height: 4px !important;               /* Change thickness */
+    left: 16.25rem !important;
+    box-shadow: 0 0 5px rgba(69, 204, 204, 0.7);
+}
