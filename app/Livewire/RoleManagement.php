@@ -2,6 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Models\Permission as ModelsPermission;
+use App\Models\Role as ModelsRole;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
@@ -26,16 +28,15 @@ class RoleManagement extends Component
 
     public function render()
     {
-        $roles = Role::where('guard_name', 'web')
+        $roles = ModelsRole::where('guard_name', 'web')
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%');
             })->paginate(10);
 
-        $allPermissions = Permission::all()->mapToGroups(function ($permission) {
+        $allPermissions = ModelsPermission::all()->mapToGroups(function ($permission) {
             [$group, $action] = explode('.', $permission->name);
             return [$group => ['id' => $permission->id, 'name' => $action]];
         });
-
 
         return view('livewire.role-management', compact('roles', 'allPermissions'))
             ->layout('layouts.app');
@@ -49,8 +50,7 @@ class RoleManagement extends Component
 
     public function edit($roleId)
     {
-
-        $role = Role::findOrFail($roleId);
+        $role = ModelsRole::findOrFail($roleId);
         $this->selectedRole = $role;
         $this->name = $role->name;
         $this->restriction = $role->restriction ?? 1;

@@ -65,7 +65,7 @@
                                 <td>
                                     <div class="d-flex gap-2">
                                         @can('roles.edit')
-                                        <button wire:click="edit({{ $role->id }})" 
+                                        <button wire:click="edit('{{ $role->id }}')" 
                                                 class="btn btn-sm btn-icon btn-primary" 
                                                 title="Edit">
                                             <i class="ti ti-edit"></i>
@@ -73,7 +73,7 @@
                                         @endcan
                                         @can('roles.delete')
                                         @if($role->name !== 'super-admin')
-                                        <button wire:click="delete({{ $role->id }})" 
+                                        <button wire:click="delete('{{ $role->id }}')" 
                                                 onclick="return confirm('Are you sure you want to delete this role?')"
                                                 class="btn btn-sm btn-icon btn-danger" 
                                                 title="Delete">
