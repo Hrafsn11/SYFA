@@ -76,12 +76,18 @@
             $('#hiddenFlagging').val('ya');
             $('#label-nama').text('Nama Investor');
             $('#nama').attr('placeholder', 'Masukkan Nama Investor');
+            $('#label-alamat').text('Alamat Investor');
+            $('#alamat').attr('placeholder', 'Masukkan alamat investor');
+            $('#label-ttd').text('Upload Tanda Tangan Investor');
             @this.set('flagging', 'ya');
         } else {
             $('#btnTambahText').text('Debitur');
             $('.debitur-section').removeClass('d-none');
             $('#label-nama').text('Nama Perusahaan');
             $('#nama').attr('placeholder', 'Masukkan Nama Perusahaan');
+            $('#label-alamat').text('Alamat Perusahaan');
+            $('#alamat').attr('placeholder', 'Masukkan alamat perusahaan');
+            $('#label-ttd').text('Upload Tanda Tangan Debitur');
             @this.set('flagging', 'tidak');
         }
     });

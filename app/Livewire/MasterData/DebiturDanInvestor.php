@@ -19,7 +19,7 @@ class DebiturDanInvestor extends Component
     public $kol, $banks;
     
     #[FieldInput]
-    public $nama, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $id_kol, $password, $password_confirmation, $flagging;
+    public $nama, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging;
 
     #[FieldInput]
     #[Renderless]
@@ -53,7 +53,7 @@ class DebiturDanInvestor extends Component
             });
         } else {
             $listInput = array_filter($listInput, function ($value) {
-                return !in_array($value, ['nama_ceo', 'alamat', 'id_kol', 'tanda_tangan']);
+                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp']);
             });
         }
 
