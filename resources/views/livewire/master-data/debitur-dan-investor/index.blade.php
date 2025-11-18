@@ -96,8 +96,6 @@
         const form = modal.find('form');
 
         form.attr('wire:submit', `{!! $urlAction["update_master_debitur_dan_investor"] !!}`.replace('id_placeholder', data.id));
-
-        console.log(data);
         
         // ubah title modal
         modal.find('.modal-title').html('Edit ' + (data.flagging == 'ya' ? 'Investor' : 'Debitur'));

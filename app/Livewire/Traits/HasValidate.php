@@ -11,8 +11,6 @@ use Illuminate\Validation\ValidationException;
 
 trait HasValidate
 {
-    public $formDataValidate = [];
-
     public function updated($name, $value)
     {
         $this->validateOnly($name); 

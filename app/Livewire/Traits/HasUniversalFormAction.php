@@ -10,7 +10,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HasUniversalFormAction
 {       
-    public $form_data = [];
+    protected $form_data = [];
     public $urlAction = [];
 
     public function setUrlSaveData($nameVariable, $routeName, array $params = [])
@@ -40,9 +40,9 @@ trait HasUniversalFormAction
             foreach ($this->getUniversalFieldInputs() as $key => $value) {
                 $this->form_data[$value] = $this->{$value};
             }
-
         }
 
+        $listFile = [];
         foreach ($this->form_data as $key => $value) {
             if ($value instanceof TemporaryUploadedFile) {
                 $file = new UploadedFile(
@@ -52,6 +52,7 @@ trait HasUniversalFormAction
                     null,
                     true // penting! tandai sebagai "test file" agar laravel menerimanya
                 );
+                $listFile[] = $value;
                 $this->form_data[$key] = $file;
             }
         }
@@ -67,6 +68,10 @@ trait HasUniversalFormAction
 
         if (method_exists($this, 'afterSave')) {
             $this->afterSave($payload);
+        }
+
+        foreach ($listFile as $key => $value) {
+            $value->delete();
         }
     }
 

@@ -25,7 +25,7 @@ class DebiturTable extends DataTableComponent
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('id_debitur', 'asc')
-            ->setTableAttributes(['class' => 'table table-hover'])
+            ->setTableAttributes(['class' => 'table'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
@@ -123,7 +123,6 @@ class DebiturTable extends DataTableComponent
                 ->sortable()
                 ->format(function ($value) {
                     if ($value) {
-                        $filename = basename($value);
                         return '<div class="text-center">
                             <a href="/storage/' . $value . '" target="_blank" class="text-primary text-decoration-none">
                                 <i class="ti ti-file-text me-1"></i>
@@ -142,7 +141,7 @@ class DebiturTable extends DataTableComponent
                     return view('livewire.master-data-debitur-investor.partials.debitur-table-actions', [
                         'id' => $row->id_debitur,
                         'status' => $row->status
-                    ])->render();
+                    ]);
                 })
                 ->html()
                 ->excludeFromColumnSelect(),

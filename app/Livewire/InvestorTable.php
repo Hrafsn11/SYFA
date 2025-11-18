@@ -119,15 +119,10 @@ class InvestorTable extends DataTableComponent
                     return view('livewire.master-data-debitur-investor.partials.investor-table-actions', [
                         'id' => $row->id_debitur,
                         'status' => $row->status
-                    ])->render();
+                    ]);
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];
-    }
-
-    public function beforeLoadData($payload)
-    {
-        $this->dispatch('before-load-data', $payload)->to(DebiturDanInvestor::class);
     }
 }

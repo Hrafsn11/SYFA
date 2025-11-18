@@ -137,7 +137,10 @@ function initSelect2(element = null, data = null) {
             found = found.replace(/\\/g, '');
             var valueAttr = found ? element.attr(found) : null;
             var value = element.val();
+
+            console.log(valueAttr, value);
             
+            if (value == null || value == '') return;
             Livewire.find(changed.closest('[wire\\:id]').attr('wire:id')).set(valueAttr, value);
         });
     });
@@ -408,6 +411,59 @@ document.addEventListener('livewire:navigated', () => {
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
+});
+
+let totalUpload = 0;
+document.addEventListener('livewire-upload-start', (event) => {
+    console.log('uploading');
+    
+    totalUpload++;
+    let inputElement = event.target;
+    let form = $(inputElement).parents('form');
+    let btnSubmit = form.find('button[type="submit"]');
+    let formGroup = inputElement.closest('.form-group');
+    
+    sectionBlock($(formGroup), true);
+
+    if (btnSubmit.length > 0 && totalUpload > 0) {
+        btnSubmit.prop('disabled', true);
+    }
+});
+
+document.addEventListener('livewire-upload-error', (event) => {
+    console.log('upload error');
+
+    totalUpload--;
+
+    let inputElement = event.target;
+    let form = $(inputElement).parents('form');
+    let btnSubmit = form.find('button[type="submit"]');
+    let formGroup = inputElement.closest('.form-group');
+    sectionBlock($(formGroup), false);
+
+    if (btnSubmit.length > 0 && totalUpload == 0) {
+        btnSubmit.prop('disabled', false);
+    }
+});
+
+document.addEventListener('livewire-upload-finish', (event) => {
+    console.log('uploaded');
+    
+    totalUpload--;
+
+    let inputElement = event.target;
+    let form = $(inputElement).parents('form');
+    let btnSubmit = form.find('button[type="submit"]');
+    let formGroup = inputElement.closest('.form-group');
+    sectionBlock($(formGroup), false);
+
+    if (btnSubmit.length > 0 && totalUpload == 0) {
+        btnSubmit.prop('disabled', false);
+    }
+});
+
+document.addEventListener('livewire:exception', event => {
+    console.error('LIVEWIRE EXCEPTION:', event.detail);
 });
 
 document.addEventListener('livewire:init', () => {

@@ -26,7 +26,6 @@ class DebiturDanInvestorController extends Controller
 
     public function store(DebiturDanInvestorRequest $request)
     {
-        // dd('masuk');
         try {
             $validated = $request->validated();
 
@@ -78,7 +77,7 @@ class DebiturDanInvestorController extends Controller
             $result = [
                 'nama' => $debitur->nama,
                 'nama_ceo' => $debitur->nama_ceo,
-                'alamat' => $debitur->nama_ceo,
+                'alamat' => $debitur->alamat,
                 'email' => $debitur->email,
                 'no_telepon' => $debitur->no_telepon,
                 'nama_bank' => $debitur->nama_bank,
