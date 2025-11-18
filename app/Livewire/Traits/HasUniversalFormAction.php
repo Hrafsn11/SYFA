@@ -58,7 +58,7 @@ trait HasUniversalFormAction
         }
 
         $primaryKey = $this->getValidatePrimaryKey();
-        $this->form_data[$primaryKey] = $this->{$primaryKey};
+        if ($primaryKey) $this->form_data[$primaryKey] = $this->{$primaryKey};
 
         $payload = (new UniversalFormAction($this))->saveData([
             'route' => $routeName,

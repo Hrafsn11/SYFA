@@ -26,7 +26,9 @@ trait HasValidate
         }
         $primaryKey = $this->getValidatePrimaryKey();
 
-        $formData[$primaryKey] = $this->{$primaryKey};
+        if ($primaryKey) {
+            $formData[$primaryKey] = $this->{$primaryKey};
+        }
 
         $baseRequest = Request::create('/', 'POST', $formData);
         $formRequest = $validatorClass::createFrom(
