@@ -164,7 +164,7 @@
                                                         Setujui
                                                     </button>
                                                 @endcan
-                                                @can('peminjaman_dana.persetujuan_direktur')
+                                                @can('peminjaman_dana.validasi_direktur')
                                                     <button type="button" class="btn btn-info d-none"
                                                         id="btnPersetujuanDirektur">
                                                         <i class="fas fa-briefcase me-2"></i>
