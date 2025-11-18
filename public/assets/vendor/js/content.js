@@ -130,19 +130,23 @@ function initSelect2(element = null, data = null) {
             width: '100%',
             dropdownParent: element.parent(),
         });
-
-        element.on('change', function () {
-            let changed = $(this);
-            var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
-            found = found.replace(/\\/g, '');
-            var valueAttr = found ? element.attr(found) : null;
-            var value = element.val();
-
-            console.log(valueAttr, value);
-            
-            if (value == null || value == '') return;
-            Livewire.find(changed.closest('[wire\\:id]').attr('wire:id')).set(valueAttr, value);
-        });
+        
+        // cek pake wire model sementara
+        var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
+        
+        // kalo punya
+        if (found) {
+            element.on('change', function () {
+                let changed = $(this);
+                // var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
+                found = found.replace(/\\/g, '');
+                var valueAttr = found ? element.attr(found) : null;
+                var value = element.val();
+                
+                if (value == null || value == '') return;
+                Livewire.find(changed.closest('[wire\\:id]').attr('wire:id')).set(valueAttr, value);
+            });
+        }
     });
 }
 

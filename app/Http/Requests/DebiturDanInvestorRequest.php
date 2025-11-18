@@ -27,7 +27,7 @@ class DebiturDanInvestorRequest extends FormRequest
         $validate = [
             'id_kol' => 'required_if:flagging,tidak|exists:master_kol,id_kol',
             'nama' => 'required|max:255',
-            'alamat' => 'required_if:flagging,tidak|max:500',
+            'alamat' => 'required|max:500',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|min:8',
             'password_confirmation' => 'required_with:password|min:8|same:password',
@@ -36,8 +36,9 @@ class DebiturDanInvestorRequest extends FormRequest
             'nama_ceo' => 'required_if:flagging,tidak|max:255',
             'nama_bank' => 'required|in:' . implode(',', BanksEnum::getConstants()),
             'no_rek' => 'required|max:100',
+            'npwp' => 'nullable|numeric|unique:master_debitur_dan_investor,npwp',
             'flagging' => 'required|in:ya,tidak',
-            'tanda_tangan' => 'required_if:flagging,tidak|image|mimes:jpeg,png,jpg|max:2048',
+            'tanda_tangan' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ];
 
         if ($this->id) {
@@ -52,6 +53,7 @@ class DebiturDanInvestorRequest extends FormRequest
             if ($this->flagging == 'tidak') {
                 $validate['tanda_tangan'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
             }
+            $validate['npwp'] = 'nullable|numeric|unique:master_debitur_dan_investor,npwp,' . $this->id . ',id_debitur';
         }
 
         return $validate;
@@ -81,6 +83,8 @@ class DebiturDanInvestorRequest extends FormRequest
             'nama_bank.in' => 'Nama bank tidak valid.',
             'no_rek.required' => 'Nomor rekening harus diisi.',
             'no_rek.max' => 'Nomor rekening tidak boleh lebih dari 100 karakter.',
+            'npwp.numeric' => 'NPWP harus berupa angka.',
+            'npwp.unique' => 'NPWP sudah terdaftar.',
             'flagging.required' => 'Flagging harus diisi.',
             'flagging.in' => 'Flagging tidak valid.',
             'tanda_tangan.required_if' => 'Tanda tangan harus diisi.',

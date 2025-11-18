@@ -38,7 +38,7 @@ class InvestorTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging');
     }
 
     public function columns(): array
@@ -88,6 +88,12 @@ class InvestorTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
+            Column::make('Alamat', 'alamat')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
             Column::make('Nama Bank', 'nama_bank')
                 ->sortable()
                 ->searchable()
@@ -108,6 +114,21 @@ class InvestorTable extends DataTableComponent
                         return '<div class="text-center"><span class="badge bg-success">Active</span></div>';
                     } else {
                         return '<div class="text-center"><span class="badge bg-secondary">Non Active</span></div>';
+                    }
+                })
+                ->html(),
+
+            Column::make('Tanda Tangan', 'tanda_tangan')
+                ->sortable()
+                ->format(function ($value) {
+                    if ($value) {
+                        return '<div class="text-center">
+                            <a href="/storage/' . $value . '" target="_blank" class="text-primary text-decoration-none">
+                                <i class="ti ti-file-text me-1"></i>
+                            </a>
+                        </div>';
+                    } else {
+                        return '<div class="text-center"><span class="text-muted">-</span></div>';
                     }
                 })
                 ->html(),
