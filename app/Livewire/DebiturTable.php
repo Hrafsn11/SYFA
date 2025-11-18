@@ -3,11 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\MasterDebiturDanInvestor;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class DebiturTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
+
     protected $model = MasterDebiturDanInvestor::class;
 
     protected $listeners = ['refreshDebiturTable' => '$refresh'];
@@ -133,10 +136,14 @@ class DebiturTable extends DataTableComponent
                 ->html(),
 
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.master-data-debitur-investor.partials.debitur-table-actions', [
-                    'id' => $row->id_debitur,
-                    'status' => $row->status
-                ]))
+                ->label(function ($row) {
+                    $this->setUrlLoadData('get_data_' . $row->id_debitur, 'master-data.debitur-investor.edit', ['id' => $row->id_debitur, 'callback' => 'editData']);
+
+                    return view('livewire.master-data-debitur-investor.partials.debitur-table-actions', [
+                        'id' => $row->id_debitur,
+                        'status' => $row->status
+                    ])->render();
+                })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];

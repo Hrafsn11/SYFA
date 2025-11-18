@@ -4,6 +4,7 @@ namespace App\Livewire\Traits;
 
 use App\Attributes\FieldInput;
 use Illuminate\Http\UploadedFile;
+use App\Attributes\ParameterIDRoute;
 use App\Livewire\UniversalFormAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -55,6 +56,9 @@ trait HasUniversalFormAction
             }
         }
 
+        $primaryKey = $this->getValidatePrimaryKey();
+        $this->form_data[$primaryKey] = $this->{$primaryKey};
+
         $payload = (new UniversalFormAction($this))->saveData([
             'route' => $routeName,
             'params' => $params,
@@ -69,7 +73,7 @@ trait HasUniversalFormAction
     public function loadDataForm(string $routeName, array $params = [])
     {
         if (method_exists($this, 'beforeLoadData')) {
-            $this->beforeLoadData();
+            $this->beforeLoadData($params);
         }
 
         $payload = (new UniversalFormAction($this))->loadData([
@@ -91,5 +95,16 @@ trait HasUniversalFormAction
             ->map(fn($p) => $p->getName())
             ->values()
             ->all();
+    }
+
+    private function getUniversakPrimaryKey()
+    {
+        $reflection = new \ReflectionClass($this);
+
+        return collect($reflection->getProperties())
+            ->filter(fn($p) => $p->getAttributes(ParameterIDRoute::class))
+            ->map(fn($p) => $p->getName())
+            ->values()
+            ->first();
     }
 }

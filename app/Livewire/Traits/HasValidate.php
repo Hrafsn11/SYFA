@@ -3,12 +3,16 @@
 namespace App\Livewire\Traits;
 
 use Livewire\Attributes\On;
+use Illuminate\Http\Request;
 use App\Attributes\FieldInput;
+use App\Attributes\ParameterIDRoute;
 use Livewire\Attributes\Renderless;
 use Illuminate\Validation\ValidationException;
 
 trait HasValidate
 {
+    public $formDataValidate = [];
+
     public function updated($name, $value)
     {
         $this->validateOnly($name); 
@@ -18,8 +22,21 @@ trait HasValidate
     {
         $validatorClass = $this->validateClass;
 
-        $validate = new $validatorClass();
-        $validate = $validate->rules();
+        $formData = [];
+        foreach ($this->getValidateFieldInputs() as $field) {
+            $formData[$field] = $this->{$field};
+        }
+        $primaryKey = $this->getValidatePrimaryKey();
+
+        $formData[$primaryKey] = $this->{$primaryKey};
+
+        $baseRequest = Request::create('/', 'POST', $formData);
+        $formRequest = $validatorClass::createFrom(
+            $baseRequest,
+            new $validatorClass
+        );
+
+        $validate = $formRequest->rules();
 
         return $validate;
     }
@@ -61,5 +78,16 @@ trait HasValidate
             ->map(fn($p) => $p->getName())
             ->values()
             ->all();
+    }
+
+    private function getValidatePrimaryKey()
+    {
+        $reflection = new \ReflectionClass($this);
+
+        return collect($reflection->getProperties())
+            ->filter(fn($p) => $p->getAttributes(ParameterIDRoute::class))
+            ->map(fn($p) => $p->getName())
+            ->values()
+            ->first();
     }
 }

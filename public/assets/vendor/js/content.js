@@ -10,8 +10,13 @@ $(document).on("keydown", ":input:not(textarea)", function (event) {
 
 $(document).on('keyup change paste', 'form input, form select, form textarea', function () {
     if ($(this).attr('type') == 'radio' || $(this).attr('type') == 'checkbox') {
-        let nameElement = $(this).attr('name');
-        $(`[name="${nameElement}"]`).each(function () {
+        let modelAttr = $.map(this.attributes, a => a.name).find(n => n.startsWith('wire:model'));
+        let modelValue = $(this).attr(modelAttr);
+
+        let elements = $('[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.lazy], [wire\\:model\\.blur], [wire\\:model\\.debounce\\.500ms], [wire\\:model\\.defer]')
+            .filter((_, el) => $(el).attr(modelAttr) === modelValue);
+        
+        elements.each(function () {
             $(this).removeClass('is-invalid');
         });
     } else {
@@ -389,6 +394,11 @@ document.addEventListener('livewire:navigated', () => {
     $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
         Livewire.dispatch('close-modal');
         let form = $(this).find('form');
+
+        form.find('.select2').each(function () {
+            $(this).val(null).trigger('change');
+        });
+
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });

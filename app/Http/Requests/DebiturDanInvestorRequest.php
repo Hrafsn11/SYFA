@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use App\Enums\BanksEnum;
+use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DebiturDanInvestorRequest extends FormRequest
@@ -27,7 +29,8 @@ class DebiturDanInvestorRequest extends FormRequest
             'nama' => 'required|max:255',
             'alamat' => 'required_if:flagging,tidak|max:500',
             'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|min:8|confirmed',
+            'password' => 'required|min:8',
+            'password_confirmation' => 'required_with:password|min:8|same:password',
             'no_telepon' => 'required|max:20',
             'deposito' => 'required_if:flagging,ya|in:reguler,khusus',
             'nama_ceo' => 'required_if:flagging,tidak|max:255',
@@ -39,6 +42,16 @@ class DebiturDanInvestorRequest extends FormRequest
 
         if ($this->id) {
             $validate['id_kol'] = 'nullable|exists:master_kol,id_kol';
+            unset($validate['password'], $validate['password_confirmation']);
+            $validate['email'] = ['required', 'email', 'max:255', function ( $attribute, $value, $fail) {
+                $master = MasterDebiturDanInvestor::where('id_debitur', $this->id)->first();
+                $user = User::where('email', $value)->where('id', '!=', $master->user_id)->exists();
+                if ($user) $fail('Email sudah digunakan.');
+            }];
+
+            if ($this->flagging == 'tidak') {
+                $validate['tanda_tangan'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
+            }
         }
 
         return $validate;
@@ -56,7 +69,8 @@ class DebiturDanInvestorRequest extends FormRequest
             'email.unique' => 'Email sudah digunakan.',
             'password.required' => 'Password harus diisi.',
             'password.min' => 'Password minimal 8 karakter.',
-            'password.confirmed' => 'Password tidak cocok.',
+            'password_confirmation.required_with' => 'Konfirmasi password harus diisi.',
+            'password_confirmation.same' => 'Konfirmasi password tidak cocok.',
             'no_telepon.required' => 'Nomor telepon harus diisi.',
             'no_telepon.max' => 'Nomor telepon tidak boleh lebih dari 20 karakter.',
             'deposito.required_if' => 'Deposit harus diisi.',
