@@ -164,7 +164,7 @@
                                                         Setujui
                                                     </button>
                                                 @endcan
-                                                @can('peminjaman_dana.persetujuan_direktur')
+                                                @can('peminjaman_dana.validasi_direktur')
                                                     <button type="button" class="btn btn-info d-none"
                                                         id="btnPersetujuanDirektur">
                                                         <i class="fas fa-briefcase me-2"></i>
@@ -1068,7 +1068,7 @@
                 
                 // Show buttons only when appropriate for the current status
                 // Submit Pengajuan button: muncul jika status Draft atau Validasi Ditolak
-                const showSubmitPengajuan = currentStatus === 'Draft' || currentStatus === 'Validasi Ditolak';
+                const showSubmitPengajuan = currentStatus === 'Draft';
                 toggleDisplay(dom.buttons.submitPengajuan, showSubmitPengajuan);
                 
                 toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
@@ -1103,6 +1103,16 @@
             };
 
             const updateActivityTimeline = () => {
+                const firstTimeline = 1; // First timeline step index
+                const allHistoryCount = @json($allHistory->count());
+
+                if(firstTimeline && allHistoryCount === 0) {
+                    toggleDisplay(dom.timeline.empty, false);
+                    toggleDisplay(dom.timeline.container, true);
+                }else if(firstTimeline && allHistoryCount > 0) {
+                    toggleDisplay(dom.timeline.empty, !showTimeline);
+                    toggleDisplay(dom.timeline.container, showTimeline);
+                }
                 const showTimeline = state.currentStep >= 2;
                 toggleDisplay(dom.timeline.empty, !showTimeline);
                 toggleDisplay(dom.timeline.container, showTimeline);
