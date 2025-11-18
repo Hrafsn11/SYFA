@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ConfigMatrixPinjaman;
 
 use App\Models\ConfigMatrixPinjaman;
 use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
-class ConfigMatrixPinjamanTable extends DataTableComponent
+class Table extends DataTableComponent
 {
     use HasUniversalFormAction;
 

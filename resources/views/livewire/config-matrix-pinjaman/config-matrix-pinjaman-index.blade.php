@@ -15,7 +15,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-datatable">
-                    <livewire:config-matrix-pinjaman-table />
+                    <livewire:config-matrix-pinjaman.table />
                 </div>
             </div>
         </div>

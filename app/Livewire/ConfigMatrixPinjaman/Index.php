@@ -8,7 +8,7 @@ use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\ConfigMatrixPinjamanRequest;
 
-class ConfigMatrixPinjamanIndex extends Component
+class Index extends Component
 {
     use HasUniversalFormAction, HasValidate;
     private string $validateClass = ConfigMatrixPinjamanRequest::class;
