@@ -30,6 +30,7 @@ class MasterDebiturDanInvestor extends Model
         'nama_ceo',
         'nama_bank',
         'no_rek',
+        'npwp',
         'flagging',
         'tanda_tangan',
     ];
