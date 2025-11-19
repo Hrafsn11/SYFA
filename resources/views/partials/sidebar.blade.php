@@ -50,6 +50,19 @@
             </a>
         </li>
 
+        <!-- Restrukturisasi Section -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Restrukturisasi</span>
+        </li>
+
+        <li class="menu-item {{ request()->routeIs('pengajuan-restrukturisasi*') ? 'active' : '' }}">
+            <a href="{{ route('pengajuan-restrukturisasi.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-file-text"></i>
+                <div data-i18n="Pengajuan Restrukturisasi">Pengajuan Restrukturisasi</div>
+            </a>
+        </li>
+
+
         <!-- Pengembalian Section -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pengembalian</span>
@@ -88,7 +101,7 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item {{ request()->is('debitur-dan-investor/form-kerja-investor*') ? 'active' : '' }}">
-            <a wire:navigate.hover href="{{ route('form-kerja-investor.index') }}" class="menu-link">
+                    <a wire:navigate.hover href="{{ route('form-kerja-investor.index') }}" class="menu-link">
                         <div data-i18n="Investasi">Investasi</div>
                     </a>
                 </li>
@@ -137,13 +150,15 @@
                             <div data-i18n="KOL">KOL</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('master-data.sumber-pendanaan-eksternal.*') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
+                    <li class="menu-item">
+                        <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
+                            class="menu-link">
                             <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('master-data.debitur-investor.*') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}" class="menu-link">
+                    <li class="menu-item">
+                        <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}"
+                            class="menu-link">
                             <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                         </a>
                     </li>

@@ -6,6 +6,7 @@ use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PermissionManagement;
+use App\Livewire\PengajuanRestrukturisasi;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\FormKerjaInvestorController;
@@ -14,8 +15,8 @@ use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\RencanaPenagihanDepositoController;
-use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,9 @@ Route::middleware([
     Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
     Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
     Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
+
+    //Restrukturisasi Routes
+    Route::get('pengajuan-restrukturisasi', PengajuanRestrukturisasi::class)->name('pengajuan-restrukturisasi.index');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
