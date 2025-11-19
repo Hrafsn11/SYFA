@@ -3,11 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\MasterDebiturDanInvestor;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class DebiturTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
+
     protected $model = MasterDebiturDanInvestor::class;
 
     protected $listeners = ['refreshDebiturTable' => '$refresh'];
@@ -22,7 +25,7 @@ class DebiturTable extends DataTableComponent
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('id_debitur', 'asc')
-            ->setTableAttributes(['class' => 'table table-hover'])
+            ->setTableAttributes(['class' => 'table'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
@@ -34,7 +37,7 @@ class DebiturTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging', 'tanda_tangan');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan');
     }
 
     public function columns(): array
@@ -104,6 +107,12 @@ class DebiturTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
+            Column::make('NPWP', 'npwp')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
             Column::make('Status', 'status')
                 ->sortable()
                 ->searchable()
@@ -120,7 +129,6 @@ class DebiturTable extends DataTableComponent
                 ->sortable()
                 ->format(function ($value) {
                     if ($value) {
-                        $filename = basename($value);
                         return '<div class="text-center">
                             <a href="/storage/' . $value . '" target="_blank" class="text-primary text-decoration-none">
                                 <i class="ti ti-file-text me-1"></i>
@@ -133,10 +141,14 @@ class DebiturTable extends DataTableComponent
                 ->html(),
 
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.master-data-debitur-investor.partials.debitur-table-actions', [
-                    'id' => $row->id_debitur,
-                    'status' => $row->status
-                ]))
+                ->label(function ($row) {
+                    $this->setUrlLoadData('get_data_' . $row->id_debitur, 'master-data.debitur-investor.edit', ['id' => $row->id_debitur, 'callback' => 'editData']);
+
+                    return view('livewire.master-data-debitur-investor.partials.debitur-table-actions', [
+                        'id' => $row->id_debitur,
+                        'status' => $row->status
+                    ]);
+                })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];

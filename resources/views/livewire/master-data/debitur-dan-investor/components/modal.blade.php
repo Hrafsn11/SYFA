@@ -41,15 +41,18 @@
 
                         <!-- Nama CEO (Hanya untuk Debitur) -->
                         <div class="col-12 mb-3 form-group debitur-section d-none">
-                            <label for="nama_ceo" class="form-label">Nama CEO</label>
+                            <label for="nama_ceo" class="form-label">Nama CEO <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nama_ceo" placeholder="Masukkan Nama CEO" wire:model.blur="nama_ceo">
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <!-- Alamat Perusahaan (Hanya untuk Debitur) -->
-                        <div class="col-12 mb-3 form-group debitur-section d-none">
-                            <label for="alamat" class="form-label">Alamat Perusahaan</label>
-                            <textarea class="form-control" id="alamat" rows="2" placeholder="Masukkan alamat perusahaan" wire:model.blur="alamat"></textarea>
+                        <!-- Alamat (Untuk Debitur dan Investor) -->
+                        <div class="col-12 mb-3 form-group">
+                            <label for="alamat" class="form-label">
+                                <span id="label-alamat">Alamat</span> <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="alamat" rows="2" placeholder="Masukkan alamat" wire:model.blur="alamat"></textarea>
+                            <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- Email -->
@@ -85,6 +88,13 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
+                        <!-- NPWP -->
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
+                            <label for="npwp" class="form-label">NPWP</label>
+                            <input type="text" class="form-control" id="npwp" placeholder="Masukkan NPWP" wire:model.blur="npwp">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
                         <!-- KOL Perusahaan (Hanya untuk Debitur) -->
                         <div class="col-12 mb-3 form-group debitur-section d-none">
                             <label for="id_kol" class="form-label">KOL Perusahaan <span class="text-danger">*</span></label>
@@ -100,16 +110,18 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <!-- Upload Tanda Tangan (Hanya untuk Debitur) -->
-                        <div class="col-12 mb-3 form-group debitur-section d-none">
-                            <label class="form-label">Upload Tanda Tangan Debitur <span class="text-danger">*</span></label>
+                        <!-- Upload Tanda Tangan (Untuk Debitur dan Investor) -->
+                        <div class="col-12 mb-3 form-group">
+                            <label class="form-label">
+                                <span id="label-ttd">Upload Tanda Tangan</span> <span class="text-danger">*</span>
+                            </label>
                             <input type="file" class="form-control" id="tanda_tangan" wire:model.blur="tanda_tangan" accept="image/jpeg,image/png,image/jpg">
                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: jpg, png, jpeg)</small>
                             <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- Password -->
-                        <div class="col-md-6 mb-3 form-group">
+                        <div class="col-md-6 mb-3 form-group password-section">
                             <label for="password" class="form-label">Password <span class="text-danger" id="password-required">*</span></label>
                             <input type="password" class="form-control" id="password" placeholder="Masukkan password" wire:model.blur="password" autocomplete="new-password">
                             <div class="invalid-feedback"></div>
@@ -117,7 +129,7 @@
                         </div>
 
                         <!-- Confirm Password -->
-                        <div class="col-md-6 mb-3 form-group">
+                        <div class="col-md-6 mb-3 form-group password-section">
                             <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span></label>
                             <input type="password" class="form-control" id="password_confirmation" wire:model.blur="password_confirmation" placeholder="Konfirmasi password" autocomplete="new-password">
                             <div class="invalid-feedback"></div>

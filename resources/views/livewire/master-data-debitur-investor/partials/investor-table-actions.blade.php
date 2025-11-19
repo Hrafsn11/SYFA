@@ -2,9 +2,10 @@
     {{-- Button Edit --}}
     <button class="btn btn-sm btn-icon btn-text-primary rounded-pill waves-effect debitur-edit-btn" 
             type="button"
-            data-id="{{ $id }}" 
+            wire:click='{{ $this->urlAction['get_data_' . $id] }}'
             title="Edit">
-        <i class="ti ti-edit"></i>
+        <i class="ti ti-edit" wire:loading.remove wire:target='{{ $this->urlAction['get_data_' . $id] }}'></i>
+        <span class="spinner-border spinner-border-sm" wire:loading wire:target='{{ $this->urlAction['get_data_' . $id] }}'></span>
     </button>
 
     {{-- Button Toggle Status --}}

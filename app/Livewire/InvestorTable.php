@@ -2,12 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Livewire\MasterData\DebiturDanInvestor;
 use App\Models\MasterDebiturDanInvestor;
-use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class InvestorTable extends DataTableComponent
 {
+    use HasUniversalFormAction;
+
     protected $model = MasterDebiturDanInvestor::class;
 
     protected $listeners = ['refreshInvestorTable' => '$refresh'];
@@ -34,7 +38,7 @@ class InvestorTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'flagging');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging');
     }
 
     public function columns(): array
@@ -84,6 +88,12 @@ class InvestorTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
+            Column::make('Alamat', 'alamat')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
             Column::make('Nama Bank', 'nama_bank')
                 ->sortable()
                 ->searchable()
@@ -108,11 +118,30 @@ class InvestorTable extends DataTableComponent
                 })
                 ->html(),
 
+            Column::make('Tanda Tangan', 'tanda_tangan')
+                ->sortable()
+                ->format(function ($value) {
+                    if ($value) {
+                        return '<div class="text-center">
+                            <a href="/storage/' . $value . '" target="_blank" class="text-primary text-decoration-none">
+                                <i class="ti ti-file-text me-1"></i>
+                            </a>
+                        </div>';
+                    } else {
+                        return '<div class="text-center"><span class="text-muted">-</span></div>';
+                    }
+                })
+                ->html(),
+
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.master-data-debitur-investor.partials.investor-table-actions', [
-                    'id' => $row->id_debitur,
-                    'status' => $row->status
-                ]))
+                ->label(function ($row) {
+                    $this->setUrlLoadData('get_data_' . $row->id_debitur, 'master-data.debitur-investor.edit', ['id' => $row->id_debitur, 'callback' => 'editData']);
+
+                    return view('livewire.master-data-debitur-investor.partials.investor-table-actions', [
+                        'id' => $row->id_debitur,
+                        'status' => $row->status
+                    ]);
+                })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];

@@ -10,8 +10,13 @@ $(document).on("keydown", ":input:not(textarea)", function (event) {
 
 $(document).on('keyup change paste', 'form input, form select, form textarea', function () {
     if ($(this).attr('type') == 'radio' || $(this).attr('type') == 'checkbox') {
-        let nameElement = $(this).attr('name');
-        $(`[name="${nameElement}"]`).each(function () {
+        let modelAttr = $.map(this.attributes, a => a.name).find(n => n.startsWith('wire:model'));
+        let modelValue = $(this).attr(modelAttr);
+
+        let elements = $('[wire\\:model], [wire\\:model\\.live], [wire\\:model\\.lazy], [wire\\:model\\.blur], [wire\\:model\\.debounce\\.500ms], [wire\\:model\\.defer]')
+            .filter((_, el) => $(el).attr(modelAttr) === modelValue);
+        
+        elements.each(function () {
             $(this).removeClass('is-invalid');
         });
     } else {
@@ -125,19 +130,20 @@ function initSelect2(element = null, data = null) {
             width: '100%',
             dropdownParent: element.parent(),
         });
-
+        
         // cek pake wire model sementara
-        var hasWireModel = possibleAttrs.some(attr => element.is(`[${attr}]`));
+        var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
         
         // kalo punya
-        if (hasWireModel) {
+        if (found) {
             element.on('change', function () {
                 let changed = $(this);
-                var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
+                // var found = possibleAttrs.find(attr => element.is(`[${attr}]`));
                 found = found.replace(/\\/g, '');
                 var valueAttr = found ? element.attr(found) : null;
                 var value = element.val();
                 
+                if (value == null || value == '') return;
                 Livewire.find(changed.closest('[wire\\:id]').attr('wire:id')).set(valueAttr, value);
             });
         }
@@ -395,6 +401,11 @@ document.addEventListener('livewire:navigated', () => {
     $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
         Livewire.dispatch('close-modal');
         let form = $(this).find('form');
+
+        form.find('.select2').each(function () {
+            $(this).val(null).trigger('change');
+        });
+
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
@@ -404,6 +415,59 @@ document.addEventListener('livewire:navigated', () => {
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
+});
+
+let totalUpload = 0;
+document.addEventListener('livewire-upload-start', (event) => {
+    console.log('uploading');
+    
+    totalUpload++;
+    let inputElement = event.target;
+    let form = $(inputElement).parents('form');
+    let btnSubmit = form.find('button[type="submit"]');
+    let formGroup = inputElement.closest('.form-group');
+    
+    sectionBlock($(formGroup), true);
+
+    if (btnSubmit.length > 0 && totalUpload > 0) {
+        btnSubmit.prop('disabled', true);
+    }
+});
+
+document.addEventListener('livewire-upload-error', (event) => {
+    console.log('upload error');
+
+    totalUpload--;
+
+    let inputElement = event.target;
+    let form = $(inputElement).parents('form');
+    let btnSubmit = form.find('button[type="submit"]');
+    let formGroup = inputElement.closest('.form-group');
+    sectionBlock($(formGroup), false);
+
+    if (btnSubmit.length > 0 && totalUpload == 0) {
+        btnSubmit.prop('disabled', false);
+    }
+});
+
+document.addEventListener('livewire-upload-finish', (event) => {
+    console.log('uploaded');
+    
+    totalUpload--;
+
+    let inputElement = event.target;
+    let form = $(inputElement).parents('form');
+    let btnSubmit = form.find('button[type="submit"]');
+    let formGroup = inputElement.closest('.form-group');
+    sectionBlock($(formGroup), false);
+
+    if (btnSubmit.length > 0 && totalUpload == 0) {
+        btnSubmit.prop('disabled', false);
+    }
+});
+
+document.addEventListener('livewire:exception', event => {
+    console.error('LIVEWIRE EXCEPTION:', event.detail);
 });
 
 document.addEventListener('livewire:init', () => {
