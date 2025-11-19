@@ -56,7 +56,7 @@
         </li>
 
         <li class="menu-item {{ request()->routeIs('pengembalian*') ? 'active' : '' }}">
-            <a href="{{ route('pengembalian.index') }}" class="menu-link">
+            <a wire:navigate.hover href="{{ route('pengembalian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-wallet"></i>
                 <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
             </a>
@@ -126,24 +126,24 @@
         </li>
 
         @can('master_data.view')
-            <li class="menu-item">
+            <li class="menu-item {{ request()->routeIs('master-data.*') ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons ti ti-database"></i>
                     <div data-i18n="Master Data">Master Data</div>
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item">
+                    <li class="menu-item {{ request()->routeIs('master-data.kol.*') ? 'active' : '' }}">
                         <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
                             <div data-i18n="KOL">KOL</div>
                         </a>
                     </li>
-                    <li class="menu-item">
+                    <li class="menu-item {{ request()->routeIs('master-data.sumber-pendanaan-eksternal.*') ? 'active' : '' }}">
                         <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}" class="menu-link">
                             <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                         </a>
                     </li>
-                    <li class="menu-item">
-                        <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}" class="menu-link">
+                    <li class="menu-item {{ request()->routeIs('master-data.debitur-investor.*') ? 'active' : '' }}">
+                        <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}" class="menu-link">
                             <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                         </a>
                     </li>
