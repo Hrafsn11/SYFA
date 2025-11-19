@@ -4,12 +4,13 @@ namespace App\Livewire\Traits;
 
 use App\Attributes\FieldInput;
 use Illuminate\Http\UploadedFile;
+use App\Attributes\ParameterIDRoute;
 use App\Livewire\UniversalFormAction;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 trait HasUniversalFormAction
 {       
-    public $form_data = [];
+    protected $form_data = [];
     public $urlAction = [];
 
     public function setUrlSaveData($nameVariable, $routeName, array $params = [])
@@ -39,9 +40,9 @@ trait HasUniversalFormAction
             foreach ($this->getUniversalFieldInputs() as $key => $value) {
                 $this->form_data[$value] = $this->{$value};
             }
-
         }
 
+        $listFile = [];
         foreach ($this->form_data as $key => $value) {
             if ($value instanceof TemporaryUploadedFile) {
                 $file = new UploadedFile(
@@ -51,9 +52,13 @@ trait HasUniversalFormAction
                     null,
                     true // penting! tandai sebagai "test file" agar laravel menerimanya
                 );
+                $listFile[] = $value;
                 $this->form_data[$key] = $file;
             }
         }
+
+        $primaryKey = $this->getValidatePrimaryKey();
+        if ($primaryKey) $this->form_data[$primaryKey] = $this->{$primaryKey};
 
         $payload = (new UniversalFormAction($this))->saveData([
             'route' => $routeName,
@@ -64,12 +69,16 @@ trait HasUniversalFormAction
         if (method_exists($this, 'afterSave')) {
             $this->afterSave($payload);
         }
+
+        foreach ($listFile as $key => $value) {
+            $value->delete();
+        }
     }
 
     public function loadDataForm(string $routeName, array $params = [])
     {
         if (method_exists($this, 'beforeLoadData')) {
-            $this->beforeLoadData();
+            $this->beforeLoadData($params);
         }
 
         $payload = (new UniversalFormAction($this))->loadData([
@@ -91,5 +100,16 @@ trait HasUniversalFormAction
             ->map(fn($p) => $p->getName())
             ->values()
             ->all();
+    }
+
+    private function getUniversakPrimaryKey()
+    {
+        $reflection = new \ReflectionClass($this);
+
+        return collect($reflection->getProperties())
+            ->filter(fn($p) => $p->getAttributes(ParameterIDRoute::class))
+            ->map(fn($p) => $p->getName())
+            ->values()
+            ->first();
     }
 }

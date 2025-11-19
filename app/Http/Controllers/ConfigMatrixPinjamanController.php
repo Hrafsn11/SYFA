@@ -11,11 +11,6 @@ use App\Http\Requests\ConfigMatrixPinjamanRequest;
 
 class ConfigMatrixPinjamanController extends Controller
 {
-    // public function index()
-    // {
-    //     return view('livewire.config-matrix-pinjaman.index');
-    // }
-
     public function store(ConfigMatrixPinjamanRequest $request)
     {
         try {

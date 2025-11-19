@@ -26,18 +26,19 @@ class DebiturDanInvestorController extends Controller
 
     public function store(DebiturDanInvestorRequest $request)
     {
-        // dd('masuk');
         try {
             $validated = $request->validated();
 
             DB::beginTransaction();
 
             $file = null;
-            // Handle file upload
-            if ($request->tanda_tangan) {
-                $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
+            if ($validated['flagging'] == 'tidak') {
+                // Handle file upload
+                if ($request->tanda_tangan) {
+                    $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
+                }
+                $validated['tanda_tangan'] = $file;
             }
-            $validated['tanda_tangan'] = $file;
 
             $user = User::create([
                 'name' => $validated['nama'],
@@ -46,7 +47,7 @@ class DebiturDanInvestorController extends Controller
             ]);
 
             $validated['user_id'] = $user->id;
-            unset($validated['password']); 
+            unset($validated['password'], $validated['password_confirmation']);
             
             $debitur = MasterDebiturDanInvestor::create($validated);
             $debitur->load('kol', 'user');
@@ -63,8 +64,33 @@ class DebiturDanInvestorController extends Controller
     public function edit($id)
     {
         $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->with('kol')->firstOrFail();
+        if ($debitur->flagging == 'ya') {
+            $result = [
+                'nama' => $debitur->nama,
+                'deposito' => $debitur->deposito,
+                'email' => $debitur->email,
+                'no_telepon' => $debitur->no_telepon,
+                'nama_bank' => $debitur->nama_bank,
+                'no_rek' => $debitur->no_rek
+            ];
+        } else {
+            $result = [
+                'nama' => $debitur->nama,
+                'nama_ceo' => $debitur->nama_ceo,
+                'alamat' => $debitur->alamat,
+                'email' => $debitur->email,
+                'no_telepon' => $debitur->no_telepon,
+                'nama_bank' => $debitur->nama_bank,
+                'no_rek' => $debitur->no_rek,
+                'id_kol' => $debitur->id_kol,
+                // 'tanda_tangan' => $debitur->tanda_tangan
+            ];
+        }
+
+        $result['id'] = $debitur->id_debitur;
+        $result['flagging'] = $debitur->flagging;
         
-        return Response::success($debitur->toArray(), 'Debitur berhasil ditemukan');
+        return Response::success($result, 'Debitur berhasil ditemukan');
     }
 
     public function update(DebiturDanInvestorRequest $request, $id)
@@ -75,16 +101,18 @@ class DebiturDanInvestorController extends Controller
         try {
             DB::beginTransaction();
 
-            $file = $debitur->tanda_tangan;
-            if (Storage::disk('public')->exists($debitur->tanda_tangan)) {
-                Storage::disk('public')->delete($debitur->tanda_tangan);
+            if ($debitur->flagging == 'tidak') {
+                $file = $debitur->tanda_tangan;
+                if (Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                    Storage::disk('public')->delete($debitur->tanda_tangan);
+                }
+    
+                // Handle file upload
+                if ($request->tanda_tangan) {
+                    $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
+                }
+                $validated['tanda_tangan'] = $file;
             }
-
-            // Handle file upload
-            if ($request->tanda_tangan) {
-                $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
-            }
-            $validated['tanda_tangan'] = $file;
 
             // Update user if exists
             if ($debitur->user_id) {
@@ -102,24 +130,14 @@ class DebiturDanInvestorController extends Controller
                 }
             }
 
-            unset($validated['password']); // Remove password from debitur data
+            unset($validated['password'], $validated['password_confirmation']); // Remove password from debitur data
             $debitur->update($validated);
-            $debitur->refresh();
-            $debitur->load('kol', 'user');
 
             DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Debitur berhasil diupdate',
-                'data' => $debitur->toArray()
-            ]);
+            return Response::success(null, 'Debitur berhasil diupdate');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengupdate debitur: ' . $e->getMessage()
-            ], 500);
+            return Response::errorCatch($e);
         }
     }
 

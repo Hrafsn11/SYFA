@@ -5,18 +5,22 @@ namespace App\Livewire\MasterData;
 use Livewire\Component;
 use App\Enums\BanksEnum;
 use App\Models\MasterKol;
+use Livewire\WithFileUploads;
 use App\Attributes\FieldInput;
+use App\Attributes\ParameterIDRoute;
+use Livewire\Attributes\Renderless;
 use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
-use App\Http\Requests\DebiturDanInvestorRequest;
-use Livewire\Attributes\Renderless;
-use Livewire\WithFileUploads;
+use App\Http\Requests\DebiturDanInvestorRequest; 
 
 class DebiturDanInvestor extends Component
 {
     use HasUniversalFormAction, HasValidate, WithFileUploads;
     private string $validateClass = DebiturDanInvestorRequest::class;
     public $kol, $banks;
+
+    #[ParameterIDRoute]
+    public $id; // untuk edit data
     
     #[FieldInput]
     public $nama, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging;
@@ -29,7 +33,7 @@ class DebiturDanInvestor extends Component
     {
         $this->setUrlSaveData('store_master_debitur_dan_investor', 'master-data.debitur-investor.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_master_debitur_dan_investor', 'master-data.debitur-investor.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
-        $this->setUrlSaveData('delete_master_debitur_dan_investor', 'master-data.debitur-investor.destroy', ["id" => "id_placeholder", "callback" => "afterAction"]);
+        $this->setUrlSaveData('status_master_debitur_dan_investor', 'master-data.debitur-investor.toggle-status', ["id" => "id_placeholder", "callback" => "afterAction"]);
 
         $this->kol = MasterKol::orderBy('id_kol', 'asc')->get();
         $this->banks = BanksEnum::getConstants();
