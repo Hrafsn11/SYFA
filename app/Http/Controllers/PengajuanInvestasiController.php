@@ -7,6 +7,7 @@ use App\Models\PengajuanInvestasi;
 use App\Models\HistoryStatusPengajuanInvestor;
 use App\Models\MasterDebiturDanInvestor;
 use App\Http\Requests\PengajuanInvestasiRequest;
+use App\Services\KontrakInvestasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -100,6 +101,7 @@ class PengajuanInvestasiController extends Controller
             'id' => $pengajuan->id_pengajuan_investasi,
             'nama_investor' => $pengajuan->nama_investor,
             'nama_perusahaan' => $pengajuan->investor->nama ?? '-',
+            'alamat' => $pengajuan->investor->alamat ?? '-',
             'deposito' => $pengajuan->deposito,
             'tanggal_investasi' => $pengajuan->tanggal_investasi,
             'lama_investasi' => $pengajuan->lama_investasi,
@@ -233,6 +235,19 @@ class PengajuanInvestasiController extends Controller
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal mengambil data histori');
         }
+    }
+
+    /**
+     * Display preview kontrak investasi deposito
+     */
+    public function previewKontrak(Request $request, $id, KontrakInvestasiService $kontrakService)
+    {
+        $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
+        
+        $nomorKontrak = $request->input('nomor_kontrak');
+        $kontrak = $kontrakService->generateKontrakData($pengajuan, $nomorKontrak);
+
+        return view('livewire.pengajuan-investasi.preview-kontrak', compact('kontrak'));
     }
 
     /**
@@ -377,14 +392,22 @@ class PengajuanInvestasiController extends Controller
     /**
      * Generate kontrak
      */
-    public function generateKontrak(PengajuanInvestasiRequest $request, $id)
+    public function generateKontrak(Request $request, $id)
     {
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
 
-            $validated = $request->validated();
-
             DB::beginTransaction();
+
+            // Create history for "Generate Kontrak"
+            HistoryStatusPengajuanInvestor::create([
+                'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
+                'status' => 'Generate Kontrak',
+                'date' => now()->toDateString(),
+                'time' => now()->toTimeString(),
+                'current_step' => 6,
+                'submit_step1_by' => Auth::id(),
+            ]);
 
             // Update status to completed (Step 6: Selesai)
             $pengajuan->update([
@@ -393,7 +416,7 @@ class PengajuanInvestasiController extends Controller
                 'updated_by' => Auth::id(),
             ]);
 
-            // Create history
+            // Create history for "Selesai"
             HistoryStatusPengajuanInvestor::create([
                 'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
                 'status' => 'Selesai',
@@ -405,7 +428,7 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return Response::success($pengajuan, 'Kontrak berhasil digenerate');
+            return Response::success($pengajuan, 'Kontrak berhasil digenerate!');
         } catch (\Exception $e) {
             DB::rollBack();
             return Response::errorCatch($e, 'Terjadi kesalahan saat generate kontrak');
