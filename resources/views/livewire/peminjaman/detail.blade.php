@@ -1071,7 +1071,7 @@
                 const showSubmitPengajuan = currentStatus === 'Draft';
                 toggleDisplay(dom.buttons.submitPengajuan, showSubmitPengajuan);
                 
-                toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
+                toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen' || currentStatus === 'Ditolak oleh CEO SKI');
                 toggleDisplay(dom.buttons.persetujuanDebitur, currentStatus === 'Dokumen Tervalidasi');
                 toggleDisplay(dom.buttons.persetujuanCEO, currentStatus === 'Debitur Setuju');
                 
