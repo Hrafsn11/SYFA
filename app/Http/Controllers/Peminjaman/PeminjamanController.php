@@ -1357,7 +1357,7 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Ditolak oleh CEO SKI') {
                 $historyData['reject_by'] = auth()->id();
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_persetujuan_ceo');
-                $historyData['current_step'] = 1;
+                $historyData['current_step'] = 2;
             } elseif ($status === 'Disetujui oleh Direktur SKI') {
                 $historyData['approve_by'] = auth()->id();
                 
