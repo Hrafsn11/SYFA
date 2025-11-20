@@ -61,4 +61,9 @@ class PengajuanPeminjaman extends Model
     {
         return $this->hasMany(BuktiPeminjaman::class, 'id_pengajuan_peminjaman', 'id_pengajuan_peminjaman');
     }
+
+    public function historyStatus()
+    {
+        return $this->hasMany(HistoryStatusPengajuanPinjaman::class, 'id_pengajuan_peminjaman', 'id_pengajuan_peminjaman');
+    }
 }

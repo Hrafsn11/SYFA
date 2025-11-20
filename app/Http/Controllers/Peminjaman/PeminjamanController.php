@@ -11,6 +11,7 @@ use App\Models\MasterSumberPendanaanEksternal;
 use App\Models\Peminjaman;
 use App\Models\PengajuanPeminjaman;
 use App\Services\PeminjamanNumberService;
+use App\Services\ArPerbulanService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -1413,6 +1414,11 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Dana Sudah Dicairkan') {
                 $historyData['approve_by'] = auth()->id();
                 $historyData['current_step'] = 9;
+                
+                app(ArPerbulanService::class)->updateAROnPencairan(
+                    $peminjaman->id_debitur,
+                    now()
+                );
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Dashboard;
+use App\Livewire\ArPerbulan;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
@@ -9,6 +10,7 @@ use App\Livewire\PermissionManagement;
 use App\Livewire\PengajuanRestrukturisasi;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
+use App\Livewire\ValidasiPengajuanRestrukturisasi;
 use App\Http\Controllers\FormKerjaInvestorController;
 use App\Http\Controllers\ReportPengembalianController;
 use App\Http\Controllers\PengembalianPinjamanController;
@@ -62,6 +64,7 @@ Route::middleware([
 
     //Restrukturisasi Routes
     Route::get('pengajuan-restrukturisasi', PengajuanRestrukturisasi::class)->name('pengajuan-restrukturisasi.index');
+    Route::get('detail-restrukturisasi', ValidasiPengajuanRestrukturisasi::class)->name('detail-restrukturisasi');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
@@ -71,7 +74,9 @@ Route::middleware([
         return view('livewire.debitur-piutang.index');
     })->name('debitur-piutang.index');
 
-    Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
+    //Ar Routes
+    Route::get('ar-perbulan', ArPerbulan::class)->name('ar-perbulan.index');
+    Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
     Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 

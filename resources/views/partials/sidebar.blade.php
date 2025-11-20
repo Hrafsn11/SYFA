@@ -157,7 +157,7 @@
                         </a>
                     </li>
                     <li class="menu-item">
-                        <a wire:navigate.hover href="{{ route('master-data.debitur-dan-investor.index') }}"
+                        <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}"
                             class="menu-link">
                             <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
                         </a>
