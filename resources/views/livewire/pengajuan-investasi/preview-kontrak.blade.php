@@ -246,7 +246,7 @@
                             </div>
                             <div class="col-6 text-center">
                                 <p class="mb-5"><strong>PIHAK KEDUA</strong></p>
-                                <div style="height: 80px;" class="mb-3"></div>
+                                <img src="{{ asset('assets/img/ttd.png') }}" alt="TTD CEO" style="display:inline-block; max-width:150px; max-height:80px; margin-left:30px;" class="mb-3">
                                 <p class="mb-0"><strong>Muhamad Kurniawan</strong></p>
                                 <p class="mb-0">CEO PT. Synnovac Kapital Indonesia</p>
                             </div>
