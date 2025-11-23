@@ -40,6 +40,7 @@ class PengajuanPeminjaman extends Model
         'created_by',
         'updated_by',
         'upload_bukti_transfer',
+        'no_kontrak',
     ];
 
     public function invoices()

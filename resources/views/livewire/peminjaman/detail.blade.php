@@ -752,6 +752,11 @@
                                         <h5 class="mb-4">Generate Kontrak Peminjaman</h5>
                                         <form action="" id="formGenerateKontrak">
                                             <div class="col-lg mb-3">
+                                                <label for="no_kontrak" class="form-label">No Kontrak</label>
+                                                <input type="text" class="form-control" id="no_kontrak"
+                                                    name="no_kontrak" value="{{ $header->no_kontrak ?? '' }}" placeholder="No Kontrak">
+                                            </div>
+                                            <div class="col-lg mb-3">
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
@@ -1499,8 +1504,46 @@
                 // Get peminjaman ID from current page
                 const peminjamanId = @json($peminjaman['id'] ?? 1);
 
-                // Open preview in new tab
-                window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
+                // Collect form data
+                const form = document.getElementById('formGenerateKontrak');
+                const formData = new FormData(form);
+                
+                // Get biaya_admin value and clean it
+                const biayaAdminInput = document.getElementById('biaya_admin');
+                const biayaAdmin = biayaAdminInput ? biayaAdminInput.value.replace(/[^\d]/g, '') : '0';
+                
+                // Create a temporary form to submit via POST
+                const tempForm = document.createElement('form');
+                tempForm.method = 'POST';
+                tempForm.action = `/peminjaman/${peminjamanId}/preview-kontrak`;
+                tempForm.target = '_blank';
+                
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                tempForm.appendChild(csrfInput);
+                
+                // Add form data
+                const fields = {
+                    'no_kontrak': document.getElementById('no_kontrak')?.value || '',
+                    'biaya_administrasi': biayaAdmin
+                };
+                
+                Object.keys(fields).forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = fields[key];
+                    tempForm.appendChild(input);
+                });
+                
+                // Submit form
+                document.body.appendChild(tempForm);
+                tempForm.submit();
+                document.body.removeChild(tempForm);
             };
 
 
@@ -1633,6 +1676,21 @@
                 }
             }
 
+            // Handle Generate Kontrak - get no_kontrak from form
+            if (status === 'Generate Kontrak') {
+                const noKontrakInput = document.getElementById('no_kontrak');
+                const biayaAdminInput = document.getElementById('biaya_admin');
+                
+                if (noKontrakInput) {
+                    requestData.no_kontrak = noKontrakInput.value.trim();
+                }
+                
+                if (biayaAdminInput) {
+                    // Clean rupiah format to get raw number
+                    requestData.biaya_administrasi = biayaAdminInput.value.replace(/[^\d]/g, '');
+                }
+            }
+
             // Merge specific request data based on button text
             if (window.pencairanRequestData && buttonText === 'Submit Pencairan Dana') {
                 requestData = { ...requestData, ...window.pencairanRequestData };
@@ -1760,8 +1818,44 @@
         // Global function untuk preview kontrak dari activity tab
         function previewKontrakActivity() {
             const peminjamanId = @json($peminjaman['id'] ?? 1);
-            // Open preview in new tab
-            window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
+            
+            // Get no_kontrak and biaya_admin if available (from PengajuanPeminjaman model)
+            const noKontrak = '{{ $peminjaman['no_kontrak'] ?? '' }}';
+            const biayaAdmin = '{{ $peminjaman['biaya_administrasi'] ?? 0 }}';
+            
+            // Create a temporary form to submit via POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/peminjaman/${peminjamanId}/preview-kontrak`;
+            form.target = '_blank';
+            form.style.display = 'none';
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            
+            // Add no_kontrak
+            const kontrakInput = document.createElement('input');
+            kontrakInput.type = 'hidden';
+            kontrakInput.name = 'no_kontrak';
+            kontrakInput.value = noKontrak;
+            form.appendChild(kontrakInput);
+            
+            // Add biaya_administrasi
+            const biayaInput = document.createElement('input');
+            biayaInput.type = 'hidden';
+            biayaInput.name = 'biaya_administrasi';
+            biayaInput.value = biayaAdmin;
+            form.appendChild(biayaInput);
+            
+            // Submit form
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
 
         // Global function untuk show history detail

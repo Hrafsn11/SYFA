@@ -52,7 +52,8 @@ Route::middleware([
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
     Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
     Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update');
-    Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
+    Route::post('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
+    Route::post('peminjaman/{id}/download-kontrak', [PeminjamanController::class, 'downloadKontrak'])->name('peminjaman.download-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
     Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
