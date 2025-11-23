@@ -83,6 +83,7 @@ class DebiturDanInvestorController extends Controller
                 'nama_bank' => $debitur->nama_bank,
                 'no_rek' => $debitur->no_rek,
                 'id_kol' => $debitur->id_kol,
+                'npwp' => $debitur->npwp,
                 // 'tanda_tangan' => $debitur->tanda_tangan
             ];
         }
@@ -103,7 +104,7 @@ class DebiturDanInvestorController extends Controller
 
             if ($debitur->flagging == 'tidak') {
                 $file = $debitur->tanda_tangan;
-                if (Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                if ($file && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                     Storage::disk('public')->delete($debitur->tanda_tangan);
                 }
     
@@ -132,6 +133,8 @@ class DebiturDanInvestorController extends Controller
 
             unset($validated['password'], $validated['password_confirmation']); // Remove password from debitur data
             $debitur->update($validated);
+
+            // dd($debitur);
 
             DB::commit();
             return Response::success(null, 'Debitur berhasil diupdate');
