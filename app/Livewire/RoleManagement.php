@@ -81,14 +81,14 @@ class RoleManagement extends Component
             
             session()->flash('message', 'Role updated successfully!');
         } else {
-            $role = Role::create([
+            $role = ModelsRole::create([
                 'name' => $this->name,
                 'restriction' => $this->restriction,
                 'guard_name' => 'web'
             ]);
             
             // Convert permission IDs to names for syncing
-            $permissionNames = Permission::whereIn('id', $this->permissions)
+            $permissionNames = ModelsPermission::whereIn('id', $this->permissions)
                 ->pluck('name')
                 ->toArray();
             $role->syncPermissions($permissionNames);
