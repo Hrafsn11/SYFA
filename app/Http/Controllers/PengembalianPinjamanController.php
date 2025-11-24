@@ -6,6 +6,7 @@ use App\Helpers\Response;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
 use App\Http\Requests\PengembalianPinjamanRequest;
+use App\Services\ArPerbulanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -211,6 +212,12 @@ class PengembalianPinjamanController extends Controller
                     'nilai_total_pengembalian' => $item['nominal'],
                 ]);
             }
+
+            // Update AR Perbulan
+            app(ArPerbulanService::class)->updateAROnPengembalian(
+                $validated['kode_peminjaman'],
+                now()
+            );
 
             \DB::commit();
 
