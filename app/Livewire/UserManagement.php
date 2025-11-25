@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Role as ModelsRole;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
@@ -33,7 +34,7 @@ class UserManagement extends Component
                 ->orWhere('email', 'like', '%' . $this->search . '%');
         })->paginate(10);
 
-        $allRoles = Role::where('guard_name', 'web')->get();
+        $allRoles = ModelsRole::where('guard_name', 'web')->get();
 
         return view('livewire.user-management', compact('users', 'allRoles'))
             ->layout('layouts.app');
@@ -78,13 +79,13 @@ class UserManagement extends Component
             $user = $this->selectedUser;
             $user->update($userData);
             // Convert role IDs to role names for syncRoles
-            $roleNames = Role::whereIn('id', $this->roles)->pluck('name')->toArray();
+            $roleNames = ModelsRole::whereIn('id', $this->roles)->pluck('name')->toArray();
             $user->syncRoles($roleNames);
             session()->flash('message', 'User updated successfully!');
         } else {
             $user = User::create($userData);
             // Convert role IDs to role names for syncRoles
-            $roleNames = Role::whereIn('id', $this->roles)->pluck('name')->toArray();
+            $roleNames = ModelsRole::whereIn('id', $this->roles)->pluck('name')->toArray();
             $user->syncRoles($roleNames);
             session()->flash('message', 'User created successfully!');
         }

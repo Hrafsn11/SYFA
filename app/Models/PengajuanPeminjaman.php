@@ -40,6 +40,7 @@ class PengajuanPeminjaman extends Model
         'created_by',
         'updated_by',
         'upload_bukti_transfer',
+        'no_kontrak',
     ];
 
     public function invoices()
@@ -60,5 +61,10 @@ class PengajuanPeminjaman extends Model
     public function buktiPeminjaman()
     {
         return $this->hasMany(BuktiPeminjaman::class, 'id_pengajuan_peminjaman', 'id_pengajuan_peminjaman');
+    }
+
+    public function historyStatus()
+    {
+        return $this->hasMany(HistoryStatusPengajuanPinjaman::class, 'id_pengajuan_peminjaman', 'id_pengajuan_peminjaman');
     }
 }

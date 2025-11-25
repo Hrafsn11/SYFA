@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Helpers\Response;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\MasterKol;
 use Illuminate\Http\Request;
@@ -46,6 +47,12 @@ class DebiturDanInvestorController extends Controller
                 'password' => Hash::make($validated['password']),
             ]);
 
+            $debiturRole = Role::firstOrCreate(['name' => 'Debitur', 'restriction' => 0]);
+
+            if (! $user->hasRole('Debitur')) {
+                $user->assignRole('Debitur');
+            }
+
             $validated['user_id'] = $user->id;
             unset($validated['password'], $validated['password_confirmation']);
             
@@ -83,6 +90,7 @@ class DebiturDanInvestorController extends Controller
                 'nama_bank' => $debitur->nama_bank,
                 'no_rek' => $debitur->no_rek,
                 'id_kol' => $debitur->id_kol,
+                'npwp' => $debitur->npwp,
                 // 'tanda_tangan' => $debitur->tanda_tangan
             ];
         }
@@ -103,7 +111,7 @@ class DebiturDanInvestorController extends Controller
 
             if ($debitur->flagging == 'tidak') {
                 $file = $debitur->tanda_tangan;
-                if (Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                if ($file && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                     Storage::disk('public')->delete($debitur->tanda_tangan);
                 }
     
@@ -132,6 +140,8 @@ class DebiturDanInvestorController extends Controller
 
             unset($validated['password'], $validated['password_confirmation']); // Remove password from debitur data
             $debitur->update($validated);
+
+            // dd($debitur);
 
             DB::commit();
             return Response::success(null, 'Debitur berhasil diupdate');

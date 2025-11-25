@@ -1,13 +1,16 @@
 <?php
 
 use App\Livewire\Dashboard;
+use App\Livewire\ArPerbulan;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\PermissionManagement;
+use App\Livewire\PengajuanRestrukturisasi;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
+use App\Livewire\ValidasiPengajuanRestrukturisasi;
 use App\Http\Controllers\FormKerjaInvestorController;
 use App\Http\Controllers\ReportPengembalianController;
 use App\Http\Controllers\PengembalianPinjamanController;
@@ -16,6 +19,7 @@ use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\PenyaluranDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,12 +56,17 @@ Route::middleware([
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
     Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
     Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update');
-    Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
+    Route::post('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
+    Route::post('peminjaman/{id}/download-kontrak', [PeminjamanController::class, 'downloadKontrak'])->name('peminjaman.download-kontrak');
     Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
     Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
     Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
     Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
     Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
+
+    //Restrukturisasi Routes
+    Route::get('pengajuan-restrukturisasi', PengajuanRestrukturisasi::class)->name('pengajuan-restrukturisasi.index');
+    Route::get('detail-restrukturisasi', ValidasiPengajuanRestrukturisasi::class)->name('detail-restrukturisasi');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
@@ -67,7 +76,9 @@ Route::middleware([
         return view('livewire.debitur-piutang.index');
     })->name('debitur-piutang.index');
 
-    Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
+    //Ar Routes
+    Route::get('ar-perbulan', ArPerbulan::class)->name('ar-perbulan.index');
+    Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
     Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 

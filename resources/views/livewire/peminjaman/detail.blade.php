@@ -7,8 +7,7 @@
                 Detail Pengajuan Peminjaman
             </h4>
 
-
-            <!-- AStepper -->
+            <!-- Stepper -->
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
 
@@ -752,6 +751,11 @@
                                         <h5 class="mb-4">Generate Kontrak Peminjaman</h5>
                                         <form action="" id="formGenerateKontrak">
                                             <div class="col-lg mb-3">
+                                                <label for="no_kontrak" class="form-label">No Kontrak</label>
+                                                <input type="text" class="form-control" id="no_kontrak"
+                                                    name="no_kontrak" value="{{ $header->no_kontrak ?? '' }}" placeholder="No Kontrak">
+                                            </div>
+                                            <div class="col-lg mb-3">
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
@@ -1004,10 +1008,10 @@
                 const showModalEl = document.getElementById(showModal._element.id);
 
                 const handleHidden = () => {
-                    onShow?.();
                     showModal.show();
                     showModalEl.addEventListener('shown.bs.modal', function() {
-                        initCleaveRupiah(); // Re-initialize cleave on new modal
+                        initCleaveRupiah(); // Initialize Cleave first
+                        onShow?.(); // Then run callback to set values
                     }, {
                         once: true
                     });
@@ -1071,7 +1075,7 @@
                 const showSubmitPengajuan = currentStatus === 'Draft';
                 toggleDisplay(dom.buttons.submitPengajuan, showSubmitPengajuan);
                 
-                toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen');
+                toggleDisplay(dom.buttons.setujuiPeminjaman, currentStatus === 'Submit Dokumen' || currentStatus === 'Ditolak oleh CEO SKI');
                 toggleDisplay(dom.buttons.persetujuanDebitur, currentStatus === 'Dokumen Tervalidasi');
                 toggleDisplay(dom.buttons.persetujuanCEO, currentStatus === 'Debitur Setuju');
                 
@@ -1499,22 +1503,62 @@
                 // Get peminjaman ID from current page
                 const peminjamanId = @json($peminjaman['id'] ?? 1);
 
-                // Open preview in new tab
-                window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
+                // Collect form data
+                const form = document.getElementById('formGenerateKontrak');
+                const formData = new FormData(form);
+                
+                // Get biaya_admin value and clean it
+                const biayaAdminInput = document.getElementById('biaya_admin');
+                const biayaAdmin = biayaAdminInput ? biayaAdminInput.value.replace(/[^\d]/g, '') : '0';
+                
+                // Create a temporary form to submit via POST
+                const tempForm = document.createElement('form');
+                tempForm.method = 'POST';
+                tempForm.action = `/peminjaman/${peminjamanId}/preview-kontrak`;
+                tempForm.target = '_blank';
+                
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                tempForm.appendChild(csrfInput);
+                
+                // Add form data
+                const fields = {
+                    'no_kontrak': document.getElementById('no_kontrak')?.value || '',
+                    'biaya_administrasi': biayaAdmin
+                };
+                
+                Object.keys(fields).forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = fields[key];
+                    tempForm.appendChild(input);
+                });
+                
+                // Submit form
+                document.body.appendChild(tempForm);
+                tempForm.submit();
+                document.body.removeChild(tempForm);
             };
 
 
             dom.stepper.addEventListener('click', handleStepperClick);
             dom.buttons.setujuiPeminjaman?.addEventListener('click', () => dom.modals.persetujuan.show());
             dom.buttons.konfirmasiSetuju?.addEventListener('click', () => {
-                switchModal(dom.modals.persetujuan, dom.modals.pencairan, () => {
+                const handleModalShown = () => {
                     resetForm(dom.forms.pencairan);
                     const nominalPinjaman = @json($peminjaman['nominal_pinjaman'] ?? 0);
                     dom.inputs.nominalPengajuan.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominalPinjaman);
                     const harapanTanggal = @json($peminjaman['harapan_tanggal_pencairan'] ?? null);
                     dom.inputs.tanggalHarapan.value = harapanTanggal ? new Date(harapanTanggal).toLocaleDateString('en-GB') : '';
                     initFlatpickr();
-                });
+                };
+                
+                switchModal(dom.modals.persetujuan, dom.modals.pencairan, handleModalShown);
             });
             dom.buttons.tolakPinjaman?.addEventListener('click', () => {
                 switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
@@ -1630,6 +1674,21 @@
                     // Close the modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('modalHasilReview'));
                     if (modal) modal.hide();
+                }
+            }
+
+            // Handle Generate Kontrak - get no_kontrak from form
+            if (status === 'Generate Kontrak') {
+                const noKontrakInput = document.getElementById('no_kontrak');
+                const biayaAdminInput = document.getElementById('biaya_admin');
+                
+                if (noKontrakInput) {
+                    requestData.no_kontrak = noKontrakInput.value.trim();
+                }
+                
+                if (biayaAdminInput) {
+                    // Clean rupiah format to get raw number
+                    requestData.biaya_administrasi = biayaAdminInput.value.replace(/[^\d]/g, '');
                 }
             }
 
@@ -1760,8 +1819,44 @@
         // Global function untuk preview kontrak dari activity tab
         function previewKontrakActivity() {
             const peminjamanId = @json($peminjaman['id'] ?? 1);
-            // Open preview in new tab
-            window.open(`/peminjaman/${peminjamanId}/preview-kontrak`, '_blank');
+            
+            // Get no_kontrak and biaya_admin if available (from PengajuanPeminjaman model)
+            const noKontrak = '{{ $peminjaman['no_kontrak'] ?? '' }}';
+            const biayaAdmin = '{{ $peminjaman['biaya_administrasi'] ?? 0 }}';
+            
+            // Create a temporary form to submit via POST
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/peminjaman/${peminjamanId}/preview-kontrak`;
+            form.target = '_blank';
+            form.style.display = 'none';
+            
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+            
+            // Add no_kontrak
+            const kontrakInput = document.createElement('input');
+            kontrakInput.type = 'hidden';
+            kontrakInput.name = 'no_kontrak';
+            kontrakInput.value = noKontrak;
+            form.appendChild(kontrakInput);
+            
+            // Add biaya_administrasi
+            const biayaInput = document.createElement('input');
+            biayaInput.type = 'hidden';
+            biayaInput.name = 'biaya_administrasi';
+            biayaInput.value = biayaAdmin;
+            form.appendChild(biayaInput);
+            
+            // Submit form
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
 
         // Global function untuk show history detail
