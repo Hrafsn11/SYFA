@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PengajuanInvestasiRequest extends FormRequest
 {
@@ -33,11 +34,26 @@ class PengajuanInvestasiRequest extends FormRequest
 
         // Rules for generateKontrak (has 'nomor_kontrak' field)
         if ($this->has('nomor_kontrak')) {
-            return [
-                'nomor_kontrak' => 'required|string|max:255',
-                'tanggal_kontrak' => 'required|date',
-                'catatan_kontrak' => 'nullable|string',
+            $idPengajuan = $this->route('id');
+            
+            $rules = [
+                'nomor_kontrak' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('pengajuan_investasi', 'nomor_kontrak')
+                        ->ignore($idPengajuan, 'id_pengajuan_investasi')
+                ],
             ];
+            
+            if ($this->has('tanggal_kontrak')) {
+                $rules['tanggal_kontrak'] = 'required|date';
+            }
+            if ($this->has('catatan_kontrak')) {
+                $rules['catatan_kontrak'] = 'nullable|string';
+            }
+            
+            return $rules;
         }
 
         // Rules for updateStatus (has 'status' field but not CRUD fields)
@@ -103,12 +119,13 @@ class PengajuanInvestasiRequest extends FormRequest
             'file.max' => 'Ukuran file maksimal 2MB',
 
             // generateKontrak messages
-            'nomor_kontrak.required' => 'Nomor kontrak harus diisi',
-            'nomor_kontrak.string' => 'Nomor kontrak harus berupa teks',
-            'nomor_kontrak.max' => 'Nomor kontrak maksimal 255 karakter',
-            'tanggal_kontrak.required' => 'Tanggal kontrak harus diisi',
-            'tanggal_kontrak.date' => 'Tanggal kontrak harus berupa tanggal yang valid',
-            'catatan_kontrak.string' => 'Catatan kontrak harus berupa teks',
+            'nomor_kontrak.required' => 'Nomor kontrak harus diisi.',
+            'nomor_kontrak.string' => 'Nomor kontrak harus berupa teks.',
+            'nomor_kontrak.max' => 'Nomor kontrak maksimal 255 karakter.',
+            'nomor_kontrak.unique' => 'Nomor kontrak sudah digunakan.',
+            'tanggal_kontrak.required' => 'Tanggal kontrak harus diisi.',
+            'tanggal_kontrak.date' => 'Tanggal kontrak harus berupa tanggal yang valid.',
+            'catatan_kontrak.string' => 'Catatan kontrak harus berupa teks.',
         ];
     }
 }

@@ -39,6 +39,7 @@ class PengajuanInvestasi extends Model
         'current_step',
         'created_by',
         'updated_by',
+        'nomor_kontrak',
     ];
 
     /**
