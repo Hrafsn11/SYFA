@@ -7,8 +7,7 @@
                 Detail Pengajuan Peminjaman
             </h4>
 
-
-            <!-- AStepper -->
+            <!-- Stepper -->
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
 
@@ -1009,10 +1008,10 @@
                 const showModalEl = document.getElementById(showModal._element.id);
 
                 const handleHidden = () => {
-                    onShow?.();
                     showModal.show();
                     showModalEl.addEventListener('shown.bs.modal', function() {
-                        initCleaveRupiah(); // Re-initialize cleave on new modal
+                        initCleaveRupiah(); // Initialize Cleave first
+                        onShow?.(); // Then run callback to set values
                     }, {
                         once: true
                     });
@@ -1550,14 +1549,16 @@
             dom.stepper.addEventListener('click', handleStepperClick);
             dom.buttons.setujuiPeminjaman?.addEventListener('click', () => dom.modals.persetujuan.show());
             dom.buttons.konfirmasiSetuju?.addEventListener('click', () => {
-                switchModal(dom.modals.persetujuan, dom.modals.pencairan, () => {
+                const handleModalShown = () => {
                     resetForm(dom.forms.pencairan);
                     const nominalPinjaman = @json($peminjaman['nominal_pinjaman'] ?? 0);
                     dom.inputs.nominalPengajuan.value = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominalPinjaman);
                     const harapanTanggal = @json($peminjaman['harapan_tanggal_pencairan'] ?? null);
                     dom.inputs.tanggalHarapan.value = harapanTanggal ? new Date(harapanTanggal).toLocaleDateString('en-GB') : '';
                     initFlatpickr();
-                });
+                };
+                
+                switchModal(dom.modals.persetujuan, dom.modals.pencairan, handleModalShown);
             });
             dom.buttons.tolakPinjaman?.addEventListener('click', () => {
                 switchModal(dom.modals.persetujuan, dom.modals.review, () => resetForm(dom.forms.review));
