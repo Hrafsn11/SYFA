@@ -100,15 +100,9 @@
                     </a>
                 </li>
 
-                <li class="menu-item {{ request()->is('rencana-penagihan-deposito/ski*') ? 'active' : '' }}">
-                    <a href="{{ route('rencana-penagihan-deposito.ski') }}" class="menu-link">
-                        <div data-i18n="Penagihan Deposito SKI">Penagihan Deposito SKI</div>
-                    </a>
-                </li>
-
-                <li class="menu-item {{ request()->is('rencana-penagihan-deposito/penerima-dana*') ? 'active' : '' }}">
-                    <a href="{{ route('rencana-penagihan-deposito.penerima-dana') }}" class="menu-link">
-                        <div data-i18n="Penagihan Deposito Penerima Dana">Penagihan Deposito Penerima Dana</div>
+                <li class="menu-item {{ request()->is('penyaluran-deposito*') ? 'active' : '' }}">
+                    <a href="{{ route('penyaluran-deposito.index') }}" class="menu-link">
+                        <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
                     </a>
                 </li>
 

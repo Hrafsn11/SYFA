@@ -4,11 +4,11 @@
     <div class="row">
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">Penagihan Deposito SKI</h4>
+                <h4 class="fw-bold">Penyaluran Deposito</h4>
                 <button class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                    id="btnTambahPenagihanDeposito">
+                    id="btnTambahPenyaluranDeposito">
                     <i class="fa fa-plus"></i>
-                    Penagihan Deposito
+                    Penyaluran Deposito
                 </button>
             </div>
 
@@ -21,10 +21,10 @@
                                     <th class="text-center">No</th>
                                     <th class="text-center">No. Kontrak</th>
                                     <th class="text-center">Nama Perusahaan</th>
-                                    <th class="text-center">nominal yang disalurkan</th>
-                                    <th class="text-center">tanggal pengiriman dana</th>
-                                    <th class="text-center">tanggal pengembalian dana</th>
-                                    <th class="text-center">Bukti pengembalian dana</th>
+                                    <th class="text-center">Nominal yang Disalurkan</th>
+                                    <th class="text-center">Tanggal Pengiriman Dana</th>
+                                    <th class="text-center">Tanggal Pengembalian Dana</th>
+                                    <th class="text-center">Bukti Pengembalian Dana</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -58,16 +58,16 @@
             </div>
         </div>
 
-        <div class="modal fade" id="modalTambahPenagihanDeposito" tabindex="-1"
-            aria-labelledby="modalTambahPenagihanDepositoLabel" aria-hidden="true">
+        <div class="modal fade" id="modalTambahPenyaluranDeposito" tabindex="-1"
+            aria-labelledby="modalTambahPenyaluranDepositoLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalTambahKOLLabel">Tambah Penagihan Deposito</h5>
+                        <h5 class="modal-title" id="modalTambahPenyaluranDepositoLabel">Tambah Penyaluran Deposito</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <form id="formTambahKOL" novalidate>
+                        <form id="formTambahPenyaluranDeposito" novalidate>
                             <div class="col-12 mb-3">
                                 <label for="NoKontrak" class="form-label">No. Kontrak</label>
                                 <input type="text" class="form-control" id="NoKontrak" placeholder="KTR-001" required
@@ -106,7 +106,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger">Hapus Data</button>
-                        <button type="button" class="btn btn-primary" id="btnSimpanPenagihanDeposito">
+                        <button type="button" class="btn btn-primary" id="btnSimpanPenyaluranDeposito">
                             <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSimpanSpinner"></span>
                             Simpan Data
                         </button>
@@ -121,8 +121,8 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            const $modal = $('#modalTambahPenagihanDeposito');
-            const $form = $('#formTambahKOL');
+            const $modal = $('#modalTambahPenyaluranDeposito');
+            const $form = $('#formTambahPenyaluranDeposito');
 
             $('#tableHistoryKol').DataTable({
                 language: {
@@ -142,19 +142,17 @@
 
             window.initCleaveRupiah();
 
-            $('#btnTambahPenagihanDeposito').on('click', function() {
+            $('#btnTambahPenyaluranDeposito').on('click', function() {
                 $form[0].reset();
                 $form.removeClass('was-validated');
                 $('.datepicker').datepicker('update', '');
-
 
                 window.initCleaveRupiah();
 
                 $modal.modal('show');
             });
 
-
-            $('#btnSimpanPenagihanDeposito').on('click', function() {
+            $('#btnSimpanPenyaluranDeposito').on('click', function() {
                 if (!$form[0].checkValidity()) {
                     $form.addClass('was-validated');
                     return;
@@ -173,7 +171,6 @@
 
                 console.log('Data to save:', formData);
 
-
                 $modal.modal('hide');
             });
 
@@ -183,3 +180,4 @@
         });
     </script>
 @endpush
+

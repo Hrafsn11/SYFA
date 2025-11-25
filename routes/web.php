@@ -13,7 +13,7 @@ use App\Http\Controllers\ReportPengembalianController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
-use App\Http\Controllers\RencanaPenagihanDepositoController;
+use App\Http\Controllers\PenyaluranDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 
@@ -75,11 +75,8 @@ Route::middleware([
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');    
-    // Rencana Penagihan Deposito
-    Route::prefix('rencana-penagihan-deposito')->name('rencana-penagihan-deposito.')->group(function () {
-        Route::get('ski', [RencanaPenagihanDepositoController::class, 'ski'])->name('ski');
-        Route::get('penerima-dana', [RencanaPenagihanDepositoController::class, 'penerimaDana'])->name('penerima-dana');
-    });
+    // Penyaluran Deposito
+    Route::get('penyaluran-deposito', [PenyaluranDepositoController::class, 'index'])->name('penyaluran-deposito.index');
 
     // Form Kerja Investor Routes (Legacy - redirect to pengajuan-investasi)
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
