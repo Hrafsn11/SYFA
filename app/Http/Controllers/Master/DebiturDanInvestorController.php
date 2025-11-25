@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Master;
 
 use App\Helpers\Response;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\MasterKol;
 use Illuminate\Http\Request;
@@ -45,6 +46,12 @@ class DebiturDanInvestorController extends Controller
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
             ]);
+
+            $debiturRole = Role::firstOrCreate(['name' => 'Debitur', 'restriction' => 0]);
+
+            if (! $user->hasRole('Debitur')) {
+                $user->assignRole('Debitur');
+            }
 
             $validated['user_id'] = $user->id;
             unset($validated['password'], $validated['password_confirmation']);
