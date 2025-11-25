@@ -75,8 +75,14 @@ Route::middleware([
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');    
-    // Penyaluran Deposito
-    Route::get('penyaluran-deposito', [PenyaluranDepositoController::class, 'index'])->name('penyaluran-deposito.index');
+    
+    Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
+        Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
+        Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
+        Route::delete('{id}', [PenyaluranDepositoController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
+    });
 
     // Form Kerja Investor Routes (Legacy - redirect to pengajuan-investasi)
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
