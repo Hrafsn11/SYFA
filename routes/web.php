@@ -19,7 +19,6 @@ use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\PenyaluranDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
-use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 
 /*
 |--------------------------------------------------------------------------
