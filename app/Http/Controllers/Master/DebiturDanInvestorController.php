@@ -32,14 +32,12 @@ class DebiturDanInvestorController extends Controller
 
             DB::beginTransaction();
 
+            // Handle file upload for both debitur and investor
             $file = null;
-            if ($validated['flagging'] == 'tidak') {
-                // Handle file upload
-                if ($request->tanda_tangan) {
-                    $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
-                }
-                $validated['tanda_tangan'] = $file;
+            if ($request->tanda_tangan) {
+                $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
             }
+            $validated['tanda_tangan'] = $file;
 
             $user = User::create([
                 'name' => $validated['nama'],
@@ -109,16 +107,15 @@ class DebiturDanInvestorController extends Controller
         try {
             DB::beginTransaction();
 
-            if ($debitur->flagging == 'tidak') {
-                $file = $debitur->tanda_tangan;
+            // Handle file upload for both debitur and investor
+            $file = $debitur->tanda_tangan;
+            if ($request->tanda_tangan) {
+                // Delete old file if exists
                 if ($file && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                     Storage::disk('public')->delete($debitur->tanda_tangan);
                 }
-    
-                // Handle file upload
-                if ($request->tanda_tangan) {
-                    $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
-                }
+                
+                $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
                 $validated['tanda_tangan'] = $file;
             }
 

@@ -246,7 +246,9 @@
                             </div>
                             <div class="col-6 text-center">
                                 <p class="mb-5"><strong>PIHAK KEDUA</strong></p>
-                                <img src="{{ asset('assets/img/ttd.png') }}" alt="TTD CEO" style="display:inline-block; max-width:150px; max-height:80px; margin-left:30px;" class="mb-3">
+                                <div style="position: relative; display: inline-block; width: 150px; height: 80px; margin-bottom: 1rem; background-image: url('{{ asset('assets/img/image.png') }}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                                    <img src="{{ asset('assets/img/ttd.png') }}" alt="TTD CEO" style="position: absolute; top: 0; left: 0; width: 150px; height: 80px; object-fit: contain; z-index: 2; mix-blend-mode: multiply;" onload="this.style.opacity='1'" onerror="this.style.opacity='1'">
+                                </div>
                                 <p class="mb-0"><strong>Muhamad Kurniawan</strong></p>
                                 <p class="mb-0">CEO PT. Synnovac Kapital Indonesia</p>
                             </div>

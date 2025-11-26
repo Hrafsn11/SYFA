@@ -202,8 +202,7 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label for="nomorKontrak" class="form-label">Nomor Kontrak <span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control" id="nomorKontrak" placeholder="Contoh: 001/SKI/INV/2025" required>
-                                                            <div class="form-text">Nomor kontrak ini hanya untuk preview, tidak disimpan di database</div>
+                                                            <input type="text" class="form-control" id="nomorKontrak" name="nomor_kontrak" placeholder="Contoh: 001/SKI/INV/2025" value="{{ old('nomor_kontrak', $investasi['nomor_kontrak'] ?? '') }}" required>
                                                         </div>
                                                     </div>
 
@@ -524,7 +523,14 @@
             const STATUS = '{{ $investasi['status'] }}';
             const STEP = {{ $investasi['current_step'] ?? 1 }};
             const CSRF = '{{ csrf_token() }}';
-            let savedNomorKontrak = localStorage.getItem(`kontrak_${ID}`);
+            // Use nomor kontrak from database if available, otherwise from localStorage
+            const nomorKontrakFromDB = '{{ $investasi['nomor_kontrak'] ?? '' }}';
+            let savedNomorKontrak = nomorKontrakFromDB || localStorage.getItem(`kontrak_${ID}`);
+            
+            // Update localStorage if nomor kontrak from DB exists
+            if (nomorKontrakFromDB) {
+                localStorage.setItem(`kontrak_${ID}`, nomorKontrakFromDB);
+            }
 
             // Update UI berdasarkan step
             function updateUI() {
@@ -567,7 +573,7 @@
                     success: (res) => res.error ? 
                         (Swal.fire('Error!', res.message, 'error'), $btn.prop('disabled', false).html(originalHtml)) :
                         onSuccess(res),
-                    error: () => (Swal.fire('Error!', 'Terjadi kesalahan', 'error'), $btn.prop('disabled', false).html(originalHtml))
+                    
                 });
             };
 
