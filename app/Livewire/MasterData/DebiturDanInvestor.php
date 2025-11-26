@@ -7,15 +7,16 @@ use App\Enums\BanksEnum;
 use App\Models\MasterKol;
 use Livewire\WithFileUploads;
 use App\Attributes\FieldInput;
-use App\Attributes\ParameterIDRoute;
+use App\Livewire\Traits\HasModal;
 use Livewire\Attributes\Renderless;
+use App\Attributes\ParameterIDRoute;
 use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\DebiturDanInvestorRequest; 
 
 class DebiturDanInvestor extends Component
 {
-    use HasUniversalFormAction, HasValidate, WithFileUploads;
+    use HasUniversalFormAction, HasValidate, HasModal, WithFileUploads;
     private string $validateClass = DebiturDanInvestorRequest::class;
     public $kol, $banks;
 

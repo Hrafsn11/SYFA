@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Peminjaman;
 
-use App\Http\Controllers\Controller;
-use App\Models\BuktiPeminjaman;
-use App\Models\HistoryStatusPengajuanPinjaman;
-use Illuminate\Http\Request;
-use App\Models\MasterDebiturDanInvestor;
-use App\Models\MasterSumberPendanaanEksternal;
-use App\Models\Peminjaman;
-use App\Models\PengajuanPeminjaman;
-use App\Services\PeminjamanNumberService;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Models\Peminjaman;
+use Illuminate\Http\Request;
+use App\Models\BuktiPeminjaman;
+use Illuminate\Support\Facades\DB;
+use App\Models\PengajuanPeminjaman;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+use App\Models\MasterDebiturDanInvestor;
+use App\Services\PeminjamanNumberService;
+use App\Models\HistoryStatusPengajuanPinjaman;
+use App\Models\MasterSumberPendanaanEksternal;
+use App\Http\Requests\PengajuanPinjamanRequest;
 
 class PeminjamanController extends Controller
 {
@@ -560,8 +562,8 @@ class PeminjamanController extends Controller
             $lampiran_sid_path = $pengajuan->lampiran_sid;
             if ($request->hasFile('lampiran_sid')) {
                 // Delete old file if exists
-                if ($lampiran_sid_path && \Storage::disk('public')->exists($lampiran_sid_path)) {
-                    \Storage::disk('public')->delete($lampiran_sid_path);
+                if ($lampiran_sid_path && Storage::disk('public')->exists($lampiran_sid_path)) {
+                    Storage::disk('public')->delete($lampiran_sid_path);
                 }
                 $lampiran_sid_path = $request->file('lampiran_sid')->store('lampiran_sid', 'public');
             }
@@ -854,7 +856,7 @@ class PeminjamanController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(PengajuanPinjamanRequest $request)
     {
 
         // Get jenis_pembiayaan first for conditional validation

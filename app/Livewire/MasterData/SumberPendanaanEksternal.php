@@ -2,16 +2,17 @@
 
 namespace App\Livewire\MasterData;
 
-use App\Attributes\FieldInput;
 use Livewire\Component;
+use App\Attributes\FieldInput;
+use App\Livewire\Traits\HasModal;
 use App\Livewire\Traits\HasValidate;
+use App\Http\Traits\HandlesPermissions;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\MasterSumberPendanaanEksternalRequest;
-use App\Http\Traits\HandlesPermissions;
 
 class SumberPendanaanEksternal extends Component
 {
-    use HasUniversalFormAction, HasValidate, HandlesPermissions;
+    use HasUniversalFormAction, HasValidate, HasModal, HandlesPermissions;
     private string $validateClass = MasterSumberPendanaanEksternalRequest::class;
 
     #[FieldInput]

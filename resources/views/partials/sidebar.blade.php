@@ -29,7 +29,7 @@
 
         @can('peminjaman_dana.view')
             <li class="menu-item {{ request()->routeIs('peminjaman*') ? 'active' : '' }}">
-                <a href="{{ route('peminjaman') }}" class="menu-link">
+                <a wire:navigate.hover href="{{ route('peminjaman.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons ti ti-briefcase"></i>
                     <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
                 </a>

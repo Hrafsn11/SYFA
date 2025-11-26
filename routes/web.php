@@ -1,6 +1,5 @@
 <?php
 
-use App\Livewire\Dashboard;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
 use App\Livewire\ConfigMatrixScore;
@@ -8,13 +7,10 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\PermissionManagement;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
-use App\Http\Controllers\FormKerjaInvestorController;
-use App\Http\Controllers\ReportPengembalianController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\RencanaPenagihanDepositoController;
-use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 
 /*
@@ -48,20 +44,21 @@ Route::middleware([
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
     
     // Peminjaman Routes
-    Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
-    Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
-    Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
-    Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update');
-    Route::get('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
-    Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
-    Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
-    Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
-    Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
-    Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
+    Route::prefix('peminjaman')->name('peminjaman.')->controller(PeminjamanController::class)->group(function () {
+        Route::post('/', 'store')->name('store');
+        Route::get('/{id}', 'show')->name('detail');
+        Route::get('/{id}/edit', 'edit')->name('edit');
+        Route::post('/{id}', 'update')->name('update');
 
-    Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
-    Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
-    Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+        Route::get('/{id}/preview-kontrak', 'previewKontrak')->name('preview-kontrak');
+        Route::post('/{id}/approval', 'approval')->name('approval');
+        Route::get('/history/{historyId}', 'getHistoryDetail')->name('history.detail');
+        Route::patch('/{id}/toggle-active', 'toggleActive')->name('toggle-active');
+    });
+
+    // Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
+    // Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
+    Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
 
     Route::get('debitur-piutang', function () {
         return view('livewire.debitur-piutang.index');
@@ -125,6 +122,7 @@ Route::middleware([
         Route::get('{id}/edit', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'update'])->name('update');
         Route::delete('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'destroy'])->name('destroy');
+        
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('{id}/delete-signature', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'deleteSignature'])->name('delete-signature');
         Route::get('{id}/history-kol', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'historyKol'])->name('history-kol');

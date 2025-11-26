@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
-use App\Http\Requests\PengembalianPinjamanRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\PengembalianPinjamanRequest;
 
 class PengembalianPinjamanController extends Controller
 {
@@ -113,7 +114,7 @@ class PengembalianPinjamanController extends Controller
 
         $namaPerusahaan = $debitur->nama ?? Auth::user()->name;
 
-        return view('livewire.pengembalian-pinjaman.create', compact('pengajuanPeminjaman', 'namaPerusahaan'));
+        return view('livewire.pengembalian-pinjaman.create_old', compact('pengajuanPeminjaman', 'namaPerusahaan'));
     }
 
     /**
@@ -125,7 +126,7 @@ class PengembalianPinjamanController extends Controller
             $validated = $request->validated();
             $pengembalianInvoices = $validated['pengembalian_invoices'] ?? [];
 
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             $pengajuan = PengajuanPeminjaman::findOrFail($validated['kode_peminjaman']);
 
@@ -212,14 +213,14 @@ class PengembalianPinjamanController extends Controller
                 ]);
             }
 
-            \DB::commit();
+            DB::commit();
 
             return Response::success([
                 'redirect' => route('pengembalian.index')
             ], 'Data pengembalian berhasil disimpan');
 
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return Response::errorCatch($e);
         }
     }
@@ -253,7 +254,7 @@ class PengembalianPinjamanController extends Controller
         try {
             $validated = $request->validated();
             
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             $pengembalian = PengembalianPinjaman::where('ulid', $id)->firstOrFail();
             
@@ -287,11 +288,11 @@ class PengembalianPinjamanController extends Controller
                 'status' => $status,
             ]);
 
-            \DB::commit();
+            DB::commit();
 
             return Response::success(null, 'Data pengembalian berhasil diupdate');
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return Response::errorCatch($e);
         }
     }
