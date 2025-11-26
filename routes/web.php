@@ -64,8 +64,18 @@ Route::middleware([
     Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
 
     //Restrukturisasi Routes
-    Route::get('pengajuan-restrukturisasi', PengajuanRestrukturisasi::class)->name('pengajuan-restrukturisasi.index');
-    Route::get('detail-restrukturisasi', ValidasiPengajuanRestrukturisasi::class)->name('detail-restrukturisasi');
+    Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'store'])->name('store');
+        Route::get('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'destroy'])->name('destroy');
+        Route::get('peminjaman/{idDebitur}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPeminjamanList'])->name('peminjaman.list');
+        Route::get('detail-pengajuan/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
+    });
+    
+    Route::get('detail-restrukturisasi/{id}', ValidasiPengajuanRestrukturisasi::class)->name('detail-restrukturisasi');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
