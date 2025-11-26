@@ -16,9 +16,9 @@ use App\Http\Controllers\ReportPengembalianController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
-use App\Http\Controllers\RencanaPenagihanDepositoController;
-use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Http\Controllers\PenyaluranDepositoController;
 use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
+use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,10 +85,13 @@ Route::middleware([
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');    
-    // Rencana Penagihan Deposito
-    Route::prefix('rencana-penagihan-deposito')->name('rencana-penagihan-deposito.')->group(function () {
-        Route::get('ski', [RencanaPenagihanDepositoController::class, 'ski'])->name('ski');
-        Route::get('penerima-dana', [RencanaPenagihanDepositoController::class, 'penerimaDana'])->name('penerima-dana');
+    
+    Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
+        Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
+        Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
+        Route::delete('{id}', [PenyaluranDepositoController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
     });
 
     // Form Kerja Investor Routes (Legacy - redirect to pengajuan-investasi)

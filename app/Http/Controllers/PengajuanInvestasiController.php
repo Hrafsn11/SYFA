@@ -55,13 +55,24 @@ class PengajuanInvestasiController extends Controller
             // Calculate nominal bagi hasil
             $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
 
-            $pengajuan = PengajuanInvestasi::create(array_merge($validated, [
+            // Prepare payload for creation. Only include nomor_kontrak if provided by user.
+            $payload = array_merge($validated, [
                 'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
                 'status' => 'Draft',
                 'current_step' => 1,
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
-            ]));
+            ]);
+
+            if (!empty($validated['nomor_kontrak'] ?? null)) {
+                if (PengajuanInvestasi::where('nomor_kontrak', $validated['nomor_kontrak'])->exists()) {
+                    return Response::error('Nomor kontrak sudah digunakan.');
+                }
+
+                $payload['nomor_kontrak'] = $validated['nomor_kontrak'];
+            }
+
+            $pengajuan = PengajuanInvestasi::create($payload);
 
             // Create initial history record
             HistoryStatusPengajuanInvestor::create([
@@ -109,6 +120,7 @@ class PengajuanInvestasiController extends Controller
             'bagi_hasil_pertahun' => $pengajuan->bagi_hasil_pertahun,
             'nominal_bagi_hasil_yang_didapatkan' => $pengajuan->nominal_bagi_hasil_yang_didapatkan,
             'upload_bukti_transfer' => $pengajuan->upload_bukti_transfer,
+            'nomor_kontrak' => $pengajuan->nomor_kontrak,
             'status' => $pengajuan->status,
             'current_step' => $pengajuan->current_step,
         ];
@@ -244,7 +256,8 @@ class PengajuanInvestasiController extends Controller
     {
         $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
         
-        $nomorKontrak = $request->input('nomor_kontrak');
+        // Use nomor_kontrak from request if provided, otherwise use from database
+        $nomorKontrak = $request->input('nomor_kontrak') ?? $pengajuan->nomor_kontrak;
         $kontrak = $kontrakService->generateKontrakData($pengajuan, $nomorKontrak);
 
         return view('livewire.pengajuan-investasi.preview-kontrak', compact('kontrak'));
@@ -262,11 +275,13 @@ class PengajuanInvestasiController extends Controller
 
             $validated = $request->validated();
 
-            // Recalculate nominal bagi hasil
-            $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
+            // Ensure `nomor_kontrak` is unique
+            if (PengajuanInvestasi::where('nomor_kontrak', $validated['nomor_kontrak'])->where('id_pengajuan_investasi', '!=', $id)->exists()) {
+                return Response::error('Nomor kontrak sudah digunakan.');
+            }
 
             $pengajuan->update(array_merge($validated, [
-                'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
+                'nomor_kontrak' => $validated['nomor_kontrak'],
                 'updated_by' => Auth::id(),
             ]));
 
@@ -392,12 +407,20 @@ class PengajuanInvestasiController extends Controller
     /**
      * Generate kontrak
      */
-    public function generateKontrak(Request $request, $id)
+    public function generateKontrak(PengajuanInvestasiRequest $request, $id)
     {
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
 
             DB::beginTransaction();
+
+            // Update nomor kontrak and status to completed (Step 6: Selesai)
+            $pengajuan->update([
+                'nomor_kontrak' => $request->input('nomor_kontrak'),
+                'status' => 'Selesai',
+                'current_step' => 6,
+                'updated_by' => Auth::id(),
+            ]);
 
             // Create history for "Generate Kontrak"
             HistoryStatusPengajuanInvestor::create([
@@ -407,13 +430,6 @@ class PengajuanInvestasiController extends Controller
                 'time' => now()->toTimeString(),
                 'current_step' => 6,
                 'submit_step1_by' => Auth::id(),
-            ]);
-
-            // Update status to completed (Step 6: Selesai)
-            $pengajuan->update([
-                'status' => 'Selesai',
-                'current_step' => 6,
-                'updated_by' => Auth::id(),
             ]);
 
             // Create history for "Selesai"
