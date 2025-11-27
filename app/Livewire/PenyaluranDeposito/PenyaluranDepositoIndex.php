@@ -18,7 +18,6 @@ class PenyaluranDepositoIndex extends Component
     use HasUniversalFormAction, HasValidate, WithFileUploads;
     
     private string $validateClass = PenyaluranDepositoRequest::class;
-    public $pengajuanInvestasi, $debitur;
 
     #[ParameterIDRoute]
     public $id;
@@ -30,21 +29,37 @@ class PenyaluranDepositoIndex extends Component
     {
         $this->setUrlSaveData('store_penyaluran_deposito', 'penyaluran-deposito.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_penyaluran_deposito', 'penyaluran-deposito.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
-        
-        $this->pengajuanInvestasi = PengajuanInvestasi::with('investor')
-            ->whereNotNull('nomor_kontrak')
-            ->where('nomor_kontrak', '!=', '')
-            ->orderBy('created_at', 'desc')
+    }
+
+    /**
+     */
+    public function getPengajuanInvestasiProperty()
+    {
+        return PengajuanInvestasi::query()
+            ->withSisaDana()  
+            ->whereNotNull('pengajuan_investasi.nomor_kontrak')
+            ->where('pengajuan_investasi.nomor_kontrak', '!=', '')
+            ->orderBy('pengajuan_investasi.created_at', 'desc')
             ->get();
-            
-        $this->debitur = MasterDebiturDanInvestor::where('flagging', 'tidak')
+    }
+
+    /**
+     */
+    public function getDebiturProperty()
+    {
+        return MasterDebiturDanInvestor::query()
+            ->where('flagging', 'tidak')
             ->where('status', 'active')
-            ->get();
+            ->orderBy('nama', 'asc')
+            ->get(['id_debitur', 'nama']);
     }
 
     public function render()
     {
-        return view('livewire.penyaluran-deposito.index')
+        return view('livewire.penyaluran-deposito.index', [
+            'pengajuanInvestasi' => $this->pengajuanInvestasi,
+            'debitur' => $this->debitur,
+        ])
         ->layout('layouts.app', [
             'title' => 'Penyaluran Deposito'
         ]);

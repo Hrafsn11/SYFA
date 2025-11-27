@@ -29,11 +29,31 @@ class PenyaluranDepositoRequest extends FormRequest
                 'numeric',
                 'min:1',
                 function ($attribute, $value, $fail) {
-                    if ($this->id_pengajuan_investasi) {
-                        $pengajuan = PengajuanInvestasi::find($this->id_pengajuan_investasi);
-                        if ($pengajuan && $value > $pengajuan->jumlah_investasi) {
-                            $fail('Nominal yang disalurkan tidak boleh lebih dari nilai investasi (Rp ' . number_format($pengajuan->jumlah_investasi, 0, ',', '.') . ')');
+                    if (!$this->id_pengajuan_investasi) {
+                        return;
+                    }
+
+                    $pengajuan = PengajuanInvestasi::withSisaDana()
+                        ->where('pengajuan_investasi.id_pengajuan_investasi', $this->id_pengajuan_investasi)
+                        ->first();
+
+                    if (!$pengajuan) {
+                        $fail('Pengajuan investasi tidak ditemukan.');
+                        return;
+                    }
+
+                    $sisaDana = $pengajuan->sisa_dana;
+
+                    if ($this->route('id')) {
+                        $penyaluranLama = \App\Models\PenyaluranDeposito::find($this->route('id'));
+                        
+                        if ($penyaluranLama && $penyaluranLama->id_pengajuan_investasi == $this->id_pengajuan_investasi) {
+                            $sisaDana += $penyaluranLama->nominal_yang_disalurkan;
                         }
+                    }
+
+                    if ($value > $sisaDana) {
+                        $fail('Nominal tidak boleh lebih dari sisa dana yang tersedia (Rp ' . number_format($sisaDana, 0, ',', '.') . ')');
                     }
                 },
             ],
