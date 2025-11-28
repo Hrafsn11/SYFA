@@ -41,6 +41,8 @@ class PengajuanInvestasi extends Model
         'created_by',
         'updated_by',
         'nomor_kontrak',
+        'sisa_pokok',
+        'sisa_bagi_hasil',
     ];
 
     /**
@@ -53,7 +55,24 @@ class PengajuanInvestasi extends Model
         'lama_investasi' => 'integer',
         'bagi_hasil_pertahun' => 'integer',
         'current_step' => 'integer',
+        'sisa_pokok' => 'decimal:2',
+        'sisa_bagi_hasil' => 'decimal:2',
     ];
+
+       protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($investasi): void {
+            if (!$investasi->sisa_pokok || $investasi->sisa_pokok == 0) {
+                $investasi->sisa_pokok = $investasi->jumlah_investasi ?? 0;
+            }
+            
+            if (!$investasi->sisa_bagi_hasil || $investasi->sisa_bagi_hasil == 0) {
+                $investasi->sisa_bagi_hasil = $investasi->nominal_bagi_hasil_yang_didapatkan ?? 0;
+            }
+        });
+    }
 
     /**
      * Get the investor (debitur dan investor) that owns the pengajuan.
@@ -141,6 +160,14 @@ class PengajuanInvestasi extends Model
     public function penyaluranDeposito(): HasMany
     {
         return $this->hasMany(PenyaluranDeposito::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
+    }
+
+    /**
+     * Get all pengembalian investasi records for this pengajuan.
+     */
+    public function pengembalianInvestasi(): HasMany
+    {
+        return $this->hasMany(PengembalianInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
     }
 
    
