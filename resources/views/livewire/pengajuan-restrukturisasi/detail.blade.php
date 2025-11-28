@@ -5,56 +5,56 @@
             Evaluasi Pengajuan
         </h4>
 
-            <!-- AStepper -->
-            <div class="stepper-container mb-4">
-                <div class="stepper-wrapper">
+        <!-- Stepper -->
+        <div class="stepper-container mb-4">
+            <div class="stepper-wrapper">
 
-                    <div class="stepper-item" data-step="1">
-                        <div class="stepper-node">
-                        </div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 1</div>
-                            <div class="step-name">Pengajuan Restrukturisasi</div>
-                        </div>
+                <div class="stepper-item" data-step="1">
+                    <div class="stepper-node">
                     </div>
-
-                    <div class="stepper-item" data-step="2">
-                        <div class="stepper-node">
-                        </div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 2</div>
-                            <div class="step-name">Validasi Dokumen</div>
-                        </div>
+                    <div class="stepper-content">
+                        <div class="step-label">STEP 1</div>
+                        <div class="step-name">Pengajuan Restrukturisasi</div>
                     </div>
-
-                    <div class="stepper-item" data-step="3">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 3</div>
-                            <div class="step-name">Persetujuan CEO</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="4">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 4</div>
-                            <div class="step-name">Validasi Direktur</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="5">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 5</div>
-                            <div class="step-name">Selesai</div>
-                        </div>
-                    </div>
-
-                    
-
                 </div>
+
+                <div class="stepper-item" data-step="2">
+                    <div class="stepper-node">
+                    </div>
+                    <div class="stepper-content">
+                        <div class="step-label">STEP 2</div>
+                        <div class="step-name">Validasi Dokumen</div>
+                    </div>
+                </div>
+
+                <div class="stepper-item" data-step="3">
+                    <div class="stepper-node"></div>
+                    <div class="stepper-content">
+                        <div class="step-label">STEP 3</div>
+                        <div class="step-name">Persetujuan CEO</div>
+                    </div>
+                </div>
+
+                <div class="stepper-item" data-step="4">
+                    <div class="stepper-node"></div>
+                    <div class="stepper-content">
+                        <div class="step-label">STEP 4</div>
+                        <div class="step-name">Validasi Direktur</div>
+                    </div>
+                </div>
+
+                <div class="stepper-item" data-step="5">
+                    <div class="stepper-node"></div>
+                    <div class="stepper-content">
+                        <div class="step-label">STEP 5</div>
+                        <div class="step-name">Selesai</div>
+                    </div>
+                </div>
+
+
+
             </div>
+        </div>
     </div>
 
     <div class="row">
@@ -62,6 +62,15 @@
             <div class="card mb-4">
                 <h5 class="card-header d-flex justify-content-between align-items-center">
                     <span>Ringkasan Data Debitur & Pengajuan</span>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" onclick="approval(this)"
+                            data-status="Submit Dokumen">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Submit Pengajuan
+                        </button>
+
+                    </div>
                 </h5>
                 <div class="card-body">
                     <div class="row">
@@ -69,7 +78,8 @@
                             <table class="table table-borderless table-sm">
                                 <tbody>
                                     <tr>
-                                        <td class="text-nowrap" style="width: 35%;"><strong>Nama Perusahaan:</strong></td>
+                                        <td class="text-nowrap" style="width: 35%;"><strong>Nama Perusahaan:</strong>
+                                        </td>
                                         <td>{{ $pengajuan->nama_perusahaan ?? '-' }}</td>
                                     </tr>
                                     <tr>
@@ -91,8 +101,9 @@
                                     <tr>
                                         <td class="text-nowrap"><strong>Jenis Pembiayaan:</strong></td>
                                         <td>
-                                            @if($pengajuan->jenis_pembiayaan)
-                                                <span class="badge bg-label-primary">{{ $pengajuan->jenis_pembiayaan }}</span>
+                                            @if ($pengajuan->jenis_pembiayaan)
+                                                <span
+                                                    class="badge bg-label-primary">{{ $pengajuan->jenis_pembiayaan }}</span>
                                             @else
                                                 -
                                             @endif
@@ -106,27 +117,33 @@
                                 <tbody>
                                     <tr>
                                         <td class="text-nowrap" style="width: 40%;"><strong>Plafon Awal:</strong></td>
-                                        <td>{{ $pengajuan->jumlah_plafon_awal ? 'Rp ' . number_format($pengajuan->jumlah_plafon_awal, 0, ',', '.') : '-' }}</td>
+                                        <td>{{ $pengajuan->jumlah_plafon_awal ? 'Rp ' . number_format($pengajuan->jumlah_plafon_awal, 0, ',', '.') : '-' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Sisa Pokok Belum Bayar:</strong></td>
-                                        <td class="fw-semibold">{{ $pengajuan->sisa_pokok_belum_dibayar ? 'Rp ' . number_format($pengajuan->sisa_pokok_belum_dibayar, 0, ',', '.') : '-' }}</td>
+                                        <td class="fw-semibold">
+                                            {{ $pengajuan->sisa_pokok_belum_dibayar ? 'Rp ' . number_format($pengajuan->sisa_pokok_belum_dibayar, 0, ',', '.') : '-' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Tunggakan Pokok:</strong></td>
-                                        <td class="{{ $pengajuan->tunggakan_pokok > 0 ? 'text-danger fw-semibold' : '' }}">
+                                        <td
+                                            class="{{ $pengajuan->tunggakan_pokok > 0 ? 'text-danger fw-semibold' : '' }}">
                                             {{ $pengajuan->tunggakan_pokok ? 'Rp ' . number_format($pengajuan->tunggakan_pokok, 0, ',', '.') : 'Rp 0' }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Tunggakan Margin/Bunga:</strong></td>
-                                        <td class="{{ $pengajuan->tunggakan_margin_bunga > 0 ? 'text-danger fw-semibold' : '' }}">
+                                        <td
+                                            class="{{ $pengajuan->tunggakan_margin_bunga > 0 ? 'text-danger fw-semibold' : '' }}">
                                             {{ $pengajuan->tunggakan_margin_bunga ? 'Rp ' . number_format($pengajuan->tunggakan_margin_bunga, 0, ',', '.') : 'Rp 0' }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Jatuh Tempo Terakhir:</strong></td>
-                                        <td>{{ $pengajuan->jatuh_tempo_terakhir ? \Carbon\Carbon::parse($pengajuan->jatuh_tempo_terakhir)->format('d/m/Y') : '-' }}</td>
+                                        <td>{{ $pengajuan->jatuh_tempo_terakhir ? \Carbon\Carbon::parse($pengajuan->jatuh_tempo_terakhir)->format('d/m/Y') : '-' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Status Saat Ini (DPD):</strong></td>
@@ -134,7 +151,8 @@
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Tanggal Pengajuan:</strong></td>
-                                        <td>{{ $pengajuan->created_at ? $pengajuan->created_at->format('d/m/Y H:i') : '-' }}</td>
+                                        <td>{{ $pengajuan->created_at ? $pengajuan->created_at->format('d/m/Y H:i') : '-' }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -148,17 +166,55 @@
                                 <p class="mb-1"><strong>Rencana Pemulihan Usaha:</strong></p>
                                 <small>{{ $pengajuan->rencana_pemulihan_usaha ?? 'Tidak ada keterangan' }}</small>
                             </div>
-                            @if($pengajuan->jenis_restrukturisasi)
-                                <div class="alert alert-info py-2" role="alert">
-                                    <p class="mb-1"><strong>Jenis Restrukturisasi yang Diajukan:</strong></p>
-                                    <div class="d-flex flex-wrap gap-2 mt-2">
-                                        @foreach($pengajuan->jenis_restrukturisasi ?? [] as $jenis)
-                                            <span class="badge bg-label-info">{{ $jenis }}</span>
-                                        @endforeach
+                            @if ($pengajuan->jenis_restrukturisasi && count($pengajuan->jenis_restrukturisasi) > 0)
+                                <div class="alert alert-info py-3" role="alert">
+                                    <div class="d-flex align-items-start">
+                                        <i class="ti ti-list-check me-2 mt-1" style="font-size: 1.2rem;"></i>
+                                        <div class="flex-grow-1">
+                                            <p class="mb-2 fw-semibold">Jenis Restrukturisasi yang Diajukan:</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach ($pengajuan->jenis_restrukturisasi as $index => $jenis)
+                                                    @php
+                                                        // Determine badge color based on type
+                                                        $badgeColor = 'info';
+                                                        if (stripos($jenis, 'penurunan') !== false) {
+                                                            $badgeColor = 'success';
+                                                        } elseif (stripos($jenis, 'perpanjangan') !== false) {
+                                                            $badgeColor = 'primary';
+                                                        } elseif (stripos($jenis, 'pengurangan') !== false) {
+                                                            $badgeColor = 'warning';
+                                                        } elseif (stripos($jenis, 'masa tenggang') !== false || stripos($jenis, 'grace') !== false) {
+                                                            $badgeColor = 'info';
+                                                        } elseif (stripos($jenis, 'penjadwalan') !== false) {
+                                                            $badgeColor = 'secondary';
+                                                        } elseif (stripos($jenis, 'lainnya') !== false) {
+                                                            $badgeColor = 'dark';
+                                                        }
+                                                    @endphp
+                                                    <span class="badge bg-label-{{ $badgeColor }} px-3 py-2" style="font-size: 0.875rem;">
+                                                        <i class="ti ti-circle-check me-1"></i>{{ $jenis }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                            
+                                            @if ($pengajuan->jenis_restrukturisasi_lainnya)
+                                                <div class="mt-3 p-2 bg-light rounded">
+                                                    <small class="d-block">
+                                                        <i class="ti ti-info-circle me-1 text-primary"></i>
+                                                        <strong>Keterangan Lainnya:</strong>
+                                                    </small>
+                                                    <small class="text-muted ms-4">{{ $pengajuan->jenis_restrukturisasi_lainnya }}</small>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
-                                    @if($pengajuan->jenis_restrukturisasi_lainnya)
-                                        <small class="d-block mt-2"><strong>Lainnya:</strong> {{ $pengajuan->jenis_restrukturisasi_lainnya }}</small>
-                                    @endif
+                                </div>
+                            @else
+                                <div class="alert alert-secondary py-2" role="alert">
+                                    <small class="text-muted">
+                                        <i class="ti ti-info-circle me-1"></i>
+                                        Belum ada jenis restrukturisasi yang dipilih
+                                    </small>
                                 </div>
                             @endif
                         </div>
@@ -193,19 +249,18 @@
                                         ['label' => 'Bukti Kondisi Eksternal', 'field' => 'dokumen_kondisi_eksternal'],
                                         ['label' => 'Kontrak Pembiayaan', 'field' => 'dokumen_kontrak_pembiayaan'],
                                         ['label' => 'Dokumen Lainnya', 'field' => 'dokumen_lainnya'],
-                                        ['label' => 'Tanda Tangan Digital', 'field' => 'dokumen_tanda_tangan']
+                                        ['label' => 'Tanda Tangan Digital', 'field' => 'dokumen_tanda_tangan'],
                                     ];
                                 @endphp
-                                
-                                @foreach($dokumen as $index => $dok)
+
+                                @foreach ($dokumen as $index => $dok)
                                     <tr>
                                         <td class="text-center">{{ $index + 1 }}</td>
                                         <td>{{ $dok['label'] }}</td>
                                         <td class="text-center">
-                                            @if($pengajuan->{$dok['field']})
-                                                <a href="{{ Storage::url($pengajuan->{$dok['field']}) }}" 
-                                                   target="_blank" 
-                                                   class="text-success">
+                                            @if ($pengajuan->{$dok['field']})
+                                                <a href="{{ Storage::url($pengajuan->{$dok['field']}) }}"
+                                                    target="_blank" class="text-success">
                                                     <i class="ti ti-file-text me-1"></i> Lihat Dokumen
                                                 </a>
                                             @else
@@ -214,22 +269,23 @@
                                         </td>
                                         <td>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="kelengkapan_{{ $index + 1 }}"
-                                                       id="dok_{{ $index + 1 }}_ya" value="Ya">
-                                                <label class="form-check-label" for="dok_{{ $index + 1 }}_ya">Ya</label>
+                                                <input class="form-check-input" type="radio"
+                                                    name="kelengkapan_{{ $index + 1 }}"
+                                                    id="dok_{{ $index + 1 }}_ya" value="Ya">
+                                                <label class="form-check-label"
+                                                    for="dok_{{ $index + 1 }}_ya">Ya</label>
                                             </div>
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" 
-                                                       name="kelengkapan_{{ $index + 1 }}"
-                                                       id="dok_{{ $index + 1 }}_tidak" value="Tidak">
-                                                <label class="form-check-label" for="dok_{{ $index + 1 }}_tidak">Tidak</label>
+                                                <input class="form-check-input" type="radio"
+                                                    name="kelengkapan_{{ $index + 1 }}"
+                                                    id="dok_{{ $index + 1 }}_tidak" value="Tidak">
+                                                <label class="form-check-label"
+                                                    for="dok_{{ $index + 1 }}_tidak">Tidak</label>
                                             </div>
                                         </td>
                                         <td>
-                                            <textarea class="form-control form-control-sm" rows="1" 
-                                                      name="catatan_{{ $index + 1 }}" 
-                                                      placeholder="Catatan"></textarea>
+                                            <textarea class="form-control form-control-sm" rows="1" name="catatan_{{ $index + 1 }}"
+                                                placeholder="Catatan"></textarea>
                                         </td>
                                     </tr>
                                 @endforeach

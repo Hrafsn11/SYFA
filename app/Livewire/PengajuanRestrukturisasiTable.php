@@ -86,18 +86,51 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
                 }),
                 
             Column::make('Jenis Restrukturisasi', 'jenis_restrukturisasi')
-                ->format(function ($value) {
-                    if (!$value) return '-';
+                ->label(function ($row) {
+                    $value = $row->jenis_restrukturisasi;
                     
+                    if (!$value) {
+                        return new HtmlString('<span class="text-muted">-</span>');
+                    }
+                    
+                    // Parse JSON to array
                     $jenisArray = is_array($value) ? $value : json_decode($value, true);
-                    if (!$jenisArray || !is_array($jenisArray)) return '-';
+                    if (!$jenisArray || !is_array($jenisArray) || count($jenisArray) === 0) {
+                        return new HtmlString('<span class="text-muted">-</span>');
+                    }
                     
-                    $badges = array_map(function ($jenis) {
-                        return '<span class="badge bg-label-info me-1">' . e($jenis) . '</span>';
-                    }, $jenisArray);
+                    $html = '<div class="d-flex flex-wrap gap-1">';
                     
-                    return new HtmlString(implode('', $badges));
-                }),
+                    foreach ($jenisArray as $jenis) {
+                        // Badge colors based on type
+                        $badgeColor = 'info';
+                        if (stripos($jenis, 'penurunan') !== false) {
+                            $badgeColor = 'success';
+                        } elseif (stripos($jenis, 'perpanjangan') !== false) {
+                            $badgeColor = 'primary';
+                        } elseif (stripos($jenis, 'pengurangan') !== false) {
+                            $badgeColor = 'warning';
+                        } elseif (stripos($jenis, 'lainnya') !== false) {
+                            $badgeColor = 'secondary';
+                        }
+                        
+                        $html .= '<span class="badge bg-label-' . $badgeColor . ' text-wrap" style="max-width: 200px;">' . e($jenis) . '</span>';
+                    }
+                    
+                    // display keterangan lainnya k=kalu ada
+                    // if (!empty($row->jenis_restrukturisasi_lainnya)) {
+                    //     $lainnyaText = $row->jenis_restrukturisasi_lainnya;
+                    //     $truncated = mb_strlen($lainnyaText) > 30 ? mb_substr($lainnyaText, 0, 30) . '...' : $lainnyaText;
+                        
+                    //     $html .= '<span class="badge bg-label-dark text-wrap" style="max-width: 200px;" title="' . e($lainnyaText) . '">
+                    //         <i class="ti ti-info-circle me-1"></i>' . e($truncated) . '</span>';
+                    // }
+                    
+                    $html .= '</div>';
+                    
+                    return new HtmlString($html);
+                })
+                ->html(),
                 
             Column::make('Action')
                 ->label(function ($row) {

@@ -15,6 +15,34 @@ class PengajuanRestrukturisasiRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Clean rupiah format fields before validation
+        $rupiahFields = ['jumlah_plafon_awal', 'sisa_pokok_belum_dibayar', 'tunggakan_margin_bunga'];
+        
+        $cleanedData = [];
+        foreach ($rupiahFields as $field) {
+            if ($this->has($field)) {
+                $value = $this->input($field);
+                // Remove all non-numeric characters (Rp, dots, commas, spaces)
+                $cleanedValue = preg_replace('/[^0-9]/', '', $value);
+                $cleanedData[$field] = $cleanedValue ?: null;
+            }
+        }
+        
+        // Handle jatuh_tempo_terakhir - use hidden value if exists
+        if ($this->has('jatuh_tempo_terakhir_value') && $this->input('jatuh_tempo_terakhir_value')) {
+            $cleanedData['jatuh_tempo_terakhir'] = $this->input('jatuh_tempo_terakhir_value');
+        }
+        
+        if (!empty($cleanedData)) {
+            $this->merge($cleanedData);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -38,7 +66,6 @@ class PengajuanRestrukturisasiRequest extends FormRequest
             'jenis_pembiayaan' => 'required|string|max:100',
             'jumlah_plafon_awal' => 'nullable|numeric|min:0',
             'sisa_pokok_belum_dibayar' => 'nullable|numeric|min:0',
-            'tunggakan_pokok' => 'nullable|numeric|min:0',
             'tunggakan_margin_bunga' => 'nullable|numeric|min:0',
             'jatuh_tempo_terakhir' => 'nullable|date',
             'status_dpd' => 'nullable|string|max:100',
@@ -91,8 +118,13 @@ class PengajuanRestrukturisasiRequest extends FormRequest
             'tanggal_akad.required' => 'Tanggal akad harus diisi.',
             'tanggal_akad.date' => 'Format tanggal akad tidak valid.',
             'jenis_pembiayaan.required' => 'Jenis pembiayaan harus dipilih.',
+            'jumlah_plafon_awal.numeric' => 'Jumlah plafon awal harus berupa angka.',
+            'jumlah_plafon_awal.min' => 'Jumlah plafon awal tidak boleh kurang dari 0.',
             'sisa_pokok_belum_dibayar.numeric' => 'Sisa pokok harus berupa angka.',
             'sisa_pokok_belum_dibayar.min' => 'Sisa pokok tidak boleh kurang dari 0.',
+            'tunggakan_margin_bunga.numeric' => 'Tunggakan margin/bunga harus berupa angka.',
+            'tunggakan_margin_bunga.min' => 'Tunggakan margin/bunga tidak boleh kurang dari 0.',
+            'jatuh_tempo_terakhir.date' => 'Format jatuh tempo terakhir tidak valid.',
             'alasan_restrukturisasi.required' => 'Alasan restrukturisasi harus diisi.',
             
             // Step 3

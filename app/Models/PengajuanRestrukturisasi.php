@@ -33,7 +33,6 @@ class PengajuanRestrukturisasi extends Model
         'jenis_pembiayaan',
         'jumlah_plafon_awal',
         'sisa_pokok_belum_dibayar',
-        'tunggakan_pokok',
         'tunggakan_margin_bunga',
         'jatuh_tempo_terakhir',
         'status_dpd',
