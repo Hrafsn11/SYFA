@@ -1,189 +1,105 @@
-<div wire:ignore>
-    {{-- Header Section --}}
-    <div class="row">
-        <div class="col-12">
-            <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">Pengajuan Restrukturisasi</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-2"
-                    data-bs-toggle="modal" data-bs-target="#modalRestrukturisasi" id="btnTambahRestrukturisasi">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Ajukan Restrukturisasi</span>
-                </button>
+@extends('layouts.app')
+
+@section('title', 'Pengajuan Restrukturisasi')
+
+@section('content')
+    <div class="container-xxl flex-grow-1 container-p-y">
+
+        {{-- Header Section --}}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Pengajuan Restrukturisasi
+                </h4>
+            </div>
+            <button type="button" class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal"
+                data-bs-target="#modalRestrukturisasi" id="btnTambahRestrukturisasi">
+                <i class="ti ti-plus me-1"></i>
+                <span>Ajukan Restrukturisasi</span>
+            </button>
+        </div>
+
+        {{-- DataTable Card --}}
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"></i>Daftar Pengajuan
+                </h5>
+            </div>
+            <div class="card-body">
+                <livewire:pengajuan-restrukturisasi-table />
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="text-center" style="width: 5%;">No</th>
-                                    <th>Nama Debitur</th>
-                                    <th>Nomor Kontrak</th>
-                                    <th class="text-center">Jenis Pembiayaan</th>
-                                    <th class="text-end">Plafon Awal</th>
-                                    <th class="text-end">Sisa Pokok</th>
-                                    <th>Jenis Restrukturisasi</th>
-                                    <th class="text-center" style="width: 10%;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center">1</td>
-                                    <td>
-                                        <div class="fw-semibold">PT Maju Jaya Sejahtera</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-label-secondary">INV/2024/001</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-primary">Invoice Financing</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="fw-semibold">Rp 500.000.000</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="text-warning fw-semibold">Rp 300.000.000</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-label-info">Perpanjangan Tenor</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center align-items-center gap-2">
-                                            <a href="{{ route('detail-restrukturisasi') }}"
-                                                class="btn btn-sm btn-icon btn-text-secondary rounded-pill me-1"
-                                                title="Detail">
-                                                <i class="ti ti-file"></i>
-                                            </a>
-                                            <a href="javascript:void(0);"
-                                                class="btn btn-sm btn-icon btn-text-secondary rounded-pill me-1"
-                                                title="Edit">
-                                                <i class="ti ti-edit"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                
-                                <tr>
-                                    <td class="text-center">2</td>
-                                    <td>
-                                        <div class="fw-semibold">CV Berkah Mandiri</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-label-secondary">PO/2024/025</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-label-success">PO Financing</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="fw-semibold">Rp 750.000.000</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <span class="text-warning fw-semibold">Rp 450.000.000</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-label-warning">Penurunan Margin</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center align-items-center gap-2">
-                                            <a href="{{ route('detail-restrukturisasi') }}"
-                                                class="btn btn-sm btn-icon btn-text-secondary rounded-pill me-1"
-                                                title="Detail">
-                                                <i class="ti ti-file"></i>
-                                            </a>
-                                            <a href="javascript:void(0);"
-                                                class="btn btn-sm btn-icon btn-text-secondary rounded-pill me-1"
-                                                title="Edit">
-                                                <i class="ti ti-edit"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{-- Modal Restrukturisasi --}}
+        @include('livewire.pengajuan-restrukturisasi.partials._modal-pengajuan-restrukturisasi')
     </div>
-
-    {{-- Modal Restrukturisasi --}}
-    @include('livewire.pengajuan-restrukturisasi.partials._modal-pengajuan-restrukturisasi')
-</div>
+@endsection
 
 @push('scripts')
     <script>
+        'use strict';
+
         let wizardRestrukturisasi;
+        let currentStepIndex = 0;
+        let editMode = false;
+        let editId = null;
 
         $(document).ready(function() {
             initWizardRestrukturisasi();
+            setupEventListeners();
         });
 
         function initWizardRestrukturisasi() {
             const wizardElement = document.getElementById('wizardRestrukturisasi');
-            if (wizardElement) {
-                wizardRestrukturisasi = new Stepper(wizardElement, {
-                    linear: false,
-                    animation: true
-                });
+            if (!wizardElement) return;
 
-                wizardElement.addEventListener('shown.bs-stepper', function(event) {
-                    if (event.detail.indexStep === 3) {
-                        populateReviewData();
-                    }
-                });
-            }
-        }
-
-        function validateCurrentStep() {
-            return true;
-        }
-
-        function populateReviewData() {
-            $('#review_kode_peminjaman').text($('#nomor_kontrak_pembiayaan option:selected').text() || '-');
-            $('#review_nama_perusahaan').text($('#nama_perusahaan').val() || '-');
-            $('#review_alasan').text($('#alasan_restrukturisasi').val() || '-');
-
-            const jenisText = $('input[name="customRadioTemp"]:checked').next('.custom-option-header').find('.h6').text();
-            $('#review_jenis').text(jenisText || '-');
-
-            const dokumenList = [];
-            const fileInputs = [{
-                    id: 'fotocopy_ktp_pic',
-                    label: 'Fotocopy KTP PIC'
-                },
-                {
-                    id: 'fotokopi_npwp_perusahaan',
-                    label: 'Fotokopi NPWP Perusahaan'
-                },
-                {
-                    id: 'laporan_keuangan_terbaru',
-                    label: 'Laporan Keuangan Terbaru'
-                },
-                {
-                    id: 'rekap_arus_kas',
-                    label: 'Rekap Arus Kas'
-                }
-            ];
-
-            fileInputs.forEach(function(file) {
-                const input = $(`#${file.id}`)[0];
-                if (input && input.files.length > 0) {
-                    dokumenList.push(
-                        `<li><i class="ti ti-file-check text-success me-2"></i>${file.label}: ${input.files[0].name}</li>`
-                    );
-                }
+            wizardRestrukturisasi = new Stepper(wizardElement, {
+                linear: false,
+                animation: true
             });
 
-            if (dokumenList.length > 0) {
-                $('#review_dokumen').html(dokumenList.join(''));
-            } else {
-                $('#review_dokumen').html('<li class="text-muted">Belum ada dokumen yang diupload</li>');
+            const steps = wizardElement.querySelectorAll('.bs-stepper-content .content');
+            steps.forEach((step, index) => {
+                const observer = new MutationObserver(() => {
+                    if (step.classList.contains('active')) {
+                        currentStepIndex = index;
+                    }
+                });
+                observer.observe(step, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            });
+        }
+
+        function resetWizard() {
+            if (wizardRestrukturisasi) {
+                wizardRestrukturisasi.to(1);
             }
+
+            const form = document.getElementById('formRestrukturisasi');
+            if (form) form.reset();
+
+            editMode = false;
+            editId = null;
+
+            const $select2 = $('#nomor_kontrak_pembiayaan');
+            if ($select2.length && $select2.hasClass('select2-hidden-accessible')) {
+                $select2.val(null).trigger('change');
+            }
+
+            $('#id_pengajuan_peminjaman, #nomor_kontrak_pembiayaan_value').val('');
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+            $('.jenis-pembiayaan-radio').prop('disabled', true).prop('checked', false);
+            $('.jenis-pembiayaan-radio').closest('.custom-option').removeClass('checked');
+            $('.input-rupiah').val('Rp 0');
+        }
+
+        // ========================================
+        // FORM SUBMISSION
+        // ========================================
+        function validateCurrentStep() {
+            return true;
         }
 
         function handleSubmit() {
@@ -194,73 +110,315 @@
                 confirmButtonText: 'Ya, Ajukan',
                 cancelButtonText: 'Batal',
             }, () => {
-                // TODO: Integrate with Livewire
-                // @this.saveData("route.name", {"data": formData, "callback": "afterAction"});
-
-                showSweetAlert({
-                    title: 'Berhasil!',
-                    text: 'Pengajuan restrukturisasi berhasil disubmit',
-                    icon: 'success'
-                }).then(() => {
-                    $('#modalRestrukturisasi').modal('hide');
-                });
+                submitForm();
             });
         }
 
-        function resetWizard() {
-            // $('#formRestrukturisasi')[0].reset();
+        function submitForm() {
+            const form = document.getElementById('formRestrukturisasi');
+            if (!form) return;
 
-            if (wizardRestrukturisasi) {
-                // wizardRestrukturisasi.reset();
-                wizardRestrukturisasi.to(1);
+            const formData = new FormData(form);
+
+            formData.delete('jenis_restrukturisasi[]');
+            $('input[name="jenis_restrukturisasi[]"]:checked').each(function() {
+                formData.append('jenis_restrukturisasi[]', $(this).val());
+            });
+
+            const jenisPembiayaan = $('input[name="jenis_pembiayaan_radio"]:checked').val();
+            if (jenisPembiayaan) {
+                formData.append('jenis_pembiayaan', jenisPembiayaan);
+            }
+
+            const rupiahFields = ['jumlah_plafon_awal', 'sisa_pokok_belum_dibayar', 'tunggakan_pokok',
+                'tunggakan_margin_bunga'
+            ];
+            rupiahFields.forEach(field => {
+                const value = $('#' + field).val();
+                if (value && value !== 'Rp 0' && value.trim() !== 'Rp' && value.trim() !== '') {
+                    let cleanValue = value.replace(/Rp\s*/g, '');
+                    cleanValue = cleanValue.replace(/\./g, '');
+                    cleanValue = cleanValue.replace(',', '.');
+                    cleanValue = cleanValue.replace(/[^\d.]/g, '');
+                    formData.set(field, cleanValue);
+                }
+            });
+
+            const url = editMode ?
+                "{{ route('pengajuan-restrukturisasi.update', ':id') }}".replace(':id', editId) :
+                "{{ route('pengajuan-restrukturisasi.store') }}";
+
+            if (editMode) {
+                formData.append('_method', 'PUT');
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    showSweetAlert({
+                        title: 'Berhasil!',
+                        text: response.message || 'Pengajuan restrukturisasi berhasil disimpan',
+                        icon: 'success'
+                    });
+
+                    $('#modalRestrukturisasi').modal('hide');
+
+                    setTimeout(() => window.location.reload(), 1500);
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON?.errors || {};
+                        displayValidationErrors(errors);
+
+                        showSweetAlert({
+                            title: 'Error Validasi',
+                            text: 'Mohon periksa kembali data yang Anda masukkan',
+                            icon: 'error'
+                        });
+                    } else {
+                        const message = xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data';
+                        showSweetAlert({
+                            title: 'Error',
+                            text: message,
+                            icon: 'error'
+                        });
+                    }
+                }
+            });
+        }
+
+        function displayValidationErrors(errors) {
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+
+            $.each(errors, function(field, messages) {
+                const errorMessage = Array.isArray(messages) ? messages[0] : messages;
+                const $field = $('#' + field);
+
+                if ($field.length) {
+                    $field.addClass('is-invalid');
+                    $field.closest('.form-group').find('.invalid-feedback').remove();
+                    const $errorSpan = $('<span class="invalid-feedback d-block"></span>').text(errorMessage);
+                    $field.after($errorSpan);
+                }
+            });
+
+            const $firstError = $('.is-invalid').first();
+            if ($firstError.length) {
+                $firstError[0].scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
             }
         }
 
-        // Livewire callback function
-        function afterAction(payload) {
-            // Refresh datatable jika ada
-            // Livewire.dispatch('refreshRestrukturisasiTable');
-            $('#modalRestrukturisasi').modal('hide');
-        }
-
-        // Event handlers menggunakan event delegation
-        $(document).on('click', '.btn-next', function() {
+        $('#modalRestrukturisasi').on('click', '.btn-next', function(e) {
+            e.preventDefault();
             if (validateCurrentStep()) {
                 wizardRestrukturisasi.next();
             }
         });
 
-        $(document).on('click', '.btn-prev', function() {
+        $('#modalRestrukturisasi').on('click', '.btn-prev', function(e) {
+            e.preventDefault();
             wizardRestrukturisasi.previous();
         });
 
-        $(document).on('click', '#btnSubmitRestrukturisasi', function(e) {
+        $('#modalRestrukturisasi').on('click', '#btnSubmitRestrukturisasi', function(e) {
             e.preventDefault();
             handleSubmit();
         });
 
-        $('#modalRestrukturisasi').on('shown.bs.modal', function() {
-            initAllComponents();
+        // Helper function to format rupiah
+        function formatRupiah(number) {
+            if (!number) return '';
+            return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
+        }
+
+        function initializeModalPlugins() {
+            const $select2 = $('#nomor_kontrak_pembiayaan');
+
+            if ($select2.hasClass('select2-hidden-accessible')) {
+                $select2.select2('destroy');
+            }
+
+            $select2.select2({
+                dropdownParent: $('#modalRestrukturisasi'),
+                placeholder: 'Pilih Nomor Kontrak Pembiayaan'
+            });
+
+            $select2.off('change.restrukturisasi').on('change.restrukturisasi', function(e) {
+                const value = $(this).val();
+                const selectedText = $(this).find('option:selected').text();
+
+                $('#id_pengajuan_peminjaman').val(value);
+                $('#nomor_kontrak_pembiayaan_value').val(selectedText.trim());
+
+                if (value) {
+                    loadPengajuanData(value);
+                } else {
+                    $('.jenis-pembiayaan-radio').prop('disabled', true).prop('checked', false);
+                    $('.jenis-pembiayaan-radio').closest('.custom-option').removeClass('checked');
+                    $('#jumlah_plafon_awal, #sisa_pokok_belum_dibayar').val('Rp 0');
+                    $('#id_pengajuan_peminjaman').val('');
+                    $('#nomor_kontrak_pembiayaan_value').val('');
+                }
+            });
+
+            if (typeof window.initFlatpickr === 'function') {
+                window.initFlatpickr();
+            } else if (typeof flatpickr !== 'undefined') {
+                $('.flatpickr').each(function() {
+                    const $input = $(this);
+                    if (!$input[0]._flatpickr) {
+                        flatpickr($input[0], {
+                            altInput: true,
+                            altFormat: 'j F Y',
+                            dateFormat: 'Y-m-d',
+                            locale: 'id',
+                        });
+                    }
+                });
+            }
 
             if (typeof window.initCleaveRupiah === 'function') {
                 window.initCleaveRupiah();
             }
+        }
 
-            // Initialize Bootstrap Datepicker
-            $('.bs-datepicker').datepicker({
-                format: 'dd/mm/yyyy',
-                autoclose: true,
-                todayHighlight: true,
-                orientation: 'bottom auto'
+        function loadPengajuanData(idPengajuan) {
+            const url = "{{ route('pengajuan-restrukturisasi.detail-pengajuan', ':id') }}".replace(':id', idPengajuan);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    const data = response.data;
+                    if (!data) return;
+
+                    $('.jenis-pembiayaan-radio').prop('disabled', true).prop('checked', false);
+                    $('.jenis-pembiayaan-radio').each(function() {
+                        if ($(this).val() === data.jenis_pembiayaan) {
+                            $(this).prop('disabled', false).prop('checked', true);
+                            $(this).closest('.custom-option').addClass('checked');
+                        } else {
+                            $(this).closest('.custom-option').removeClass('checked');
+                        }
+                    });
+
+                    $('#jumlah_plafon_awal').val(formatRupiah(data.jumlah_plafon_awal));
+                    $('#sisa_pokok_belum_dibayar').val(formatRupiah(data.sisa_pokok_belum_dibayar));
+
+                    if (typeof window.initCleaveRupiah === 'function') {
+                        window.initCleaveRupiah();
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error loading pengajuan data:', xhr);
+                }
             });
-        });
+        }
 
-        $('#modalRestrukturisasi').on('hide.bs.modal', function() {
-            resetWizard();
-        });
+        function setupEventListeners() {
+            $('#modalRestrukturisasi').on('shown.bs.modal', function() {
+                initializeModalPlugins();
+            });
 
-        $(document).on('change', '#checkLainnya', function() {
-            $('#inputLainnya').prop('disabled', !this.checked);
-        });
+            $('#modalRestrukturisasi').on('hide.bs.modal', function() {
+                resetWizard();
+
+                if ($('#nomor_kontrak_pembiayaan').hasClass('select2-hidden-accessible')) {
+                    $('#nomor_kontrak_pembiayaan').select2('destroy');
+                }
+
+                $('.bs-datepicker').each(function() {
+                    if ($(this).data('datepicker')) {
+                        $(this).datepicker('destroy');
+                    }
+                });
+            });
+
+            $(document).on('change', '#checkLainnya', function() {
+                const isChecked = $(this).is(':checked');
+                const $inputLainnya = $('#inputLainnya');
+
+                if (isChecked) {
+                    $inputLainnya.prop('disabled', false);
+                    setTimeout(() => $inputLainnya.focus(), 100);
+                } else {
+                    $inputLainnya.prop('disabled', true).val('');
+                }
+            });
+        }
+
+        function editPengajuan(id) {
+            editMode = true;
+            editId = id;
+
+            $.ajax({
+                url: `/pengajuan-restrukturisasi/${id}`,
+                method: 'GET',
+                success: function(response) {
+                    const data = response.data;
+
+                    wizardRestrukturisasi.reset();
+
+                    $('#id_debitur').val(data.id_debitur).trigger('change');
+
+                    setTimeout(() => {
+                        $('#id_pengajuan_peminjaman').val(data.id_pengajuan_peminjaman).trigger(
+                            'change');
+                    }, 500);
+
+                    $('#nama_perusahaan').val(data.nama_perusahaan);
+                    $('#npwp').val(data.npwp);
+                    $('#nama_pic').val(data.nama_pic);
+                    $('#no_hp_pic').val(data.no_hp_pic);
+                    $('#jabatan_pic').val(data.jabatan_pic);
+                    $('#alamat').val(data.alamat);
+                    $('#nomor_kontrak_pembiayaan_value').val(data.nomor_kontrak_pembiayaan);
+                    $('#jenis_pembiayaan').val(data.jenis_pembiayaan);
+                    $('#tanggal_akad').val(data.tanggal_akad);
+                    $('#jatuh_tempo_terakhir').val(data.jatuh_tempo_terakhir);
+                    $('#jumlah_plafon_awal').val(data.jumlah_plafon_awal);
+                    $('#sisa_pokok_belum_dibayar').val(data.sisa_pokok_belum_dibayar);
+                    $('#tunggakan_pokok').val(data.tunggakan_pokok);
+                    $('#tunggakan_margin_bunga').val(data.tunggakan_margin_bunga);
+                    $('#status_dpd').val(data.status_dpd);
+                    $('#alasan_restrukturisasi').val(data.alasan_restrukturisasi);
+                    $('#rencana_pemulihan_usaha').val(data.rencana_pemulihan_usaha);
+                    $('#tanggal').val(data.tanggal);
+
+                    if (data.jenis_restrukturisasi) {
+                        const jenisArray = JSON.parse(data.jenis_restrukturisasi);
+                        jenisArray.forEach(jenis => {
+                            $(`input[name="jenis_restrukturisasi[]"][value="${jenis}"]`).prop('checked',
+                                true);
+                            if (jenis === 'Lainnya' && data.jenis_restrukturisasi_lainnya) {
+                                $('#jenis_restrukturisasi_lainnya').val(data
+                                    .jenis_restrukturisasi_lainnya).prop('disabled', false);
+                            }
+                        });
+                    }
+
+                    $('#modalRestrukturisasi').modal('show');
+                    $('#modalRestrukturisasiLabel').text('Edit Pengajuan Restrukturisasi');
+                },
+                error: function(xhr) {
+                    showNotification('error', 'Gagal memuat data', xhr.responseJSON?.message ||
+                        'Terjadi kesalahan');
+                }
+            });
+        }
     </script>
 @endpush
