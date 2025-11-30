@@ -1,4 +1,4 @@
-<div class="currency-field-wrapper" wire:ignore>
+<div class="currency-field-wrapper">
     <input
         type="text"
         id="{{ $model_name }}"
@@ -17,7 +17,7 @@
         (function () {
             const inputId = '{{ $model_name }}';
 
-            function initCleaveForCurrencyField() {
+            function initCleaveForCurrencyField(inputId) {
                 const input = document.getElementById(inputId);
 
                 if (!input) {
@@ -51,7 +51,7 @@
                 }
 
                 const input = $input.get(0);
-                const cleaveInstance = input._cleaveInstance || initCleaveForCurrencyField();
+                const cleaveInstance = input._cleaveInstance || initCleaveForCurrencyField(inputId);
                 
                 if (!cleaveInstance) {
                     return;
@@ -150,7 +150,7 @@
 
                     const modelName = input.dataset.modelName || '{{ $model_name }}';
                     const value = component.get(modelName);
-                    const cleaveInstance = input._cleaveInstance || initCleaveForCurrencyField();
+                    const cleaveInstance = input._cleaveInstance || initCleaveForCurrencyField(inputId);
 
                     if (!cleaveInstance) {
                         return;
@@ -179,10 +179,20 @@
                 });
             }
 
+            let previousWireId = null;
+
+            function getCurrentWireId() {
+                const $input = $('#' + inputId);
+                if ($input.length === 0) return null;
+                
+                const $currencyComponent = $input.closest('[wire\\:id]').first();
+                return $currencyComponent.length ? $currencyComponent.attr('wire:id') : null;
+            }
+
             function initializeCurrencyField() {
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        initCleaveForCurrencyField();
+                        initCleaveForCurrencyField(inputId);
                         syncComponentToInput();
                         attachInputListeners();
                     });
@@ -190,14 +200,22 @@
             }
 
             document.addEventListener('livewire:init', () => {
-                // initializeCurrencyField();
+                previousWireId = getCurrentWireId();
+                initializeCurrencyField();
             });
 
             document.addEventListener('livewire:navigated', () => {
+                previousWireId = getCurrentWireId();
                 initializeCurrencyField();
 
                 Livewire.hook('morphed', () => {
-                    initializeCurrencyField();
+                    const currentWireId = getCurrentWireId();
+                    
+                    // Only init if wire:id has changed
+                    if (currentWireId && currentWireId !== previousWireId) {
+                        previousWireId = currentWireId;
+                        initializeCurrencyField();
+                    }
                 });
             });
 

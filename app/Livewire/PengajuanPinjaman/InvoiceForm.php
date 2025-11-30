@@ -7,52 +7,39 @@ use Livewire\WithFileUploads;
 use App\Livewire\Traits\HasModal;
 use App\Attributes\ParameterIDRoute;
 use App\Livewire\Traits\HasValidate;
-use App\Livewire\PengajuanPinjaman\Create;
 use App\Http\Requests\InvoicePengajuanPinjamanRequest;
 use App\Livewire\PengajuanPinjaman\Event\HandleInvoiceEvents;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use App\Livewire\PengajuanPinjaman\FieldsInput\FieldInputInvoice;
 
-class Invoice extends Component
+class InvoiceForm extends Component
 {
     use HasValidate, 
         HasModal, 
         WithFileUploads, 
         HandleInvoiceEvents, 
         FieldInputInvoice;
+
     private string $validateClass = InvoicePengajuanPinjamanRequest::class;
 
     #[ParameterIDRoute]
     public $index_data_invoice;
-    
+
     public $jenis_pembiayaan, $pengajuan, $sumber_pembiayaan, $id_instansi;
 
     public $form_data_invoice,
-        $invoice_financing_data, 
-        $po_financing_data, 
-        $installment_data, 
-        $factoring_data, 
         $modal_title = 'Tambah Invoice', 
         $nilai_bagi_hasil,
         $persentase_bagi_hasil = 0;
 
-
-    public function mount($jenis_pembiayaan = null, $pengajuan = null, $sumber_pembiayaan = null, $id_instansi = null)
-    {
-        $this->jenis_pembiayaan = $jenis_pembiayaan;
-        $this->pengajuan = $pengajuan;
-        $this->sumber_pembiayaan = $sumber_pembiayaan;
-        $this->id_instansi = $id_instansi;
-
-        $this->form_data_invoice = [];
-    }
-    
     public function render()
     {
         $this->prepareFormData();
         $this->prepareFormInvoice();
 
         if ($this->pengajuan !== null) $this->edit();
-        return view('livewire.pengajuan-pinjaman.components.table_create');
+
+        return view('livewire.pengajuan-pinjaman.components.modal_create');
     }
 
     public function saveDataInvoice()
@@ -104,6 +91,29 @@ class Invoice extends Component
             return $nilaiPinjaman * $persentase;
         });
 
+        foreach ($this->form_data_invoice as $key => $value) {
+            foreach ([
+                'dokumen_invoice_file', 
+                'dokumen_kontrak_file', 
+                'dokumen_so_file', 
+                'dokumen_bast_file', 
+                'dokumen_lainnnya_file'
+            ] as $dokumen) {
+                if (
+                    array_key_exists($dokumen, $value) && 
+                    $value[$dokumen] instanceof TemporaryUploadedFile
+                ) {
+                    $fileInfo = [
+                        'real_path' => $value[$dokumen]->getRealPath(),
+                        'client_original_name' => $value[$dokumen]->getClientOriginalName(),
+                        'mime_type' => $value[$dokumen]->getMimeType(),
+                    ];
+    
+                    $this->form_data_invoice[$key][$dokumen] = $fileInfo;
+                }
+            }   
+        }
+
         $this->dispatch(
             'invoiceTotalsUpdated',
             totalPinjaman: $totalPinjaman,
@@ -111,33 +121,4 @@ class Invoice extends Component
             formDataInvoice: $this->form_data_invoice ?? []
         )->to(Create::class);
     }
-
-    public function editInvoice($idx)
-    {
-        $data = [];
-
-        $this->index_data_invoice = $idx;
-        foreach ($this->form_data_invoice[$idx] as $key => $value) {
-            if (in_array($key, [
-                'dokumen_invoice_file', 
-                'dokumen_kontrak_file', 
-                'dokumen_so_file', 
-                'dokumen_bast_file', 
-                'dokumen_lainnnya_file'
-            ])) continue;
-
-            if (in_array($key, ['nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil'])) {
-                $this->{$key} = rupiahFormatter($value);
-            } else if (in_array($key, ['invoice_date', 'due_date'])) {
-                $this->{$key} = parseCarbonDate($value)->format('d/m/Y');
-                $data[$key] = $this->{$key};
-            } else {
-                $this->{$key} = $value;
-            }
-
-        }
-        $this->dispatch('edit-invoice', $data);
-    }
-
-    
 }

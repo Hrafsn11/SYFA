@@ -31,7 +31,7 @@ class PengajuanPinjamanRequest extends FormRequest
             'jenis_pembiayaan' => 'required|in:' . implode(',', JenisPembiayaanEnum::getConstants()),
             'tanggal_pencairan' => 'required',
             'tanggal_pembayaran' => 'required',
-            'tenor_pembayaran' => 'required',
+            'tenor_pembayaran' => 'required_if:jenis_pembiayaan,Installment',
             'catatan_lainnya' => 'required',
         ];
 
@@ -43,6 +43,10 @@ class PengajuanPinjamanRequest extends FormRequest
             $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, null, $formDataInvoice);
             
             foreach ($invoiceRules as $key => $rule) {
+                if ($key == 'no_invoice' || $key == 'no_kontrak') {
+                    $rule = array_merge($rule, ['distinct']);
+                }
+
                 $validate["form_data_invoice.*.{$key}"] = $rule;
             }
         }

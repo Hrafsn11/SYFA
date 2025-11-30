@@ -4,16 +4,18 @@ namespace App\Livewire\PengajuanPinjaman;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Attributes\FieldInput;
+use App\Enums\JenisPembiayaanEnum;
 use App\Models\PengajuanPeminjaman;
 use App\Attributes\ParameterIDRoute;
-use App\Http\Requests\PengajuanPinjamanRequest;
 use App\Livewire\Traits\HasValidate;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\MasterSumberPendanaanEksternal;
+use App\Http\Requests\PengajuanPinjamanRequest;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Livewire\PengajuanPinjaman\Event\HandleCreateEvents;
-use App\Livewire\PengajuanPinjaman\Dispatch\HandleCreateDispatch;
 use App\Livewire\PengajuanPinjaman\FieldsInput\FieldInputCreate;
+use App\Livewire\PengajuanPinjaman\Dispatch\HandleCreateDispatch;
 
 class Create extends Component
 {
@@ -21,12 +23,24 @@ class Create extends Component
         HasValidate, 
         WithFileUploads, 
         HandleCreateEvents, // event handling
-        HandleCreateDispatch, // dispatching events
-        FieldInputCreate; // list input fields
+        HandleCreateDispatch; // list input fields
     private string $validateClass = PengajuanPinjamanRequest::class;
 
     #[ParameterIDRoute]
     public $id = null;
+
+    #[FieldInput]
+    public $sumber_pembiayaan = 'Eksternal', 
+        $id_instansi, 
+        $nama_rekening, 
+        $lampiran_sid, 
+        $tujuan_pembiayaan, 
+        $jenis_pembiayaan = JenisPembiayaanEnum::INVOICE_FINANCING, 
+        $tanggal_pencairan, 
+        $tanggal_pembayaran, 
+        $tenor_pembayaran, 
+        $catatan_lainnya, 
+        $form_data_invoice = [];
 
     public $nama_perusahaan;
     public $nama_bank;
@@ -87,6 +101,39 @@ class Create extends Component
 
         if ($this->id !== null) $this->edit();
         return view('livewire.pengajuan-pinjaman.create');
+    }
+
+    public function setterFormData()
+    {
+        foreach ($this->getUniversalFieldInputs() as $key => $value) {
+            $this->form_data[$value] = $this->{$value};
+        }
+    }
+
+    public function editInvoice($idx)
+    {
+        $data = [];
+
+        $this->index_data_invoice = $idx;
+        foreach ($this->form_data_invoice[$idx] as $key => $value) {
+            if (in_array($key, [
+                'dokumen_invoice_file', 
+                'dokumen_kontrak_file', 
+                'dokumen_so_file', 
+                'dokumen_bast_file', 
+                'dokumen_lainnnya_file'
+            ])) continue;
+
+            if (in_array($key, ['nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil'])) {
+                $this->{$key} = rupiahFormatter($value);
+            } else if (in_array($key, ['invoice_date', 'due_date'])) {
+                $this->{$key} = parseCarbonDate($value)->format('d/m/Y');
+                $data[$key] = $this->{$key};
+            } else {
+                $this->{$key} = $value;
+            }
+        }
+        $this->dispatch('edit-invoice', $data);
     }
 
     protected function setAdditionalValidationData(): array

@@ -858,6 +858,7 @@ class PeminjamanController extends Controller
 
     public function store(PengajuanPinjamanRequest $request)
     {
+        dd($request->validated());
 
         // Get jenis_pembiayaan first for conditional validation
         $jenisPembiayaan = $request->input('jenis_pembiayaan');

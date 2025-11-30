@@ -21,17 +21,10 @@
         (function() {
             const inputId = '{{ $model_name }}';
             
-            function initDatepickerComponent(inputId, skipIfOpen = false) {
-                const $input = $('#' + inputId);
+            function initDatepickerComponent(inputIdModel) {
+                const $input = $('#' + inputIdModel);
                 
                 if ($input.length === 0) return;
-
-                if (skipIfOpen) {
-                    const $datepickerDropdown = $('.datepicker:visible');
-                    if ($datepickerDropdown.length > 0) {
-                        return;
-                    }
-                }
 
                 if ($input.data('datepicker')) {
                     $input.off('changeDate');
@@ -138,6 +131,16 @@
                 }
             }
 
+            let previousWireId = null;
+
+            function getCurrentWireId() {
+                const $input = $('#' + inputId);
+                if ($input.length === 0) return null;
+                
+                const $datepickerComponent = $input.closest('[wire\\:id]').first();
+                return $datepickerComponent.length ? $datepickerComponent.attr('wire:id') : null;
+            }
+
             function initializeDatepickerComponent() {
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -147,14 +150,22 @@
             }
             
             document.addEventListener('livewire:init', () => {
+                // previousWireId = getCurrentWireId();
                 // initializeDatepickerComponent();
             });
 
             document.addEventListener('livewire:navigated', () => {
+                previousWireId = getCurrentWireId();
                 initializeDatepickerComponent();
 
                 Livewire.hook('morphed', () => {
-                    initializeDatepickerComponent();
+                    const currentWireId = getCurrentWireId();
+                    
+                    // Only init if wire:id has changed
+                    if (currentWireId && currentWireId !== previousWireId) {
+                        previousWireId = currentWireId;
+                        initializeDatepickerComponent();
+                    }
                 });
             });
         })();

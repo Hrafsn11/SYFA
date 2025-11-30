@@ -39,7 +39,7 @@ class CurrencyField extends Component
 
         $this->previousValue = $value;
 
-        $this->skipRender();
+        // $this->skipRender();
         $this->dispatch(
             'currency-updated',
             value: $value,

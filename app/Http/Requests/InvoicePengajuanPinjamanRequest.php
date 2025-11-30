@@ -55,11 +55,13 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                         function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
                             if (is_array($formDataInvoice)) {
                                 $existingNoInvoice = collect($formDataInvoice)->pluck('no_invoice')->toArray();
-                                if ($index !== null) unset($existingNoInvoice[$index]);
-
-                                if (in_array($value, $existingNoInvoice)) {
-                                    $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
+                                if ($index !== null) {
+                                    unset($existingNoInvoice[$index]);
+                                    if (in_array($value, $existingNoInvoice)) {
+                                        $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
+                                    }
                                 }
+
                             }
                         },
                     ],
@@ -82,11 +84,14 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'no_kontrak' => [
                         'required',
                         'string',
-                        function ($attribute, $value, $fail) use ($formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
                             if (is_array($formDataInvoice)) {
                                 $existingNoKontrak = collect($formDataInvoice)->pluck('no_kontrak')->filter()->toArray();
-                                if (in_array($value, $existingNoKontrak)) {
-                                    $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
+                                if ($index !== null) {
+                                    unset($existingNoKontrak[$index]);
+                                    if (in_array($value, $existingNoKontrak)) {
+                                        $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
+                                    }
                                 }
                             }
                         },
@@ -109,11 +114,14 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                         'required',
                         'string',
                         'unique:bukti_peminjaman,no_invoice',
-                        function ($attribute, $value, $fail) use ($formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
                             if (is_array($formDataInvoice)) {
                                 $existingNoInvoice = collect($formDataInvoice)->pluck('no_invoice')->toArray();
-                                if (in_array($value, $existingNoInvoice)) {
-                                    $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
+                                if ($index !== null) {
+                                    unset($existingNoInvoice[$index]);
+                                    if (in_array($value, $existingNoInvoice)) {
+                                        $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
+                                    }
                                 }
                             }
                         },
@@ -132,11 +140,14 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'no_kontrak' => [
                         'required',
                         'string',
-                        function ($attribute, $value, $fail) use ($formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
                             if (is_array($formDataInvoice)) {
                                 $existingNoKontrak = collect($formDataInvoice)->pluck('no_kontrak')->filter()->toArray();
-                                if (in_array($value, $existingNoKontrak)) {
-                                    $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
+                                if ($index !== null) {
+                                    unset($existingNoKontrak[$index]);
+                                    if (in_array($value, $existingNoKontrak)) {
+                                        $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
+                                    }
                                 }
                             }
                         },

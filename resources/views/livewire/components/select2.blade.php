@@ -9,8 +9,8 @@
     >
     <option value="">-- {{ $data_placeholder }} --</option>
     @foreach ($list_data as $key => $item)
-        <option value="{{ $item->{$value_name} }}" {{ $value == $item->{$value_name} ? 'selected' : '' }}>
-            {{ $item->{$value_label} }}
+        <option value="{{ $item->{$value_name} ?? $item['value'] }}" {{ $value == ($item->{$value_name} ?? $item['value']) ? 'selected' : '' }}>
+            {{ $item->{$value_label} ?? $item['label'] }}
         </option>
     @endforeach
     </select>
@@ -105,6 +105,16 @@
                 }
             }
 
+            let previousWireId = null;
+
+            function getCurrentWireId() {
+                const $select = $('#' + selectId);
+                if ($select.length === 0) return null;
+                
+                const $select2Component = $select.closest('[wire\\:id]').first();
+                return $select2Component.length ? $select2Component.attr('wire:id') : null;
+            }
+
             function initializeSelect2Component() {
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -112,15 +122,24 @@
                     });
                 });
             }
+            
             document.addEventListener('livewire:init', () => {
-                // initializeSelect2Component();
+                previousWireId = getCurrentWireId();
+                initializeSelect2Component();
             });
 
             document.addEventListener('livewire:navigated', () => {
+                previousWireId = getCurrentWireId();
                 initializeSelect2Component();
 
                 Livewire.hook('morphed', () => {
-                    initializeSelect2Component();
+                    const currentWireId = getCurrentWireId();
+                    
+                    // Only init if wire:id has changed
+                    if (currentWireId && currentWireId !== previousWireId) {
+                        previousWireId = currentWireId;
+                        initializeSelect2Component();
+                    }
                 });
             });
         })();

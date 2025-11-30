@@ -124,74 +124,14 @@
     
                 <!-- Table Invoice/Kontrak -->
                 <div wire:block-when-change-state="jenis_pembiayaan|id_instansi">
-                    <livewire:pengajuan-pinjaman.invoice 
-                        :$jenis_pembiayaan 
-                        :$pengajuan 
-                        :$sumber_pembiayaan 
-                        :$id_instansi 
-                        wire:key="invoice-{{ $jenis_pembiayaan }}-{{ $sumber_pembiayaan }}-{{ $id_instansi }}" />
+                    @include('livewire.pengajuan-pinjaman.components.table_create')
                 </div>
     
                 <div class="card border-1 mb-4 shadow-none">
                     <div class="card-body">
-                        <!-- Form untuk selain Invoice Financing && PO Financing -->
-                        <div id="formNonInstallment">
-                            <div class="row">
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">Total Pinjaman</label>
-                                    <input type="text" class="form-control input-rupiah non-editable" id="total_pinjaman" wire:model="total_pinjaman" placeholder="Rp 0" readonly disabled>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="tanggal_pencairan" class="form-label">Harapan Tanggal Pencairan</label>
-                                    <livewire:components.datepicker-bootstrap 
-                                        wire:key="tanggal_pencarian_{{ Str::random(5) }}"
-                                        model_name="tanggal_pencairan"
-                                        :value="$tanggal_pencairan"
-                                        data_placeholder="DD/MM/YYYY"
-                                        format="dd/mm/yyyy"
-                                        :autoclose="true" 
-                                        :today_highlight="true"
-                                    />
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-    
-                            <div class="row">
-                                <div class="col-md-4 form-group mb-3">
-                                    <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control input-rupiah non-editable" id="total_bagi_hasil" wire:model="total_bagi_hasil" placeholder="2%" readonly disabled>
-                                        <span class="input-group-text">/Bulan</span>
-                                    </div>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-4 form-group mb-3">
-                                    <label for="tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran</label>
-                                    <livewire:components.datepicker-bootstrap 
-                                        wire:key="tanggal_pembayaran_{{ Str::random(5) }}"
-                                        model_name="tanggal_pembayaran"
-                                        :value="$tanggal_pembayaran"
-                                        data_placeholder="DD/MM/YYYY"
-                                        format="dd/mm/yyyy"
-                                        :autoclose="true"
-                                        :today_highlight="true"
-                                    />
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-4 form-group mb-3">
-                                    <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control input-rupiah non-editable" id="pembayaran_total" wire:model="pembayaran_total" placeholder="" readonly disabled>
-                                        <span class="input-group-text">/Bulan</span>
-                                    </div>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-                        </div>
-    
+                        @if ($jenis_pembiayaan == 'Installment')
                         <!-- Form khusus untuk Installment -->
-                        <div id="formInstallment" style="display: none;">
+                        <div id="formInstallment">
                             <div class="row mb-3">
                                 <div class="col-md-6 form-group">
                                     <label for="nominal_pinjaman" class="form-label">Total Pinjaman</label>
@@ -200,12 +140,16 @@
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label for="tenorPembayaran" class="form-label">Tenor Pembayaran</label>
-                                    <select class="form-select select2" id="tenorPembayaran" wire:model.blur="tenor_pembayaran">
-                                        <option value="">Pilih Tenor</option>
-                                        @foreach ($list_tenor_pembayaran as $tenor)
-                                            <option value="{{ $tenor['value'] }}">{{ $tenor['label'] }}</option>
-                                        @endforeach
-                                    </select>
+                                    <livewire:components.select2 
+                                        :list_data="$list_tenor_pembayaran"
+                                        value_name="value"
+                                        value_label="label"
+                                        data_placeholder="Pilih Tenor Pembayaran"
+                                        model_name="tenor_pembayaran"
+                                        :value="$tenor_pembayaran"
+                                        :allow_clear="true"
+                                        :tags="false"
+                                    />
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </div>
@@ -247,6 +191,61 @@
                             </div>
                         </div>
                         {{-- end form khusus installment --}}
+                        @else
+                        <!-- Form untuk selain Invoice Financing && PO Financing -->
+                        <div id="formNonInstallment">
+                            <div class="row">
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">{{ $jenis_pembiayaan == 'Factoring' ? 'Total Nominal Yang Dialihkan' : 'Total Pinjaman' }}</label>
+                                    <input type="text" class="form-control input-rupiah non-editable" id="total_pinjaman" wire:model="total_pinjaman" placeholder="Rp 0" readonly disabled>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="tanggal_pencairan" class="form-label">Harapan Tanggal Pencairan</label>
+                                    <livewire:components.datepicker-bootstrap 
+                                        model_name="tanggal_pencairan"
+                                        :value="$tanggal_pencairan"
+                                        data_placeholder="DD/MM/YYYY"
+                                        format="dd/mm/yyyy"
+                                        :autoclose="true" 
+                                        :today_highlight="true"
+                                    />
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+    
+                            <div class="row">
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control input-rupiah non-editable" id="total_bagi_hasil" wire:model="total_bagi_hasil" placeholder="2%" readonly disabled>
+                                        <span class="input-group-text">/Bulan</span>
+                                    </div>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran</label>
+                                    <livewire:components.datepicker-bootstrap 
+                                        model_name="tanggal_pembayaran"
+                                        :value="$tanggal_pembayaran"
+                                        data_placeholder="DD/MM/YYYY"
+                                        format="dd/mm/yyyy"
+                                        :autoclose="true"
+                                        :today_highlight="true"
+                                    />
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control input-rupiah non-editable" id="pembayaran_total" wire:model="pembayaran_total" placeholder="" readonly disabled>
+                                        <span class="input-group-text">/Bulan</span>
+                                    </div>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
     
@@ -271,6 +270,14 @@
             </form>
         </div>
     </div>
+    
+    <livewire:pengajuan-pinjaman.invoice-form 
+        :$jenis_pembiayaan 
+        :$pengajuan 
+        :$sumber_pembiayaan 
+        :$id_instansi 
+        wire:key="invoice-form-{{ $jenis_pembiayaan }}-{{ $sumber_pembiayaan }}-{{ $id_instansi }}" 
+    />
 </div>
 
 @push('scripts')

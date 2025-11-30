@@ -295,38 +295,16 @@
                 </div>
                 @break
             @default
-
         @endswitch
         <button type="button" class="btn btn-outline-primary" id="btnTambahInvoice" data-bs-toggle="modal" data-bs-target="#modalTambahInvoice">
             <i class="fa-solid fa-plus me-1"></i>
             Tambah
         </button>
     </div>
-    @include('livewire.pengajuan-pinjaman.components.modal_create')
 </div>
 
 @push('scripts')
 <script>
-    document.addEventListener('livewire:navigated', () => {
-        initAllComponents();
-
-        Livewire.on('invoice-saved', (event) => {
-            $('.modal').modal('hide');
-        });
-
-        Livewire.on('edit-invoice', (event) => {
-            const data = event[0];
-            
-            Object.entries(data).forEach(([key, value]) => {
-                if (['invoice_date', 'due_date'].includes(key)) {
-                    $('#' + key).datepicker('setDate', value);
-                }
-            });
-
-            $('.modal').modal('show');
-        });
-    });
-
     document.addEventListener('livewire:navigated', () => {
         Livewire.hook('morphed',  ({ el, component }) => {
             const isTableCreate = component?.name === 'pengajuan-pinjaman.create';

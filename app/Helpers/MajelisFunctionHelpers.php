@@ -180,13 +180,74 @@ if (!function_exists('getFileUrl')) {
     /**
      * Mendapatkan URL untuk preview atau download file dari livewire-tmp
      * 
-     * @param mixed $file TemporaryUploadedFile, UploadedFile, string (path), atau null
+     * @param mixed $file TemporaryUploadedFile, UploadedFile, string (path), array dengan real_path/client_original_name/mime_type, atau null
      * @param bool $forceDownload Jika true, akan memaksa download. Jika false, akan preview di tab baru jika memungkinkan
      * @return string|null URL untuk mengakses file atau null
      */
     function getFileUrl($file, $forceDownload = false)
     {
         if (empty($file)) {
+            return null;
+        }
+
+        // Jika berupa array dengan real_path, client_original_name, mime_type
+        if (is_array($file) && isset($file['real_path']) && isset($file['client_original_name']) && isset($file['mime_type'])) {
+            $realPath = $file['real_path'];
+            
+            // Cek apakah file exists
+            if (!file_exists($realPath)) {
+                return null;
+            }
+
+            // Ekstrak filename dari real_path untuk digunakan dengan route
+            // Path biasanya seperti: /path/to/livewire-tmp/filename atau storage/livewire-tmp/filename
+            $filename = basename($realPath);
+            
+            // Jika path mengandung livewire-tmp, gunakan route Livewire
+            if (str_contains($realPath, 'livewire-tmp')) {
+                if (!$forceDownload) {
+                    return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                        'file.preview',
+                        now()->addMinutes(30),
+                        ['filename' => $filename]
+                    );
+                }
+                
+                return \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'livewire.preview-file',
+                    now()->addMinutes(30),
+                    ['filename' => $filename]
+                );
+            }
+            
+            // Jika bukan livewire-tmp, coba gunakan Storage disk
+            $disk = \Livewire\Features\SupportFileUploads\FileUploadConfiguration::disk();
+            $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+            
+            // Coba cari path relatif di storage
+            $relativePath = str_replace($storage->path(''), '', $realPath);
+            $relativePath = ltrim($relativePath, '/\\');
+            
+            if ($storage->exists($relativePath)) {
+                if (!$forceDownload) {
+                    try {
+                        $previewMimes = config('livewire.temporary_file_upload.preview_mimes', []);
+                        $extension = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
+                        
+                        if (in_array($extension, $previewMimes)) {
+                            if (method_exists($storage->getAdapter(), 'getTemporaryUrl')) {
+                                return $storage->temporaryUrl($relativePath, now()->addMinutes(30));
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        // Fallback ke URL biasa
+                    }
+                }
+                
+                return $storage->url($relativePath);
+            }
+            
+            // Fallback: jika file ada tapi tidak di storage, return null
             return null;
         }
 
@@ -255,6 +316,67 @@ if (!function_exists('getFileUrl')) {
         }
 
         return null;
+    }
+}
+
+if (!function_exists('createTemporaryUploadedFileFromArray')) {
+    /**
+     * Membuat instance TemporaryUploadedFile dari array dengan real_path, client_original_name, mime_type
+     * 
+     * @param array $fileInfo Array dengan keys: real_path, client_original_name, mime_type
+     * @return \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null Instance TemporaryUploadedFile atau null jika gagal
+     */
+    function createTemporaryUploadedFileFromArray(array $fileInfo)
+    {
+        if (empty($fileInfo) || !isset($fileInfo['real_path'])) {
+            return null;
+        }
+
+        $realPath = $fileInfo['real_path'];
+        
+        // Cek apakah file exists
+        if (!file_exists($realPath)) {
+            return null;
+        }
+
+        // Ekstrak filename dari real_path
+        // Contoh: E:\laragon\www\syifa-hadju-fineshyt\storage\app\livewire-tmp/5VlMIHmEo45KqPGgm25oLvJdXpsdzG-metaMTMxNDU1OS5wbmc=-.png
+        // Filename: 5VlMIHmEo45KqPGgm25oLvJdXpsdzG-metaMTMxNDU1OS5wbmc=-.png
+        $filename = basename($realPath);
+        
+        // Buat path relatif untuk TemporaryUploadedFile
+        // Path relatif harus seperti: livewire-tmp/filename
+        $relativePath = 'livewire-tmp/' . $filename;
+        
+        try {
+            // Gunakan method static createFromLivewire untuk membuat instance
+            return \Livewire\Features\SupportFileUploads\TemporaryUploadedFile::createFromLivewire($relativePath);
+        } catch (\Exception $e) {
+            // Jika gagal, coba dengan path lengkap
+            // Ekstrak path relatif dari real_path
+            $disk = \Livewire\Features\SupportFileUploads\FileUploadConfiguration::disk();
+            $storage = \Illuminate\Support\Facades\Storage::disk($disk);
+            $storagePath = $storage->path('');
+            
+            // Coba ekstrak path relatif dari real_path
+            if (str_contains($realPath, 'livewire-tmp')) {
+                // Cari posisi 'livewire-tmp' di path
+                $pos = strpos($realPath, 'livewire-tmp');
+                if ($pos !== false) {
+                    $relativePath = substr($realPath, $pos);
+                    // Normalize path separator untuk cross-platform
+                    $relativePath = str_replace('\\', '/', $relativePath);
+                    
+                    try {
+                        return \Livewire\Features\SupportFileUploads\TemporaryUploadedFile::createFromLivewire($relativePath);
+                    } catch (\Exception $e2) {
+                        return null;
+                    }
+                }
+            }
+            
+            return null;
+        }
     }
 }
 }
