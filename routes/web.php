@@ -12,7 +12,6 @@ use App\Livewire\ConfigMatrixScore;
 use App\Livewire\PermissionManagement;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
-use App\Livewire\ValidasiPengajuanRestrukturisasi;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -68,9 +67,13 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'destroy'])->name('destroy');
         Route::get('peminjaman/{idDebitur}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPeminjamanListApi'])->name('peminjaman.list');
         Route::get('detail-pengajuan/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
+        // Evaluasi endpoints
+        Route::post('{id}/evaluasi', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'save'])->name('evaluasi.save');
+        Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
     });
 
-    Route::get('detail-restrukturisasi/{id}', ValidasiPengajuanRestrukturisasi::class)->name('detail-restrukturisasi');
+    // Detail restrukturisasi menggunakan Controller dengan Pure AJAX (bukan Livewire component)
+    Route::get('detail-restrukturisasi/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('detail-restrukturisasi');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');

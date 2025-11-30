@@ -7,6 +7,7 @@ use App\Models\PengajuanRestrukturisasi;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
+use App\Models\HistoryStatusPengajuanRestrukturisasi;
 use App\Http\Requests\PengajuanRestrukturisasiRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -92,7 +93,25 @@ class PengajuanRestrukturisasiController extends Controller
     {
         try {
             $pengajuan = PengajuanRestrukturisasi::with(['debitur', 'pengajuanPeminjaman'])->findOrFail($id);
-            return view('livewire.pengajuan-restrukturisasi.detail', compact('pengajuan'));
+            
+            // Load history
+            $histories = HistoryStatusPengajuanRestrukturisasi::where('id_pengajuan_restrukturisasi', $id)
+                ->with(['submittedBy', 'approvedBy', 'rejectedBy'])
+                ->orderByDesc('created_at')
+                ->get();
+            
+            $latestHistory = $histories->first();
+            
+            // Convert to array format for view consistency
+            $restrukturisasi = [
+                'id' => $pengajuan->id_pengajuan_restrukturisasi,
+                'nama_perusahaan' => $pengajuan->debitur->nama_perusahaan ?? '-',
+                'status' => $pengajuan->status,
+                'current_step' => $pengajuan->current_step ?? 1,
+                'data' => $pengajuan, // Full model for detailed access
+            ];
+            
+            return view('livewire.pengajuan-restrukturisasi.detail', compact('restrukturisasi', 'histories', 'latestHistory', 'pengajuan'));
         } catch (\Exception $e) {
             abort(404, 'Pengajuan restrukturisasi tidak ditemukan');
         }
