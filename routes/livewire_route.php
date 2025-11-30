@@ -16,3 +16,10 @@ Route::get('penyaluran-deposito', \App\Livewire\PenyaluranDeposito\PenyaluranDep
 
 Route::get('config-matrix-pinjaman', \App\Livewire\ConfigMatrixPinjaman\Index::class)->name('config-matrix-pinjaman.index');
 
+// AR Performance
+Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-performance.index');
+
+// Debitur Piutang
+Route::get('debitur-piutang', \App\Livewire\DebiturPiutangIndex::class)->name('debitur-piutang.index');
+
+
