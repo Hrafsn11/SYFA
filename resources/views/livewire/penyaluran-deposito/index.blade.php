@@ -143,11 +143,34 @@
             $('#nominal_raw').val(rawValue);
             @this.set('nominal_yang_disalurkan', rawValue);
             
-            // Validasi
+            const selectedOption = $('#id_pengajuan_investasi option:selected');
+            const nilaiInvestasi = parseFloat(selectedOption.data('nilai-investasi')) || 0;
+            const sisaDana = parseFloat(selectedOption.data('sisa-dana')) || 0;
+            
             if (nilaiInvestasiMax > 0 && parseFloat(rawValue) > nilaiInvestasiMax) {
-                $('#nilai-investasi-info').html('<span class="text-danger">⚠ Nominal tidak boleh lebih dari nilai investasi (Rp ' + nilaiInvestasiMax.toLocaleString('id-ID') + ')</span>');
+                $('#nilai-investasi-info').html(`
+                    <div class="alert alert-danger py-2 mt-2">
+                        <small>
+                            <i class="ti ti-alert-circle me-1"></i>
+                            <strong>Perhatian!</strong> Nominal melebihi sisa dana yang tersedia 
+                            (Rp ${nilaiInvestasiMax.toLocaleString('id-ID')})
+                        </small>
+                    </div>
+                `);
+                $(this).addClass('is-invalid');
             } else {
-                $('#nilai-investasi-info').html('');
+                $(this).removeClass('is-invalid');
+                
+                if (sisaDana > 0 && nilaiInvestasi > 0) {
+                    $('#nilai-investasi-info').html(`
+                        <div class="alert alert-info py-2 mt-2">
+                            <small>
+                                <strong>Nilai Investasi:</strong> Rp ${nilaiInvestasi.toLocaleString('id-ID')}<br>
+                                <strong class="text-success">Sisa Dana Tersedia:</strong> Rp ${sisaDana.toLocaleString('id-ID')}
+                            </small>
+                        </div>
+                    `);
+                }
             }
         });
 
@@ -184,10 +207,19 @@
         $('#id_pengajuan_investasi').on('change', function() {
             const selectedOption = $(this).find('option:selected');
             const nilaiInvestasi = selectedOption.data('nilai-investasi');
+            const sisaDana = parseFloat(selectedOption.data('sisa-dana')) || 0;
             
-            if (nilaiInvestasi) {
-                nilaiInvestasiMax = parseFloat(nilaiInvestasi);
-                $('#nilai-investasi-info').html('<small class="text-muted">Nilai investasi: Rp ' + nilaiInvestasiMax.toLocaleString('id-ID') + '</small>');
+            if (sisaDana !== undefined && nilaiInvestasi !== undefined) {
+                nilaiInvestasiMax = sisaDana;  
+                
+                $('#nilai-investasi-info').html(`
+                    <div class="alert alert-info py-2 mt-2">
+                        <small>
+                            <strong>Nilai Investasi:</strong> Rp ${parseFloat(nilaiInvestasi).toLocaleString('id-ID')}<br>
+                            <strong class="text-success">Sisa Dana Tersedia:</strong> Rp ${sisaDana.toLocaleString('id-ID')}
+                        </small>
+                    </div>
+                `);
             } else {
                 nilaiInvestasiMax = 0;
                 $('#nilai-investasi-info').html('');

@@ -68,7 +68,7 @@
             <span class="menu-header-text">Pengembalian</span>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('pengembalian*') ? 'active' : '' }}">
+        <li class="menu-item {{ request()->routeIs('pengembalian.index') ? 'active' : '' }}">
             <a wire:navigate.hover href="{{ route('pengembalian.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-wallet"></i>
                 <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
@@ -94,7 +94,7 @@
             <span class="menu-header-text">Investasi</span>
         </li>
 
-        <li class="menu-item {{ request()->is('debitur-dan-investor*') ? 'open' : '' }}">
+        <li class="menu-item {{ request()->is('debitur-dan-investor*') || request()->is('penyaluran-deposito*') || request()->is('pengembalian-investasi*') || request()->is('kertas-kerja-investor-sfinance*') ? 'open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-id-badge"></i>
                 <div data-i18n="Pengajuan Investasi">Pengajuan Investasi</div>
@@ -122,6 +122,12 @@
                 <li class="menu-item {{ request()->is('kertas-kerja-investor-sfinance*') ? 'active' : '' }}">
                     <a href="{{ route('kertas-kerja-investor-sfinance.index') }}" class="menu-link">
                         <div data-i18n="Kertas Kerja Investor SFinance">Kertas Kerja Investor SFinance</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ request()->is('pengembalian-investasi*') ? 'active' : '' }}">
+                    <a wire:navigate.hover href="{{ route('pengembalian-investasi.index') }}" class="menu-link">
+                        <div data-i18n="Pengembalian Investasi">Pengembalian Investasi</div>
                     </a>
                 </li>
             </ul>

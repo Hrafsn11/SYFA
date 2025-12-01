@@ -152,7 +152,8 @@
                                 $tabs = [
                                     'config' => 'Configuration',
                                     'master_data' => 'Master Data',
-                                    'peminjaman' => 'Peminjaman'
+                                    'peminjaman' => 'Peminjaman',
+                                    'investasi' => 'Investasi',
                                 ];
 
                                 $groupPrefixes = [
@@ -163,14 +164,19 @@
                                     'master_data' => ['master_data'],
                                     'peminjaman' => [
                                         'peminjaman',
-                                        ],
+                                        'peminjaman_dana',
+                                    ],
+                                    'investasi' => [
+                                        'investasi',
+                                        'penyaluran_deposito',
+                                    ],
                                 ];
                             @endphp
 
                             <!-- Nav Pills -->
-                            <ul class="nav nav-pills mb-3" id="permissionTabs" role="tablist">
+                            <ul class="nav nav-pills mb-3 flex-nowrap gap-2" id="permissionTabs" role="tablist" style="overflow-x: auto; white-space: nowrap;">
                                 @foreach($tabs as $id => $label)
-                                    <li class="nav-item" role="presentation">
+                                    <li class="nav-item flex-fill text-center" role="presentation">
                                         <button class="nav-link {{ $loop->first ? 'active' : '' }}" id="tab-{{ $id }}-tab"
                                                 data-bs-toggle="pill" data-bs-target="#tab-{{ $id }}" type="button" role="tab"
                                                 aria-controls="tab-{{ $id }}" aria-selected="{{ $loop->first ? 'true' : 'false' }}">
@@ -214,6 +220,10 @@
                                                                         'roles' => 'roles',
                                                                         'users' => 'users',
                                                                         'peminjaman' => 'peminjaman',
+                                                                        'peminjaman_dana' => 'peminjaman dana',
+                                                                        'investasi' => 'investasi',
+                                                                        'penyaluran_deposito' => 'penyaluran deposito',
+                                                                        'master_data' => 'master data',
                                                                     ];
 
                                                                     $name_group = $groupMap[$group] ?? $group;

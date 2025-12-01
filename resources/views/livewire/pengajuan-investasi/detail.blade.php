@@ -94,18 +94,24 @@
                                                     <i class="fas fa-paper-plane me-2"></i>
                                                     Submit Pengajuan
                                                 </button>
+                                                @can('investasi.validasi_bagi_hasil')
                                                 <button type="button" class="btn btn-primary d-none" id="btnSetujuiPengajuan">
                                                     <i class="fas fa-check me-2"></i>
                                                     Validasi Bagi Hasil
                                                 </button>
+                                                @endcan
+                                                @can('investasi.validasi_ceo_ski')
                                                 <button type="button" class="btn btn-primary d-none" id="btnValidasiCEO">
                                                     <i class="ti ti-check me-2"></i>
                                                     Validasi CEO SKI
                                                 </button>
+                                                @endcan
+                                                @can('investasi.generate_kontrak')
                                                 <button type="button" class="btn btn-primary d-none" id="btnUploadBukti">
                                                     <i class="ti ti-upload me-2"></i>
                                                     Upload Bukti Transfer
                                                 </button>
+                                                @endcan
                                             </div>
                                         </div>
 
@@ -161,6 +167,7 @@
 
                                     <!-- Konten Step 5: Generate Kontrak (After Dana Sudah Dicairkan) -->
                                     <div id="kontrak-step5" class="d-none">
+                                        @can('investasi.generate_kontrak')
                                         <h5 class="mb-4">Generate Kontrak Investasi Deposito</h5>
                                         
                                         <!-- Data Kontrak (10 Fields) -->
@@ -222,6 +229,11 @@
                                                 </form>
                                             </div>
                                         </div>
+                                        @else
+                                        <div class="alert alert-info">
+                                            Anda tidak memiliki izin untuk melakukan generate kontrak.
+                                        </div>
+                                        @endcan
                                     </div>
                                     <!-- End Konten Step 5 -->
                                 </div>
@@ -361,6 +373,7 @@
     </div>
 
     <!-- Modal Persetujuan Investasi -->
+    @can('investasi.validasi_bagi_hasil')
     <div class="modal fade" id="modalPersetujuanInvestasi" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -384,8 +397,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Modal Hasil Review (Penolakan) -->
+    @canany(['investasi.validasi_bagi_hasil','investasi.validasi_ceo_ski'])
     <div class="modal fade" id="modalHasilReview" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -417,8 +432,10 @@
             </div>
         </div>
     </div>
+    @endcanany
 
     <!-- Modal Upload Bukti Transfer -->
+    @can('investasi.generate_kontrak')
     <div class="modal fade" id="modalUploadBuktiTransfer" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -452,8 +469,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Modal Validasi CEO SKI -->
+    @can('investasi.validasi_ceo_ski')
     <div class="modal fade" id="modalValidasiCEO" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -479,6 +498,7 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Modal Preview Bukti Transfer -->
     <div class="modal fade" id="modalPreviewBukti" tabindex="-1" aria-hidden="true">

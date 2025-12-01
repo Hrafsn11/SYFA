@@ -22,7 +22,6 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('tanggal_pengiriman_dana', 'desc')
             ->setTableAttributes(['class' => 'table table-bordered'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -33,8 +32,20 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         return PenyaluranDeposito::query()
-            ->leftJoin('pengajuan_investasi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pengajuan_investasi.id_pengajuan_investasi')
-            ->select(
+            ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->leftJoin(
+                \DB::raw('(
+                    SELECT 
+                        id_pengajuan_investasi, 
+                        SUM(nominal_yang_disalurkan) as total_disalurkan_sum
+                    FROM penyaluran_deposito 
+                    GROUP BY id_pengajuan_investasi
+                ) as pd_sum'),
+                'pi.id_pengajuan_investasi', 
+                '=', 
+                'pd_sum.id_pengajuan_investasi'
+            )
+            ->select([
                 'penyaluran_deposito.id_penyaluran_deposito',
                 'penyaluran_deposito.id_pengajuan_investasi',
                 'penyaluran_deposito.id_debitur',
@@ -44,11 +55,13 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 'penyaluran_deposito.bukti_pengembalian',
                 'penyaluran_deposito.created_at',
                 'penyaluran_deposito.updated_at',
-                'pengajuan_investasi.nomor_kontrak as pi_nomor_kontrak',
-                'pengajuan_investasi.nama_investor as pi_nama_investor',
-                'pengajuan_investasi.jumlah_investasi as pi_jumlah_investasi',
-                'pengajuan_investasi.lama_investasi as pi_lama_investasi'
-            );
+                'pi.nomor_kontrak as pi_nomor_kontrak',
+                'pi.nama_investor as pi_nama_investor',
+                'pi.jumlah_investasi as pi_jumlah_investasi',
+                'pi.lama_investasi as pi_lama_investasi',
+                \DB::raw('COALESCE(pd_sum.total_disalurkan_sum, 0) as total_disalurkan'),
+                \DB::raw('(pi.jumlah_investasi - COALESCE(pd_sum.total_disalurkan_sum, 0)) as sisa_dana')
+            ]);
     }
 
     public function columns(): array
@@ -92,7 +105,19 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    return '<div class="text-center">'.($value ? 'Rp ' . number_format($value, 0, ',', '.') : '-').'</div>';
+                    return '<div class="text-end">'.($value ? 'Rp ' . number_format($value, 0, ',', '.') : '-').'</div>';
+                })
+                ->html(),
+
+            Column::make('Sisa Dana')
+                ->label(function ($row) {
+                    $sisa = $row->sisa_dana ?? 0;
+                    $badgeClass = $sisa > 0 ? 'bg-label-success' : 'bg-label-secondary';
+                    return '<div class="text-end">
+                        <span class="badge '.$badgeClass.' px-3 py-2">
+                            Rp ' . number_format($sisa, 0, ',', '.') . '
+                        </span>
+                    </div>';
                 })
                 ->html(),
 

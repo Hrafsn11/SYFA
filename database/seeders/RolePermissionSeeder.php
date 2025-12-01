@@ -76,6 +76,26 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.generate_kontrak',
             'peminjaman_dana.konfirmasi_debitur',
             'peminjaman_dana.upload_dokumen_transfer',
+            // Restrukturisasi Management
+            'pengajuan_restrukturisasi.view',
+            'pengajuan_restrukturisasi.add',
+            'pengajuan_restrukturisasi.edit',
+            'pengajuan_restrukturisasi.ajukan_restrukturisasi',
+            'pengajuan_restrukturisasi.validasi_dokumen',
+            'pengajuan_restrukturisasi.persetujuan_ceo_ski',
+            'pengajuan_restrukturisasi.persetujuan_direktur',
+            // Investasi Management
+            'investasi.view',
+            'investasi.add',
+            'investasi.edit',
+            'investasi.delete',
+            'investasi.validasi_bagi_hasil',
+            'investasi.validasi_ceo_ski',
+            'investasi.generate_kontrak',
+            // Penyaluran Deposito
+            'penyaluran_deposito.view',
+            'penyaluran_deposito.add',
+            'penyaluran_deposito.edit',
         ];
 
         foreach ($permissions as $permission) {
@@ -127,6 +147,11 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.pengajuan_peminjaman',
             'peminjaman_dana.persetujuan_debitur',
             'peminjaman_dana.konfirmasi_debitur',
+            
+            'pengajuan_restrukturisasi.view',
+            'pengajuan_restrukturisasi.add',
+            'pengajuan_restrukturisasi.edit',
+            'pengajuan_restrukturisasi.ajukan_restrukturisasi',
         ]);
 
         $financeRole = Role::firstOrCreate(['name' => 'Finance SKI', 'restriction' => 0]);
@@ -135,6 +160,11 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.view',
             'peminjaman_dana.validasi_dokumen',
             'peminjaman_dana.upload_dokumen_transfer',
+
+            'pengajuan_restrukturisasi.validasi_dokumen',
+            'investasi.validasi_bagi_hasil',
+            'investasi.generate_kontrak',
+            'penyaluran_deposito.edit',
         ]);
 
         $ceoRole = Role::firstOrCreate(['name' => 'CEO SKI', 'restriction' => 0]);
@@ -142,6 +172,9 @@ class RolePermissionSeeder extends Seeder
         $ceoRole->syncPermissions([
             'peminjaman_dana.view',
             'peminjaman_dana.validasi_ceo_ski',
+
+            'pengajuan_restrukturisasi.persetujuan_ceo_ski',
+            'investasi.validasi_ceo_ski',
         ]);
 
         $direkturRole = Role::firstOrCreate(['name' => 'Direktur SKI', 'restriction' => 0]);
@@ -149,6 +182,8 @@ class RolePermissionSeeder extends Seeder
         $direkturRole->syncPermissions([
             'peminjaman_dana.view',
             'peminjaman_dana.validasi_direktur',
+
+            'pengajuan_restrukturisasi.persetujuan_direktur',
         ]);
 
 
