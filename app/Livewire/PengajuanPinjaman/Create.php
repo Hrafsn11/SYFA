@@ -112,11 +112,11 @@ class Create extends Component
         $this->index_data_invoice = $idx;
         foreach ($this->form_data_invoice[$idx] as $key => $value) {
             if (in_array($key, [
-                'dokumen_invoice_file', 
-                'dokumen_kontrak_file', 
-                'dokumen_so_file', 
-                'dokumen_bast_file', 
-                'dokumen_lainnnya_file'
+                'dokumen_invoice', 
+                'dokumen_kontrak', 
+                'dokumen_so', 
+                'dokumen_bast', 
+                'dokumen_lainnnya'
             ])) continue;
 
             if (in_array($key, ['nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil'])) {

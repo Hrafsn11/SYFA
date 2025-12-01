@@ -23,7 +23,6 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
     {
         return $this->getRules(
             $this->jenis_pembiayaan ?? null,
-            $this->index_data_invoice ?? null,
             $this->form_data_invoice ?? []
         );
     }
@@ -36,12 +35,11 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
      * @param array $formDataInvoice
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function getRules(?string $jenisPembiayaan = null, ?int $indexDataInvoice = null, array $formDataInvoice = []): array
+    public function getRules(?string $jenisPembiayaan = null, array $formDataInvoice = []): array
     {        
         // Base rules yang berlaku untuk semua jenis pembiayaan
         $validate = [];
 
-        $index = $indexDataInvoice;
         $jenisPembiayaan = $jenisPembiayaan ?? $this->jenis_pembiayaan ?? null;
         $formDataInvoice = !empty($formDataInvoice) ? $formDataInvoice : ($this->form_data_invoice ?? []);
 
@@ -52,14 +50,19 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                         'required',
                         'string',
                         'unique:bukti_peminjaman,no_invoice',
-                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($formDataInvoice) {
                             if (is_array($formDataInvoice)) {
-                                $existingNoInvoice = collect($formDataInvoice)->pluck('no_invoice')->toArray();
-                                if ($index !== null) {
-                                    unset($existingNoInvoice[$index]);
-                                    if (in_array($value, $existingNoInvoice)) {
-                                        $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
-                                    }
+                                $collection = collect($formDataInvoice);
+                                $max = 2;
+
+                                if (!is_null($this->index_data_invoice) && $collection->has($this->index_data_invoice)) {
+                                    $collection->forget($this->index_data_invoice);
+                                    $max = 1;
+                                }
+
+                                $existingNoInvoice = $collection->where('no_invoice', $value)->count();
+                                if ($existingNoInvoice >= $max) {
+                                    $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
                                 }
                             }
                         },
@@ -75,7 +78,7 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
 
-                if ($index !== null) $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
+                if ($this->index_data_invoice !== null) $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
                 break;
 
             case 'PO Financing':
@@ -83,14 +86,19 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'no_kontrak' => [
                         'required',
                         'string',
-                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($formDataInvoice) {
                             if (is_array($formDataInvoice)) {
-                                $existingNoKontrak = collect($formDataInvoice)->pluck('no_kontrak')->filter()->toArray();
-                                if ($index !== null) {
-                                    unset($existingNoKontrak[$index]);
-                                    if (in_array($value, $existingNoKontrak)) {
-                                        $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
-                                    }
+                                $collection = collect($formDataInvoice);
+                                $max = 2;
+
+                                if (!is_null($this->index_data_invoice) && $collection->has($this->index_data_invoice)) {
+                                    $collection->forget($this->index_data_invoice);
+                                    $max = 1;
+                                }
+
+                                $existingNoKontrak = $collection->where('no_kontrak', $value)->count();
+                                if ($existingNoKontrak >= $max) {
+                                    $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
                                 }
                             }
                         },
@@ -105,6 +113,8 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_lainnnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
+
+                if ($this->index_data_invoice !== null) $validate['dokumen_kontrak'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
                 break;
 
             case 'Installment':
@@ -113,14 +123,19 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                         'required',
                         'string',
                         'unique:bukti_peminjaman,no_invoice',
-                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($formDataInvoice) {
                             if (is_array($formDataInvoice)) {
-                                $existingNoInvoice = collect($formDataInvoice)->pluck('no_invoice')->toArray();
-                                if ($index !== null) {
-                                    unset($existingNoInvoice[$index]);
-                                    if (in_array($value, $existingNoInvoice)) {
-                                        $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
-                                    }
+                                $collection = collect($formDataInvoice);
+                                $max = 2;
+
+                                if (!is_null($this->index_data_invoice) && $collection->has($this->index_data_invoice)) {
+                                    $collection->forget($this->index_data_invoice);
+                                    $max = 1;
+                                }
+
+                                $existingNoInvoice = $collection->where('no_invoice', $value)->count();
+                                if ($existingNoInvoice >= $max) {
+                                    $fail('No. Invoice sudah digunakan dalam list invoice yang akan ditambahkan.');
                                 }
                             }
                         },
@@ -132,6 +147,8 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'dokumen_invoice' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_lainnnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
+
+                if ($this->index_data_invoice !== null) $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
                 break;
 
             case 'Factoring':
@@ -139,14 +156,20 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'no_kontrak' => [
                         'required',
                         'string',
-                        function ($attribute, $value, $fail) use ($index, $formDataInvoice) {
+                        function ($attribute, $value, $fail) use ($formDataInvoice) {
                             if (is_array($formDataInvoice)) {
-                                $existingNoKontrak = collect($formDataInvoice)->pluck('no_kontrak')->filter()->toArray();
-                                if ($index !== null) {
-                                    unset($existingNoKontrak[$index]);
-                                    if (in_array($value, $existingNoKontrak)) {
-                                        $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
-                                    }
+                                $collection = collect($formDataInvoice);
+                                $max = 2;
+
+                                if (!is_null($this->index_data_invoice) && $collection->has($this->index_data_invoice)) {
+                                    $collection->forget($this->index_data_invoice);
+                                    $max = 1;
+                                }
+
+                                $existingNoKontrak = $collection->where('no_kontrak', $value)->count();
+
+                                if ($existingNoKontrak >= $max) {
+                                    $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
                                 }
                             }
                         },
@@ -161,6 +184,11 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'dokumen_so' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
+
+                if ($this->index_data_invoice !== null) {
+                    $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
+                    $validate['dokumen_kontrak'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
+                };
                 break;
 
             default:

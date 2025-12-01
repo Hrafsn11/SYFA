@@ -55,6 +55,8 @@ trait HasUniversalFormAction
             'formData' => $this->form_data
         ]);
 
+        if (!isset($payload)) return;
+
         if (method_exists($this, 'afterSave')) {
             $this->afterSave($payload);
         }

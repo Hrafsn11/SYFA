@@ -40,7 +40,7 @@ class PengajuanPinjamanRequest extends FormRequest
         
         if ($jenisPembiayaan) {
             $invoiceRequest = new InvoicePengajuanPinjamanRequest();
-            $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, null, $formDataInvoice);
+            $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, $formDataInvoice);
             
             foreach ($invoiceRules as $key => $rule) {
                 if ($key == 'no_invoice' || $key == 'no_kontrak') {
