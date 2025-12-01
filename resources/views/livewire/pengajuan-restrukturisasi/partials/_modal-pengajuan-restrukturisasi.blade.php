@@ -1,4 +1,4 @@
-{{-- <style>
+<style>
     .flatpickr-input:not([readonly]) {
         background-color: #fff !important;
         cursor: text !important;
@@ -26,7 +26,7 @@
         display: block;
         margin-top: 0.25rem;
     }
-</style> --}}
+</style>
 
 <div class="modal fade" id="modalRestrukturisasi">
     <div class="modal-dialog modal-xl modal-dialog-centered">
