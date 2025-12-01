@@ -69,26 +69,34 @@
                             <table class="table table-borderless table-sm">
                                 <tbody>
                                     <tr>
-                                        <td class="text-nowrap" style="width: 35%;"><strong>Nama
-                                                Perusahaan:</strong>
-                                        </td>
-                                        <td>Techno Infinity</td>
+                                        <td class="text-nowrap" style="width: 35%;"><strong>Nama Perusahaan:</strong></td>
+                                        <td>{{ $pengajuan->nama_perusahaan ?? '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>NPWP:</strong></td>
-                                        <td>12345678910</td>
+                                        <td>{{ $pengajuan->npwp ?? '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Nama PIC:</strong></td>
-                                        <td>Adam</td>
+                                        <td>{{ $pengajuan->nama_pic ?? '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap"><strong>Jabatan PIC:</strong></td>
+                                        <td>{{ $pengajuan->jabatan_pic ?? '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Kontrak Pembiayaan:</strong></td>
-                                        <td>KONTRAK-001</td>
+                                        <td>{{ $pengajuan->nomor_kontrak_pembiayaan ?? '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Jenis Pembiayaan:</strong></td>
-                                        <td>Invoice Financing</td>
+                                        <td>
+                                            @if($pengajuan->jenis_pembiayaan)
+                                                <span class="badge bg-label-primary">{{ $pengajuan->jenis_pembiayaan }}</span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -97,25 +105,36 @@
                             <table class="table table-borderless table-sm">
                                 <tbody>
                                     <tr>
-                                        <td class="text-nowrap" style="width: 40%;"><strong>Sisa Pokok Belum
-                                                Bayar:</strong></td>
-                                        <td>Rp 1.500.000.000</td>
+                                        <td class="text-nowrap" style="width: 40%;"><strong>Plafon Awal:</strong></td>
+                                        <td>{{ $pengajuan->jumlah_plafon_awal ? 'Rp ' . number_format($pengajuan->jumlah_plafon_awal, 0, ',', '.') : '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap"><strong>Sisa Pokok Belum Bayar:</strong></td>
+                                        <td class="fw-semibold">{{ $pengajuan->sisa_pokok_belum_dibayar ? 'Rp ' . number_format($pengajuan->sisa_pokok_belum_dibayar, 0, ',', '.') : '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Tunggakan Pokok:</strong></td>
-                                        <td class="text-danger">Rp 150.000.000</td>
+                                        <td class="{{ $pengajuan->tunggakan_pokok > 0 ? 'text-danger fw-semibold' : '' }}">
+                                            {{ $pengajuan->tunggakan_pokok ? 'Rp ' . number_format($pengajuan->tunggakan_pokok, 0, ',', '.') : 'Rp 0' }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-nowrap"><strong>Tunggakan Margin/Bunga:</strong></td>
+                                        <td class="{{ $pengajuan->tunggakan_margin_bunga > 0 ? 'text-danger fw-semibold' : '' }}">
+                                            {{ $pengajuan->tunggakan_margin_bunga ? 'Rp ' . number_format($pengajuan->tunggakan_margin_bunga, 0, ',', '.') : 'Rp 0' }}
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Jatuh Tempo Terakhir:</strong></td>
-                                        <td>10/11/2025</td>
+                                        <td>{{ $pengajuan->jatuh_tempo_terakhir ? \Carbon\Carbon::parse($pengajuan->jatuh_tempo_terakhir)->format('d/m/Y') : '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Status Saat Ini (DPD):</strong></td>
-                                        <td class="text-warning">30 Hari</td>
+                                        <td class="text-warning">{{ $pengajuan->status_dpd ?? '-' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="text-nowrap"><strong>Tanggal Pengajuan:</strong></td>
-                                        <td>19/11/2025</td>
+                                        <td>{{ $pengajuan->created_at ? $pengajuan->created_at->format('d/m/Y H:i') : '-' }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -123,23 +142,25 @@
                         <div class="col-12 mt-3">
                             <div class="alert alert-secondary py-2" role="alert">
                                 <p class="mb-1"><strong>Alasan Restrukturisasi:</strong></p>
-                                <small>
-                                    [Teks panjang yang diisi Debitur pada kolom `alasan_restrukturisasi` di Step 2.
-                                    Contoh: Penurunan tajam volume proyek pada Q4 2025 akibat penundaan kontrak
-                                    besar
-                                    dari klien utama, yang berdampak pada arus kas perusahaan.]
-                                </small>
+                                <small>{{ $pengajuan->alasan_restrukturisasi ?? 'Tidak ada keterangan' }}</small>
                             </div>
                             <div class="alert alert-secondary py-2" role="alert">
                                 <p class="mb-1"><strong>Rencana Pemulihan Usaha:</strong></p>
-                                <small>
-                                    [Teks panjang yang diisi Debitur pada kolom `rencana_pemulihan` di Step 3.
-                                    Contoh:
-                                    Menargetkan kontrak baru pada sektor lain, serta memotong biaya operasional
-                                    sebesar
-                                    15% selama 6 bulan ke depan untuk memastikan cicilan dapat dibayar tepat waktu.]
-                                </small>
+                                <small>{{ $pengajuan->rencana_pemulihan_usaha ?? 'Tidak ada keterangan' }}</small>
                             </div>
+                            @if($pengajuan->jenis_restrukturisasi)
+                                <div class="alert alert-info py-2" role="alert">
+                                    <p class="mb-1"><strong>Jenis Restrukturisasi yang Diajukan:</strong></p>
+                                    <div class="d-flex flex-wrap gap-2 mt-2">
+                                        @foreach($pengajuan->jenis_restrukturisasi ?? [] as $jenis)
+                                            <span class="badge bg-label-info">{{ $jenis }}</span>
+                                        @endforeach
+                                    </div>
+                                    @if($pengajuan->jenis_restrukturisasi_lainnya)
+                                        <small class="d-block mt-2"><strong>Lainnya:</strong> {{ $pengajuan->jenis_restrukturisasi_lainnya }}</small>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -163,135 +184,55 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td class="text-center">1</td>
-                                    <td>Formulir pengajuan lengkap</td>
-                                    <td class="text-center"><a href="#" target="_blank"
-                                            class="text-success">Lihat
-                                            Dokumen</a></td>
-                                    <td>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_1"
-                                                id="dok_1_ya" value="Ya">
-                                            <label class="form-check-label" for="dok_1_ya">Ya</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_1"
-                                                id="dok_1_tidak" value="Tidak">
-                                            <label class="form-check-label" for="dok_1_tidak">Tidak</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan"></textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">2</td>
-                                    <td>Laporan keuangan terbaru (min. 3 bulan)</td>
-                                    <td class="text-center"><a href="#" target="_blank"
-                                            class="text-success">Lihat
-                                            Dokumen</a></td>
-                                    <td>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_2"
-                                                id="dok_2_ya" value="Ya">
-                                            <label class="form-check-label" for="dok_2_ya">Ya</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_2"
-                                                id="dok_2_tidak" value="Tidak">
-                                            <label class="form-check-label" for="dok_2_tidak">Tidak</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan"></textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">3</td>
-                                    <td>Proyeksi arus kas 6–12 bulan</td>
-                                    <td class="text-center"><a href="#" target="_blank"
-                                            class="text-success">Lihat
-                                            Dokumen</a></td>
-                                    <td>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_3"
-                                                id="dok_3_ya" value="Ya">
-                                            <label class="form-check-label" for="dok_3_ya">Ya</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_3"
-                                                id="dok_3_tidak" value="Tidak">
-                                            <label class="form-check-label" for="dok_3_tidak">Tidak</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan"></textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">4</td>
-                                    <td>Bukti kondisi pemicu kesulitan (Eksternal)</td>
-                                    <td class="text-center"><a href="#" target="_blank"
-                                            class="text-success">Lihat Dokumen</a></td>
-                                    <td>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_4"
-                                                id="dok_4_ya" value="Ya">
-                                            <label class="form-check-label" for="dok_4_ya">Ya</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_4"
-                                                id="dok_4_tidak" value="Tidak">
-                                            <label class="form-check-label" for="dok_4_tidak">Tidak</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan"></textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">5</td>
-                                    <td>Salinan akad pembiayaan</td>
-                                    <td class="text-center"><a href="#" target="_blank"
-                                            class="text-success">Lihat Dokumen</a></td>
-                                    <td>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_5"
-                                                id="dok_5_ya" value="Ya">
-                                            <label class="form-check-label" for="dok_5_ya">Ya</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_5"
-                                                id="dok_5_tidak" value="Tidak">
-                                            <label class="form-check-label" for="dok_5_tidak">Tidak</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan"></textarea>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center">6</td>
-                                    <td>Identitas & legalitas perusahaan valid</td>
-                                    <td class="text-center"><a href="#" target="_blank"
-                                            class="text-success">Lihat Dokumen</a></td>
-                                    <td>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_6"
-                                                id="dok_6_ya" value="Ya">
-                                            <label class="form-check-label" for="dok_6_ya">Ya</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="kelengkapan_6"
-                                                id="dok_6_tidak" value="Tidak">
-                                            <label class="form-check-label" for="dok_6_tidak">Tidak</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <textarea class="form-control form-control-sm" rows="1" placeholder="Catatan"></textarea>
-                                    </td>
-                                </tr>
+                                @php
+                                    $dokumen = [
+                                        ['label' => 'KTP PIC', 'field' => 'dokumen_ktp_pic'],
+                                        ['label' => 'NPWP Perusahaan', 'field' => 'dokumen_npwp_perusahaan'],
+                                        ['label' => 'Laporan Keuangan', 'field' => 'dokumen_laporan_keuangan'],
+                                        ['label' => 'Proyeksi Arus Kas', 'field' => 'dokumen_arus_kas'],
+                                        ['label' => 'Bukti Kondisi Eksternal', 'field' => 'dokumen_kondisi_eksternal'],
+                                        ['label' => 'Kontrak Pembiayaan', 'field' => 'dokumen_kontrak_pembiayaan'],
+                                        ['label' => 'Dokumen Lainnya', 'field' => 'dokumen_lainnya'],
+                                        ['label' => 'Tanda Tangan Digital', 'field' => 'dokumen_tanda_tangan']
+                                    ];
+                                @endphp
+                                
+                                @foreach($dokumen as $index => $dok)
+                                    <tr>
+                                        <td class="text-center">{{ $index + 1 }}</td>
+                                        <td>{{ $dok['label'] }}</td>
+                                        <td class="text-center">
+                                            @if($pengajuan->{$dok['field']})
+                                                <a href="{{ Storage::url($pengajuan->{$dok['field']}) }}" 
+                                                   target="_blank" 
+                                                   class="text-success">
+                                                    <i class="ti ti-file-text me-1"></i> Lihat Dokumen
+                                                </a>
+                                            @else
+                                                <span class="text-muted">Tidak ada</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" 
+                                                       name="kelengkapan_{{ $index + 1 }}"
+                                                       id="dok_{{ $index + 1 }}_ya" value="Ya">
+                                                <label class="form-check-label" for="dok_{{ $index + 1 }}_ya">Ya</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" 
+                                                       name="kelengkapan_{{ $index + 1 }}"
+                                                       id="dok_{{ $index + 1 }}_tidak" value="Tidak">
+                                                <label class="form-check-label" for="dok_{{ $index + 1 }}_tidak">Tidak</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <textarea class="form-control form-control-sm" rows="1" 
+                                                      name="catatan_{{ $index + 1 }}" 
+                                                      placeholder="Catatan"></textarea>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
