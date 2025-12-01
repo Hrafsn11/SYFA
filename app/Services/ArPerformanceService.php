@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class ArPerformanceService
 {
-    protected $cacheEnabled = true;
+    protected $cacheEnabled = false; // Disabled for real-time updates
     protected $cacheTTL = 3600; 
 
-    public function getArPerformanceData($tahun = null, $useCache = true)
+    public function getArPerformanceData($tahun = null, $useCache = false) // Default to false for fresh data
     {
         if (!$this->cacheEnabled || !$useCache) {
             return $this->calculateArPerformance($tahun);
@@ -44,7 +44,7 @@ class ArPerformanceService
 
     protected function getPaymentsData($tahun = null)
     {
-        return DB::table('report_pengembalian as rp')
+        $query = DB::table('report_pengembalian as rp')
             ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
             ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
             ->leftJoin('bukti_peminjaman as bp', function($join) {
@@ -63,41 +63,38 @@ class ArPerformanceService
                 'pp.nama_perusahaan as nama_debitur',
                 DB::raw('COALESCE(bp.no_kontrak, pm.no_kontrak) as kontrak_display')
             ])
-            ->when($tahun, function ($query, $tahun) {
-                return $query->whereYear('rp.created_at', $tahun);
-            })
+            ->when($tahun, fn($q, $year) => $q->whereYear('rp.created_at', $year))
             ->orderBy('pp.nama_perusahaan')
-            ->orderBy('rp.created_at')
-            ->get();
+            ->orderBy('rp.created_at');
+
+        return $query->get();
     }
 
     protected function aggregateDebiturData($payments)
     {
+        $firstPayment = $payments->first();
         $result = [
-            'id_debitur' => $payments->first()->id_debitur,
-            'nama_debitur' => $payments->first()->nama_debitur,
+            'id_debitur' => $firstPayment->id_debitur,
+            'nama_debitur' => $firstPayment->nama_debitur,
         ];
 
         $categories = $this->initializeCategories();
 
         foreach ($payments as $payment) {
-            $category = $this->calculateAgingCategory(
-                $payment->tanggal_pembayaran,
-                $payment->due_date
-            );
+            $tanggalPembayaran = Carbon::parse($payment->tanggal_pembayaran);
+            $dueDate = Carbon::parse($payment->due_date);
+            
+            $category = $this->calculateAgingCategory($tanggalPembayaran, $dueDate);
+            $daysLate = $this->calculateDaysLate($tanggalPembayaran, $dueDate);
+            $nilai = (float)($payment->nilai_total_pengembalian ?? 0);
 
-            $daysLate = $this->calculateDaysLate(
-                $payment->tanggal_pembayaran,
-                $payment->due_date
-            );
-
-            $categories[$category]['total'] += floatval($payment->nilai_total_pengembalian);
+            $categories[$category]['total'] += $nilai;
             $categories[$category]['count']++;
             $categories[$category]['transactions'][] = [
                 'id' => $payment->id_report_pengembalian,
                 'nomor_kontrak' => $payment->kontrak_display ?? '-',
-                'nomor_invoice' => $payment->nomor_invoice,
-                'nilai' => floatval($payment->nilai_total_pengembalian),
+                'nomor_invoice' => $payment->nomor_invoice ?? '-',
+                'nilai' => $nilai,
                 'due_date' => $payment->due_date,
                 'tanggal_pembayaran' => $payment->tanggal_pembayaran,
                 'hari_keterlambatan' => $daysLate,
@@ -119,48 +116,38 @@ class ArPerformanceService
         ];
     }
 
-    public function calculateAgingCategory($tanggalPembayaran, $dueDate)
+    public function calculateAgingCategory(Carbon $tanggalPembayaran, Carbon $dueDate): string
     {
-        $tanggalPembayaran = Carbon::parse($tanggalPembayaran);
-        $dueDate = Carbon::parse($dueDate);
-
+        // Early return for belum jatuh tempo
         if ($tanggalPembayaran->lte($dueDate)) {
             return 'belum_jatuh_tempo';
         }
 
         $daysLate = $tanggalPembayaran->diffInDays($dueDate);
 
-        if ($daysLate >= 1 && $daysLate <= 30) {
-            return 'del_1_30';
-        } elseif ($daysLate >= 31 && $daysLate <= 60) {
-            return 'del_31_60';
-        } elseif ($daysLate >= 61 && $daysLate <= 90) {
-            return 'del_61_90';
-        } elseif ($daysLate >= 91 && $daysLate <= 179) {
-            return 'npl_91_179';
-        } else {
-            return 'writeoff_180';
-        }
+        return match(true) {
+            $daysLate <= 30 => 'del_1_30',
+            $daysLate <= 60 => 'del_31_60',
+            $daysLate <= 90 => 'del_61_90',
+            $daysLate <= 179 => 'npl_91_179',
+            default => 'writeoff_180'
+        };
     }
 
-    public function calculateDaysLate($tanggalPembayaran, $dueDate)
+    public function calculateDaysLate(Carbon $tanggalPembayaran, Carbon $dueDate): int
     {
-        $tanggalPembayaran = Carbon::parse($tanggalPembayaran);
-        $dueDate = Carbon::parse($dueDate);
-
-        if ($tanggalPembayaran->lte($dueDate)) {
-            return 0;
-        }
-
-        return $tanggalPembayaran->diffInDays($dueDate);
+        return $tanggalPembayaran->lte($dueDate) 
+            ? 0 
+            : $tanggalPembayaran->diffInDays($dueDate);
     }
 
-    public function getTransactionsByCategory($debiturId, $category, $tahun = null)
+    public function getTransactionsByCategory($debiturId, $category, $tahun = null): array
     {
-        $data = $this->getArPerformanceData($tahun);
+        $data = $this->getArPerformanceData($tahun, false); // Always fetch fresh data
         
         $debitur = $data->firstWhere('id_debitur', $debiturId);
         
+        // Early return if debitur not found or category doesn't exist
         if (!$debitur || !isset($debitur[$category])) {
             return [];
         }

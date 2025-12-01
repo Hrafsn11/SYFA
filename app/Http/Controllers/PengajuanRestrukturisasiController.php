@@ -63,6 +63,9 @@ class PengajuanRestrukturisasiController extends Controller
             $jatuhTempo = $this->getJatuhTempoTerakhir($pengajuan->id_pengajuan_peminjaman);
             $data = array_merge($data, $jatuhTempo);
             
+            // Calculate DPD (Days Past Due)
+            $data['status_dpd'] = $this->calculateDPD($jatuhTempo['jatuh_tempo_terakhir']);
+            
             return Response::success($data, 'Data pengajuan berhasil diambil');
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal mengambil data pengajuan');
@@ -77,6 +80,11 @@ class PengajuanRestrukturisasiController extends Controller
             $validated = $request->validated();
             $validated = $this->handleFileUploads($request, $validated);
             $validated['status'] = 'Draft';
+            
+            // Calculate DPD if jatuh_tempo_terakhir is provided
+            if (isset($validated['jatuh_tempo_terakhir'])) {
+                $validated['status_dpd'] = $this->calculateDPD($validated['jatuh_tempo_terakhir']);
+            }
 
             $pengajuan = PengajuanRestrukturisasi::create($validated);
 
@@ -136,6 +144,11 @@ class PengajuanRestrukturisasiController extends Controller
 
             $validated = $request->validated();
             $validated = $this->handleFileUploads($request, $validated, $pengajuan);
+            
+            // Recalculate DPD if jatuh_tempo_terakhir is provided
+            if (isset($validated['jatuh_tempo_terakhir'])) {
+                $validated['status_dpd'] = $this->calculateDPD($validated['jatuh_tempo_terakhir']);
+            }
 
             $pengajuan->update($validated);
 
@@ -238,6 +251,24 @@ class PengajuanRestrukturisasiController extends Controller
             'jatuh_tempo_terakhir' => $tanggalJatuhTempo->format('Y-m-d'),
             'jatuh_tempo_terakhir_formatted' => $tanggalJatuhTempo->locale('id')->isoFormat('D MMMM YYYY'),
         ];
+    }
+
+    private function calculateDPD($jatuhTempoTerakhir)
+    {
+        if (!$jatuhTempoTerakhir) {
+            return 0;
+        }
+
+        $today = Carbon::now()->startOfDay();
+        $jatuhTempo = Carbon::parse($jatuhTempoTerakhir)->startOfDay();
+
+        // If today is greater than jatuh tempo, calculate the difference
+        if ($today->greaterThan($jatuhTempo)) {
+            return $today->diffInDays($jatuhTempo);
+        }
+
+        // Otherwise return 0 (not yet overdue)
+        return 0;
     }
 
     private function handleFileUploads($request, array $validated, $pengajuan = null)

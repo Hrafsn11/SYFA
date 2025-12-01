@@ -108,7 +108,19 @@
                     </tr>
                     <tr>
                         <td class="text-nowrap"><strong>Status Saat Ini (DPD):</strong></td>
-                        <td class="text-warning">{{ $pengajuan->status_dpd ?? '-' }}</td>
+                        <td>
+                            @if($pengajuan->status_dpd !== null)
+                                @if($pengajuan->status_dpd > 0)
+                                    <span class="badge bg-label-{{ $pengajuan->status_dpd > 90 ? 'danger' : ($pengajuan->status_dpd > 30 ? 'warning' : 'info') }}">
+                                        {{ $pengajuan->status_dpd }} Hari
+                                    </span>
+                                @else
+                                    <span class="badge bg-label-success">0 Hari (Lancar)</span>
+                                @endif
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <td class="text-nowrap"><strong>Tanggal Pengajuan:</strong></td>

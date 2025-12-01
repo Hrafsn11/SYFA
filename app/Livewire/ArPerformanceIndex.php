@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 use App\Services\ArPerformanceService;
 
 class ArPerformanceIndex extends Component
@@ -25,7 +26,8 @@ class ArPerformanceIndex extends Component
 
     public function render()
     {
-        $arData = $this->arPerformanceService->getArPerformanceData($this->tahun);
+        // Always fetch fresh data (no cache)
+        $arData = $this->arPerformanceService->getArPerformanceData($this->tahun, false);
 
         return view('livewire.ar-performance.index', [
             'arData' => $arData,
@@ -40,9 +42,10 @@ class ArPerformanceIndex extends Component
         $this->dispatch('filter-changed');
     }
 
+    #[On('refresh-data')]
     public function refreshData()
     {
-        // Clear cache
+        // Clear cache and refresh data
         $this->arPerformanceService->clearCache($this->tahun);
         
         // Dispatch event for success notification

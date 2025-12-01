@@ -68,7 +68,7 @@ class PengajuanRestrukturisasiRequest extends FormRequest
             'sisa_pokok_belum_dibayar' => 'nullable|numeric|min:0',
             'tunggakan_margin_bunga' => 'nullable|numeric|min:0',
             'jatuh_tempo_terakhir' => 'nullable|date',
-            'status_dpd' => 'nullable|string|max:100',
+            'status_dpd' => 'nullable|integer|min:0',
             'alasan_restrukturisasi' => 'required|string',
             
             // Step 3: Permohonan Restrukturisasi

@@ -1,4 +1,4 @@
-<style>
+{{-- <style>
     .flatpickr-input:not([readonly]) {
         background-color: #fff !important;
         cursor: text !important;
@@ -26,7 +26,7 @@
         display: block;
         margin-top: 0.25rem;
     }
-</style>
+</style> --}}
 
 <div class="modal fade" id="modalRestrukturisasi">
     <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -293,11 +293,17 @@
                                     </div>
                                     <div class="col-12 form-group">
                                         <label for="status_dpd" class="form-label">Status Saat Ini (DPD)</label>
-                                        <input type="text"
-                                            class="form-control @error('status_dpd') is-invalid @enderror"
-                                            id="status_dpd" name="status_dpd" placeholder="Contoh: DPD 30 Hari">
+                                        <div class="input-group">
+                                            <input type="number"
+                                                class="form-control @error('status_dpd') is-invalid @enderror"
+                                                id="status_dpd" name="status_dpd" 
+                                                placeholder="0 Hari"
+                                                readonly
+                                                style="background-color: #f5f5f9;">
+                                            <span class="input-group-text">Hari</span>
+                                        </div>
                                         @error('status_dpd')
-                                            <span class="invalid-feedback">{{ $message }}</span>
+                                            <span class="invalid-feedback d-block">{{ $message }}</span>
                                         @enderror
                                     </div>
 

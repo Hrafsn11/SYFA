@@ -18,7 +18,6 @@
             </button>
         </div>
 
-        {{-- DataTable Card --}}
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0"></i>Daftar Pengajuan
@@ -39,7 +38,6 @@
         'use strict';
 
         let wizardRestrukturisasi;
-        let currentStepIndex = 0;
         let editMode = false;
         let editId = null;
 
@@ -56,77 +54,26 @@
                 linear: false,
                 animation: true
             });
-
-            const steps = wizardElement.querySelectorAll('.bs-stepper-content .content');
-            steps.forEach((step, index) => {
-                const observer = new MutationObserver(() => {
-                    if (step.classList.contains('active')) {
-                        currentStepIndex = index;
-                        
-                        // Re-initialize checkbox handler when entering step 3 (index 2)
-                        if (index === 2) {
-                            console.log('Entered Step 3 - Initializing checkbox Lainnya');
-                            setTimeout(() => {
-                                initCheckboxLainnya();
-                            }, 100);
-                        }
-                    }
-                });
-                observer.observe(step, {
-                    attributes: true,
-                    attributeFilter: ['class']
-                });
-            });
         }
         
         function initCheckboxLainnya() {
             const $checkbox = $('#checkLainnya');
             const $input = $('#inputLainnya');
             
-            console.log('initCheckboxLainnya - Checkbox found:', $checkbox.length, 'Input found:', $input.length);
-            
             if ($checkbox.length && $input.length) {
-                // Remove existing handler
-                $checkbox.off('change.lainnya');
-                
-                // Bind new handler
-                $checkbox.on('change.lainnya', function() {
-                    const isChecked = $(this).is(':checked');
-                    console.log('Checkbox state changed:', isChecked);
+                $checkbox.off('change.lainnya').on('change.lainnya', function() {
+                    const isChecked = this.checked;
+                    $input.prop('disabled', !isChecked);
                     
                     if (isChecked) {
-                        $input.prop('disabled', false)
-                              .attr('disabled', false)
-                              .removeClass('disabled')
-                              .css({
-                                  'background-color': '#fff',
-                                  'cursor': 'text',
-                                  'opacity': '1'
-                              });
-                        
-                        console.log('Input enabled - disabled attr:', $input.prop('disabled'));
-                        
-                        setTimeout(() => {
-                            $input.focus();
-                        }, 200);
+                        $input.removeClass('disabled').focus();
                     } else {
-                        $input.prop('disabled', true)
-                              .attr('disabled', true)
-                              .addClass('disabled')
-                              .val('')
-                              .css({
-                                  'background-color': '',
-                                  'cursor': '',
-                                  'opacity': ''
-                              });
-                        
-                        console.log('Input disabled');
+                        $input.addClass('disabled').val('');
                     }
                 });
                 
-                // Check initial state
                 if ($checkbox.is(':checked')) {
-                    $input.prop('disabled', false).attr('disabled', false);
+                    $input.prop('disabled', false);
                 }
             }
         }
@@ -147,41 +94,20 @@
                 $select2.val(null).trigger('change');
             }
 
-            $('#id_pengajuan_peminjaman, #nomor_kontrak_pembiayaan_value').val('');
+            $('#id_pengajuan_peminjaman, #nomor_kontrak_pembiayaan_value, #jatuh_tempo_terakhir_value').val('');
+            $('#jatuh_tempo_terakhir').val('-');
+            $('#jumlah_plafon_awal, #sisa_pokok_belum_dibayar, #tunggakan_margin_bunga, .input-rupiah').val('Rp 0');
             $('.is-invalid').removeClass('is-invalid');
             $('.invalid-feedback').remove();
-            $('.jenis-pembiayaan-radio').prop('disabled', true).prop('checked', false);
-            $('.jenis-pembiayaan-radio').closest('.custom-option').removeClass('checked');
-            $('.input-rupiah').val('Rp 0');
-            
-            // Reset readonly auto-fill fields
-            $('#jumlah_plafon_awal, #sisa_pokok_belum_dibayar, #tunggakan_margin_bunga').val('Rp 0');
-            $('#jatuh_tempo_terakhir').val('-');
-            $('#jatuh_tempo_terakhir_value').val('');
-            
-            // Reset checkbox Lainnya and its input
+            $('.jenis-pembiayaan-radio').prop('disabled', true).prop('checked', false).closest('.custom-option').removeClass('checked');
             $('#checkLainnya').prop('checked', false);
-            $('#inputLainnya').prop('disabled', true)
-                              .attr('disabled', true)
-                              .addClass('disabled')
-                              .val('')
-                              .css({
-                                  'background-color': '',
-                                  'cursor': '',
-                                  'opacity': ''
-                              });
-            
-            // Uncheck all jenis_restrukturisasi checkboxes
+            $('#inputLainnya').prop('disabled', true).addClass('disabled').val('');
             $('input[name="jenis_restrukturisasi[]"]').prop('checked', false);
         }
 
         // ========================================
         // FORM SUBMISSION
         // ========================================
-        function validateCurrentStep() {
-            return true;
-        }
-
         function handleSubmit() {
             sweetAlertConfirm({
                 title: 'Konfirmasi Pengajuan',
@@ -338,17 +264,11 @@
 
         $('#modalRestrukturisasi').on('click', '.btn-next', function(e) {
             e.preventDefault();
-            if (validateCurrentStep()) {
-                wizardRestrukturisasi.next();
-            }
-        });
-
-        $('#modalRestrukturisasi').on('click', '.btn-prev', function(e) {
+            wizardRestrukturisasi.next();
+        }).on('click', '.btn-prev', function(e) {
             e.preventDefault();
             wizardRestrukturisasi.previous();
-        });
-
-        $('#modalRestrukturisasi').on('click', '#btnSubmitRestrukturisasi', function(e) {
+        }).on('click', '#btnSubmitRestrukturisasi', function(e) {
             e.preventDefault();
             handleSubmit();
         });
@@ -397,23 +317,10 @@
             // Initialize Flatpickr
             if (typeof window.initFlatpickr === 'function') {
                 window.initFlatpickr();
-            } else if (typeof flatpickr !== 'undefined') {
-                $('.flatpickr').each(function() {
-                    const $input = $(this);
-                    if (!$input[0]._flatpickr) {
-                        flatpickr($input[0], {
-                            altInput: true,
-                            altFormat: 'j F Y',
-                            dateFormat: 'Y-m-d',
-                            locale: 'id',
-                        });
-                    }
-                });
             }
 
-            // Initialize Cleave.js for Rupiah format - using global function
+            // Initialize Cleave.js for Rupiah format
             if (typeof window.initCleaveRupiah === 'function') {
-                // Reset cleave initialization flags for re-initialization
                 $('.input-rupiah').each(function() {
                     this.dataset.cleaveInitialized = 'false';
                 });
@@ -442,17 +349,13 @@
                     $('.custom-option').addClass('disabled').removeClass('checked');
                     
                     // Find and check the matching jenis_pembiayaan (but keep it disabled)
-                    $('.jenis-pembiayaan-radio').each(function() {
-                        const $radio = $(this);
-                        const $option = $radio.closest('.custom-option');
-                        
-                        if ($radio.val() === data.jenis_pembiayaan) {
-                            $radio.prop('checked', true);
-                            $option.addClass('checked');
-                            // Keep it disabled but visually indicate it's selected
-                            $option.css('opacity', '1');
+                    if (data.jenis_pembiayaan) {
+                        const $matchedRadio = $('input[name="jenis_pembiayaan_radio"][value="' + data.jenis_pembiayaan + '"]');
+                        if ($matchedRadio.length) {
+                            $matchedRadio.prop('checked', true);
+                            $matchedRadio.closest('.custom-option').addClass('checked').css('opacity', '1');
                         }
-                    });
+                    }
 
                     // Set plafon and sisa pokok values (readonly fields - use manual formatting)
                     $('#jumlah_plafon_awal').val(formatRupiah(data.jumlah_plafon_awal));
@@ -469,9 +372,15 @@
                         $('#jatuh_tempo_terakhir').val('-');
                         $('#jatuh_tempo_terakhir_value').val('');
                     }
+                    
+                    // Set status DPD (auto-calculated)
+                    if (data.status_dpd !== undefined) {
+                        $('#status_dpd').val(data.status_dpd);
+                    } else {
+                        $('#status_dpd').val(0);
+                    }
                 },
                 error: function(xhr) {
-                    console.error('Error loading pengajuan data:', xhr);
                     showSweetAlert({
                         title: 'Error',
                         text: 'Gagal memuat data pengajuan',
@@ -490,28 +399,15 @@
             // Modal hide event
             $('#modalRestrukturisasi').on('hide.bs.modal', function() {
                 resetWizard();
-
-                // Destroy Select2
-                if ($('#nomor_kontrak_pembiayaan').hasClass('select2-hidden-accessible')) {
-                    $('#nomor_kontrak_pembiayaan').select2('destroy');
+                
+                const $select2 = $('#nomor_kontrak_pembiayaan');
+                if ($select2.hasClass('select2-hidden-accessible')) {
+                    $select2.select2('destroy');
                 }
 
-                // Reset Cleave initialization flags
                 $('.input-rupiah').each(function() {
                     this.dataset.cleaveInitialized = 'false';
                 });
-
-            });
-
-            // Checkbox "Lainnya" is now handled by initCheckboxLainnya() function
-            // No need for event delegation here as it's called on modal open and step change
-
-            // File input change event - show filename
-            $(document).on('change', 'input[type="file"]', function() {
-                const fileName = $(this).val().split('\\').pop();
-                if (fileName) {
-                    console.log('File selected:', fileName);
-                }
             });
         }
 

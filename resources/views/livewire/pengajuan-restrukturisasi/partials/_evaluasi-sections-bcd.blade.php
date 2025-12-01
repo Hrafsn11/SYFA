@@ -15,7 +15,6 @@
                 </thead>
                 <tbody id="table-kelayakan-body">
                     @if($isEditable)
-                        {{-- EDITABLE --}}
                         @foreach([
                             'Riwayat pembayaran sebelumnya baik (DPD ≤ 30 hari)',
                             'Tidak dalam proses PKPU/kepailitan',
@@ -226,11 +225,11 @@
                         <small class="text-muted d-block mb-1">Rekomendasi:</small>
                         <p class="fw-bold mb-3">
                             @if($evaluasi->rekomendasi === 'Setuju')
-                                <span class="badge bg-success fs-6">✓ Setuju untuk Direstrukturisasi</span>
+                                <span class="badge bg-success fs-6">Setuju untuk Direstrukturisasi</span>
                             @elseif($evaluasi->rekomendasi === 'Tolak')
-                                <span class="badge bg-danger fs-6">✗ Tolak Pengajuan</span>
+                                <span class="badge bg-danger fs-6">Tolak Pengajuan</span>
                             @else
-                                <span class="badge bg-warning fs-6">⚠ {{ $evaluasi->rekomendasi }}</span>
+                                <span class="badge bg-warning fs-6">{{ $evaluasi->rekomendasi }}</span>
                             @endif
                         </p>
                     </div>
@@ -241,14 +240,6 @@
                         </div>
                     </div>
                 </div>
-                @if($evaluasi->evaluator)
-                    <hr class="my-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <small class="text-muted">Dievaluasi oleh:</small>
-                        <strong>{{ $evaluasi->evaluator->name }}</strong>
-                        <small class="text-muted">pada {{ $evaluasi->evaluated_at ? $evaluasi->evaluated_at->format('d M Y H:i') : '-' }}</small>
-                    </div>
-                @endif
             @else
                 <p class="text-muted mb-0">Rekomendasi belum diberikan.</p>
             @endif
