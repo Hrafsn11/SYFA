@@ -17,8 +17,10 @@
                             <select id="id_pengajuan_investasi" class="form-select select2" wire:model="id_pengajuan_investasi" data-placeholder="Pilih No Kontrak">
                                 <option value=""></option>
                                 @foreach ($pengajuanInvestasi as $item)
-                                    <option value="{{ $item->id_pengajuan_investasi }}" data-nilai-investasi="{{ $item->jumlah_investasi }}">
-                                        {{ $item->nomor_kontrak }} - {{ $item->nama_investor }} (Rp {{ number_format($item->jumlah_investasi, 0, ',', '.') }})
+                                    <option value="{{ $item->id_pengajuan_investasi }}" 
+                                            data-nilai-investasi="{{ $item->jumlah_investasi }}"
+                                            data-sisa-dana="{{ $item->sisa_dana ?? 0 }}">
+                                        {{ $item->nomor_kontrak }} - {{ $item->nama_investor }} (Sisa Dana: Rp {{ number_format($item->sisa_dana ?? 0, 0, ',', '.') }})
                                     </option>
                                 @endforeach
                             </select>
