@@ -14,6 +14,9 @@ Route::get('/master-data/master-karyawan-ski', \App\Livewire\MasterData\MasterKa
 // Penyaluran Deposito
 Route::get('penyaluran-deposito', \App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex::class)->name('penyaluran-deposito.index');
 
+// Pengembalian Investasi
+Route::get('pengembalian-investasi', \App\Livewire\PengembalianInvestasi::class)->name('pengembalian-investasi.index');
+
 Route::get('config-matrix-pinjaman', \App\Livewire\ConfigMatrixPinjaman\Index::class)->name('config-matrix-pinjaman.index');
 
 // AR Performance

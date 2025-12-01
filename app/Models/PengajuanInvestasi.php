@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class PengajuanInvestasi extends Model
 {
@@ -40,6 +41,8 @@ class PengajuanInvestasi extends Model
         'created_by',
         'updated_by',
         'nomor_kontrak',
+        'sisa_pokok',
+        'sisa_bagi_hasil',
     ];
 
     /**
@@ -52,7 +55,24 @@ class PengajuanInvestasi extends Model
         'lama_investasi' => 'integer',
         'bagi_hasil_pertahun' => 'integer',
         'current_step' => 'integer',
+        'sisa_pokok' => 'decimal:2',
+        'sisa_bagi_hasil' => 'decimal:2',
     ];
+
+       protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($investasi): void {
+            if (!$investasi->sisa_pokok || $investasi->sisa_pokok == 0) {
+                $investasi->sisa_pokok = $investasi->jumlah_investasi ?? 0;
+            }
+            
+            if (!$investasi->sisa_bagi_hasil || $investasi->sisa_bagi_hasil == 0) {
+                $investasi->sisa_bagi_hasil = $investasi->nominal_bagi_hasil_yang_didapatkan ?? 0;
+            }
+        });
+    }
 
     /**
      * Get the investor (debitur dan investor) that owns the pengajuan.
@@ -134,5 +154,61 @@ class PengajuanInvestasi extends Model
     public function scopeRejected($query)
     {
         return $query->where('status', 'Rejected');
+    }
+
+   
+    public function penyaluranDeposito(): HasMany
+    {
+        return $this->hasMany(PenyaluranDeposito::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
+    }
+
+    /**
+     * Get all pengembalian investasi records for this pengajuan.
+     */
+    public function pengembalianInvestasi(): HasMany
+    {
+        return $this->hasMany(PengembalianInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
+    }
+
+   
+    public function scopeWithSisaDana($query)
+    {
+        if (!str_contains($query->toSql(), 'pengajuan_investasi')) {
+            $query->from('pengajuan_investasi');
+        }
+        
+        return $query
+            ->leftJoin(
+                DB::raw('(
+                    SELECT 
+                        id_pengajuan_investasi as pd_id_pengajuan_investasi, 
+                        SUM(nominal_yang_disalurkan) as total_disalurkan 
+                    FROM penyaluran_deposito 
+                    GROUP BY id_pengajuan_investasi
+                ) as pd_aggregated'),
+                'pengajuan_investasi.id_pengajuan_investasi', 
+                '=', 
+                'pd_aggregated.pd_id_pengajuan_investasi'
+            )
+            ->select([
+                'pengajuan_investasi.*',
+                DB::raw('COALESCE(pd_aggregated.total_disalurkan, 0) as total_disalurkan'),
+                DB::raw('(pengajuan_investasi.jumlah_investasi - COALESCE(pd_aggregated.total_disalurkan, 0)) as sisa_dana')
+            ]);
+    }
+
+    
+    public function scopeHasSisaDana($query, $minimum = 0)
+    {
+        return $query->havingRaw('sisa_dana > ?', [$minimum]);
+    }
+
+   
+    public function getSisaDana(): float
+    {
+        $totalDisalurkan = $this->penyaluranDeposito()
+            ->sum('nominal_yang_disalurkan');
+        
+        return floatval($this->jumlah_investasi) - floatval($totalDisalurkan);
     }
 }
