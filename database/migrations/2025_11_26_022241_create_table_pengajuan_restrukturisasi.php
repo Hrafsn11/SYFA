@@ -34,7 +34,6 @@ return new class extends Migration
             $table->decimal('jumlah_plafon_awal', 15, 2)->nullable();
             $table->decimal('sisa_pokok_belum_dibayar', 15, 2)->default(0); 
             
-            $table->decimal('tunggakan_pokok', 15, 2)->nullable();
             $table->decimal('tunggakan_margin_bunga', 15, 2)->nullable();
             $table->date('jatuh_tempo_terakhir')->nullable();
             $table->string('status_dpd')->nullable(); 
