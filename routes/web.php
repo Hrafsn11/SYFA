@@ -150,6 +150,11 @@ Route::middleware([
         Route::post('{id}/generate-kontrak', [\App\Http\Controllers\PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
     });
 
+    // Kertas Kerja Investor SFinance 
+    Route::prefix('kertas-kerja-investor-sfinance')->name('kertas-kerja-investor-sfinance.')->group(function () {
+        Route::get('/', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('index');
+    });
+
     // config matrix pinjaman
     // Route::get('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'index'])->name('matrixpinjaman');
 
