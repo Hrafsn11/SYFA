@@ -239,7 +239,7 @@
                 const rejectWarnings = {
                     2: ['Penolakan di Tahap Evaluasi', 'Jika Anda menolak di tahap ini, pengajuan akan dikembalikan ke pemohon untuk diperbaiki. Status akan berubah menjadi "Perbaikan Dokumen" dan pemohon dapat mengedit ulang pengajuan.'],
                     3: ['Penolakan oleh CEO SKI', 'Jika ditolak di tahap ini, pengajuan akan dikembalikan ke tahap evaluasi (Step 2) untuk dievaluasi ulang. Status akan berubah menjadi "Perlu Evaluasi Ulang".'],
-                    4: ['Penolakan oleh Direktur', 'PERHATIAN: Penolakan di tahap ini bersifat final! Pengajuan akan masuk ke Step 5 (Selesai) dengan status "Ditolak" dan tidak dapat diproses kembali.']
+                    4: ['Penolakan oleh Direktur', 'Jika ditolak di tahap ini, pengajuan akan dikembalikan ke tahap persetujuan CEO SKI (Step 3) untuk evaluasi ulang. Status akan berubah menjadi "Perlu Evaluasi Ulang".']
                 };
 
                 const [title, text] = rejectWarnings[pendingRejectStep] || ['Perhatian!', 'Penolakan pengajuan akan dicatat dalam sistem.'];

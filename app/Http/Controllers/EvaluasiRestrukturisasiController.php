@@ -271,8 +271,9 @@ class EvaluasiRestrukturisasiController extends Controller
 
     private function rejectStep4(PengajuanRestrukturisasi $pengajuan): void
     {
-        $pengajuan->status = self::STATUS_DITOLAK;
-        $pengajuan->current_step = self::STEP_FINAL;
+        // Kembali ke step 3 untuk persetujuan ulang CEO SKI
+        $pengajuan->status = self::STATUS_PERLU_EVALUASI;
+        $pengajuan->current_step = 3;
         $pengajuan->save();
     }
 
