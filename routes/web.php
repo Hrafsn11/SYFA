@@ -1,24 +1,18 @@
 <?php
 
-use App\Livewire\Dashboard;
-use App\Livewire\ArPerbulan;
-use App\Livewire\RoleManagement;
-use App\Livewire\UserManagement;
-use App\Livewire\ConfigMatrixScore;
-use Illuminate\Support\Facades\Route;
-use App\Livewire\PermissionManagement;
-use App\Livewire\PengajuanRestrukturisasi;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
-use App\Livewire\ValidasiPengajuanRestrukturisasi;
-use App\Http\Controllers\FormKerjaInvestorController;
-use App\Http\Controllers\ReportPengembalianController;
-use App\Http\Controllers\PengembalianPinjamanController;
+use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
+use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\PenyaluranDepositoController;
-use App\Http\Controllers\Peminjaman\PeminjamanInvoiceController;
-use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Livewire\ArPerbulan;
+use App\Livewire\ConfigMatrixScore;
+use App\Livewire\PermissionManagement;
+use App\Livewire\RoleManagement;
+use App\Livewire\UserManagement;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,13 +37,13 @@ Route::middleware([
     'checkPermission', // Add permission handling middleware
 ])->group(function () {
 
-    require __DIR__ . '/livewire_route.php';
+    require __DIR__.'/livewire_route.php';
 
     // User Management Routes - Example with permission middleware
     Route::get('users', UserManagement::class)->name('users.index');
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
-    
+
     // Peminjaman Routes
     Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
     Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
@@ -63,7 +57,7 @@ Route::middleware([
     Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
     Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
 
-    //Restrukturisasi Routes
+    // Restrukturisasi Routes - Controller actions only (index route in livewire_route.php)
     Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {
         Route::get('/', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'store'])->name('store');
@@ -71,31 +65,45 @@ Route::middleware([
         Route::get('{id}/edit', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'update'])->name('update');
         Route::delete('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'destroy'])->name('destroy');
-        Route::get('peminjaman/{idDebitur}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPeminjamanList'])->name('peminjaman.list');
+        Route::get('peminjaman/{idDebitur}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPeminjamanListApi'])->name('peminjaman.list');
         Route::get('detail-pengajuan/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
+        // Evaluasi endpoints
+        Route::post('{id}/evaluasi', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'save'])->name('evaluasi.save');
+        Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
     });
-    
-    Route::get('detail-restrukturisasi/{id}', ValidasiPengajuanRestrukturisasi::class)->name('detail-restrukturisasi');
+
+    // Detail restrukturisasi menggunakan Controller dengan Pure AJAX (bukan Livewire component)
+    Route::get('detail-restrukturisasi/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('detail-restrukturisasi');
 
     Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
     Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
 
-    Route::get('debitur-piutang', function () {
-        return view('livewire.debitur-piutang.index');
-    })->name('debitur-piutang.index');
+    // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
+    // Route::get('debitur-piutang', function () {
+    //     return view('livewire.debitur-piutang.index');
+    // })->name('debitur-piutang.index');
+    
+    // AJAX endpoints for Debitur Piutang modals (Table 2 & 3)
+    Route::get('debitur-piutang/histori', [App\Http\Controllers\DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
+    Route::get('debitur-piutang/summary', [App\Http\Controllers\DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
 
-    //Ar Routes
+    // Ar Routes
     Route::get('ar-perbulan', ArPerbulan::class)->name('ar-perbulan.index');
     Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
-    Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
+    
+    // AR Performance - Migrated to Livewire (see routes/livewire_route.php)
+    // Main route moved to Livewire
+    // Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
+    
+    // AJAX endpoints (still needed for modal)
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
 
     Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
-    Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');    
-    
+    Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
+
     Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
         Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
         Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
@@ -195,4 +203,4 @@ Route::middleware([
     });
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
