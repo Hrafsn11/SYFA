@@ -53,10 +53,5 @@
             });
         });
     });
-
-    // Auto-refresh every 60 seconds for real-time updates
-    setInterval(() => {
-        Livewire.dispatch('refresh-data');
-    }, 60000);
 </script>
 @endpush

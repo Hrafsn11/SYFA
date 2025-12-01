@@ -42,16 +42,16 @@ class ArPerformanceIndex extends Component
         $this->dispatch('filter-changed');
     }
 
-    #[On('refresh-data')]
-    public function refreshData()
-    {
-        // Clear cache and refresh data
-        $this->arPerformanceService->clearCache($this->tahun);
+    // #[On('refresh-data')]
+    // public function refreshData()
+    // {
+    //     // Clear cache and refresh data
+    //     $this->arPerformanceService->clearCache($this->tahun);
         
-        // Dispatch event for success notification
-        $this->dispatch('show-alert', [
-            'type' => 'success',
-            'message' => 'Data berhasil di-refresh!'
-        ]);
-    }
+    //     // Dispatch event for success notification
+    //     $this->dispatch('show-alert', [
+    //         'type' => 'success',
+    //         'message' => 'Data berhasil di-refresh!'
+    //     ]);
+    // }
 }
