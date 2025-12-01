@@ -59,11 +59,13 @@ trait HasUniversalFormAction
             $this->afterSave($payload);
         }
 
-        foreach ($listFile as $key => $value) {
-            if ($value instanceof TemporaryUploadedFile) {
-                $value->delete();
-            } elseif (is_array($value) && isset($value['real_path'])) {
-                @unlink($value['real_path']);
+        if ($payload->error === false) {
+            foreach ($listFile as $key => $value) {
+                if ($value instanceof TemporaryUploadedFile) {
+                    $value->delete();
+                } elseif (is_array($value) && isset($value['real_path'])) {
+                    @unlink($value['real_path']);
+                }
             }
         }
     }

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Peminjaman;
 
 use Carbon\Carbon;
+use App\Helpers\Response;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use App\Models\BuktiPeminjaman;
+use App\Enums\JenisPembiayaanEnum;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPeminjaman;
 use Illuminate\Support\Facades\Log;
@@ -13,12 +15,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Models\MasterDebiturDanInvestor;
 use App\Services\PeminjamanNumberService;
+use App\Enums\PengajuanPeminjamanStatusEnum;
 use App\Models\HistoryStatusPengajuanPinjaman;
 use App\Models\MasterSumberPendanaanEksternal;
 use App\Http\Requests\PengajuanPinjamanRequest;
+use Illuminate\Http\UploadedFile;
 
 class PeminjamanController extends Controller
 {
+    public function __construct()
+    {
+        $this->persentase_bagi_hasil = 2/100;
+    }
+
     /**
      * Display the specified resource detail view.
      *
@@ -858,344 +867,102 @@ class PeminjamanController extends Controller
 
     public function store(PengajuanPinjamanRequest $request)
     {
-        dd($request->validated());
-
-        // Get jenis_pembiayaan first for conditional validation
-        $jenisPembiayaan = $request->input('jenis_pembiayaan');
-        
-        // Build validation rules based on jenis_pembiayaan
-        $rules = [
-            'id_debitur' => 'required|string|size:26', // ULID format
-            'nama_bank' => 'nullable|string',
-            'no_rekening' => 'nullable|string',
-            'nama_rekening' => 'nullable|string',
-            'jenis_pembiayaan' => 'required|string',
-            'catatan_lainnya' => 'nullable|string',
-        ];
-
-        // Add conditional validation based on jenis_pembiayaan
-        if ($jenisPembiayaan === 'Invoice Financing') {
-            $rules['invoices'] = 'required|string';
-            $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
-            $rules['nilai_kol'] = 'nullable|string';
-            if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
-            }else{
-                $rules['id_instansi'] = 'nullable';
-            }
-            $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
-            $rules['tujuan_pembiayaan'] = 'nullable|string';
-            $rules['total_pinjaman'] = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['total_bagi_hasil'] = 'nullable';
-            $rules['rencana_tgl_pembayaran'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['pembayaran_total'] = 'nullable';
-
-
-        } elseif ($jenisPembiayaan === 'Installment') {
-            $rules['details'] = 'required|array|min:1';
-            $rules['total_pinjaman'] = 'nullable';
-            $rules['tenor_pembayaran'] = 'nullable|in:3,6,9,12';
-            $rules['persentase_bagi_hasil'] = 'nullable|numeric';
-            $rules['pps'] = 'nullable|numeric';
-            $rules['sfinance'] = 'nullable|numeric';
-            $rules['total_pembayaran'] = 'nullable|numeric';
-            $rules['yang_harus_dibayarkan'] = 'nullable|numeric';
-            
-        } elseif ($jenisPembiayaan === 'PO Financing') {
-            $rules['details'] = 'required|array|min:1';
-            if($request->sumber_pembiayaan === 'eksternal'){
-                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
-            }else{
-                $rules['id_instansi'] = 'nullable';
-            }
-            $rules['no_kontrak'] = 'nullable|string';
-            $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
-            $rules['nilai_kol'] = 'nullable|string';
-            $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
-            $rules['tujuan_pembiayaan'] = 'nullable|string';
-            $rules['total_pinjaman'] = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['rencana_tgl_pembayaran'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['pembayaran_total'] = 'nullable';
-        } elseif ($jenisPembiayaan === 'Factoring') {
-            $rules['details'] = 'required|array|min:1';
-            $rules['total_nominal_yang_dialihkan'] = 'nullable|numeric';
-            $rules['harapan_tanggal_pencairan'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['total_bagi_hasil'] = 'nullable';
-            $rules['rencana_tgl_pembayaran'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['pembayaran_total'] = 'nullable';
-
-        } else {
-            // Default case for other financing types
-            $rules['invoices'] = 'nullable|string';
-            $rules['details'] = 'required|array|min:1';
-        }
-
-        $validated = $request->validate($rules);
-
-
-        //set bagi hasil installment 10%
-        if($validated['jenis_pembiayaan'] === 'Installment'){
-            $validated['id_instansi'] = null;
-            $validated['sumber_pembiayaan'] = 'internal';
-            $validated['persentase_bagi_hasil'] = 10;
-        }
-        
-        //set bagi hasil factoring 2%
-        if($validated['jenis_pembiayaan'] === 'Factoring'){
-            $validated['id_instansi'] = null;
-            $validated['sumber_pembiayaan'] = 'internal';
-            $validated['persentase_bagi_hasil'] = 2;
-        }
-
-        // Normalize date inputs that may come as d/m/Y
-        $normalizeDate = function($value) {
-            if (empty($value)) return null;
-            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $value)) {
-                [$d, $m, $y] = explode('/', $value);
-                return "$y-$m-$d";
-            }
-            return $value;
-        };
-
-        $harapan = $normalizeDate($request->input('harapan_tanggal_pencairan', $validated['harapan_tanggal_pencairan'] ?? null));
-        $rencana = $normalizeDate($request->input('rencana_tgl_pembayaran', $validated['rencana_tgl_pembayaran'] ?? null));
-
-        // Handle file upload
-        if ($request->hasFile('lampiran_sid')) {
-            $path = $request->file('lampiran_sid')->store('peminjaman/lampiran', 'public');
-            $validated['lampiran_sid'] = $path;
-        } elseif (isset($validated['lampiran_sid'])) {
-            // remove file key if not an upload
-            unset($validated['lampiran_sid']);
-        }
-
-        // Merge normalized dates and current user
-        if ($harapan) $validated['harapan_tanggal_pencairan'] = $harapan;
-        if ($rencana) $validated['rencana_tgl_pembayaran'] = $rencana;
-        $validated['total_pinjaman'] = 0; // will be computed later
-        $validated['total_bagi_hasil'] = 0; // will be computed later
-        $validated['created_by'] = auth()->id() ?? null;
-        $validated['updated_by'] = auth()->id() ?? null;
-
-        // Use different data keys based on jenis_pembiayaan
-        if ($validated['jenis_pembiayaan'] === 'Invoice Financing') {
-            $invoices = json_decode($request->input('invoices', '[]'), true);
-            if (!is_array($invoices) || count($invoices) === 0) {
-                return response()->json(['success'=>false,'message'=>'No invoices provided'], 422);
-            }
-        } else {
-            $invoices = $details = $request->input('details', []);
-        }
-
-        if (empty($validated['status'])) $validated['status'] = 'Draft';
-
         DB::beginTransaction();
         try {
-            $peminjaman = PengajuanPeminjaman::create($validated);
+            $allData = $request->validated();
+            $dataInvoice = collect($allData['form_data_invoice']);
+            unset($allData['form_data_invoice']);
+            $dataPengajuanPeminjaman = $allData;
 
-            // Generate nomor_peminjaman using the service with different codes based on jenis_pembiayaan
-            $prefix = 'INV'; // default prefix
-            switch ($validated['jenis_pembiayaan']) {
-                case 'Invoice Financing':
-                    $prefix = 'INV';
-                    break;
-                case 'PO Financing':
-                    $prefix = 'PO';
-                    break;
-                case 'Installment':
-                    $prefix = 'INS';
-                    break;
-                case 'Factoring':
-                    $prefix = 'FAC';
-                    break;
-                default:
-                    $prefix = 'INV';
-                    break;
-            }
+            $dataPengajuanPeminjaman['status'] = PengajuanPeminjamanStatusEnum::DRAFT;
 
-            $peminjaman->nomor_peminjaman = (new PeminjamanNumberService())->generateNumber(
-                $prefix,
-                $peminjaman->created_at?->format('Ym')
+            $dataPengajuanPeminjaman['nomor_peminjaman'] = (new PeminjamanNumberService())->generateNumber(
+                JenisPembiayaanEnum::getPrefix($dataPengajuanPeminjaman['jenis_pembiayaan']),
+                now()->format('Ym')
             );
-            $peminjaman->save();
-            
-            // Determine bagi hasil percentage based on sumber pembiayaan (before loop for efficiency)
-            $persentaseBagiHasil = 2.0; // default for internal
-            if ($peminjaman->sumber_pembiayaan === 'eksternal' && $peminjaman->id_instansi) {
-                $instansi = MasterSumberPendanaanEksternal::find($peminjaman->id_instansi);
+
+            if ($dataPengajuanPeminjaman['sumber_pembiayaan'] === 'Eksternal') {
+                $instansi = MasterSumberPendanaanEksternal::find($dataPengajuanPeminjaman['id_instansi']);
                 if ($instansi && $instansi->persentase_bagi_hasil) {
-                    $persentaseBagiHasil = floatval($instansi->persentase_bagi_hasil);
-                }
-            }
-            
-            $sumPinjaman = 0;
-            $sumBagi = 0;
-
-            foreach ($invoices as $i => $inv) {
-                // server-side validation per invoice/detail based on financing type
-                $no = null;
-                if ($validated['jenis_pembiayaan'] === 'Invoice Financing') {
-                    $no = $inv['no_invoice'] ?? null;
-                } elseif ($validated['jenis_pembiayaan'] === 'PO Financing' || $validated['jenis_pembiayaan'] === 'Factoring') {
-                    $no = $inv['no_kontrak'] ?? null;
-                } elseif ($validated['jenis_pembiayaan'] === 'Installment') {
-                    $no = $inv['no_invoice'] ?? null; 
-                }
-                
-                $nilai_invoice = floatval($inv['nilai_invoice'] ?? 0);
-                $nilai_pinjaman = floatval($inv['nilai_pinjaman'] ?? 0);
-
-                
-                if($validated['jenis_pembiayaan'] === 'Invoice Financing'){
-                    if (!$no || $nilai_pinjaman <= 0) {
-                        $errorMsg = $validated['jenis_pembiayaan'] === 'Invoice Financing' ? 
-                            "Invalid invoice at index {$i}" :
-                            "Invalid detail at index {$i}";
-                        throw new \Exception($errorMsg);
-                    }
-    
-                    if ($nilai_pinjaman > $nilai_invoice) {
-                        $fieldName = $validated['jenis_pembiayaan'] === 'Invoice Financing' ? 'invoice' : 'detail';
-                    throw new \Exception("Nilai pinjaman cannot exceed nilai invoice for {$fieldName} {$no}");
+                    $this->persentase_bagi_hasil = (double) $instansi->persentase_bagi_hasil / 100;
                 }
             }
 
-            $nilai_bagi = round($nilai_pinjaman * ($persentaseBagiHasil / 100), 2);                $dok_invoice_path = null;
-                $dok_kontrak_path = null;
-                $dok_so_path = null;
-                $dok_bast_path = null;
-                $dok_lainnya_path = null;
-
-                if ($request->hasFile("files.{$i}.dokumen_invoice") || $request->hasFile("details.{$i}.dokumen_invoice")) {
-                    $file = $request->hasFile("files.{$i}.dokumen_invoice") 
-                        ? $request->file("files.{$i}.dokumen_invoice") 
-                        : $request->file("details.{$i}.dokumen_invoice");
-                    $dok_invoice_path = $file->store('peminjaman/invoices', 'public');
-                }
-                if ($request->hasFile("files.{$i}.dokumen_kontrak") || $request->hasFile("details.{$i}.dokumen_kontrak")) {
-                    $file = $request->hasFile("files.{$i}.dokumen_kontrak") 
-                        ? $request->file("files.{$i}.dokumen_kontrak") 
-                        : $request->file("details.{$i}.dokumen_kontrak");
-                    $dok_kontrak_path = $file->store('peminjaman/invoices', 'public');
-                }
-                if ($request->hasFile("files.{$i}.dokumen_so") || $request->hasFile("details.{$i}.dokumen_so")) {
-                    $file = $request->hasFile("files.{$i}.dokumen_so") 
-                        ? $request->file("files.{$i}.dokumen_so") 
-                        : $request->file("details.{$i}.dokumen_so");
-                    $dok_so_path = $file->store('peminjaman/invoices', 'public');
-                }
-                if ($request->hasFile("files.{$i}.dokumen_bast") || $request->hasFile("details.{$i}.dokumen_bast")) {
-                    $file = $request->hasFile("files.{$i}.dokumen_bast") 
-                        ? $request->file("files.{$i}.dokumen_bast") 
-                        : $request->file("details.{$i}.dokumen_bast");
-                    $dok_bast_path = $file->store('peminjaman/invoices', 'public');
-                }
-                if ($request->hasFile("files.{$i}.dokumen_lainnya") || $request->hasFile("details.{$i}.dokumen_lainnya")) {
-                    $file = $request->hasFile("files.{$i}.dokumen_lainnya") 
-                        ? $request->file("files.{$i}.dokumen_lainnya") 
-                        : $request->file("details.{$i}.dokumen_lainnya");
-                    $dok_lainnya_path = $file->store('peminjaman/invoices', 'public');
-                }
-
-                // Prepare base data for BuktiPeminjaman
-                $buktiData = [
-                    'id_pengajuan_peminjaman' => $peminjaman->id_pengajuan_peminjaman,
-                    'nama_client' => $inv['nama_client'] ?? null,
-                    'nilai_invoice' => $nilai_invoice,
-                    'nilai_pinjaman' => $nilai_pinjaman,
-                    'nilai_bagi_hasil' => $nilai_bagi,
-                    'invoice_date' => $inv['invoice_date'] ?? null,
-                    'due_date' => $inv['due_date'] ?? null,
-                    'dokumen_invoice' => $dok_invoice_path,
-                    'dokumen_kontrak' => $dok_kontrak_path,
-                    'dokumen_so' => $dok_so_path,
-                    'dokumen_bast' => $dok_bast_path,
-                    'dokumen_lainnya' => $dok_lainnya_path,
-                    'created_by' => auth()->id() ?? null,
-                ];
-
-                // Set no_invoice or no_kontrak based on financing type
-                if ($validated['jenis_pembiayaan'] === 'Invoice Financing' || $validated['jenis_pembiayaan'] === 'Installment') {
-                    $buktiData['no_invoice'] = $no;
-                } else {
-                    $buktiData['no_kontrak'] = $no;
-                }
-
-                // Add conditional attributes based on jenis_pembayaran
-                if ($validated['jenis_pembiayaan'] === 'PO Financing') {
-                    $buktiData['no_kontrak'] = $inv['no_kontrak'] ?? null;
-                    $buktiData['kontrak_date'] = $inv['kontrak_date'] ?? null;
-                    $buktiData['nama_barang'] = $inv['nama_barang'] ?? null;
-                } elseif ($validated['jenis_pembiayaan'] === 'Factoring') {
-                    $buktiData['no_kontrak'] = $inv['no_kontrak'] ?? null;
-                } elseif ($validated['jenis_pembiayaan'] === 'Installment') {
-                    $buktiData['nama_barang'] = $inv['nama_barang'] ?? null;
-                }
-
-                BuktiPeminjaman::create($buktiData);
-
-                $sumPinjaman += $nilai_pinjaman;
-                $sumBagi += $nilai_bagi;
+            if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
+                $this->persentase_bagi_hasil = (double) 10/100;
             }
 
-            // update header totals based on jenis_pembiayaan
-            $manualTotal = $request->input('total_pinjaman');
-            
-            if ($validated['jenis_pembiayaan'] === 'Installment') {
-                // Special calculation for Installment
-                $totalPinjaman = $manualTotal ? floatval(preg_replace('/[^0-9\.]/', '', $manualTotal)) : $sumPinjaman;
-                $tenor = (int) ($request->input('tenor_pembayaran') ?? 3);
-                
-                // Business rules: bagi hasil = 10% of total pinjaman
-                $persentaseBagi = 10.0000; // stored as percent value (10.0000 => 10%)
-                $totalBagiHasil = round($totalPinjaman * ($persentaseBagi / 100), 2);
-                
+            $dataPengajuanPeminjaman['persentase_bagi_hasil'] = $this->persentase_bagi_hasil;
+
+            $dataPengajuanPeminjaman['total_pinjaman'] = (double) $dataInvoice->sum(fn ($item) => (double) $item['nilai_pinjaman']);
+            $dataPengajuanPeminjaman['total_bagi_hasil'] = $dataPengajuanPeminjaman['total_pinjaman'] * $this->persentase_bagi_hasil;
+            $dataPengajuanPeminjaman['pembayaran_total'] = (double) $dataPengajuanPeminjaman['total_pinjaman'] + $dataPengajuanPeminjaman['total_bagi_hasil'];
+
+            if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
                 // PPS = 40% of bagi hasil, S Finance = 60% of bagi hasil
-                $ppsAmount = round($totalBagiHasil * 0.40, 2);
-                $sfinanceAmount = round($totalBagiHasil * 0.60, 2);
-                
-                $totalPembayaran = round($totalPinjaman + $totalBagiHasil, 2);
-                $monthlyPay = $tenor > 0 ? round($totalPembayaran / $tenor, 2) : $totalPembayaran;
-                
-                $peminjaman->total_pinjaman = $totalPinjaman;
-                $peminjaman->total_bagi_hasil = $totalBagiHasil;
-                $peminjaman->pembayaran_total = $totalPembayaran;
-                
-                // Store additional installment-specific fields
-                $peminjaman->tenor_pembayaran = $tenor;
-                $peminjaman->persentase_bagi_hasil = $persentaseBagi;
-                $peminjaman->pps = $ppsAmount;
-                $peminjaman->s_finance = $sfinanceAmount;
-                $peminjaman->yang_harus_dibayarkan = $monthlyPay;
+                $dataPengajuanPeminjaman['pps'] = (double) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.40;
+                $dataPengajuanPeminjaman['s_finance'] = (double) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.60;;
+                $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = (double) ((double) $dataPengajuanPeminjaman['pembayaran_total'] / (double) $dataPengajuanPeminjaman['tenor_pembayaran']);
             } else {
-                // Standard calculation for other financing types
-                if ($manualTotal) {
-                    // try to normalize numeric from formatted input (remove non-digits except dot)
-                    $manualClean = preg_replace('/[^0-9\.]/', '', $manualTotal);
-                    $manualValue = floatval($manualClean);
-                    $peminjaman->total_pinjaman = $manualValue;
-                    
-                    // compute bagi hasil using the correct percentage (already calculated before loop)
-                    $peminjaman->total_bagi_hasil = round($manualValue * ($persentaseBagiHasil / 100), 2);
-                    $peminjaman->pembayaran_total = $peminjaman->total_pinjaman + $peminjaman->total_bagi_hasil;
-                } else {
-                    $peminjaman->total_pinjaman = $sumPinjaman;
-                    $peminjaman->total_bagi_hasil = $sumBagi;
-                    $peminjaman->pembayaran_total = $sumPinjaman + $sumBagi;
-                }
-                
-                // Store persentase bagi hasil for non-Installment financing types
-                $peminjaman->persentase_bagi_hasil = $persentaseBagiHasil;
+                $dataPengajuanPeminjaman['tanggal_pencairan'] = parseCarbonDate($dataPengajuanPeminjaman['tanggal_pencairan'])->format('Y-m-d');
+                $dataPengajuanPeminjaman['tanggal_pembayaran'] = parseCarbonDate($dataPengajuanPeminjaman['tanggal_pembayaran'])->format('Y-m-d');
             }
-            $peminjaman->save();
+
+            $userEmail = auth()->user()->email;
+            $id_debitur = MasterDebiturDanInvestor::select('id_debitur')->where('email', $userEmail)->first()->id_debitur;
+            $dataPengajuanPeminjaman['id_debitur'] = $id_debitur;
+
+            if ($dataPengajuanPeminjaman['lampiran_sid'] instanceof UploadedFile) {
+                $dataPengajuanPeminjaman['lampiran_sid'] = Storage::disk('public')->put('lampiran_sid', $dataPengajuanPeminjaman['lampiran_sid']);
+            }
+            $dataPengajuanPeminjaman['created_by'] = auth()->user()->id;
+            $dataPengajuanPeminjaman['updated_by'] = auth()->user()->id;
+
+            $peminjaman = PengajuanPeminjaman::create($dataPengajuanPeminjaman);
+
+            foreach ($dataInvoice as $i => $inv) {                
+                $nilai_pinjaman = (double) $inv['nilai_pinjaman'];
+
+                $nilai_bagi = (double) $nilai_pinjaman * (double) $this->persentase_bagi_hasil;
+
+                $inv['id_pengajuan_peminjaman'] = $peminjaman->id_pengajuan_peminjaman;
+                $inv['nilai_bagi_hasil'] = (double) $nilai_bagi;
+
+                if (
+                    in_array($dataPengajuanPeminjaman['jenis_pembiayaan'], [
+                        JenisPembiayaanEnum::INVOICE_FINANCING,
+                        JenisPembiayaanEnum::INSTALLMENT,
+                    ])
+                ) {
+                    $inv['invoice_date'] = parseCarbonDate($inv['invoice_date'])->format('Y-m-d');
+                } else {
+                    $inv['kontrak_date'] = parseCarbonDate($inv['kontrak_date'])->format('Y-m-d');
+                }
+
+                $inv['due_date'] = parseCarbonDate($inv['due_date'])->format('Y-m-d');
+
+                foreach ([
+                    'dokumen_invoice', 
+                    'dokumen_kontrak', 
+                    'dokumen_so', 
+                    'dokumen_bast', 
+                    'dokumen_lainnnya'
+                ] as $dokumen) {
+                    if (isset($inv[$dokumen]) && $inv[$dokumen] instanceof UploadedFile) {
+                        $inv[$dokumen] = Storage::disk('public')->put($dokumen, $inv[$dokumen]);
+                    } else {
+                        $inv[$dokumen] = null;
+                    }
+                }
+
+                BuktiPeminjaman::create($inv);
+            }
 
             DB::commit();
-            return response()->json(['success' => true, 'id' => $peminjaman->id_pengajuan_peminjaman], 201);
+            return Response::success(null, 'Pengajuan pinjaman berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return Response::errorCatch($e);
         }
     }
     

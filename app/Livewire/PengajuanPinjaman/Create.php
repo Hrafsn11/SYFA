@@ -23,24 +23,12 @@ class Create extends Component
         HasValidate, 
         WithFileUploads, 
         HandleCreateEvents, // event handling
-        HandleCreateDispatch; // list input fields
+        HandleCreateDispatch, // dispatching
+        FieldInputCreate; // list input fields
     private string $validateClass = PengajuanPinjamanRequest::class;
 
     #[ParameterIDRoute]
     public $id = null;
-
-    #[FieldInput]
-    public $sumber_pembiayaan = 'Eksternal', 
-        $id_instansi, 
-        $nama_rekening, 
-        $lampiran_sid, 
-        $tujuan_pembiayaan, 
-        $jenis_pembiayaan = JenisPembiayaanEnum::INVOICE_FINANCING, 
-        $tanggal_pencairan, 
-        $tanggal_pembayaran, 
-        $tenor_pembayaran, 
-        $catatan_lainnya, 
-        $form_data_invoice = [];
 
     public $nama_perusahaan;
     public $nama_bank;
@@ -108,6 +96,13 @@ class Create extends Component
         foreach ($this->getUniversalFieldInputs() as $key => $value) {
             $this->form_data[$value] = $this->{$value};
         }
+
+        if ($this->jenis_pembiayaan != JenisPembiayaanEnum::INSTALLMENT) {
+            unset($this->form_data['tenor_pembayaran']);
+        } else {
+            unset($this->form_data['tanggal_pencairan']);
+            unset($this->form_data['tanggal_pembayaran']);
+        }
     }
 
     public function editInvoice($idx)
@@ -151,5 +146,12 @@ class Create extends Component
 
         $jenisPembiayaan = $this->jenis_pembiayaan;
         $this->{str_replace(' ', '_', strtolower($jenisPembiayaan)) . '_data'} = $this->pengajuan->buktiPeminjaman;
+    }
+
+    public function afterSave($payload)
+    {
+        if ($payload->error === false) {
+            $this->redirect(route('peminjaman.index'));
+        }
     }
 }

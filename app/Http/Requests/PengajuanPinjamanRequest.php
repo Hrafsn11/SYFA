@@ -12,7 +12,7 @@ class PengajuanPinjamanRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,9 +29,9 @@ class PengajuanPinjamanRequest extends FormRequest
             'lampiran_sid' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'tujuan_pembiayaan' => 'required',
             'jenis_pembiayaan' => 'required|in:' . implode(',', JenisPembiayaanEnum::getConstants()),
-            'tanggal_pencairan' => 'required',
-            'tanggal_pembayaran' => 'required',
-            'tenor_pembayaran' => 'required_if:jenis_pembiayaan,Installment',
+            'tanggal_pencairan' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
+            'tanggal_pembayaran' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
+            'tenor_pembayaran' => 'required_if:jenis_pembiayaan,Installment|in:3,6,9,12',
             'catatan_lainnya' => 'required',
         ];
 

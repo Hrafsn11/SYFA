@@ -281,5 +281,9 @@
 </div>
 
 @push('scripts')
-<script></script>
+<script>
+    function afterAction(payload) {
+        // Redirect sudah dihandle di Livewire component (afterSave method)
+    }
+</script>
 @endpush

@@ -8,15 +8,15 @@ use App\Enums\JenisPembiayaanEnum;
 trait FieldInputCreate
 {
     #[FieldInput]
-    public $sumber_pembiayaan = 'Eksternal';
-    public $id_instansi;
-    public $nama_rekening;
-    public $lampiran_sid;
-    public $tujuan_pembiayaan;
-    public $jenis_pembiayaan = JenisPembiayaanEnum::INVOICE_FINANCING;
-    public $tanggal_pencairan;
-    public $tanggal_pembayaran;
-    public $tenor_pembayaran;
-    public $catatan_lainnya;
-    public $form_data_invoice = [];
+    public $sumber_pembiayaan = 'Eksternal', 
+        $id_instansi, 
+        $nama_rekening, 
+        $lampiran_sid, 
+        $tujuan_pembiayaan, 
+        $jenis_pembiayaan = JenisPembiayaanEnum::INVOICE_FINANCING, 
+        $tanggal_pencairan, 
+        $tanggal_pembayaran, 
+        $tenor_pembayaran, 
+        $catatan_lainnya, 
+        $form_data_invoice = [];
 }

@@ -631,15 +631,24 @@ document.addEventListener('livewire:init', () => {
         const callbackName = event[0].callback;
         const payload = event[0]?.payload?.original || {};
 
-        showSweetAlert({
-            title: payload?.data?.title ?? 'Berhasil!',
-            text: payload.message,
-            icon: payload?.data?.icon ?? 'success',
-            showConfirmButton: payload?.data?.showConfirmButton
-        }); 
-
-        if (typeof window[callbackName] === 'function') {
-            window[callbackName](payload);
+        if (payload.error === false) {
+            showSweetAlert({
+                title: payload?.data?.title ?? 'Berhasil!',
+                text: payload.message,
+                icon: payload?.data?.icon ?? 'success',
+                showConfirmButton: payload?.data?.showConfirmButton
+            }); 
+    
+            if (typeof window[callbackName] === 'function') {
+                window[callbackName](payload);
+            }
+        } else {
+            showSweetAlert({
+                title: payload?.data?.title ?? 'Gagal!',
+                text: payload.message,
+                icon: payload?.data?.icon ?? 'error',
+                showConfirmButton: payload?.data?.showConfirmButton
+            });
         }
     });
 

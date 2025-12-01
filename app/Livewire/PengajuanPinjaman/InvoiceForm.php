@@ -60,11 +60,11 @@ class InvoiceForm extends Component
     {
         if ($this->index_data_invoice !== null) {
             foreach ([
-                'dokumen_invoice_file', 
-                'dokumen_kontrak_file', 
-                'dokumen_so_file', 
-                'dokumen_bast_file', 
-                'dokumen_lainnnya_file'
+                'dokumen_invoice', 
+                'dokumen_kontrak', 
+                'dokumen_so', 
+                'dokumen_bast', 
+                'dokumen_lainnnya'
             ] as $dokumen) {
                 if (array_key_exists($dokumen, $formData) && is_null($formData[$dokumen])) {
                     $formData[$dokumen] = $this->form_data_invoice[$this->index_data_invoice][$dokumen];
@@ -83,21 +83,21 @@ class InvoiceForm extends Component
     {
         $data = collect($this->form_data_invoice ?? []);
 
-        $totalPinjaman = $data->sum(fn ($item) => (float) ($item['nilai_pinjaman'] ?? 0));
+        $totalPinjaman = $data->sum(fn ($item) => (double) ($item['nilai_pinjaman'] ?? 0));
         $totalBagiHasil = $data->sum(function ($item) {
-            $persentase = (float) ($this->persentase_bagi_hasil ?? 0);
-            $nilaiPinjaman = (float) ($item['nilai_pinjaman'] ?? 0);
+            $persentase = (double) ($this->persentase_bagi_hasil ?? 0);
+            $nilaiPinjaman = (double) ($item['nilai_pinjaman'] ?? 0);
 
             return $nilaiPinjaman * $persentase;
         });
 
         foreach ($this->form_data_invoice as $key => $value) {
             foreach ([
-                'dokumen_invoice_file', 
-                'dokumen_kontrak_file', 
-                'dokumen_so_file', 
-                'dokumen_bast_file', 
-                'dokumen_lainnnya_file'
+                'dokumen_invoice', 
+                'dokumen_kontrak', 
+                'dokumen_so', 
+                'dokumen_bast', 
+                'dokumen_lainnnya'
             ] as $dokumen) {
                 if (
                     array_key_exists($dokumen, $value) && 

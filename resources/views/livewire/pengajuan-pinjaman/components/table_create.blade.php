@@ -38,29 +38,29 @@
                                         <td>{{ parseCarbonDate($invoice['invoice_date'])->format('d F Y') }}</td>
                                         <td>{{ parseCarbonDate($invoice['due_date'])->format('d F Y') }}</td>
                                         <td>
-                                            @if(!empty($invoice['dokumen_invoice_file']))
-                                                <a href="{{ getFileUrl($invoice['dokumen_invoice_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($invoice['dokumen_invoice']))
+                                                <a href="{{ getFileUrl($invoice['dokumen_invoice']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($invoice['dokumen_kontrak_file']))
-                                                <a href="{{ getFileUrl($invoice['dokumen_kontrak_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($invoice['dokumen_kontrak']))
+                                                <a href="{{ getFileUrl($invoice['dokumen_kontrak']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($invoice['dokumen_so_file']))
-                                                <a href="{{ getFileUrl($invoice['dokumen_so_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($invoice['dokumen_so']))
+                                                <a href="{{ getFileUrl($invoice['dokumen_so']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($invoice['dokumen_bast_file']))
-                                                <a href="{{ getFileUrl($invoice['dokumen_bast_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($invoice['dokumen_bast']))
+                                                <a href="{{ getFileUrl($invoice['dokumen_bast']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -120,29 +120,29 @@
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($po['due_date'])->format('d F Y') }}</td>
                                         <td>
-                                            @if(!empty($po['dokumen_kontrak_file']))
-                                                <a href="{{ getFileUrl($po['dokumen_kontrak_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($po['dokumen_kontrak']))
+                                                <a href="{{ getFileUrl($po['dokumen_kontrak']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($po['dokumen_so_file']))
-                                                <a href="{{ getFileUrl($po['dokumen_so_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($po['dokumen_so']))
+                                                <a href="{{ getFileUrl($po['dokumen_so']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($po['dokumen_bast_file']))
-                                                <a href="{{ getFileUrl($po['dokumen_bast_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($po['dokumen_bast']))
+                                                <a href="{{ getFileUrl($po['dokumen_bast']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($po['dokumen_lainnnya_file']))
-                                                <a href="{{ getFileUrl($po['dokumen_lainnnya_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($po['dokumen_lainnnya']))
+                                                <a href="{{ getFileUrl($po['dokumen_lainnnya']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -190,15 +190,15 @@
                                         </td>
                                         <td>{{ $inst['nama_barang'] }}</td>
                                         <td>
-                                            @if(!empty($inst['dokumen_invoice_file']))
-                                                <a href="{{ getFileUrl($inst['dokumen_invoice_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($inst['dokumen_invoice']))
+                                                <a href="{{ getFileUrl($inst['dokumen_invoice']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($inst['dokumen_lainnnya_file']))
-                                                <a href="{{ getFileUrl($inst['dokumen_lainnnya_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($inst['dokumen_lainnnya']))
+                                                <a href="{{ getFileUrl($inst['dokumen_lainnnya']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
@@ -256,29 +256,29 @@
                                         <td>{{ \Carbon\Carbon::parse($fact['due_date'])->format('d F Y') }}
                                         </td>
                                         <td>
-                                            @if(!empty($fact['dokumen_invoice_file']))
-                                                <a href="{{ getFileUrl($fact['dokumen_invoice_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($fact['dokumen_invoice']))
+                                                <a href="{{ getFileUrl($fact['dokumen_invoice']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($fact['dokumen_kontrak_file']))
-                                                <a href="{{ getFileUrl($fact['dokumen_kontrak_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($fact['dokumen_kontrak']))
+                                                <a href="{{ getFileUrl($fact['dokumen_kontrak']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($fact['dokumen_so_file']))
-                                                <a href="{{ getFileUrl($fact['dokumen_so_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($fact['dokumen_so']))
+                                                <a href="{{ getFileUrl($fact['dokumen_so']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if(!empty($fact['dokumen_bast_file']))
-                                                <a href="{{ getFileUrl($fact['dokumen_bast_file']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
+                                            @if(!empty($fact['dokumen_bast']))
+                                                <a href="{{ getFileUrl($fact['dokumen_bast']) }}" target="_blank" class="text-primary">Lihat Dokumen</a>
                                             @else
                                                 <span class="text-muted">-</span>
                                             @endif

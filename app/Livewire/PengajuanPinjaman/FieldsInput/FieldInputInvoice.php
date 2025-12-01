@@ -10,9 +10,9 @@ trait FieldInputInvoice
     #[FieldInput]
     public $no_invoice, $nama_client,
         $nilai_invoice, $nilai_pinjaman,
-        $invoice_date, $due_date, $dokumen_invoice_file,
-        $dokumen_kontrak_file, $dokumen_so_file, $dokumen_bast_file,
-        $no_kontrak, $contract_date, $dokumen_lainnya_file, $nama_barang;
+        $invoice_date, $due_date, $dokumen_invoice,
+        $dokumen_kontrak, $dokumen_so, $dokumen_bast,
+        $no_kontrak, $kontrak_date, $dokumen_lainnya, $nama_barang;
 
     /**
      * Menyiapkan data form berdasarkan jenis pembiayaan
@@ -44,10 +44,10 @@ trait FieldInputInvoice
             'nilai_bagi_hasil' => $nilaiBagiHasil,
             'invoice_date' => parseCarbonDate($this->invoice_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date)?->format('d/m/Y') ?? '',
-            'dokumen_invoice_file' => $this->dokumen_invoice_file,
-            'dokumen_kontrak_file' => $this->dokumen_kontrak_file,
-            'dokumen_so_file' => $this->dokumen_so_file,
-            'dokumen_bast_file' => $this->dokumen_bast_file,
+            'dokumen_invoice' => $this->dokumen_invoice,
+            'dokumen_kontrak' => $this->dokumen_kontrak,
+            'dokumen_so' => $this->dokumen_so,
+            'dokumen_bast' => $this->dokumen_bast,
         ];
     }
 
@@ -65,12 +65,12 @@ trait FieldInputInvoice
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'nilai_pinjaman' => $nilaiPinjaman,
             'nilai_bagi_hasil' => $nilaiBagiHasil,
-            'contract_date' => parseCarbonDate($this->contract_date)?->format('d/m/Y') ?? '',
+            'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date) ?? '',
-            'dokumen_kontrak_file' => $this->dokumen_kontrak_file,
-            'dokumen_so_file' => $this->dokumen_so_file,
-            'dokumen_bast_file' => $this->dokumen_bast_file,
-            'dokumen_lainnya_file' => $this->dokumen_lainnya_file,
+            'dokumen_kontrak' => $this->dokumen_kontrak,
+            'dokumen_so' => $this->dokumen_so,
+            'dokumen_bast' => $this->dokumen_bast,
+            'dokumen_lainnya' => $this->dokumen_lainnya,
         ];
     }
 
@@ -85,8 +85,8 @@ trait FieldInputInvoice
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'invoice_date' => parseCarbonDate($this->invoice_date) ?? '',
             'nama_barang' => $this->nama_barang ?? '',
-            'dokumen_invoice_file' => $this->dokumen_invoice_file,
-            'dokumen_lainnya_file' => $this->dokumen_lainnya_file,
+            'dokumen_invoice' => $this->dokumen_invoice,
+            'dokumen_lainnya' => $this->dokumen_lainnya,
         ];
     }
 
@@ -104,12 +104,12 @@ trait FieldInputInvoice
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'nilai_pinjaman' => $nilaiPinjaman,
             'nilai_bagi_hasil' => $nilaiBagiHasil,
-            'contract_date' => parseCarbonDate($this->contract_date)?->format('d/m/Y') ?? '',
+            'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date) ?? '',
-            'dokumen_invoice_file' => $this->dokumen_invoice_file,
-            'dokumen_kontrak_file' => $this->dokumen_kontrak_file,
-            'dokumen_so_file' => $this->dokumen_so_file,
-            'dokumen_bast_file' => $this->dokumen_bast_file,
+            'dokumen_invoice' => $this->dokumen_invoice,
+            'dokumen_kontrak' => $this->dokumen_kontrak,
+            'dokumen_so' => $this->dokumen_so,
+            'dokumen_bast' => $this->dokumen_bast,
         ];
     }
 
@@ -129,13 +129,13 @@ trait FieldInputInvoice
             'nilai_bagi_hasil' => $nilaiBagiHasil,
             'invoice_date' => parseCarbonDate($this->invoice_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date)?->format('d/m/Y') ?? '',
-            'dokumen_invoice_file' => $this->dokumen_invoice_file,
-            'dokumen_kontrak_file' => $this->dokumen_kontrak_file,
-            'dokumen_so_file' => $this->dokumen_so_file,
-            'dokumen_bast_file' => $this->dokumen_bast_file,
+            'dokumen_invoice' => $this->dokumen_invoice,
+            'dokumen_kontrak' => $this->dokumen_kontrak,
+            'dokumen_so' => $this->dokumen_so,
+            'dokumen_bast' => $this->dokumen_bast,
             'no_kontrak' => $this->no_kontrak ?? '',
-            'contract_date' => parseCarbonDate($this->contract_date)?->format('d/m/Y') ?? '',
-            'dokumen_lainnya_file' => $this->dokumen_lainnya_file,
+            'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
+            'dokumen_lainnya' => $this->dokumen_lainnya,
             'nama_barang' => $this->nama_barang ?? '',
         ];
     }

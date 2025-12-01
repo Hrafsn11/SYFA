@@ -80,28 +80,28 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_invoice_file">Upload Dokumen Invoice <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control" id="dokumen_invoice_file" wire:model.blur="dokumen_invoice_file">
+                                            <label class="form-label" for="dokumen_invoice">Upload Dokumen Invoice <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_kontrak_file">Upload Dokumen Kontrak</label>
-                                            <input type="file" class="form-control" id="dokumen_kontrak_file"  wire:model.blur="dokumen_kontrak_file">
+                                            <label class="form-label" for="dokumen_kontrak">Upload Dokumen Kontrak</label>
+                                            <input type="file" class="form-control" id="dokumen_kontrak"  wire:model.blur="dokumen_kontrak">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_so_file">Upload Dokumen SO</label>
-                                            <input type="file" class="form-control" id="dokumen_so_file" wire:model.blur="dokumen_so_file">
+                                            <label class="form-label" for="dokumen_so">Upload Dokumen SO</label>
+                                            <input type="file" class="form-control" id="dokumen_so" wire:model.blur="dokumen_so">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_bast_file">Upload Dokumen BAST</label>
-                                            <input type="file" class="form-control" id="dokumen_bast_file"  wire:model.blur="dokumen_bast_file">
+                                            <label class="form-label" for="dokumen_bast">Upload Dokumen BAST</label>
+                                            <input type="file" class="form-control" id="dokumen_bast"  wire:model.blur="dokumen_bast">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -153,10 +153,10 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="contract_date">Contract Date</label>
+                                            <label class="form-label" for="kontrak_date">Contract Date</label>
                                             <livewire:components.datepicker-bootstrap 
-                                                model_name="contract_date"
-                                                :value="$contract_date"
+                                                model_name="kontrak_date"
+                                                :value="$kontrak_date"
                                                 data_placeholder="DD/MM/YYYY"
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
@@ -179,28 +179,28 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_kontrak_file">Upload Dokumen Kontrak  <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control" id="dokumen_kontrak_file" wire:model.blur="dokumen_kontrak_file">
+                                            <label class="form-label" for="dokumen_kontrak">Upload Dokumen Kontrak  <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="dokumen_kontrak" wire:model.blur="dokumen_kontrak">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_so_file">Upload Dokumen SO</label>
-                                            <input type="file" class="form-control" id="dokumen_so_file" wire:model.blur="dokumen_so_file">
+                                            <label class="form-label" for="dokumen_so">Upload Dokumen SO</label>
+                                            <input type="file" class="form-control" id="dokumen_so" wire:model.blur="dokumen_so">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_bast_file">Upload Dokumen BAST</label>
-                                            <input type="file" class="form-control" id="dokumen_bast_file" wire:model.blur="dokumen_bast_file">
+                                            <label class="form-label" for="dokumen_bast">Upload Dokumen BAST</label>
+                                            <input type="file" class="form-control" id="dokumen_bast" wire:model.blur="dokumen_bast">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_lainnya_file">Upload Dokumen Lainnya</label>
-                                            <input type="file" class="form-control" id="dokumen_lainnya_file" wire:model.blur="dokumen_lainnya_file">
+                                            <label class="form-label" for="dokumen_lainnya">Upload Dokumen Lainnya</label>
+                                            <input type="file" class="form-control" id="dokumen_lainnya" wire:model.blur="dokumen_lainnya">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -248,14 +248,14 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_invoice_file">Upload Dokumen Invoice <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control" id="dokumen_invoice_file" wire:model.blur="dokumen_invoice_file">
+                                            <label class="form-label" for="dokumen_invoice">Upload Dokumen Invoice <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_lainnya_file">Upload Dokumen Lainnya</label>
-                                            <input type="file" class="form-control" id="dokumen_lainnya_file" wire:model.blur="dokumen_lainnya_file">
+                                            <label class="form-label" for="dokumen_lainnya">Upload Dokumen Lainnya</label>
+                                            <input type="file" class="form-control" id="dokumen_lainnya" wire:model.blur="dokumen_lainnya">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -299,10 +299,10 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="contract_date">Contract Date</label>
+                                            <label class="form-label" for="kontrak_date">Contract Date</label>
                                             <livewire:components.datepicker-bootstrap 
-                                                model_name="contract_date"
-                                                :value="$contract_date"
+                                                model_name="kontrak_date"
+                                                :value="$kontrak_date"
                                                 data_placeholder="DD/MM/YYYY"
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
@@ -325,25 +325,25 @@
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_invoice_file">Upload Dokumen Invoice <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control" id="dokumen_invoice_file" wire:model.blur="dokumen_invoice_file">
+                                            <label class="form-label" for="dokumen_invoice">Upload Dokumen Invoice <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_kontrak_file">Upload Dokumen Kontrak <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control" id="dokumen_kontrak_file" wire:model.blur="dokumen_kontrak_file">
+                                            <label class="form-label" for="dokumen_kontrak">Upload Dokumen Kontrak <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="dokumen_kontrak" wire:model.blur="dokumen_kontrak">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_so_file">Upload Dokumen SO</label>
-                                            <input type="file" class="form-control" id="dokumen_so_file" wire:model.blur="dokumen_so_file">
+                                            <label class="form-label" for="dokumen_so">Upload Dokumen SO</label>
+                                            <input type="file" class="form-control" id="dokumen_so" wire:model.blur="dokumen_so">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="dokumen_bast_file">Upload Dokumen BAST</label>
-                                            <input type="file" class="form-control" id="dokumen_bast_file" wire:model.blur="dokumen_bast_file">
+                                            <label class="form-label" for="dokumen_bast">Upload Dokumen BAST</label>
+                                            <input type="file" class="form-control" id="dokumen_bast" wire:model.blur="dokumen_bast">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
