@@ -48,18 +48,44 @@
         
         // Initialize Select2 for Filters
         function initSelect2() {
+            // Destroy existing instances first
+            if ($('#filterBulan').hasClass('select2-hidden-accessible')) {
+                $('#filterBulan').select2('destroy');
+            }
+            if ($('#filterTahun').hasClass('select2-hidden-accessible')) {
+                $('#filterTahun').select2('destroy');
+            }
+
+            // Initialize filterBulan with fixed width (tidak auto-resize)
             $('#filterBulan').select2({
                 placeholder: 'Pilih Bulan',
                 minimumResultsForSearch: Infinity,
-                width: '150px',
-                allowClear: true
+                width: 'resolve', // Use the width of the original element
+                allowClear: true,
+                dropdownAutoWidth: false
             });
 
+            // Initialize filterTahun with fixed width
             $('#filterTahun').select2({
                 placeholder: 'Pilih Tahun',
                 minimumResultsForSearch: Infinity,
-                width: '150px'
+                width: 'resolve',
+                dropdownAutoWidth: false
             });
+            
+            // Force set width setelah initialize untuk memastikan konsisten
+            setTimeout(function() {
+                $('#filterBulan').next('.select2-container').css({
+                    'width': '180px',
+                    'min-width': '180px',
+                    'max-width': '180px'
+                });
+                $('#filterTahun').next('.select2-container').css({
+                    'width': '150px',
+                    'min-width': '150px',
+                    'max-width': '150px'
+                });
+            }, 10);
         }
 
         // Init on page load

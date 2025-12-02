@@ -14,8 +14,8 @@
                 <i class="ti ti-file-type-pdf me-1"></i>
                 Export PDF
             </a>
-            <div wire:ignore>
-                <select id="filterBulan" class="form-select" style="width: 150px;">
+            <div wire:ignore style="width: 180px; flex-shrink: 0;">
+                <select id="filterBulan" class="form-select" style="width: 100%;">
                     <option value="" {{ $bulan == null || $bulan == '' ? 'selected' : '' }}>Semua Bulan</option>
                     @php
                         $bulanNama = [
@@ -62,6 +62,36 @@
     {{-- Modal Component --}}
     @include('livewire.ar-performance.partials._modal')
 </div>
+
+@push('styles')
+<style>
+    /* Fix Select2 dropdown bulan agar width konsisten */
+    #filterBulan + .select2-container {
+        width: 180px !important;
+        min-width: 180px !important;
+        max-width: 180px !important;
+    }
+    
+    #filterBulan + .select2-container .select2-selection {
+        width: 100% !important;
+        min-width: 180px !important;
+    }
+    
+    #filterBulan + .select2-container .select2-selection__rendered {
+        min-width: 150px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Fix Select2 dropdown tahun */
+    #filterTahun + .select2-container {
+        width: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>
