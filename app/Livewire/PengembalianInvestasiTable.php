@@ -23,7 +23,7 @@ class PengembalianInvestasiTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('tanggal_pengembalian', 'desc')
+            ->setDefaultSort('desc')
             ->setTableAttributes(['class' => 'table table-bordered'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
