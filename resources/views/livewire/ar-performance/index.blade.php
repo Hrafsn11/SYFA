@@ -5,6 +5,15 @@
             <h4 class="fw-bold mb-1">AR Performance</h4>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('ar-performance.export-pdf', ['tahun' => $tahun, 'bulan' => $bulan]) }}" 
+               class="btn btn-primary btn-sm" 
+               target="_blank"
+               title="Export ke PDF"
+               wire:key="export-pdf-{{ $tahun }}-{{ $bulan ?? 'all' }}"
+               id="btnExportPDF">
+                <i class="ti ti-file-type-pdf me-1"></i>
+                Export PDF
+            </a>
             <div wire:ignore>
                 <select id="filterBulan" class="form-select" style="width: 150px;">
                     <option value="" {{ $bulan == null || $bulan == '' ? 'selected' : '' }}>Semua Bulan</option>

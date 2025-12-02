@@ -64,15 +64,30 @@
 
         // Init on page load
         initSelect2();
+        updateExportLink();
+
+        // Update export PDF link when filters change
+        function updateExportLink() {
+            const tahun = @this.tahun;
+            const bulan = @this.bulan || '';
+            let url = "{{ route('ar-performance.export-pdf') }}";
+            url += '?tahun=' + tahun;
+            if (bulan) {
+                url += '&bulan=' + bulan;
+            }
+            $('#btnExportPDF').attr('href', url);
+        }
 
         $('#filterBulan').on('change', function(e) {
             const bulan = $(this).val();
             @this.set('bulan', bulan || null);
+            setTimeout(updateExportLink, 100);
         });
 
         $('#filterTahun').on('change', function(e) {
             const tahun = $(this).val();
             @this.set('tahun', tahun);
+            setTimeout(updateExportLink, 100);
         });
 
         let isSelectChanging = false;
@@ -90,6 +105,9 @@
                     
                     $('#filterBulan').val(@this.bulan || '').trigger('change.select2');
                     $('#filterTahun').val(@this.tahun).trigger('change.select2');
+                    
+                    // Update export link after Livewire update
+                    updateExportLink();
                 }
             });
         });
