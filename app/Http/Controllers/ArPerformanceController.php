@@ -30,8 +30,9 @@ class ArPerformanceController extends Controller
         $debiturId = $request->input('debitur_id');
         $category = $request->input('category');
         $tahun = $request->input('tahun');
+        $bulan = $request->input('bulan');
 
-        $transactions = $this->arService->getTransactionsByCategory($debiturId, $category, $tahun);
+        $transactions = $this->arService->getTransactionsByCategory($debiturId, $category, $tahun, $bulan);
 
         return response()->json([
             'success' => true,

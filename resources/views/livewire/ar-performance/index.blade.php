@@ -6,6 +6,23 @@
         </div>
         <div class="d-flex gap-2">
             <div wire:ignore>
+                <select id="filterBulan" class="form-select" style="width: 150px;">
+                    <option value="" {{ $bulan == null || $bulan == '' ? 'selected' : '' }}>Semua Bulan</option>
+                    @php
+                        $bulanNama = [
+                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                        ];
+                    @endphp
+                    @for($month = 1; $month <= 12; $month++)
+                        <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $bulan == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                            {{ $bulanNama[$month] }}
+                        </option>
+                    @endfor
+                </select>
+            </div>
+            <div wire:ignore>
                 <select id="filterTahun" class="form-select" style="width: 150px;">
                     @for($year = date('Y'); $year >= 2020; $year--)
                         <option value="{{ $year }}" {{ $tahun == $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -29,7 +46,7 @@
             </div>
         @else
             {{-- Table Component --}}
-            <livewire:ar-performance-table :arData="$arData" :tahun="$tahun" :key="$tahun" />
+            <livewire:ar-performance-table :arData="$arData" :tahun="$tahun" :bulan="$bulan" :key="$tahun-$bulan" />
         @endif
     </div>
     

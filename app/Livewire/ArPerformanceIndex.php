@@ -10,6 +10,7 @@ class ArPerformanceIndex extends Component
 {
     // Filters
     public $tahun;
+    public $bulan;
 
     // Inject Service
     protected $arPerformanceService;
@@ -22,12 +23,13 @@ class ArPerformanceIndex extends Component
     public function mount()
     {
         $this->tahun = date('Y');
+        $this->bulan = null; // Default: semua bulan
     }
 
     public function render()
     {
         // Always fetch fresh data (no cache)
-        $arData = $this->arPerformanceService->getArPerformanceData($this->tahun, false);
+        $arData = $this->arPerformanceService->getArPerformanceData($this->tahun, $this->bulan, false);
 
         return view('livewire.ar-performance.index', [
             'arData' => $arData,
@@ -39,6 +41,12 @@ class ArPerformanceIndex extends Component
     public function updatedTahun()
     {
         // Auto-refresh ketika tahun berubah
+        $this->dispatch('filter-changed');
+    }
+
+    public function updatedBulan()
+    {
+        // Auto-refresh ketika bulan berubah
         $this->dispatch('filter-changed');
     }
 

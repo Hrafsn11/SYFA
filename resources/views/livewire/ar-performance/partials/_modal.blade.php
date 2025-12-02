@@ -46,8 +46,15 @@
         const $modal = $('#modalDetailTransaksi');
         const $tbody = $('#tableDetailTransaksi');
         
-        // Initialize Select2 for Year Filter
+        // Initialize Select2 for Filters
         function initSelect2() {
+            $('#filterBulan').select2({
+                placeholder: 'Pilih Bulan',
+                minimumResultsForSearch: Infinity,
+                width: '150px',
+                allowClear: true
+            });
+
             $('#filterTahun').select2({
                 placeholder: 'Pilih Tahun',
                 minimumResultsForSearch: Infinity,
@@ -57,6 +64,11 @@
 
         // Init on page load
         initSelect2();
+
+        $('#filterBulan').on('change', function(e) {
+            const bulan = $(this).val();
+            @this.set('bulan', bulan || null);
+        });
 
         $('#filterTahun').on('change', function(e) {
             const tahun = $(this).val();
@@ -68,21 +80,25 @@
         document.addEventListener('livewire:init', () => {
             Livewire.hook('morph.updated', ({ el, component }) => {
                 if (!isSelectChanging) {
+                    if ($('#filterBulan').hasClass('select2-hidden-accessible')) {
+                        $('#filterBulan').select2('destroy');
+                    }
                     if ($('#filterTahun').hasClass('select2-hidden-accessible')) {
                         $('#filterTahun').select2('destroy');
                     }
                     initSelect2();
                     
+                    $('#filterBulan').val(@this.bulan || '').trigger('change.select2');
                     $('#filterTahun').val(@this.tahun).trigger('change.select2');
                 }
             });
         });
 
-        $('#filterTahun').on('select2:selecting', function() {
+        $('#filterBulan, #filterTahun').on('select2:selecting', function() {
             isSelectChanging = true;
         });
         
-        $('#filterTahun').on('select2:select', function() {
+        $('#filterBulan, #filterTahun').on('select2:select', function() {
             setTimeout(() => { isSelectChanging = false; }, 100);
         });
 
@@ -116,6 +132,7 @@
             $modal.modal('show');
 
             const tahun = @this.tahun;
+            const bulan = @this.bulan;
 
             $.ajax({
                 url: "{{ route('ar-performance.transactions') }}",
@@ -123,7 +140,8 @@
                 data: {
                     debitur_id: debiturId,
                     category: category,
-                    tahun: tahun
+                    tahun: tahun,
+                    bulan: bulan
                 },
                 success: function(response) {
                     if (response.success && response.data.length > 0) {

@@ -12,22 +12,22 @@ class ArPerformanceService
     protected $cacheEnabled = false; // Disabled for real-time updates
     protected $cacheTTL = 3600; 
 
-    public function getArPerformanceData($tahun = null, $useCache = false) // Default to false for fresh data
+    public function getArPerformanceData($tahun = null, $bulan = null, $useCache = false) // Default to false for fresh data
     {
         if (!$this->cacheEnabled || !$useCache) {
-            return $this->calculateArPerformance($tahun);
+            return $this->calculateArPerformance($tahun, $bulan);
         }
 
-        $cacheKey = $this->getCacheKey($tahun);
+        $cacheKey = $this->getCacheKey($tahun, $bulan);
         
-        return Cache::remember($cacheKey, $this->cacheTTL, function () use ($tahun) {
-            return $this->calculateArPerformance($tahun);
+        return Cache::remember($cacheKey, $this->cacheTTL, function () use ($tahun, $bulan) {
+            return $this->calculateArPerformance($tahun, $bulan);
         });
     }
 
-    protected function calculateArPerformance($tahun = null)
+    protected function calculateArPerformance($tahun = null, $bulan = null)
     {
-        $payments = $this->getPaymentsData($tahun);
+        $payments = $this->getPaymentsData($tahun, $bulan);
         
         if ($payments->isEmpty()) {
             return collect([]);
@@ -42,7 +42,7 @@ class ArPerformanceService
             ->sortBy('nama_debitur');
     }
 
-    protected function getPaymentsData($tahun = null)
+    protected function getPaymentsData($tahun = null, $bulan = null)
     {
         $query = DB::table('report_pengembalian as rp')
             ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
@@ -64,6 +64,7 @@ class ArPerformanceService
                 DB::raw('COALESCE(bp.no_kontrak, pm.no_kontrak) as kontrak_display')
             ])
             ->when($tahun, fn($q, $year) => $q->whereYear('rp.created_at', $year))
+            ->when($bulan, fn($q, $month) => $q->whereMonth('rp.created_at', $month))
             ->orderBy('pp.nama_perusahaan')
             ->orderBy('rp.created_at');
 
@@ -141,9 +142,9 @@ class ArPerformanceService
             : $tanggalPembayaran->diffInDays($dueDate);
     }
 
-    public function getTransactionsByCategory($debiturId, $category, $tahun = null): array
+    public function getTransactionsByCategory($debiturId, $category, $tahun = null, $bulan = null): array
     {
-        $data = $this->getArPerformanceData($tahun, false); // Always fetch fresh data
+        $data = $this->getArPerformanceData($tahun, $bulan, false); // Always fetch fresh data
         
         $debitur = $data->firstWhere('id_debitur', $debiturId);
         
@@ -155,19 +156,20 @@ class ArPerformanceService
         return $debitur[$category]['transactions'] ?? [];
     }
 
-    public function clearCache($tahun = null)
+    public function clearCache($tahun = null, $bulan = null)
     {
-        if ($tahun) {
-            Cache::forget($this->getCacheKey($tahun));
+        if ($tahun || $bulan) {
+            Cache::forget($this->getCacheKey($tahun, $bulan));
         } else {
             Cache::flush();
         }
     }
 
-    protected function getCacheKey($tahun = null)
+    protected function getCacheKey($tahun = null, $bulan = null)
     {
         $tahun = $tahun ?? 'all';
-        return "ar_performance_data_{$tahun}";
+        $bulan = $bulan ?? 'all';
+        return "ar_performance_data_{$tahun}_{$bulan}";
     }
 
     public function getCategoryLabel($category)
