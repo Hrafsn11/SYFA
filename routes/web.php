@@ -72,6 +72,21 @@ Route::middleware([
         Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
     });
 
+    // Program Restrukturisasi Routes
+    Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
+        // Blade index + Livewire table (recommended)
+        Route::get('/', function () {return view('program-restrukturisasi.index');})->name('index');
+        // Livewire create form
+        Route::get('create', \App\Livewire\ProgramRestrukturisasiCreate::class)->name('create');
+        Route::get('{id}', \App\Livewire\ProgramRestrukturisasiShow::class)->name('show');
+        Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasiEdit::class)->name('edit');
+        // Controller version (fallback/alternative)
+        Route::get('create-old', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'create'])->name('create-old');
+        Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
+        Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
+        Route::get('detail/{id}', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
+    });
+
     // Detail restrukturisasi menggunakan Controller dengan Pure AJAX (bukan Livewire component)
     Route::get('detail-restrukturisasi/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('detail-restrukturisasi');
 
