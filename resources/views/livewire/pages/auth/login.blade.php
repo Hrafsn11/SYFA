@@ -1,5 +1,6 @@
 <?php
 
+use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -21,7 +22,7 @@ new #[Layout('layouts.guest')] class extends Component {
         
         if (Auth::attempt([$fieldType => $this->email, 'password' => $this->password], $this->remember)) {
             request()->session()->regenerate();
-            $this->redirect('/dashboard');
+            $this->redirect(RouteServiceProvider::HOME);
         } else {
             $this->addError('email', 'The provided credentials do not match our records.');
         }

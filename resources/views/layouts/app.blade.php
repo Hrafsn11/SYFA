@@ -1,6 +1,14 @@
+@php
+    $showSidebar = $showSidebar ?? true;
+    $showNavbar = $showNavbar ?? true;
+    $layoutBodyClass = $showSidebar ? 'layout-wrapper layout-content-navbar' : 'layout-wrapper layout-content-navbar layout-without-menu';
+    $htmlLayoutClass = $showSidebar
+        ? 'light-style layout-navbar-fixed layout-menu-fixed layout-compact'
+        : 'light-style layout-navbar-fixed layout-compact';
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-    class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default"
+    class="{{ $htmlLayoutClass }}" dir="ltr" data-theme="theme-default"
     data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template" data-style="light">
 
 <head>
@@ -102,17 +110,21 @@
 
 <body>
     <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
+    <div class="{{ $layoutBodyClass }}">
         <div class="layout-container">
-            <!-- Menu -->
-            @include('partials.sidebar')
-            <!-- / Menu -->
+            @if($showSidebar)
+                <!-- Menu -->
+                @include('partials.sidebar')
+                <!-- / Menu -->
+            @endif
 
             <!-- Layout container -->
             <div class="layout-page">
-                <!-- Navbar -->
-                @include('partials.navbar')
-                <!-- / Navbar -->
+                @if($showNavbar)
+                    <!-- Navbar -->
+                    @include('partials.navbar')
+                    <!-- / Navbar -->
+                @endif
 
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
@@ -137,10 +149,12 @@
             <!-- / Layout page -->
         </div>
 
-        <!-- Overlay -->
-        <div class="layout-overlay layout-menu-toggle"></div>
+        @if($showSidebar)
+            <!-- Overlay -->
+            <div class="layout-overlay layout-menu-toggle"></div>
 
-        <div class="drag-target"></div>
+            <div class="drag-target"></div>
+        @endif
     </div>
     <!-- / Layout wrapper -->
 
