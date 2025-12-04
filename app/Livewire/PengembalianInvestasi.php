@@ -29,6 +29,8 @@ class PengembalianInvestasi extends Component
     public $bagi_hasil_total;
     public $sisa_pokok;
     public $sisa_bagi_hasil;
+    public $dana_tersedia = 0;
+    public $sisa_dana_di_perusahaan = 0;
     public $total_pokok_dikembalikan = 0;
     public $total_bagi_hasil_dikembalikan = 0;
     public $jumlah_transaksi = 0;
@@ -72,7 +74,9 @@ class PengembalianInvestasi extends Component
                 'lama_investasi',
                 'nominal_bagi_hasil_yang_didapatkan',
                 'sisa_pokok',
-                'sisa_bagi_hasil'
+                'sisa_bagi_hasil',
+                'total_disalurkan',
+                'total_kembali_dari_penyaluran'
             ])->findOrFail($idPengajuanInvestasi);
 
             $this->nominal_investasi = $investasi->jumlah_investasi;
@@ -80,6 +84,9 @@ class PengembalianInvestasi extends Component
             $this->bagi_hasil_total = $investasi->nominal_bagi_hasil_yang_didapatkan;
             $this->sisa_pokok = $investasi->sisa_pokok;
             $this->sisa_bagi_hasil = $investasi->sisa_bagi_hasil;
+            
+            $this->dana_tersedia = $investasi->dana_tersedia;
+            $this->sisa_dana_di_perusahaan = $investasi->sisa_dana_di_perusahaan;
 
             $hasHistory = ($this->sisa_pokok < $this->nominal_investasi) || 
                           ($this->sisa_bagi_hasil < $this->bagi_hasil_total);
@@ -115,6 +122,8 @@ class PengembalianInvestasi extends Component
         $this->total_bagi_hasil_dikembalikan = 0;
         $this->sisa_pokok = null;
         $this->sisa_bagi_hasil = null;
+        $this->dana_tersedia = 0;
+        $this->sisa_dana_di_perusahaan = 0;
         $this->jumlah_transaksi = 0;
         $this->history = [];
     }
