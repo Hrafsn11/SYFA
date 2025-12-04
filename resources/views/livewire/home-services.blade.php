@@ -9,24 +9,63 @@
                 <span class="fs-3 fw-bold text-heading">SYFA</span>
             </div>
         </div>
-        <div class="col-md-6 d-flex justify-content-end align-items-center gap-3">
-            <div class="text-end me-2">
-                <div class="fw-semibold">
-                    {{ auth()->user()->name ?? 'Super Admin' }}
+
+        {{-- USER INFO & DROPDOWN LOGOUT FEATURE --}}
+        <div class="col-md-6 d-flex justify-content-end">
+            <div class="dropdown">
+                {{-- Dropdown Trigger (Clickable User Area) --}}
+                <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
+                    <div class="text-end me-2">
+                        <div class="fw-semibold">
+                            {{ auth()->user()->name ?? 'Super Admin' }}
+                        </div>
+                        <small class="text-muted">
+                            {{ auth()->user()->currentTeam->name ?? 'Super Admin' }}
+                        </small>
+                    </div>
+                    <div class="position-relative">
+                        <span class="avatar avatar-sm rounded-circle bg-label-warning d-inline-flex align-items-center justify-content-center">
+                            <i class="ti ti-award fs-5 text-warning"></i>
+                        </span>
+                        <span class="position-absolute bottom-0 end-0 translate-middle p-1 bg-success border border-2 border-card rounded-circle">
+                            <span class="visually-hidden">Online</span>
+                        </span>
+                    </div>
                 </div>
-                <small class="text-muted">
-                    {{ auth()->user()->currentTeam->name ?? 'Super Admin' }}
-                </small>
-            </div>
-            <div class="position-relative">
-                <span class="avatar avatar-sm rounded-circle bg-label-warning d-inline-flex align-items-center justify-content-center">
-                    <i class="ti ti-award fs-5 text-warning"></i>
-                </span>
-                <span class="position-absolute bottom-0 end-0 translate-middle p-1 bg-success border border-2 border-card rounded-circle">
-                    <span class="visually-hidden">Online</span>
-                </span>
+                {{-- /Dropdown Trigger --}}
+
+                {{-- Dropdown Menu --}}
+                <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 14rem;">
+                    {{-- User Profile Header --}}
+                    <li>
+                        <div class="dropdown-item p-3 border-bottom d-flex align-items-center">
+                            <span class="avatar avatar-sm rounded-circle bg-label-warning me-3">
+                                <i class="ti ti-user fs-5 text-warning"></i>
+                            </span>
+                            <div class="d-flex flex-column">
+                                <p class="mb-0 fw-semibold">{{ auth()->user()->name ?? 'Super Admin' }}</p>
+                                <small class="text-muted">{{ auth()->user()->email ?? 'superadmin@syfa.test' }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li><hr class="dropdown-divider my-1"></li>
+
+                    {{-- Logout Form Action --}}
+                    <li>
+                        <form method="POST" action="{{ route('logout') }}" class="w-full">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="ti ti-logout me-2"></i>
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+                {{-- /Dropdown Menu --}}
             </div>
         </div>
+        {{-- /USER INFO & DROPDOWN LOGOUT FEATURE --}}
     </div>
 
     {{-- Main Card Container for Services --}}
@@ -184,6 +223,11 @@
         /* Main Card */
         .main-card {
             min-height: 480px; 
+        }
+
+        /* Custom style for clickable dropdown trigger */
+        .cursor-pointer {
+            cursor: pointer;
         }
 
     </style>
