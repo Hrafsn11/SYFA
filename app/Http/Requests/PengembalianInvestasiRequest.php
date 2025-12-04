@@ -32,10 +32,18 @@ class PengembalianInvestasiRequest extends FormRequest
                         return;
                     }
 
-                    $sisaPokok = $investasi->sisa_pokok ?? 0;
+                  
+                    $danaTersedia = $investasi->dana_tersedia; 
+                    $sisaDiPerusahaan = $investasi->sisa_dana_di_perusahaan; 
 
-                    if ($value > $sisaPokok) {
-                        $fail('Dana Pokok tidak boleh lebih dari Sisa Pokok (Rp ' . number_format($sisaPokok, 0, ',', '.') . ')');
+                    if ($value > $danaTersedia) {
+                        $errorMsg = 'Dana tidak tersedia! Yang bisa dikembalikan: Rp ' . number_format($danaTersedia, 0, ',', '.');
+                        
+                        if ($sisaDiPerusahaan > 0) {
+                            $errorMsg .= ' (Dana Rp ' . number_format($sisaDiPerusahaan, 0, ',', '.') . ' masih di perusahaan, menunggu pembayaran)';
+                        }
+                        
+                        $fail($errorMsg);
                     }
                 },
             ],

@@ -43,6 +43,8 @@ class PengajuanInvestasi extends Model
         'nomor_kontrak',
         'sisa_pokok',
         'sisa_bagi_hasil',
+        'total_disalurkan',
+        'total_kembali_dari_penyaluran',
     ];
 
     /**
@@ -57,6 +59,8 @@ class PengajuanInvestasi extends Model
         'current_step' => 'integer',
         'sisa_pokok' => 'decimal:2',
         'sisa_bagi_hasil' => 'decimal:2',
+        'total_disalurkan' => 'decimal:2',
+        'total_kembali_dari_penyaluran' => 'decimal:2',
     ];
 
        protected static function boot()
@@ -210,5 +214,44 @@ class PengajuanInvestasi extends Model
             ->sum('nominal_yang_disalurkan');
         
         return floatval($this->jumlah_investasi) - floatval($totalDisalurkan);
+    }
+
+    /**
+     * Get sisa dana yang masih di perusahaan (belum balik)
+     * 
+     * Formula: total_disalurkan - total_kembali_dari_penyaluran
+     * 
+     * @return float
+     */
+    public function getSisaDanaDiPerusahaanAttribute(): float
+    {
+        return max(0, floatval($this->total_disalurkan ?? 0) - floatval($this->total_kembali_dari_penyaluran ?? 0));
+    }
+
+    /**
+     * Get dana tersedia yang bisa dikembalikan ke investor
+     * 
+     * Formula: sisa_pokok - sisa_dana_di_perusahaan
+     * 
+     * Logic:
+     * - Dana internal (tidak disalurkan) bisa langsung dikembalikan
+     * - Dana yang disalurkan harus nunggu perusahaan bayar dulu
+     * 
+     * @return float
+     */
+    public function getDanaTersediaAttribute(): float
+    {
+        $sisaDiPerusahaan = $this->sisa_dana_di_perusahaan; // Pakai accessor
+        return max(0, floatval($this->sisa_pokok ?? 0) - $sisaDiPerusahaan);
+    }
+
+    /**
+     * Get dana tersedia formatted (Rupiah)
+     * 
+     * @return string
+     */
+    public function getDanaTersediaFormattedAttribute(): string
+    {
+        return 'Rp ' . number_format($this->dana_tersedia, 0, ',', '.');
     }
 }

@@ -72,6 +72,20 @@
                             <input type="text" class="form-control text-warning fw-bold" value="Rp {{ number_format($sisa_bagi_hasil ?? 0, 0, ',', '.') }}" readonly>
                         </div>
 
+                        @if($id_pengajuan_investasi)
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Dana di Perusahaan</label>
+                                <input type="text" class="form-control text-danger fw-bold" value="Rp {{ number_format($sisa_dana_di_perusahaan ?? 0, 0, ',', '.') }}" readonly>
+                                <small class="text-muted">Dana yang disalurkan ke perusahaan, menunggu pembayaran kembali</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Dana Tersedia</label>
+                                <input type="text" class="form-control text-success fw-bold" value="Rp {{ number_format($dana_tersedia ?? 0, 0, ',', '.') }}" readonly>
+                                <small class="text-muted">Dana yang bisa dikembalikan ke investor saat ini</small>
+                            </div>
+                        @endif
+
                         <div class="col-md-6 mb-3 form-group">
                             <label for="dana_pokok_dibayar" class="form-label">
                                 Dana Pokok Yang Dibayarkan <span class="text-danger">*</span>
@@ -81,8 +95,8 @@
                                 placeholder="Ketik angka saja (contoh: 10000000)"
                                 autocomplete="off">
                             <input type="hidden" id="dana_pokok_raw" wire:model="dana_pokok_dibayar">
-                            @if($sisa_pokok)
-                                <small class="text-muted">Maksimal: Rp {{ number_format($sisa_pokok, 0, ',', '.') }}</small>
+                            @if($id_pengajuan_investasi && $dana_tersedia !== null)
+                                <small class="text-muted">Maksimal: Rp {{ number_format($dana_tersedia, 0, ',', '.') }}</small>
                             @endif
                             @error('dana_pokok_dibayar')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -98,7 +112,7 @@
                                 placeholder="Ketik angka saja (contoh: 1000000)"
                                 autocomplete="off">
                             <input type="hidden" id="bagi_hasil_raw" wire:model="bagi_hasil_dibayar">
-                            @if($sisa_bagi_hasil)
+                            @if($id_pengajuan_investasi && $sisa_bagi_hasil !== null)
                                 <small class="text-muted">Maksimal: Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}</small>
                             @endif
                             @error('bagi_hasil_dibayar')
