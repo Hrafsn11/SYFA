@@ -9,6 +9,7 @@ use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\PenyaluranDepositoController;
 use App\Livewire\ArPerbulan;
 use App\Livewire\ConfigMatrixScore;
+use App\Livewire\HomeServices;
 use App\Livewire\PermissionManagement;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
@@ -29,12 +30,19 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Authenticated routes with Jetstream and Permission handling
+// Halaman landing setelah login (tanpa middleware checkPermission)
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    'checkPermission', // Add permission handling middleware
+])->get('/home-services', HomeServices::class)->name('home.services');
+
+// Authenticated routes dengan Jetstream dan Permission handling
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+    'checkPermission', // Permission handling middleware
 ])->group(function () {
 
     require __DIR__.'/livewire_route.php';
