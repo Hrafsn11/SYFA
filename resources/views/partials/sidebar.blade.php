@@ -62,6 +62,13 @@
             </a>
         </li>
 
+        <li class="menu-item {{ request()->routeIs('program-restrukturisasi*') ? 'active' : '' }}">
+            <a href="{{ route('program-restrukturisasi.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-calculator"></i>
+                <div data-i18n="Program Restrukturisasi">Program Restrukturisasi</div>
+            </a>
+        </li>
+
 
         <!-- Pengembalian Section -->
         <li class="menu-header small text-uppercase">
