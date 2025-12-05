@@ -19,6 +19,14 @@
         <!-- /Search -->
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <!-- Home Icon -->
+            <li class="nav-item me-2">
+                <a class="nav-link btn btn-text-secondary btn-icon rounded-pill" href="{{ route('home.services') }}" title="Home">
+                    <i class="ti ti-home ti-md"></i>
+                </a>
+            </li>
+            <!-- /Home Icon -->
+
             <!-- Style Switcher -->
             <li class="nav-item dropdown-style-switcher dropdown">
                 <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"

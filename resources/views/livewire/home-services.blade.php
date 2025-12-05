@@ -1,19 +1,16 @@
 <div class="services-wrapper mx-auto pt-5">
-    {{-- Header Section (Logo, Title, User Info) --}}
     <div class="row align-items-center mb-5 header-offset">
         <div class="col-md-6 d-flex align-items-center gap-3">
             <div class="app-brand-logo">
-                <img src="{{ asset('assets/img/logo.png') }}" alt="SYFA Logo" width="42" height="42">
+                <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40" />
             </div>
             <div class="d-flex flex-column">
                 <span class="fs-3 fw-bold text-heading">SYFA</span>
             </div>
         </div>
 
-        {{-- USER INFO & DROPDOWN LOGOUT FEATURE --}}
         <div class="col-md-6 d-flex justify-content-end">
             <div class="dropdown">
-                {{-- Dropdown Trigger (Clickable User Area) --}}
                 <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
                     <div class="text-end me-2">
                         <div class="fw-semibold">
@@ -32,11 +29,8 @@
                         </span>
                     </div>
                 </div>
-                {{-- /Dropdown Trigger --}}
 
-                {{-- Dropdown Menu --}}
                 <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 14rem;">
-                    {{-- User Profile Header --}}
                     <li>
                         <div class="dropdown-item p-3 border-bottom d-flex align-items-center">
                             <span class="avatar avatar-sm rounded-circle bg-label-warning me-3">
@@ -51,7 +45,6 @@
                     
                     <li><hr class="dropdown-divider my-1"></li>
 
-                    {{-- Logout Form Action --}}
                     <li>
                         <form method="POST" action="{{ route('logout') }}" class="w-full">
                             @csrf
@@ -62,13 +55,10 @@
                         </form>
                     </li>
                 </ul>
-                {{-- /Dropdown Menu --}}
             </div>
         </div>
-        {{-- /USER INFO & DROPDOWN LOGOUT FEATURE --}}
     </div>
 
-    {{-- Main Card Container for Services --}}
     <div class="card border-0 shadow-sm main-card">
         <div class="card-body px-4 py-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -78,7 +68,6 @@
             </div>
 
             <div class="row g-4">
-                {{-- SFinance (CORE) --}}
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="card h-100 border-0 service-card">
                         <div class="card-body d-flex flex-column align-items-center text-center position-relative">
@@ -92,14 +81,13 @@
                             <p class="text-muted mb-4 small flex-grow-1">
                                 Modul utama pengelolaan pembiayaan dan investasi SYFA.
                             </p>
-                            <a href="#" class="btn btn-primary fw-semibold px-4 mt-auto">
+                            <a href="{{ route('sfinance.dashboard.index') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
                                 Go to Application
                             </a>
                         </div>
                     </div>
                 </div>
 
-                {{-- SFinlog (SUPPORT) --}}
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="card h-100 border-0 service-card">
                         <div class="card-body d-flex flex-column align-items-center text-center position-relative">
@@ -113,14 +101,13 @@
                             <p class="text-muted mb-4 small flex-grow-1">
                                 Monitoring dan pencatatan transaksi keuangan operasional.
                             </p>
-                            <a href="#" class="btn btn-primary fw-semibold px-4 mt-auto">
+                            <a href="{{ route('sfinlog.dashboard.index') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
                                 Go to Application
                             </a>
                         </div>
                     </div>
                 </div>
 
-                {{-- Master Data & Configuration (CONFIGURATION) --}}
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="card h-100 border-0 service-card">
                         <div class="card-body d-flex flex-column align-items-center text-center position-relative">
@@ -134,14 +121,13 @@
                             <p class="text-muted mb-4 small flex-grow-1">
                                 Pengaturan master data, parameter sistem, dan konfigurasi aplikasi.
                             </p>
-                            <a href="#" class="btn btn-primary fw-semibold px-4 mt-auto">
+                            <a href="{{ route('master-data.kol.index') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
                                 Go to Application
                             </a>
                         </div>
                     </div>
                 </div>
 
-                {{-- Portofolio (INSIGHT) --}}
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="card h-100 border-0 service-card">
                         <div class="card-body d-flex flex-column align-items-center text-center position-relative">
@@ -172,20 +158,16 @@
             max-width: 1400px;
         }
 
-        /* OFFSET HEADER */
         .header-offset {
             padding-top: 30px;
         }
 
-        /* === SERVICE CARDS === */
         .service-card {
             border-radius: 1rem;
             border: 1px solid #e2e6f0;
             box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.06);
             transition: transform 0.18s ease, box-shadow 0.18s ease;
-            
-            /* Tambahan agar card modul seragam */
-            min-height: 370px; /* ← SESUAIKAN: 300–360px */
+            min-height: 370px; 
             display: flex;
             flex-direction: column;
         }
@@ -198,10 +180,9 @@
         .service-card .card-body {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Buat ikon, teks, dan tombol tersusun rapi */
+            justify-content: space-between; 
         }
 
-        /* ICON */
         .service-icon .icon-size-lg {
             padding: 1.5rem;
             border-radius: 50%;
@@ -209,7 +190,6 @@
             display: inline-flex;
         }
 
-        /* BADGE */
         .badge-top-right {
             position: absolute;
             top: 0;
@@ -220,12 +200,10 @@
             border-radius: 0.5rem;
         }
 
-        /* Main Card */
         .main-card {
             min-height: 480px; 
         }
 
-        /* Custom style for clickable dropdown trigger */
         .cursor-pointer {
             cursor: pointer;
         }

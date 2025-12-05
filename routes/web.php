@@ -43,9 +43,20 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
     'checkPermission', // Permission handling middleware
+    'setActiveModule', // Set active module based on route
 ])->group(function () {
 
     require __DIR__.'/livewire_route.php';
+
+    // Module Routes: SFinance
+    Route::prefix('sfinance')->name('sfinance.')->group(function () {
+        require __DIR__.'/module_routes.php';
+    });
+
+    // Module Routes: SFinlog  
+    Route::prefix('sfinlog')->name('sfinlog.')->group(function () {
+        require __DIR__.'/module_routes.php';
+    });
 
     // User Management Routes - Example with permission middleware
     Route::get('users', UserManagement::class)->name('users.index');
