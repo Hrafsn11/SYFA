@@ -55,7 +55,7 @@ Route::middleware([
 
     // Module Routes: SFinlog  
     Route::prefix('sfinlog')->name('sfinlog.')->group(function () {
-        require __DIR__.'/module_routes.php';
+        require __DIR__.'/sfinlog_routes.php';
     });
 
     // User Management Routes - Example with permission middleware

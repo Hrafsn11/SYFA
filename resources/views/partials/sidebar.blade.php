@@ -140,9 +140,15 @@
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*kertas-kerja-investor*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('kertas-kerja-investor-sfinance.index') }}" class="menu-link">
-                            <div data-i18n="Kertas Kerja Investor {{ $isSFinance ? 'SFinance' : 'SFinlog' }}">Kertas Kerja Investor {{ $isSFinance ? 'SFinance' : 'SFinlog' }}</div>
-                        </a>
+                        @if($isSFinance)
+                            <a href="{{ route('sfinance.kertas-kerja-investor-sfinance.index') }}" class="menu-link">
+                                <div data-i18n="Kertas Kerja Investor SFinance">Kertas Kerja Investor SFinance</div>
+                            </a>
+                        @elseif($isSFinlog)
+                            <a href="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}" class="menu-link">
+                                <div data-i18n="Kertas Kerja Investor SFinlog">Kertas Kerja Investor SFinlog</div>
+                            </a>
+                        @endif
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*pengembalian-investasi*') ? 'active' : '' }}">
