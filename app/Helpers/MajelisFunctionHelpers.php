@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Storage;
+
 if (!function_exists('rupiahFormatter')) {
     /**
      * Format angka menjadi format rupiah dengan pemisah ribuan
@@ -15,20 +17,25 @@ if (!function_exists('rupiahFormatter')) {
             return 'Rp 0';
         }
 
-        // Convert ke numeric, hapus format yang sudah ada jika ada
-        if (is_string($value)) {
+        // Jika sudah numeric (int, float, double), langsung convert ke integer
+        if (is_numeric($value)) {
+            // Convert ke integer (tanpa desimal) dengan round untuk handle float/double seperti 70000.00
+            $value = (int) round((float) $value);
+        } elseif (is_string($value)) {
             // Hapus "Rp", spasi, dan karakter non-digit kecuali titik dan koma
             $cleaned = preg_replace('/Rp\.?\s*/i', '', $value);
             $cleaned = preg_replace('/[^\d,.-]/', '', $cleaned);
             
-            // Hapus pemisah ribuan yang sudah ada (koma atau titik)
-            $cleaned = str_replace([',', '.'], '', $cleaned);
+            // Hapus koma (biasanya pemisah ribuan)
+            $cleaned = str_replace(',', '', $cleaned);
             
-            $value = (float) $cleaned;
+            // Parse sebagai float untuk handle desimal dengan benar (seperti "70000.00")
+            // Lalu round dan convert ke integer
+            $value = (int) round((float) $cleaned);
+        } else {
+            // Untuk tipe data lain, coba convert ke numeric lalu ke integer
+            $value = (int) round((float) $value);
         }
-
-        // Convert ke integer (tanpa desimal)
-        $value = (int) round($value);
 
         // Format dengan pemisah ribuan
         $formatted = number_format($value, 0, '.', $separator);
@@ -300,6 +307,11 @@ if (!function_exists('getFileUrl')) {
                     // Gunakan URL biasa dari Storage (browser akan handle preview/download)
                     return $storage->url($file);
                 }
+            }
+
+            // jika path storage
+            if (Storage::disk('public')->exists($file)) {
+                return Storage::disk('public')->url($file);
             }
             
             // Jika path sudah berupa URL, return langsung

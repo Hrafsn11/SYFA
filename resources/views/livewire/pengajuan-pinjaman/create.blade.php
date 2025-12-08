@@ -20,7 +20,7 @@
                 {{-- khusus Invoice Financing & PO Financing --}}
                 <div class="card border-1 mb-3 shadow-none" wire:block-when-change-state="sumber_pembiayaan">
                     <div class="card-body">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12 mb-3 form-group" wire:ignore>
                             <label class="form-label mb-2">Sumber Pembiayaan</label>
                             <div class="d-flex">
                                 <div class="form-check me-3">
@@ -32,21 +32,23 @@
                                     <label class="form-check-label" for="sumber_internal">Internal</label>
                                 </div>
                             </div>
-                            @if ($sumber_pembiayaan == 'Eksternal')
-                            <div class="mt-2" id="divSumberEksternal">
-                                <livewire:components.select2 
-                                    :list_data="$sumber_eksternal"
-                                    value_name="id_instansi"
-                                    value_label="nama_instansi"
-                                    data_placeholder="Pilih Sumber Pembiayaan Eksternal"
-                                    model_name="id_instansi"
-                                    :value="$id_instansi"
-                                    :allow_clear="true"
-                                    :tags="false"
-                                />
-                            </div>
-                            @endif
+                            <div class="invalid-feedback"></div>
                         </div>
+                        @if ($sumber_pembiayaan == 'Eksternal')
+                        <div class="mt-2 form-group" id="divSumberEksternal" wire:ignore>
+                            <livewire:components.select2 
+                                :list_data="$sumber_eksternal"
+                                value_name="id_instansi"
+                                value_label="nama_instansi"
+                                data_placeholder="Pilih Sumber Pembiayaan Eksternal"
+                                model_name="id_instansi"
+                                :value="$id_instansi"
+                                :allow_clear="true"
+                                :tags="false"
+                            />
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        @endif
                     </div>
                 </div>
                 {{-- end khusus Invoice Financing & PO Financing --}}
@@ -65,7 +67,7 @@
                                 <input type="text" class="form-control" id="no_rekening" wire:model="no_rekening" placeholder="Masukkan No. Rekening" readonly disabled>
                                 <div class="invalid-feedback"></div>
                             </div>
-                            <div class="col-md-5 mb-3 form-group">
+                            <div class="col-md-5 mb-3 form-group" wire:ignore>
                                 <label for="nama_rekening" class="form-label">Nama Rekening</label>
                                 <input type="text" class="form-control" id="nama_rekening" wire:model.blur="nama_rekening" placeholder="Masukkan Nama Rekening">
                                 <div class="invalid-feedback"></div>
@@ -77,18 +79,20 @@
                             <div class="col-md-6 form-group">
                                 <div class="d-flex justify-content-between">
                                     <label for="lampiran_sid" class="form-label">Lampiran SID</label>
-                                    <a href="/"><small>Current File</small></a>
+                                    @if (isset($lampiran_sid_current))
+                                    <a href="{{ getFileUrl($lampiran_sid_current) }}" target="_blank"><small>Current File</small></a>
+                                    @endif
                                 </div>
-                                <input class="form-control" type="file" id="lampiran_sid" wire:model.blur="lampiran_sid">
-                                <div class="invalid-feedback"></div>
+                                <input class="form-control" type="file" id="lampiran_sid" wire:model.blur="lampiran_sid" wire:ignore>
+                                <div class="invalid-feedback" wire:ignore></div>
                                 <small class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                             </div>
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-6 form-group" wire:ignore>
                                 <label for="nilai_kol" class="form-label">Nilai KOL</label>
                                 <input type="text" class="form-control" id="nilai_kol" wire:model="nilai_kol" placeholder="Nilai KOL" readonly disabled>
                                 <div class="invalid-feedback"></div>
                             </div>
-                            <div class="col-md-12 mt-3 form-group">
+                            <div class="col-md-12 mt-3 form-group" wire:ignore>
                                 <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
                                 <input type="text" class="form-control" id="tujuan_pembiayaan" wire:model.blur="tujuan_pembiayaan" placeholder="Tujuan Pembiayaan"/>
                                 <div class="invalid-feedback"></div>
@@ -97,7 +101,7 @@
                         {{-- end --}}
     
                         <div class="row" wire:block-when-change-state="jenis_pembiayaan">
-                            <div class="col-md-12 form-group">
+                            <div class="col-md-12 form-group" wire:ignore>
                                 <label class="form-label mb-2">Jenis Pembiayaan</label>
                                 <div class="d-flex">
                                     <div class="form-check me-3">
@@ -117,6 +121,7 @@
                                         <label class="form-check-label" for="factoring">Factoring</label>
                                     </div>
                                 </div>
+                                <div class="invalid-feedback"></div>
                             </div>
                         </div>
                     </div>
@@ -138,8 +143,8 @@
                                     <input type="text" class="form-control input-rupiah" id="nominal_pinjaman" wire:model="nominal_pinjaman" placeholder="Rp 0" readonly disabled>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-6 form-group">
-                                    <label for="tenorPembayaran" class="form-label">Tenor Pembayaran</label>
+                                <div class="col-md-6 form-group" wire:ignore>
+                                    <label for="tenor_pembayaran" class="form-label">Tenor Pembayaran</label>
                                     <livewire:components.select2 
                                         :list_data="$list_tenor_pembayaran"
                                         value_name="value"
@@ -200,11 +205,11 @@
                                     <input type="text" class="form-control input-rupiah non-editable" id="total_pinjaman" wire:model="total_pinjaman" placeholder="Rp 0" readonly disabled>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="tanggal_pencairan" class="form-label">Harapan Tanggal Pencairan</label>
+                                <div class="col-md-6 form-group mb-3" wire:ignore>
+                                    <label for="harapan_tanggal_pencairan" class="form-label">Harapan Tanggal Pencairan</label>
                                     <livewire:components.datepicker-bootstrap 
-                                        model_name="tanggal_pencairan"
-                                        :value="$tanggal_pencairan"
+                                        model_name="harapan_tanggal_pencairan"
+                                        :value="$harapan_tanggal_pencairan"
                                         data_placeholder="DD/MM/YYYY"
                                         format="dd/mm/yyyy"
                                         :autoclose="true" 
@@ -223,11 +228,11 @@
                                     </div>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-4 form-group mb-3">
-                                    <label for="tanggal_pembayaran" class="form-label">Rencana Tanggal Pembayaran</label>
+                                <div class="col-md-4 form-group mb-3" wire:ignore>
+                                    <label for="rencana_tgl_pembayaran" class="form-label">Rencana Tanggal Pembayaran</label>
                                     <livewire:components.datepicker-bootstrap 
-                                        model_name="tanggal_pembayaran"
-                                        :value="$tanggal_pembayaran"
+                                        model_name="rencana_tgl_pembayaran"
+                                        :value="$rencana_tgl_pembayaran"
                                         data_placeholder="DD/MM/YYYY"
                                         format="dd/mm/yyyy"
                                         :autoclose="true"
@@ -250,7 +255,7 @@
                 </div>
     
                 <div class="row mb-3">
-                    <div class="col-md-12 form-group">
+                    <div class="col-md-12 form-group" wire:ignore>
                         <label for="catatan_lainnya" class="form-label">Catatan Lainnya</label>
                         <textarea class="form-control" id="catatan_lainnya" wire:model.blur="catatan_lainnya" rows="3" placeholder="Masukkan Catatan"></textarea>
                         <div class="invalid-feedback"></div>

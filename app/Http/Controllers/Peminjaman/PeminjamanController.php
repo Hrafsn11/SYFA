@@ -892,6 +892,16 @@ class PeminjamanController extends Controller
                 $this->persentase_bagi_hasil = (double) 10/100;
             }
 
+            $masterDebiturDanInvestor = MasterDebiturDanInvestor::where('email', auth()->user()->email)
+            ->where('flagging', 'tidak')
+            ->where('status', 'active')
+            ->with('kol')
+            ->first();
+
+            $dataPengajuanPeminjaman['nama_bank'] = $masterDebiturDanInvestor->nama_bank;
+            $dataPengajuanPeminjaman['no_rekening'] = $masterDebiturDanInvestor->no_rek;
+            $dataPengajuanPeminjaman['nilai_kol'] = $masterDebiturDanInvestor->kol->kol;
+
             $dataPengajuanPeminjaman['persentase_bagi_hasil'] = $this->persentase_bagi_hasil;
 
             $dataPengajuanPeminjaman['total_pinjaman'] = (double) $dataInvoice->sum(fn ($item) => (double) $item['nilai_pinjaman']);
@@ -904,8 +914,8 @@ class PeminjamanController extends Controller
                 $dataPengajuanPeminjaman['s_finance'] = (double) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.60;;
                 $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = (double) ((double) $dataPengajuanPeminjaman['pembayaran_total'] / (double) $dataPengajuanPeminjaman['tenor_pembayaran']);
             } else {
-                $dataPengajuanPeminjaman['tanggal_pencairan'] = parseCarbonDate($dataPengajuanPeminjaman['tanggal_pencairan'])->format('Y-m-d');
-                $dataPengajuanPeminjaman['tanggal_pembayaran'] = parseCarbonDate($dataPengajuanPeminjaman['tanggal_pembayaran'])->format('Y-m-d');
+                $dataPengajuanPeminjaman['harapan_tanggal_pencairan'] = parseCarbonDate($dataPengajuanPeminjaman['harapan_tanggal_pencairan'])->format('Y-m-d');
+                $dataPengajuanPeminjaman['rencana_tgl_pembayaran'] = parseCarbonDate($dataPengajuanPeminjaman['rencana_tgl_pembayaran'])->format('Y-m-d');
             }
 
             $userEmail = auth()->user()->email;

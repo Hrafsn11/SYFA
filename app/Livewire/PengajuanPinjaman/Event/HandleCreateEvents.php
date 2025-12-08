@@ -26,5 +26,12 @@ trait HandleCreateEvents
         }
     }
 
+    public function updatedLampiranSID($lampiranSID)
+    {
+        if (property_exists($this, 'lampiran_sid_current')) {
+            $this->lampiran_sid_current = $lampiranSID;
+        }
+    }
+
 }
 

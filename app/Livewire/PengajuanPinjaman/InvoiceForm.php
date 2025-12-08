@@ -29,6 +29,11 @@ class InvoiceForm extends Component
 
     public $form_data_invoice,
         $modal_title = 'Tambah Invoice', 
+        $dokumen_invoice_current = null,
+        $dokumen_kontrak_current = null,
+        $dokumen_so_current = null,
+        $dokumen_bast_current = null,
+        $dokumen_lainnnya_current = null,
         $nilai_bagi_hasil,
         $persentase_bagi_hasil = 0;
 

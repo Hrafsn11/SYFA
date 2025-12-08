@@ -26,5 +26,6 @@ Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::get('/', \App\Livewire\PengajuanPinjaman\Index::class)->name('index');
     Route::get('create', \App\Livewire\PengajuanPinjaman\Create::class)->name('create');
+    Route::get('{id}/edit', \App\Livewire\PengajuanPinjaman\Create::class)->name('edit');
 });
 

@@ -1,4 +1,4 @@
-<div class="input-group" wire:ignore>
+<div class="input-group">
     <input 
         type="text" 
         id="{{ $model_name }}" 

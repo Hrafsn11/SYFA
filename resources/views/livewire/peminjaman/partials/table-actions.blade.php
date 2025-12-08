@@ -13,6 +13,7 @@
     
     @can('peminjaman_dana.edit')
         <a href="{{ route('peminjaman.edit', $id) }}" 
+        wire:navigate.hover
         class="btn btn-sm btn-outline-warning action-btn edit-btn" 
         title="Edit"
         data-action="edit"

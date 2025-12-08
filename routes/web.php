@@ -47,7 +47,7 @@ Route::middleware([
     Route::prefix('peminjaman')->name('peminjaman.')->controller(PeminjamanController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::get('/{id}', 'show')->name('detail');
-        Route::get('/{id}/edit', 'edit')->name('edit');
+        // Route::get('/{id}/edit', 'edit')->name('edit');
         Route::post('/{id}', 'update')->name('update');
 
         Route::get('/{id}/preview-kontrak', 'previewKontrak')->name('preview-kontrak');

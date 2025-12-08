@@ -4,7 +4,6 @@ namespace App\Livewire\PengajuanPinjaman;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Attributes\FieldInput;
 use App\Enums\JenisPembiayaanEnum;
 use App\Models\PengajuanPeminjaman;
 use App\Attributes\ParameterIDRoute;
@@ -94,41 +93,24 @@ class Create extends Component
     public function setterFormData()
     {
         foreach ($this->getUniversalFieldInputs() as $key => $value) {
-            $this->form_data[$value] = $this->{$value};
+            if ($key == 'sumber_pembiayaan') {
+                $this->form_data[$value] = strtolower($this->{$value});
+            } else {
+                $this->form_data[$value] = $this->{$value};
+            }
         }
 
         if ($this->jenis_pembiayaan != JenisPembiayaanEnum::INSTALLMENT) {
             unset($this->form_data['tenor_pembayaran']);
         } else {
-            unset($this->form_data['tanggal_pencairan']);
-            unset($this->form_data['tanggal_pembayaran']);
+            unset($this->form_data['harapan_tanggal_pencairan']);
+            unset($this->form_data['rencana_tgl_pembayaran']);
         }
     }
 
     public function editInvoice($idx)
     {
-        $data = [];
-
-        $this->index_data_invoice = $idx;
-        foreach ($this->form_data_invoice[$idx] as $key => $value) {
-            if (in_array($key, [
-                'dokumen_invoice', 
-                'dokumen_kontrak', 
-                'dokumen_so', 
-                'dokumen_bast', 
-                'dokumen_lainnnya'
-            ])) continue;
-
-            if (in_array($key, ['nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil'])) {
-                $this->{$key} = rupiahFormatter($value);
-            } else if (in_array($key, ['invoice_date', 'due_date'])) {
-                $this->{$key} = parseCarbonDate($value)->format('d/m/Y');
-                $data[$key] = $this->{$key};
-            } else {
-                $this->{$key} = $value;
-            }
-        }
-        $this->dispatch('edit-invoice', $data);
+        $this->dispatch('edit-invoice', $this->form_data_invoice[$idx]);
     }
 
     protected function setAdditionalValidationData(): array
@@ -142,16 +124,27 @@ class Create extends Component
     private function edit()
     {
         $this->pengajuan = PengajuanPeminjaman::with(['debitur', 'instansi', 'buktiPeminjaman'])->findOrFail($this->id);
-        $this->jenis_pembiayaan = $this->pengajuan->jenis_pembiayaan;
+        $this->form_data_invoice = collect($this->pengajuan->buktiPeminjaman)->toArray();
 
-        $jenisPembiayaan = $this->jenis_pembiayaan;
-        $this->{str_replace(' ', '_', strtolower($jenisPembiayaan)) . '_data'} = $this->pengajuan->buktiPeminjaman;
+        foreach ($this->pengajuan->toArray() as $key => $value) {
+            if ($key == 'sumber_pembiayaan') {
+                $data = ucfirst($value);
+            } elseif (in_array($key, ['harapan_tanggal_pencairan', 'rencana_tgl_pembayaran'])) {
+                $data = parseCarbonDate($value)->format('d/m/Y');
+            } else {
+                $data = $value;
+            }
+
+            if (property_exists($this, $key)) {
+                $this->{$key} = $data;
+            }
+        }
     }
 
     public function afterSave($payload)
     {
         if ($payload->error === false) {
-            $this->redirect(route('peminjaman.index'));
+            $this->redirect(route('peminjaman.index'), navigate: true);
         }
     }
 }

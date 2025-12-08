@@ -690,10 +690,44 @@ document.addEventListener('livewire:init', () => {
         });
 
         const listeners = [];
+        let isBlocked = false;
+        const $element = $(el);
+        let unblockTimeout = null;
+
+        // Handler untuk unblock ketika Livewire selesai update
+        const unblockHandler = () => {
+            // Gunakan requestAnimationFrame untuk memastikan unblock terjadi setelah DOM update
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (isBlocked) {
+                        sectionBlock($element, false);
+                        isBlocked = false;
+                    }
+                });
+            });
+        };
+
+        // Setup hook untuk mendeteksi kapan Livewire selesai morph
+        Livewire.hook('morphed', unblockHandler);
+
+        // Juga dengarkan event navigated sebagai fallback
+        const navigatedHandler = () => {
+            unblockHandler();
+        };
+        document.addEventListener('livewire:navigated', navigatedHandler);
 
         matchedElements.forEach(elementInput => {
             const handler = () => {
-                sectionBlock($(el), true);
+                // Clear timeout sebelumnya jika ada
+                if (unblockTimeout) {
+                    clearTimeout(unblockTimeout);
+                    unblockTimeout = null;
+                }
+
+                if (!isBlocked) {
+                    sectionBlock($element, true);
+                    isBlocked = true;
+                }
             };
 
             if (elementInput.hasAttribute('select2-livewire')) {
@@ -715,6 +749,7 @@ document.addEventListener('livewire:init', () => {
         });
 
         cleanup(() => {
+            // Remove event listeners
             listeners.forEach(({ elementInput, handler, isSelect2, $select }) => {
                 if (isSelect2 && $select) {
                     $select.off('select2:select.block-when-change-state', handler);
@@ -723,6 +758,20 @@ document.addEventListener('livewire:init', () => {
                     elementInput.removeEventListener('change', handler);
                 }
             });
+
+            // Remove navigated event listener
+            document.removeEventListener('livewire:navigated', navigatedHandler);
+
+            // Clear timeout jika ada
+            if (unblockTimeout) {
+                clearTimeout(unblockTimeout);
+            }
+
+            // Unblock jika masih blocked
+            if (isBlocked) {
+                sectionBlock($element, false);
+                isBlocked = false;
+            }
         });
     });
 
@@ -754,20 +803,16 @@ document.addEventListener('livewire:init', () => {
                 [wire\\:model\\.lazy="${k}"],
                 [wire\\:model\\.blur="${k}"],
                 [wire\\:model\\.debounce\\.500ms="${k}"],
-                [wire\\:model\\.defer="${k}"]`
+                [wire\\:model\\.defer="${k}"],
+                [select2-livewire="${k}"],
+                [datepicker-livewire="${k}"]`
             );
 
             if (inputs.length > 0) {
                 inputs.forEach(input => {
-                    // tambahkan border merah
-                    input.classList.add('is-invalid');
-
-                    // versi jQuery
-                    const $el = $(input);
-                    $el.addClass('is-invalid');
-
-                    const $parentEl = $el.closest('.form-group');
-                    $parentEl.find('.invalid-feedback')
+                    $(input).addClass('is-invalid');
+                    $(input).parents('.form-group')
+                        .find('.invalid-feedback')
                         .addClass('d-block')
                         .html(messages[0]);
                 });

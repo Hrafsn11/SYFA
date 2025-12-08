@@ -1,4 +1,4 @@
-<div wire:ignore>
+<div>
     <select 
         id="{{ $model_name }}" 
         class="form-select" 
@@ -134,9 +134,8 @@
 
                 Livewire.hook('morphed', () => {
                     const currentWireId = getCurrentWireId();
-                    
                     // Only init if wire:id has changed
-                    if (currentWireId && currentWireId !== previousWireId) {
+                    if (currentWireId !== previousWireId) {
                         previousWireId = currentWireId;
                         initializeSelect2Component();
                     }
