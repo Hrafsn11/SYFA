@@ -198,7 +198,7 @@
                             </a>
                         </li> --}}
                         <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
-                            <a wire:navigate.hover href="{{ route('cells-project.index') }}" class="menu-link">
+                            <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}" class="menu-link">
                                 <div data-i18n="Cells Project">Cells Project</div>
                             </a>
                         </li>

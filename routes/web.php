@@ -236,6 +236,14 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\MasterKaryawanSkiController::class, 'destroy'])->name('destroy');
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\MasterKaryawanSkiController::class, 'toggleStatus'])->name('toggle-status');
     });
+
+    // Master Cells Project
+    Route::prefix('master-data/cells-project')->name('master-data.cells-project.')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Master\CellsProjectController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [\App\Http\Controllers\Master\CellsProjectController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'destroy'])->name('destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

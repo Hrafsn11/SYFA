@@ -25,8 +25,8 @@ Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-
 // Debitur Piutang
 Route::get('debitur-piutang', \App\Livewire\DebiturPiutangIndex::class)->name('debitur-piutang.index');
 
-// Cells Project
-Route::get('cells-project', \App\Livewire\CellsProject::class)->name('cells-project.index');
+// Master Cells Project
+Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');
 
 // SFinlog - Pengajuan Investasi
 Route::get('sfinlog/pengajuan-investasi', \App\Livewire\SFinlog\PengajuanInvestasi::class)->name('sfinlog.pengajuan-investasi.index');
