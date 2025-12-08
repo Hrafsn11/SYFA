@@ -98,7 +98,6 @@ Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(functi
 });
 
 Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(function () {
-    Route::get('/', [PengajuanInvestasiController::class, 'index'])->name('index');
     Route::get('create', [PengajuanInvestasiController::class, 'create'])->name('create');
     Route::post('/', [PengajuanInvestasiController::class, 'store'])->name('store');
     Route::get('{id}', [PengajuanInvestasiController::class, 'show'])->name('show');

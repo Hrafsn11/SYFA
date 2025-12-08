@@ -1,13 +1,13 @@
 @php
     use App\Helpers\ModuleHelper;
     use App\Helpers\RouteHelper;
-    
+
     $currentModule = ModuleHelper::getCurrentModule();
     $isSFinance = ModuleHelper::isSFinance();
     $isSFinlog = ModuleHelper::isSFinlog();
     $isMasterData = ModuleHelper::isMasterData();
     $isPortofolio = ModuleHelper::isPortofolio();
-    
+
     // Determine which sidebar to show
     $showSFinanceSidebar = $isSFinance || $isSFinlog;
 @endphp
@@ -36,7 +36,7 @@
             </a>
         </li>
 
-        @if($showSFinanceSidebar)
+        @if ($showSFinanceSidebar)
             <!-- Peminjaman Section -->
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Peminjaman</span>
@@ -115,15 +115,16 @@
                 <span class="menu-header-text">Investasi</span>
             </li>
 
-            <li class="menu-item {{ RouteHelper::is('*form-kerja-investor*') || RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*pengembalian-investasi*') || RouteHelper::is('*kertas-kerja-investor*') ? 'open' : '' }}">
+            <li
+                class="menu-item {{ RouteHelper::is('*form-kerja-investor*') || RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*pengembalian-investasi*') || RouteHelper::is('*kertas-kerja-investor*') ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons ti ti-id-badge"></i>
                     <div data-i18n="Pengajuan Investasi">Pengajuan Investasi</div>
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item {{ RouteHelper::is('*form-kerja-investor*') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ RouteHelper::route('form-kerja-investor.index') }}" class="menu-link">
-                            <div data-i18n="Investasi">Investasi</div>
+                    <li class="menu-item {{ RouteHelper::is('*pengajuan-investasi*') ? 'active' : '' }}">
+                        <a href="{{ RouteHelper::route('pengajuan-investasi.index') }}" class="menu-link">
+                            <div data-i18n="Pengajuan Investasi">Pengajuan Investasi</div>
                         </a>
                     </li>
 
@@ -140,7 +141,7 @@
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*kertas-kerja-investor*') ? 'active' : '' }}">
-                        @if($isSFinance)
+                        @if ($isSFinance)
                             <a href="{{ route('sfinance.kertas-kerja-investor-sfinance.index') }}" class="menu-link">
                                 <div data-i18n="Kertas Kerja Investor SFinance">Kertas Kerja Investor SFinance</div>
                             </a>
@@ -152,7 +153,8 @@
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*pengembalian-investasi*') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian-investasi.index') }}" class="menu-link">
+                        <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian-investasi.index') }}"
+                            class="menu-link">
                             <div data-i18n="Pengembalian Investasi">Pengembalian Investasi</div>
                         </a>
                     </li>
@@ -160,7 +162,7 @@
             </li>
         @endif
 
-        @if($isMasterData)
+        @if ($isMasterData)
             <!-- Master Data Section -->
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Master Data</span>
@@ -195,6 +197,11 @@
                                 <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
                             </a>
                         </li> --}}
+                        <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
+                            <a wire:navigate.hover href="{{ route('cells-project.index') }}" class="menu-link">
+                                <div data-i18n="Cells Project">Cells Project</div>
+                            </a>
+                        </li>
                         <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
                             <a href="#" class="menu-link">
                                 <div data-i18n="Menu Lainnya">Menu Lainnya</div>
