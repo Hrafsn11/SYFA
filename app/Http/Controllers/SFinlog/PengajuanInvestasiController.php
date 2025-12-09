@@ -307,7 +307,7 @@ class PengajuanInvestasiController extends Controller
 
             if ($persetujuan === 'disetujui') {
                 $pengajuan->update([
-                    'status' => 'Menunggu Informasi Rekening',
+                    'status' => 'Menunggu Upload Bukti Transfer',
                     'current_step' => 4,
                     'updated_by' => Auth::id(),
                 ]);
@@ -389,7 +389,7 @@ class PengajuanInvestasiController extends Controller
     }
 
     /**
-     * Upload Bukti Transfer (Step 5)
+     * Upload Bukti Transfer (Step 4)
      */
     public function uploadBuktiTransfer(Request $request, $id)
     {
@@ -398,7 +398,7 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
             
-            if ($pengajuan->current_step !== 5) {
+            if ($pengajuan->current_step !== 4) {
                 return Response::error('Pengajuan tidak dalam tahap upload bukti transfer');
             }
 
@@ -418,7 +418,7 @@ class PengajuanInvestasiController extends Controller
             $pengajuan->update([
                 'upload_bukti_transfer' => $filePath,
                 'status' => 'Menunggu Generate Kontrak',
-                'current_step' => 6,
+                'current_step' => 5,
                 'updated_by' => Auth::id(),
             ]);
 
@@ -427,7 +427,7 @@ class PengajuanInvestasiController extends Controller
                 'status' => 'Bukti Transfer Diupload',
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'current_step' => 6,
+                'current_step' => 5,
                 'approve_by' => Auth::id(),
             ]);
 
@@ -441,7 +441,7 @@ class PengajuanInvestasiController extends Controller
     }
 
     /**
-     * Generate Kontrak (Step 6)
+     * Generate Kontrak (Step 5)
      */
     public function generateKontrak(Request $request, $id)
     {
@@ -450,7 +450,7 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
             
-            if ($pengajuan->current_step !== 6) {
+            if ($pengajuan->current_step !== 5) {
                 return Response::error('Pengajuan tidak dalam tahap generate kontrak');
             }
 

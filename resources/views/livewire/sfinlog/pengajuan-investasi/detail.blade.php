@@ -44,7 +44,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 4</div>
-                            <div class="step-name">Validasi Investor</div>
+                            <div class="step-name">Upload Bukti Transfer</div>
                         </div>
                     </div>
 
@@ -52,7 +52,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
-                            <div class="step-name">Upload Bukti Transfer</div>
+                            <div class="step-name">Generate Kontrak</div>
                         </div>
                     </div>
 
@@ -60,7 +60,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 6</div>
-                            <div class="step-name">Generate Kontrak</div>
+                            <div class="step-name">Selesai</div>
                         </div>
                     </div>
                 </div>
@@ -241,34 +241,6 @@
         </div>
     </div>
 
-    <!-- Modal Informasi Rekening -->
-    <div class="modal fade" id="modalInformasiRekening" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Informasi Rekening</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="formInformasiRekening">
-                    <div class="modal-body">
-                       
-                        <div class="mb-3">
-                            <label for="informasi_rekening" class="form-label">Informasi Rekening <span class="text-danger">*</span></label>
-                            <textarea class="form-control" id="informasi_rekening" rows="4" 
-                                placeholder="Masukan Nomor Rekening" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ti ti-send me-1"></i>
-                            Kirim Informasi
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
 <!-- Modal Generate Kontrak -->
 <div class="modal fade" id="modalGenerateKontrak" tabindex="-1" aria-hidden="true">
@@ -321,6 +293,12 @@
             </div>
             <form id="formUploadBuktiTransfer">
                 <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <h6 class="alert-heading mb-2"><i class="ti ti-info-circle me-2"></i>Informasi Rekening Transfer</h6>
+                        <p class="mb-1"><strong>Nama:</strong> PT. Synnovac Kapital Indonesia</p>
+                        <p class="mb-1"><strong>No. Rekening:</strong> 1240012977113</p>
+                        <p class="mb-0"><strong>Bank:</strong> Bank Mandiri</p>
+                    </div>
                     <div class="mb-3">
                         <label for="file_bukti_transfer" class="form-label">File Bukti Transfer <span class="text-danger">*</span></label>
                         <input type="file" class="form-control" id="file_bukti_transfer" 
@@ -569,50 +547,6 @@
                         alert('error', errorList);
                     } else {
                         alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
-                    }
-                }
-            });
-        });
-
-        // Step 4: Kirim Informasi Rekening - Open Modal
-        $('#btnKirimInformasiRekening').click(function() {
-            $('#modalInformasiRekening').modal('show');
-        });
-
-        // Step 4: Submit Form Informasi Rekening
-        $('#formInformasiRekening').submit(function(e) {
-            e.preventDefault();
-            
-            const informasiRekening = $('#informasi_rekening').val();
-            
-            if (!informasiRekening || informasiRekening.trim() === '') {
-                alert('error', 'Informasi rekening wajib diisi');
-                return;
-            }
-
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/informasi-rekening`,
-                method: 'POST',
-                data: {
-                    _token: CSRF,
-                    informasi_rekening: informasiRekening
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        $('#modalInformasiRekening').modal('hide');
-                        alert('success', res.message || 'Informasi rekening berhasil dikirim!')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Gagal mengirim informasi rekening');
                     }
                 }
             });
