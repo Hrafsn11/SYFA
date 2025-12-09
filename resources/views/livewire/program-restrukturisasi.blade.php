@@ -61,10 +61,15 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span class="text-danger">*</span></label>
-                        <select class="form-select @error('metode_perhitungan') is-invalid @enderror" wire:model.live="metode_perhitungan">
+                        <select class="form-select @error('metode_perhitungan') is-invalid @enderror" 
+                            wire:model.live="metode_perhitungan"
+                            @if($isEdit) disabled style="background-color: #f5f5f9;" @endif>
                             <option value="Flat">Metode Flat</option>
                             <option value="Anuitas">Metode Anuitas</option>
                         </select>
+                        @if($isEdit)
+                            <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program dibuat</small>
+                        @endif
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -139,11 +144,15 @@
                                         <th>Pokok (Rp)</th>
                                         <th>Margin (Rp)</th>
                                         <th>Total Cicilan (Rp)</th>
+                                        <th>Status</th>
                                         <th>Catatan</th>
+                                        @if($isEdit)
+                                        <th>Bukti Pembayaran</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($jadwal_angsuran as $item)
+                                    @foreach($jadwal_angsuran as $index => $item)
                                     <tr class="{{ $item['is_grace_period'] ? 'table-warning' : '' }}">
                                         <td>{{ $item['no'] }}</td>
                                         <td>{{ $item['tanggal_jatuh_tempo'] }}</td>
@@ -151,7 +160,65 @@
                                         <td class="text-end">{{ number_format($item['pokok'], 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($item['margin'], 0, ',', '.') }}</td>
                                         <td class="text-end"><strong>{{ number_format($item['total_cicilan'], 0, ',', '.') }}</strong></td>
+                                        <td>
+                                            @if(isset($item['status']))
+                                                @if($item['status'] === 'Lunas')
+                                                    <span class="badge bg-success">{{ $item['status'] }}</span>
+                                                @elseif($item['status'] === 'Jatuh Tempo')
+                                                    <span class="badge bg-danger">{{ $item['status'] }}</span>
+                                                @else
+                                                    <span class="badge bg-secondary">{{ $item['status'] }}</span>
+                                                @endif
+                                            @else
+                                                <span class="badge bg-secondary">Belum Jatuh Tempo</span>
+                                            @endif
+                                        </td>
                                         <td>{{ $item['catatan'] }}</td>
+                                        @if($isEdit)
+                                        <td>
+                                            @if(!empty($item['bukti_pembayaran']))
+                                                <div class="d-flex flex-column gap-1">
+                                                    <a href="{{ Storage::url($item['bukti_pembayaran']) }}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-info">
+                                                        <i class="ti ti-eye me-1"></i>Lihat Bukti
+                                                    </a>
+                                                    <small class="text-muted">
+                                                        {{ isset($item['tanggal_bayar']) ? \Carbon\Carbon::parse($item['tanggal_bayar'])->format('d/m/Y') : '' }}
+                                                    </small>
+                                                </div>
+                                            @else
+                                                @php
+                                                    // Cek apakah bisa upload (angsuran sebelumnya sudah lunas)
+                                                    $canUpload = true;
+                                                    $previousNo = null;
+                                                    if ($item['no'] > 1) {
+                                                        $previousIndex = $index - 1;
+                                                        if (isset($jadwal_angsuran[$previousIndex])) {
+                                                            $previous = $jadwal_angsuran[$previousIndex];
+                                                            $previousNo = $previous['no'];
+                                                            if ($previous['status'] !== 'Lunas' || empty($previous['bukti_pembayaran'])) {
+                                                                $canUpload = false;
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                <div>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-primary"
+                                                            wire:click="openUploadModal({{ $index }})"
+                                                            @if(!$canUpload) disabled @endif>
+                                                        <i class="ti ti-upload me-1"></i>Upload Bukti
+                                                    </button>
+                                                    @if(!$canUpload)
+                                                        <small class="text-danger d-block mt-1">
+                                                            Bayar angsuran bulan {{ $previousNo }} terlebih dahulu
+                                                        </small>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </td>
+                                        @endif
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -163,6 +230,10 @@
                                         <th class="text-end">{{ number_format($total_margin, 0, ',', '.') }}</th>
                                         <th class="text-end">{{ number_format($total_cicilan, 0, ',', '.') }}</th>
                                         <th></th>
+                                        <th></th>
+                                        @if($isEdit)
+                                        <th></th>
+                                        @endif
                                     </tr>
                                 </tfoot>
                             </table>
@@ -214,6 +285,81 @@
             </form>
         </div>
     </div>
+
+    {{-- Modal Upload Bukti Pembayaran (di dalam root Livewire agar hanya satu root element) --}}
+    @if($isEdit)
+    <div class="modal fade" id="modalUploadBukti" tabindex="-1" aria-hidden="true" wire:ignore.self>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Upload Bukti Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="closeUploadModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if($selectedAngsuranNo)
+                        <div class="mb-3 p-3 bg-light rounded">
+                            <p class="mb-1"><strong>Angsuran Bulan:</strong> {{ $selectedAngsuranNo }}</p>
+                            @if(isset($jadwal_angsuran[$selectedAngsuranIndex]))
+                                @php
+                                    $selectedAngsuran = $jadwal_angsuran[$selectedAngsuranIndex];
+                                @endphp
+                                <p class="mb-1"><strong>Tanggal Jatuh Tempo:</strong> {{ $selectedAngsuran['tanggal_jatuh_tempo'] }}</p>
+                                <p class="mb-0"><strong>Total Cicilan:</strong> Rp {{ number_format($selectedAngsuran['total_cicilan'], 0, ',', '.') }}</p>
+                            @endif
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <label class="form-label">Pilih File Bukti Pembayaran <span class="text-danger">*</span></label>
+                        <input type="file" 
+                            class="form-control @error('uploadFile') is-invalid @enderror" 
+                            accept="image/*,.pdf"
+                            wire:model="uploadFile"
+                            wire:loading.attr="disabled">
+                        @error('uploadFile')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Format: JPG, PNG, atau PDF. Maksimal 2MB</small>
+                        
+                        <div wire:loading wire:target="uploadFile" class="mt-2">
+                            <div class="alert alert-info py-2">
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                <small>Mengunggah file ke server, harap tunggu...</small>
+                            </div>
+                        </div>
+                        
+                        <div wire:loading.remove wire:target="uploadFile">
+                            @if($uploadFile)
+                                <div class="mt-2">
+                                    <div class="alert alert-success py-2">
+                                        <i class="ti ti-check me-1"></i>
+                                        <small>File siap: <strong>{{ is_string($uploadFile) ? $uploadFile : $uploadFile->getClientOriginalName() }}</strong></small>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="closeUploadModal">Batal</button>
+                    <button type="button" 
+                            class="btn btn-primary" 
+                            wire:click="submitUploadBukti"
+                            wire:loading.attr="disabled"
+                            wire:target="submitUploadBukti">
+                        <span wire:loading.remove wire:target="submitUploadBukti">
+                            <i class="ti ti-upload me-1"></i>Upload
+                        </span>
+                        <span wire:loading wire:target="submitUploadBukti">
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            Mengupload...
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
 @push('scripts')
@@ -248,6 +394,33 @@
                     window.location.href = options.redirect_url;
                 }
             });
+        });
+    });
+
+    document.addEventListener('livewire:init', () => {
+        // Buka modal ketika event dipanggil
+        Livewire.on('open-upload-modal', () => {
+            const modalElement = document.getElementById('modalUploadBukti');
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                
+                // Reset form ketika modal ditutup
+                modalElement.addEventListener('hidden.bs.modal', function () {
+                    @this.closeUploadModal();
+                });
+            }
+        });
+
+        // Auto close modal when upload success
+        Livewire.on('swal:modal', (data) => {
+            const options = data[0];
+            if (options.type === 'success' && options.text.includes('Bukti pembayaran berhasil')) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('modalUploadBukti'));
+                if (modal) {
+                    modal.hide();
+                }
+            }
         });
     });
 </script>

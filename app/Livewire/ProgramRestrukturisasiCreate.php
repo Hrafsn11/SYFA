@@ -3,15 +3,19 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Models\PengajuanRestrukturisasi;
 use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class ProgramRestrukturisasiCreate extends Component
 {
+    use WithFileUploads;
+    
     public bool $isEdit = false;
     public string $pageTitle = 'Form Tambah Jenis Program Restrukturisasi';
     public string $pageSubtitle = 'Buat program restrukturisasi berdasarkan pengajuan yang telah disetujui';
