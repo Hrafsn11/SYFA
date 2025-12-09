@@ -1,7 +1,7 @@
 <div>
     @php
-        // Dummy data - nanti bisa diganti dengan data dari Livewire component
-        $currentStep = 2; // Step saat ini (1-6)
+        $currentStep = $pengajuan->current_step ?? 1;
+        $status = $pengajuan->status ?? 'Draft';
     @endphp
 
     <div class="row">
@@ -52,7 +52,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 5</div>
-                            <div class="step-name">Validasi Transaksi</div>
+                            <div class="step-name">Upload Bukti Transfer</div>
                         </div>
                     </div>
 
@@ -63,23 +63,6 @@
                             <div class="step-name">Generate Kontrak</div>
                         </div>
                     </div>
-
-                    {{-- <div class="stepper-item" data-step="7">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 7</div>
-                            <div class="step-name">Upload Dokumen Transfer</div>
-                        </div>
-                    </div> --}}
-
-                    {{-- <div class="stepper-item" data-step="8">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 8</div>
-                            <div class="step-name">Selesai</div>
-                        </div>
-                    </div> --}}
-
                 </div>
             </div>
 
@@ -138,96 +121,154 @@
         </div>
     </div>
 
-    <!-- Modal Persetujuan Pengajuan -->
-    <div class="modal fade" id="modalPersetujuanPengajuan" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Konfirmasi Persetujuan</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <hr class="my-2">
-            <div class="modal-body">
-                <p class="mb-0">Apakah Anda yakin ingin menyetujui pengajuan investasi ini?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" id="btnTolakPengajuan">Tolak</button>
-                <button type="button" class="btn btn-primary" id="btnKonfirmasiSetuju">Setuju</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- Modal Validasi Finance SKI -->
+    <div class="modal fade" id="modalValidasiFinanceSKI" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Validasi Finance SKI</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formValidasiFinanceSKI">
+                    <div class="modal-body">
+                        <h5 class="mb-3">Apakah anda yakin menyetujui pengajuan investasi ini?</h5>
+                        
+                        <div class="mb-3">
+                            <label for="tanggal_investasi_validasi" class="form-label">Tanggal Investasi</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bs-datepicker" id="tanggal_investasi_validasi" 
+                                    value="{{ $pengajuan->tanggal_investasi ? \Carbon\Carbon::parse($pengajuan->tanggal_investasi)->format('Y-m-d') : '' }}" placeholder="yyyy-mm-dd">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
+                            <small class="text-muted">Anda dapat mengubah tanggal investasi atau membiarkan seperti semula</small>
+                        </div>
 
-<!-- Modal Validasi CEO -->
-<div class="modal fade" id="modalValidasiCEO" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Validasi CEO Finlog</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <hr class="my-2">
-            <div class="modal-body">
-                <p class="mb-0">Apakah Anda yakin ingin menyetujui pengajuan investasi ini sebagai CEO Finlog?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" id="btnTolakCEO">Tolak</button>
-                <button type="button" class="btn btn-primary" id="btnKonfirmasiCEO">Setuju</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Validasi Investor -->
-<div class="modal fade" id="modalValidasiInvestor" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Validasi Investor</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <hr class="my-2">
-            <div class="modal-body">
-                <p class="mb-0">Apakah Anda yakin untuk memvalidasi pengajuan investasi ini?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-danger" id="btnTolakInvestor">Tolak</button>
-                <button type="button" class="btn btn-primary" id="btnKonfirmasiInvestor">Setuju</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Hasil Review (Penolakan) -->
-<div class="modal fade" id="modalHasilReview" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Hasil Review</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="formHasilReview">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="alasan_penolakan" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="alasan_penolakan" rows="4" 
-                            placeholder="Masukkan alasan penolakan..." required></textarea>
+                        <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk menolak.</p>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="btnKonfirmasiSetujuFinanceSKI">
+                            <i class="ti ti-check me-1"></i>
+                            Setuju
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btnTolakFinanceSKI">
+                            <i class="ti ti-x me-1"></i>
+                            Tolak
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Alasan Penolakan Finance SKI -->
+    <div class="modal fade" id="modalAlasanPenolakan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hasil Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formAlasanPenolakan">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="alasan_penolakan" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="alasan_penolakan" rows="4" 
+                                placeholder="Masukkan alasan penolakan..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ti ti-x me-1"></i>
+                            Tolak Pengajuan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Validasi CEO -->
+    <div class="modal fade" id="modalValidasiCEO" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Validasi CEO Finlog</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <hr class="my-2">
+                <div class="modal-body">
+                    <h5 class="mb-2">Apakah anda yakin menyetujui pengajuan investasi ini?</h5>
+                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk menolak.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="ti ti-x me-1"></i>
-                        Tolak Pengajuan
+                    <button type="button" class="btn btn-success" id="btnKonfirmasiCEO">
+                        Setuju
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnTolakCEO">
+                        Tolak
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Modal Alasan Penolakan CEO -->
+    <div class="modal fade" id="modalAlasanPenolakanCEO" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Hasil Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formAlasanPenolakanCEO">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="alasan_penolakan_ceo" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="alasan_penolakan_ceo" rows="4" 
+                                placeholder="Masukkan alasan penolakan..." required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="ti ti-x me-1"></i>
+                            Tolak Pengajuan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Informasi Rekening -->
+    <div class="modal fade" id="modalInformasiRekening" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Informasi Rekening</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="formInformasiRekening">
+                    <div class="modal-body">
+                       
+                        <div class="mb-3">
+                            <label for="informasi_rekening" class="form-label">Informasi Rekening <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="informasi_rekening" rows="4" 
+                                placeholder="Masukan Nomor Rekening" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti ti-send me-1"></i>
+                            Kirim Informasi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 <!-- Modal Generate Kontrak -->
 <div class="modal fade" id="modalGenerateKontrak" tabindex="-1" aria-hidden="true">
@@ -330,6 +371,17 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
+        const PENGAJUAN_ID = '{{ $pengajuan->id_pengajuan_investasi_finlog ?? '' }}';
+        const CSRF = '{{ csrf_token() }}';
+
+        const alert = (icon, html, title = icon === 'error' ? 'Error!' : icon === 'success' ? 'Berhasil!' : 'Perhatian') => 
+            Swal.fire({ 
+                icon, 
+                title, 
+                [icon === 'error' || icon === 'warning' ? 'html' : 'text']: html, 
+                ...(icon === 'success' && { timer: 2000, showConfirmButton: false }) 
+            });
+
         // Initialize datepicker for kontrak modal
         $('.bs-datepicker').datepicker({
             format: 'yyyy-mm-dd',
@@ -355,107 +407,326 @@
             });
         });
 
-        $('#btnSetujuiPengajuan').click(function() {
-            $('#modalPersetujuanPengajuan').modal('show');
+        // Step 2: Validasi Finance SKI - Open Modal
+        $('#btnValidasiFinanceSKI').click(function() {
+            $('#modalValidasiFinanceSKI').modal('show');
         });
 
-        $('#btnKonfirmasiSetuju').click(function() {
-            $('#modalPersetujuanPengajuan').modal('hide');
-            Swal.fire('Berhasil!', 'Pengajuan berhasil divalidasi.', 'success')
-                .then(() => location.reload());
-        });
-
-        $('#btnTolakPengajuan').click(function() {
-            $('#modalPersetujuanPengajuan').modal('hide');
-            setTimeout(() => $('#modalHasilReview').modal('show'), 300);
-        });
-
-        $('#btnValidasiCEO').click(function() {
-            $('#modalValidasiCEO').modal('show');
-        });
-
-        $('#btnKonfirmasiCEO').click(function() {
-            $('#modalValidasiCEO').modal('hide');
-            Swal.fire('Berhasil!', 'Pengajuan berhasil divalidasi oleh CEO Finlog.', 'success')
-                .then(() => location.reload());
-        });
-
-        $('#btnTolakCEO').click(function() {
-            $('#modalValidasiCEO').modal('hide');
-            setTimeout(() => $('#modalHasilReview').modal('show'), 300);
-        });
-
-        $('#btnValidasiInvestor').click(function() {
-            $('#modalValidasiInvestor').modal('show');
-        });
-
-        $('#btnKonfirmasiInvestor').click(function() {
-            $('#modalValidasiInvestor').modal('hide');
-            Swal.fire('Berhasil!', 'Pengajuan berhasil divalidasi oleh investor.', 'success')
-                .then(() => location.reload());
-        });
-
-        $('#btnTolakInvestor').click(function() {
-            $('#modalValidasiInvestor').modal('hide');
-            setTimeout(() => $('#modalHasilReview').modal('show'), 300);
-        });
-
-        $('#btnValidasiTransaksi').click(function() {
-            Swal.fire({
-                title: 'Konfirmasi',
-                text: 'Apakah Anda yakin ingin memvalidasi transaksi ini?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Validasi',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Berhasil!', 'Transaksi berhasil divalidasi.', 'success')
-                        .then(() => location.reload());
+        // Step 2: Konfirmasi Setuju
+        $('#btnKonfirmasiSetujuFinanceSKI').click(function() {
+            const tanggalInvestasi = $('#tanggal_investasi_validasi').val();
+            
+            $('#modalValidasiFinanceSKI').modal('hide');
+            
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-finance-ski`,
+                method: 'POST',
+                data: {
+                    _token: CSRF,
+                    validasi_pengajuan: 'disetujui',
+                    tanggal_investasi: tanggalInvestasi
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        alert('success', res.message || 'Pengajuan berhasil divalidasi!')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
+                    }
                 }
             });
         });
 
-        $('#formHasilReview').submit(function(e) {
-            e.preventDefault();
-            $('#modalHasilReview').modal('hide');
-            Swal.fire('Ditolak!', 'Pengajuan berhasil ditolak.', 'info')
-                .then(() => location.reload());
+        // Step 2: Tolak - Open Alasan Modal
+        $('#btnTolakFinanceSKI').click(function() {
+            $('#modalValidasiFinanceSKI').modal('hide');
+            setTimeout(() => $('#modalAlasanPenolakan').modal('show'), 300);
         });
 
-        $('#formGenerateKontrak').submit(function(e) {
+        // Step 2: Submit Alasan Penolakan
+        $('#formAlasanPenolakan').submit(function(e) {
             e.preventDefault();
-            $('#modalGenerateKontrak').modal('hide');
-            Swal.fire('Berhasil!', 'Kontrak berhasil digenerate.', 'success')
-                .then(() => location.reload());
-        });
+            
+            const catatan = $('#alasan_penolakan').val();
+            
+            if (!catatan || catatan.trim() === '') {
+                alert('error', 'Alasan penolakan wajib diisi');
+                return;
+            }
 
-        $('#btnPreviewKontrak').click(function() {
-            Swal.fire({
-                title: 'Preview Kontrak',
-                text: 'Kontrak dengan nomor FINLOG/INV/2025/001',
-                icon: 'info'
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-finance-ski`,
+                method: 'POST',
+                data: {
+                    _token: CSRF,
+                    validasi_pengajuan: 'ditolak',
+                    catatan_penolakan: catatan
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        $('#modalAlasanPenolakan').modal('hide');
+                        alert('success', res.message || 'Pengajuan telah ditolak')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
+                    }
+                }
             });
+        });
+
+        // Step 3: Validasi CEO - Open Modal
+        $('#btnValidasiCEO').click(function() {
+            $('#modalValidasiCEO').modal('show');
+        });
+
+        // Step 3: Konfirmasi Setuju CEO
+        $('#btnKonfirmasiCEO').click(function() {
+            $('#modalValidasiCEO').modal('hide');
+            
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-ceo`,
+                method: 'POST',
+                data: {
+                    _token: CSRF,
+                    persetujuan_ceo_finlog: 'disetujui'
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        alert('success', res.message || 'Pengajuan berhasil disetujui CEO!')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
+                    }
+                }
+            });
+        });
+
+        // Step 3: Tolak CEO - Open Alasan Modal
+        $('#btnTolakCEO').click(function() {
+            $('#modalValidasiCEO').modal('hide');
+            setTimeout(() => $('#modalAlasanPenolakanCEO').modal('show'), 300);
+        });
+
+        // Step 3: Submit Alasan Penolakan CEO
+        $('#formAlasanPenolakanCEO').submit(function(e) {
+            e.preventDefault();
+            
+            const catatan = $('#alasan_penolakan_ceo').val();
+            
+            if (!catatan || catatan.trim() === '') {
+                alert('error', 'Alasan penolakan wajib diisi');
+                return;
+            }
+
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-ceo`,
+                method: 'POST',
+                data: {
+                    _token: CSRF,
+                    persetujuan_ceo_finlog: 'ditolak',
+                    catatan_penolakan: catatan
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        $('#modalAlasanPenolakanCEO').modal('hide');
+                        alert('success', res.message || 'Pengajuan telah ditolak')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
+                    }
+                }
+            });
+        });
+
+        // Step 4: Kirim Informasi Rekening - Open Modal
+        $('#btnKirimInformasiRekening').click(function() {
+            $('#modalInformasiRekening').modal('show');
+        });
+
+        // Step 4: Submit Form Informasi Rekening
+        $('#formInformasiRekening').submit(function(e) {
+            e.preventDefault();
+            
+            const informasiRekening = $('#informasi_rekening').val();
+            
+            if (!informasiRekening || informasiRekening.trim() === '') {
+                alert('error', 'Informasi rekening wajib diisi');
+                return;
+            }
+
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/informasi-rekening`,
+                method: 'POST',
+                data: {
+                    _token: CSRF,
+                    informasi_rekening: informasiRekening
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        $('#modalInformasiRekening').modal('hide');
+                        alert('success', res.message || 'Informasi rekening berhasil dikirim!')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Gagal mengirim informasi rekening');
+                    }
+                }
+            });
+        });
+
+        // Step 5: Upload Bukti Transfer
+        $('#btnUploadBuktiTransfer').click(function() {
+            $('#modalUploadBuktiTransfer').modal('show');
         });
 
         $('#formUploadBuktiTransfer').submit(function(e) {
             e.preventDefault();
+            
             const file = $('#file_bukti_transfer')[0].files[0];
             
             if (!file) {
-                Swal.fire('Error!', 'Silakan pilih file terlebih dahulu.', 'error');
+                alert('error', 'Silakan pilih file terlebih dahulu');
                 return;
             }
 
             if (file.size > 2 * 1024 * 1024) {
-                Swal.fire('Error!', 'Ukuran file maksimal 2MB.', 'error');
+                alert('error', 'Ukuran file maksimal 2MB');
                 return;
             }
 
-            $('#modalUploadBuktiTransfer').modal('hide');
-            Swal.fire('Berhasil!', 'Bukti transfer berhasil diupload.', 'success')
-                .then(() => location.reload());
+            const formData = new FormData();
+            formData.append('upload_bukti_transfer', file);
+            formData.append('_token', CSRF);
+
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/upload-bukti`,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: (res) => {
+                    if (!res.error) {
+                        $('#modalUploadBuktiTransfer').modal('hide');
+                        alert('success', res.message || 'Bukti transfer berhasil diupload!')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Gagal upload bukti transfer');
+                    }
+                }
+            });
         });
+
+        // Step 6: Generate Kontrak
+        $('#btnGenerateKontrak').click(function() {
+            $('#modalGenerateKontrak').modal('show');
+        });
+
+        $('#formGenerateKontrak').submit(function(e) {
+            e.preventDefault();
+            
+            const nomorKontrak = $('#nomor_kontrak').val();
+            
+            if (!nomorKontrak) {
+                alert('error', 'Nomor kontrak wajib diisi');
+                return;
+            }
+
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/generate-kontrak`,
+                method: 'POST',
+                data: {
+                    _token: CSRF,
+                    nomor_kontrak: nomorKontrak
+                },
+                success: (res) => {
+                    if (!res.error) {
+                        $('#modalGenerateKontrak').modal('hide');
+                        alert('success', res.message || 'Kontrak berhasil digenerate!')
+                            .then(() => window.location.reload());
+                    } else {
+                        alert('error', res.message);
+                    }
+                },
+                error: (xhr) => {
+                    const errors = xhr.responseJSON?.errors;
+                    if (errors) {
+                        const errorList = Object.values(errors).flat().join('<br>');
+                        alert('error', errorList);
+                    } else {
+                        alert('error', xhr.responseJSON?.message || 'Gagal generate kontrak');
+                    }
+                }
+            });
+        });
+
+        // Preview Bukti Transfer
+        window.previewBuktiTransfer = function(url) {
+            const fileExt = url.split('.').pop().toLowerCase();
+            
+            if (fileExt === 'pdf') {
+                $('#previewPdf').attr('src', url).removeClass('d-none');
+                $('#previewImage').addClass('d-none');
+            } else {
+                $('#previewImage').attr('src', url).removeClass('d-none');
+                $('#previewPdf').addClass('d-none');
+            }
+            
+            $('#downloadBukti').attr('href', url);
+            $('#modalPreviewBukti').modal('show');
+        };
     });
 </script>
 @endpush

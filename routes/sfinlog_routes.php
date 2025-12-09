@@ -104,11 +104,11 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
     Route::get('{id}/edit', [PengajuanInvestasiController::class, 'edit'])->name('edit');
     Route::put('{id}', [PengajuanInvestasiController::class, 'update'])->name('update');
     Route::delete('{id}', [PengajuanInvestasiController::class, 'destroy'])->name('destroy');
-    Route::post('{id}/approval', [PengajuanInvestasiController::class, 'approval'])->name('approval');
-    Route::get('history/{historyId}', [PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history.detail');
-    Route::post('{id}/update-status', [PengajuanInvestasiController::class, 'updateStatus'])->name('update-status');
+    Route::post('{id}/submit', [PengajuanInvestasiController::class, 'submit'])->name('submit');
+    Route::post('{id}/validasi-finance-ski', [PengajuanInvestasiController::class, 'validasiFinanceSKI'])->name('validasi-finance-ski');
+    Route::post('{id}/validasi-ceo', [PengajuanInvestasiController::class, 'validasiCEO'])->name('validasi-ceo');
+    Route::post('{id}/informasi-rekening', [PengajuanInvestasiController::class, 'informasiRekening'])->name('informasi-rekening');
     Route::post('{id}/upload-bukti', [PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
-    Route::get('{id}/preview-kontrak', [PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
     Route::post('{id}/generate-kontrak', [PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
 });
 

@@ -1,8 +1,7 @@
 <div id="content-default">
     @php
-        // Dummy data - nanti bisa diganti dengan data dari Livewire component
-        $currentStep = 2; // Step saat ini (1-6)
-        $status = 'Menunggu Validasi'; // Draft, Menunggu Validasi, Disetujui, Ditolak
+        $currentStep = $pengajuan->current_step ?? 1;
+        $status = $pengajuan->status ?? 'Draft';
     @endphp
 
     <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2 mt-3">
@@ -15,45 +14,52 @@
                 </button>
             @endif
 
-            @if($currentStep == 2 && $status == 'Menunggu Validasi')
-                <button type="button" class="btn btn-primary" id="btnSetujuiPengajuan">
+            @if($currentStep == 2 && str_contains($status, 'Menunggu Validasi Finance SKI'))
+                <button type="button" class="btn btn-primary" id="btnValidasiFinanceSKI">
                     <i class="fas fa-check me-2"></i>
-                    Validasi Pengajuan
+                    Validasi Finance SKI
                 </button>
             @endif
 
-            @if($currentStep == 3 && $status == 'Menunggu Validasi')
-                <button type="button" class="btn btn-info" id="btnValidasiCEO">
+            @if($currentStep == 3 && str_contains($status, 'Menunggu Persetujuan CEO Finlog'))
+                <button type="button" class="btn btn-primary" id="btnValidasiCEO">
                     <i class="ti ti-check me-2"></i>
                     Validasi CEO Finlog
                 </button>
             @endif
 
-            @if($currentStep == 4 && $status == 'Menunggu Validasi')
-                <button type="button" class="btn btn-warning" id="btnValidasiInvestor">
-                    <i class="ti ti-user-check me-2"></i>
-                    Validasi Investor
+            @if($currentStep == 4 && str_contains($status, 'Menunggu Informasi Rekening'))
+                <button type="button" class="btn btn-primary" id="btnKirimInformasiRekening">
+                    <i class="ti ti-send me-2"></i>
+                    Kirim Informasi Rekening
                 </button>
             @endif
 
-            @if($currentStep == 5 && $status == 'Menunggu Validasi')
-                <button type="button" class="btn btn-success" id="btnValidasiTransaksi">
-                    <i class="ti ti-cash me-2"></i>
-                    Validasi Transaksi
+            @if($currentStep == 5 && str_contains($status, 'Menunggu Upload Bukti Transfer'))
+                <button type="button" class="btn btn-success" id="btnUploadBuktiTransfer">
+                    <i class="ti ti-upload me-2"></i>
+                    Upload Bukti Transfer
                 </button>
             @endif
 
-            @if($status == 'Ditolak')
+            @if($currentStep == 6 && str_contains($status, 'Menunggu Generate Kontrak'))
+                <button type="button" class="btn btn-primary" id="btnGenerateKontrak">
+                    <i class="ti ti-file-check me-2"></i>
+                    Generate Kontrak
+                </button>
+            @endif
+
+            @if(str_contains($status, 'Ditolak'))
                 <span class="badge bg-danger fs-6">
                     <i class="ti ti-x me-1"></i>
-                    Pengajuan Ditolak
+                    {{ $status }}
                 </span>
             @endif
 
-            @if($status == 'Disetujui')
+            @if(str_contains($status, 'Selesai'))
                 <span class="badge bg-success fs-6">
                     <i class="ti ti-check me-1"></i>
-                    Pengajuan Disetujui
+                    Proses Selesai
                 </span>
             @endif
         </div>
@@ -67,25 +73,31 @@
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Nama Investor</small>
-                <p class="fw-bold mb-0">John Doe</p>
+                <p class="fw-bold mb-0">{{ $pengajuan->nama_investor ?? '-' }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Project</small>
-                <p class="fw-bold mb-0">Velocity</p>
+                <p class="fw-bold mb-0">{{ $pengajuan->project->nama_project ?? '-' }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Tanggal Investasi</small>
-                <p class="fw-bold mb-0">08 December 2025</p>
+                <p class="fw-bold mb-0">{{ $pengajuan->tanggal_investasi ? \Carbon\Carbon::parse($pengajuan->tanggal_investasi)->format('d F Y') : '-' }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Lama Berinvestasi</small>
-                <p class="fw-bold mb-0">12 Bulan</p>
+                <p class="fw-bold mb-0">{{ $pengajuan->lama_investasi ?? 0 }} Bulan</p>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="mb-0">
+                <small class="text-light fw-semibold d-block mb-1">Tanggal Berakhir Investasi</small>
+                <p class="fw-bold mb-0">{{ $pengajuan->tanggal_berakhir_investasi ? \Carbon\Carbon::parse($pengajuan->tanggal_berakhir_investasi)->format('d F Y') : '-' }}</p>
             </div>
         </div>
     </div>
@@ -98,19 +110,19 @@
         <div class="col-12 col-sm-6 col-md-4">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Jumlah Investasi</small>
-                <p class="fw-bold mb-0">Rp 100.000.000</p>
+                <p class="fw-bold mb-0">Rp {{ number_format($pengajuan->nominal_investasi ?? 0, 0, ',', '.') }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Bagi Hasil (%)/Tahun</small>
-                <p class="fw-bold mb-0">12%</p>
+                <p class="fw-bold mb-0">{{ $pengajuan->persentase_bagi_hasil ?? 0 }}%</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Nominal Bagi Hasil Yang Didapat</small>
-                <p class="fw-bold mb-0">Rp 12.000.000</p>
+                <p class="fw-bold mb-0">Rp {{ number_format($pengajuan->nominal_bagi_hasil_yang_didapat ?? 0, 0, ',', '.') }}</p>
             </div>
         </div>
     </div>
