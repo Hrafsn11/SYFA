@@ -69,18 +69,5 @@
         </div>
     @endif
 
-    <hr class="my-3 my-md-4">
-
-    <!-- Bukti Transfer -->
-    <h6 class="text-dark mb-3">Bukti Transfer</h6>
-    <div class="row g-3">
-        <div class="col-12">
-            <div class="card border">
-                <div class="card-body text-center py-5">
-                    <i class="ti ti-file-upload" style="font-size: 48px; color: #ccc;"></i>
-                    <p class="text-muted mt-3 mb-0">Belum ada bukti transfer yang diupload</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 </div>

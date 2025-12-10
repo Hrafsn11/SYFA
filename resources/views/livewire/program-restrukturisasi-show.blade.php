@@ -1,4 +1,5 @@
 @php
+    use Illuminate\Support\Facades\Storage;
     $pengajuan = $program->pengajuanRestrukturisasi;
     $debitur = $pengajuan?->debitur?->nama ?? $pengajuan?->nama_perusahaan ?? '-';
     $nomorKontrak = $pengajuan?->nomor_kontrak_pembiayaan ?? '-';
@@ -114,28 +115,65 @@
                         <tr>
                             <th>No</th>
                             <th>Tanggal Jatuh Tempo</th>
+                            @if($program->metode_perhitungan === 'Anuitas')
+                            <th>Sisa Pinjaman (Rp)</th>
+                            @endif
                             <th>Pokok (Rp)</th>
                             <th>Margin (Rp)</th>
                             <th>Total Cicilan (Rp)</th>
-                            <th>Status / Catatan</th>
+                            <th>Status</th>
+                            <th>Catatan</th>
+                            <th>Bukti Pembayaran</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($jadwal as $item)
+                        @forelse($jadwal as $index => $item)
+                            @php
+                                $sisaPinjaman = isset($jadwalWithSisa[$index]['sisa_pinjaman']) 
+                                    ? $jadwalWithSisa[$index]['sisa_pinjaman'] 
+                                    : null;
+                            @endphp
                             <tr class="{{ $item->is_grace_period ? 'table-warning' : '' }}">
                                 <td>{{ $item->no }}</td>
                                 <td>{{ optional($item->tanggal_jatuh_tempo)->format('d/m/Y') ?? '-' }}</td>
+                                @if($program->metode_perhitungan === 'Anuitas')
+                                <td class="text-end">Rp {{ number_format($sisaPinjaman ?? 0, 0, ',', '.') }}</td>
+                                @endif
                                 <td class="text-end">Rp {{ number_format($item->pokok, 0, ',', '.') }}</td>
                                 <td class="text-end">Rp {{ number_format($item->margin, 0, ',', '.') }}</td>
                                 <td class="text-end fw-semibold">Rp {{ number_format($item->total_cicilan, 0, ',', '.') }}</td>
                                 <td>
-                                    <div>{{ $item->catatan ?? '-' }}</div>
-                                    <small class="text-muted">{{ $item->status }}</small>
+                                    @if($item->status === 'Lunas')
+                                        <span class="badge bg-success">{{ $item->status }}</span>
+                                    @elseif($item->status === 'Jatuh Tempo')
+                                        <span class="badge bg-danger">{{ $item->status }}</span>
+                                    @else
+                                        <span class="badge bg-secondary">{{ $item->status }}</span>
+                                    @endif
+                                </td>
+                                <td>{{ $item->catatan ?? '-' }}</td>
+                                <td>
+                                    @if(!empty($item->bukti_pembayaran))
+                                        <div class="d-flex flex-column gap-1">
+                                            <a href="{{ Storage::url($item->bukti_pembayaran) }}" 
+                                               target="_blank" 
+                                               class="btn btn-sm btn-info">
+                                                <i class="ti ti-eye me-1"></i>Lihat Bukti
+                                            </a>
+                                            @if($item->tanggal_bayar)
+                                                <small class="text-muted">
+                                                    Dibayar: {{ optional($item->tanggal_bayar)->format('d/m/Y') }}
+                                                </small>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">Belum ada jadwal angsuran</td>
+                                <td colspan="{{ $program->metode_perhitungan === 'Anuitas' ? 9 : 8 }}" class="text-center text-muted">Belum ada jadwal angsuran</td>
                             </tr>
                         @endforelse
                     </tbody>
