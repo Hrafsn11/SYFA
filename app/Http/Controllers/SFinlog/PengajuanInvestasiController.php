@@ -307,7 +307,7 @@ class PengajuanInvestasiController extends Controller
 
             if ($persetujuan === 'disetujui') {
                 $pengajuan->update([
-                    'status' => 'Menunggu Informasi Rekening',
+                    'status' => 'Menunggu Upload Bukti Transfer',
                     'current_step' => 4,
                     'updated_by' => Auth::id(),
                 ]);
@@ -389,7 +389,7 @@ class PengajuanInvestasiController extends Controller
     }
 
     /**
-     * Upload Bukti Transfer (Step 5)
+     * Upload Bukti Transfer (Step 4)
      */
     public function uploadBuktiTransfer(Request $request, $id)
     {
@@ -398,7 +398,7 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
             
-            if ($pengajuan->current_step !== 5) {
+            if ($pengajuan->current_step !== 4) {
                 return Response::error('Pengajuan tidak dalam tahap upload bukti transfer');
             }
 
@@ -418,7 +418,7 @@ class PengajuanInvestasiController extends Controller
             $pengajuan->update([
                 'upload_bukti_transfer' => $filePath,
                 'status' => 'Menunggu Generate Kontrak',
-                'current_step' => 6,
+                'current_step' => 5,
                 'updated_by' => Auth::id(),
             ]);
 
@@ -427,7 +427,7 @@ class PengajuanInvestasiController extends Controller
                 'status' => 'Bukti Transfer Diupload',
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'current_step' => 6,
+                'current_step' => 5,
                 'approve_by' => Auth::id(),
             ]);
 
@@ -441,7 +441,39 @@ class PengajuanInvestasiController extends Controller
     }
 
     /**
-     * Generate Kontrak (Step 6)
+     * Preview Kontrak
+     */
+    public function previewKontrak(Request $request, $id)
+    {
+        try {
+            $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
+            
+            $nomorKontrak = $pengajuan->nomor_kontrak ?? $request->input('nomor_kontrak', 'DRAFT-' . date('Ymd-His'));
+            
+            $tanggalKontrak = $pengajuan->tanggal_kontrak ?? now()->toDateString();
+            
+            $data = [
+                'nomor_kontrak' => $nomorKontrak,
+                'tanggal_kontrak' => $tanggalKontrak,
+                'nama_investor' => $pengajuan->nama_investor,
+                'nama_perusahaan' => $pengajuan->nama_investor,
+                'project' => $pengajuan->project->nama_project ?? '-',
+                'nominal_investasi' => $pengajuan->nominal_investasi,
+                'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
+                'lama_investasi' => $pengajuan->lama_investasi,
+                'tanggal_investasi' => $pengajuan->tanggal_investasi,
+                'tanggal_berakhir' => $pengajuan->tanggal_berakhir_investasi,
+                'alamat' => $pengajuan->investor->alamat ?? '-',
+            ];
+            
+            return view('livewire.sfinlog.pengajuan-investasi.preview-kontrak', compact('data', 'pengajuan'));
+        } catch (\Exception $e) {
+            return Response::errorCatch($e, 'Gagal memuat preview kontrak');
+        }
+    }
+
+    /**
+     * Generate Kontrak (Step 5)
      */
     public function generateKontrak(Request $request, $id)
     {
@@ -450,7 +482,7 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
             
-            if ($pengajuan->current_step !== 6) {
+            if ($pengajuan->current_step !== 5) {
                 return Response::error('Pengajuan tidak dalam tahap generate kontrak');
             }
 
@@ -465,6 +497,7 @@ class PengajuanInvestasiController extends Controller
             // Update with kontrak
             $pengajuan->update([
                 'nomor_kontrak' => $request->nomor_kontrak,
+                'tanggal_kontrak' => now()->toDateString(),
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'updated_by' => Auth::id(),
