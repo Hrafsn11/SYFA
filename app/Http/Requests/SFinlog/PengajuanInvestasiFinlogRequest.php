@@ -51,11 +51,32 @@ class PengajuanInvestasiFinlogRequest extends FormRequest
             return $rules;
         }
 
+        // Approval workflow validation
         if ($this->has('status') && !$this->has('id_debitur_dan_investor')) {
-            return [
+            $rules = [
                 'status' => 'required|string',
+                'catatan_penolakan' => 'nullable|string',
                 'catatan' => 'nullable|string',
             ];
+            
+            // Validasi Finance SKI
+            if ($this->has('validasi_pengajuan')) {
+                $rules['validasi_pengajuan'] = 'required|in:disetujui,ditolak';
+                $rules['tanggal_investasi'] = 'nullable|date';
+            }
+            
+            // Validasi CEO Finlog
+            if ($this->has('persetujuan_ceo_finlog')) {
+                $rules['persetujuan_ceo_finlog'] = 'required|in:disetujui,ditolak';
+            }
+            
+            // Rejection requires catatan
+            if (in_array($this->input('validasi_pengajuan'), ['ditolak']) || 
+                in_array($this->input('persetujuan_ceo_finlog'), ['ditolak'])) {
+                $rules['catatan_penolakan'] = 'required|string';
+            }
+            
+            return $rules;
         }
 
         if ($this->has('id_debitur_dan_investor')) {
@@ -100,10 +121,16 @@ class PengajuanInvestasiFinlogRequest extends FormRequest
             'persentase_bagi_hasil.min' => 'Persentase bagi hasil minimal :min%.',
             'persentase_bagi_hasil.max' => 'Persentase bagi hasil maksimal :max%.',
 
-            // updateStatus messages
+            // Approval workflow messages
             'status.required' => 'Status harus diisi',
             'status.string' => 'Status harus berupa teks',
             'catatan.string' => 'Catatan harus berupa teks',
+            'catatan_penolakan.required' => 'Alasan penolakan harus diisi',
+            'catatan_penolakan.string' => 'Alasan penolakan harus berupa teks',
+            'validasi_pengajuan.required' => 'Validasi pengajuan harus dipilih',
+            'validasi_pengajuan.in' => 'Validasi pengajuan harus disetujui atau ditolak',
+            'persetujuan_ceo_finlog.required' => 'Persetujuan CEO Finlog harus dipilih',
+            'persetujuan_ceo_finlog.in' => 'Persetujuan CEO Finlog harus disetujui atau ditolak',
 
             // uploadBuktiTransfer messages
             'file.required' => 'File bukti transfer harus diupload',

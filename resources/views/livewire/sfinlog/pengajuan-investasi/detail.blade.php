@@ -352,320 +352,79 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        const PENGAJUAN_ID = '{{ $pengajuan->id_pengajuan_investasi_finlog ?? '' }}';
-        const CSRF = '{{ csrf_token() }}';
-
-        const alert = (icon, html, title = icon === 'error' ? 'Error!' : icon === 'success' ? 'Berhasil!' : 'Perhatian') => 
-            Swal.fire({ 
-                icon, 
-                title, 
-                [icon === 'error' || icon === 'warning' ? 'html' : 'text']: html, 
-                ...(icon === 'success' && { timer: 2000, showConfirmButton: false }) 
-            });
-
-        // Initialize datepicker for kontrak modal
-        $('.bs-datepicker').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true,
-            todayHighlight: true,
-            orientation: 'bottom auto'
-        });
-
-        // Button handlers
-        $('#btnSubmitPengajuan').click(function() {
-            Swal.fire({
-                title: 'Konfirmasi',
-                text: 'Apakah Anda yakin ingin submit pengajuan investasi ini?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Submit',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire('Berhasil!', 'Pengajuan berhasil disubmit.', 'success')
-                        .then(() => location.reload());
-                }
-            });
-        });
-
-        // Step 2: Validasi Finance SKI - Open Modal
-        $('#btnValidasiFinanceSKI').click(function() {
-            $('#modalValidasiFinanceSKI').modal('show');
-        });
-
-        // Step 2: Konfirmasi Setuju
-        $('#btnKonfirmasiSetujuFinanceSKI').click(function() {
-            const tanggalInvestasi = $('#tanggal_investasi_validasi').val();
-            
-            $('#modalValidasiFinanceSKI').modal('hide');
-            
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-finance-ski`,
-                method: 'POST',
-                data: {
-                    _token: CSRF,
-                    validasi_pengajuan: 'disetujui',
-                    tanggal_investasi: tanggalInvestasi
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        alert('success', res.message || 'Pengajuan berhasil divalidasi!')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
-                    }
-                }
-            });
-        });
-
-        // Step 2: Tolak - Open Alasan Modal
-        $('#btnTolakFinanceSKI').click(function() {
-            $('#modalValidasiFinanceSKI').modal('hide');
-            setTimeout(() => $('#modalAlasanPenolakan').modal('show'), 300);
-        });
-
-        // Step 2: Submit Alasan Penolakan
-        $('#formAlasanPenolakan').submit(function(e) {
+(function() {
+    'use strict';
+    
+    const CFG = {id: '{{ $pengajuan->id_pengajuan_investasi_finlog ?? "" }}', csrf: '{{ csrf_token() }}', base: '/sfinlog/pengajuan-investasi', maxSize: 2097152};
+    const url = e => `${CFG.base}/${CFG.id}${e}`;
+    const alert = (i, m) => Swal.fire({icon: i, title: i === 'error' ? 'Error!' : 'Berhasil!', [i === 'error' ? 'html' : 'text']: m, ...(i === 'success' && {timer: 2000, showConfirmButton: false})});
+    const modal = (id, hide, delay = 0) => delay ? setTimeout(() => $(`#${id}`).modal(hide ? 'hide' : 'show'), delay) : $(`#${id}`).modal(hide ? 'hide' : 'show');
+    const reload = () => location.reload();
+    const errMsg = xhr => Object.values(xhr.responseJSON?.errors || {}).flat().join('<br>') || xhr.responseJSON?.message || 'Terjadi kesalahan';
+    
+    const ajax = {
+        post: (u, d, o = {}) => $.ajax({url: u, method: 'POST', data: {_token: CFG.csrf, ...d}, ...o}),
+        respond: (r, m, id) => r.error ? alert('error', r.message) : (id && modal(id, true), alert('success', r.message || m).then(reload))
+    };
+    
+    const approval = {
+        submit: (d, m) => ajax.post(url('/approval'), d).done(r => ajax.respond(r, m)).fail(x => alert('error', errMsg(x))),
+        approve: (s, v, a = {}) => approval.submit({status: s, [v]: 'disetujui', ...a}, 'Pengajuan berhasil divalidasi!'),
+        reject: (s, v, c) => c?.trim() ? approval.submit({status: s, [v]: 'ditolak', catatan_penolakan: c}, 'Pengajuan telah ditolak') : alert('error', 'Alasan penolakan wajib diisi')
+    };
+    
+    const file = {
+        validate: f => !f ? (alert('error', 'Pilih file terlebih dahulu'), false) : f.size > CFG.maxSize ? (alert('error', 'Ukuran file maksimal 2MB'), false) : true,
+        upload: (e, f, n, m, id) => {
+            const fd = new FormData();
+            fd.append(n, f);
+            fd.append('_token', CFG.csrf);
+            $.ajax({url: url(e), method: 'POST', data: fd, processData: false, contentType: false, headers: {'X-CSRF-TOKEN': CFG.csrf}})
+                .done(r => ajax.respond(r, m, id)).fail(x => alert('error', errMsg(x)));
+        }
+    };
+    
+    $(document).ready(() => {
+        $('.bs-datepicker').datepicker({format: 'yyyy-mm-dd', autoclose: true, todayHighlight: true, orientation: 'bottom auto'});
+        
+        // Finance SKI
+        $('#btnValidasiFinanceSKI').click(() => modal('modalValidasiFinanceSKI'));
+        $('#btnKonfirmasiSetujuFinanceSKI').click(() => (modal('modalValidasiFinanceSKI', true), approval.approve('Dokumen Tervalidasi', 'validasi_pengajuan', {tanggal_investasi: $('#tanggal_investasi_validasi').val()})));
+        $('#btnTolakFinanceSKI').click(() => (modal('modalValidasiFinanceSKI', true), modal('modalAlasanPenolakan', false, 300)));
+        $('#formAlasanPenolakan').submit(e => (e.preventDefault(), approval.reject('Ditolak Finance SKI', 'validasi_pengajuan', $('#alasan_penolakan').val())));
+        
+        // CEO
+        $('#btnValidasiCEO').click(() => modal('modalValidasiCEO'));
+        $('#btnKonfirmasiCEO').click(() => (modal('modalValidasiCEO', true), approval.approve('Disetujui CEO Finlog', 'persetujuan_ceo_finlog')));
+        $('#btnTolakCEO').click(() => (modal('modalValidasiCEO', true), modal('modalAlasanPenolakanCEO', false, 300)));
+        $('#formAlasanPenolakanCEO').submit(e => (e.preventDefault(), approval.reject('Ditolak CEO Finlog', 'persetujuan_ceo_finlog', $('#alasan_penolakan_ceo').val())));
+        
+        // Upload Bukti
+        $('#btnUploadBuktiTransfer').click(() => modal('modalUploadBuktiTransfer'));
+        $('#formUploadBuktiTransfer').submit(e => {
             e.preventDefault();
-            
-            const catatan = $('#alasan_penolakan').val();
-            
-            if (!catatan || catatan.trim() === '') {
-                alert('error', 'Alasan penolakan wajib diisi');
-                return;
-            }
-
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-finance-ski`,
-                method: 'POST',
-                data: {
-                    _token: CSRF,
-                    validasi_pengajuan: 'ditolak',
-                    catatan_penolakan: catatan
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        $('#modalAlasanPenolakan').modal('hide');
-                        alert('success', res.message || 'Pengajuan telah ditolak')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
-                    }
-                }
-            });
+            const f = $('#file_bukti_transfer')[0].files[0];
+            file.validate(f) && file.upload('/upload-bukti', f, 'file', 'Bukti transfer berhasil diupload!', 'modalUploadBuktiTransfer');
         });
-
-        // Step 3: Validasi CEO - Open Modal
-        $('#btnValidasiCEO').click(function() {
-            $('#modalValidasiCEO').modal('show');
-        });
-
-        // Step 3: Konfirmasi Setuju CEO
-        $('#btnKonfirmasiCEO').click(function() {
-            $('#modalValidasiCEO').modal('hide');
-            
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-ceo`,
-                method: 'POST',
-                data: {
-                    _token: CSRF,
-                    persetujuan_ceo_finlog: 'disetujui'
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        alert('success', res.message || 'Pengajuan berhasil disetujui CEO!')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
-                    }
-                }
-            });
-        });
-
-        // Step 3: Tolak CEO - Open Alasan Modal
-        $('#btnTolakCEO').click(function() {
-            $('#modalValidasiCEO').modal('hide');
-            setTimeout(() => $('#modalAlasanPenolakanCEO').modal('show'), 300);
-        });
-
-        // Step 3: Submit Alasan Penolakan CEO
-        $('#formAlasanPenolakanCEO').submit(function(e) {
+        
+        // Generate Kontrak
+        $('#btnGenerateKontrak').click(() => modal('modalGenerateKontrak'));
+        $('#formGenerateKontrak').submit(e => {
             e.preventDefault();
-            
-            const catatan = $('#alasan_penolakan_ceo').val();
-            
-            if (!catatan || catatan.trim() === '') {
-                alert('error', 'Alasan penolakan wajib diisi');
-                return;
-            }
-
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/validasi-ceo`,
-                method: 'POST',
-                data: {
-                    _token: CSRF,
-                    persetujuan_ceo_finlog: 'ditolak',
-                    catatan_penolakan: catatan
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        $('#modalAlasanPenolakanCEO').modal('hide');
-                        alert('success', res.message || 'Pengajuan telah ditolak')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Terjadi kesalahan');
-                    }
-                }
-            });
+            const n = $('#nomor_kontrak').val();
+            n ? ajax.post(url('/generate-kontrak'), {nomor_kontrak: n}).done(r => ajax.respond(r, 'Kontrak berhasil digenerate!', 'modalGenerateKontrak')).fail(x => alert('error', errMsg(x))) : alert('error', 'Nomor kontrak wajib diisi');
         });
-
-        // Step 5: Upload Bukti Transfer
-        $('#btnUploadBuktiTransfer').click(function() {
-            $('#modalUploadBuktiTransfer').modal('show');
-        });
-
-        $('#formUploadBuktiTransfer').submit(function(e) {
-            e.preventDefault();
-            
-            const file = $('#file_bukti_transfer')[0].files[0];
-            
-            if (!file) {
-                alert('error', 'Silakan pilih file terlebih dahulu');
-                return;
-            }
-
-            if (file.size > 2 * 1024 * 1024) {
-                alert('error', 'Ukuran file maksimal 2MB');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('upload_bukti_transfer', file);
-            formData.append('_token', CSRF);
-
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/upload-bukti`,
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: (res) => {
-                    if (!res.error) {
-                        $('#modalUploadBuktiTransfer').modal('hide');
-                        alert('success', res.message || 'Bukti transfer berhasil diupload!')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Gagal upload bukti transfer');
-                    }
-                }
-            });
-        });
-
-        // Step 6: Generate Kontrak
-        $('#btnGenerateKontrak').click(function() {
-            $('#modalGenerateKontrak').modal('show');
-        });
-
-        $('#formGenerateKontrak').submit(function(e) {
-            e.preventDefault();
-            
-            const nomorKontrak = $('#nomor_kontrak').val();
-            
-            if (!nomorKontrak) {
-                alert('error', 'Nomor kontrak wajib diisi');
-                return;
-            }
-
-            $.ajax({
-                url: `/sfinlog/pengajuan-investasi/${PENGAJUAN_ID}/generate-kontrak`,
-                method: 'POST',
-                data: {
-                    _token: CSRF,
-                    nomor_kontrak: nomorKontrak
-                },
-                success: (res) => {
-                    if (!res.error) {
-                        $('#modalGenerateKontrak').modal('hide');
-                        alert('success', res.message || 'Kontrak berhasil digenerate!')
-                            .then(() => window.location.reload());
-                    } else {
-                        alert('error', res.message);
-                    }
-                },
-                error: (xhr) => {
-                    const errors = xhr.responseJSON?.errors;
-                    if (errors) {
-                        const errorList = Object.values(errors).flat().join('<br>');
-                        alert('error', errorList);
-                    } else {
-                        alert('error', xhr.responseJSON?.message || 'Gagal generate kontrak');
-                    }
-                }
-            });
-        });
-
-        // Preview Bukti Transfer
-        window.previewBuktiTransfer = function(url) {
-            const fileExt = url.split('.').pop().toLowerCase();
-            
-            if (fileExt === 'pdf') {
-                $('#previewPdf').attr('src', url).removeClass('d-none');
-                $('#previewImage').addClass('d-none');
-            } else {
-                $('#previewImage').attr('src', url).removeClass('d-none');
-                $('#previewPdf').addClass('d-none');
-            }
-            
-            $('#downloadBukti').attr('href', url);
-            $('#modalPreviewBukti').modal('show');
+        
+        // Preview
+        window.previewBuktiTransfer = u => {
+            const p = u.split('.').pop().toLowerCase() === 'pdf';
+            $('#previewPdf').attr('src', p ? u : '').toggleClass('d-none', !p);
+            $('#previewImage').attr('src', p ? '' : u).toggleClass('d-none', p);
+            $('#downloadBukti').attr('href', u);
+            modal('modalPreviewBukti');
         };
     });
+})();
 </script>
 @endpush
 </div>
