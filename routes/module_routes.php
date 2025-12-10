@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 
 // Dashboard
 Route::get('dashboard', Dashboard::class)->name('dashboard.index');
+Route::get('dashboard/pembiayaan', Dashboard::class)->name('dashboard.pembiayaan');
+Route::get('dashboard/investasi-deposito', Dashboard::class)->name('dashboard.investasi-deposito');
 
 // Peminjaman Routes
 Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
