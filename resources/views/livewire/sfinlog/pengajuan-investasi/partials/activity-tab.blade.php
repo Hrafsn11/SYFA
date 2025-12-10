@@ -113,6 +113,12 @@
                                 Lihat Bukti
                             </button>
                         @endif
+                        @if($history->status == 'Selesai' && $pengajuan->nomor_kontrak)
+                            <a href="{{ route('sfinlog.pengajuan-investasi.preview-kontrak', $pengajuan->id_pengajuan_investasi_finlog) }}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="ti ti-file-text me-1"></i>
+                                Lihat Kontrak
+                            </a>
+                        @endif
                     </div>
                 </div>
             </div>

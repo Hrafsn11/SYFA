@@ -79,6 +79,7 @@
                                             <span class="d-none d-sm-inline">Detail Investasi</span>
                                         </button>
                                     </li>
+                                    @if($pengajuan->status_approval !== 'Selesai')
                                     <li class="nav-item">
                                         <button type="button" class="nav-link" data-bs-toggle="tab"
                                             data-bs-target="#detail-kontrak" role="tab" aria-selected="false">
@@ -86,6 +87,7 @@
                                             <span class="d-none d-sm-inline">Detail Kontrak</span>
                                         </button>
                                     </li>
+                                    @endif
                                     <li class="nav-item">
                                         <button type="button" class="nav-link" data-bs-toggle="tab"
                                             data-bs-target="#activity" role="tab" aria-selected="false">
@@ -105,9 +107,11 @@
                                 </div>
 
                                 <!-- Detail Kontrak Tab -->
+                                @if($pengajuan->status_approval !== 'Selesai')
                                 <div class="tab-pane fade" id="detail-kontrak" role="tabpanel">
                                     @include('livewire.sfinlog.pengajuan-investasi.partials.kontrak-tab')
                                 </div>
+                                @endif
 
                                 <!-- Activity Tab -->
                                 <div class="tab-pane fade" id="activity" role="tabpanel">

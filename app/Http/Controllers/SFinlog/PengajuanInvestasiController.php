@@ -441,6 +441,38 @@ class PengajuanInvestasiController extends Controller
     }
 
     /**
+     * Preview Kontrak
+     */
+    public function previewKontrak(Request $request, $id)
+    {
+        try {
+            $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
+            
+            $nomorKontrak = $pengajuan->nomor_kontrak ?? $request->input('nomor_kontrak', 'DRAFT-' . date('Ymd-His'));
+            
+            $tanggalKontrak = $pengajuan->tanggal_kontrak ?? now()->toDateString();
+            
+            $data = [
+                'nomor_kontrak' => $nomorKontrak,
+                'tanggal_kontrak' => $tanggalKontrak,
+                'nama_investor' => $pengajuan->nama_investor,
+                'nama_perusahaan' => $pengajuan->nama_investor,
+                'project' => $pengajuan->project->nama_project ?? '-',
+                'nominal_investasi' => $pengajuan->nominal_investasi,
+                'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
+                'lama_investasi' => $pengajuan->lama_investasi,
+                'tanggal_investasi' => $pengajuan->tanggal_investasi,
+                'tanggal_berakhir' => $pengajuan->tanggal_berakhir_investasi,
+                'alamat' => $pengajuan->investor->alamat ?? '-',
+            ];
+            
+            return view('livewire.sfinlog.pengajuan-investasi.preview-kontrak', compact('data', 'pengajuan'));
+        } catch (\Exception $e) {
+            return Response::errorCatch($e, 'Gagal memuat preview kontrak');
+        }
+    }
+
+    /**
      * Generate Kontrak (Step 5)
      */
     public function generateKontrak(Request $request, $id)
@@ -465,6 +497,7 @@ class PengajuanInvestasiController extends Controller
             // Update with kontrak
             $pengajuan->update([
                 'nomor_kontrak' => $request->nomor_kontrak,
+                'tanggal_kontrak' => now()->toDateString(),
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'updated_by' => Auth::id(),
