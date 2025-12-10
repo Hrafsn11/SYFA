@@ -92,6 +92,16 @@ class RolePermissionSeeder extends Seeder
             'investasi.validasi_bagi_hasil',
             'investasi.validasi_ceo_ski',
             'investasi.generate_kontrak',
+            // Pengajuan Investasi Finlog Management
+            'pengajuan_investasi_finlog.view',
+            'pengajuan_investasi_finlog.add',
+            'pengajuan_investasi_finlog.edit',
+            'pengajuan_investasi_finlog.delete',
+            'pengajuan_investasi_finlog.submit',
+            'pengajuan_investasi_finlog.validasi_finance_ski',
+            'pengajuan_investasi_finlog.validasi_ceo_finlog',
+            'pengajuan_investasi_finlog.upload_bukti',
+            'pengajuan_investasi_finlog.generate_kontrak',
             // Penyaluran Deposito
             'penyaluran_deposito.view',
             'penyaluran_deposito.add',
@@ -164,6 +174,10 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_restrukturisasi.validasi_dokumen',
             'investasi.validasi_bagi_hasil',
             'investasi.generate_kontrak',
+            'pengajuan_investasi_finlog.view',
+            'pengajuan_investasi_finlog.validasi_finance_ski',
+            'pengajuan_investasi_finlog.upload_bukti',
+            'pengajuan_investasi_finlog.generate_kontrak',
             'penyaluran_deposito.edit',
         ]);
 
@@ -184,6 +198,13 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.validasi_direktur',
 
             'pengajuan_restrukturisasi.persetujuan_direktur',
+        ]);
+
+        $ceoFinlogRole = Role::firstOrCreate(['name' => 'CEO S-Finlog', 'restriction' => 0]);
+        $ceoFinlogRole->permissions()->detach();
+        $ceoFinlogRole->syncPermissions([
+            'pengajuan_investasi_finlog.view',
+            'pengajuan_investasi_finlog.validasi_ceo_finlog',
         ]);
 
 
@@ -247,6 +268,16 @@ class RolePermissionSeeder extends Seeder
         ]);
         if (! $direktur->hasRole('Direktur SKI')) {
             $direktur->assignRole('Direktur SKI');
+        }
+
+        $ceoFinlog = User::firstOrCreate([
+            'email' => 'ceofinlog@example.com',
+        ], [
+            'name' => 'CEO S-Finlog',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $ceoFinlog->hasRole('CEO S-Finlog')) {
+            $ceoFinlog->assignRole('CEO S-Finlog');
         }
 
         // Restore the original cache driver

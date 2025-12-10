@@ -3,6 +3,7 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Pengajuan Investasi</h4>
+                @can('pengajuan_investasi_finlog.add')
                 @if($currentInvestor)
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
                     id="btnTambahPengajuanInvestasi" data-bs-toggle="modal" data-bs-target="#modalPengajuanInvestasi">
@@ -10,6 +11,7 @@
                     Pengajuan Investasi
                 </button>
                 @endif
+                @endcan
             </div>
         </div>
     </div>

@@ -7,40 +7,41 @@
     <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2 mt-3">
         <h5 class="mb-3 mb-md-4">Detail Investasi</h5>
         <div class="d-flex gap-2">
+            @can('pengajuan_investasi_finlog.submit')
             @if($currentStep == 1 && $status == 'Draft')
                 <button type="button" class="btn btn-success" id="btnSubmitPengajuan">
                     <i class="fas fa-paper-plane me-2"></i>
                     Submit Pengajuan
                 </button>
             @endif
+            @endcan
 
+            @can('pengajuan_investasi_finlog.validasi_finance_ski')
             @if($currentStep == 2 && str_contains($status, 'Menunggu Validasi Finance SKI'))
                 <button type="button" class="btn btn-primary" id="btnValidasiFinanceSKI">
                     <i class="fas fa-check me-2"></i>
                     Validasi Finance SKI
                 </button>
             @endif
+            @endcan
 
+            @can('pengajuan_investasi_finlog.validasi_ceo_finlog')
             @if($currentStep == 3 && str_contains($status, 'Menunggu Persetujuan CEO Finlog'))
                 <button type="button" class="btn btn-primary" id="btnValidasiCEO">
                     <i class="ti ti-check me-2"></i>
                     Validasi CEO Finlog
                 </button>
             @endif
+            @endcan
 
+            @can('pengajuan_investasi_finlog.upload_bukti')
             @if($currentStep == 4 && str_contains($status, 'Menunggu Upload Bukti Transfer'))
                 <button type="button" class="btn btn-success" id="btnUploadBuktiTransfer">
                     <i class="ti ti-upload me-2"></i>
                     Upload Bukti Transfer
                 </button>
             @endif
-
-            @if($currentStep == 5 && str_contains($status, 'Menunggu Generate Kontrak'))
-                <button type="button" class="btn btn-primary" id="btnGenerateKontrak">
-                    <i class="ti ti-file-check me-2"></i>
-                    Generate Kontrak
-                </button>
-            @endif
+            @endcan
 
             @if(str_contains($status, 'Ditolak'))
                 <span class="badge bg-danger fs-6">
@@ -48,13 +49,7 @@
                     {{ $status }}
                 </span>
             @endif
-
-            @if(str_contains($status, 'Selesai'))
-                <span class="badge bg-success fs-6">
-                    <i class="ti ti-check me-1"></i>
-                    Proses Selesai
-                </span>
-            @endif
+            
         </div>
     </div>
 
