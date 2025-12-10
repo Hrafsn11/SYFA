@@ -28,21 +28,14 @@
                 </button>
             @endif
 
-            @if($currentStep == 4 && str_contains($status, 'Menunggu Informasi Rekening'))
-                <button type="button" class="btn btn-primary" id="btnKirimInformasiRekening">
-                    <i class="ti ti-send me-2"></i>
-                    Kirim Informasi Rekening
-                </button>
-            @endif
-
-            @if($currentStep == 5 && str_contains($status, 'Menunggu Upload Bukti Transfer'))
+            @if($currentStep == 4 && str_contains($status, 'Menunggu Upload Bukti Transfer'))
                 <button type="button" class="btn btn-success" id="btnUploadBuktiTransfer">
                     <i class="ti ti-upload me-2"></i>
                     Upload Bukti Transfer
                 </button>
             @endif
 
-            @if($currentStep == 6 && str_contains($status, 'Menunggu Generate Kontrak'))
+            @if($currentStep == 5 && str_contains($status, 'Menunggu Generate Kontrak'))
                 <button type="button" class="btn btn-primary" id="btnGenerateKontrak">
                     <i class="ti ti-file-check me-2"></i>
                     Generate Kontrak
