@@ -10,6 +10,7 @@ class ArPerformanceIndex extends Component
 {
     // Filters
     public $tahun;
+    public $bulan;
 
     // Inject Service
     protected $arPerformanceService;
@@ -22,12 +23,13 @@ class ArPerformanceIndex extends Component
     public function mount()
     {
         $this->tahun = date('Y');
+        $this->bulan = null; // Default: semua bulan
     }
 
     public function render()
     {
         // Always fetch fresh data (no cache)
-        $arData = $this->arPerformanceService->getArPerformanceData($this->tahun, false);
+        $arData = $this->arPerformanceService->getArPerformanceData($this->tahun, $this->bulan, false);
 
         return view('livewire.ar-performance.index', [
             'arData' => $arData,
@@ -42,16 +44,22 @@ class ArPerformanceIndex extends Component
         $this->dispatch('filter-changed');
     }
 
-    #[On('refresh-data')]
-    public function refreshData()
+    public function updatedBulan()
     {
-        // Clear cache and refresh data
-        $this->arPerformanceService->clearCache($this->tahun);
-        
-        // Dispatch event for success notification
-        $this->dispatch('show-alert', [
-            'type' => 'success',
-            'message' => 'Data berhasil di-refresh!'
-        ]);
+        // Auto-refresh ketika bulan berubah
+        $this->dispatch('filter-changed');
     }
+
+    // #[On('refresh-data')]
+    // public function refreshData()
+    // {
+    //     // Clear cache and refresh data
+    //     $this->arPerformanceService->clearCache($this->tahun);
+        
+    //     // Dispatch event for success notification
+    //     $this->dispatch('show-alert', [
+    //         'type' => 'success',
+    //         'message' => 'Data berhasil di-refresh!'
+    //     ]);
+    // }
 }

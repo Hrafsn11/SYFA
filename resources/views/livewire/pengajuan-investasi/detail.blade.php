@@ -445,6 +445,12 @@
                 </div>
                 <form id="formUploadBuktiTransfer">
                     <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <h6 class="alert-heading mb-2"><i class="ti ti-info-circle me-2"></i>Informasi Rekening Transfer</h6>
+                            <p class="mb-1"><strong>Nama:</strong> PT. Synnovac Kapital Indonesia</p>
+                            <p class="mb-1"><strong>No. Rekening:</strong> 1240010052851</p>
+                            <p class="mb-0"><strong>Bank:</strong> Bank Mandiri</p>
+                        </div>
                         <div class="mb-3">
                             <label for="fileBuktiTransfer" class="form-label">File Bukti Transfer <span
                                     class="text-danger">*</span></label>

@@ -450,4 +450,57 @@ class PengajuanInvestasiController extends Controller
             return Response::errorCatch($e, 'Terjadi kesalahan saat generate kontrak');
         }
     }
+
+    /**
+     * Download Certificate
+     */
+    public function downloadSertifikat($id)
+    {
+        try {
+            $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
+            
+            // Check if status is Selesai
+            if ($pengajuan->status !== 'Selesai') {
+                return redirect()->back()->with('error', 'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai');
+            }
+
+            // Generate Nomor Deposito
+            $year = date('Y');
+            $countThisYear = PengajuanInvestasi::whereYear('created_at', $year)
+                ->where('status', 'Selesai')
+                ->where('id_pengajuan_investasi', '<=', $pengajuan->id_pengajuan_investasi)
+                ->count();
+            
+            $nomorDeposito = 'DC' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
+
+            // Get description based on deposito type
+            $deskripsi = $pengajuan->deposito === 'Khusus' 
+                ? 'INVESTASI DEPOSITO KHUSUS' 
+                : 'INVESTASI DEPOSITO REGULER';
+
+            // Calculate tanggal berakhir (tanggal_investasi + lama_investasi bulan)
+            $tanggalInvestasiCarbon = \Carbon\Carbon::parse($pengajuan->tanggal_investasi);
+            $tanggalBerakhirCarbon = $tanggalInvestasiCarbon->copy()->addMonths($pengajuan->lama_investasi);
+
+            // Format dates
+            $tanggalInvestasi = $tanggalInvestasiCarbon->translatedFormat('d F Y');
+            $tanggalBerakhir = $tanggalBerakhirCarbon->translatedFormat('d F Y');
+            $jangkaWaktu = $tanggalInvestasi . ' - ' . $tanggalBerakhir;
+
+            $data = [
+                'nama_deposan' => $pengajuan->nama_investor,
+                'nomor_deposito' => $nomorDeposito,
+                'deskripsi' => $deskripsi,
+                'nilai_deposito' => 'Rp ' . number_format($pengajuan->jumlah_investasi, 0, ',', '.'),
+                'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
+                'jangka_waktu' => $jangkaWaktu,
+                'bagi_hasil' => $pengajuan->bagi_hasil_pertahun . ' % P.A NET',
+                'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->jumlah_investasi, 2, ',', '.'),
+            ];
+
+            return view('livewire.pengajuan-investasi.sertifikat', compact('data'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menggenerate sertifikat: ' . $e->getMessage());
+        }
+    }
 }

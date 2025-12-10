@@ -9,6 +9,7 @@ use App\Http\Controllers\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\PenyaluranDepositoController;
 use App\Livewire\ArPerbulan;
 use App\Livewire\ConfigMatrixScore;
+use App\Livewire\HomeServices;
 use App\Livewire\PermissionManagement;
 use App\Livewire\RoleManagement;
 use App\Livewire\UserManagement;
@@ -29,15 +30,33 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Authenticated routes with Jetstream and Permission handling
+// Halaman landing setelah login (tanpa middleware checkPermission)
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    'checkPermission', // Add permission handling middleware
+])->get('/home-services', HomeServices::class)->name('home.services');
+
+// Authenticated routes dengan Jetstream dan Permission handling
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+    'checkPermission', // Permission handling middleware
+    'setActiveModule', // Set active module based on route
 ])->group(function () {
 
     require __DIR__.'/livewire_route.php';
+
+    // Module Routes: SFinance
+    Route::prefix('sfinance')->name('sfinance.')->group(function () {
+        require __DIR__.'/module_routes.php';
+    });
+
+    // Module Routes: SFinlog  
+    Route::prefix('sfinlog')->name('sfinlog.')->group(function () {
+        require __DIR__.'/sfinlog_routes.php';
+    });
 
     // User Management Routes - Example with permission middleware
     Route::get('users', UserManagement::class)->name('users.index');
@@ -113,6 +132,7 @@ Route::middleware([
     
     // AJAX endpoints (still needed for modal)
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
+    Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
     Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
 
@@ -163,6 +183,7 @@ Route::middleware([
         Route::post('{id}/upload-bukti', [\App\Http\Controllers\PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
         Route::get('{id}/preview-kontrak', [\App\Http\Controllers\PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
         Route::post('{id}/generate-kontrak', [\App\Http\Controllers\PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
+        Route::get('{id}/download-sertifikat', [\App\Http\Controllers\PengajuanInvestasiController::class, 'downloadSertifikat'])->name('download-sertifikat');
     });
 
     // Kertas Kerja Investor SFinance 
@@ -187,7 +208,7 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'destroy'])->name('destroy');
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('{id}/delete-signature', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'deleteSignature'])->name('delete-signature');
-        Route::get('{id}/history-kol', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'historyKol'])->name('history-kol');
+        Route::get('{id}/history-kol', \App\Livewire\KolHistoryIndex::class)->name('history-kol');
     });
 
     // Master KOL
@@ -215,6 +236,14 @@ Route::middleware([
         Route::put('{id}', [\App\Http\Controllers\Master\MasterKaryawanSkiController::class, 'update'])->name('update');
         Route::delete('{id}', [\App\Http\Controllers\Master\MasterKaryawanSkiController::class, 'destroy'])->name('destroy');
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\MasterKaryawanSkiController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // Master Cells Project
+    Route::prefix('master-data/cells-project')->name('master-data.cells-project.')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Master\CellsProjectController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [\App\Http\Controllers\Master\CellsProjectController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'destroy'])->name('destroy');
     });
 });
 

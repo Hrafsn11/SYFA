@@ -8,11 +8,13 @@ class ArPerformanceTable extends Component
 {
     public $arData;
     public $tahun;
+    public $bulan;
 
-    public function mount($arData, $tahun)
+    public function mount($arData, $tahun, $bulan = null)
     {
         $this->arData = $arData;
         $this->tahun = $tahun;
+        $this->bulan = $bulan;
     }
 
     public function render()

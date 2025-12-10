@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Response;
 use Illuminate\Support\Facades\DB;
 use App\Models\PenyaluranDeposito;
+use App\Models\PengajuanInvestasi;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\PenyaluranDepositoRequest;
 
@@ -24,6 +25,10 @@ class PenyaluranDepositoController extends Controller
 
             $penyaluran = PenyaluranDeposito::create($validated);
             $penyaluran->load('pengajuanInvestasi', 'debitur');
+
+            $pengajuan = PengajuanInvestasi::findOrFail($validated['id_pengajuan_investasi']);
+            $pengajuan->total_disalurkan += $validated['nominal_yang_disalurkan'];
+            $pengajuan->save();
 
             DB::commit();
 
@@ -78,16 +83,25 @@ class PenyaluranDepositoController extends Controller
     public function destroy($id)
     {
         try {
+            DB::beginTransaction();
+
             $penyaluran = PenyaluranDeposito::where('id_penyaluran_deposito', $id)->firstOrFail();
             
+            $pengajuan = PengajuanInvestasi::findOrFail($penyaluran->id_pengajuan_investasi);
+            $pengajuan->total_disalurkan -= $penyaluran->nominal_yang_disalurkan;
+            $pengajuan->save();
+
             if ($penyaluran->bukti_pengembalian && Storage::disk('public')->exists($penyaluran->bukti_pengembalian)) {
                 Storage::disk('public')->delete($penyaluran->bukti_pengembalian);
             }
             
             $penyaluran->delete();
 
+            DB::commit();
+
             return Response::success(null, 'Data berhasil dihapus');
         } catch (\Exception $e) {
+            DB::rollBack();
             return Response::errorCatch($e);
         }
     }
@@ -95,7 +109,11 @@ class PenyaluranDepositoController extends Controller
     public function uploadBukti($id, PenyaluranDepositoRequest $request)
     {
         try {
+            DB::beginTransaction();
+
             $penyaluran = PenyaluranDeposito::where('id_penyaluran_deposito', $id)->firstOrFail();
+            
+            $isFirstUpload = empty($penyaluran->bukti_pengembalian);
             
             if ($request->hasFile('bukti_pengembalian')) {
                 // Delete old file if exists
@@ -106,10 +124,20 @@ class PenyaluranDepositoController extends Controller
                 // Store new file
                 $file = Storage::disk('public')->put('bukti_pengembalian', $request->file('bukti_pengembalian'));
                 $penyaluran->update(['bukti_pengembalian' => $file]);
+
+             
+                if ($isFirstUpload) {
+                    $pengajuan = PengajuanInvestasi::findOrFail($penyaluran->id_pengajuan_investasi);
+                    $pengajuan->total_kembali_dari_penyaluran += $penyaluran->nominal_yang_disalurkan;
+                    $pengajuan->save();
+                }
             }
+
+            DB::commit();
 
             return Response::success(null, 'Bukti pengembalian berhasil diupload');
         } catch (\Exception $e) {
+            DB::rollBack();
             return Response::errorCatch($e);
         }
     }
