@@ -53,7 +53,7 @@ class CellsProjectTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return CellsProject::query()->select('id_cells_project', 'nama_project', 'created_at');
+        return CellsProject::query()->select('id_cells_project', 'nama_project', 'nama_pic', 'created_at');
     }
 
     public function columns(): array
@@ -70,6 +70,10 @@ class CellsProjectTable extends DataTableComponent
                 ->excludeFromColumnSelect(),
             
             Column::make("Nama Project", "nama_project")
+                ->sortable()
+                ->searchable(),
+
+            Column::make("Nama PIC", "nama_pic")
                 ->sortable()
                 ->searchable(),
             

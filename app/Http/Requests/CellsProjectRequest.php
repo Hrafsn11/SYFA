@@ -19,6 +19,12 @@ class CellsProjectRequest extends FormRequest
                 'string',
                 'max:255',
                 'unique:cells_projects,nama_project'
+            ],
+            'nama_pic' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:cells_projects,nama_pic'
             ]
         ];
 
@@ -28,6 +34,12 @@ class CellsProjectRequest extends FormRequest
                 'string',
                 'max:255',
                 'unique:cells_projects,nama_project,' . $this->id_cells_project . ',id_cells_project'
+            ];
+            $validate['nama_pic'] = [
+                'required',
+                'string',
+                'max:255',
+                'unique:cells_projects,nama_pic,' . $this->id_cells_project . ',id_cells_project'
             ];
         }
 
@@ -41,6 +53,10 @@ class CellsProjectRequest extends FormRequest
             'nama_project.string' => 'Nama project harus berupa text',
             'nama_project.max' => 'Nama project maksimal 255 karakter',
             'nama_project.unique' => 'Nama project sudah terdaftar',
+            'nama_pic.required' => 'Nama PIC harus diisi',
+            'nama_pic.string' => 'Nama PIC harus berupa text',
+            'nama_pic.max' => 'Nama PIC maksimal 255 karakter',
+            'nama_pic.unique' => 'Nama PIC sudah terdaftar',
         ];
     }
 }

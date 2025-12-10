@@ -43,8 +43,14 @@
             </li>
 
             @can('peminjaman_dana.view')
-                <li class="menu-item {{ RouteHelper::routeIs('peminjaman*') ? 'active' : '' }}">
-                    <a href="{{ RouteHelper::route('peminjaman') }}" class="menu-link">
+                <li class="menu-item {{ RouteHelper::is('*peminjaman*') ? 'active' : '' }}">
+                    @if($isSFinlog)
+                        <a href="{{ route('sfinlog.peminjaman.index') }}" class="menu-link">
+                    @elseif($isSFinance)
+                        <a href="{{ route('sfinance.peminjaman') }}" class="menu-link">
+                    @else
+                        <a href="{{ route('peminjaman') }}" class="menu-link">
+                    @endif
                         <i class="menu-icon tf-icons ti ti-briefcase"></i>
                         <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
                     </a>

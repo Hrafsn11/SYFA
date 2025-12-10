@@ -3,134 +3,210 @@
 namespace App\Http\Controllers\SFinlog;
 
 use App\Http\Controllers\Controller;
-use App\Models\PengajuanPeminjaman;
+use App\Helpers\Response;
+use App\Models\PeminjamanFinlog;
+use App\Http\Requests\SFinlog\PeminjamanRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
 
 class PeminjamanController extends Controller
 {
     /**
-     * Display a listing of peminjaman for SFinlog module
-     */
-    public function index()
-    {
-        // TODO: Implementasi logika query khusus SFinlog
-        // Saat ini menggunakan query dasar, bisa ditambahkan filter khusus SFinlog nanti
-        $peminjamanRecords = PengajuanPeminjaman::with(['debitur.kol'])->get();
-
-        $peminjaman_data = $peminjamanRecords->map(function($r) {
-            return [
-                'id' => $r->id_pengajuan_peminjaman,
-                'type' => $r->jenis_pembiayaan ?? 'peminjaman',
-                'nomor_peminjaman' => $r->nomor_peminjaman ?? null,
-                'nama_perusahaan' => $r->debitur?->nama_debitur ?? '',
-                'lampiran_sid' => $r->lampiran_sid,
-                'nilai_kol' => $r->debitur?->kol->kol ?? '',
-                'status' => $r->status ?? 'draft',
-            ];
-        })->toArray();
-
-        return view('livewire.sfinlog.peminjaman.index', compact('peminjaman_data'));
-    }
-
-    /**
-     * Show the form for creating a new peminjaman for SFinlog
-     */
-    public function create()
-    {
-        // TODO: Implementasi logika form create khusus SFinlog
-        return view('livewire.sfinlog.peminjaman.create');
-    }
-
-    /**
-     * Display the specified peminjaman detail for SFinlog
-     */
-    public function show(Request $request, $id)
-    {
-        // TODO: Implementasi logika detail khusus SFinlog
-        $header = PengajuanPeminjaman::with(['debitur.kol', 'instansi', 'buktiPeminjaman'])->find($id);
-        
-        if (!$header) abort(404);
-        
-        // TODO: Implementasi struktur data khusus SFinlog
-        $peminjaman = [
-            'id' => $header->id_pengajuan_peminjaman,
-            'nomor_peminjaman' => $header->nomor_peminjaman,
-            // ... data lainnya akan ditambahkan sesuai kebutuhan SFinlog
-        ];
-
-        return view('livewire.sfinlog.peminjaman.detail', compact('peminjaman'));
-    }
-
-    /**
-     * Show the form for editing the specified peminjaman for SFinlog
-     */
-    public function edit($id)
-    {
-        // TODO: Implementasi logika form edit khusus SFinlog
-        return view('livewire.sfinlog.peminjaman.edit', compact('id'));
-    }
-
-    /**
      * Store a newly created peminjaman for SFinlog
      */
-    public function store(Request $request)
+    public function store(PeminjamanRequest $request)
     {
-        // TODO: Implementasi logika store khusus SFinlog
-        return redirect()->route('sfinlog.peminjaman.index');
+        try {
+            DB::beginTransaction();
+            
+            $data = $request->validated();
+            
+            // Handle file uploads
+            // Files from Livewire are already stored as path strings in setterFormData()
+            // Files from direct form upload will be handled here
+            $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
+                          'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
+            
+            foreach ($fileFields as $field) {
+                // Check if it's a file object (from direct form upload)
+                if ($request->hasFile($field)) {
+                    $file = $request->file($field);
+                    $fileName = time() . '_' . $field . '_' . $file->getClientOriginalName();
+                    $data[$field] = $file->storeAs('peminjaman_finlog', $fileName, 'public');
+                }
+                // If it's already a string path from Livewire, keep it as is
+                // The validation already passed, so it's valid
+            }
+            
+            // Generate nomor peminjaman
+            $lastPeminjaman = PeminjamanFinlog::whereYear('created_at', date('Y'))
+                                             ->whereMonth('created_at', date('m'))
+                                             ->count();
+            $data['nomor_peminjaman'] = 'PFL/' . date('Ym') . '/' . str_pad($lastPeminjaman + 1, 4, '0', STR_PAD_LEFT);
+            
+            $peminjaman = PeminjamanFinlog::create($data);
+            
+            DB::commit();
+            
+            return Response::success($peminjaman, 'Pengajuan peminjaman berhasil dibuat!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::error(null, 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
      * Update the specified peminjaman for SFinlog
      */
-    public function update(Request $request, $id)
+    public function update(PeminjamanRequest $request, $id)
     {
-        // TODO: Implementasi logika update khusus SFinlog
-        return redirect()->route('sfinlog.peminjaman.show', $id);
+        try {
+            DB::beginTransaction();
+            
+            $peminjaman = PeminjamanFinlog::findOrFail($id);
+            
+            if ($peminjaman->status !== 'Draft') {
+                return Response::error('Peminjaman tidak dapat diubah setelah disubmit');
+            }
+            
+            $data = $request->validated();
+            
+            // Handle file uploads
+            $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
+                          'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
+            
+            foreach ($fileFields as $field) {
+                if ($request->hasFile($field)) {
+                    // Delete old file if exists
+                    if ($peminjaman->{$field} && \Storage::disk('public')->exists($peminjaman->{$field})) {
+                        \Storage::disk('public')->delete($peminjaman->{$field});
+                    }
+                    
+                    $file = $request->file($field);
+                    $fileName = time() . '_' . $field . '_' . $file->getClientOriginalName();
+                    $data[$field] = $file->storeAs('peminjaman_finlog', $fileName, 'public');
+                }
+            }
+            
+            $peminjaman->update($data);
+            
+            DB::commit();
+            
+            return Response::success($peminjaman, 'Peminjaman berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::error(null, 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Preview kontrak for SFinlog
+     * Remove the specified resource from storage.
      */
-    public function previewKontrak(Request $request, $id)
+    public function destroy($id)
     {
-        // TODO: Implementasi logika preview kontrak khusus SFinlog
-        return view('livewire.sfinlog.peminjaman.preview-kontrak', compact('id'));
+        try {
+            DB::beginTransaction();
+
+            $peminjaman = PeminjamanFinlog::findOrFail($id);
+            
+            if ($peminjaman->status !== 'Draft') {
+                return Response::error('Peminjaman hanya dapat dihapus jika masih berstatus Draft');
+            }
+
+            // Delete all uploaded files
+            $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
+                          'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
+            
+            foreach ($fileFields as $field) {
+                if ($peminjaman->{$field}) {
+                    \Storage::disk('public')->delete($peminjaman->{$field});
+                }
+            }
+
+            $peminjaman->delete();
+
+            DB::commit();
+
+            return Response::success(null, 'Peminjaman berhasil dihapus!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::error(null, 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Download kontrak for SFinlog
+     * Update NPA status for current user's debitur
      */
-    public function downloadKontrak(Request $request, $id)
+    public function updateNpaStatus(Request $request)
     {
-        // TODO: Implementasi logika download kontrak khusus SFinlog
-        return response()->json(['message' => 'Download kontrak untuk SFinlog']);
+        try {
+            $debitur = auth()->user()->debitur;
+            
+            if (!$debitur) {
+                return Response::error('Data debitur tidak ditemukan');
+            }
+            
+            $debitur->update(['npa' => true]);
+            
+            return Response::success($debitur, 'Status NPA berhasil diperbarui');
+        } catch (\Exception $e) {
+            return Response::error(null, 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Approval peminjaman for SFinlog
+     * Get data for DataTables
      */
-    public function approval(Request $request, $id)
+    public function getData(Request $request)
     {
-        // TODO: Implementasi logika approval khusus SFinlog
-        return redirect()->back();
-    }
-
-    /**
-     * Get history detail for SFinlog
-     */
-    public function getHistoryDetail($historyId)
-    {
-        // TODO: Implementasi logika history detail khusus SFinlog
-        return response()->json(['data' => []]);
-    }
-
-    /**
-     * Toggle active status for SFinlog
-     */
-    public function toggleActive($id)
-    {
-        // TODO: Implementasi logika toggle active khusus SFinlog
-        return redirect()->back();
+        if ($request->ajax()) {
+            $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->select('peminjaman_finlog.*');
+            
+            return DataTables::of($peminjaman)
+                ->addIndexColumn()
+                ->editColumn('nama_project', function($row) {
+                    return $row->nama_project ?? '-';
+                })
+                ->editColumn('harapan_tanggal_pencairan', function($row) {
+                    return $row->harapan_tanggal_pencairan ? $row->harapan_tanggal_pencairan->format('d/m/Y') : '-';
+                })
+                ->editColumn('durasi_project', function($row) {
+                    return $row->durasi_project . ' bulan';
+                })
+                ->editColumn('nilai_pinjaman', function($row) {
+                    return 'Rp ' . number_format($row->nilai_pinjaman, 0, ',', '.');
+                })
+                ->editColumn('presentase_bagi_hasil', function($row) {
+                    return $row->presentase_bagi_hasil . '%';
+                })
+                ->editColumn('nilai_bagi_hasil', function($row) {
+                    return 'Rp ' . number_format($row->nilai_bagi_hasil, 0, ',', '.');
+                })
+                ->editColumn('status', function($row) {
+                    $badges = [
+                        'Draft' => 'secondary',
+                        'Menunggu Persetujuan' => 'warning',
+                        'Disetujui' => 'success',
+                        'Ditolak' => 'danger',
+                        'Dicairkan' => 'info',
+                        'Selesai' => 'primary'
+                    ];
+                    $badge = $badges[$row->status] ?? 'secondary';
+                    return '<span class="badge bg-'.$badge.'">'.$row->status.'</span>';
+                })
+                ->addColumn('action', function($row) {
+                    $btn = '<div class="btn-group" role="group">';
+                    $btn .= '<button type="button" class="btn btn-sm btn-info" onclick="viewDetail(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-eye"></i></button>';
+                    $btn .= '<button type="button" class="btn btn-sm btn-warning" onclick="editPeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-edit"></i></button>';
+                    $btn .= '<button type="button" class="btn btn-sm btn-danger" onclick="deletePeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-trash"></i></button>';
+                    $btn .= '</div>';
+                    return $btn;
+                })
+                ->rawColumns(['status', 'action'])
+                ->make(true);
+        }
     }
 }
 

@@ -244,6 +244,8 @@ Route::middleware([
         Route::put('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'update'])->name('update');
         Route::delete('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'destroy'])->name('destroy');
     });
+
+    
 });
 
 require __DIR__.'/auth.php';

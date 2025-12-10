@@ -23,18 +23,14 @@ use Illuminate\Support\Facades\Route;
 // Dashboard
 Route::get('dashboard', Dashboard::class)->name('dashboard.index');
 
-// Peminjaman Routes
-Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
-Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
-Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
-Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update');
-Route::post('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
-Route::post('peminjaman/{id}/download-kontrak', [PeminjamanController::class, 'downloadKontrak'])->name('peminjaman.download-kontrak');
-Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
-Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
-Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
-Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
-Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
+// Peminjaman Routes - Controller actions only (index & create moved to livewire_route.php)
+Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+    Route::post('/', [PeminjamanController::class, 'store'])->name('store');
+    Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
+    Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
+    Route::post('update-npa-status', [PeminjamanController::class, 'updateNpaStatus'])->name('update-npa-status');
+    Route::get('data', [PeminjamanController::class, 'getData'])->name('data');
+});
 
 // AR Perbulan
 Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
