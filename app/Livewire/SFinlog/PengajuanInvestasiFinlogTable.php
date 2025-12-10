@@ -87,6 +87,13 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                     return '<div class="text-center">'.($value ? \Carbon\Carbon::parse($value)->format('d M Y') : '-').'</div>';
                 })
                 ->html(),
+            Column::make('Tanggal Berakhir', 'tanggal_berakhir_investasi')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value) {
+                    return '<div class="text-center">'.($value ? \Carbon\Carbon::parse($value)->format('d M Y') : '-').'</div>';
+                })
+                ->html(),
                 
             Column::make('Nominal Investasi', 'nominal_investasi')
                 ->sortable()
