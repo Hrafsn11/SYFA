@@ -1,5 +1,7 @@
 <?php
 
+use App\Livewire\Dashboard;
+use App\Livewire\DashboardInvestasiDeposito;
 use App\Livewire\DashboardPembiayaanSfinance;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
@@ -20,9 +22,10 @@ use App\Livewire\PengembalianInvestasi;
 use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
 
-// Dashboard Pembiayaan Sfinance
+// Dashboard
+Route::get('dashboard', Dashboard::class)->name('dashboard.index');
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan');
-Route::get('dashboard/investasi-deposito', DashboardPembiayaanSfinance::class)->name('dashboard.investasi-deposito');
+Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito');
 
 // Peminjaman Routes
 Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');

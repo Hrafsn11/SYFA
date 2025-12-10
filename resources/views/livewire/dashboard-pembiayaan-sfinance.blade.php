@@ -317,6 +317,23 @@
         min-width: 120px !important;
         max-width: 120px !important;
     }
+    
+    /* Override purple theme color for Select2 */
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection,
+    .select2-container--default.select2-container--open .select2-selection {
+        border-color: #86b7fe !important;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection:focus,
+    .select2-container--default.select2-container--open .select2-selection:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
 </style>
 @endpush
 
