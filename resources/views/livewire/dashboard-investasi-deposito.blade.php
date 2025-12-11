@@ -1,12 +1,10 @@
 <div>
-    {{-- Page Header --}}
     <div class="row">
         <div class="col-12">
             <h4 class="fw-bold py-3 mb-4">Dashboard Investasi Deposito SFinance</h4>
         </div>
     </div>
 
-    {{-- Summary Cards Row 1 (TIDAK BERUBAH) --}}
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 col-12 mb-4">
             <div class="card">
@@ -19,7 +17,6 @@
                                 <i class="ti ti-arrow-up text-success me-1"></i>
                                 <span class="text-success fw-semibold">{{ $summaryData['total_deposito_pokok_percent'] }}% dari bulan lalu</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_deposito_pokok_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -42,7 +39,6 @@
                                 <i class="ti ti-arrow-up text-success me-1"></i>
                                 <span class="text-success fw-semibold">{{ $summaryData['total_cof_percent'] }}% lebih lancar</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_cof_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -65,7 +61,6 @@
                                 <i class="ti ti-arrow-up text-success me-1"></i>
                                 <span class="text-success fw-semibold">{{ $summaryData['total_pengembalian_percent'] }}%</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_pengembalian_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -88,7 +83,6 @@
                                 <i class="ti ti-arrow-down text-warning me-1"></i>
                                 <span class="text-warning fw-semibold">{{ $summaryData['total_outstanding_percent'] }}% dari bulan lalu</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_outstanding_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">

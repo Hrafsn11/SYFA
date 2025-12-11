@@ -6,18 +6,12 @@ use Livewire\Component;
 
 class DashboardInvestasiDeposito extends Component
 {
-    public $selectedMonth = null; // <-- PERBAIKAN: Default diubah menjadi null
+    public $selectedMonth = null;
 
     public function mount()
     {
-        // Set default bulan ke null agar filter tampil kosong/placeholder saat pertama dimuat
-        $this->selectedMonth = null; 
-        
-        // Catatan: Anda mungkin perlu memanggil fungsi loadData() di sini
-        // agar dashboard tidak kosong saat mount (tergantung implementasi loadData Anda)
-        // Jika data utama dashboard BUKAN berdasarkan selectedMonth, maka ini aman.
-        // Jika data utama dashboard HARUS berdasarkan selectedMonth, Anda harus menginisialisasi
-        // selectedMonth ke bulan saat ini, atau pastikan loadData dapat menangani null/kosong.
+        // Set default bulan ke bulan saat ini
+        $this->selectedMonth = date('m');
     }
 
     public function updatedSelectedMonth()
@@ -28,8 +22,6 @@ class DashboardInvestasiDeposito extends Component
 
     public function render()
     {
-        // ... (data summaryData, chartDepositoPokok, dll.)
-
         // Data untuk summary cards
         $summaryData = [
             'total_deposito_pokok' => 126500,
@@ -72,6 +64,7 @@ class DashboardInvestasiDeposito extends Component
         ];
 
         // Data untuk chart Total Pengembalian Pokok dan Bagi Hasil Perbulan
+        // NOTE: Chart row 2 TIDAK memiliki "0" di X-axis sesuai gambar
         $chartPengembalian = [
             'categories' => ['Techno', 'Proxsis', 'Malaka', 'Hukum', 'Kredit'],
             'series' => [
@@ -87,6 +80,7 @@ class DashboardInvestasiDeposito extends Component
         ];
 
         // Data untuk chart Total Sisa Deposito Pokok dan CoF yang Belum Dikembalikan
+        // NOTE: Chart row 2 TIDAK memiliki "0" di X-axis sesuai gambar
         $chartSisaDeposito = [
             'categories' => ['Techno', 'Proxsis', 'Malaka', 'Hukum', 'Kredit'],
             'series' => [
@@ -100,7 +94,6 @@ class DashboardInvestasiDeposito extends Component
                 ]
             ]
         ];
-        // ... (lanjutkan data chart lainnya)
 
         return view('livewire.dashboard-investasi-deposito', compact(
             'summaryData',
@@ -111,3 +104,4 @@ class DashboardInvestasiDeposito extends Component
         ))->layout('layouts.app');
     }
 }
+
