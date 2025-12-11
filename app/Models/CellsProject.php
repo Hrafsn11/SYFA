@@ -16,6 +16,14 @@ class CellsProject extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'nama_project'
+        'nama_project',
+        'nama_pic',
+        'alamat',
+        'deskripsi_bidang',
     ];
+
+    public function peminjamanFinlog()
+    {
+        return $this->hasMany(PeminjamanFinlog::class, 'id_cells_project');
+    }
 }

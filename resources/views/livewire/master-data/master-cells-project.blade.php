@@ -4,7 +4,8 @@
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Cells Project</h4>
                 @can('master_data.add')
-                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3" data-bs-toggle="modal" data-bs-target="#modalTambahCellsProject" id="btnTambahCellsProject">
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        data-bs-toggle="modal" data-bs-target="#modalTambahCellsProject" id="btnTambahCellsProject">
                         <i class="fa-solid fa-plus"></i>
                         Cells Project
                     </button>
@@ -17,7 +18,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-datatable">
-                    <livewire:cells-project-table/>
+                    <livewire:cells-project-table />
                 </div>
             </div>
         </div>
@@ -34,15 +35,39 @@
                 <form wire:submit='{{ $urlAction['store_cells_project'] }}'>
                     <div class="modal-body">
                         <div class="mb-3 form-group">
-                            <label for="nama_project" class="form-label">Nama Project <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama_project" placeholder="Masukkan Nama Project" wire:model.blur="nama_project">
+                            <label for="nama_project" class="form-label">Nama Project <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama_project"
+                                placeholder="Masukkan Nama Project" wire:model.blur="nama_project">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3 form-group">
+                            <label for="nama_pic" class="form-label">Nama PIC <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama_pic"
+                                placeholder="Masukkan Nama PIC" wire:model.blur="nama_pic">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3 form-group">
+                            <label for="alamat" class="form-label">Alamat <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="alamat"
+                                placeholder="Masukkan Alamat" wire:model.blur="alamat">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3 form-group">
+                            <label for="deskripsi_bidang" class="form-label">Deskripsi Bidang <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="deskripsi_bidang"
+                                placeholder="Masukkan Deskripsi Bidang" wire:model.blur="deskripsi_bidang">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary" id="btnSimpanCellsProject">
-                            <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="saveData"></span>
+                            <span class="spinner-border spinner-border-sm me-2" wire:loading
+                                wire:target="saveData"></span>
                             Simpan
                         </button>
                     </div>
@@ -53,49 +78,58 @@
 </div>
 
 @push('scripts')
-<script>
-    function afterAction(payload) {
-        Livewire.dispatch('refreshCellsProjectTable');
-        $('.modal').modal('hide');
-    }
+    <script>
+        function afterAction(payload) {
+            Livewire.dispatch('refreshCellsProjectTable');
+            $('.modal').modal('hide');
+        }
 
-    function editData(payload) {
-        const data = payload.data;
-        
-        const modal = $('.modal');
-        const form = modal.find('form');
+        function editData(payload) {
+            const data = payload.data;
 
-        form.attr('wire:submit', `{!! $urlAction["update_cells_project"] !!}`.replace('id_placeholder', data.id_cells_project));
+            const modal = $('.modal');
+            const form = modal.find('form');
 
-        // ubah title modal
-        modal.find('.modal-title').text('Edit Cells Project');
-        // tampilkan modal
-        modal.modal('show');
+            form.attr('wire:submit', `{!! $urlAction['update_cells_project'] !!}`.replace('id_placeholder', data.id_cells_project));
 
-        @this.set('id_cells_project', data.id_cells_project);
-        @this.set('nama_project', data.nama_project);
-    }
+            // ubah title modal
+            modal.find('.modal-title').text('Edit Cells Project');
+            // tampilkan modal
+            modal.modal('show');
 
-    $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form').attr('wire:submit', `{!! $urlAction["store_cells_project"] !!}`);
-        $(this).find('.modal-title').text('Tambah Cells Project');
-        @this.set('id_cells_project', null);
-        @this.set('nama_project', '');
-    });
+            @this.set('id_cells_project', data.id_cells_project);
+            @this.set('nama_project', data.nama_project);
+            @this.set('nama_pic', data.nama_pic);
+            @this.set('alamat', data.alamat);
+            @this.set('deskripsi_bidang', data.deskripsi_bidang);
+        }
 
-    $(document).on('click', '.cells-project-delete-btn', function(e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-
-        sweetAlertConfirm({
-            title: 'Konfirmasi Hapus',
-            text: 'Apakah Anda yakin ingin menghapus Cells Project ini? Tindakan ini tidak dapat dibatalkan.',
-            icon: 'warning',
-            confirmButtonText: 'Hapus',
-            cancelButtonText: 'Batal',
-        }, () => {
-            @this.saveData("master-data.cells-project.destroy", {"id" : id, "callback" : "afterAction"});
+        $('.modal').on('hide.bs.modal', function() {
+            $(this).find('form').attr('wire:submit', `{!! $urlAction['store_cells_project'] !!}`);
+            $(this).find('.modal-title').text('Tambah Cells Project');
+            @this.set('id_cells_project', null);
+            @this.set('nama_project', '');
+            @this.set('nama_pic', '');
+            @this.set('alamat', '');
+            @this.set('deskripsi_bidang', '');
         });
-    });
-</script>
+
+        $(document).on('click', '.cells-project-delete-btn', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+
+            sweetAlertConfirm({
+                title: 'Konfirmasi Hapus',
+                text: 'Apakah Anda yakin ingin menghapus Cells Project ini? Tindakan ini tidak dapat dibatalkan.',
+                icon: 'warning',
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal',
+            }, () => {
+                @this.saveData("master-data.cells-project.destroy", {
+                    "id": id,
+                    "callback": "afterAction"
+                });
+            });
+        });
+    </script>
 @endpush

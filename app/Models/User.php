@@ -81,4 +81,12 @@ class User extends Authenticatable
             );
         });
     }
+
+    /**
+     * Get the debitur/investor record associated with the user.
+     */
+    public function debitur()
+    {
+        return $this->hasOne(MasterDebiturDanInvestor::class, 'user_id', 'id');
+    }
 }
