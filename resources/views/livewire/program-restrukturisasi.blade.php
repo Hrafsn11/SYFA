@@ -65,7 +65,7 @@
                             wire:model.live="metode_perhitungan"
                             @if($isEdit) disabled style="background-color: #f5f5f9;" @endif>
                             <option value="Flat">Metode Flat</option>
-                            <option value="Anuitas">Metode Anuitas</option>
+                            <option value="Efektif (Anuitas)">Metode Efektif (Anuitas)</option>
                         </select>
                         @if($isEdit)
                             <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program dibuat</small>
@@ -140,7 +140,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Tanggal Jatuh Tempo</th>
-                                        @if($metode_perhitungan === 'Anuitas')<th>Sisa Pinjaman (Rp)</th>@endif
+                                        @if($metode_perhitungan === 'Efektif (Anuitas)')<th>Sisa Pinjaman (Rp)</th>@endif
                                         <th>Pokok (Rp)</th>
                                         <th>Margin (Rp)</th>
                                         <th>Total Cicilan (Rp)</th>
@@ -156,7 +156,7 @@
                                     <tr class="{{ $item['is_grace_period'] ? 'table-warning' : '' }}">
                                         <td>{{ $item['no'] }}</td>
                                         <td>{{ $item['tanggal_jatuh_tempo'] }}</td>
-                                        @if($metode_perhitungan === 'Anuitas')<td class="text-end">Rp {{ number_format($item['sisa_pinjaman'] ?? 0, 0, ',', '.') }}</td>@endif
+                                        @if($metode_perhitungan === 'Efektif (Anuitas)')<td class="text-end">Rp {{ number_format($item['sisa_pinjaman'] ?? 0, 0, ',', '.') }}</td>@endif
                                         <td class="text-end">{{ number_format($item['pokok'], 0, ',', '.') }}</td>
                                         <td class="text-end">{{ number_format($item['margin'], 0, ',', '.') }}</td>
                                         <td class="text-end"><strong>{{ number_format($item['total_cicilan'], 0, ',', '.') }}</strong></td>
@@ -225,7 +225,7 @@
                                 <tfoot class="table-light">
                                     <tr>
                                         <th colspan="2">Total</th>
-                                        @if($metode_perhitungan === 'Anuitas')<th></th> @endif
+                                        @if($metode_perhitungan === 'Efektif (Anuitas)')<th></th> @endif
                                         <th class="text-end">{{ number_format($total_pokok, 0, ',', '.') }}</th>
                                         <th class="text-end">{{ number_format($total_margin, 0, ',', '.') }}</th>
                                         <th class="text-end">{{ number_format($total_cicilan, 0, ',', '.') }}</th>

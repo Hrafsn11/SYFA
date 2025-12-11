@@ -22,7 +22,7 @@ return new class extends Migration
                 ->onDelete('cascade');
             
             // Parameter perhitungan
-            $table->enum('metode_perhitungan', ['Flat', 'Anuitas'])->default('Flat');
+            $table->enum('metode_perhitungan', ['Flat', 'Efektif (Anuitas)'])->default('Flat');
             $table->decimal('plafon_pembiayaan', 15, 2);
             $table->decimal('suku_bunga_per_tahun', 5, 2); // percentage
             $table->integer('jangka_waktu_total'); // dalam bulan
