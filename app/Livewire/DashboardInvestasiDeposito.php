@@ -486,6 +486,19 @@ class DashboardInvestasiDeposito extends Component
     }
 
     /**
+     * Get total outstanding deposito (sisa pokok + sisa bagi hasil) untuk bulan tertentu
+     * Data diambil dari pengajuan_investasi
+     */
+    private function getTotalOutstandingDeposito($year, $month)
+    {
+        return (float) DB::table('pengajuan_investasi')
+            ->whereYear('tanggal_investasi', $year)
+            ->whereMonth('tanggal_investasi', $month)
+            ->selectRaw('COALESCE(SUM(sisa_pokok + sisa_bagi_hasil), 0) as total_outstanding')
+            ->value('total_outstanding');
+    }
+
+    /**
      * Get summary data for Total Pengembalian Bulan Ini
      * Menghitung total pengembalian (pokok + bagi hasil) bulan ini dan membandingkan dengan bulan sebelumnya
      */
@@ -532,12 +545,60 @@ class DashboardInvestasiDeposito extends Component
         ];
     }
 
+    /**
+     * Get summary data untuk Total Outstanding Deposito
+     * Menggunakan kolom total_belum_dikembalikan dari kertas kerja (sisa_pokok + sisa_bagi_hasil)
+     * Dibandingkan dengan bulan sebelumnya; jika tidak ada transaksi di bulan sebelumnya maka persentase 0
+     */
+    private function getSummaryOutstandingDeposito()
+    {
+        $currentYear = date('Y');
+        // Gunakan filter yang sama dengan chart Sisa Deposito
+        $selectedMonth = $this->selectedMonthSisaDeposito
+            ? (int) $this->selectedMonthSisaDeposito
+            : (($this->selectedMonth ? (int) $this->selectedMonth : (int) date('m')));
+
+        $totalBulanIni = $this->getTotalOutstandingDeposito($currentYear, $selectedMonth);
+
+        // Hitung bulan sebelumnya
+        $bulanSebelumnya = $selectedMonth - 1;
+        $tahunSebelumnya = $currentYear;
+
+        if ($bulanSebelumnya < 1) {
+            $bulanSebelumnya = 12;
+            $tahunSebelumnya = $currentYear - 1;
+        }
+
+        $totalBulanSebelumnya = $this->getTotalOutstandingDeposito($tahunSebelumnya, $bulanSebelumnya);
+
+        // Hitung persentase perubahan; jika tidak ada transaksi sebelumnya, persentase = 0
+        $persentase = 0;
+        if ($totalBulanSebelumnya > 0) {
+            $persentase = (($totalBulanIni - $totalBulanSebelumnya) / $totalBulanSebelumnya) * 100;
+        }
+
+        $namaBulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
+        $period = $namaBulan[$selectedMonth] . ' ' . $currentYear;
+
+        return [
+            'total_outstanding' => $totalBulanIni,
+            'total_outstanding_percent' => round($persentase, 1),
+            'total_outstanding_period' => $period,
+        ];
+    }
+
     public function render()
     {
         // Data untuk summary cards
         $summaryDepositoPokok = $this->getSummaryDepositoPokok();
         $summaryCoF = $this->getSummaryCoF();
         $summaryPengembalian = $this->getSummaryPengembalian();
+        $summaryOutstanding = $this->getSummaryOutstandingDeposito();
         
         $summaryData = [
             'total_deposito_pokok' => $summaryDepositoPokok['total_deposito_pokok'],
@@ -552,9 +613,9 @@ class DashboardInvestasiDeposito extends Component
             'total_pengembalian_percent' => $summaryPengembalian['total_pengembalian_percent'],
             'total_pengembalian_period' => $summaryPengembalian['total_pengembalian_period'],
             
-            'total_outstanding' => 126500,
-            'total_outstanding_percent' => 5,
-            'total_outstanding_period' => 'Oct 2023',
+            'total_outstanding' => $summaryOutstanding['total_outstanding'],
+            'total_outstanding_percent' => $summaryOutstanding['total_outstanding_percent'],
+            'total_outstanding_period' => $summaryOutstanding['total_outstanding_period'],
         ];
 
         // Data untuk chart Total Deposito Pokok yang masuk Per Bulan
