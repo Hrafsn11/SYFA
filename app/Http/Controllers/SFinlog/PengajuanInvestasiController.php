@@ -329,7 +329,6 @@ class PengajuanInvestasiController extends Controller
             // Update nomor kontrak and status to completed (Step 6: Selesai)
             $pengajuan->update([
                 'nomor_kontrak' => $request->input('nomor_kontrak'),
-                'tanggal_kontrak' => now()->toDateString(),
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'updated_by' => Auth::id(),
@@ -360,7 +359,11 @@ class PengajuanInvestasiController extends Controller
             $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
             
             $nomorKontrak = $pengajuan->nomor_kontrak ?? $request->input('nomor_kontrak', 'DRAFT-' . date('Ymd-His'));
-            $tanggalKontrak = $pengajuan->tanggal_kontrak ?? now()->toDateString();
+            
+            $historySelesai = HistoryStatusPengajuanInvestasiFinlog::where('id_pengajuan_investasi_finlog', $id)
+                ->where('status', 'Selesai')
+                ->first();
+            $tanggalKontrak = $historySelesai ? $historySelesai->date : now()->toDateString();
             
             $data = [
                 'nomor_kontrak' => $nomorKontrak,
