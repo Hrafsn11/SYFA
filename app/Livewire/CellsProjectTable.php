@@ -76,6 +76,14 @@ class CellsProjectTable extends DataTableComponent
             Column::make("Nama PIC", "nama_pic")
                 ->sortable()
                 ->searchable(),
+
+            Column::make("Alamat", "alamat")
+                ->sortable()
+                ->searchable(),
+
+            Column::make("Deskripsi Bidang", "deskripsi_bidang")
+                ->sortable()
+                ->searchable(),
             
             Column::make("Aksi")
                 ->label(function ($row) {

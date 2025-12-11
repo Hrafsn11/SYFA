@@ -70,6 +70,7 @@ class PeminjamanDetail extends Component
 
             DB::commit();
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Pengajuan berhasil disubmit');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -87,9 +88,17 @@ class PeminjamanDetail extends Component
         try {
             DB::beginTransaction();
 
+            // Recalculate nilai_bagi_hasil dan total_pinjaman berdasarkan bagi_hasil_disetujui
+            $nilai_pinjaman = $this->peminjaman->nilai_pinjaman ?? 0;
+            $nilai_bagi_hasil_baru = $nilai_pinjaman * ($this->bagi_hasil_disetujui / 100);
+            $total_pinjaman_baru = $nilai_pinjaman + $nilai_bagi_hasil_baru;
+
             $this->peminjaman->update([
                 'current_step' => 3,
-                'status' => 'Menunggu Persetujuan'
+                'status' => 'Menunggu Persetujuan',
+                'presentase_bagi_hasil' => $this->bagi_hasil_disetujui,
+                'nilai_bagi_hasil' => $nilai_bagi_hasil_baru,
+                'total_pinjaman' => $total_pinjaman_baru
             ]);
 
             HistoryPengajuanPinjamanFinlog::create([
@@ -104,8 +113,9 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            $this->reset(['bagi_hasil_disetujui', 'catatan']);
+            $this->reset(['bagi_hasil_disetujui']);
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Validasi IO berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -123,8 +133,10 @@ class PeminjamanDetail extends Component
         try {
             DB::beginTransaction();
 
+            // Step 2 ditolak: kembali ke Draft (step 1)
             $this->peminjaman->update([
-                'status' => 'Ditolak'
+                'current_step' => 1,
+                'status' => 'Draft'
             ]);
 
             HistoryPengajuanPinjamanFinlog::create([
@@ -140,7 +152,8 @@ class PeminjamanDetail extends Component
             DB::commit();
             $this->reset(['catatan_penolakan']);
             $this->loadData();
-            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat');
+            $this->dispatch('refreshData');
+            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Pengajuan kembali ke Draft');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', title: 'Error', text: $e->getMessage());
@@ -173,6 +186,7 @@ class PeminjamanDetail extends Component
 
             DB::commit();
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan debitur berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -190,6 +204,7 @@ class PeminjamanDetail extends Component
         try {
             DB::beginTransaction();
 
+            // Step 3 ditolak: Ditolak permanent (tidak bisa revisi)
             $this->peminjaman->update([
                 'status' => 'Ditolak'
             ]);
@@ -207,7 +222,8 @@ class PeminjamanDetail extends Component
             DB::commit();
             $this->reset(['catatan_penolakan']);
             $this->loadData();
-            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat');
+            $this->dispatch('refreshData');
+            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Pengajuan ditolak oleh Debitur');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', title: 'Error', text: $e->getMessage());
@@ -236,6 +252,7 @@ class PeminjamanDetail extends Component
 
             DB::commit();
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan SKI Finance berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -253,8 +270,10 @@ class PeminjamanDetail extends Component
         try {
             DB::beginTransaction();
 
+            // Step 4 ditolak: kembali ke Step 2 (IO harus validasi ulang)
             $this->peminjaman->update([
-                'status' => 'Ditolak'
+                'current_step' => 2,
+                'status' => 'Menunggu Persetujuan'
             ]);
 
             HistoryPengajuanPinjamanFinlog::create([
@@ -270,7 +289,8 @@ class PeminjamanDetail extends Component
             DB::commit();
             $this->reset(['catatan_penolakan']);
             $this->loadData();
-            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat');
+            $this->dispatch('refreshData');
+            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Kembali ke Validasi IO');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', title: 'Error', text: $e->getMessage());
@@ -299,6 +319,7 @@ class PeminjamanDetail extends Component
 
             DB::commit();
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan CEO berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -316,8 +337,10 @@ class PeminjamanDetail extends Component
         try {
             DB::beginTransaction();
 
+            // Step 5 ditolak: kembali ke Step 4 (SKI Finance harus approve ulang)
             $this->peminjaman->update([
-                'status' => 'Ditolak'
+                'current_step' => 4,
+                'status' => 'Menunggu Persetujuan'
             ]);
 
             HistoryPengajuanPinjamanFinlog::create([
@@ -333,7 +356,8 @@ class PeminjamanDetail extends Component
             DB::commit();
             $this->reset(['catatan_penolakan']);
             $this->loadData();
-            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat');
+            $this->dispatch('refreshData');
+            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Kembali ke Persetujuan SKI Finance');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', title: 'Error', text: $e->getMessage());
@@ -372,6 +396,7 @@ class PeminjamanDetail extends Component
             DB::commit();
             $this->reset(['nomor_kontrak', 'biaya_administrasi', 'jaminan']);
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Kontrak berhasil digenerate');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -409,6 +434,7 @@ class PeminjamanDetail extends Component
             DB::commit();
             $this->reset(['bukti_transfer']);
             $this->loadData();
+            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {
             DB::rollBack();

@@ -17,7 +17,9 @@ class CellsProject extends Model
 
     protected $fillable = [
         'nama_project',
-        'nama_pic'
+        'nama_pic',
+        'alamat',
+        'deskripsi_bidang',
     ];
 
     public function peminjamanFinlog()

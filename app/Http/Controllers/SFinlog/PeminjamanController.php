@@ -22,29 +22,34 @@ class PeminjamanController extends Controller
             DB::beginTransaction();
             
             $data = $request->validated();
-            
-            // Handle file uploads
-            // Files from Livewire are already stored as path strings in setterFormData()
-            // Files from direct form upload will be handled here
+
             $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
                           'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
             
             foreach ($fileFields as $field) {
-                // Check if it's a file object (from direct form upload)
                 if ($request->hasFile($field)) {
                     $file = $request->file($field);
                     $fileName = time() . '_' . $field . '_' . $file->getClientOriginalName();
                     $data[$field] = $file->storeAs('peminjaman_finlog', $fileName, 'public');
                 }
-                // If it's already a string path from Livewire, keep it as is
-                // The validation already passed, so it's valid
             }
             
-            // Generate nomor peminjaman
-            $lastPeminjaman = PeminjamanFinlog::whereYear('created_at', date('Y'))
-                                             ->whereMonth('created_at', date('m'))
-                                             ->count();
-            $data['nomor_peminjaman'] = 'PFL/' . date('Ym') . '/' . str_pad($lastPeminjaman + 1, 4, '0', STR_PAD_LEFT);
+            // Generate nomor peminjaman dengan format PMJ-TAHUNBULAN-SLOG-RUNNINGTEXT
+            $yearMonth = date('Ym'); // Format: 202512
+            $lastPeminjaman = PeminjamanFinlog::where('nomor_peminjaman', 'LIKE', "PMJ-{$yearMonth}-SLOG-%")
+                                             ->orderBy('nomor_peminjaman', 'desc')
+                                             ->first();
+            
+            if ($lastPeminjaman) {
+                // Ambil running text terakhir dan tambah 1
+                $lastNumber = (int) substr($lastPeminjaman->nomor_peminjaman, -2);
+                $runningText = str_pad($lastNumber + 1, 2, '0', STR_PAD_LEFT);
+            } else {
+                // Jika belum ada peminjaman di bulan ini, mulai dari 01
+                $runningText = '01';
+            }
+            
+            $data['nomor_peminjaman'] = "PMJ-{$yearMonth}-SLOG-{$runningText}";
             
             $peminjaman = PeminjamanFinlog::create($data);
             
@@ -73,13 +78,11 @@ class PeminjamanController extends Controller
             
             $data = $request->validated();
             
-            // Handle file uploads
             $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
                           'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
             
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
-                    // Delete old file if exists
                     if ($peminjaman->{$field} && \Storage::disk('public')->exists($peminjaman->{$field})) {
                         \Storage::disk('public')->delete($peminjaman->{$field});
                     }
@@ -115,7 +118,6 @@ class PeminjamanController extends Controller
                 return Response::error('Peminjaman hanya dapat dihapus jika masih berstatus Draft');
             }
 
-            // Delete all uploaded files
             $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
                           'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
             
@@ -157,56 +159,47 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * Get data for DataTables
+     * Show kontrak peminjaman
      */
-    public function getData(Request $request)
+    public function showKontrak($id)
     {
-        if ($request->ajax()) {
-            $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->select('peminjaman_finlog.*');
+        $peminjaman = PeminjamanFinlog::with([
+            'debitur',
+            'cellsProject'
+        ])->findOrFail($id);
+
+        // Prepare data untuk kontrak
+        $data = [
+            'nomor_kontrak' => $peminjaman->nomor_kontrak,
+            'tanggal_kontrak' => now()->toDateString(),
             
-            return DataTables::of($peminjaman)
-                ->addIndexColumn()
-                ->editColumn('nama_project', function($row) {
-                    return $row->nama_project ?? '-';
-                })
-                ->editColumn('harapan_tanggal_pencairan', function($row) {
-                    return $row->harapan_tanggal_pencairan ? $row->harapan_tanggal_pencairan->format('d/m/Y') : '-';
-                })
-                ->editColumn('durasi_project', function($row) {
-                    return $row->durasi_project . ' bulan';
-                })
-                ->editColumn('nilai_pinjaman', function($row) {
-                    return 'Rp ' . number_format($row->nilai_pinjaman, 0, ',', '.');
-                })
-                ->editColumn('presentase_bagi_hasil', function($row) {
-                    return $row->presentase_bagi_hasil . '%';
-                })
-                ->editColumn('nilai_bagi_hasil', function($row) {
-                    return 'Rp ' . number_format($row->nilai_bagi_hasil, 0, ',', '.');
-                })
-                ->editColumn('status', function($row) {
-                    $badges = [
-                        'Draft' => 'secondary',
-                        'Menunggu Persetujuan' => 'warning',
-                        'Disetujui' => 'success',
-                        'Ditolak' => 'danger',
-                        'Dicairkan' => 'info',
-                        'Selesai' => 'primary'
-                    ];
-                    $badge = $badges[$row->status] ?? 'secondary';
-                    return '<span class="badge bg-'.$badge.'">'.$row->status.'</span>';
-                })
-                ->addColumn('action', function($row) {
-                    $btn = '<div class="btn-group" role="group">';
-                    $btn .= '<button type="button" class="btn btn-sm btn-info" onclick="viewDetail(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-eye"></i></button>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-warning" onclick="editPeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-edit"></i></button>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-danger" onclick="deletePeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-trash"></i></button>';
-                    $btn .= '</div>';
-                    return $btn;
-                })
-                ->rawColumns(['status', 'action'])
-                ->make(true);
-        }
+            // Data Principal (Cells Project)
+            'nama_principal' => $peminjaman->cellsProject->nama_project ?? '-',
+            'nama_pic' => $peminjaman->cellsProject->nama_pic ?? '-',
+            'alamat_principal' => $peminjaman->cellsProject->alamat ?? '-',
+            'deskripsi_bidang' => $peminjaman->cellsProject->deskripsi_bidang ?? '-',
+            
+            // Data Debitur (Perusahaan)
+            'nama_perusahaan' => $peminjaman->debitur->nama ?? '-',
+            'nama_ceo' => $peminjaman->debitur->nama_ceo ?? '-',
+            'alamat_perusahaan' => $peminjaman->debitur->alamat ?? '-',
+            
+            // Detail Pembiayaan
+            'tujuan_pembiayaan' => $peminjaman->nama_project ?? '-',
+            'nilai_pembiayaan' => $peminjaman->nilai_pinjaman ?? 0,
+            'tenor_pembiayaan' => $peminjaman->durasi_project ?? 0,
+            'biaya_administrasi' => $peminjaman->biaya_administrasi ?? 0,
+            'bagi_hasil' => $peminjaman->nilai_bagi_hasil ?? 0,
+            'persentase_bagi_hasil' => $peminjaman->presentase_bagi_hasil ?? 0,
+            'jaminan' => $peminjaman->jaminan ?? '-',
+            
+            // Tanggal
+            'tanggal_pencairan' => $peminjaman->harapan_tanggal_pencairan,
+            'tanggal_pengembalian' => $peminjaman->rencana_tgl_pengembalian,
+        ];
+
+        return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
     }
 }
+
 

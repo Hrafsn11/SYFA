@@ -8,7 +8,6 @@
     $isMasterData = ModuleHelper::isMasterData();
     $isPortofolio = ModuleHelper::isPortofolio();
 
-    // Determine which sidebar to show
     $showSFinanceSidebar = $isSFinance || $isSFinlog;
 @endphp
 

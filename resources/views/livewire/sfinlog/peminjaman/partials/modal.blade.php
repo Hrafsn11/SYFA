@@ -31,16 +31,21 @@
             </div>
             <form id="formValidasiIO">
                 <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="ti ti-info-circle me-2"></i>
+                            <div>
+                                <strong>Bagi Hasil yang Diajukan:</strong>
+                                <span class="fw-bold">{{ $peminjaman->presentase_bagi_hasil ?? 0 }}%</span>
+                                <span class="text-muted">(Rp {{ number_format($peminjaman->nilai_bagi_hasil ?? 0, 0, ',', '.') }})</span>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Bagi Hasil Disetujui (%)<span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="bagi_hasil_disetujui" name="bagi_hasil_disetujui" 
                                step="0.01" min="0" max="100" required>
                         <small class="text-muted">Masukkan persentase bagi hasil yang disetujui</small>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Catatan (Opsional)</label>
-                        <textarea class="form-control" id="catatan_validasi_io" name="catatan" rows="3" 
-                                  placeholder="Tambahkan catatan jika diperlukan..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

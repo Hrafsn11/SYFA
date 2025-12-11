@@ -51,10 +51,12 @@
 
         <!-- Button Preview Kontrak -->
         <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-info" id="btnPreviewKontrak">
+            <a href="{{ route('sfinlog.peminjaman.show-kontrak', $peminjaman->id_peminjaman_finlog) }}" 
+               target="_blank" 
+               class="btn btn-info">
                 <i class="ti ti-eye me-1"></i>
                 Preview Kontrak
-            </button>
+            </a>
         </div>
 
     @elseif($currentStep == 6 && !$peminjaman->nomor_kontrak)

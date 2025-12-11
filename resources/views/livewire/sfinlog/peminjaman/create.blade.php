@@ -14,7 +14,6 @@
     <div class="card">
         <div class="card-body">
             <form id="formPeminjamanDana" novalidate>
-                <!-- Informasi Perusahaan & Project -->
                 <h5 class="mb-3">Informasi Perusahaan & Project</h5>
                 <div class="row">
                     <div class="col-lg-12 mb-3">
@@ -426,7 +425,6 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Call Livewire method to save data
                         @this.call('saveData', 'sfinlog.peminjaman.store', {
                             callback: 'afterAction'
                         });
@@ -435,7 +433,6 @@
             });
         });
 
-        // Global callback function for after-action event (outside document.ready)
         function afterAction(payload) {
             if (payload.error === false) {
                 Swal.fire({

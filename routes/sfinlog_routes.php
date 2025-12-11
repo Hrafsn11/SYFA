@@ -23,13 +23,14 @@ use Illuminate\Support\Facades\Route;
 // Dashboard
 Route::get('dashboard', Dashboard::class)->name('dashboard.index');
 
-// Peminjaman Routes - Controller actions only (index & create moved to livewire_route.php)
+// Peminjaman
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::post('/', [PeminjamanController::class, 'store'])->name('store');
     Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
     Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
     Route::post('update-npa-status', [PeminjamanController::class, 'updateNpaStatus'])->name('update-npa-status');
     Route::get('data', [PeminjamanController::class, 'getData'])->name('data');
+    Route::get('{id}/show-kontrak', [PeminjamanController::class, 'showKontrak'])->name('show-kontrak');
 });
 
 // AR Perbulan

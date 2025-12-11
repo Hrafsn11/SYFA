@@ -48,6 +48,20 @@
                                 placeholder="Masukkan Nama PIC" wire:model.blur="nama_pic">
                             <div class="invalid-feedback"></div>
                         </div>
+                        <div class="mb-3 form-group">
+                            <label for="alamat" class="form-label">Alamat <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="alamat"
+                                placeholder="Masukkan Alamat" wire:model.blur="alamat">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3 form-group">
+                            <label for="deskripsi_bidang" class="form-label">Deskripsi Bidang <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="deskripsi_bidang"
+                                placeholder="Masukkan Deskripsi Bidang" wire:model.blur="deskripsi_bidang">
+                            <div class="invalid-feedback"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -86,6 +100,8 @@
             @this.set('id_cells_project', data.id_cells_project);
             @this.set('nama_project', data.nama_project);
             @this.set('nama_pic', data.nama_pic);
+            @this.set('alamat', data.alamat);
+            @this.set('deskripsi_bidang', data.deskripsi_bidang);
         }
 
         $('.modal').on('hide.bs.modal', function() {
@@ -94,6 +110,8 @@
             @this.set('id_cells_project', null);
             @this.set('nama_project', '');
             @this.set('nama_pic', '');
+            @this.set('alamat', '');
+            @this.set('deskripsi_bidang', '');
         });
 
         $(document).on('click', '.cells-project-delete-btn', function(e) {

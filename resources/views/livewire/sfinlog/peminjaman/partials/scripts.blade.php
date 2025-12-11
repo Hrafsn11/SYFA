@@ -9,10 +9,14 @@
                 ...(icon === 'success' && { timer: 2000, showConfirmButton: false }) 
             });
 
-        // Livewire alert listener
         Livewire.on('alert', (event) => {
             const { icon, title, text } = event;
             alert(icon, text, title);
+        });
+
+        // Livewire refresh listener
+        Livewire.on('refreshData', () => {
+            @this.call('refreshData');
         });
 
         // Step 1: Submit Pengajuan

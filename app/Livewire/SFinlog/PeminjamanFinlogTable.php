@@ -130,8 +130,8 @@ class PeminjamanFinlogTable extends DataTableComponent
                     $detailUrl = route('sfinlog.peminjaman.detail', ['id' => $row->id_peminjaman_finlog]);
                     $btn = '<div class="btn-group" role="group">';
                     $btn .= '<a href="'.$detailUrl.'" class="btn btn-sm btn-info"><i class="ti ti-eye"></i></a>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-warning" onclick="editPeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-edit"></i></button>';
-                    $btn .= '<button type="button" class="btn btn-sm btn-danger" onclick="deletePeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-trash"></i></button>';
+                    // $btn .= '<button type="button" class="btn btn-sm btn-warning" onclick="editPeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-edit"></i></button>';
+                    // $btn .= '<button type="button" class="btn btn-sm btn-danger" onclick="deletePeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-trash"></i></button>';
                     $btn .= '</div>';
                     return $btn;
                 })
