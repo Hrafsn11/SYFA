@@ -112,7 +112,7 @@
                         <select id="filterBulanDepositoPokok" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthDepositoPokok ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -133,7 +133,7 @@
                         <select id="filterBulanCoF" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthCoF ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -157,7 +157,7 @@
                         <select id="filterBulanPengembalian" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthPengembalian ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -178,7 +178,7 @@
                         <select id="filterBulanSisaDeposito" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthSisaDeposito ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -191,18 +191,24 @@
             </div>
         </div>
     </div>
+
+    {{-- Hidden element untuk membawa data chart terbaru ke JS (agar bisa diparse ulang setelah Livewire morph) --}}
+    <div id="chart-data-json"
+         data-deposito='@json($chartDepositoPokok ?? ["series" => [], "categories" => []])'
+         data-cof='@json($chartCoF ?? ["series" => [], "categories" => []])'
+         data-pengembalian='@json($chartPengembalian ?? ["series" => [], "categories" => []])'
+         data-sisa='@json($chartSisaDeposito ?? ["series" => [], "categories" => []])'
+         class="d-none"></div>
 </div>
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}" />
 
 <style>
-    /* Fix Select2 dropdown width */
     .select2-container {
         width: 100% !important;
     }
     
-    /* Mengatur lebar Select2 pada filter bulan chart (150px) */
     #filterBulanDepositoPokok + .select2-container,
     #filterBulanCoF + .select2-container,
     #filterBulanPengembalian + .select2-container,
@@ -212,7 +218,6 @@
         max-width: 150px !important;
     }
     
-    /* Override warna tema Select2 agar konsisten dengan tema Sfinance/Bootstrap biru */
     .select2-container--default .select2-results__option--highlighted[aria-selected] {
         background-color: #0d6efd !important;
         color: #fff !important;
@@ -228,20 +233,68 @@
         border-color: #0d6efd !important;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     }
+
+    .row.mb-4 > [class*="col-"] > .card {
+        min-height: 160px; 
+        height: 100%;
+    }
+    
+    .row.mb-4 > [class*="col-"] .card-body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+        padding: 1.25rem !important; 
+    }
+
+    .row.mb-4 > [class*="col-"] .card-title {
+        white-space: normal; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; 
+        -webkit-box-orient: vertical;
+        line-height: 1.4; 
+        min-height: 40px; 
+        margin-bottom: 0.5rem !important; 
+        font-size: 0.9em; 
+    }
+    
+    .row.mb-4 > [class*="col-"] h4.mb-2 {
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis; 
+        line-height: 1.3; 
+        min-height: 35px; 
+        margin-bottom: 0.5rem !important; 
+        font-size: 1.4rem; 
+    }
+    
+    .row.mb-4 > [class*="col-"] .d-flex.align-items-center {
+        margin-top: 0.25rem; 
+        margin-bottom: 0 !important; 
+        min-height: 25px; 
+    }
+
+    .row.mb-4.g-3 .card-header .card-title {
+        font-size: 1.25rem !important; 
+        font-weight: bold; 
+    }
+
+    .row.mb-4 .flex-grow-1 {
+        min-width: 0; 
+    }
 </style>
 @endpush
 
 @push('scripts')
 <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 <script>
-    // Inisialisasi variabel global di awal untuk chart instances
     window.chartDepositoPokok = null;
     window.chartCoF = null;
     window.chartPengembalian = null;
     window.chartSisaDeposito = null;
 
-    // Store chart options globally for re-rendering
-    // PASTIKAN data ini diisi di Livewire/PHP backend Anda agar tidak kosong
     window.chartOptions = {
         depositoPokok: @json($chartDepositoPokok),
         coF: @json($chartCoF),
@@ -249,12 +302,31 @@
         sisaDeposito: @json($chartSisaDeposito)
     };
 
+    function refreshChartOptionsFromDom() {
+        const holder = document.getElementById('chart-data-json');
+        if (!holder) return;
+        const parseJson = (attr) => {
+            try { return JSON.parse(holder.dataset[attr] || '{"series":[],"categories":[]}'); }
+            catch (e) { return { series: [], categories: [] }; }
+        };
+        window.chartOptions = {
+            depositoPokok: parseJson('deposito'),
+            coF: parseJson('cof'),
+            pengembalian: parseJson('pengembalian'),
+            sisaDeposito: parseJson('sisa')
+        };
+    }
+
     function initSelect2() {
-        const selectIds = [
-            'filterBulanDepositoPokok', 'filterBulanCoF', 'filterBulanPengembalian', 'filterBulanSisaDeposito'
-        ];
+        const filterMapping = {
+            'filterBulanDepositoPokok': 'selectedMonthDepositoPokok',
+            'filterBulanCoF': 'selectedMonthCoF',
+            'filterBulanPengembalian': 'selectedMonthPengembalian',
+            'filterBulanSisaDeposito': 'selectedMonthSisaDeposito'
+        };
         
-        // Hancurkan instance yang sudah ada
+        const selectIds = Object.keys(filterMapping);
+        
         selectIds.forEach(function(id) {
             const $select = $('#' + id);
             if ($select.length && $select.hasClass('select2-hidden-accessible')) {
@@ -262,12 +334,12 @@
             }
         });
 
-        // Inisialisasi Select2
         selectIds.forEach(function(id) {
             const $select = $('#' + id);
             if (!$select.length) return;
             
-            const width = 150; 
+            const width = 150;
+            const propertyName = filterMapping[id];
             
             $select.select2({
                 placeholder: $select.attr('data-placeholder') || 'Pilih...',
@@ -277,7 +349,6 @@
                 dropdownAutoWidth: false
             });
             
-            // Force set width after initialization
             setTimeout(function() {
                 $select.next('.select2-container').css({
                     'width': width + 'px',
@@ -286,14 +357,12 @@
                 });
             }, 10);
             
-            // Handle change events and dispatch to Livewire
-            $select.off('change.livewire'); // Hapus event listener lama
+            $select.off('change.livewire');
             $select.on('change.livewire', function() {
                 const bulan = $(this).val();
                 const componentId = $(this).closest('[wire\\:id]').attr('wire:id');
                 if (componentId && typeof Livewire !== 'undefined') {
-                    // Mengirim nilai ke properti $selectedMonth
-                    Livewire.find(componentId).set('selectedMonth', bulan || null);
+                    Livewire.find(componentId).set(propertyName, bulan || null);
                 }
             });
         });
@@ -305,13 +374,13 @@
             return;
         }
 
-        // Penghancuran (Destroy) Chart yang Aman
+        refreshChartOptionsFromDom();
+
         if (window.chartDepositoPokok) window.chartDepositoPokok.destroy();
         if (window.chartCoF) window.chartCoF.destroy();
         if (window.chartPengembalian) window.chartPengembalian.destroy();
         if (window.chartSisaDeposito) window.chartSisaDeposito.destroy();
         
-        // Fungsi pembantu untuk format Rupiah
         const formatterRupiah = function(val) {
             if (val === 0) return 'Rp. 0';
             const numVal = parseFloat(val);
@@ -321,7 +390,6 @@
             return 'Rp. ' + formatted;
         };
         
-        // Opsi Dasar untuk Bar Chart
         const baseBarOptions = (data, colors = ['#71dd37']) => ({
             series: data.series,
             chart: {
@@ -355,14 +423,14 @@
             },
             xaxis: {
                 categories: data.categories,
-                labels: { style: { fontSize: '12px', colors: '#697a8d' } },
+                labels: { style: { fontSize: '14px', colors: '#697a8d' } }, 
                 axisBorder: { show: true, color: '#e0e0e0' },
                 axisTicks: { show: true, color: '#e0e0e0' }
             },
             yaxis: {
                 labels: {
                     formatter: formatterRupiah,
-                    style: { fontSize: '12px', colors: '#697a8d' }
+                    style: { fontSize: '14px', colors: '#697a8d' } 
                 },
                 min: 0,
                 max: 200000000, 
@@ -384,36 +452,31 @@
             }
         });
         
-        // Mendapatkan data chart dari Blade/PHP
         const chartData = {
-            depositoPokok: @json($chartDepositoPokok ?? ['series' => [], 'categories' => []]),
-            coF: @json($chartCoF ?? ['series' => [], 'categories' => []]),
-            pengembalian: @json($chartPengembalian ?? ['series' => [], 'categories' => []]),
-            sisaDeposito: @json($chartSisaDeposito ?? ['series' => [], 'categories' => []])
+            depositoPokok: window.chartOptions.depositoPokok ?? { series: [], categories: [] },
+            coF: window.chartOptions.coF ?? { series: [], categories: [] },
+            pengembalian: window.chartOptions.pengembalian ?? { series: [], categories: [] },
+            sisaDeposito: window.chartOptions.sisaDeposito ?? { series: [], categories: [] }
         };
 
-        // Chart 1: Total Deposito Pokok yang masuk Per Bulan
         if (document.querySelector("#chartDepositoPokok")) {
             const options = baseBarOptions(chartData.depositoPokok);
             window.chartDepositoPokok = new ApexCharts(document.querySelector("#chartDepositoPokok"), options);
             window.chartDepositoPokok.render();
         }
 
-        // Chart 2: Total CoF per bulan
         if (document.querySelector("#chartCoF")) {
             const options = baseBarOptions(chartData.coF);
             window.chartCoF = new ApexCharts(document.querySelector("#chartCoF"), options);
             window.chartCoF.render();
         }
 
-        // Chart 3: Total Pengembalian Pokok dan Bagi Hasil Perbulan 
         if (document.querySelector("#chartPengembalian")) {
             const options = baseBarOptions(chartData.pengembalian, ['#71dd37', '#ffab00']);
             window.chartPengembalian = new ApexCharts(document.querySelector("#chartPengembalian"), options);
             window.chartPengembalian.render();
         }
 
-        // Chart 4: Total Sisa Deposito Pokok dan CoF yang Belum Dikembalikan
         if (document.querySelector("#chartSisaDeposito")) {
             const options = baseBarOptions(chartData.sisaDeposito, ['#71dd37', '#ffab00']);
             window.chartSisaDeposito = new ApexCharts(document.querySelector("#chartSisaDeposito"), options);
@@ -421,7 +484,6 @@
         }
     }
 
-    // Function to resize all charts
     function resizeCharts() {
         const charts = [window.chartDepositoPokok, window.chartCoF, window.chartPengembalian, window.chartSisaDeposito];
         setTimeout(function() {
@@ -433,7 +495,6 @@
         }, 100);
     }
     
-    // Setup ResizeObserver for chart containers
     function setupResizeObservers() {
         const chartContainers = [
             document.querySelector("#chartDepositoPokok"),
@@ -452,15 +513,14 @@
         });
     }
 
-    // Initialize Select2 dan Charts pada DOM Ready
     $(document).ready(function() {
         setTimeout(function() {
+            refreshChartOptionsFromDom();
             initSelect2(); 
             initCharts();
             setupResizeObservers();
         }, 500);
         
-        // Listeners untuk perubahan layout (sidebar toggle)
         const menuToggle = document.querySelector('.layout-menu-toggle');
         if (menuToggle) {
             menuToggle.addEventListener('click', function() {
@@ -477,35 +537,41 @@
         });
     });
 
-    // Re-render saat Livewire selesai memuat atau memperbarui (Livewire 3+)
     document.addEventListener('livewire:navigated', function() {
         setTimeout(function() {
+            refreshChartOptionsFromDom();
             initSelect2(); 
             initCharts();
             setupResizeObservers();
         }, 300);
     });
 
-    // Re-render saat Livewire component terupdate (penting untuk Select2 dan Chart)
     if (typeof Livewire !== 'undefined') {
         Livewire.hook('morph.updated', ({ el, component }) => {
             setTimeout(() => {
-                // Re-initialize Select2
                 initSelect2(); 
                 
-                // Set value Select2 setelah re-init
                 const $component = $(el);
-                $component.find('#filterBulanDepositoPokok, #filterBulanCoF, #filterBulanPengembalian, #filterBulanSisaDeposito').each(function() {
-                    const $select = $(this);
-                    // Mengambil nilai dari properti $selectedMonth (yang kini mungkin null atau '')
-                    const value = component.get('selectedMonth') || ''; 
-                    
-                    if ($select.val() !== value) {
-                        $select.val(value).trigger('change.select2');
+                const filterMapping = {
+                    'filterBulanDepositoPokok': 'selectedMonthDepositoPokok',
+                    'filterBulanCoF': 'selectedMonthCoF',
+                    'filterBulanPengembalian': 'selectedMonthPengembalian',
+                    'filterBulanSisaDeposito': 'selectedMonthSisaDeposito'
+                };
+                
+                Object.keys(filterMapping).forEach(function(filterId) {
+                    const $select = $component.find('#' + filterId);
+                    if ($select.length) {
+                        const propertyName = filterMapping[filterId];
+                        const value = component.get(propertyName) || '';
+                        
+                        if ($select.val() !== value) {
+                            $select.val(value).trigger('change.select2');
+                        }
                     }
                 });
 
-                // Re-initialize charts dengan data baru
+                refreshChartOptionsFromDom();
                 initCharts(); 
             }, 100);
         });
