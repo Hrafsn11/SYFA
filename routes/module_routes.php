@@ -2,6 +2,7 @@
 
 use App\Livewire\Dashboard;
 use App\Livewire\DashboardInvestasiDeposito;
+use App\Livewire\DashboardPembiayaanSfinance;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\DebiturPiutangController;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 // Dashboard
 Route::get('dashboard', Dashboard::class)->name('dashboard.index');
-Route::get('dashboard/pembiayaan', Dashboard::class)->name('dashboard.pembiayaan');
+Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan');
 Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito');
 
 // Peminjaman Routes
