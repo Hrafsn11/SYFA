@@ -3,6 +3,11 @@
 use App\Livewire\Dashboard;
 use Illuminate\Support\Facades\Route;
 
+// File preview route (dengan auth + signed URL untuk keamanan ganda)
+Route::get('/file-preview/{filename}', [\App\Http\Controllers\FilePreviewController::class, 'preview'])
+    ->name('file.preview')
+    ->middleware('signed');
+
 // dashboard
 Route::get('dashboard', Dashboard::class)->name('dashboard.index');
 
@@ -18,6 +23,17 @@ Route::get('penyaluran-deposito', \App\Livewire\PenyaluranDeposito\PenyaluranDep
 Route::get('pengembalian-investasi', \App\Livewire\PengembalianInvestasi::class)->name('pengembalian-investasi.index');
 
 Route::get('config-matrix-pinjaman', \App\Livewire\ConfigMatrixPinjaman\Index::class)->name('config-matrix-pinjaman.index');
+
+Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
+    Route::get('/', \App\Livewire\PengembalianPinjaman\Index::class)->name('index');
+    Route::get('create', \App\Livewire\PengembalianPinjaman\Create::class)->name('create');
+});
+
+Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+    Route::get('/', \App\Livewire\PengajuanPinjaman\Index::class)->name('index');
+    Route::get('create', \App\Livewire\PengajuanPinjaman\Create::class)->name('create');
+    Route::get('{id}/edit', \App\Livewire\PengajuanPinjaman\Create::class)->name('edit');
+});
 
 // AR Performance
 Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-performance.index');
