@@ -1,17 +1,28 @@
 stages:
   - deploy
+
 before_script:
   - export NVM_DIR="$HOME/.nvm"
   - if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
   - node -v
-  - pnpm -v       # pastikan pnpm bisa dipanggil
+  - pnpm -v
+
 deploy:
   stage: deploy
   tags:
     - shenlong
+
+  rules:
+    # Run pipeline when commit is pushed to development
+    - if: '$CI_COMMIT_BRANCH == "development"'
+    # Run pipeline when merge request targets development
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"'
+    
   script:
     - echo "Deploying syifa"
     - cd /var/www/html/syifa
+    - setfacl -R -m u:gitlab-runner:rwx storage bootstrap/cache public/build || true
+    - setfacl -R -d -m u:gitlab-runner:rwx storage bootstrap/cache public/build || true
     - git fetch --all
     - git checkout development
     - git pull origin development
@@ -19,5 +30,3 @@ deploy:
     - php artisan migrate --force
     - pnpm install
     - pnpm run build
-  only:
-    - development
