@@ -304,17 +304,38 @@
 
     function refreshChartOptionsFromDom() {
         const holder = document.getElementById('chart-data-json');
-        if (!holder) return;
+        if (!holder) {
+            return false;
+        }
+        
         const parseJson = (attr) => {
-            try { return JSON.parse(holder.dataset[attr] || '{"series":[],"categories":[]}'); }
-            catch (e) { return { series: [], categories: [] }; }
+            try {
+                const dataAttr = holder.getAttribute('data-' + attr);
+                if (!dataAttr) {
+                    return { series: [], categories: [] };
+                }
+                const parsed = JSON.parse(dataAttr);
+                // Pastikan struktur data benar
+                if (!parsed.series) parsed.series = [];
+                if (!parsed.categories) parsed.categories = [];
+                
+                return parsed;
+            } catch (e) {
+                console.error('Error parsing chart data for', attr, ':', e);
+                return { series: [], categories: [] };
+            }
         };
-        window.chartOptions = {
+        
+        const newOptions = {
             depositoPokok: parseJson('deposito'),
             coF: parseJson('cof'),
             pengembalian: parseJson('pengembalian'),
             sisaDeposito: parseJson('sisa')
         };
+        
+        // Update window.chartOptions
+        window.chartOptions = newOptions;
+        return true;
     }
 
     function initSelect2() {
@@ -360,27 +381,87 @@
             $select.off('change.livewire');
             $select.on('change.livewire', function() {
                 const bulan = $(this).val();
-                const componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                const $component = $(this).closest('[wire\\:id]');
+                const componentId = $component.attr('wire:id');
+                
+                console.log('Filter changed:', propertyName, '=', bulan);
+                
                 if (componentId && typeof Livewire !== 'undefined') {
-                    Livewire.find(componentId).set(propertyName, bulan || null);
+                    const component = Livewire.find(componentId);
+                    if (component) {
+                        // Set property - Livewire akan otomatis trigger re-render
+                        component.set(propertyName, bulan || null);
+                        console.log('Property set:', propertyName, '=', bulan);
+                        
+                        // Setelah property di-set, tunggu update dan refresh chart
+                        setTimeout(() => {
+                            console.log('Manually refreshing charts after filter change...');
+                            refreshChartOptionsFromDom();
+                            initCharts();
+                        }, 500);
+                    }
                 }
             });
         });
     }
 
+    function updateChart(chartInstance, newData, colors = ['#71dd37']) {
+        if (!chartInstance) return false;
+        
+        if (!newData) {
+            newData = { series: [], categories: [] };
+        }
+        
+        try {
+            // Pastikan struktur data benar
+            const series = newData.series || [];
+            const categories = newData.categories || [];
+            
+            // Jika data kosong, return false untuk trigger destroy dan recreate
+            // Ini memastikan chart benar-benar clear
+            const hasData = series.length > 0 && categories.length > 0;
+            if (!hasData) {
+                return false; // Return false untuk trigger destroy dan recreate
+            }
+            
+            // Update series terlebih dahulu
+            chartInstance.updateSeries(series, false); // false = tidak animate
+            
+            // Update xaxis categories dan legend
+            chartInstance.updateOptions({
+                xaxis: {
+                    categories: categories
+                },
+                legend: {
+                    show: series.length > 1
+                },
+                colors: colors
+            }, false, true); // false = tidak animate, true = updateSeries juga
+            
+            return true;
+        } catch (e) {
+            console.error('Error updating chart:', e);
+            // Jika update gagal, destroy dan recreate
+            try {
+                chartInstance.destroy();
+            } catch (destroyErr) {
+                console.error('Error destroying chart:', destroyErr);
+            }
+            return false; // Return false untuk trigger recreate
+        }
+    }
+
     function initCharts() {
+        console.log('initCharts called');
+        
         if (typeof ApexCharts === 'undefined') {
             console.error('ApexCharts is not loaded');
             return;
         }
 
         refreshChartOptionsFromDom();
+        console.log('Chart options after refresh:', window.chartOptions);
 
-        if (window.chartDepositoPokok) window.chartDepositoPokok.destroy();
-        if (window.chartCoF) window.chartCoF.destroy();
-        if (window.chartPengembalian) window.chartPengembalian.destroy();
-        if (window.chartSisaDeposito) window.chartSisaDeposito.destroy();
-        
         const formatterRupiah = function(val) {
             if (val === 0) return 'Rp. 0';
             const numVal = parseFloat(val);
@@ -391,7 +472,7 @@
         };
         
         const baseBarOptions = (data, colors = ['#71dd37']) => ({
-            series: data.series,
+            series: data.series || [],
             chart: {
                 type: 'bar',
                 height: 350,
@@ -422,7 +503,7 @@
                 padding: { top: 10, right: 10, bottom: 0, left: 10 }
             },
             xaxis: {
-                categories: data.categories,
+                categories: data.categories || [],
                 labels: { style: { fontSize: '14px', colors: '#697a8d' } }, 
                 axisBorder: { show: true, color: '#e0e0e0' },
                 axisTicks: { show: true, color: '#e0e0e0' }
@@ -442,7 +523,7 @@
             fill: { opacity: 1 },
             colors: colors,
             legend: { 
-                show: data.series.length > 1, 
+                show: (data.series && data.series.length > 1) || false, 
                 position: 'top', 
                 horizontalAlign: 'right', 
                 markers: { width: 12, height: 12, radius: 12 } 
@@ -458,29 +539,148 @@
             pengembalian: window.chartOptions.pengembalian ?? { series: [], categories: [] },
             sisaDeposito: window.chartOptions.sisaDeposito ?? { series: [], categories: [] }
         };
+        
+        console.log('Chart data to render:', chartData);
 
+        // Update existing charts or create new ones
         if (document.querySelector("#chartDepositoPokok")) {
-            const options = baseBarOptions(chartData.depositoPokok);
-            window.chartDepositoPokok = new ApexCharts(document.querySelector("#chartDepositoPokok"), options);
-            window.chartDepositoPokok.render();
+            const data = chartData.depositoPokok;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            console.log('Processing chartDepositoPokok, hasData:', hasData, 'data:', data);
+            
+            if (window.chartDepositoPokok) {
+                // Jika data kosong, destroy dan recreate untuk memastikan chart benar-benar clear
+                if (!hasData) {
+                    console.log('Destroying chartDepositoPokok because no data');
+                    try {
+                        window.chartDepositoPokok.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartDepositoPokok = null;
+                }
+                
+                if (window.chartDepositoPokok) {
+                    console.log('Updating existing chartDepositoPokok');
+                    const updated = updateChart(window.chartDepositoPokok, data);
+                    if (!updated) {
+                        console.log('Update failed, recreating chartDepositoPokok');
+                        // Recreate chart jika update gagal
+                        try {
+                            window.chartDepositoPokok.destroy();
+                        } catch (e) {}
+                        window.chartDepositoPokok = null;
+                    } else {
+                        console.log('ChartDepositoPokok updated successfully');
+                    }
+                }
+            }
+            
+            // Create chart jika belum ada
+            if (!window.chartDepositoPokok) {
+                console.log('Creating new chartDepositoPokok');
+                const options = baseBarOptions(data);
+                window.chartDepositoPokok = new ApexCharts(document.querySelector("#chartDepositoPokok"), options);
+                window.chartDepositoPokok.render();
+                console.log('ChartDepositoPokok rendered');
+            }
         }
 
         if (document.querySelector("#chartCoF")) {
-            const options = baseBarOptions(chartData.coF);
-            window.chartCoF = new ApexCharts(document.querySelector("#chartCoF"), options);
-            window.chartCoF.render();
+            const data = chartData.coF;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            if (window.chartCoF) {
+                if (!hasData) {
+                    try {
+                        window.chartCoF.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartCoF = null;
+                }
+                
+                if (window.chartCoF) {
+                    const updated = updateChart(window.chartCoF, data);
+                    if (!updated) {
+                        try {
+                            window.chartCoF.destroy();
+                        } catch (e) {}
+                        window.chartCoF = null;
+                    }
+                }
+            }
+            
+            if (!window.chartCoF) {
+                const options = baseBarOptions(data);
+                window.chartCoF = new ApexCharts(document.querySelector("#chartCoF"), options);
+                window.chartCoF.render();
+            }
         }
 
         if (document.querySelector("#chartPengembalian")) {
-            const options = baseBarOptions(chartData.pengembalian, ['#71dd37', '#ffab00']);
-            window.chartPengembalian = new ApexCharts(document.querySelector("#chartPengembalian"), options);
-            window.chartPengembalian.render();
+            const data = chartData.pengembalian;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            if (window.chartPengembalian) {
+                if (!hasData) {
+                    try {
+                        window.chartPengembalian.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartPengembalian = null;
+                }
+                
+                if (window.chartPengembalian) {
+                    const updated = updateChart(window.chartPengembalian, data, ['#71dd37', '#ffab00']);
+                    if (!updated) {
+                        try {
+                            window.chartPengembalian.destroy();
+                        } catch (e) {}
+                        window.chartPengembalian = null;
+                    }
+                }
+            }
+            
+            if (!window.chartPengembalian) {
+                const options = baseBarOptions(data, ['#71dd37', '#ffab00']);
+                window.chartPengembalian = new ApexCharts(document.querySelector("#chartPengembalian"), options);
+                window.chartPengembalian.render();
+            }
         }
 
         if (document.querySelector("#chartSisaDeposito")) {
-            const options = baseBarOptions(chartData.sisaDeposito, ['#71dd37', '#ffab00']);
-            window.chartSisaDeposito = new ApexCharts(document.querySelector("#chartSisaDeposito"), options);
-            window.chartSisaDeposito.render();
+            const data = chartData.sisaDeposito;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            if (window.chartSisaDeposito) {
+                if (!hasData) {
+                    try {
+                        window.chartSisaDeposito.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartSisaDeposito = null;
+                }
+                
+                if (window.chartSisaDeposito) {
+                    const updated = updateChart(window.chartSisaDeposito, data, ['#71dd37', '#ffab00']);
+                    if (!updated) {
+                        try {
+                            window.chartSisaDeposito.destroy();
+                        } catch (e) {}
+                        window.chartSisaDeposito = null;
+                    }
+                }
+            }
+            
+            if (!window.chartSisaDeposito) {
+                const options = baseBarOptions(data, ['#71dd37', '#ffab00']);
+                window.chartSisaDeposito = new ApexCharts(document.querySelector("#chartSisaDeposito"), options);
+                window.chartSisaDeposito.render();
+            }
         }
     }
 
@@ -513,12 +713,49 @@
         });
     }
 
+    // Function untuk update chart ketika data berubah
+    let chartUpdateTimer = null;
+    function scheduleChartUpdate() {
+        if (chartUpdateTimer) {
+            clearTimeout(chartUpdateTimer);
+        }
+        chartUpdateTimer = setTimeout(() => {
+            console.log('Scheduled chart update triggered');
+            refreshChartOptionsFromDom();
+            initCharts();
+        }, 300);
+    }
+
+    // Setup MutationObserver untuk memantau perubahan pada chart-data-json
+    function setupChartDataObserver() {
+        const holder = document.getElementById('chart-data-json');
+        if (!holder) {
+            console.warn('chart-data-json not found for observer');
+            return;
+        }
+
+        const observer = new MutationObserver(function(mutations) {
+            console.log('Chart data changed in DOM');
+            scheduleChartUpdate();
+        });
+
+        observer.observe(holder, {
+            attributes: true,
+            attributeFilter: ['data-deposito', 'data-cof', 'data-pengembalian', 'data-sisa'],
+            childList: false,
+            subtree: false
+        });
+
+        console.log('Chart data observer setup complete');
+    }
+
     $(document).ready(function() {
         setTimeout(function() {
             refreshChartOptionsFromDom();
             initSelect2(); 
             initCharts();
             setupResizeObservers();
+            setupChartDataObserver();
         }, 500);
         
         const menuToggle = document.querySelector('.layout-menu-toggle');
@@ -543,37 +780,109 @@
             initSelect2(); 
             initCharts();
             setupResizeObservers();
+            setupChartDataObserver();
         }, 300);
     });
 
     if (typeof Livewire !== 'undefined') {
+        // Hook untuk update setelah Livewire selesai morph
         Livewire.hook('morph.updated', ({ el, component }) => {
+            console.log('Livewire morph.updated triggered');
+            
+            // Setup observer ulang setelah morph
             setTimeout(() => {
-                initSelect2(); 
-                
-                const $component = $(el);
-                const filterMapping = {
-                    'filterBulanDepositoPokok': 'selectedMonthDepositoPokok',
-                    'filterBulanCoF': 'selectedMonthCoF',
-                    'filterBulanPengembalian': 'selectedMonthPengembalian',
-                    'filterBulanSisaDeposito': 'selectedMonthSisaDeposito'
-                };
-                
-                Object.keys(filterMapping).forEach(function(filterId) {
-                    const $select = $component.find('#' + filterId);
-                    if ($select.length) {
-                        const propertyName = filterMapping[filterId];
-                        const value = component.get(propertyName) || '';
-                        
-                        if ($select.val() !== value) {
-                            $select.val(value).trigger('change.select2');
-                        }
-                    }
-                });
-
-                refreshChartOptionsFromDom();
-                initCharts(); 
+                setupChartDataObserver();
             }, 100);
+            
+            // Gunakan requestAnimationFrame untuk memastikan DOM sudah ter-update
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    console.log('Updating charts after morph...');
+                    
+                    initSelect2(); 
+                    
+                    const $component = $(el);
+                    const filterMapping = {
+                        'filterBulanDepositoPokok': 'selectedMonthDepositoPokok',
+                        'filterBulanCoF': 'selectedMonthCoF',
+                        'filterBulanPengembalian': 'selectedMonthPengembalian',
+                        'filterBulanSisaDeposito': 'selectedMonthSisaDeposito'
+                    };
+                    
+                    Object.keys(filterMapping).forEach(function(filterId) {
+                        const $select = $component.find('#' + filterId);
+                        if ($select.length) {
+                            const propertyName = filterMapping[filterId];
+                            const value = component.get(propertyName) || '';
+                            
+                            if ($select.val() !== value) {
+                                $select.val(value).trigger('change.select2');
+                            }
+                        }
+                    });
+
+                    // Pastikan data chart sudah ter-update di DOM sebelum membaca
+                    // Coba beberapa kali jika data belum tersedia
+                    let attempts = 0;
+                    const maxAttempts = 15;
+                    const checkAndUpdate = () => {
+                        const holder = document.getElementById('chart-data-json');
+                        if (!holder) {
+                            console.log('chart-data-json not found, attempt:', attempts);
+                            if (attempts < maxAttempts) {
+                                attempts++;
+                                setTimeout(checkAndUpdate, 100);
+                            }
+                            return;
+                        }
+                        
+                        // Pastikan data attributes sudah ter-update
+                        const hasData = holder.getAttribute('data-deposito') !== null;
+                        console.log('Has data attribute:', hasData, 'attempt:', attempts);
+                        
+                        if (hasData || attempts >= maxAttempts) {
+                            // Refresh data dari DOM
+                            const refreshed = refreshChartOptionsFromDom();
+                            console.log('Data refreshed:', refreshed);
+                            if (refreshed) {
+                                // Update charts dengan data baru
+                                console.log('Initializing charts...');
+                                initCharts();
+                                console.log('Charts initialized');
+                            } else if (attempts < maxAttempts) {
+                                attempts++;
+                                setTimeout(checkAndUpdate, 100);
+                            }
+                        } else {
+                            attempts++;
+                            setTimeout(checkAndUpdate, 100);
+                        }
+                    };
+                    checkAndUpdate();
+                }, 200);
+            });
+        });
+        
+        // Hook untuk update setelah request selesai
+        Livewire.hook('message.processed', (message, component) => {
+            console.log('Livewire message.processed triggered');
+            if (message.updateQueue && message.updateQueue.length > 0) {
+                setTimeout(() => {
+                    console.log('Updating charts after message processed...');
+                    refreshChartOptionsFromDom();
+                    initCharts();
+                }, 300);
+            }
+        });
+        
+        // Hook untuk update setelah component di-update
+        Livewire.hook('component.updated', (component) => {
+            console.log('Livewire component.updated triggered');
+            setTimeout(() => {
+                console.log('Updating charts after component updated...');
+                refreshChartOptionsFromDom();
+                initCharts();
+            }, 300);
         });
     }
 
