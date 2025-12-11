@@ -27,6 +27,7 @@ class JadwalAngsuran extends Model
         'status',
         'tanggal_bayar',
         'nominal_bayar',
+        'bukti_pembayaran',
     ];
 
     protected $casts = [

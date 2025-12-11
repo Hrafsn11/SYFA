@@ -6,12 +6,22 @@ use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
 {
     public bool $isEdit = true;
     public ProgramRestrukturisasi $program;
+    
+    // Property untuk file upload per angsuran
+    public $buktiPembayaranFiles = [];
+    
+    // Property untuk modal upload
+    public $showUploadModal = false;
+    public $selectedAngsuranIndex = null;
+    public $selectedAngsuranNo = null;
+    public $uploadFile = null;
 
     public string $pageTitle = 'Edit Program Restrukturisasi';
     public string $pageSubtitle = 'Perbarui parameter program restrukturisasi';
@@ -49,8 +59,12 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         $this->total_margin = (float) $this->program->total_margin;
         $this->total_cicilan = (float) $this->program->total_cicilan;
 
-        $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item) {
-            return [
+        // Hitung sisa pinjaman untuk metode Efektif (Anuitas)
+        $sisaPokok = $this->plafon_pembiayaan;
+        
+        $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item, $index) use (&$sisaPokok) {
+            $data = [
+                'id' => $item->id_jadwal_angsuran,
                 'no' => $item->no,
                 'tanggal_jatuh_tempo' => optional($item->tanggal_jatuh_tempo)->format('d F Y') ?? '-',
                 'tanggal_jatuh_tempo_raw' => optional($item->tanggal_jatuh_tempo)->format('Y-m-d'),
@@ -60,11 +74,66 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'catatan' => $item->catatan,
                 'is_grace_period' => (bool) $item->is_grace_period,
                 'status' => $item->status,
+                'bukti_pembayaran' => $item->bukti_pembayaran,
+                'tanggal_bayar' => $item->tanggal_bayar ? optional($item->tanggal_bayar)->format('Y-m-d') : null,
+                'nominal_bayar' => (float) $item->nominal_bayar,
             ];
+            
+            // Tambah sisa_pinjaman untuk metode Efektif (Anuitas)
+            if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
+                $data['sisa_pinjaman'] = $sisaPokok;
+                if (!$item->is_grace_period) {
+                    $sisaPokok -= (float) $item->pokok;
+                    if ($sisaPokok < 0) $sisaPokok = 0;
+                }
+            }
+            
+            return $data;
         })->toArray();
 
         $this->show_jadwal = true;
         $this->loadApprovedRestrukturisasi($this->id_pengajuan_restrukturisasi);
+    }
+
+    /**
+     * Reload data jadwal angsuran dari database
+     */
+    protected function loadData()
+    {
+        $this->program->refresh();
+        $this->program->load(['jadwalAngsuran' => fn ($query) => $query->orderBy('no')]);
+        
+        // Hitung sisa pinjaman untuk metode Efektif (Anuitas)
+        $sisaPokok = $this->plafon_pembiayaan;
+        
+        $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item, $index) use (&$sisaPokok) {
+            $data = [
+                'id' => $item->id_jadwal_angsuran,
+                'no' => $item->no,
+                'tanggal_jatuh_tempo' => optional($item->tanggal_jatuh_tempo)->format('d F Y') ?? '-',
+                'tanggal_jatuh_tempo_raw' => optional($item->tanggal_jatuh_tempo)->format('Y-m-d'),
+                'pokok' => (float) $item->pokok,
+                'margin' => (float) $item->margin,
+                'total_cicilan' => (float) $item->total_cicilan,
+                'catatan' => $item->catatan,
+                'is_grace_period' => (bool) $item->is_grace_period,
+                'status' => $item->status,
+                'bukti_pembayaran' => $item->bukti_pembayaran,
+                'tanggal_bayar' => $item->tanggal_bayar ? optional($item->tanggal_bayar)->format('Y-m-d') : null,
+                'nominal_bayar' => (float) $item->nominal_bayar,
+            ];
+            
+            // Tambah sisa_pinjaman untuk metode Efektif (Anuitas)
+            if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
+                $data['sisa_pinjaman'] = $sisaPokok;
+                if (!$item->is_grace_period) {
+                    $sisaPokok -= (float) $item->pokok;
+                    if ($sisaPokok < 0) $sisaPokok = 0;
+                }
+            }
+            
+            return $data;
+        })->toArray();
     }
 
     public function simpan()
@@ -81,7 +150,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         try {
             $this->validate([
                 'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
-                'metode_perhitungan' => 'required|in:Flat,Anuitas',
+                'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
                 'plafon_pembiayaan' => 'required|numeric|min:0',
                 'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
                 'jangka_waktu_total' => 'required|integer|min:1',
@@ -120,18 +189,36 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'updated_by' => Auth::id(),
             ]);
 
+            // Simpan mapping bukti pembayaran berdasarkan nomor angsuran
+            $buktiMapping = $this->program->jadwalAngsuran->keyBy('no')->map(function($item) {
+                return [
+                    'bukti_pembayaran' => $item->bukti_pembayaran,
+                    'tanggal_bayar' => $item->tanggal_bayar,
+                    'nominal_bayar' => $item->nominal_bayar,
+                    'status' => $item->status,
+                ];
+            });
+            
+            // Delete dan recreate jadwal angsuran
             $this->program->jadwalAngsuran()->delete();
 
             foreach ($this->jadwal_angsuran as $item) {
+                $no = $item['no'];
+                $existingData = $buktiMapping->get($no);
+                
                 $this->program->jadwalAngsuran()->create([
-                    'no' => $item['no'],
+                    'no' => $no,
                     'tanggal_jatuh_tempo' => \Carbon\Carbon::parse($item['tanggal_jatuh_tempo_raw']),
                     'pokok' => $item['pokok'],
                     'margin' => $item['margin'],
                     'total_cicilan' => $item['total_cicilan'],
                     'catatan' => $item['catatan'],
                     'is_grace_period' => $item['is_grace_period'] ?? false,
-                    'status' => $item['status'] ?? 'Belum Jatuh Tempo',
+                    'status' => $existingData ? $existingData['status'] : ($item['status'] ?? 'Belum Jatuh Tempo'),
+                    // Preserve bukti pembayaran jika ada
+                    'bukti_pembayaran' => $existingData ? $existingData['bukti_pembayaran'] : null,
+                    'tanggal_bayar' => $existingData ? $existingData['tanggal_bayar'] : null,
+                    'nominal_bayar' => $existingData ? $existingData['nominal_bayar'] : null,
                 ]);
             }
 
@@ -151,6 +238,235 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'type' => 'error',
                 'title' => 'System Error',
                 'text' => 'Gagal memperbarui: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Buka modal upload bukti pembayaran
+     */
+    public function openUploadModal($index)
+    {
+        // Cek apakah jadwal angsuran ada
+        if (!isset($this->jadwal_angsuran[$index])) {
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'Error',
+                'text' => 'Data angsuran tidak ditemukan.',
+            ]);
+            return;
+        }
+
+        $angsuran = $this->jadwal_angsuran[$index];
+        $noAngsuran = $angsuran['no'];
+
+        // Validasi pembayaran berurutan
+        if ($noAngsuran > 1) {
+            // Cari angsuran sebelumnya
+            $previousIndex = $index - 1;
+            if (isset($this->jadwal_angsuran[$previousIndex])) {
+                $previousAngsuran = $this->jadwal_angsuran[$previousIndex];
+                
+                // Cek apakah angsuran sebelumnya sudah lunas
+                if ($previousAngsuran['status'] !== 'Lunas' || empty($previousAngsuran['bukti_pembayaran'])) {
+                    $this->dispatch('swal:modal', [
+                        'type' => 'error',
+                        'title' => 'Pembayaran Berurutan',
+                        'text' => 'Anda harus melunasi angsuran bulan ' . $previousAngsuran['no'] . ' terlebih dahulu sebelum dapat mengupload bukti pembayaran untuk bulan ' . $noAngsuran . '.',
+                    ]);
+                    return;
+                }
+            }
+        }
+
+        // Cek apakah sudah ada bukti pembayaran
+        if (!empty($angsuran['bukti_pembayaran'])) {
+            $this->dispatch('swal:modal', [
+                'type' => 'info',
+                'title' => 'Info',
+                'text' => 'Bukti pembayaran untuk angsuran ini sudah ada. Silakan hapus terlebih dahulu jika ingin mengganti.',
+            ]);
+            return;
+        }
+
+        $this->selectedAngsuranIndex = $index;
+        $this->selectedAngsuranNo = $noAngsuran;
+        $this->uploadFile = null;
+        $this->showUploadModal = true;
+        
+        // Dispatch event untuk trigger JavaScript buka modal
+        $this->dispatch('open-upload-modal');
+    }
+
+    /**
+     * Tutup modal upload
+     */
+    public function closeUploadModal()
+    {
+        $this->showUploadModal = false;
+        $this->selectedAngsuranIndex = null;
+        $this->selectedAngsuranNo = null;
+        $this->uploadFile = null;
+        $this->resetValidation();
+    }
+
+    /**
+     * Upload bukti pembayaran untuk angsuran tertentu
+     */
+    public function submitUploadBukti()
+    {
+        \Log::info('submitUploadBukti called', [
+            'selected_index' => $this->selectedAngsuranIndex,
+            'has_file' => $this->uploadFile ? 'yes' : 'no',
+            'file_type' => $this->uploadFile ? get_class($this->uploadFile) : 'null'
+        ]);
+
+        try {
+            // Validasi
+            if ($this->selectedAngsuranIndex === null) {
+                $this->dispatch('swal:modal', [
+                    'type' => 'error',
+                    'title' => 'Error',
+                    'text' => 'Data angsuran tidak ditemukan.',
+                ]);
+                return;
+            }
+
+            // Cek apakah file sudah dipilih
+            if (!$this->uploadFile) {
+                $this->dispatch('swal:modal', [
+                    'type' => 'error',
+                    'title' => 'Error',
+                    'text' => 'Silakan pilih file bukti pembayaran terlebih dahulu.',
+                ]);
+                return;
+            }
+
+            // Validasi file - Livewire sudah handle upload, jadi langsung validate
+            try {
+                $this->validate([
+                    'uploadFile' => 'required|mimes:jpg,jpeg,png,pdf|max:2048',
+                ], [
+                    'uploadFile.required' => 'File bukti pembayaran wajib diisi.',
+                    'uploadFile.mimes' => 'File harus berupa gambar (jpg, jpeg, png) atau PDF.',
+                    'uploadFile.max' => 'Ukuran file maksimal 2MB.',
+                ]);
+            } catch (ValidationException $e) {
+                // Jika validasi gagal karena file belum ter-upload, tunggu sebentar
+                if (str_contains(implode(' ', $e->errors()['uploadFile'] ?? []), 'required')) {
+                    $this->dispatch('swal:modal', [
+                        'type' => 'warning',
+                        'title' => 'Tunggu Sebentar',
+                        'text' => 'File sedang diunggah ke server. Silakan tunggu sampai loading selesai, lalu klik Upload lagi.',
+                    ]);
+                    return;
+                }
+                throw $e;
+            }
+
+            // Pastikan file adalah instance UploadedFile
+            $file = $this->uploadFile;
+            if (!($file instanceof \Illuminate\Http\UploadedFile)) {
+                \Log::warning('File is not UploadedFile instance', [
+                    'file_type' => gettype($file),
+                    'file_class' => is_object($file) ? get_class($file) : 'not object'
+                ]);
+                $this->dispatch('swal:modal', [
+                    'type' => 'warning',
+                    'title' => 'File Belum Siap',
+                    'text' => 'File sedang diunggah ke server. Silakan tunggu sampai muncul pesan "File siap" (hijau), lalu klik Upload lagi.',
+                ]);
+                return;
+            }
+
+            $index = $this->selectedAngsuranIndex;
+            
+            if (!isset($this->jadwal_angsuran[$index])) {
+                $this->dispatch('swal:modal', [
+                    'type' => 'error',
+                    'title' => 'Error',
+                    'text' => 'Data angsuran tidak ditemukan.',
+                ]);
+                return;
+            }
+
+            $angsuran = $this->jadwal_angsuran[$index];
+            $noAngsuran = $angsuran['no'];
+
+            DB::beginTransaction();
+
+            // Upload file
+            $filename = 'bukti_pembayaran_' . $this->program->id_program_restrukturisasi . '_' . $noAngsuran . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('restrukturisasi/bukti_pembayaran', $filename, 'public');
+
+            // Hapus file lama jika ada
+            if (!empty($angsuran['bukti_pembayaran']) && Storage::disk('public')->exists($angsuran['bukti_pembayaran'])) {
+                Storage::disk('public')->delete($angsuran['bukti_pembayaran']);
+            }
+
+            // Update jadwal angsuran di database
+            if (!isset($angsuran['id'])) {
+                $this->dispatch('swal:modal', [
+                    'type' => 'error',
+                    'title' => 'Error',
+                    'text' => 'ID angsuran tidak ditemukan. Silakan refresh halaman dan coba lagi.',
+                ]);
+                DB::rollBack();
+                return;
+            }
+
+            $jadwalAngsuran = JadwalAngsuran::find($angsuran['id']);
+            if (!$jadwalAngsuran) {
+                $this->dispatch('swal:modal', [
+                    'type' => 'error',
+                    'title' => 'Error',
+                    'text' => 'Data jadwal angsuran tidak ditemukan di database.',
+                ]);
+                DB::rollBack();
+                return;
+            }
+
+            $jadwalAngsuran->update([
+                'bukti_pembayaran' => $path,
+                'status' => 'Lunas',
+                'tanggal_bayar' => now(),
+                'nominal_bayar' => $angsuran['total_cicilan'],
+            ]);
+
+            DB::commit();
+
+            // Reload data dulu
+            $this->loadData();
+
+            // Tutup modal dan clear data
+            $this->closeUploadModal();
+
+            $this->dispatch('swal:modal', [
+                'type' => 'success',
+                'title' => 'Berhasil',
+                'text' => 'Bukti pembayaran berhasil diupload dan status angsuran telah diperbarui menjadi Lunas.',
+            ]);
+
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            $errors = collect($e->errors())->flatten()->join(', ');
+            \Log::error('Validation error uploading bukti: ' . $errors);
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'Validasi Gagal',
+                'text' => $errors,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error uploading bukti pembayaran: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'selected_index' => $this->selectedAngsuranIndex,
+                'has_file' => $this->uploadFile ? 'yes' : 'no',
+            ]);
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'System Error',
+                'text' => 'Gagal mengupload bukti pembayaran: ' . $e->getMessage(),
             ]);
         }
     }

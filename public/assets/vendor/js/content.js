@@ -31,15 +31,14 @@ $(document).on('keyup change paste', 'form input, form select, form textarea', f
     $(this).parents(".form-group").find(".invalid-feedback").html(null).removeClass("d-block");
 });
 
-// $(document).ready(function () {
-//     initAllComponents();
-// });
-
 function initAllComponents() {
     initSelect2();
     initPopOver();
     initTooltips();
     initFlatpickr();
+    registerModalResetListener();
+    initBootstrapDatepicker();
+    window.initCleaveRupiah();
 }
 
 function initFlatpickr() {
@@ -164,6 +163,65 @@ function initTooltips() {
     });
 }
 
+function initBootstrapDatepicker() {
+    const datepickers = $('.bs-datepicker');
+    if (datepickers.length) {
+        datepickers.each(function() {
+            const $this = $(this);
+            // Destroy existing instance if any
+            if ($this.data('datepicker')) {
+                $this.off('changeDate'); // Remove old event listeners
+                $this.datepicker('destroy');
+            }
+            
+            // Handle Livewire wire:model synchronization - get attribute before initialization
+            let wireModelAttr = null;
+            let wireModelValue = null;
+            
+            // Check for wire:model attributes
+            const possibleAttrs = ['wire:model', 'wire:model.blur', 'wire:model.live', 'wire:model.lazy', 'wire:model.defer'];
+            for (let attr of possibleAttrs) {
+                const value = $this.attr(attr);
+                if (value) {
+                    wireModelAttr = attr;
+                    wireModelValue = value;
+                    break;
+                }
+            }
+
+            // Initialize with config
+            $this.datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                startDate: new Date(),
+                orientation: 'bottom auto'
+            }).on('hide', function (e) {
+                e.stopPropagation();
+            });
+            
+            // Handle Livewire wire:model synchronization
+            if (wireModelValue && typeof Livewire !== 'undefined') {
+                const $closestWire = $this.closest('[wire\\:id]');
+                if ($closestWire.length > 0) {
+                    const livewireId = $closestWire.attr('wire:id');
+                    if (livewireId) {
+                        const component = Livewire.find(livewireId);
+                        if (component) {
+                            $this.on('changeDate', function(e) {
+                                const dateValue = $this.val();
+                                if (dateValue) {
+                                    component.set(wireModelValue, dateValue);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
 // function initFormRepeater(el = $('.form-repeater')) {
 //     var row = 2;
 //     var col = 1;
@@ -249,7 +307,7 @@ function btnBlock(element, bool = true) {
  * @param bool
  * @returns {void}
  * */
-function sectionBlock(element, bool = true) {
+function sectionBlock(element, bool = true) {    
     if (bool) {
         element.block({
             message: '<div class="spinner-border text-light" role="status"></div>',
@@ -394,13 +452,27 @@ function tooltip() {
   $("#tooltip-filter").attr("data-bs-original-title", filter);
 }
 
-document.addEventListener('livewire:navigated', () => {
-    initAllComponents();
-
-    // Triggered on modal hide
-    $('.modal:not(.custom-reset)').on('hide.bs.modal', function () {
-        Livewire.dispatch('close-modal');
-        let form = $(this).find('form');
+function registerModalResetListener() {
+    $(document).off('hide.bs.modal', '.modal:not(.custom-reset)');
+    $(document).off('show.bs.modal', '.modal:not(.custom-reset)');
+    
+    $(document).on('hide.bs.modal', '.modal:not(.custom-reset)', function (e) {
+    
+        const $modal = $(this);
+        
+        // Cek apakah event di-prevent (jika ada preventDefault, berarti modal tidak akan di-hide)
+        if (e.isDefaultPrevented()) {
+            return;
+        }
+        
+        if (!$modal.hasClass('show')) {
+            return; // Modal tidak dalam state yang benar, skip
+        }
+        
+        if (typeof Livewire !== 'undefined') {
+            Livewire.dispatch('close-modal');
+        }
+        let form = $modal.find('form');
 
         form.find('.select2').each(function () {
             $(this).val(null).trigger('change');
@@ -410,11 +482,49 @@ document.addEventListener('livewire:navigated', () => {
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
 
-    $('.modal:not(.custom-reset)').on('show.bs.modal', function () {        
+    $(document).on('show.bs.modal', '.modal:not(.custom-reset)', function () {        
         let form = $(this).find('form');
         form.find('.is-invalid').removeClass('is-invalid');
         form.find('.invalid-feedback').html(null).removeClass('d-block');   
     });
+}
+
+let isInitializing = false;
+
+window.handleComponentUpdate = () => {
+    if (isInitializing) return;
+    
+    isInitializing = true;
+    
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (typeof initAllComponents === 'function') {
+                initAllComponents();
+            }
+            isInitializing = false;
+        });
+    });
+};
+
+window.reinitWhenComponentsUpdated = (eventName) => {
+    if (typeof Livewire === 'undefined') {
+        console.warn('Livewire belum tersedia, tunggu livewire:init');
+        return;
+    }
+    
+    if (typeof eventName === 'string' && eventName.trim() !== '') {
+        Livewire.on(eventName, window.handleComponentUpdate);
+    } else if (Array.isArray(eventName)) {
+        eventName.forEach(event => {
+            if (typeof event === 'string' && event.trim() !== '') {
+                Livewire.on(event, window.handleComponentUpdate);
+            }
+        });
+    }
+};
+
+document.addEventListener('livewire:navigated', () => {
+    initAllComponents();
 });
 
 let totalUpload = 0;
@@ -470,22 +580,199 @@ document.addEventListener('livewire:exception', event => {
     console.error('LIVEWIRE EXCEPTION:', event.detail);
 });
 
-document.addEventListener('livewire:init', () => {
+// Global function untuk inisialisasi Cleave.js pada input rupiah
+window.initCleaveRupiah = function() {
+    // Selector untuk semua input yang perlu format rupiah
+    const rupiahInputs = document.querySelectorAll('.input-rupiah, [data-format="rupiah"]');
+
+    rupiahInputs.forEach(function(input) {
+        // Skip jika sudah di-initialize
+        if (input.dataset.cleaveInitialized === 'true') {
+            return;
+        }
+
+        // Initialize Cleave.js
+        new Cleave(input, {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand',
+            numeralDecimalScale: 0,
+            prefix: 'Rp ',
+            rawValueTrimPrefix: true,
+            noImmediatePrefix: false
+        });
+
+        // Mark as initialized
+        input.dataset.cleaveInitialized = 'true';
+    });
+};
+
+// Function untuk get raw value (angka saja tanpa format)
+window.getCleaveRawValue = function(element) {
+    if (!element) return 0;
+    const value = element.value.replace(/[^0-9]/g, '');
+    return parseInt(value) || 0;
+};
+
+// Function untuk set value dengan format rupiah
+window.setCleaveValue = function(element, value) {
+    if (!element) return;
+    // Remove existing Cleave instance if any
+    if (element._vCleave) {
+        element._vCleave.destroy();
+    }
+    // Set value
+    element.value = value;
+    // Reinitialize
+    window.initCleaveRupiah();
+};
+
+document.addEventListener('livewire:init', () => {    
     Livewire.on('after-action', (event) => {        
         const callbackName = event[0].callback;
         const payload = event[0]?.payload?.original || {};
 
-        showSweetAlert({
-            title: payload?.data?.title ?? 'Berhasil!',
-            text: payload.message,
-            icon: payload?.data?.icon ?? 'success',
-            showConfirmButton: payload?.data?.showConfirmButton
-        }); 
-
-        if (typeof window[callbackName] === 'function') {
-            window[callbackName](payload);
+        if (payload.error === false) {
+            showSweetAlert({
+                title: payload?.data?.title ?? 'Berhasil!',
+                text: payload.message,
+                icon: payload?.data?.icon ?? 'success',
+                showConfirmButton: payload?.data?.showConfirmButton
+            }); 
+    
+            if (typeof window[callbackName] === 'function') {
+                window[callbackName](payload);
+            }
+        } else {
+            showSweetAlert({
+                title: payload?.data?.title ?? 'Gagal!',
+                text: payload.message,
+                icon: payload?.data?.icon ?? 'error',
+                showConfirmButton: payload?.data?.showConfirmButton
+            });
         }
-        
+    });
+
+    Livewire.directive('block-when-change-state', ({ el, directive, cleanup }) => {
+        const possibleAttrs = [
+            'wire:model',
+            'wire:model.live',
+            'wire:model.change',
+            'wire:model.lazy',
+            'wire:model.blur',
+            'wire:model.debounce.500ms',
+            'wire:model.defer',
+            'select2-livewire',
+            'datepicker-livewire'
+        ];
+
+        const expressions = (directive.expression || '')
+            .split('|')
+            .map(expr => expr.trim())
+            .filter(Boolean);
+
+        if (!expressions.length && directive.expression) {
+            expressions.push(directive.expression);
+        }
+
+        const expressionSet = new Set(expressions);
+        const matchedElements = new Set();
+
+        document.querySelectorAll('*').forEach(element => {
+            for (let attr of possibleAttrs) {
+                if (!element.hasAttribute(attr)) continue;
+
+                const attrValue = element.getAttribute(attr);
+                if (expressionSet.has(attrValue)) {
+                    matchedElements.add(element);
+                    break;
+                }
+            }
+        });
+
+        const listeners = [];
+        let isBlocked = false;
+        const $element = $(el);
+        let unblockTimeout = null;
+
+        // Handler untuk unblock ketika Livewire selesai update
+        const unblockHandler = () => {
+            // Gunakan requestAnimationFrame untuk memastikan unblock terjadi setelah DOM update
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (isBlocked) {
+                        sectionBlock($element, false);
+                        isBlocked = false;
+                    }
+                });
+            });
+        };
+
+        // Setup hook untuk mendeteksi kapan Livewire selesai morph
+        Livewire.hook('morphed', unblockHandler);
+
+        // Juga dengarkan event navigated sebagai fallback
+        const navigatedHandler = () => {
+            unblockHandler();
+        };
+        document.addEventListener('livewire:navigated', navigatedHandler);
+
+        matchedElements.forEach(elementInput => {
+            const handler = () => {
+                // Clear timeout sebelumnya jika ada
+                if (unblockTimeout) {
+                    clearTimeout(unblockTimeout);
+                    unblockTimeout = null;
+                }
+
+                if (!isBlocked) {
+                    sectionBlock($element, true);
+                    isBlocked = true;
+                }
+            };
+
+            if (elementInput.hasAttribute('select2-livewire')) {
+                const $select = $(elementInput);
+                
+                $select.on('select2:select.block-when-change-state', handler);
+                $select.on('select2:clear.block-when-change-state', handler);
+                
+                listeners.push({ 
+                    elementInput, 
+                    handler, 
+                    isSelect2: true,
+                    $select: $select
+                });
+            } else {
+                elementInput.addEventListener('change', handler);
+                listeners.push({ elementInput, handler, isSelect2: false });
+            }
+        });
+
+        cleanup(() => {
+            // Remove event listeners
+            listeners.forEach(({ elementInput, handler, isSelect2, $select }) => {
+                if (isSelect2 && $select) {
+                    $select.off('select2:select.block-when-change-state', handler);
+                    $select.off('select2:clear.block-when-change-state', handler);
+                } else {
+                    elementInput.removeEventListener('change', handler);
+                }
+            });
+
+            // Remove navigated event listener
+            document.removeEventListener('livewire:navigated', navigatedHandler);
+
+            // Clear timeout jika ada
+            if (unblockTimeout) {
+                clearTimeout(unblockTimeout);
+            }
+
+            // Unblock jika masih blocked
+            if (isBlocked) {
+                sectionBlock($element, false);
+                isBlocked = false;
+            }
+        });
     });
 
     Livewire.on('after-get-data', (event) => {
@@ -516,20 +803,16 @@ document.addEventListener('livewire:init', () => {
                 [wire\\:model\\.lazy="${k}"],
                 [wire\\:model\\.blur="${k}"],
                 [wire\\:model\\.debounce\\.500ms="${k}"],
-                [wire\\:model\\.defer="${k}"]`
+                [wire\\:model\\.defer="${k}"],
+                [select2-livewire="${k}"],
+                [datepicker-livewire="${k}"]`
             );
 
             if (inputs.length > 0) {
                 inputs.forEach(input => {
-                    // tambahkan border merah
-                    input.classList.add('is-invalid');
-
-                    // versi jQuery
-                    const $el = $(input);
-                    $el.addClass('is-invalid');
-
-                    const $parentEl = $el.closest('.form-group');
-                    $parentEl.find('.invalid-feedback')
+                    $(input).addClass('is-invalid');
+                    $(input).parents('.form-group')
+                        .find('.invalid-feedback')
                         .addClass('d-block')
                         .html(messages[0]);
                 });

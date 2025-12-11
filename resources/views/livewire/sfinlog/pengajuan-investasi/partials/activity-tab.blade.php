@@ -30,10 +30,10 @@
                                     $statusIcons = [
                                         'Menunggu Validasi Finance SKI' => ['color' => 'info', 'icon' => 'ti-clock'],
                                         'Menunggu Persetujuan CEO Finlog' => ['color' => 'warning', 'icon' => 'ti-clock'],
-                                        'Disetujui CEO Finlog' => ['color' => 'success', 'icon' => 'ti-check'],
+                                        'Menunggu Upload Bukti Transfer' => ['color' => 'success', 'icon' => 'ti-check'],
+                                        'Menunggu Generate Kontrak' => ['color' => 'info', 'icon' => 'ti-clock'],
                                         'Ditolak Finance SKI' => ['color' => 'danger', 'icon' => 'ti-x'],
                                         'Ditolak CEO Finlog' => ['color' => 'danger', 'icon' => 'ti-x'],
-                                        'Informasi Rekening Terkirim' => ['color' => 'primary', 'icon' => 'ti-send'],
                                         'Bukti Transfer Diupload' => ['color' => 'success', 'icon' => 'ti-upload'],
                                         'Selesai' => ['color' => 'success', 'icon' => 'ti-check-circle'],
                                     ];
@@ -51,11 +51,10 @@
                                     $statusTitles = [
                                         'Menunggu Validasi Finance SKI' => 'Pengajuan Disubmit',
                                         'Menunggu Persetujuan CEO Finlog' => 'Validasi Finance SKI - Disetujui',
-                                        'Disetujui CEO Finlog' => 'Validasi CEO Finlog - Disetujui',
+                                        'Menunggu Upload Bukti Transfer' => 'Validasi CEO Finlog - Disetujui',
+                                        'Menunggu Generate Kontrak' => 'Bukti Transfer Diupload',
                                         'Ditolak Finance SKI' => 'Validasi Finance SKI - Ditolak',
                                         'Ditolak CEO Finlog' => 'Validasi CEO Finlog - Ditolak',
-                                        'Informasi Rekening Terkirim' => 'Informasi Rekening Dikirim ke Investor',
-                                        'Bukti Transfer Diupload' => 'Bukti Transfer Diupload',
                                         'Selesai' => 'Kontrak Digenerate - Proses Selesai',
                                     ];
                                 @endphp
@@ -66,15 +65,14 @@
                                     $statusDescriptions = [
                                         'Menunggu Validasi Finance SKI' => 'Pengajuan investasi telah disubmit dan menunggu validasi dari Finance SKI.',
                                         'Menunggu Persetujuan CEO Finlog' => 'Validasi Finance SKI berhasil, menunggu persetujuan CEO Finlog.',
-                                        'Disetujui CEO Finlog' => 'Pengajuan telah disetujui oleh CEO Finlog.',
+                                        'Menunggu Upload Bukti Transfer' => 'Pengajuan telah disetujui oleh CEO Finlog, menunggu upload bukti transfer.',
+                                        'Menunggu Generate Kontrak' => 'Bukti transfer telah diupload, menunggu generate kontrak.',
                                         'Ditolak Finance SKI' => $history->catatan_penolakan 
                                             ? '<span class="text-danger fw-semibold">Alasan: </span>' . $history->catatan_penolakan
                                             : 'Pengajuan ditolak oleh Finance SKI.',
                                         'Ditolak CEO Finlog' => $history->catatan_penolakan 
                                             ? '<span class="text-danger fw-semibold">Alasan: </span>' . $history->catatan_penolakan
                                             : 'Pengajuan ditolak oleh CEO Finlog.',
-                                        'Informasi Rekening Terkirim' => 'Informasi nomor rekening telah dikirim ke investor untuk transfer dana.',
-                                        'Bukti Transfer Diupload' => 'Bukti transfer dana investasi telah diupload.',
                                         'Selesai' => 'Kontrak investasi telah digenerate. Proses pengajuan selesai.',
                                     ];
                                 @endphp

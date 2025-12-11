@@ -1,145 +1,131 @@
-@extends('layouts.app')
 
-@section('content')
+<div>
     <div>
-        <div>
-            <a href="{{ route('pengembalian.index') }}" class="btn btn-outline-primary mb-4">
-                <i class="fa-solid fa-arrow-left me-2"></i>
-                Kembali
-            </a>
-            <h4 class="fw-bold">
-                Menu Pengembalian Peminjaman
-            </h4>
-        </div>
-
-        <div class="card">
-            <div class="card-body">
-                <form action="{{ route('pengembalian.store') }}" method="POST" id="formPengembalian"
-                    enctype="multipart/form-data">
-                    @csrf
-
-                    <div class="row">
-                        <div class="col-lg mb-3">
-                            <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                            <input type="text" class="form-control" id="nama_perusahaan" name="nama_perusahaan"
-                                value="{{ $namaPerusahaan }}" readonly required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-lg mb-3">
-                            <label for="kode_peminjaman" class="form-label">Kode Peminjaman</label>
-                            <select class="form-control select2" name="kode_peminjaman" id="kode_peminjaman"
-                                data-placeholder="Pilih Peminjaman" required>
-                                <option value="">Pilih Peminjaman</option>
-                                @foreach ($pengajuanPeminjaman as $item)
-                                    <option value="{{ $item->id_pengajuan_peminjaman }}"
-                                        data-total-pinjaman="{{ $item->total_pinjaman }}"
-                                        data-total-bagi-hasil="{{ $item->total_bagi_hasil }}"
-                                        data-tanggal-pencairan="{{ $item->harapan_tanggal_pencairan }}"
-                                        data-jenis-pembiayaan="{{ $item->jenis_pembiayaan }}"
-                                        data-invoices="{{ json_encode($item->invoices_json) }}"
-                                        data-tenor-pembayaran="{{ $item->tenor_pembayaran_value ?? 0 }}"
-                                        data-yang-harus-dibayarkan="{{ $item->yang_harus_dibayarkan_value ?? 0 }}"
-                                        data-tanggal-pencairan-real="{{ $item->tanggal_pencairan_real ?? $item->harapan_tanggal_pencairan }}">
-                                        {{ $item->nomor_peminjaman }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="card border-1 shadow-none mb-4">
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-2">
-                                    <label for="total_pinjaman">Total Pinjaman</label>
-                                    <input type="text" class="form-control" id="total_pinjaman" name="total_pinjaman"
-                                        readonly>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="total_bagi_hasil">Total Bagi Hasil</label>
-                                    <input type="text" class="form-control" id="total_bagi_hasil" name="total_bagi_hasil"
-                                        readonly>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-2">
-                                    <label for="tanggal_pencairan">Tanggal Pencairan</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="tanggal_pencairan"
-                                            name="tanggal_pencairan" readonly>
-                                        <span class="input-group-text"><i class="ti ti-calendar"></i></span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="lama_pemakaian">Lama Pemakaian</label>
-                                    <input type="text" class="form-control" id="lama_pemakaian" name="lama_pemakaian"
-                                        readonly>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-6 mb-2">
-                                    <label for="invoice" id="labelInvoice">Invoice Yang Akan Dibayar</label>
-                                    <select name="invoice" id="invoice" class="form-control select2"
-                                        data-placeholder="Pilih Invoice">
-                                        <option value="">Pilih Invoice</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="nominal_invoice" id="labelNominalInvoice">Nominal Invoice</label>
-                                    <input type="text" class="form-control" id="nominal_invoice" name="nominal_invoice"
-                                        readonly>
-                                </div>
-                            </div>
-
-                            <!-- Khusus Installment -->
-                            <div class="row mb-3" id="installmentFields" style="display: none;">
-                                <div class="col-md-6 mb-2">
-                                    <label for="bulan_pembayaran">Bulan Pembayaran</label>
-                                    <select name="bulan_pembayaran" id="bulan_pembayaran" class="form-control select2"
-                                        data-placeholder="Pilih Bulan">
-                                        <option value="">Pilih Bulan</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="yang_harus_dibayarkan">Yang Harus Dibayar Bulan Ini</label>
-                                    <input type="text" class="form-control" id="yang_harus_dibayarkan" name="yang_harus_dibayarkan" readonly>
-                                </div>
-                            </div>
-
-                            @include('livewire.pengembalian-pinjaman.partials._pengembalian-table')
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="sisa_utang" class="form-label">Sisa Bayar Pokok</label>
-                            <input type="text" class="form-control" id="sisa_utang" name="sisa_utang" readonly>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
-                            <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil"
-                                readonly>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-lg">
-                            <label for="catatan">Catatan Lainnya</label>
-                            <textarea name="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">
-                            Simpan Data
-                            <i class="ti ti-arrow-right ms-2"></i>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <a wire:navigate.hover href="{{ route('pengembalian.index') }}" class="btn btn-outline-primary mb-4">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Kembali
+        </a>
+        <h4 class="fw-bold">
+            Menu Pengembalian Peminjaman
+        </h4>
     </div>
 
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ route('pengembalian.store') }}" method="POST" id="formPengembalian"
+                enctype="multipart/form-data">
+                @csrf
+
+                <div class="row">
+                    <div class="col-lg mb-3">
+                        <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
+                        <input type="text" class="form-control" id="nama_perusahaan" value="{{ $namaPerusahaan }}" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg mb-3">
+                        <label for="kode_peminjaman" class="form-label">Kode Peminjaman</label>
+                        <select class="form-control select2" id="kode_peminjaman" data-placeholder="Pilih Peminjaman" wire:model.live="kode_peminjaman">
+                            <option value="">Pilih Peminjaman</option>
+                            @foreach ($pengajuanPeminjaman as $item)
+                                <option value="{{ $item->id_pengajuan_peminjaman }}">
+                                    {{ $item->nomor_peminjaman }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="card border-1 shadow-none mb-4">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-2">
+                                <label for="total_pinjaman">Total Pinjaman</label>
+                                <input type="text" class="form-control" id="total_pinjaman" name="total_pinjaman" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="total_bagi_hasil">Total Bagi Hasil</label>
+                                <input type="text" class="form-control" id="total_bagi_hasil" name="total_bagi_hasil"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-2">
+                                <label for="tanggal_pencairan">Tanggal Pencairan</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="tanggal_pencairan"
+                                        name="tanggal_pencairan" readonly>
+                                    <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lama_pemakaian">Lama Pemakaian</label>
+                                <input type="text" class="form-control" id="lama_pemakaian" name="lama_pemakaian"
+                                    readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-2">
+                                <label for="invoice" id="labelInvoice">Invoice Yang Akan Dibayar</label>
+                                <select name="invoice" id="invoice" class="form-control select2"
+                                    data-placeholder="Pilih Invoice">
+                                    <option value="">Pilih Invoice</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nominal_invoice" id="labelNominalInvoice">Nominal Invoice</label>
+                                <input type="text" class="form-control" id="nominal_invoice" name="nominal_invoice"
+                                    readonly>
+                            </div>
+                        </div>
+
+                        <!-- Khusus Installment -->
+                        <div class="row mb-3" id="installmentFields" style="display: none;">
+                            <div class="col-md-6 mb-2">
+                                <label for="bulan_pembayaran">Bulan Pembayaran</label>
+                                <select name="bulan_pembayaran" id="bulan_pembayaran" class="form-control select2"
+                                    data-placeholder="Pilih Bulan">
+                                    <option value="">Pilih Bulan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="yang_harus_dibayarkan">Yang Harus Dibayar Bulan Ini</label>
+                                <input type="text" class="form-control" id="yang_harus_dibayarkan" name="yang_harus_dibayarkan" readonly>
+                            </div>
+                        </div>
+
+                        @include('livewire.pengembalian-pinjaman.partials._pengembalian-table')
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="sisa_utang" class="form-label">Sisa Bayar Pokok</label>
+                        <input type="text" class="form-control" id="sisa_utang" name="sisa_utang" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
+                        <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil"
+                            readonly>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-lg">
+                        <label for="catatan">Catatan Lainnya</label>
+                        <textarea name="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        Simpan Data
+                        <i class="ti ti-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     @include('livewire.pengembalian-pinjaman.partials._modal-tambah-pengembalian-invoice')
-@endsection
+</div>
+
 
 @push('scripts')
     <script>
