@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
