@@ -159,8 +159,8 @@ class ProgramRestrukturisasiCreate extends Component
         // [LOGIC PERHITUNGAN DISINI]
         if ($this->metode_perhitungan === 'Flat') {
             $this->calculateFlatMethod();
-        } elseif ($this->metode_perhitungan === 'Anuitas') {
-            $this->calculateAnuitasMethod();
+        } elseif ($this->metode_perhitungan === 'Efektif (Anuitas)') {
+            $this->calculateEfektifAnuitasMethod();
         }
 
         $this->show_jadwal = true; 
@@ -177,8 +177,8 @@ class ProgramRestrukturisasiCreate extends Component
     private function calculateFlatMethod()
     {
         $marginPerBulan = ($this->plafon_pembiayaan * ($this->suku_bunga_per_tahun / 100)) / 12;
-        $bulanEfektif = $this->jangka_waktu_total - $this->masa_tenggang;
-        $pokokPerBulan = $bulanEfektif > 0 ? $this->plafon_pembiayaan / $bulanEfektif : 0;
+        $bulanEfektifAnuitas = $this->jangka_waktu_total - $this->masa_tenggang;
+        $pokokPerBulan = $bulanEfektifAnuitas > 0 ? $this->plafon_pembiayaan / $bulanEfektifAnuitas : 0;
 
         $jadwal = [];
         $totalPokok = 0; $totalMargin = 0; $totalCicilan = 0;
@@ -217,17 +217,17 @@ class ProgramRestrukturisasiCreate extends Component
         $this->total_cicilan = $totalCicilan;
     }
 
-    // [METODE ANUITAS - ADA SISA PINJAMAN]
-    private function calculateAnuitasMethod()
+    // [METODE Efektif (Anuitas) - ADA SISA PINJAMAN]
+    private function calculateEfektifAnuitasMethod()
     {
         $bungaPerBulan = ($this->suku_bunga_per_tahun / 100) / 12; 
         $sisaPokok = $this->plafon_pembiayaan;
-        $bulanEfektif = $this->jangka_waktu_total - $this->masa_tenggang;
+        $bulanEfektifAnuitas = $this->jangka_waktu_total - $this->masa_tenggang;
 
-        $cicilanAnuitasTetap = 0;
-        if ($bulanEfektif > 0 && $bungaPerBulan > 0) {
-            $penyebut = 1 - pow(1 + $bungaPerBulan, -$bulanEfektif);
-            $cicilanAnuitasTetap = $sisaPokok * ($bungaPerBulan / $penyebut);
+        $cicilanEfektifAnuitasTetap = 0;
+        if ($bulanEfektifAnuitas > 0 && $bungaPerBulan > 0) {
+            $penyebut = 1 - pow(1 + $bungaPerBulan, -$bulanEfektifAnuitas);
+            $cicilanEfektifAnuitasTetap = $sisaPokok * ($bungaPerBulan / $penyebut);
         }
 
         $jadwal = [];
@@ -255,7 +255,7 @@ class ProgramRestrukturisasiCreate extends Component
                     $pokok = $sisaPokok; 
                     $total = $pokok + $margin;
                 } else {
-                    $total = $cicilanAnuitasTetap;
+                    $total = $cicilanEfektifAnuitasTetap;
                     $pokok = $total - $margin;
                 }
 
@@ -269,7 +269,7 @@ class ProgramRestrukturisasiCreate extends Component
                 'no' => $i,
                 'tanggal_jatuh_tempo' => $dueDate->format('d F Y'),
                 'tanggal_jatuh_tempo_raw' => $dueDate->format('Y-m-d'),
-                'sisa_pinjaman' => $sisaPinjamanDisplay, // <--- HANYA ADA DI ANUITAS
+                'sisa_pinjaman' => $sisaPinjamanDisplay, // <--- HANYA ADA DI Efektif (Anuitas)
                 'pokok' => $pokok,
                 'margin' => $margin,
                 'total_cicilan' => $total,
@@ -298,7 +298,7 @@ class ProgramRestrukturisasiCreate extends Component
         try {
             $this->validate([
                 'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
-                'metode_perhitungan' => 'required|in:Flat,Anuitas',
+                'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
                 'plafon_pembiayaan' => 'required|numeric|min:0',
                 'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
                 'jangka_waktu_total' => 'required|integer|min:1',
