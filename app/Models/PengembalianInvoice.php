@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class PengembalianInvoice extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlids;
     
     protected $table = 'pengembalian_invoice';
     protected $primaryKey = 'id_pengembalian_invoice';
+    public $incrementing = false;
+    protected $keyType = 'string';
     
     protected $fillable = [
         'id_pengembalian',

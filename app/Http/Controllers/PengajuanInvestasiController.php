@@ -7,6 +7,7 @@ use App\Models\PengajuanInvestasi;
 use App\Models\HistoryStatusPengajuanInvestor;
 use App\Models\MasterDebiturDanInvestor;
 use App\Http\Requests\PengajuanInvestasiRequest;
+use App\Services\KontrakInvestasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -54,13 +55,24 @@ class PengajuanInvestasiController extends Controller
             // Calculate nominal bagi hasil
             $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
 
-            $pengajuan = PengajuanInvestasi::create(array_merge($validated, [
+            // Prepare payload for creation. Only include nomor_kontrak if provided by user.
+            $payload = array_merge($validated, [
                 'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
                 'status' => 'Draft',
                 'current_step' => 1,
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
-            ]));
+            ]);
+
+            if (!empty($validated['nomor_kontrak'] ?? null)) {
+                if (PengajuanInvestasi::where('nomor_kontrak', $validated['nomor_kontrak'])->exists()) {
+                    return Response::error('Nomor kontrak sudah digunakan.');
+                }
+
+                $payload['nomor_kontrak'] = $validated['nomor_kontrak'];
+            }
+
+            $pengajuan = PengajuanInvestasi::create($payload);
 
             // Create initial history record
             HistoryStatusPengajuanInvestor::create([
@@ -100,6 +112,7 @@ class PengajuanInvestasiController extends Controller
             'id' => $pengajuan->id_pengajuan_investasi,
             'nama_investor' => $pengajuan->nama_investor,
             'nama_perusahaan' => $pengajuan->investor->nama ?? '-',
+            'alamat' => $pengajuan->investor->alamat ?? '-',
             'deposito' => $pengajuan->deposito,
             'tanggal_investasi' => $pengajuan->tanggal_investasi,
             'lama_investasi' => $pengajuan->lama_investasi,
@@ -107,6 +120,7 @@ class PengajuanInvestasiController extends Controller
             'bagi_hasil_pertahun' => $pengajuan->bagi_hasil_pertahun,
             'nominal_bagi_hasil_yang_didapatkan' => $pengajuan->nominal_bagi_hasil_yang_didapatkan,
             'upload_bukti_transfer' => $pengajuan->upload_bukti_transfer,
+            'nomor_kontrak' => $pengajuan->nomor_kontrak,
             'status' => $pengajuan->status,
             'current_step' => $pengajuan->current_step,
         ];
@@ -236,6 +250,20 @@ class PengajuanInvestasiController extends Controller
     }
 
     /**
+     * Display preview kontrak investasi deposito
+     */
+    public function previewKontrak(Request $request, $id, KontrakInvestasiService $kontrakService)
+    {
+        $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
+        
+        // Use nomor_kontrak from request if provided, otherwise use from database
+        $nomorKontrak = $request->input('nomor_kontrak') ?? $pengajuan->nomor_kontrak;
+        $kontrak = $kontrakService->generateKontrakData($pengajuan, $nomorKontrak);
+
+        return view('livewire.pengajuan-investasi.preview-kontrak', compact('kontrak'));
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(PengajuanInvestasiRequest $request, $id)
@@ -247,11 +275,13 @@ class PengajuanInvestasiController extends Controller
 
             $validated = $request->validated();
 
-            // Recalculate nominal bagi hasil
-            $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
+            // Ensure `nomor_kontrak` is unique
+            if (PengajuanInvestasi::where('nomor_kontrak', $validated['nomor_kontrak'])->where('id_pengajuan_investasi', '!=', $id)->exists()) {
+                return Response::error('Nomor kontrak sudah digunakan.');
+            }
 
             $pengajuan->update(array_merge($validated, [
-                'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
+                'nomor_kontrak' => $validated['nomor_kontrak'],
                 'updated_by' => Auth::id(),
             ]));
 
@@ -382,18 +412,27 @@ class PengajuanInvestasiController extends Controller
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
 
-            $validated = $request->validated();
-
             DB::beginTransaction();
 
-            // Update status to completed (Step 6: Selesai)
+            // Update nomor kontrak and status to completed (Step 6: Selesai)
             $pengajuan->update([
+                'nomor_kontrak' => $request->input('nomor_kontrak'),
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'updated_by' => Auth::id(),
             ]);
 
-            // Create history
+            // Create history for "Generate Kontrak"
+            HistoryStatusPengajuanInvestor::create([
+                'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
+                'status' => 'Generate Kontrak',
+                'date' => now()->toDateString(),
+                'time' => now()->toTimeString(),
+                'current_step' => 6,
+                'submit_step1_by' => Auth::id(),
+            ]);
+
+            // Create history for "Selesai"
             HistoryStatusPengajuanInvestor::create([
                 'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
                 'status' => 'Selesai',
@@ -405,10 +444,63 @@ class PengajuanInvestasiController extends Controller
 
             DB::commit();
 
-            return Response::success($pengajuan, 'Kontrak berhasil digenerate');
+            return Response::success($pengajuan, 'Kontrak berhasil digenerate!');
         } catch (\Exception $e) {
             DB::rollBack();
             return Response::errorCatch($e, 'Terjadi kesalahan saat generate kontrak');
+        }
+    }
+
+    /**
+     * Download Certificate
+     */
+    public function downloadSertifikat($id)
+    {
+        try {
+            $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
+            
+            // Check if status is Selesai
+            if ($pengajuan->status !== 'Selesai') {
+                return redirect()->back()->with('error', 'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai');
+            }
+
+            // Generate Nomor Deposito
+            $year = date('Y');
+            $countThisYear = PengajuanInvestasi::whereYear('created_at', $year)
+                ->where('status', 'Selesai')
+                ->where('id_pengajuan_investasi', '<=', $pengajuan->id_pengajuan_investasi)
+                ->count();
+            
+            $nomorDeposito = 'DC' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
+
+            // Get description based on deposito type
+            $deskripsi = $pengajuan->deposito === 'Khusus' 
+                ? 'INVESTASI DEPOSITO KHUSUS' 
+                : 'INVESTASI DEPOSITO REGULER';
+
+            // Calculate tanggal berakhir (tanggal_investasi + lama_investasi bulan)
+            $tanggalInvestasiCarbon = \Carbon\Carbon::parse($pengajuan->tanggal_investasi);
+            $tanggalBerakhirCarbon = $tanggalInvestasiCarbon->copy()->addMonths($pengajuan->lama_investasi);
+
+            // Format dates
+            $tanggalInvestasi = $tanggalInvestasiCarbon->translatedFormat('d F Y');
+            $tanggalBerakhir = $tanggalBerakhirCarbon->translatedFormat('d F Y');
+            $jangkaWaktu = $tanggalInvestasi . ' - ' . $tanggalBerakhir;
+
+            $data = [
+                'nama_deposan' => $pengajuan->nama_investor,
+                'nomor_deposito' => $nomorDeposito,
+                'deskripsi' => $deskripsi,
+                'nilai_deposito' => 'Rp ' . number_format($pengajuan->jumlah_investasi, 0, ',', '.'),
+                'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
+                'jangka_waktu' => $jangkaWaktu,
+                'bagi_hasil' => $pengajuan->bagi_hasil_pertahun . ' % P.A NET',
+                'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->jumlah_investasi, 2, ',', '.'),
+            ];
+
+            return view('livewire.pengajuan-investasi.sertifikat', compact('data'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menggenerate sertifikat: ' . $e->getMessage());
         }
     }
 }

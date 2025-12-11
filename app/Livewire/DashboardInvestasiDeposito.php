@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Livewire;
+
+use Livewire\Component;
+
+class DashboardInvestasiDeposito extends Component
+{
+    public $selectedMonth = null; // <-- PERBAIKAN: Default diubah menjadi null
+
+    public function mount()
+    {
+        // Set default bulan ke null agar filter tampil kosong/placeholder saat pertama dimuat
+        $this->selectedMonth = null; 
+        
+        // Catatan: Anda mungkin perlu memanggil fungsi loadData() di sini
+        // agar dashboard tidak kosong saat mount (tergantung implementasi loadData Anda)
+        // Jika data utama dashboard BUKAN berdasarkan selectedMonth, maka ini aman.
+        // Jika data utama dashboard HARUS berdasarkan selectedMonth, Anda harus menginisialisasi
+        // selectedMonth ke bulan saat ini, atau pastikan loadData dapat menangani null/kosong.
+    }
+
+    public function updatedSelectedMonth()
+    {
+        // Method ini akan dipanggil ketika bulan berubah
+        // Bisa digunakan untuk refresh data chart
+    }
+
+    public function render()
+    {
+        // ... (data summaryData, chartDepositoPokok, dll.)
+
+        // Data untuk summary cards
+        $summaryData = [
+            'total_deposito_pokok' => 126500,
+            'total_deposito_pokok_percent' => 34.7,
+            'total_deposito_pokok_period' => 'Jan 2025',
+            
+            'total_cof' => 126500,
+            'total_cof_percent' => 8,
+            'total_cof_period' => 'Oct 2023',
+            
+            'total_pengembalian' => 126500,
+            'total_pengembalian_percent' => 34.7,
+            'total_pengembalian_period' => 'Oct 2023',
+            
+            'total_outstanding' => 126500,
+            'total_outstanding_percent' => 5,
+            'total_outstanding_period' => 'Oct 2023',
+        ];
+
+        // Data untuk chart Total Deposito Pokok yang masuk Per Bulan
+        $chartDepositoPokok = [
+            'categories' => ['0', 'Techno', 'Proxsis', 'Malaka', 'Hukum', 'Kredit'],
+            'series' => [
+                [
+                    'name' => 'Pokok',
+                    'data' => [0, 195000000, 188000000, 115000000, 85000000, 20000000]
+                ]
+            ]
+        ];
+
+        // Data untuk chart Total CoF per bulan
+        $chartCoF = [
+            'categories' => ['0', 'Techno', 'Proxsis', 'Malaka', 'Hukum', 'Kredit'],
+            'series' => [
+                [
+                    'name' => 'Pokok',
+                    'data' => [0, 195000000, 185000000, 115000000, 85000000, 20000000]
+                ]
+            ]
+        ];
+
+        // Data untuk chart Total Pengembalian Pokok dan Bagi Hasil Perbulan
+        $chartPengembalian = [
+            'categories' => ['Techno', 'Proxsis', 'Malaka', 'Hukum', 'Kredit'],
+            'series' => [
+                [
+                    'name' => 'Pokok',
+                    'data' => [200000000, 175000000, 115000000, 95000000, 25000000]
+                ],
+                [
+                    'name' => 'Bagi Hasil',
+                    'data' => [150000000, 120000000, 150000000, 125000000, 95000000]
+                ]
+            ]
+        ];
+
+        // Data untuk chart Total Sisa Deposito Pokok dan CoF yang Belum Dikembalikan
+        $chartSisaDeposito = [
+            'categories' => ['Techno', 'Proxsis', 'Malaka', 'Hukum', 'Kredit'],
+            'series' => [
+                [
+                    'name' => 'Pokok',
+                    'data' => [190000000, 180000000, 115000000, 90000000, 25000000]
+                ],
+                [
+                    'name' => 'Bagi Hasil',
+                    'data' => [145000000, 115000000, 145000000, 120000000, 90000000]
+                ]
+            ]
+        ];
+        // ... (lanjutkan data chart lainnya)
+
+        return view('livewire.dashboard-investasi-deposito', compact(
+            'summaryData',
+            'chartDepositoPokok',
+            'chartCoF',
+            'chartPengembalian',
+            'chartSisaDeposito'
+        ))->layout('layouts.app');
+    }
+}

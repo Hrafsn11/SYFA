@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
+use App\Services\ArPerbulanService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PengembalianPinjamanRequest;
 
@@ -62,13 +64,13 @@ class PengembalianPinjamanController extends Controller
                     // Tentukan field yang digunakan berdasarkan jenis pembiayaan
                     if ($jenisPembiayaan === 'Invoice Financing') {
                         $labelField = $b->no_invoice;
-                        $nilaiAsli = (float) $b->nilai_invoice;
+                        $nilaiAsli = (float) $b->nilai_pinjaman;
                     } elseif (in_array($jenisPembiayaan, ['PO Financing', 'Factoring'])) {
                         $labelField = $b->no_kontrak;
                         $nilaiAsli = (float) $b->nilai_pinjaman;
                     } else {
                         $labelField = $b->no_invoice ?? $b->no_kontrak;
-                        $nilaiAsli = (float) ($b->nilai_invoice ?? $b->nilai_pinjaman);
+                        $nilaiAsli = (float) $b->nilai_pinjaman;
                     }
                     
                     // Rumus: Total yang harus dibayar = Pokok + Bagi Hasil
@@ -214,6 +216,11 @@ class PengembalianPinjamanController extends Controller
             }
 
             DB::commit();
+            // Update AR Perbulan
+            app(ArPerbulanService::class)->updateAROnPengembalian(
+                $validated['kode_peminjaman'],
+                now()
+            );
 
             return Response::success([
                 'redirect' => route('pengembalian.index')
@@ -302,28 +309,7 @@ class PengembalianPinjamanController extends Controller
      */
     public function destroy($id)
     {
-        // try {
-        //     \DB::beginTransaction();
 
-        //     $pengembalian = PengembalianPinjaman::where('ulid', $id)->firstOrFail();
-            
-        //     // Delete related invoices and their files
-        //     foreach ($pengembalian->pengembalianInvoices as $invoice) {
-        //         if ($invoice->bukti_pembayaran && \Storage::disk('public')->exists($invoice->bukti_pembayaran)) {
-        //             \Storage::disk('public')->delete($invoice->bukti_pembayaran);
-        //         }
-        //         $invoice->delete();
-        //     }
-            
-        //     $pengembalian->delete();
-
-        //     \DB::commit();
-
-        //     return Response::success(null, 'Data pengembalian berhasil dihapus');
-        // } catch (\Exception $e) {
-        //     \DB::rollBack();
-        //     return Response::errorCatch($e);
-        // }
     }
 
     private function calculateHariKeterlambatan($dueDate)

@@ -10,55 +10,15 @@
             <!-- Stepper -->
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
-
-                    <div class="stepper-item" data-step="1">
+                    @foreach(['Pengajuan Investasi', 'Validasi Bagi Hasil', 'Validasi CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'] as $i => $name)
+                    <div class="stepper-item" data-step="{{ $i + 1 }}">
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
-                            <div class="step-label">STEP 1</div>
-                            <div class="step-name">Pengajuan Investasi</div>
+                            <div class="step-label">STEP {{ $i + 1 }}</div>
+                            <div class="step-name">{{ $name }}</div>
                         </div>
                     </div>
-
-                    <div class="stepper-item" data-step="2">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 2</div>
-                            <div class="step-name">Validasi Bagi Hasil</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="3">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 3</div>
-                            <div class="step-name">Validasi CEO SKI</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="4">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 4</div>
-                            <div class="step-name">Upload Bukti Transfer</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="5">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 5</div>
-                            <div class="step-name">Generate Kontrak</div>
-                        </div>
-                    </div>
-
-                    <div class="stepper-item" data-step="6">
-                        <div class="stepper-node"></div>
-                        <div class="stepper-content">
-                            <div class="step-label">STEP 6</div>
-                            <div class="step-name">Selesai</div>
-                        </div>
-                    </div>
-
+                    @endforeach
                 </div>
             </div>
 
@@ -134,92 +94,65 @@
                                                     <i class="fas fa-paper-plane me-2"></i>
                                                     Submit Pengajuan
                                                 </button>
+                                                @can('investasi.validasi_bagi_hasil')
                                                 <button type="button" class="btn btn-primary d-none" id="btnSetujuiPengajuan">
                                                     <i class="fas fa-check me-2"></i>
                                                     Validasi Bagi Hasil
                                                 </button>
+                                                @endcan
+                                                @can('investasi.validasi_ceo_ski')
                                                 <button type="button" class="btn btn-primary d-none" id="btnValidasiCEO">
                                                     <i class="ti ti-check me-2"></i>
                                                     Validasi CEO SKI
                                                 </button>
+                                                @endcan
+                                                @can('investasi.generate_kontrak')
                                                 <button type="button" class="btn btn-primary d-none" id="btnUploadBukti">
                                                     <i class="ti ti-upload me-2"></i>
                                                     Upload Bukti Transfer
                                                 </button>
+                                                @endcan
                                             </div>
                                         </div>
 
                                         <hr class="my-3 my-md-4">
 
-                                        <!-- Data Investasi -->
-                                        <h6 class="text-dark mb-3">Data Investasi</h6>
+                                        @php
+                                            $dataFields = [
+                                                'Data Investasi' => [
+                                                    'Nama Investor' => $investasi['nama_investor'] ?? '-',
+                                                    'Jenis Deposito' => ucfirst($investasi['deposito'] ?? '-'),
+                                                    'Tanggal Investasi' => $investasi['tanggal_investasi'] ? \Carbon\Carbon::parse($investasi['tanggal_investasi'])->format('d F Y') : '-',
+                                                    'Lama Investasi' => ($investasi['lama_investasi'] ?? '-') . ' Bulan'
+                                                ],
+                                                'Data Pembiayaan' => [
+                                                    'Jumlah Investasi' => 'Rp ' . number_format($investasi['jumlah_investasi'] ?? 0, 0, ',', '.'),
+                                                    'Persentase Bagi Hasil' => ($investasi['bagi_hasil_pertahun'] ?? 0) . '%',
+                                                    'Nominal Bagi Hasil Keseluruhan' => 'Rp ' . number_format($investasi['nominal_bagi_hasil_yang_didapatkan'] ?? 0, 0, ',', '.')
+                                                ]
+                                            ];
+                                        @endphp
+                                        @foreach($dataFields as $section => $fields)
+                                        <h6 class="text-dark mb-3">{{ $section }}</h6>
                                         <div class="row g-3 mb-4">
+                                            @foreach($fields as $label => $value)
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nama
-                                                        Investor</small>
-                                                    <p class="fw-bold mb-0">{{ $investasi['nama_investor'] ?? '-' }}</p>
+                                                    <small class="text-light fw-semibold d-block mb-1">{{ $label }}</small>
+                                                    <p class="fw-bold mb-0">{{ $value }}</p>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Jenis
-                                                        Deposito</small>
-                                                    <p class="fw-bold mb-0">{{ ucfirst($investasi['deposito'] ?? '-') }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Tanggal
-                                                        Investasi</small>
-                                                    <p class="fw-bold mb-0">
-                                                        {{ $investasi['tanggal_investasi'] ? \Carbon\Carbon::parse($investasi['tanggal_investasi'])->format('d F Y') : '-' }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Lama
-                                                        Investasi</small>
-                                                    <p class="fw-bold mb-0">{{ $investasi['lama_investasi'] ?? '-' }} Bulan</p>
-                                                </div>
-                                            </div>
+                                            @endforeach
                                         </div>
-
-                                        <hr class="my-3 my-md-4">
-
-                                        <!-- Data Pembiayaan -->
-                                        <h6 class="text-dark mb-3">Data Pembiayaan</h6>
-                                        <div class="row g-3 mb-4">
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Jumlah
-                                                        Investasi</small>
-                                                    <p class="fw-bold mb-0">Rp {{ number_format($investasi['jumlah_investasi'] ?? 0, 0, ',', '.') }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Persentase Bagi
-                                                        Hasil</small>
-                                                    <p class="fw-bold mb-0">{{ $investasi['bagi_hasil_pertahun'] ?? 0 }}%</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
-                                                <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nominal Bagi Hasil
-                                                        Keseluruhan</small>
-                                                    <p class="fw-bold mb-0">Rp {{ number_format($investasi['nominal_bagi_hasil_yang_didapatkan'] ?? 0, 0, ',', '.') }}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        @if(!$loop->last)<hr class="my-3 my-md-4">@endif
+                                        @endforeach
                                     </div>
                                     <!-- End Konten Default -->
                                 </div>
 
                                 <!-- Detail Kontrak Tab -->
                                 <div class="tab-pane fade" id="detail-kontrak" role="tabpanel">
-                                    <!-- Konten Default (Before Step 4) -->
+                                    <!-- Konten Default (Before Step 5) -->
                                     <div id="kontrak-default">
                                         <div class="text-center py-5">
                                             <div class="mb-3">
@@ -227,49 +160,82 @@
                                             </div>
                                             <h5 class="text-muted mb-2">Kontrak Belum Tersedia</h5>
                                             <p class="text-muted mb-0">
-                                                Kontrak akan tersedia setelah proses validasi selesai.
+                                                Kontrak akan tersedia setelah dana dicairkan.
                                             </p>
                                         </div>
                                     </div>
 
-                                    <!-- Konten Step 4: Generate Kontrak -->
-                                    <div id="kontrak-step4" class="d-none">
-                                        <h5 class="mb-4">Generate Kontrak Investasi</h5>
-                                        <form id="formGenerateKontrak">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="nomorKontrak" class="form-label">Nomor Kontrak <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="nomorKontrak"
-                                                        placeholder="Masukkan nomor kontrak" required>
-                                                </div>
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="tanggalKontrak" class="form-label">Tanggal Kontrak <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control flatpickr-date"
-                                                        id="tanggalKontrak" placeholder="DD/MM/YYYY" required>
-                                                </div>
-                                                <div class="col-12 mb-3">
-                                                    <label for="catatanKontrak" class="form-label">Catatan
-                                                        Tambahan</label>
-                                                    <textarea class="form-control" id="catatanKontrak" rows="3" placeholder="Masukkan catatan jika ada"></textarea>
-                                                </div>
+                                    <!-- Konten Step 5: Generate Kontrak (After Dana Sudah Dicairkan) -->
+                                    <div id="kontrak-step5" class="d-none">
+                                        @can('investasi.generate_kontrak')
+                                        <h5 class="mb-4">Generate Kontrak Investasi Deposito</h5>
+                                        
+                                        <!-- Data Kontrak (10 Fields) -->
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Data Kontrak</h6>
                                             </div>
+                                            <div class="card-body">
+                                                <form id="formGenerateKontrak">
+                                                    <div class="row g-3">
+                                                        @php
+                                                            $kontrakFields = [
+                                                                'Nama Investor' => $investasi['nama_investor'] ?? '-',
+                                                                'Nama Perusahaan' => $investasi['nama_investor'] ?? '-',
+                                                                'Jenis Deposito' => ucfirst($investasi['deposito'] ?? '-'),
+                                                                'Jumlah Investasi' => 'Rp ' . number_format($investasi['jumlah_investasi'] ?? 0, 0, ',', '.'),
+                                                                'Persentase Bagi Hasil' => ($investasi['deposito'] === 'Reguler' ? '10%' : ($investasi['bagi_hasil_pertahun'] ?? 0) . '%'),
+                                                                'Lama Investasi' => ($investasi['lama_investasi'] ?? '-') . ' Bulan',
+                                                                'Tanggal Investasi' => $investasi['tanggal_investasi'] ? \Carbon\Carbon::parse($investasi['tanggal_investasi'])->format('d F Y') : '-',
+                                                                'Tanggal Jatuh Tempo' => $investasi['tanggal_investasi'] ? 
+                                                                    ($investasi['deposito'] === 'Reguler' ? 
+                                                                        \Carbon\Carbon::createFromDate(\Carbon\Carbon::parse($investasi['tanggal_investasi'])->year, 12, 31)->format('d F Y') :
+                                                                        \Carbon\Carbon::parse($investasi['tanggal_investasi'])->addMonths($investasi['lama_investasi'])->format('d F Y')) : '-'
+                                                            ];
+                                                        @endphp
+                                                        @foreach($kontrakFields as $label => $value)
+                                                        <div class="col-md-6">
+                                                            <label class="form-label text-muted small">{{ $label }}</label>
+                                                            @if($label === 'Alamat')
+                                                            <textarea class="form-control" rows="2" readonly>{{ $value }}</textarea>
+                                                            @else
+                                                            <input type="text" class="form-control" value="{{ $value }}" readonly>
+                                                            @endif
+                                                        </div>
+                                                        @endforeach
+                                                        <div class="col-md-6">
+                                                            <label class="form-label text-muted small">Alamat</label>
+                                                            <textarea class="form-control" rows="2" readonly>{{ $investasi['alamat'] ?? '-' }}</textarea>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="nomorKontrak" class="form-label">Nomor Kontrak <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control" id="nomorKontrak" name="nomor_kontrak" placeholder="Contoh: 001/SKI/INV/2025" value="{{ old('nomor_kontrak', $investasi['nomor_kontrak'] ?? '') }}" required>
+                                                        </div>
+                                                    </div>
 
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <button type="button" class="btn btn-label-secondary"
-                                                    id="btnBatalKontrak">
-                                                    Batal
-                                                </button>
-                                                <button type="submit" class="btn btn-primary" id="btnSimpanKontrak">
-                                                    <span class="spinner-border spinner-border-sm me-2 d-none"
-                                                        id="btnSimpanKontrakSpinner"></span>
-                                                    Generate Kontrak
-                                                </button>
+                                                    <hr class="my-4">
+
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <button type="button" class="btn btn-outline-primary" id="btnPreviewKontrak">
+                                                            <i class="ti ti-eye me-2"></i>
+                                                            Preview Kontrak
+                                                        </button>
+                                                        <button type="submit" class="btn btn-success" id="btnGenerateKontrak">
+                                                            <span class="spinner-border spinner-border-sm me-2 d-none" id="btnGenerateKontrakSpinner"></span>
+                                                            <i class="ti ti-file-check me-2"></i>
+                                                            Generate Kontrak
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </div>
-                                        </form>
+                                        </div>
+                                        @else
+                                        <div class="alert alert-info">
+                                            Anda tidak memiliki izin untuk melakukan generate kontrak.
+                                        </div>
+                                        @endcan
                                     </div>
-                                    <!-- End Konten Step 4 -->
+                                    <!-- End Konten Step 5 -->
                                 </div>
 
                                 <!-- Activity Tab -->
@@ -301,89 +267,61 @@
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
                                                             <div class="avatar avatar-sm">
-                                                                @if($history->status == 'Draft')
-                                                                    <span class="avatar-initial rounded-circle bg-label-secondary">
-                                                                        <i class="ti ti-pencil"></i>
-                                                                    </span>
-                                                                @elseif($history->status == 'Submit Dokumen')
-                                                                    <span class="avatar-initial rounded-circle bg-label-info">
-                                                                        <i class="ti ti-send"></i>
-                                                                    </span>
-                                                                @elseif($history->status == 'Dokumen Tervalidasi')
-                                                                    <span class="avatar-initial rounded-circle bg-label-success">
-                                                                        <i class="ti ti-check"></i>
-                                                                    </span>
-                                                                @elseif($history->status == 'Ditolak')
-                                                                    <span class="avatar-initial rounded-circle bg-label-danger">
-                                                                        <i class="ti ti-x"></i>
-                                                                    </span>
-                                                                @elseif($history->status == 'Disetujui oleh CEO SKI')
-                                                                    <span class="avatar-initial rounded-circle bg-label-success">
-                                                                        <i class="ti ti-user-check"></i>
-                                                                    </span>
-                                                                @elseif($history->status == 'Dana Sudah Dicairkan')
-                                                                    <span class="avatar-initial rounded-circle bg-label-primary">
-                                                                        <i class="ti ti-file-upload"></i>
-                                                                    </span>
-                                                                @elseif($history->status == 'Selesai')
-                                                                    <span class="avatar-initial rounded-circle bg-label-success">
-                                                                        <i class="ti ti-check-circle"></i>
-                                                                    </span>
-                                                                @else
-                                                                    <span class="avatar-initial rounded-circle bg-label-primary">
-                                                                        <i class="ti ti-clock"></i>
-                                                                    </span>
-                                                                @endif
+                                                                @php
+                                                                    $statusIcons = [
+                                                                        'Draft' => ['color' => 'secondary', 'icon' => 'ti-pencil'],
+                                                                        'Submit Dokumen' => ['color' => 'info', 'icon' => 'ti-send'],
+                                                                        'Dokumen Tervalidasi' => ['color' => 'success', 'icon' => 'ti-check'],
+                                                                        'Ditolak' => ['color' => 'danger', 'icon' => 'ti-x'],
+                                                                        'Disetujui oleh CEO SKI' => ['color' => 'success', 'icon' => 'ti-user-check'],
+                                                                        'Dana Sudah Dicairkan' => ['color' => 'primary', 'icon' => 'ti-file-upload'],
+                                                                        'Generate Kontrak' => ['color' => 'info', 'icon' => 'ti-file-text'],
+                                                                        'Selesai' => ['color' => 'success', 'icon' => 'ti-check-circle'],
+                                                                    ];
+                                                                    
+                                                                    $statusConfig = $statusIcons[$history->status] ?? ['color' => 'primary', 'icon' => 'ti-clock'];
+                                                                @endphp
+                                                                <span class="avatar-initial rounded-circle bg-label-{{ $statusConfig['color'] }}">
+                                                                    <i class="ti {{ $statusConfig['icon'] }}"></i>
+                                                                </span>
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-1">
-                                                                @if($history->status == 'Draft')
-                                                                    Draft Pengajuan
-                                                                @elseif($history->status == 'Submit Dokumen')
-                                                                    Dokumen Disubmit
-                                                                @elseif($history->status == 'Dokumen Tervalidasi')
-                                                                    Validasi Bagi Hasil - Disetujui
-                                                                @elseif($history->status == 'Ditolak')
-                                                                    @if($history->current_step == 2)
-                                                                        Validasi Bagi Hasil - Ditolak
-                                                                    @elseif($history->current_step == 3)
-                                                                        Validasi CEO SKI - Ditolak
-                                                                    @else
-                                                                        Pengajuan Ditolak
-                                                                    @endif
-                                                                @elseif($history->status == 'Disetujui oleh CEO SKI')
-                                                                    Validasi CEO SKI - Disetujui
-                                                                @elseif($history->status == 'Dana Sudah Dicairkan')
-                                                                    Upload Bukti Transfer
-                                                                @elseif($history->status == 'Selesai')
-                                                                    Proses Selesai
-                                                                @else
-                                                                    {{ $history->status }}
-                                                                @endif
+                                                                @php
+                                                                    $statusTitles = [
+                                                                        'Draft' => 'Draft Pengajuan',
+                                                                        'Submit Dokumen' => 'Dokumen Disubmit',
+                                                                        'Dokumen Tervalidasi' => 'Validasi Bagi Hasil - Disetujui',
+                                                                        'Ditolak' => match($history->current_step) {
+                                                                            2 => 'Validasi Bagi Hasil - Ditolak',
+                                                                            3 => 'Validasi CEO SKI - Ditolak',
+                                                                            default => 'Pengajuan Ditolak'
+                                                                        },
+                                                                        'Disetujui oleh CEO SKI' => 'Validasi CEO SKI - Disetujui',
+                                                                        'Dana Sudah Dicairkan' => 'Upload Bukti Transfer',
+                                                                        'Generate Kontrak' => 'Generate Kontrak',
+                                                                        'Selesai' => 'Proses Selesai',
+                                                                    ];
+                                                                @endphp
+                                                                {{ $statusTitles[$history->status] ?? $history->status }}
                                                             </h6>
                                                             <p class="text-muted mb-0 small">
-                                                                @if($history->status == 'Draft')
-                                                                    Pengajuan investasi dibuat sebagai draft.
-                                                                @elseif($history->status == 'Submit Dokumen')
-                                                                    Dokumen pengajuan berhasil disubmit untuk validasi.
-                                                                @elseif($history->status == 'Dokumen Tervalidasi')
-                                                                    Bagi hasil telah divalidasi dan disetujui.
-                                                                @elseif($history->status == 'Ditolak')
-                                                                    @if($history->catatan_validasi_dokumen_ditolak)
-                                                                        <span class="text-danger fw-semibold">Alasan: </span>{{ $history->catatan_validasi_dokumen_ditolak }}
-                                                                    @else
-                                                                        Pengajuan ditolak.
-                                                                    @endif
-                                                                @elseif($history->status == 'Disetujui oleh CEO SKI')
-                                                                    Pengajuan telah disetujui oleh CEO SKI.
-                                                                @elseif($history->status == 'Dana Sudah Dicairkan')
-                                                                    Bukti transfer investasi telah diupload.
-                                                                @elseif($history->status == 'Selesai')
-                                                                    Proses investasi telah selesai.
-                                                                @else
-                                                                    {{ $history->status }}
-                                                                @endif
+                                                                @php
+                                                                    $statusDescriptions = [
+                                                                        'Draft' => 'Pengajuan investasi dibuat sebagai draft.',
+                                                                        'Submit Dokumen' => 'Dokumen pengajuan berhasil disubmit untuk validasi.',
+                                                                        'Dokumen Tervalidasi' => 'Bagi hasil telah divalidasi dan disetujui.',
+                                                                        'Ditolak' => $history->catatan_validasi_dokumen_ditolak 
+                                                                            ? '<span class="text-danger fw-semibold">Alasan: </span>' . $history->catatan_validasi_dokumen_ditolak
+                                                                            : 'Pengajuan ditolak.',
+                                                                        'Disetujui oleh CEO SKI' => 'Pengajuan telah disetujui oleh CEO SKI.',
+                                                                        'Dana Sudah Dicairkan' => 'Bukti transfer investasi telah diupload.',
+                                                                        'Generate Kontrak' => 'Kontrak investasi telah digenerate.',
+                                                                        'Selesai' => 'Proses investasi telah selesai.',
+                                                                    ];
+                                                                @endphp
+                                                                {!! $statusDescriptions[$history->status] ?? $history->status !!}
                                                             </p>
                                                             @if($history->submittedBy)
                                                                 <small class="text-muted">
@@ -409,6 +347,12 @@
                                                                 Lihat Bukti
                                                             </button>
                                                         @endif
+                                                        @if($history->status == 'Generate Kontrak')
+                                                            <button type="button" class="btn btn-sm btn-success" onclick="previewKontrakFromHistory()">
+                                                                <i class="ti ti-file-text me-1"></i>
+                                                                Preview Kontrak
+                                                            </button>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -429,6 +373,7 @@
     </div>
 
     <!-- Modal Persetujuan Investasi -->
+    @can('investasi.validasi_bagi_hasil')
     <div class="modal fade" id="modalPersetujuanInvestasi" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -452,8 +397,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Modal Hasil Review (Penolakan) -->
+    @canany(['investasi.validasi_bagi_hasil','investasi.validasi_ceo_ski'])
     <div class="modal fade" id="modalHasilReview" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -485,8 +432,10 @@
             </div>
         </div>
     </div>
+    @endcanany
 
     <!-- Modal Upload Bukti Transfer -->
+    @can('investasi.generate_kontrak')
     <div class="modal fade" id="modalUploadBuktiTransfer" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -496,6 +445,12 @@
                 </div>
                 <form id="formUploadBuktiTransfer">
                     <div class="modal-body">
+                        <div class="alert alert-info mb-3">
+                            <h6 class="alert-heading mb-2"><i class="ti ti-info-circle me-2"></i>Informasi Rekening Transfer</h6>
+                            <p class="mb-1"><strong>Nama:</strong> PT. Synnovac Kapital Indonesia</p>
+                            <p class="mb-1"><strong>No. Rekening:</strong> 1240010052851</p>
+                            <p class="mb-0"><strong>Bank:</strong> Bank Mandiri</p>
+                        </div>
                         <div class="mb-3">
                             <label for="fileBuktiTransfer" class="form-label">File Bukti Transfer <span
                                     class="text-danger">*</span></label>
@@ -520,8 +475,10 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Modal Validasi CEO SKI -->
+    @can('investasi.validasi_ceo_ski')
     <div class="modal fade" id="modalValidasiCEO" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -547,6 +504,7 @@
             </div>
         </div>
     </div>
+    @endcan
 
     <!-- Modal Preview Bukti Transfer -->
     <div class="modal fade" id="modalPreviewBukti" tabindex="-1" aria-hidden="true">
@@ -574,365 +532,189 @@
     <script>
         // Preview Bukti Transfer
         function previewBuktiTransfer(fileUrl) {
-            const modal = new bootstrap.Modal($('#modalPreviewBukti')[0]);
-            const extension = fileUrl.split('.').pop().toLowerCase();
+            const ext = fileUrl.split('.').pop().toLowerCase();
+            const $img = $('#previewImage'), $pdf = $('#previewPdf');
             
-            $('#previewImage').addClass('d-none');
-            $('#previewPdf').addClass('d-none');
+            $img.add($pdf).addClass('d-none');
             $('#downloadBukti').attr('href', fileUrl);
             
-            if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
-                $('#previewImage').attr('src', fileUrl).removeClass('d-none');
-            } else if (extension === 'pdf') {
-                $('#previewPdf').attr('src', fileUrl).removeClass('d-none');
-            }
+            (['jpg', 'jpeg', 'png', 'gif'].includes(ext) ? $img : $pdf)
+                .attr('src', fileUrl).removeClass('d-none');
             
-            modal.show();
+            new bootstrap.Modal($('#modalPreviewBukti')[0]).show();
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const investasiId = '{{ $investasi['id'] }}';
-            const currentStatus = '{{ $investasi['status'] }}';
-            let currentStep = {{ $investasi['current_step'] ?? 1 }};
-
-         
+            const ID = '{{ $investasi['id'] }}';
+            const STATUS = '{{ $investasi['status'] }}';
+            const STEP = {{ $investasi['current_step'] ?? 1 }};
+            const CSRF = '{{ csrf_token() }}';
+            // Use nomor kontrak from database if available, otherwise from localStorage
+            const nomorKontrakFromDB = '{{ $investasi['nomor_kontrak'] ?? '' }}';
+            let savedNomorKontrak = nomorKontrakFromDB || localStorage.getItem(`kontrak_${ID}`);
+            
+            // Update localStorage if nomor kontrak from DB exists
+            if (nomorKontrakFromDB) {
+                localStorage.setItem(`kontrak_${ID}`, nomorKontrakFromDB);
+            }
 
             // Update UI berdasarkan step
             function updateUI() {
-                
                 // Update stepper
-                document.querySelectorAll('.stepper-item').forEach((item, index) => {
-                    const step = index + 1;
-                    item.classList.remove('completed', 'active');
-                    if (step < currentStep) item.classList.add('completed');
-                    else if (step === currentStep) item.classList.add('active');
+                $('.stepper-item').each((i, el) => {
+                    const step = i + 1;
+                    $(el).toggleClass('completed', step < STEP).toggleClass('active', step === STEP);
                 });
 
-                // Show/hide buttons based on status
-                // Submit button: show if Draft OR (Ditolak AND Step 1)
-                const showSubmitBtn = currentStatus === 'Draft' || (currentStatus === 'Ditolak' && currentStep === 1);
-                $('#btnSubmitPengajuan').toggleClass('d-none', !showSubmitBtn);
-                $('#btnSetujuiPengajuan').toggleClass('d-none', currentStep !== 2 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
-                $('#btnValidasiCEO').toggleClass('d-none', currentStep !== 3 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
-                $('#btnUploadBukti').toggleClass('d-none', currentStep !== 4 || currentStatus === 'Draft' || currentStatus === 'Ditolak');
+                // Toggle buttons
+                const isDraft = STATUS === 'Draft';
+                const isDitolak = STATUS === 'Ditolak';
+                const canSubmit = isDraft || (isDitolak && STEP === 1);
                 
-                // Show/hide alerts
-                if (currentStatus === 'Draft') {
-                    $('#alertDraft').show();
-                    $('#alertDitolak').hide();
-                    $('#alertPeninjauan').hide();
-                } else if (currentStatus === 'Ditolak') {
-                    $('#alertDraft').hide();
-                    $('#alertDitolak').show();
-                    $('#alertPeninjauan').hide();
-                } else {
-                    $('#alertDraft').hide();
-                    $('#alertDitolak').hide();
-                    $('#alertPeninjauan').toggle(currentStep < 6);
-                }
+                $('#btnSubmitPengajuan').toggleClass('d-none', !canSubmit);
+                $('#btnSetujuiPengajuan').toggleClass('d-none', STEP !== 2 || isDraft || isDitolak);
+                $('#btnValidasiCEO').toggleClass('d-none', STEP !== 3 || isDraft || isDitolak);
+                $('#btnUploadBukti').toggleClass('d-none', STEP !== 4 || isDraft || isDitolak);
+                
+                // Toggle alerts
+                const alerts = { Draft: '#alertDraft', Ditolak: '#alertDitolak' };
+                Object.entries(alerts).forEach(([status, id]) => $(id).toggle(STATUS === status));
+                $('#alertPeninjauan').toggle(!isDraft && !isDitolak && STEP < 6);
 
-                // Detail Kontrak content
-                $('#kontrak-default').toggleClass('d-none', currentStep === 5);
-                $('#kontrak-step4').toggleClass('d-none', currentStep !== 5);
-                if (currentStep === 5) initFlatpickr();
-
-                // Activity timeline is now rendered from database histories in blade template
-                // No need for JavaScript logic here
+                // Kontrak tab
+                $('#kontrak-default').toggleClass('d-none', STEP === 5);
+                $('#kontrak-step5').toggleClass('d-none', STEP !== 5);
             }
 
-            // Init flatpickr
-            function initFlatpickr() {
-                const el = document.getElementById('tanggalKontrak');
-                if (el && !el._flatpickr) {
-                    flatpickr(el, {
-                        dateFormat: 'd/m/Y',
-                        altInput: true,
-                        altFormat: 'j F Y'
-                    });
-                }
-            }
 
-            // Stepper click - DISABLED (stepper hanya mengikuti step dari database)
-            // $('.stepper-wrapper').on('click', '.stepper-item', function() {
-            //     currentStep = parseInt($(this).data('step'));
-            //     updateUI();
-            //     if (currentStep === 5) {
-            //         new bootstrap.Tab($('[data-bs-target="#detail-kontrak"]')[0]).show();
-            //     }
-            // });
-
-            // Button Submit Pengajuan
-            $('#btnSubmitPengajuan').click(function() {
-                $.ajax({
-                    url: `/pengajuan-investasi/${investasiId}/approval`,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'Submit Dokumen'
-                    },
-                    beforeSend: function() {
-                        $('#btnSubmitPengajuan').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Mengirim...');
-                    },
-                    success: function(response) {
-                        if (!response.error) {
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: response.message || 'Pengajuan investasi berhasil di-submit.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error!', response.message, 'error');
-                            $('#btnSubmitPengajuan').prop('disabled', false).html('<i class="fas fa-paper-plane me-2"></i>Submit Pengajuan');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error!', 'Terjadi kesalahan saat submit pengajuan.', 'error');
-                        $('#btnSubmitPengajuan').prop('disabled', false).html('<i class="fas fa-paper-plane me-2"></i>Submit Pengajuan');
-                    }
-                });
-            });
-
-            // Button Setujui Pengajuan (Step 2: Validasi Bagi Hasil)
-            $('#btnSetujuiPengajuan').click(() => {
-                new bootstrap.Modal($('#modalPersetujuanInvestasi')[0]).show();
-            });
-
-            $('#btnKonfirmasiSetuju').click(function() {
-                const modal = bootstrap.Modal.getInstance($('#modalPersetujuanInvestasi')[0]);
+            // Generic AJAX handler
+            const ajaxPost = (url, data, onSuccess, btnSelector, loadingText) => {
+                const $btn = $(btnSelector);
+                const originalHtml = $btn.html();
                 
                 $.ajax({
-                    url: `/pengajuan-investasi/${investasiId}/approval`,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'Dokumen Tervalidasi',
-                        validasi_bagi_hasil: 'disetujui'
-                    },
-                    beforeSend: function() {
-                        $('#btnKonfirmasiSetuju').prop('disabled', true).text('Memproses...');
-                    },
-                    success: function(response) {
-                        if (!response.error) {
-                            modal.hide();
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: response.message || 'Pengajuan investasi berhasil disetujui.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error!', response.message, 'error');
-                            $('#btnKonfirmasiSetuju').prop('disabled', false).text('Setuju');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error!', 'Terjadi kesalahan saat menyetujui pengajuan.', 'error');
-                        $('#btnKonfirmasiSetuju').prop('disabled', false).text('Setuju');
-                    }
+                    url, method: 'POST',
+                    data: { _token: CSRF, ...data },
+                    beforeSend: () => $btn.prop('disabled', true).html(loadingText),
+                    success: (res) => res.error ? 
+                        (Swal.fire('Error!', res.message, 'error'), $btn.prop('disabled', false).html(originalHtml)) :
+                        onSuccess(res),
+                    
                 });
-            });
+            };
 
-            // Button Tolak (Step 2: Validasi Bagi Hasil)
-            $('#btnTolakInvestasi').click(() => {
-                const modalPersetujuan = bootstrap.Modal.getInstance($('#modalPersetujuanInvestasi')[0]);
-                modalPersetujuan.hide();
-                setTimeout(() => {
-                    new bootstrap.Modal($('#modalHasilReview')[0]).show();
-                }, 300);
-            });
+            const showSuccessReload = (msg) => Swal.fire('Berhasil!', msg, 'success').then(() => location.reload());
+            const showModal = (id) => new bootstrap.Modal($(`#${id}`)[0]).show();
+            const hideModal = (id) => bootstrap.Modal.getInstance($(`#${id}`)[0])?.hide();
 
-            // Form Review (Penolakan)
+            // Button handlers
+            $('#btnSubmitPengajuan').click(() => ajaxPost(
+                `/pengajuan-investasi/${ID}/approval`,
+                { status: 'Submit Dokumen' },
+                () => showSuccessReload('Pengajuan berhasil di-submit'),
+                '#btnSubmitPengajuan',
+                '<i class="fas fa-spinner fa-spin me-2"></i>Mengirim...'
+            ));
+
+            $('#btnSetujuiPengajuan').click(() => showModal('modalPersetujuanInvestasi'));
+            
+            $('#btnKonfirmasiSetuju').click(() => ajaxPost(
+                `/pengajuan-investasi/${ID}/approval`,
+                { status: 'Dokumen Tervalidasi', validasi_bagi_hasil: 'disetujui' },
+                () => (hideModal('modalPersetujuanInvestasi'), showSuccessReload('Pengajuan berhasil disetujui')),
+                '#btnKonfirmasiSetuju',
+                'Memproses...'
+            ));
+
+            $('#btnTolakInvestasi').click(() => (hideModal('modalPersetujuanInvestasi'), setTimeout(() => showModal('modalHasilReview'), 300)));
+
             $('#formHasilReview').submit(function(e) {
                 e.preventDefault();
-                if (!this.checkValidity()) {
-                    e.stopPropagation();
-                    $(this).addClass('was-validated');
-                    return;
-                }
-
-                const alasanPenolakan = $('#hasilReview').val();
-
-                $.ajax({
-                    url: `/pengajuan-investasi/${investasiId}/approval`,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'Ditolak',
-                        validasi_bagi_hasil: 'ditolak',
-                        catatan: alasanPenolakan
-                    },
-                    beforeSend: function() {
-                        $('#formHasilReview button[type="submit"]').prop('disabled', true).text('Mengirim...');
-                    },
-                    success: function(response) {
-                        if (!response.error) {
-                            bootstrap.Modal.getInstance($('#modalHasilReview')[0]).hide();
-                            $('#formHasilReview').removeClass('was-validated')[0].reset();
-                            
-                            Swal.fire({
-                                title: 'Pengajuan Ditolak',
-                                text: response.message || 'Pengajuan investasi telah ditolak.',
-                                icon: 'info',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error!', response.message, 'error');
-                            $('#formHasilReview button[type="submit"]').prop('disabled', false).text('Kirim');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error!', 'Terjadi kesalahan saat menolak pengajuan.', 'error');
-                        $('#formHasilReview button[type="submit"]').prop('disabled', false).text('Kirim');
-                    }
-                });
-            });
-
-            // Button Validasi CEO (Step 3)
-            $('#btnValidasiCEO').click(() => {
-                new bootstrap.Modal($('#modalValidasiCEO')[0]).show();
-            });
-
-            $('#btnKonfirmasiCEO').click(function() {
-                const modal = bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]);
+                if (!this.checkValidity()) return (e.stopPropagation(), $(this).addClass('was-validated'));
                 
-                $.ajax({
-                    url: `/pengajuan-investasi/${investasiId}/approval`,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: 'Disetujui oleh CEO SKI'
-                    },
-                    beforeSend: function() {
-                        $('#btnKonfirmasiCEO').prop('disabled', true).html('<i class="ti ti-check me-1"></i>Memproses...');
-                    },
-                    success: function(response) {
-                        if (!response.error) {
-                            modal.hide();
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: response.message || 'Pengajuan investasi berhasil disetujui oleh CEO.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error!', response.message, 'error');
-                            $('#btnKonfirmasiCEO').prop('disabled', false).html('<i class="ti ti-check me-1"></i>Setujui');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error!', 'Terjadi kesalahan saat menyetujui pengajuan.', 'error');
-                        $('#btnKonfirmasiCEO').prop('disabled', false).html('<i class="ti ti-check me-1"></i>Setujui');
-                    }
-                });
+                ajaxPost(
+                    `/pengajuan-investasi/${ID}/approval`,
+                    { status: 'Ditolak', validasi_bagi_hasil: 'ditolak', catatan: $('#hasilReview').val() },
+                    () => (hideModal('modalHasilReview'), $('#formHasilReview').removeClass('was-validated')[0].reset(), 
+                           Swal.fire('Pengajuan Ditolak', 'Pengajuan telah ditolak', 'info').then(() => location.reload())),
+                    '#formHasilReview button[type="submit"]',
+                    'Mengirim...'
+                );
             });
 
-            // Button Tolak CEO (Step 3 - akan langsung ke Step 6/Selesai)
-            $('#btnTolakCEO').click(() => {
-                const modalValidasiCEO = bootstrap.Modal.getInstance($('#modalValidasiCEO')[0]);
-                modalValidasiCEO.hide();
-                
-                // Tunggu sebentar sebelum membuka modal hasil review
-                setTimeout(() => {
-                    new bootstrap.Modal($('#modalHasilReview')[0]).show();
-                }, 300);
-            });
+            $('#btnValidasiCEO').click(() => showModal('modalValidasiCEO'));
+            
+            $('#btnKonfirmasiCEO').click(() => ajaxPost(
+                `/pengajuan-investasi/${ID}/approval`,
+                { status: 'Disetujui oleh CEO SKI' },
+                () => (hideModal('modalValidasiCEO'), showSuccessReload('Pengajuan disetujui CEO')),
+                '#btnKonfirmasiCEO',
+                '<i class="ti ti-check me-1"></i>Memproses...'
+            ));
 
-            // Button Upload Bukti (Step 4)
-            $('#btnUploadBukti').click(() => {
-                new bootstrap.Modal($('#modalUploadBuktiTransfer')[0]).show();
-            });
+            $('#btnTolakCEO').click(() => (hideModal('modalValidasiCEO'), setTimeout(() => showModal('modalHasilReview'), 300)));
+
+            $('#btnUploadBukti').click(() => showModal('modalUploadBuktiTransfer'));
 
             $('#formUploadBuktiTransfer').submit(function(e) {
                 e.preventDefault();
-                if (!this.checkValidity()) {
-                    e.stopPropagation();
-                    $(this).addClass('was-validated');
-                    return;
-                }
+                if (!this.checkValidity()) return (e.stopPropagation(), $(this).addClass('was-validated'));
+                
+                const fd = new FormData();
+                fd.append('_token', CSRF);
+                fd.append('status', 'Dana Sudah Dicairkan');
+                fd.append('file', $('#fileBuktiTransfer')[0].files[0]);
 
-                const formData = new FormData();
-                formData.append('_token', '{{ csrf_token() }}');
-                formData.append('status', 'Dana Sudah Dicairkan');
-                formData.append('file', $('#fileBuktiTransfer')[0].files[0]);
+                const $btn = $('#formUploadBuktiTransfer button[type="submit"]');
+                const $spinner = $('#btnUploadSpinner');
 
                 $.ajax({
-                    url: `/pengajuan-investasi/${investasiId}/upload-bukti`,
-                    method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: function() {
-                        $('#formUploadBuktiTransfer button[type="submit"]').prop('disabled', true);
-                        $('#btnUploadSpinner').removeClass('d-none');
-                    },
-                    success: function(response) {
-                        if (!response.error) {
-                            bootstrap.Modal.getInstance($('#modalUploadBuktiTransfer')[0]).hide();
-                            $('#formUploadBuktiTransfer').removeClass('was-validated')[0].reset();
-                            
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: response.message || 'Bukti transfer berhasil diupload.',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error!', response.message, 'error');
-                            $('#formUploadBuktiTransfer button[type="submit"]').prop('disabled', false);
-                            $('#btnUploadSpinner').addClass('d-none');
-                        }
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error!', 'Terjadi kesalahan saat upload bukti transfer.', 'error');
-                        $('#formUploadBuktiTransfer button[type="submit"]').prop('disabled', false);
-                        $('#btnUploadSpinner').addClass('d-none');
+                    url: `/pengajuan-investasi/${ID}/upload-bukti`,
+                    method: 'POST', data: fd, processData: false, contentType: false,
+                    beforeSend: () => ($btn.prop('disabled', true), $spinner.removeClass('d-none')),
+                    success: (res) => res.error ? 
+                        (Swal.fire('Error!', res.message, 'error'), $btn.prop('disabled', false), $spinner.addClass('d-none')) :
+                        (hideModal('modalUploadBuktiTransfer'), $('#formUploadBuktiTransfer').removeClass('was-validated')[0].reset(), showSuccessReload('Bukti transfer berhasil diupload')),
+                    error: () => (Swal.fire('Error!', 'Terjadi kesalahan', 'error'), $btn.prop('disabled', false), $spinner.addClass('d-none'))
+                });
+            });
+
+            const openPreview = (nomor = savedNomorKontrak) => 
+                window.open(`/pengajuan-investasi/${ID}/preview-kontrak${nomor ? '?nomor_kontrak=' + encodeURIComponent(nomor) : ''}`, '_blank');
+
+            $('#btnPreviewKontrak').click(() => {
+                const nomor = $('#nomorKontrak').val();
+                nomor ? openPreview(nomor) : (Swal.fire('Perhatian!', 'Mohon isi nomor kontrak', 'warning'), $('#nomorKontrak').focus());
+            });
+
+            window.previewKontrakFromHistory = () => openPreview();
+
+            $('#formGenerateKontrak').submit(function(e) {
+                e.preventDefault();
+                if (!this.checkValidity()) return (e.stopPropagation(), $(this).addClass('was-validated'));
+                
+                Swal.fire({
+                    title: 'Konfirmasi',
+                    text: 'Generate kontrak ini?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Generate'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        const nomor = $('#nomorKontrak').val();
+                        savedNomorKontrak = nomor;
+                        localStorage.setItem(`kontrak_${ID}`, nomor);
+                        ajaxPost(
+                            `/pengajuan-investasi/${ID}/generate-kontrak`,
+                            { nomor_kontrak: nomor, status: 'Selesai' },
+                            () => showSuccessReload('Kontrak berhasil digenerate'),
+                            '#btnGenerateKontrak',
+                            '<span class="spinner-border spinner-border-sm me-2"></span>Generate...'
+                        );
                     }
                 });
             });
 
-            // Generate Kontrak
-            $('#formGenerateKontrak').submit(function(e) {
-                e.preventDefault();
-                if (!this.checkValidity()) {
-                    e.stopPropagation();
-                    $(this).addClass('was-validated');
-                    return;
-                }
-
-                $('#btnSimpanKontrak').prop('disabled', true);
-                $('#btnSimpanKontrakSpinner').removeClass('d-none');
-
-                setTimeout(() => {
-                    $('#btnSimpanKontrak').prop('disabled', false);
-                    $('#btnSimpanKontrakSpinner').addClass('d-none');
-                    $(this).removeClass('was-validated');
-                    currentStep = 6;
-                    updateUI();
-                    new bootstrap.Tab($('[data-bs-target="#activity"]')[0]).show();
-                }, 2000);
-            });
-
-            $('#btnBatalKontrak').click(() => {
-                $('#formGenerateKontrak').removeClass('was-validated');
-            });
-
-            // Preview Kontrak
-            $('#btnPreviewKontrak').click(() => {
-                window.open('/form-kerja-investor/1/preview-kontrak', '_blank');
-            });
-
-            // Initialize
             updateUI();
         });
     </script>

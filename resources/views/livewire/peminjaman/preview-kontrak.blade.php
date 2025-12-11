@@ -29,7 +29,7 @@
                     <!-- Judul Kontrak -->
                     <div class="text-center mb-5">
                         <h4 class="fw-bold mb-2">FINANCING CONTRACT</h4>
-                        <h6 class="text-primary">No: SSP3026092025</h6>
+                        <h6 class="text-primary">No: {{ $kontrak['no_kontrak2'] }}</h6>
                     </div>
 
                     <!-- Isi Kontrak -->
@@ -169,25 +169,40 @@
                         <!-- Area Tanda Tangan -->
                         <div class="row mt-5 pt-4">
                             <div class="col-md-6 text-center mb-4">
-                                <p class="fw-bold mb-1">Kreditur</p>
-                                <p class="mb-0 small">{{ $kontrak['nama_perusahaan'] }}</p>
+                                <p class="fw-bold mb-3">Kreditur</p>
+                                <p class="mb-4 small">{{ $kontrak['nama_perusahaan'] }}</p>
                                 
                                 <!-- Placeholder untuk tanda tangan -->
-                                <div class="my-5 py-4">
-                                    <div class="border-bottom border-2 d-inline-block" style="width: 200px;"></div>
+                                <div class="signature-container" style="min-height: 150px;">
+                                    <img src="{{ asset('assets/img/ttd2.png') }}" 
+                                         alt="Tanda Tangan Kreditur" 
+                                         class="img-fluid mb-3" 
+                                         style="max-height: 75px; max-width: 100%; display: block; margin: 0 auto;">
+                                    <div class="border-bottom border-2 d-inline-block mb-2" style="width: 200px;"></div>
+                                    <p class="mb-0 fw-semibold">Muhamad Kurniawan</p>
                                 </div>
                                 
-                                <p class="text-muted small">Director</p>
+                                <p class="text-muted small mt-2 mb-0">Director</p>
                             </div>
                             <div class="col-md-6 text-center mb-4">
-                                <p class="fw-bold mb-1">Debitur</p>
+                                <p class="fw-bold mb-3">Debitur</p>
+                                <p class="mb-4 small">{{ $kontrak['nama_pimpinan'] }}</p>
                                 
                                 <!-- Placeholder untuk tanda tangan -->
-                                <div class="my-5 py-4">
-                                    <div class="border-bottom border-2 d-inline-block" style="width: 200px;"></div>
+                                <div class="signature-container" style="min-height: 150px;">
+                                    @if ($kontrak['tanda_tangan'])
+                                        <img src="{{ asset('storage/' . $kontrak['tanda_tangan']) }}" 
+                                             alt="Tanda Tangan Debitur" 
+                                             class="img-fluid mb-3" 
+                                             style="max-height: 75px; max-width: 100%; display: block; margin: 0 auto;">
+                                    @else
+                                        <div style="height: 75px;" class="mb-3"></div>
+                                    @endif
+                                    <div class="border-bottom border-2 d-inline-block mb-2" style="width: 200px;"></div>
+                                    <p class="mb-0 fw-semibold">{{ $kontrak['nama_pimpinan'] }}</p>
                                 </div>
                                 
-                                <p class="text-muted small">Pimpinan</p>
+                                <p class="text-muted small mt-2 mb-0">Pimpinan</p>
                             </div>
                         </div>
                     </div>
@@ -216,16 +231,82 @@
                 $btn.prop('disabled', true);
                 $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Generating PDF...');
 
-                setTimeout(() => {
-                    // Reset button
-                    $btn.prop('disabled', false);
-                    $btn.html(originalText);
+                // Get CSRF token
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
+                const peminjamanId = '{{ $kontrak['id_peminjaman'] }}';
+                
+                // Get no_kontrak and biaya_admin from form in detail page (if available)
+                const noKontrak = '{{ $kontrak['no_kontrak2'] ?? '' }}';
+                const biayaAdmin = '{{ $kontrak['biaya_admin_raw'] ?? 0 }}';
 
-                    // Success message
-                    console.log('PDF Generated!');
+                // Make AJAX request to generate PDF
+                $.ajax({
+                    url: `/peminjaman/${peminjamanId}/download-kontrak`,
+                    type: 'POST',
+                    data: {
+                        _token: csrfToken,
+                        no_kontrak: noKontrak,
+                        biaya_administrasi: biayaAdmin
+                    },
+                    xhrFields: {
+                        responseType: 'blob' // Important for PDF download
+                    },
+                    success: function(response, status, xhr) {
+                        // Reset button
+                        $btn.prop('disabled', false);
+                        $btn.html(originalText);
 
-                    // window.open('/peminjaman/{{ $kontrak['id_peminjaman'] }}/download-kontrak', '_blank');
-                }, 2000);
+                        // Get filename from Content-Disposition header
+                        const disposition = xhr.getResponseHeader('Content-Disposition');
+                        let filename = 'Kontrak_Peminjaman.pdf';
+                        if (disposition && disposition.indexOf('filename=') !== -1) {
+                            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                            const matches = filenameRegex.exec(disposition);
+                            if (matches != null && matches[1]) {
+                                filename = matches[1].replace(/['"]/g, '');
+                            }
+                        }
+
+                        // Create blob link to download
+                        const blob = new Blob([response], { type: 'application/pdf' });
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        
+                        // Trigger download
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        // Clean up
+                        window.URL.revokeObjectURL(link.href);
+
+                        // Show success message
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: 'PDF kontrak berhasil di-generate dan diunduh.',
+                            icon: 'success',
+                            timer: 1000,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        // Reset button
+                        $btn.prop('disabled', false);
+                        $btn.html(originalText);
+
+                        console.error('Error generating PDF:', error);
+                        
+                        // Show error message
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat membuat PDF. Silakan coba lagi.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
             });
         });
     </script>

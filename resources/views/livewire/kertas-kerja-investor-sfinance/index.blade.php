@@ -4,8 +4,8 @@
     <div class="row">
         <div class="row">
             <div class="col-12">
-                <div class="mb-4 d-flex justify-content-between align-items-center">
-                    <h4 class="fw-bold">Kertas Kerja Investor SFinance</h4></h4>
+                <div class="mb-4">
+                    <h4 class="fw-bold">Kertas Kerja Investor SFinance</h4>
                 </div>
             </div>
         </div>
@@ -29,7 +29,20 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-10">
+                            <div class="col-md-3">
+                                <!-- Year Filter -->
+                                <form method="GET" action="{{ route('kertas-kerja-investor-sfinance.index') }}">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Select Year" id="flatpickr-year"
+                                            name="year" value="{{ $year }}" />
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="ti ti-filter"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="col-md-7">
                                 <div class="d-flex justify-content-end">
                                     <input type="search" class="form-control search-input" placeholder="Cari..." />
                                 </div>
@@ -37,12 +50,9 @@
                         </div>
 
                         <!-- Table -->
-                         <div style="overflow-x: auto; white-space: nowrap;">
+                        <div style="overflow-x: auto; white-space: nowrap;">
                             <!-- Tabel 1 -->
-                            <div class="table-container">
-                                <!-- Placeholder kosong untuk sejajarkan dengan tabel 2 -->
-                                <div class="filter-placeholder"></div>
-                                
+                            <div style="display: inline-block; vertical-align: top; margin-right: 20px;">
                                 <table class="datatables-basic table border-top">
                                     <thead class="table-light">
                                         <tr>
@@ -54,68 +64,113 @@
                                             <th class="text-center">Lama Deposito (Bulan)</th>
                                             <th class="text-center">Bagi Hasil (%PA)</th>
                                             <th class="text-center">Bagi Hasil Nominal</th>
-                                            <th class="text-center">Bagi Hasil Per Nominal</th>
                                             <th class="text-center">Bagi Hasil (%Bulan)</th>
                                             <th class="text-center">Bagi Hasil (COF/Bulan)</th>
-                                            <th class="text-center">CFO/Akhir Periode</th>
+                                            <th class="text-center">CoF Per Akhir Des {{ $year }}</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Tanggal Pengembalian</th>
-                                           
+
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td class="text-center">1</td>
-                                            <td class="text-center">01-01-2024</td>
-                                            <td class="text-center">Deposito A</td>
-                                            <td class="text-center">Deposan A</td>
-                                            <td class="text-center">Rp 10.000.000</td>
-                                            <td class="text-center">3 Bulan</td>
-                                            <td class="text-center">5%</td>
-                                            <td class="text-center">Rp 500.000</td>
-                                            <td class="text-center">Rp 1.666.667</td>
-                                            <td class="text-center">10%</td>
-                                            <td class="text-center">Rp 100.000</td>
-                                            <td class="text-center">Rp 100.000</td>
-                                            <td class="text-center">Aktif</td>
-                                            <td class="text-center">01-04-2024</td>
-                                        </tr>
+                                        @forelse($data as $index => $row)
+                                            <tr>
+                                                <td class="text-center">{{ $index + 1 }}</td>
+                                                <td class="text-center">
+                                                    {{ \Carbon\Carbon::parse($row['tanggal_uang_masuk'])->format('d-m-Y') }}
+                                                </td>
+                                                <td class="text-center">{{ $row['deposito'] ?? '-' }}</td>
+                                                <td class="text-center">{{ $row['deposan'] }}</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['nominal_deposito'], 0, ',', '.') }}</td>
+                                                <td class="text-center">{{ $row['lama_deposito'] }} Bulan</td>
+                                                <td class="text-center">{{ number_format($row['bagi_hasil_pa'], 2) }}%</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['bagi_hasil_nominal'], 0, ',', '.') }}</td>
+                                                <td class="text-center">
+                                                    {{ number_format($row['bagi_hasil_per_bulan'], 2) }}%</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['cof_bulan'], 0, ',', '.') }}</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['cof_akhir_periode'], 0, ',', '.') }}</td>
+                                                <td class="text-center">
+                                                    @if ($row['status'] === 'Lunas')
+                                                        <span class="badge bg-label-success">Lunas</span>
+                                                    @else
+                                                        <span class="badge bg-label-warning">Aktif</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    {{ $row['tgl_pengembalian'] ? \Carbon\Carbon::parse($row['tgl_pengembalian'])->format('d-m-Y') : '-' }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="13" class="text-center">Tidak ada data</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
 
                             <!-- Tabel 2 dengan Select Period -->
-                            <div class="table-container">
-                                <div class="mb-3" style="width: 200px;">
-                                    <div class="input-group input-group-md">
-                                        <input type="text" class="form-control" placeholder="Select Period"
-                                            id="flatpickr-tahun-pencarian" name="tahun_pencarian" />
-                                        <span class="input-group-text cursor-pointer">
-                                            <i class="ti ti-filter"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                
+                            <div style="display: inline-block; vertical-align: top; margin-right: 20px;">
                                 <table class="datatables-basic table border-top">
                                     <thead class="table-light">
                                         <tr>
-                                            <th class="text-center ">Januari</th>
-                                           
+                                            <th class="text-center">Jan</th>
+                                            <th class="text-center">Feb</th>
+                                            <th class="text-center">Mar</th>
+                                            <th class="text-center">Apr</th>
+                                            <th class="text-center">Mei</th>
+                                            <th class="text-center">Jun</th>
+                                            <th class="text-center">Jul</th>
+                                            <th class="text-center">Agu</th>
+                                            <th class="text-center">Sep</th>
+                                            <th class="text-center">Okt</th>
+                                            <th class="text-center">Nov</th>
+                                            <th class="text-center">Des</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td class="text-center">Rp 10.000.000</td>
-                                        </tr>
+                                        @forelse($data as $row)
+                                            <tr>
+                                                <td class="text-center">Rp {{ number_format($row['jan'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['feb'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['mar'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['apr'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['mei'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['jun'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['jul'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['agu'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['sep'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['okt'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['nov'], 0, ',', '.') }}
+                                                </td>
+                                                <td class="text-center">Rp {{ number_format($row['des'], 0, ',', '.') }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="12" class="text-center">Tidak ada data</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
 
                             <!-- Tabel 3 -->
-                            <div class="table-container" style="margin-right: 0;">
-                                <!-- Placeholder kosong untuk sejajarkan dengan tabel 2 -->
-                                <div class="filter-placeholder"></div>
-                                
+                            <div style="display: inline-block; vertical-align: top;">
                                 <table class="datatables-basic table border-top">
                                     <thead class="table-light">
                                         <tr>
@@ -127,13 +182,30 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td class="text-center">Rp 1.000.000</td>
-                                            <td class="text-center">Rp 800.000</td>
-                                            <td class="text-center">Rp 4.000.000</td>
-                                            <td class="text-center">Rp 3.200.000</td>
-                                            <td class="text-center">Rp 7.200.000</td>
-                                        </tr>
+                                        @forelse($data as $row)
+                                            <tr>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['pengembalian_pokok'], 0, ',', '.') }}</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['pengembalian_bagi_hasil'], 0, ',', '.') }}</td>
+                                                <td class="text-center">
+                                                    <strong class="text-danger">Rp
+                                                        {{ number_format($row['sisa_pokok'], 0, ',', '.') }}</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    <strong class="text-danger">Rp
+                                                        {{ number_format($row['sisa_bagi_hasil'], 0, ',', '.') }}</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    <strong class="text-danger">Rp
+                                                        {{ number_format($row['total_belum_dikembalikan'], 0, ',', '.') }}</strong>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5" class="text-center">Tidak ada data</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -172,56 +244,17 @@
     </div>
 @endsection
 
-@push('styles')
-    <style>
-       
-        .table-container {
-            display: inline-block;
-            vertical-align: top;
-            margin-right: 20px;
-            white-space: normal; 
-            min-width: 250px; 
-        }
 
-        .filter-placeholder {
-            width: 250px; 
-            height: 42px; 
-            margin-bottom: 0.5rem;
-        }
 
-        .table-container .input-group {
-            width: 250px;
-        }
-
-        .table-container .table {
-            margin-bottom: 0;
-        }
-
-    
-        .table-container table {
-            display: inline-table; 
-            width: auto;
-            table-layout: auto; 
-        }
-
-        .table-container table th,
-        .table-container table td {
-            white-space: nowrap;
-        }
-        media (max-width: 768px) {
-            .table-container {
-                display: block;
-                width: 100%;
-                margin-right: 0;
-            }
-
-            .filter-placeholder {
-                display: none; 
-            }
-
-            .table-container .input-group {
-                width: 100%;
-            }
-        }
-    </style>
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Flatpickr for year selection
+            flatpickr('#flatpickr-year', {
+                mode: "single",
+                dateFormat: "Y",
+                defaultDate: "{{ $year }}"
+            });
+        });
+    </script>
 @endpush

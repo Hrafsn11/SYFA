@@ -2,60 +2,97 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ArPerformanceService;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ArPerformanceController extends Controller
 {
-    public function index()
+    protected $arService;
+
+    public function __construct(ArPerformanceService $arService)
     {
-        return view('livewire.ar-performance.index');
+        $this->arService = $arService;
+    }
+
+    public function index(Request $request)
+    {
+        $tahun = $request->input('tahun');
+        $arData = $this->arService->getArPerformanceData($tahun);
+
+        return view('livewire.ar-performance.index', [
+            'arData' => $arData,
+            'tahun' => $tahun ?? date('Y'),
+        ]);
     }
 
     public function getTransactions(Request $request)
     {
-        $debitur = $request->input('debitur');
+        $debiturId = $request->input('debitur_id');
         $category = $request->input('category');
-        
-        $transactions = $this->getDummyTransactions($category);
-        
+        $tahun = $request->input('tahun');
+        $bulan = $request->input('bulan');
+
+        $transactions = $this->arService->getTransactionsByCategory($debiturId, $category, $tahun, $bulan);
+
         return response()->json([
             'success' => true,
-            'data' => $transactions
+            'data' => $transactions,
+            'category_label' => $this->arService->getCategoryLabel($category),
         ]);
     }
-    
-    private function getDummyTransactions($category)
+
+    public function clearCache(Request $request)
     {
-        $data = [
-            'Belum Jatuh Tempo' => [
-                ['nomor_kontrak' => 'KTR-2024-001', 'no_invoice' => 'INV-001', 'nilai_invoice' => 2000000],
-                ['nomor_kontrak' => 'KTR-2024-002', 'no_invoice' => 'INV-002', 'nilai_invoice' => 2000000],
-                ['nomor_kontrak' => 'KTR-2024-003', 'no_invoice' => 'INV-003', 'nilai_invoice' => 2000000],
-                ['nomor_kontrak' => 'KTR-2024-004', 'no_invoice' => 'INV-004', 'nilai_invoice' => 2000000],
-                ['nomor_kontrak' => 'KTR-2024-005', 'no_invoice' => 'INV-005', 'nilai_invoice' => 2000000],
-            ],
-            'DEL (1 - 30)' => [
-                ['nomor_kontrak' => 'KTR-2024-006', 'no_invoice' => 'INV-006', 'nilai_invoice' => 2000000],
-            ],
-            'DEL (31 - 60)' => [
-                ['nomor_kontrak' => 'KTR-2024-007', 'no_invoice' => 'INV-007', 'nilai_invoice' => 1500000],
-            ],
-            'DEL (61 - 90)' => [
-                ['nomor_kontrak' => 'KTR-2024-008', 'no_invoice' => 'INV-008', 'nilai_invoice' => 1000000],
-            ],
-            'NPL (91 - 179)' => [
-                ['nomor_kontrak' => 'KTR-2024-009', 'no_invoice' => 'INV-009', 'nilai_invoice' => 500000],
-            ],
-            'WriteOff (>180)' => [
-                ['nomor_kontrak' => 'KTR-2024-010', 'no_invoice' => 'INV-010', 'nilai_invoice' => 200000],
-            ],
-        ];
-        
-        return $data[$category] ?? [];
+        $tahun = $request->input('tahun');
+        $this->arService->clearCache($tahun);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cache cleared successfully'
+        ]);
     }
 
-    public function show()
+    public function exportPDF(Request $request)
     {
+        $tahun = $request->input('tahun', date('Y'));
+        $bulan = $request->input('bulan');
 
+        // Get fresh data based on filters
+        $arData = $this->arService->getArPerformanceData($tahun, $bulan, false);
+
+        // Prepare bulan name
+        $bulanNama = [
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+        ];
+
+        // Build title
+        $title = 'Daftar AR Performance';
+        if ($bulan) {
+            $title .= ' - ' . ($bulanNama[$bulan] ?? $bulan);
+        }
+        $title .= ' Tahun ' . $tahun;
+
+        // Generate filename
+        $filename = 'AR_Performance';
+        if ($bulan) {
+            $filename .= '_' . ($bulanNama[$bulan] ?? $bulan);
+        }
+        $filename .= '_' . $tahun . '_' .'.pdf';
+
+        // Generate PDF
+        $pdf = Pdf::loadView('livewire.ar-performance.export-pdf', [
+            'arData' => $arData,
+            'tahun' => $tahun,
+            'bulan' => $bulan,
+            'bulanNama' => $bulanNama,
+            'title' => $title
+        ]);
+
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->download($filename);
     }
 }

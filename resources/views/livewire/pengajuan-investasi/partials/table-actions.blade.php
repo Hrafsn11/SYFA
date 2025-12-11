@@ -21,4 +21,13 @@
         <i class="ti ti-edit"></i>
     </button>
     @endif
+
+    @if($status === 'Selesai')
+    <a href="{{ route('pengajuan-investasi.download-sertifikat', $id) }}" 
+       class="btn btn-sm btn-icon btn-text-success rounded-pill waves-effect" 
+       target="_blank"
+       title="Download Sertifikat">
+        <i class="ti ti-certificate"></i>
+    </a>
+    @endif
 </div>
