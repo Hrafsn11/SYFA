@@ -154,6 +154,7 @@
                                     'master_data' => 'Master Data',
                                     'peminjaman' => 'Peminjaman',
                                     'investasi' => 'Investasi',
+                                    'sfinlog' => 'S-Finlog',
                                 ];
 
                                 $groupPrefixes = [
@@ -169,6 +170,9 @@
                                     'investasi' => [
                                         'investasi',
                                         'penyaluran_deposito',
+                                    ],
+                                    'sfinlog' => [
+                                        'pengajuan_investasi_finlog',
                                     ],
                                 ];
                             @endphp
@@ -224,6 +228,7 @@
                                                                         'investasi' => 'investasi',
                                                                         'penyaluran_deposito' => 'penyaluran deposito',
                                                                         'master_data' => 'master data',
+                                                                        'pengajuan_investasi_finlog' => 'pengajuan investasi finlog',
                                                                     ];
 
                                                                     $name_group = $groupMap[$group] ?? $group;
