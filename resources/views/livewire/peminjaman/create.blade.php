@@ -1006,6 +1006,11 @@
             const tbody = $('#poFinancingTable tbody');
             tbody.empty();
             poFinancingData.forEach(function(po, idx) {
+                const dokKontrak = getDocumentDisplay(po.dokumen_kontrak_file, po.dokumen_kontrak);
+                const dokSo = getDocumentDisplay(po.dokumen_so_file, po.dokumen_so);
+                const dokBast = getDocumentDisplay(po.dokumen_bast_file, po.dokumen_bast);
+                const dokLainnya = getDocumentDisplay(po.dokumen_lainnya_file, po.dokumen_lainnya);
+                
                 const row = `<tr>
                     <td>${idx + 1}</td>
                     <td>${po.no_kontrak}</td>
@@ -1015,10 +1020,10 @@
                     <td>Rp. ${numberWithThousandSeparator(po.nilai_bagi_hasil)}</td>
                     <td>${po.contract_date || ''}</td>
                     <td>${po.due_date || ''}</td>
-                    <td>${po.dokumen_kontrak_file ? po.dokumen_kontrak_file.name : ''}</td>
-                    <td>${po.dokumen_so_file ? po.dokumen_so_file.name : ''}</td>
-                    <td>${po.dokumen_bast_file ? po.dokumen_bast_file.name : ''}</td>
-                    <td>${po.dokumen_lainnya_file ? po.dokumen_lainnya_file.name : ''}</td>
+                    <td>${dokKontrak ? '<span class="badge bg-label-success">' + dokKontrak + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokSo ? '<span class="badge bg-label-success">' + dokSo + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokBast ? '<span class="badge bg-label-success">' + dokBast + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokLainnya ? '<span class="badge bg-label-success">' + dokLainnya + '</span>' : '<span class="text-muted">-</span>'}</td>
                     <td>
                         <a href="#" class="btn btn-sm btn-outline-primary btn-edit-po" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
@@ -1052,6 +1057,10 @@
 
                 editInvoiceIndex = idx;
                 modalInstance.show();
+                
+                setTimeout(function() {
+                    initModalBootstrapDatepicker();
+                }, 100);
             });
         }
 
@@ -1059,6 +1068,9 @@
             const tbody = $('#installmentTable tbody');
             tbody.empty();
             installmentData.forEach(function(inst, idx) {
+                const dokInvoice = getDocumentDisplay(inst.dokumen_invoice_file, inst.dokumen_invoice);
+                const dokLainnya = getDocumentDisplay(inst.dokumen_lainnya_file, inst.dokumen_lainnya);
+                
                 const row = `<tr>
                     <td>${idx + 1}</td>
                     <td>${inst.no_invoice}</td>
@@ -1066,8 +1078,8 @@
                     <td>Rp. ${numberWithThousandSeparator(inst.nilai_invoice || 0)}</td>
                     <td>${inst.invoice_date || ''}</td>
                     <td>${inst.nama_barang || ''}</td>
-                    <td>${inst.dokumen_invoice_file ? inst.dokumen_invoice_file.name : ''}</td>
-                    <td>${inst.dokumen_lainnya_file ? inst.dokumen_lainnya_file.name : ''}</td>
+                    <td>${dokInvoice ? '<span class="badge bg-label-success">' + dokInvoice + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokLainnya ? '<span class="badge bg-label-success">' + dokLainnya + '</span>' : '<span class="text-muted">-</span>'}</td>
                     <td>
                         <a href="#" class="btn btn-sm btn-outline-primary btn-edit-installment" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
@@ -1102,13 +1114,32 @@
 
                 editInvoiceIndex = idx;
                 modalInstance.show();
+                
+                setTimeout(function() {
+                    initModalBootstrapDatepicker();
+                }, 100);
             });
+        }
+
+        function getDocumentDisplay(fileObj, pathStr) {
+            if (fileObj && fileObj.name) {
+                return fileObj.name;
+            } else if (pathStr && typeof pathStr === 'string') {
+                const parts = pathStr.split('/');
+                return parts[parts.length - 1] || pathStr;
+            }
+            return '';
         }
 
         function renderFactoringTable() {
             const tbody = $('#factoringTable tbody');
             tbody.empty();
             factoringData.forEach(function(f, idx) {
+                const dokInvoice = getDocumentDisplay(f.dokumen_invoice_file, f.dokumen_invoice);
+                const dokKontrak = getDocumentDisplay(f.dokumen_kontrak_file, f.dokumen_kontrak);
+                const dokSo = getDocumentDisplay(f.dokumen_so_file, f.dokumen_so);
+                const dokBast = getDocumentDisplay(f.dokumen_bast_file, f.dokumen_bast);
+                
                 const row = `<tr>
                     <td>${idx + 1}</td>
                     <td>${f.no_kontrak}</td>
@@ -1118,10 +1149,10 @@
                     <td>Rp. ${numberWithThousandSeparator(f.nilai_bagi_hasil || 0)}</td>
                     <td>${f.contract_date || ''}</td>
                     <td>${f.due_date || ''}</td>
-                    <td>${f.dokumen_invoice_file ? f.dokumen_invoice_file.name : ''}</td>
-                    <td>${f.dokumen_kontrak_file ? f.dokumen_kontrak_file.name : ''}</td>
-                    <td>${f.dokumen_so_file ? f.dokumen_so_file.name : ''}</td>
-                    <td>${f.dokumen_bast_file ? f.dokumen_bast_file.name : ''}</td>
+                    <td>${dokInvoice ? '<span class="badge bg-label-success">' + dokInvoice + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokKontrak ? '<span class="badge bg-label-success">' + dokKontrak + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokSo ? '<span class="badge bg-label-success">' + dokSo + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokBast ? '<span class="badge bg-label-success">' + dokBast + '</span>' : '<span class="text-muted">-</span>'}</td>
                     <td>
                         <a href="#" class="btn btn-sm btn-outline-primary btn-edit-factoring" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
@@ -1135,6 +1166,10 @@
                 const idx = $(this).data('idx');
                 const f = factoringData[idx];
                 if (!f) return;
+
+                $('.modal-form-content').hide();
+                $('#formModalFactoring').show();
+                $('#modalTitle').text('Edit Kontrak Penjamin');
 
                 $('#modal_no_kontrak_fact').val(f.no_kontrak);
                 $('#modal_nama_client_fact').val(f.nama_client);
@@ -1153,8 +1188,37 @@
                 $('#modal_dokumen_so_fact').val('');
                 $('#modal_dokumen_bast_fact').val('');
 
+                const dokInvoice = getDocumentDisplay(f.dokumen_invoice_file, f.dokumen_invoice);
+                const dokKontrak = getDocumentDisplay(f.dokumen_kontrak_file, f.dokumen_kontrak);
+                const dokSo = getDocumentDisplay(f.dokumen_so_file, f.dokumen_so);
+                const dokBast = getDocumentDisplay(f.dokumen_bast_file, f.dokumen_bast);
+                
+                $('#modal_dokumen_invoice_fact').parent().find('.existing-file-info').remove();
+                if (dokInvoice) {
+                    $('#modal_dokumen_invoice_fact').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokInvoice + '</small>');
+                }
+                
+                $('#modal_dokumen_kontrak_fact').parent().find('.existing-file-info').remove();
+                if (dokKontrak) {
+                    $('#modal_dokumen_kontrak_fact').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokKontrak + '</small>');
+                }
+                
+                $('#modal_dokumen_so_fact').parent().find('.existing-file-info').remove();
+                if (dokSo) {
+                    $('#modal_dokumen_so_fact').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokSo + '</small>');
+                }
+                
+                $('#modal_dokumen_bast_fact').parent().find('.existing-file-info').remove();
+                if (dokBast) {
+                    $('#modal_dokumen_bast_fact').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokBast + '</small>');
+                }
+
                 editInvoiceIndex = idx;
                 modalInstance.show();
+                
+                setTimeout(function() {
+                    initModalBootstrapDatepicker();
+                }, 100);
             });
         }
 
@@ -1163,6 +1227,11 @@
             const tbody = $('#invoiceFinancingTable tbody');
             tbody.empty();
             invoiceFinancingData.forEach(function(inv, idx) {
+                const dokInvoice = getDocumentDisplay(inv.dokumen_invoice_file, inv.dokumen_invoice);
+                const dokKontrak = getDocumentDisplay(inv.dokumen_kontrak_file, inv.dokumen_kontrak);
+                const dokSo = getDocumentDisplay(inv.dokumen_so_file, inv.dokumen_so);
+                const dokBast = getDocumentDisplay(inv.dokumen_bast_file, inv.dokumen_bast);
+                
                 const row = `<tr>
                     <td>${idx+1}</td>
                     <td>${inv.no_invoice}</td>
@@ -1172,10 +1241,10 @@
                     <td>Rp. ${numberWithThousandSeparator(inv.nilai_bagi_hasil || 0)}</td>
                     <td>${inv.invoice_date || ''}</td>
                     <td>${inv.due_date || ''}</td>
-                    <td>${inv.dokumen_invoice_file ? inv.dokumen_invoice_file.name : ''}</td>
-                    <td>${inv.dokumen_kontrak_file ? inv.dokumen_kontrak_file.name : ''}</td>
-                    <td>${inv.dokumen_so_file ? inv.dokumen_so_file.name : ''}</td>
-                    <td>${inv.dokumen_bast_file ? inv.dokumen_bast_file.name : ''}</td>
+                    <td>${dokInvoice ? '<span class="badge bg-label-success">' + dokInvoice + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokKontrak ? '<span class="badge bg-label-success">' + dokKontrak + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokSo ? '<span class="badge bg-label-success">' + dokSo + '</span>' : '<span class="text-muted">-</span>'}</td>
+                    <td>${dokBast ? '<span class="badge bg-label-success">' + dokBast + '</span>' : '<span class="text-muted">-</span>'}</td>
                     <td>
                         <a href="#" class="btn btn-sm btn-outline-primary btn-edit-invoice" data-idx="${idx}" title="Edit"><i class="fas fa-edit"></i></a>
                     </td>
@@ -1191,6 +1260,10 @@
                 const idx = $(this).data('idx');
                 const inv = invoiceFinancingData[idx];
                 if (!inv) return;
+
+                $('.modal-form-content').hide();
+                $('#formModalInvoiceFinancing').show();
+                $('#modalTitle').text('Edit Invoice Financing');
 
                 $('#modal_no_invoice').val(inv.no_invoice);
                 $('#modal_nama_client').val(inv.nama_client);
@@ -1208,9 +1281,38 @@
                 $('#modal_dokumen_kontrak').val('');
                 $('#modal_dokumen_so').val('');
                 $('#modal_dokumen_bast').val('');
+                
+                const dokInvoice = getDocumentDisplay(inv.dokumen_invoice_file, inv.dokumen_invoice);
+                const dokKontrak = getDocumentDisplay(inv.dokumen_kontrak_file, inv.dokumen_kontrak);
+                const dokSo = getDocumentDisplay(inv.dokumen_so_file, inv.dokumen_so);
+                const dokBast = getDocumentDisplay(inv.dokumen_bast_file, inv.dokumen_bast);
+                
+                $('#modal_dokumen_invoice').parent().find('.existing-file-info').remove();
+                if (dokInvoice) {
+                    $('#modal_dokumen_invoice').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokInvoice + '</small>');
+                }
+                
+                $('#modal_dokumen_kontrak').parent().find('.existing-file-info').remove();
+                if (dokKontrak) {
+                    $('#modal_dokumen_kontrak').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokKontrak + '</small>');
+                }
+                
+                $('#modal_dokumen_so').parent().find('.existing-file-info').remove();
+                if (dokSo) {
+                    $('#modal_dokumen_so').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokSo + '</small>');
+                }
+                
+                $('#modal_dokumen_bast').parent().find('.existing-file-info').remove();
+                if (dokBast) {
+                    $('#modal_dokumen_bast').after('<small class="existing-file-info text-success d-block mt-1"><i class="ti ti-file-check me-1"></i>File saat ini: ' + dokBast + '</small>');
+                }
 
                 editInvoiceIndex = idx;
                 modalInstance.show();
+                
+                setTimeout(function() {
+                    initModalBootstrapDatepicker();
+                }, 100);
             });
 
             $('#btnHapusDataModal').off('click').on('click', function(e) {
@@ -1317,29 +1419,20 @@
             let postUrl = isEdit ? '{{ isset($pengajuan) ? route('peminjaman.update', $pengajuan->id_pengajuan_peminjaman) : '' }}' : '{{ route('peminjaman.store') }}';
             
             if (currentJenisPembiayaan === 'Invoice Financing') {
-                // Normalize invoice data before sending
-                const normalizedInvoices = invoiceFinancingData.map(i => {
-                    return {
-                        no_invoice: i.no_invoice,
-                        nama_client: i.nama_client,
-                        nilai_invoice: normalizeNumericForServer(i.nilai_invoice),
-                        nilai_pinjaman: normalizeNumericForServer(i.nilai_pinjaman),
-                        nilai_bagi_hasil: normalizeNumericForServer(i.nilai_bagi_hasil),
-                        invoice_date: i.invoice_date,
-                        due_date: i.due_date
-                    };
-                });
-                
-                fd.set('invoices', JSON.stringify(normalizedInvoices));
-
+                // Append each invoice as form fields (same format as PO/Factoring)
                 invoiceFinancingData.forEach(function(inv, idx) {
-                    if (inv.dokumen_invoice_file) fd.append(`files[${idx}][dokumen_invoice]`, inv
-                        .dokumen_invoice_file);
-                    if (inv.dokumen_kontrak_file) fd.append(`files[${idx}][dokumen_kontrak]`, inv
-                        .dokumen_kontrak_file);
-                    if (inv.dokumen_so_file) fd.append(`files[${idx}][dokumen_so]`, inv.dokumen_so_file);
-                    if (inv.dokumen_bast_file) fd.append(`files[${idx}][dokumen_bast]`, inv
-                        .dokumen_bast_file);
+                    fd.append(`details[${idx}][no_invoice]`, inv.no_invoice || '');
+                    fd.append(`details[${idx}][nama_client]`, inv.nama_client || '');
+                    fd.append(`details[${idx}][nilai_invoice]`, normalizeNumericForServer(inv.nilai_invoice || 0));
+                    fd.append(`details[${idx}][nilai_pinjaman]`, normalizeNumericForServer(inv.nilai_pinjaman || 0));
+                    fd.append(`details[${idx}][nilai_bagi_hasil]`, normalizeNumericForServer(inv.nilai_bagi_hasil || 0));
+                    fd.append(`details[${idx}][invoice_date]`, inv.invoice_date || '');
+                    fd.append(`details[${idx}][due_date]`, inv.due_date || '');
+
+                    if (inv.dokumen_invoice_file) fd.append(`details[${idx}][dokumen_invoice]`, inv.dokumen_invoice_file);
+                    if (inv.dokumen_kontrak_file) fd.append(`details[${idx}][dokumen_kontrak]`, inv.dokumen_kontrak_file);
+                    if (inv.dokumen_so_file) fd.append(`details[${idx}][dokumen_so]`, inv.dokumen_so_file);
+                    if (inv.dokumen_bast_file) fd.append(`details[${idx}][dokumen_bast]`, inv.dokumen_bast_file);
                 });
             } else if (currentJenisPembiayaan === 'PO Financing') {
                 // Append each detail as form fields so PHP/Laravel parses them as array

@@ -73,7 +73,7 @@ class PeminjamanController extends Controller
             // Installment specific fields
             'tenor_pembayaran' => $header->tenor_pembayaran,
             'pps' => $header->pps,
-            'sfinance' => $header->sfinance,
+            's_finance' => $header->s_finance,
             'yang_harus_dibayarkan' => $header->yang_harus_dibayarkan,
             // Factoring specific fields
             'total_nominal_yang_dialihkan' => $header->total_nominal_yang_dialihkan,
@@ -150,8 +150,11 @@ class PeminjamanController extends Controller
                 $baseData['no_kontrak'] = $bukti->no_kontrak;
             }
 
-            if ($header->jenis_pembiayaan === 'PO Financing') {
+            if ($header->jenis_pembiayaan === 'PO Financing' || $header->jenis_pembiayaan === 'Factoring') {
                 $baseData['kontrak_date'] = $bukti->kontrak_date;
+            }
+            
+            if ($header->jenis_pembiayaan === 'PO Financing') {
                 $baseData['nama_barang'] = $bukti->nama_barang;
             } elseif ($header->jenis_pembiayaan === 'Installment') {
                 $baseData['nama_barang'] = $bukti->nama_barang;
@@ -881,8 +884,9 @@ class PeminjamanController extends Controller
         DB::beginTransaction();
         try {
             $allData = $request->validated();
-            $dataInvoice = collect($allData['form_data_invoice']);
-            unset($allData['form_data_invoice']);
+            // Handle both 'form_data_invoice' (Invoice/PO) and 'details' (Factoring/Installment) keys
+            $dataInvoice = collect($allData['form_data_invoice'] ?? $allData['details'] ?? []);
+            unset($allData['form_data_invoice'], $allData['details']);
             $dataPengajuanPeminjaman = $allData;
 
             $dataPengajuanPeminjaman['status'] = PengajuanPeminjamanStatusEnum::DRAFT;
@@ -913,27 +917,63 @@ class PeminjamanController extends Controller
             $dataPengajuanPeminjaman['no_rekening'] = $masterDebiturDanInvestor->no_rek;
             $dataPengajuanPeminjaman['nilai_kol'] = $masterDebiturDanInvestor->kol->kol;
 
-            $dataPengajuanPeminjaman['persentase_bagi_hasil'] = $this->persentase_bagi_hasil;
+            // Use values from frontend if provided, otherwise calculate
+            if (!isset($dataPengajuanPeminjaman['total_pinjaman']) || empty($dataPengajuanPeminjaman['total_pinjaman'])) {
+                // For Installment use nilai_invoice, for others use nilai_pinjaman
+                if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
+                    $dataPengajuanPeminjaman['total_pinjaman'] = (double) $dataInvoice->sum(fn ($item) => (double) ($item['nilai_invoice'] ?? 0));
+                } else {
+                    $dataPengajuanPeminjaman['total_pinjaman'] = (double) $dataInvoice->sum(fn ($item) => (double) ($item['nilai_pinjaman'] ?? 0));
+                }
+            }
 
-            $dataPengajuanPeminjaman['total_pinjaman'] = (double) $dataInvoice->sum(fn ($item) => (double) $item['nilai_pinjaman']);
-            $dataPengajuanPeminjaman['total_bagi_hasil'] = $dataPengajuanPeminjaman['total_pinjaman'] * $this->persentase_bagi_hasil;
-            $dataPengajuanPeminjaman['pembayaran_total'] = (double) $dataPengajuanPeminjaman['total_pinjaman'] + $dataPengajuanPeminjaman['total_bagi_hasil'];
+            // Set persentase_bagi_hasil for calculation (decimal) and storage (percentage)
+            $persentaseForCalculation = 0;
+            if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
+                if (!isset($dataPengajuanPeminjaman['persentase_bagi_hasil'])) {
+                    $persentaseForCalculation = 0.10;
+                    $dataPengajuanPeminjaman['persentase_bagi_hasil'] = 10; // Store as 10%
+                } else {
+                    $persentaseForCalculation = (double) $dataPengajuanPeminjaman['persentase_bagi_hasil'] / 100;
+                    // persentase_bagi_hasil already in percentage form from frontend
+                }
+            } else {
+                $persentaseForCalculation = $this->persentase_bagi_hasil;
+                $dataPengajuanPeminjaman['persentase_bagi_hasil'] = $this->persentase_bagi_hasil * 100; // Store as percentage (5%, 2%, etc)
+            }
+
+            // Calculate total_bagi_hasil and pembayaran_total if not provided
+            if (!isset($dataPengajuanPeminjaman['total_bagi_hasil']) || empty($dataPengajuanPeminjaman['total_bagi_hasil'])) {
+                $dataPengajuanPeminjaman['total_bagi_hasil'] = $dataPengajuanPeminjaman['total_pinjaman'] * $persentaseForCalculation;
+            }
+            
+            if (!isset($dataPengajuanPeminjaman['pembayaran_total']) || empty($dataPengajuanPeminjaman['pembayaran_total'])) {
+                $dataPengajuanPeminjaman['pembayaran_total'] = (double) $dataPengajuanPeminjaman['total_pinjaman'] + $dataPengajuanPeminjaman['total_bagi_hasil'];
+            }
 
             if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
                 // PPS = 40% of bagi hasil, S Finance = 60% of bagi hasil
                 $dataPengajuanPeminjaman['pps'] = (double) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.40;
                 $dataPengajuanPeminjaman['s_finance'] = (double) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.60;;
                 $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = (double) ((double) $dataPengajuanPeminjaman['pembayaran_total'] / (double) $dataPengajuanPeminjaman['tenor_pembayaran']);
+                // Set fields that don't exist for Installment to NULL
+                $dataPengajuanPeminjaman['harapan_tanggal_pencairan'] = null;
+                $dataPengajuanPeminjaman['rencana_tgl_pembayaran'] = null;
             } else {
                 $dataPengajuanPeminjaman['harapan_tanggal_pencairan'] = parseCarbonDate($dataPengajuanPeminjaman['harapan_tanggal_pencairan'])->format('Y-m-d');
                 $dataPengajuanPeminjaman['rencana_tgl_pembayaran'] = parseCarbonDate($dataPengajuanPeminjaman['rencana_tgl_pembayaran'])->format('Y-m-d');
+                // Set Installment-specific fields to NULL
+                $dataPengajuanPeminjaman['tenor_pembayaran'] = null;
+                $dataPengajuanPeminjaman['pps'] = null;
+                $dataPengajuanPeminjaman['s_finance'] = null;
+                $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = null;
             }
 
             $userEmail = auth()->user()->email;
             $id_debitur = MasterDebiturDanInvestor::select('id_debitur')->where('email', $userEmail)->first()->id_debitur;
             $dataPengajuanPeminjaman['id_debitur'] = $id_debitur;
 
-            if ($dataPengajuanPeminjaman['lampiran_sid'] instanceof UploadedFile) {
+            if (isset($dataPengajuanPeminjaman['lampiran_sid']) && $dataPengajuanPeminjaman['lampiran_sid'] instanceof UploadedFile) {
                 $dataPengajuanPeminjaman['lampiran_sid'] = Storage::disk('public')->put('lampiran_sid', $dataPengajuanPeminjaman['lampiran_sid']);
             }
             $dataPengajuanPeminjaman['created_by'] = auth()->user()->id;
@@ -942,12 +982,14 @@ class PeminjamanController extends Controller
             $peminjaman = PengajuanPeminjaman::create($dataPengajuanPeminjaman);
 
             foreach ($dataInvoice as $i => $inv) {                
-                $nilai_pinjaman = (double) $inv['nilai_pinjaman'];
-
-                $nilai_bagi = (double) $nilai_pinjaman * (double) $this->persentase_bagi_hasil;
+                // For Installment, nilai_pinjaman doesn't exist, skip calculation
+                if ($dataPengajuanPeminjaman['jenis_pembiayaan'] !== JenisPembiayaanEnum::INSTALLMENT) {
+                    $nilai_pinjaman = (double) ($inv['nilai_pinjaman'] ?? 0);
+                    $nilai_bagi = (double) $nilai_pinjaman * (double) $this->persentase_bagi_hasil;
+                    $inv['nilai_bagi_hasil'] = (double) $nilai_bagi;
+                }
 
                 $inv['id_pengajuan_peminjaman'] = $peminjaman->id_pengajuan_peminjaman;
-                $inv['nilai_bagi_hasil'] = (double) $nilai_bagi;
 
                 if (
                     in_array($dataPengajuanPeminjaman['jenis_pembiayaan'], [
@@ -960,14 +1002,16 @@ class PeminjamanController extends Controller
                     $inv['kontrak_date'] = parseCarbonDate($inv['kontrak_date'])->format('Y-m-d');
                 }
 
-                $inv['due_date'] = parseCarbonDate($inv['due_date'])->format('Y-m-d');
+                if (isset($inv['due_date'])) {
+                    $inv['due_date'] = parseCarbonDate($inv['due_date'])->format('Y-m-d');
+                }
 
                 foreach ([
                     'dokumen_invoice', 
                     'dokumen_kontrak', 
                     'dokumen_so', 
                     'dokumen_bast', 
-                    'dokumen_lainnnya'
+                    'dokumen_lainnya'
                 ] as $dokumen) {
                     if (isset($inv[$dokumen]) && $inv[$dokumen] instanceof UploadedFile) {
                         $inv[$dokumen] = Storage::disk('public')->put($dokumen, $inv[$dokumen]);

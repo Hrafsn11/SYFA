@@ -285,7 +285,7 @@
                                                         <small class="text-light fw-semibold d-block mb-1">S
                                                             Finance</small>
                                                         <p class="fw-bold mb-0">Rp.
-                                                            {{ number_format($peminjaman['sfinance'] ?? 0, 0, ',', '.') }}
+                                                            {{ number_format($peminjaman['s_finance'] ?? 0, 0, ',', '.') }}
                                                         </p>
                                                     </div>
                                                 </div>
