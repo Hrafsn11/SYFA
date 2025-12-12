@@ -2,11 +2,9 @@
 
 namespace App\Livewire\Traits;
 
-use Livewire\Attributes\On;
 use Illuminate\Http\Request;
 use App\Attributes\FieldInput;
 use App\Attributes\ParameterIDRoute;
-use Livewire\Attributes\Renderless;
 use Illuminate\Validation\ValidationException;
 
 trait HasValidate
@@ -28,6 +26,14 @@ trait HasValidate
 
         if ($primaryKey) {
             $formData[$primaryKey] = $this->{$primaryKey};
+        }
+
+        // Tambahkan data tambahan jika ada method setAdditionalValidationData
+        if (method_exists($this, 'setAdditionalValidationData')) {
+            $additionalData = $this->setAdditionalValidationData();
+            if (is_array($additionalData)) {
+                $formData = array_merge($formData, $additionalData);
+            }
         }
 
         $baseRequest = Request::create('/', 'POST', $formData);
@@ -57,16 +63,6 @@ trait HasValidate
             $errorBag = $e->validator->errors()->toArray();
             $this->dispatch('fail-validation', $errorBag);
         }
-    }
-
-    #[On('close-modal')]
-    #[Renderless]
-    public function resetForm()
-    {
-        foreach ($this->getValidateFieldInputs() as $field) {
-            $this->reset($field);
-        }
-        $this->resetValidation();
     }
 
     private function getValidateFieldInputs(): array
