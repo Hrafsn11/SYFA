@@ -413,6 +413,7 @@ class PeminjamanController extends Controller
                         'kontrak_date' => $bukti->kontrak_date,
                         'due_date' => $bukti->due_date,
                         'dokumen_kontrak' => $bukti->dokumen_kontrak,
+                        'dokumen_so' => $bukti->dokumen_so,
                         'dokumen_bast' => $bukti->dokumen_bast,
                         'dokumen_lainnya' => $bukti->dokumen_lainnya,
                     ];
@@ -421,21 +422,23 @@ class PeminjamanController extends Controller
                 $installment_data = $pengajuan->buktiPeminjaman->map(function($bukti) {
                     return [
                         'no_invoice' => $bukti->no_invoice,
+                        'nama_client' => $bukti->nama_client,
                         'nama_barang' => $bukti->nama_barang,
                         'nilai_invoice' => (int) $bukti->nilai_invoice,
                         'invoice_date' => $bukti->invoice_date,
                         'dokumen_invoice' => $bukti->dokumen_invoice,
+                        'dokumen_lainnya' => $bukti->dokumen_lainnya,
                     ];
                 })->toArray();
             } elseif ($pengajuan->jenis_pembiayaan === 'Factoring') {
                 $factoring_data = $pengajuan->buktiPeminjaman->map(function($bukti) {
                     return [
-                        'no_invoice' => $bukti->no_invoice,
+                        'no_kontrak' => $bukti->no_kontrak,
                         'nama_client' => $bukti->nama_client,
                         'nilai_invoice' => (int) $bukti->nilai_invoice,
                         'nilai_pinjaman' => (int) $bukti->nilai_pinjaman,
                         'nilai_bagi_hasil' => (int) $bukti->nilai_bagi_hasil,
-                        'invoice_date' => $bukti->invoice_date,
+                        'kontrak_date' => $bukti->kontrak_date,
                         'due_date' => $bukti->due_date,
                         'dokumen_invoice' => $bukti->dokumen_invoice,
                         'dokumen_kontrak' => $bukti->dokumen_kontrak,
@@ -504,7 +507,7 @@ class PeminjamanController extends Controller
 
         // Add conditional validation based on jenis_pembiayaan
         if ($jenisPembiayaan === 'Invoice Financing') {
-            $rules['invoices'] = 'required|string';
+            $rules['details'] = 'required|array|min:1';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
             if($request->sumber_pembiayaan === 'eksternal'){
@@ -631,9 +634,9 @@ class PeminjamanController extends Controller
                 ->keyBy(function($item) use ($jenisPembiayaan) {
                     // Key by invoice/kontrak number for matching
                     if ($jenisPembiayaan === 'Invoice Financing' || $jenisPembiayaan === 'Installment') {
-                        return $item->no_invoice;
+                        return $item->no_invoice ?? 'temp_' . $item->id_bukti_peminjaman;
                     } else {
-                        return $item->no_kontrak;
+                        return $item->no_kontrak ?? 'temp_' . $item->id_bukti_peminjaman;
                     }
                 })
                 ->toArray();
@@ -643,8 +646,8 @@ class PeminjamanController extends Controller
 
             // Insert new bukti peminjaman based on jenis_pembiayaan
             if ($jenisPembiayaan === 'Invoice Financing') {
-                $invoices = json_decode($validated['invoices'], true);
-                foreach ($invoices as $i => $inv) {
+                $details = $validated['details'];
+                foreach ($details as $i => $inv) {
                     // Clean numeric values - remove all non-numeric characters
                     $nilaiInvoice = isset($inv['nilai_invoice']) ? preg_replace('/[^0-9]/', '', $inv['nilai_invoice']) : null;
                     $nilaiPinjaman = isset($inv['nilai_pinjaman']) ? preg_replace('/[^0-9]/', '', $inv['nilai_pinjaman']) : null;
@@ -803,31 +806,7 @@ class PeminjamanController extends Controller
                     
                     // Handle file uploads for this detail - use new file if uploaded, otherwise keep old
                     $dok_invoice_path = null;
-                    
-                    if ($request->hasFile("files.{$i}.dokumen_invoice")) {
-                        $dok_invoice_path = $request->file("files.{$i}.dokumen_invoice")->store('peminjaman/invoices', 'public');
-                    } elseif ($existingFiles && isset($existingFiles['dokumen_invoice'])) {
-                        $dok_invoice_path = $existingFiles['dokumen_invoice'];
-                    }
-                    
-                    BuktiPeminjaman::create([
-                        'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
-                        'no_invoice' => $detail['no_invoice'] ?? null,
-                        'nama_barang' => $detail['nama_barang'] ?? null,
-                        'nilai_invoice' => isset($detail['nilai_invoice']) ? preg_replace('/[^0-9]/', '', $detail['nilai_invoice']) : null,
-                        'invoice_date' => $detail['invoice_date'] ?? null,
-                        'dokumen_invoice' => $dok_invoice_path,
-                    ]);
-                }
-            } elseif ($jenisPembiayaan === 'Factoring') {
-                $details = $validated['details'];
-                foreach ($details as $i => $detail) {
-                    // Get existing file paths for this invoice (if any)
-                    $noInvoice = $detail['no_invoice'] ?? null;
-                    $existingFiles = $existingBukti[$noInvoice] ?? null;
-                    
-                    // Handle file uploads for this detail - check both files[i] and details[i] keys
-                    $dok_invoice_path = null;
+                    $dok_lainnya_path = null;
                     
                     if ($request->hasFile("files.{$i}.dokumen_invoice") || $request->hasFile("details.{$i}.dokumen_invoice")) {
                         $file = $request->hasFile("files.{$i}.dokumen_invoice") 
@@ -838,16 +817,88 @@ class PeminjamanController extends Controller
                         $dok_invoice_path = $existingFiles['dokumen_invoice'];
                     }
                     
+                    if ($request->hasFile("files.{$i}.dokumen_lainnya") || $request->hasFile("details.{$i}.dokumen_lainnya")) {
+                        $file = $request->hasFile("files.{$i}.dokumen_lainnya") 
+                            ? $request->file("files.{$i}.dokumen_lainnya") 
+                            : $request->file("details.{$i}.dokumen_lainnya");
+                        $dok_lainnya_path = $file->store('peminjaman/invoices', 'public');
+                    } elseif ($existingFiles && isset($existingFiles['dokumen_lainnya'])) {
+                        $dok_lainnya_path = $existingFiles['dokumen_lainnya'];
+                    }
+                    
                     BuktiPeminjaman::create([
                         'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
                         'no_invoice' => $detail['no_invoice'] ?? null,
                         'nama_client' => $detail['nama_client'] ?? null,
+                        'nama_barang' => $detail['nama_barang'] ?? null,
+                        'nilai_invoice' => isset($detail['nilai_invoice']) ? preg_replace('/[^0-9]/', '', $detail['nilai_invoice']) : null,
+                        'invoice_date' => $detail['invoice_date'] ?? null,
+                        'dokumen_invoice' => $dok_invoice_path,
+                        'dokumen_lainnya' => $dok_lainnya_path,
+                    ]);
+                }
+            } elseif ($jenisPembiayaan === 'Factoring') {
+                $details = $validated['details'];
+                foreach ($details as $i => $detail) {
+                    // Get existing file paths for this kontrak (if any)
+                    $noKontrak = $detail['no_kontrak'] ?? null;
+                    $existingFiles = $existingBukti[$noKontrak] ?? null;
+                    
+                    // Handle file uploads for this detail - check both files[i] and details[i] keys
+                    $dok_invoice_path = null;
+                    $dok_kontrak_path = null;
+                    $dok_so_path = null;
+                    $dok_bast_path = null;
+                    
+                    if ($request->hasFile("files.{$i}.dokumen_invoice") || $request->hasFile("details.{$i}.dokumen_invoice")) {
+                        $file = $request->hasFile("files.{$i}.dokumen_invoice") 
+                            ? $request->file("files.{$i}.dokumen_invoice") 
+                            : $request->file("details.{$i}.dokumen_invoice");
+                        $dok_invoice_path = $file->store('peminjaman/invoices', 'public');
+                    } elseif ($existingFiles && isset($existingFiles['dokumen_invoice'])) {
+                        $dok_invoice_path = $existingFiles['dokumen_invoice'];
+                    }
+                    
+                    if ($request->hasFile("files.{$i}.dokumen_kontrak") || $request->hasFile("details.{$i}.dokumen_kontrak")) {
+                        $file = $request->hasFile("files.{$i}.dokumen_kontrak") 
+                            ? $request->file("files.{$i}.dokumen_kontrak") 
+                            : $request->file("details.{$i}.dokumen_kontrak");
+                        $dok_kontrak_path = $file->store('peminjaman/invoices', 'public');
+                    } elseif ($existingFiles && isset($existingFiles['dokumen_kontrak'])) {
+                        $dok_kontrak_path = $existingFiles['dokumen_kontrak'];
+                    }
+                    
+                    if ($request->hasFile("files.{$i}.dokumen_so") || $request->hasFile("details.{$i}.dokumen_so")) {
+                        $file = $request->hasFile("files.{$i}.dokumen_so") 
+                            ? $request->file("files.{$i}.dokumen_so") 
+                            : $request->file("details.{$i}.dokumen_so");
+                        $dok_so_path = $file->store('peminjaman/invoices', 'public');
+                    } elseif ($existingFiles && isset($existingFiles['dokumen_so'])) {
+                        $dok_so_path = $existingFiles['dokumen_so'];
+                    }
+                    
+                    if ($request->hasFile("files.{$i}.dokumen_bast") || $request->hasFile("details.{$i}.dokumen_bast")) {
+                        $file = $request->hasFile("files.{$i}.dokumen_bast") 
+                            ? $request->file("files.{$i}.dokumen_bast") 
+                            : $request->file("details.{$i}.dokumen_bast");
+                        $dok_bast_path = $file->store('peminjaman/invoices', 'public');
+                    } elseif ($existingFiles && isset($existingFiles['dokumen_bast'])) {
+                        $dok_bast_path = $existingFiles['dokumen_bast'];
+                    }
+                    
+                    BuktiPeminjaman::create([
+                        'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
+                        'no_kontrak' => $detail['no_kontrak'] ?? null,
+                        'nama_client' => $detail['nama_client'] ?? null,
                         'nilai_invoice' => isset($detail['nilai_invoice']) ? preg_replace('/[^0-9]/', '', $detail['nilai_invoice']) : null,
                         'nilai_pinjaman' => isset($detail['nilai_pinjaman']) ? preg_replace('/[^0-9]/', '', $detail['nilai_pinjaman']) : null,
                         'nilai_bagi_hasil' => isset($detail['nilai_bagi_hasil']) ? preg_replace('/[^0-9]/', '', $detail['nilai_bagi_hasil']) : null,
-                        'invoice_date' => $detail['invoice_date'] ?? null,
+                        'kontrak_date' => $detail['kontrak_date'] ?? null,
                         'due_date' => $detail['due_date'] ?? null,
                         'dokumen_invoice' => $dok_invoice_path,
+                        'dokumen_kontrak' => $dok_kontrak_path,
+                        'dokumen_so' => $dok_so_path,
+                        'dokumen_bast' => $dok_bast_path,
                     ]);
                 }
             }

@@ -238,10 +238,19 @@
                                         <div class="row g-3 mb-4">
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                 <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nominal
-                                                        Pinjaman</small>
+                                                    <small class="text-light fw-semibold d-block mb-1">
+                                                        @if (($peminjaman['jenis_pembiayaan'] ?? '') === 'Factoring')
+                                                            Total Nominal Yang Dialihkan
+                                                        @else
+                                                            Nominal Pinjaman
+                                                        @endif
+                                                    </small>
                                                     <p class="mb-0 text-success fw-semibold">Rp.
-                                                        {{ number_format($peminjaman['nominal_pinjaman'] ?? ($peminjaman['total_pinjaman'] ?? 0), 0, ',', '.') }}
+                                                        @if (($peminjaman['jenis_pembiayaan'] ?? '') === 'Factoring')
+                                                            {{ number_format($peminjaman['total_nominal_yang_dialihkan'] ?? 0, 0, ',', '.') }}
+                                                        @else
+                                                            {{ number_format($peminjaman['nominal_pinjaman'] ?? ($peminjaman['total_pinjaman'] ?? 0), 0, ',', '.') }}
+                                                        @endif
                                                     </p>
                                                 </div>
                                             </div>
