@@ -70,9 +70,9 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'nama_client' => 'required|string',
                     'nilai_invoice' => 'required',
                     'nilai_pinjaman' => 'required',
-                    'invoice_date' => 'required|date_format:d/m/Y',
-                    'due_date' => 'required|date_format:d/m/Y',
-                    'dokumen_invoice' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
+                    'invoice_date' => 'required|date_format:Y-m-d',
+                    'due_date' => 'required|date_format:Y-m-d',
+                    'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_kontrak' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_so' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
@@ -106,12 +106,12 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'nama_client' => 'required|string',
                     'nilai_invoice' => 'required',
                     'nilai_pinjaman' => 'required',
-                    'kontrak_date' => 'required|date_format:d/m/Y',
-                    'due_date' => 'required|date_format:d/m/Y',
+                    'kontrak_date' => 'required|date_format:Y-m-d',
+                    'due_date' => 'required|date_format:Y-m-d',
                     'dokumen_kontrak' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_so' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_lainnnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
+                    'dokumen_lainnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
 
                 if ($this->index_data_invoice !== null) $validate['dokumen_kontrak'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
@@ -142,10 +142,10 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     ],
                     'nama_client' => 'required|string',
                     'nilai_invoice' => 'required',
-                    'invoice_date' => 'required|date_format:d/m/Y',
+                    'invoice_date' => 'required|date_format:Y-m-d',
                     'nama_barang' => 'required|string',
-                    'dokumen_invoice' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_lainnnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
+                    'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
+                    'dokumen_lainnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
 
                 if ($this->index_data_invoice !== null) $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
@@ -177,18 +177,13 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'nama_client' => 'required|string',
                     'nilai_invoice' => 'required',
                     'nilai_pinjaman' => 'required',
-                    'kontrak_date' => 'required|date_format:d/m/Y',
-                    'due_date' => 'required|date_format:d/m/Y',
-                    'dokumen_invoice' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_kontrak' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
+                    'kontrak_date' => 'required|date_format:Y-m-d',
+                    'due_date' => 'required|date_format:Y-m-d',
+                    'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
+                    'dokumen_kontrak' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_so' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
-
-                if ($this->index_data_invoice !== null) {
-                    $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
-                    $validate['dokumen_kontrak'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
-                };
                 break;
 
             default:
@@ -247,10 +242,10 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
             'dokumen_bast.file' => 'Dokumen BAST harus berupa file.',
             'dokumen_bast.max' => 'Ukuran dokumen BAST maksimal 2 MB.',
             'dokumen_bast.mimes' => 'Format dokumen BAST harus pdf, docx, xls, png, rar, atau zip.',
-            'dokumen_lainnnya.required' => 'Dokumen lainnya harus diisi.',
-            'dokumen_lainnnya.file' => 'Dokumen lainnya harus berupa file.',
-            'dokumen_lainnnya.max' => 'Ukuran dokumen lainnya maksimal 2 MB.',
-            'dokumen_lainnnya.mimes' => 'Format dokumen lainnya harus pdf, docx, xls, png, rar, atau zip.',
+            'dokumen_lainnya.required' => 'Dokumen lainnya harus diisi.',
+            'dokumen_lainnya.file' => 'Dokumen lainnya harus berupa file.',
+            'dokumen_lainnya.max' => 'Ukuran dokumen lainnya maksimal 2 MB.',
+            'dokumen_lainnya.mimes' => 'Format dokumen lainnya harus pdf, docx, xls, png, rar, atau zip.',
             'nama_barang.required' => 'Nama barang harus diisi.',
             'nama_barang.string' => 'Nama barang harus berupa teks.',
         ];

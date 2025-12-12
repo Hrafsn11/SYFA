@@ -26,29 +26,36 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6  mb-3">
-                        <label for="nama_project">Nama Project</label>
-                        <input type="text" id="nama_project" class="form-control" placeholder="Nama Project"
-                            wire:model.blur="nama_project" required>
-                        @error('nama_project')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-
                     <div class="col-md-6 mb-3">
-                        <label for="id_cells_project" class="form-label">Pilih Project <span
+                        <label for="id_cells_project" class="form-label">Pilih Cells Bisnis<span
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
                             <select id="id_cells_project" name="id_cells_project" class="form-select select2"
                                 data-placeholder="Pilih Project" required>
                                 <option value=""></option>
                                 @foreach ($projects as $project)
-                                    <option value="{{ $project->id_cells_project }}">{{ $project->nama_project }}
+                                    <option value="{{ $project->id_cells_project }}">{{ $project->nama_cells_bisnis }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
                         @error('id_cells_project')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6  mb-3">
+                        <label for="nama_project" class="form-label">Nama Project <span class="text-danger">*</span></label>
+                        <div wire:ignore>
+                            <select id="nama_project" name="nama_project" class="form-select select2"
+                                data-placeholder="Pilih Project" required>
+                                <option value=""></option>
+                                @foreach ($availableProjects as $project)
+                                    <option value="{{ $project['nama_project'] }}">{{ $project['nama_project'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @error('nama_project')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
@@ -330,12 +337,38 @@
             });
 
             $('#id_cells_project').select2({
-                    placeholder: 'Pilih Project',
+                    placeholder: 'Pilih Cells Bisnis',
                     allowClear: true
                 })
-                .on('change', function() {
-                    @this.set('id_cells_project', $(this).val());
+                .on('change', async function() {
+                    const cellsProjectId = $(this).val();
+                    
+                    // Reset nama_project dropdown
+                    $('#nama_project').val('').trigger('change');
+                    
+                    // Update Livewire
+                    await @this.set('id_cells_project', cellsProjectId);
+                    
+                    // Get updated availableProjects from Livewire
+                    const projects = @this.availableProjects || [];
+                    
+                    // Update nama_project dropdown
+                    const $namaProject = $('#nama_project');
+                    $namaProject.empty().append('<option value=""></option>');
+                    
+                    projects.forEach(project => {
+                        $namaProject.append(new Option(project.nama_project, project.nama_project, false, false));
+                    });
+                    
+                    $namaProject.trigger('change');
                 });
+
+            $('#nama_project').select2({
+                placeholder: 'Pilih Project',
+                allowClear: true
+            }).on('change', function() {
+                @this.set('nama_project', $(this).val());
+            });
 
             $('#presentase_bagi_hasil').select2({
                 placeholder: 'Pilih Persentase Bagi Hasil',

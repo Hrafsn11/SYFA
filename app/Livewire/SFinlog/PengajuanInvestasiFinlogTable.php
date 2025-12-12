@@ -72,10 +72,10 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-start"><strong>'.($value ?: '-').'</strong></div>')
                 ->html(),
                 
-            Column::make('Project')
+            Column::make('Cells Bisnis')
                 ->label(function ($row) {
-                    $namaProject = $row->project->nama_project ?? '-';
-                    return '<div class="text-start">'.$namaProject.'</div>';
+                    $namaCellsBisnis = $row->project->nama_cells_bisnis ?? $row->project->nama_cells_bisnis ?? '-';
+                    return '<div class="text-start">'.$namaCellsBisnis.'</div>';
                 })
                 ->html()
                 ->searchable(),

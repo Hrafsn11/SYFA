@@ -20,7 +20,10 @@ class MasterCellsProject extends Component
     public $id_cells_project;
 
     #[FieldInput]
-    public $nama_project, $nama_pic, $alamat, $deskripsi_bidang;
+    public $nama_cells_bisnis, $nama_pic, $alamat, $deskripsi_bidang;
+    
+    #[FieldInput]
+    public $projects = [];
 
     public function mount()
     {

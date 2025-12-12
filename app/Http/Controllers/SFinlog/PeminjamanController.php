@@ -174,7 +174,7 @@ class PeminjamanController extends Controller
             'tanggal_kontrak' => now()->toDateString(),
             
             // Data Principal (Cells Project)
-            'nama_principal' => $peminjaman->cellsProject->nama_project ?? '-',
+            'nama_principal' => $peminjaman->cellsProject->nama_cells_bisnis ?? '-',
             'nama_pic' => $peminjaman->cellsProject->nama_pic ?? '-',
             'alamat_principal' => $peminjaman->cellsProject->alamat ?? '-',
             'deskripsi_bidang' => $peminjaman->cellsProject->deskripsi_bidang ?? '-',

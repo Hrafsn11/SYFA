@@ -67,7 +67,7 @@
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Project</small>
-                <p class="fw-bold mb-0">{{ $pengajuan->project->nama_project ?? '-' }}</p>
+                <p class="fw-bold mb-0">{{ $pengajuan->project->nama_cells_bisnis ?? '-' }}</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
