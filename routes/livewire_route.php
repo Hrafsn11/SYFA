@@ -53,7 +53,6 @@ Route::get('sfinlog/peminjaman', \App\Livewire\SFinlog\Peminjaman::class)->name(
 Route::get('sfinlog/peminjaman/create', \App\Livewire\SFinlog\PeminjamanCreate::class)->name('sfinlog.peminjaman.create');
 Route::get('sfinlog/peminjaman/detail/{id}', \App\Livewire\SFinlog\PeminjamanDetail::class)->name('sfinlog.peminjaman.detail');
 
-
-
-
-
+// SFinlog - Pengembalian Pinjaman
+Route::get('sfinlog/pengembalian-pinjaman', \App\Livewire\SFinlog\PengembalianPinjamanFinlog::class)->name('sfinlog.pengembalian-pinjaman.index');
+Route::get('sfinlog/pengembalian-pinjaman/create', \App\Livewire\SFinlog\PengembalianPinjamanFinlogCreate::class)->name('sfinlog.pengembalian-pinjaman.create');

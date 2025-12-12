@@ -68,10 +68,9 @@ Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->grou
     Route::get('detail/{id}', [ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
 });
 
-// Pengembalian Routes
-Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
-Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
-Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+// Pengembalian Pinjaman - Handled by Livewire (see livewire_route.php)
+// Route pengembalian untuk SFinlog sudah menggunakan Livewire component
+// Index route: sfinlog.pengembalian-pinjaman.index
 
 // Debitur Piutang
 Route::get('debitur-piutang', DebiturPiutangIndex::class)->name('debitur-piutang.index');
