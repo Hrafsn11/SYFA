@@ -14,14 +14,6 @@ use App\Http\Requests\PengembalianPinjamanRequest;
 class PengembalianPinjamanController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('livewire.pengembalian-pinjaman.index');
-    }
-
-    /**
      * Show the form for creating a new resource.
      */
     public function create()

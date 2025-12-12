@@ -37,7 +37,6 @@ class PengembalianPinjamanRequest extends FormRequest
             'catatan' => 'nullable|string',
             'pengembalian_invoices' => 'required|array|min:1',
             'pengembalian_invoices.*.nominal' => 'required|numeric|min:1',
-            'pengembalian_invoices.*.file' => 'required|file|mimes:pdf,png,jpg,jpeg|max:2048',
         ];
     }
 
@@ -64,9 +63,6 @@ class PengembalianPinjamanRequest extends FormRequest
             'pengembalian_invoices.min' => 'Data pengembalian invoice minimal 1 item.',
             'pengembalian_invoices.*.nominal.required' => 'Nominal yang dibayarkan harus diisi.',
             'pengembalian_invoices.*.nominal.min' => 'Nominal yang dibayarkan minimal 1.',
-            'pengembalian_invoices.*.file.required' => 'Bukti pembayaran harus diupload.',
-            'pengembalian_invoices.*.file.mimes' => 'Bukti pembayaran harus berformat PDF, PNG, JPG, atau JPEG.',
-            'pengembalian_invoices.*.file.max' => 'Ukuran bukti pembayaran maksimal 2MB.',
         ];
     }
 }
