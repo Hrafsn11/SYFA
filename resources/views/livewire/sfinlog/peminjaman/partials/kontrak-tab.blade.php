@@ -79,8 +79,8 @@
                 <!-- Data Principal -->
                 <div class="col-md-6">
                     <label for="cells_project" class="form-label">Nama Principal</label>
-                    <input type="text" id="cells_project" name="cells_project" class="form-control"
-                        value="{{ $peminjaman->cellsProject->nama_project ?? '' }}" readonly>
+                        <input type="text" id="cells_project" name="cells_project" class="form-control"
+                            value="{{ $peminjaman->cellsProject->nama_cells_bisnis ?? $peminjaman->cellsProject->nama_project ?? '' }}" readonly>
                 </div>
 
                 <div class="col-md-6">

@@ -1,4 +1,3 @@
-
 <div>
     <div>
         <a wire:navigate.hover href="{{ route('pengembalian.index') }}" class="btn btn-outline-primary mb-4">
@@ -12,27 +11,25 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('pengembalian.store') }}" method="POST" id="formPengembalian"
-                enctype="multipart/form-data">
-                @csrf
-
+            <form wire:submit.prevent="save">
                 <div class="row">
                     <div class="col-lg mb-3">
                         <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                        <input type="text" class="form-control" id="nama_perusahaan" value="{{ $namaPerusahaan }}" readonly>
+                        <input type="text" class="form-control" id="nama_perusahaan" wire:model="nama_perusahaan" readonly>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg mb-3">
-                        <label for="kode_peminjaman" class="form-label">Kode Peminjaman</label>
-                        <select class="form-control select2" id="kode_peminjaman" data-placeholder="Pilih Peminjaman" wire:model.live="kode_peminjaman">
-                            <option value="">Pilih Peminjaman</option>
-                            @foreach ($pengajuanPeminjaman as $item)
-                                <option value="{{ $item->id_pengajuan_peminjaman }}">
-                                    {{ $item->nomor_peminjaman }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label for="kode_peminjaman" class="form-label">Kode Peminjaman <span class="text-danger">*</span></label>
+                        <livewire:components.select2 
+                            :list_data="$pengajuanPeminjaman" 
+                            model_name="kode_peminjaman" 
+                            value_name="id_pengajuan_peminjaman" 
+                            value_label="nomor_peminjaman" 
+                            data_placeholder="Pilih Peminjaman"
+                            :value="$kode_peminjaman"
+                        />
+                        @error('kode_peminjaman') <span class="text-danger small">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div class="card border-1 shadow-none mb-4">
@@ -40,569 +37,372 @@
                         <div class="row mb-3">
                             <div class="col-md-6 mb-2">
                                 <label for="total_pinjaman">Total Pinjaman</label>
-                                <input type="text" class="form-control" id="total_pinjaman" name="total_pinjaman" readonly>
+                                <input type="text" class="form-control" id="total_pinjaman" 
+                                    value="{{ $total_pinjaman ? 'Rp ' . number_format($total_pinjaman, 0, ',', '.') : '' }}" readonly>
                             </div>
                             <div class="col-md-6">
                                 <label for="total_bagi_hasil">Total Bagi Hasil</label>
-                                <input type="text" class="form-control" id="total_bagi_hasil" name="total_bagi_hasil"
-                                    readonly>
+                                <input type="text" class="form-control" id="total_bagi_hasil"
+                                    value="{{ $total_bagi_hasil ? 'Rp ' . number_format($total_bagi_hasil, 0, ',', '.') : '' }}" readonly>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6 mb-2">
                                 <label for="tanggal_pencairan">Tanggal Pencairan</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="tanggal_pencairan"
-                                        name="tanggal_pencairan" readonly>
-                                    <span class="input-group-text"><i class="ti ti-calendar"></i></span>
-                                </div>
+                                <input type="text" class="form-control" id="tanggal_pencairan" 
+                                    value="{{ $tanggal_pencairan }}" readonly>
                             </div>
                             <div class="col-md-6">
-                                <label for="lama_pemakaian">Lama Pemakaian</label>
-                                <input type="text" class="form-control" id="lama_pemakaian" name="lama_pemakaian"
-                                    readonly>
+                                <label for="lama_pemakaian">Lama Pemakaian (Hari)</label>
+                                <input type="text" class="form-control" id="lama_pemakaian"
+                                    value="{{ $lama_pemakaian ?? 0 }}" readonly>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6 mb-2">
-                                <label for="invoice" id="labelInvoice">Invoice Yang Akan Dibayar</label>
-                                <select name="invoice" id="invoice" class="form-control select2"
-                                    data-placeholder="Pilih Invoice">
-                                    <option value="">Pilih Invoice</option>
-                                </select>
+                                <label for="invoice_dibayarkan">
+                                    @if($jenisPembiayaan === 'Invoice Financing')
+                                        Invoice Yang Akan Dibayar
+                                    @elseif(in_array($jenisPembiayaan, ['PO Financing', 'Factoring']))
+                                        Kontrak Yang Akan Dibayar
+                                    @else
+                                        Yang Akan Dibayar
+                                    @endif
+                                    <span class="text-danger">*</span>
+                                </label>
+                                @if($jenisPembiayaan === 'Installment')
+                                    <input type="text" class="form-control" value="{{ $bulan_pembayaran ?? '' }}" readonly>
+                                @else
+                                    <livewire:components.select2 
+                                        :key="'invoice-select-' . $kode_peminjaman"
+                                        :list_data="collect($availableInvoices)" 
+                                        model_name="invoice_dibayarkan" 
+                                        value_name="label" 
+                                        value_label="label" 
+                                        :data_placeholder="$jenisPembiayaan === 'Invoice Financing' ? 'Pilih Invoice' : 'Pilih Kontrak'"
+                                        :value="$invoice_dibayarkan"
+                                    />
+                                @endif
+                                @error('invoice_dibayarkan') <span class="text-danger small">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-6">
-                                <label for="nominal_invoice" id="labelNominalInvoice">Nominal Invoice</label>
-                                <input type="text" class="form-control" id="nominal_invoice" name="nominal_invoice"
-                                    readonly>
+                                <label for="nominal_invoice">
+                                    @if($jenisPembiayaan === 'Invoice Financing')
+                                        Nominal Invoice
+                                    @elseif(in_array($jenisPembiayaan, ['PO Financing', 'Factoring']))
+                                        Nominal Kontrak
+                                    @else
+                                        Nominal
+                                    @endif
+                                </label>
+                                <input type="text" class="form-control" id="nominal_invoice"
+                                    value="{{ $nominal_invoice ? 'Rp ' . number_format($nominal_invoice, 0, ',', '.') : '' }}" readonly>
                             </div>
                         </div>
 
                         <!-- Khusus Installment -->
-                        <div class="row mb-3" id="installmentFields" style="display: none;">
+                        @if($jenisPembiayaan === 'Installment')
+                        <div class="row mb-3">
                             <div class="col-md-6 mb-2">
-                                <label for="bulan_pembayaran">Bulan Pembayaran</label>
-                                <select name="bulan_pembayaran" id="bulan_pembayaran" class="form-control select2"
-                                    data-placeholder="Pilih Bulan">
-                                    <option value="">Pilih Bulan</option>
-                                </select>
+                                <label for="bulan_pembayaran">Bulan Pembayaran <span class="text-danger">*</span></label>
+                                <livewire:components.select2 
+                                    :key="'bulan-select-' . $kode_peminjaman"
+                                    :list_data="collect($availableBulanPembayaran)->map(fn($b) => ['value' => $b, 'label' => $b])" 
+                                    model_name="bulan_pembayaran" 
+                                    value_name="value" 
+                                    value_label="label" 
+                                    data_placeholder="Pilih Bulan"
+                                    :value="$bulan_pembayaran"
+                                />
+                                @error('bulan_pembayaran') <span class="text-danger small">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-6">
                                 <label for="yang_harus_dibayarkan">Yang Harus Dibayar Bulan Ini</label>
-                                <input type="text" class="form-control" id="yang_harus_dibayarkan" name="yang_harus_dibayarkan" readonly>
+                                <input type="text" class="form-control" id="yang_harus_dibayarkan"
+                                    value="{{ $yang_harus_dibayarkan ? 'Rp ' . number_format($yang_harus_dibayarkan, 0, ',', '.') : '' }}" readonly>
                             </div>
                         </div>
+                        @endif
 
-                        @include('livewire.pengembalian-pinjaman.partials._pengembalian-table')
+                        <!-- Pengembalian Invoice Table -->
+                        <div class="card shadow-none border mb-4 financing-table" id="pengembalianInvoicetable">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Tabel Pengembalian Invoice</h5>
+                            </div>
+                            <div class="table-responsive text-nowrap">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>NO</th>
+                                            <th>Nominal yang akan dibayarkan</th>
+                                            <th>Bukti Pembayaran</th>
+                                            <th>AKSI</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-border-bottom-0" id="pengembalianTableBody">
+                                        @if(count($pengembalian_invoices) > 0)
+                                            @foreach($pengembalian_invoices as $index => $invoice)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>Rp {{ number_format($invoice['nominal'], 0, ',', '.') }}</td>
+                                                <td>
+                                                    @if(isset($invoice['file_name']))
+                                                        <span class="badge bg-success">{{ $invoice['file_name'] }}</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Belum upload</span>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-warning btn-edit-pengembalian" data-idx="{{ $index }}">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-danger btn-remove-pengembalian" data-idx="{{ $index }}">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        @else
+                                        <tr id="emptyRow">
+                                            <td colspan="4" class="text-center text-muted">Belum ada data pengembalian</td>
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary wave-effect mb-3" id="btnTambahPengembalian">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Tambah
+                        </button>
+                        @error('pengembalian_invoices') <span class="text-danger small d-block mb-3">{{ $message }}</span> @enderror
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="sisa_utang" class="form-label">Sisa Bayar Pokok</label>
-                        <input type="text" class="form-control" id="sisa_utang" name="sisa_utang" readonly>
+                        <input type="text" class="form-control" id="sisa_utang_display" readonly>
+                        <input type="hidden" wire:model="sisa_utang">
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
-                        <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil"
-                            readonly>
+                        <input type="text" class="form-control" id="sisa_bagi_hasil_display" readonly>
+                        <input type="hidden" wire:model="sisa_bagi_hasil">
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-lg">
                         <label for="catatan">Catatan Lainnya</label>
-                        <textarea name="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan"></textarea>
+                        <textarea wire:model="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan" rows="3"></textarea>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary">
-                        Simpan Data
-                        <i class="ti ti-arrow-right ms-2"></i>
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove>
+                            <i class="ti ti-device-floppy me-1"></i> Simpan Data
+                        </span>
+                        <span wire:loading>
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            Menyimpan...
+                        </span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
+
+    <!-- Include Bootstrap Modal Partial -->
     @include('livewire.pengembalian-pinjaman.partials._modal-tambah-pengembalian-invoice')
-</div>
 
+    @push('scripts')
+        <script>
+            document.addEventListener('livewire:initialized', () => {
+                const modal = new bootstrap.Modal(document.getElementById('modal-pengembalian-invoice'));
+                const elements = {
+                    modalTitle: document.getElementById('modal-pengembalian-invoice').querySelector('.modal-title'),
+                    nominalInput: document.getElementById('nominal_yang_dibayarkan'),
+                    fileInput: document.getElementById('bukti_pembayaran_invoice'),
+                    saveButton: document.getElementById('btnSavePengembalian'),
+                    fileInfoDiv: document.getElementById('currentFileInfo'),
+                    fileNameSpan: document.getElementById('currentFileName'),
+                    sisaUtangDisplay: document.getElementById('sisa_utang_display'),
+                    sisaBagiHasilDisplay: document.getElementById('sisa_bagi_hasil_display')
+                };
+                let editingIndex = null;
 
-@push('scripts')
-    <script>
-        const state = {
-            pengembalianData: [],
-            editingIndex: null,
-            totalPinjaman: 0,
-            totalBagiHasil: 0,
-            lamaPemakaianHari: 0,
-            nominalInvoiceTerpilih: 0,
-            nomorInvoiceTerpilih: '',
-            currentJenisPembiayaan: '',
-            tenorPembayaran: 0,
-            yangHarusDibayarkanPerBulan: 0,
-            tanggalPencairanReal: ''
-        };
+                const formatCurrency = (value) => 'Rp ' + (parseInt(value) || 0).toLocaleString('id-ID');
+                
+                const updateSisaDisplay = () => {
+                    elements.sisaUtangDisplay.value = formatCurrency(@this.get('sisa_utang'));
+                    elements.sisaBagiHasilDisplay.value = formatCurrency(@this.get('sisa_bagi_hasil'));
+                };
 
-        $(document).ready(function() {
-            initCleaveRupiah();
-            
-            $('#kode_peminjaman').on('change', handlePeminjamanChange);
-            $('#invoice').on('change', handleInvoiceChange);
-            $('#bulan_pembayaran').on('change', handleBulanPembayaranChange);
-            $('#btnTambahPengembalian').on('click', openModal);
-            $('#btnSimpanPengembalianInvoice').on('click', savePengembalian);
-            $('#formPengembalian').on('submit', handleFormSubmit);
-            $(document).on('click', '.btn-edit-pengembalian', handleEdit);
-            $(document).on('click', '.btn-remove-pengembalian', handleDelete);
-        });
+                const resetButton = () => {
+                    elements.saveButton.disabled = false;
+                    elements.saveButton.innerHTML = 'Simpan <i class="ti ti-check ms-1"></i>';
+                };
 
-        function handlePeminjamanChange() {
-            const selected = $(this).find(':selected');
-            if (!selected.val()) return resetForm();
-
-            const data = {
-                totalPinjaman: parseFloat(selected.data('total-pinjaman')),
-                totalBagiHasil: parseFloat(selected.data('total-bagi-hasil')),
-                tanggalPencairan: selected.data('tanggal-pencairan'),
-                jenisPembiayaan: selected.data('jenis-pembiayaan'),
-                invoices: selected.data('invoices'),
-                tenorPembayaran: parseInt(selected.data('tenor-pembayaran')) || 0,
-                yangHarusDibayarkan: parseFloat(selected.data('yang-harus-dibayarkan')) || 0,
-                tanggalPencairanReal: selected.data('tanggal-pencairan-real') || selected.data('tanggal-pencairan')
-            };
-
-            Object.assign(state, {
-                totalPinjaman: data.totalPinjaman,
-                totalBagiHasil: data.totalBagiHasil,
-                currentJenisPembiayaan: data.jenisPembiayaan,
-                tenorPembayaran: data.tenorPembayaran,
-                yangHarusDibayarkanPerBulan: data.yangHarusDibayarkan,
-                tanggalPencairanReal: data.tanggalPencairanReal
-            });
-
-            fillFormData(data);
-            updateLabels(data.jenisPembiayaan);
-            toggleInstallmentFields(data.jenisPembiayaan);
-            if (data.jenisPembiayaan === 'Installment') populateBulanPembayaran(data.tenorPembayaran);
-            calculateSisa();
-        }
-
-        function updateLabels(jenisPembiayaan) {
-            const labels = {
-                'Invoice Financing': { invoice: 'Invoice Yang Akan Dibayar', nominal: 'Nominal Invoice' },
-                'PO Financing': { invoice: 'Kontrak Yang Akan Dibayar', nominal: 'Nominal Kontrak' },
-                'Factoring': { invoice: 'Kontrak Yang Akan Dibayar', nominal: 'Nominal Kontrak' },
-                'Installment': { invoice: 'Invoice (Referensi)', nominal: 'Nominal Invoice' }
-            };
-            
-            const label = labels[jenisPembiayaan] || { invoice: 'Yang Akan Dibayar', nominal: 'Nominal' };
-            $('#labelInvoice').text(label.invoice);
-            $('#labelNominalInvoice').text(label.nominal);
-        }
-        
-        function toggleInstallmentFields(jenisPembiayaan) {
-            const isInstallment = jenisPembiayaan === 'Installment';
-            $('#installmentFields').toggle(isInstallment);
-            
-            if (isInstallment) {
-                $('#invoice').closest('.row').find('.col-md-6').first().find('label')
-                    .append(' <small class="text-muted">(Opsional)</small>');
-            } else {
-                $('#bulan_pembayaran, #yang_harus_dibayarkan').val('');
-            }
-        }
-        
-        function populateBulanPembayaran(tenor) {
-            const $select = $('#bulan_pembayaran');
-            $select.empty().append('<option value="">Pilih Bulan</option>');
-            
-            if (tenor > 0) {
-                const bulanDibayar = [];
-                for (let i = 1; i <= tenor; i++) {
-                    const bulanLabel = `Bulan ke-${i}`;
-                    if (!bulanDibayar.includes(bulanLabel)) {
-                        $select.append(`<option value="${bulanLabel}">${bulanLabel}</option>`);
-                    }
-                }
-            }
-            
-            initSelect2($select[0]);
-        }
-        
-        function handleBulanPembayaranChange() {
-            const bulanLabel = $(this).val();
-            if (!bulanLabel) {
-                $('#yang_harus_dibayarkan').val('');
-                Object.assign(state, { nominalInvoiceTerpilih: 0, nomorInvoiceTerpilih: '' });
-                return;
-            }
-            
-            const bulanKe = parseInt(bulanLabel.replace('Bulan ke-', ''));
-            let nominalBulanIni = state.yangHarusDibayarkanPerBulan;
-            if (bulanKe === 1) nominalBulanIni += state.totalBagiHasil;
-            
-            nominalBulanIni = Math.round(nominalBulanIni);
-            $('#yang_harus_dibayarkan').val(formatRupiah(nominalBulanIni));
-            Object.assign(state, { nominalInvoiceTerpilih: nominalBulanIni, nomorInvoiceTerpilih: bulanLabel });
-        }
-
-        function fillFormData(data) {
-            $('#total_pinjaman').val(formatRupiah(data.totalPinjaman));
-            $('#total_bagi_hasil').val(formatRupiah(data.totalBagiHasil));
-            
-            // Untuk Installment, gunakan tanggal_pencairan_real dari history
-            const tanggalPencairan = data.jenisPembiayaan === 'Installment' ? data.tanggalPencairanReal : data.tanggalPencairan;
-            $('#tanggal_pencairan').val(formatDate(tanggalPencairan));
-            
-            // Untuk Installment, lama pemakaian = tenor_pembayaran (dalam bulan), bukan hitung dari tanggal
-            if (data.jenisPembiayaan === 'Installment') {
-                $('#lama_pemakaian').val(data.tenorPembayaran + ' Bulan');
-                lamaPemakaianHari = data.tenorPembayaran * 30; // Konversi bulan ke hari (approx)
-            } else {
-                $('#lama_pemakaian').val(calculateDuration(tanggalPencairan));
-            }
-
-            populateInvoiceSelect(data.invoices);
-        }
-
-        function populateInvoiceSelect(invoices) {
-            const $select = $('#invoice');
-            const isKontrak = ['PO Financing', 'Factoring'].includes(state.currentJenisPembiayaan);
-            const placeholder = isKontrak ? 'Pilih Kontrak' : 'Pilih Invoice';
-            
-            $select.empty().append(`<option value="">${placeholder}</option>`);
-
-            if (invoices?.length > 0) {
-                invoices.forEach(invoice => {
-                    $select.append(`<option value="${invoice.id}" 
-                        data-nilai-invoice="${invoice.nilai}"
-                        data-nilai-asli="${invoice.nilai_asli || invoice.nilai}"
-                        data-sudah-dibayar="${invoice.sudah_dibayar || 0}">
-                        ${invoice.label}
-                    </option>`);
-                });
-            } else {
-                const jenisLabel = isKontrak ? 'kontrak' : 'invoice';
-                $select.append(`<option value="" disabled>Semua ${jenisLabel} sudah lunas</option>`);
-            }
-
-            initSelect2($select[0]);
-        }
-
-        function handleInvoiceChange() {
-            const selected = $(this).find(':selected');
-            const nilai = parseFloat(selected.data('nilai-invoice')) || 0;
-
-            Object.assign(state, { 
-                nominalInvoiceTerpilih: nilai, 
-                nomorInvoiceTerpilih: selected.text().trim() 
-            });
-
-            $('#nominal_invoice').val(nilai > 0 ? formatRupiah(nilai) : '');
-        }
-
-        function openModal() {
-            state.editingIndex = null;
-            $('#modalTitle').text('Tambah Pengembalian Invoice');
-            $('#nominal_yang_dibayarkan, #bukti_pembayaran').val('');
-            $('#currentFileInfo').hide();
-            setTimeout(initCleaveRupiah, 100);
-            $('#modalPengembalian').modal('show');
-        }
-
-        function savePengembalian() {
-            const nominalInput = $('#nominal_yang_dibayarkan').val();
-            const fileInput = $('#bukti_pembayaran')[0];
-
-            if (!nominalInput || nominalInput.trim() === '' || nominalInput === 'Rp 0') {
-                return showSweetAlert({ icon: 'warning', title: 'Perhatian', text: 'Nominal yang dibayarkan harus diisi' });
-            }
-
-            if (!fileInput.files[0] && state.editingIndex === null) {
-                return showSweetAlert({ icon: 'warning', title: 'Perhatian', text: 'Bukti pembayaran harus diupload' });
-            }
-
-            const nominal = parseFloat(nominalInput.replace(/[^0-9]/g, ''));
-
-            if (nominal <= 0 || isNaN(nominal)) {
-                return showSweetAlert({ icon: 'warning', title: 'Perhatian', text: 'Nominal yang dibayarkan tidak valid' });
-            }
-
-            if (nominal > state.nominalInvoiceTerpilih) {
-                return showSweetAlert({
-                    icon: 'error',
-                    title: 'Nominal Melebihi Sisa',
-                    text: `Pembayaran tidak boleh lebih dari sisa nominal ${formatRupiah(state.nominalInvoiceTerpilih)}`
-                });
-            }
-            
-            if (state.currentJenisPembiayaan === 'Installment' && Math.round(nominal) !== Math.round(state.nominalInvoiceTerpilih)) {
-                return showSweetAlert({
-                    icon: 'error',
-                    title: 'Nominal Tidak Sesuai',
-                    text: `Untuk pembayaran Installment, Anda harus membayar TEPAT ${formatRupiah(state.nominalInvoiceTerpilih)}`
-                });
-            }
-
-            const file = fileInput.files[0];
-            const data = {
-                nominal,
-                fileName: file?.name || state.pengembalianData[state.editingIndex]?.fileName || '',
-                file: file || state.pengembalianData[state.editingIndex]?.file || null
-            };
-
-            if (state.editingIndex !== null) {
-                state.pengembalianData[state.editingIndex] = data;
-            } else {
-                state.pengembalianData.push(data);
-            }
-
-            renderTable();
-            calculateSisa();
-            $('#modalPengembalian').modal('hide');
-        }
-
-        function renderTable() {
-            const tbody = $('#pengembalianTableBody');
-            tbody.empty();
-
-            if (state.pengembalianData.length === 0) {
-                return tbody.append('<tr><td colspan="4" class="text-center text-muted">Belum ada data pengembalian</td></tr>');
-            }
-
-            state.pengembalianData.forEach((item, index) => {
-                tbody.append(`
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${formatRupiah(item.nominal)}</td>
-                        <td>${item.fileName}</td>
-                        <td>
-                            <a href="#" class="btn btn-sm btn-outline-primary btn-edit-pengembalian" data-idx="${index}" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#" class="btn btn-sm btn-outline-danger btn-remove-pengembalian" data-idx="${index}" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                `);
-            });
-        }
-
-        function handleEdit(e) {
-            e.preventDefault();
-            state.editingIndex = $(this).data('idx');
-            const data = state.pengembalianData[state.editingIndex];
-
-            $('#modalTitle').text('Edit Pengembalian Invoice');
-            $('#nominal_yang_dibayarkan').val(data.nominal);
-            $('#bukti_pembayaran').val('');
-            
-            if (data.fileName) {
-                $('#currentFileName').text(data.fileName);
-                $('#currentFileInfo').show();
-            } else {
-                $('#currentFileInfo').hide();
-            }
-
-            setTimeout(() => {
-                if (window.cleaveNominal) window.cleaveNominal.destroy();
-                initCleaveRupiah();
-            }, 100);
-
-            $('#modalPengembalian').modal('show');
-        }
-
-        function handleDelete(e) {
-            e.preventDefault();
-            sweetAlertConfirm({
-                title: 'Hapus Data?',
-                text: 'Yakin ingin menghapus data ini?'
-            }, () => {
-                state.pengembalianData.splice($(e.target).closest('a').data('idx'), 1);
-                renderTable();
-                calculateSisa();
-            });
-        }
-
-        function calculateSisa() {
-            const totalDibayar = state.pengembalianData.reduce((sum, item) => sum + item.nominal, 0);
-            let sisaBagiHasil = state.totalBagiHasil;
-            let sisaBayarPokok = state.totalPinjaman;
-
-            if (totalDibayar >= state.totalBagiHasil) {
-                sisaBagiHasil = 0;
-                sisaBayarPokok = state.totalPinjaman - (totalDibayar - state.totalBagiHasil);
-            } else {
-                sisaBagiHasil = state.totalBagiHasil - totalDibayar;
-            }
-
-            sisaBayarPokok = Math.max(0, sisaBayarPokok);
-            $('#sisa_bagi_hasil').val(formatRupiah(sisaBagiHasil));
-            $('#sisa_utang').val(formatRupiah(sisaBayarPokok));
-        }
-
-        function calculateDuration(startDate) {
-            const start = new Date(startDate);
-            const now = new Date();
-            const diffTime = Math.abs(now - start);
-            state.lamaPemakaianHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            let years = now.getFullYear() - start.getFullYear();
-            let months = now.getMonth() - start.getMonth();
-            let days = now.getDate() - start.getDate();
-
-            if (days < 0) {
-                months--;
-                days += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-            }
-            if (months < 0) {
-                years--;
-                months += 12;
-            }
-
-            const parts = [];
-            if (years > 0) parts.push(`${years} Tahun`);
-            if (months > 0) parts.push(`${months} Bulan`);
-            if (days > 0) parts.push(`${days} Hari`);
-
-            return parts.length > 0 ? parts.join(' ') : '0 Hari';
-        }
-
-        function formatRupiah(number) {
-            return 'Rp ' + new Intl.NumberFormat('id-ID').format(number);
-        }
-
-        function formatDate(date) {
-            return new Date(date).toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        }
-
-        function resetForm() {
-            $('#total_pinjaman, #total_bagi_hasil, #tanggal_pencairan, #lama_pemakaian, #nominal_invoice, #bulan_pembayaran, #yang_harus_dibayarkan, #sisa_utang, #sisa_bagi_hasil').val('');
-            $('#invoice').empty().append('<option value="">Pilih Invoice</option>');
-            $('#labelInvoice').text('Invoice Yang Akan Dibayar');
-            $('#labelNominalInvoice').text('Nominal Invoice');
-            $('#installmentFields').hide();
-
-            Object.assign(state, {
-                pengembalianData: [],
-                totalPinjaman: 0,
-                totalBagiHasil: 0,
-                lamaPemakaianHari: 0,
-                nominalInvoiceTerpilih: 0,
-                nomorInvoiceTerpilih: '',
-                currentJenisPembiayaan: '',
-                tenorPembayaran: 0,
-                yangHarusDibayarkanPerBulan: 0,
-                tanggalPencairanReal: ''
-            });
-
-            renderTable();
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-
-            const kodePeminjaman = $('#kode_peminjaman').val();
-            if (!kodePeminjaman) {
-                return showSweetAlert({ icon: 'warning', title: 'Perhatian', text: 'Kode peminjaman harus dipilih' });
-            }
-
-            if (state.pengembalianData.length === 0) {
-                return showSweetAlert({ icon: 'warning', title: 'Perhatian', text: 'Data pengembalian invoice harus diisi minimal 1 item' });
-            }
-
-            const formData = new FormData();
-            formData.append('_token', '{{ csrf_token() }}');
-            formData.append('kode_peminjaman', kodePeminjaman);
-            formData.append('nama_perusahaan', $('#nama_perusahaan').val());
-            formData.append('total_pinjaman', state.totalPinjaman);
-            formData.append('total_bagi_hasil', state.totalBagiHasil);
-            formData.append('tanggal_pencairan', $('#tanggal_pencairan').val());
-            formData.append('lama_pemakaian', state.lamaPemakaianHari);
-            formData.append('nominal_invoice', state.nominalInvoiceTerpilih);
-            formData.append('invoice_dibayarkan', state.nomorInvoiceTerpilih);
-            formData.append('sisa_utang', $('#sisa_utang').val().replace(/[^0-9]/g, ''));
-            formData.append('sisa_bagi_hasil', $('#sisa_bagi_hasil').val().replace(/[^0-9]/g, ''));
-            formData.append('catatan', $('#catatan').val() || '');
-            
-            if (state.currentJenisPembiayaan === 'Installment') {
-                formData.append('bulan_pembayaran', $('#bulan_pembayaran').val());
-                formData.append('yang_harus_dibayarkan', state.yangHarusDibayarkanPerBulan);
-            }
-
-            state.pengembalianData.forEach((item, index) => {
-                formData.append(`pengembalian_invoices[${index}][nominal]`, item.nominal);
-                if (item.file) formData.append(`pengembalian_invoices[${index}][file]`, item.file);
-            });
-
-            $.ajax({
-                url: '{{ route('pengembalian.store') }}',
-                method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: () => {
-                    Swal.fire({
-                        title: 'Menyimpan...',
-                        text: 'Mohon tunggu sebentar',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
-                },
-                success: (response) => {
-                    if (response.error === false || response.success === true) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message || 'Data berhasil disimpan',
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            if (typeof Livewire !== 'undefined') {
-                                Livewire.dispatch('refreshPengembalianPeminjamanTable');
-                            }
-                            window.location.href = response.data?.redirect || response.redirect || '{{ route('pengembalian.index') }}';
+                const attachSelect2Listeners = () => {
+                    const select2Fields = ['kode_peminjaman', 'invoice_dibayarkan', 'bulan_pembayaran'];
+                    select2Fields.forEach(field => {
+                        $(`#${field}`).off('select2:select.custom').on('select2:select.custom', function() {
+                            const val = $(this).val();
+                            if (val) @this.set(field, val);
                         });
+                        if (field === 'kode_peminjaman') {
+                            $(`#${field}`).off('select2:clear.custom').on('select2:clear.custom', () => @this.set(field, null));
+                        }
+                    });
+                };
+
+                const waitForSelect2AndAttach = () => {
+                    const checkInterval = setInterval(() => {
+                        const el = $('#kode_peminjaman');
+                        if (el.length && el.hasClass('select2-hidden-accessible')) {
+                            clearInterval(checkInterval);
+                            attachSelect2Listeners();
+                        }
+                    }, 100);
+                    setTimeout(() => clearInterval(checkInterval), 5000);
+                };
+
+                updateSisaDisplay();
+                waitForSelect2AndAttach();
+
+                Livewire.hook('commit', ({ succeed }) => succeed(() => updateSisaDisplay()));
+                Livewire.hook('morph.updated', () => waitForSelect2AndAttach());
+
+                @this.on('alert', (event) => {
+                    const data = event[0] || event;
+                    showSweetAlert({
+                        icon: data.type === 'success' ? 'success' : 'error',
+                        title: data.type === 'success' ? 'Berhasil' : 'Error',
+                        text: data.message
+                    });
+                });
+
+                @this.on('closeInvoiceModal', () => {
+                    modal.hide();
+                    if (elements.nominalInput._cleaveInstance) {
+                        elements.nominalInput._cleaveInstance.setRawValue('');
+                    }
+                });
+
+                document.getElementById('btnTambahPengembalian').addEventListener('click', () => {
+                    editingIndex = null;
+                    elements.modalTitle.innerText = 'Tambah Pengembalian Invoice';
+                    elements.nominalInput.value = '';
+                    elements.fileInput.value = '';
+                    modal.show();
+                });
+
+                document.addEventListener('click', (e) => {
+                    const editBtn = e.target.closest('.btn-edit-pengembalian');
+                    const deleteBtn = e.target.closest('.btn-remove-pengembalian');
+
+                    if (editBtn) {
+                        editingIndex = editBtn.dataset.idx;
+                        const invoiceData = @this.get('pengembalian_invoices')[editingIndex];
+                        
+                        if (!invoiceData) return;
+                        
+                        elements.modalTitle.innerText = 'Edit Pengembalian Invoice';
+                        
+                        setTimeout(() => {
+                            if (elements.nominalInput._cleaveInstance) {
+                                elements.nominalInput._cleaveInstance.setRawValue(invoiceData.nominal || 0);
+                            } else {
+                                elements.nominalInput.value = formatCurrency(invoiceData.nominal);
+                            }
+                            
+                            if (invoiceData.file_name) {
+                                elements.fileNameSpan.textContent = invoiceData.file_name;
+                                elements.fileInfoDiv.style.display = 'block';
+                            } else {
+                                elements.fileInfoDiv.style.display = 'none';
+                            }
+                        }, 100);
+                        
+                        modal.show();
+                    }
+
+                    if (deleteBtn) {
+                        Swal.fire({
+                            title: 'Yakin ingin menghapus?',
+                            text: "Data yang dihapus tidak dapat dikembalikan!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Ya, hapus!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) @this.call('deleteInvoice', deleteBtn.dataset.idx);
+                        });
+                    }
+                });
+
+                elements.saveButton.addEventListener('click', () => {
+                    const nominal = elements.nominalInput._cleaveInstance 
+                        ? elements.nominalInput._cleaveInstance.getRawValue()
+                        : parseInt(elements.nominalInput.value.replace(/[^0-9]/g, '')) || 0;
+                    
+                    if (!nominal) {
+                        Swal.fire('Error', 'Nominal harus diisi!', 'error');
+                        return;
+                    }
+
+                    elements.saveButton.disabled = true;
+                    elements.saveButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+
+                    const formData = { nominal: parseInt(nominal), editingIndex };
+                    const file = elements.fileInput.files[0];
+
+                    if (file) {
+                        const maxSize = 2048 * 1024;
+                        const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+                        
+                        if (file.size > maxSize) {
+                            Swal.fire('Error', 'Ukuran file maksimal 2MB!', 'error');
+                            resetButton();
+                            return;
+                        }
+                        
+                        if (!allowedTypes.includes(file.type)) {
+                            Swal.fire('Error', 'Format file harus PDF, PNG, JPG, atau JPEG!', 'error');
+                            resetButton();
+                            return;
+                        }
+                        
+                        @this.upload('modalFile', file, 
+                            () => @this.call('saveInvoice', formData).finally(resetButton),
+                            () => {
+                                Swal.fire('Error', 'Gagal mengupload file!', 'error');
+                                resetButton();
+                            }
+                        );
                     } else {
-                        showSweetAlert({ icon: 'warning', title: 'Perhatian', text: response.message || 'Terjadi kesalahan' });
+                        @this.call('saveInvoice', formData).finally(resetButton);
                     }
-                },
-                error: (xhr) => {
-                    Swal.close();
-                    let errorMessage = 'Terjadi kesalahan saat menyimpan data';
+                });
 
-                    if (xhr.status === 422 && xhr.responseJSON?.errors) {
-                        errorMessage = '<ul class="text-start">' + 
-                            Object.values(xhr.responseJSON.errors).map(err => `<li>${err[0]}</li>`).join('') + 
-                            '</ul>';
-                    } else if (xhr.responseJSON?.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    } else if (xhr.status === 0) {
-                        errorMessage = 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda.';
+                document.getElementById('modal-pengembalian-invoice').addEventListener('hidden.bs.modal', () => {
+                    editingIndex = null;
+                    resetButton();
+                    
+                    if (elements.nominalInput._cleaveInstance) {
+                        elements.nominalInput._cleaveInstance.setRawValue('');
+                    } else {
+                        elements.nominalInput.value = '';
                     }
-
-                    showSweetAlert({ icon: 'error', title: 'Error', text: errorMessage });
-                }
+                    
+                    elements.fileInput.value = '';
+                    elements.fileInfoDiv.style.display = 'none';
+                    @this.set('modalFile', null);
+                });
             });
-
-            return false;
-        }
-
-        function initCleaveRupiah() {
-            if (window.cleaveNominal) window.cleaveNominal.destroy();
-            window.cleaveNominal = new Cleave('#nominal_yang_dibayarkan', {
-                numeral: true,
-                numeralThousandsGroupStyle: 'thousand',
-                numeralDecimalScale: 0,
-                prefix: 'Rp ',
-                rawValueTrimPrefix: true,
-                noImmediatePrefix: false
-            });
-        }
-    </script>
-@endpush
+        </script>
+    @endpush
+</div>
+            

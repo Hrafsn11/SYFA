@@ -22,7 +22,7 @@
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Project</label>
                             <input type="text" class="form-control"
-                                value="{{ $pengajuan->project->nama_project ?? '-' }}" readonly>
+                                value="{{ $pengajuan->project->nama_cells_bisnis ?? '-' }}" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Jumlah Investasi</label>

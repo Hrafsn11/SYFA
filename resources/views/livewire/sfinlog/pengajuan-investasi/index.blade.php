@@ -50,7 +50,7 @@
                                         data-placeholder="Pilih Project" required>
                                         <option value=""></option>
                                         @foreach($projects as $project)
-                                            <option value="{{ $project->id_cells_project }}">{{ $project->nama_project }}</option>
+                                            <option value="{{ $project->id_cells_project }}">{{ $project->nama_cells_bisnis }}</option>
                                         @endforeach
                                     </select>
                                 </div>
