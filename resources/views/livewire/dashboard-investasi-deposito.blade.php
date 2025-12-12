@@ -1,12 +1,10 @@
 <div>
-    {{-- Page Header --}}
     <div class="row">
         <div class="col-12">
             <h4 class="fw-bold py-3 mb-4">Dashboard Investasi Deposito SFinance</h4>
         </div>
     </div>
 
-    {{-- Summary Cards Row 1 (TIDAK BERUBAH) --}}
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 col-12 mb-4">
             <div class="card">
@@ -19,7 +17,6 @@
                                 <i class="ti ti-arrow-up text-success me-1"></i>
                                 <span class="text-success fw-semibold">{{ $summaryData['total_deposito_pokok_percent'] }}% dari bulan lalu</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_deposito_pokok_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -42,7 +39,6 @@
                                 <i class="ti ti-arrow-up text-success me-1"></i>
                                 <span class="text-success fw-semibold">{{ $summaryData['total_cof_percent'] }}% lebih lancar</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_cof_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -65,7 +61,6 @@
                                 <i class="ti ti-arrow-up text-success me-1"></i>
                                 <span class="text-success fw-semibold">{{ $summaryData['total_pengembalian_percent'] }}%</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_pengembalian_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -88,7 +83,6 @@
                                 <i class="ti ti-arrow-down text-warning me-1"></i>
                                 <span class="text-warning fw-semibold">{{ $summaryData['total_outstanding_percent'] }}% dari bulan lalu</span>
                             </div>
-                            <small class="text-muted">Compared to {{ $summaryData['total_outstanding_period'] }}</small>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
                             <div class="avatar-initial bg-success rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -118,7 +112,7 @@
                         <select id="filterBulanDepositoPokok" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthDepositoPokok ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -139,7 +133,7 @@
                         <select id="filterBulanCoF" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthCoF ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -163,7 +157,7 @@
                         <select id="filterBulanPengembalian" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthPengembalian ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -184,7 +178,7 @@
                         <select id="filterBulanSisaDeposito" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @for($month = 1; $month <= 12; $month++)
-                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $selectedMonth == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ ($selectedMonthSisaDeposito ?? $selectedMonth) == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                                     {{ $bulanNama[$month] }}
                                 </option>
                             @endfor
@@ -197,18 +191,24 @@
             </div>
         </div>
     </div>
+
+    {{-- Hidden element untuk membawa data chart terbaru ke JS (agar bisa diparse ulang setelah Livewire morph) --}}
+    <div id="chart-data-json"
+         data-deposito='@json($chartDepositoPokok ?? ["series" => [], "categories" => []])'
+         data-cof='@json($chartCoF ?? ["series" => [], "categories" => []])'
+         data-pengembalian='@json($chartPengembalian ?? ["series" => [], "categories" => []])'
+         data-sisa='@json($chartSisaDeposito ?? ["series" => [], "categories" => []])'
+         class="d-none"></div>
 </div>
 
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}" />
 
 <style>
-    /* Fix Select2 dropdown width */
     .select2-container {
         width: 100% !important;
     }
     
-    /* Mengatur lebar Select2 pada filter bulan chart (150px) */
     #filterBulanDepositoPokok + .select2-container,
     #filterBulanCoF + .select2-container,
     #filterBulanPengembalian + .select2-container,
@@ -218,7 +218,6 @@
         max-width: 150px !important;
     }
     
-    /* Override warna tema Select2 agar konsisten dengan tema Sfinance/Bootstrap biru */
     .select2-container--default .select2-results__option--highlighted[aria-selected] {
         background-color: #0d6efd !important;
         color: #fff !important;
@@ -234,20 +233,68 @@
         border-color: #0d6efd !important;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     }
+
+    .row.mb-4 > [class*="col-"] > .card {
+        min-height: 160px; 
+        height: 100%;
+    }
+    
+    .row.mb-4 > [class*="col-"] .card-body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+        padding: 1.25rem !important; 
+    }
+
+    .row.mb-4 > [class*="col-"] .card-title {
+        white-space: normal; 
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; 
+        -webkit-box-orient: vertical;
+        line-height: 1.4; 
+        min-height: 40px; 
+        margin-bottom: 0.5rem !important; 
+        font-size: 0.9em; 
+    }
+    
+    .row.mb-4 > [class*="col-"] h4.mb-2 {
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis; 
+        line-height: 1.3; 
+        min-height: 35px; 
+        margin-bottom: 0.5rem !important; 
+        font-size: 1.4rem; 
+    }
+    
+    .row.mb-4 > [class*="col-"] .d-flex.align-items-center {
+        margin-top: 0.25rem; 
+        margin-bottom: 0 !important; 
+        min-height: 25px; 
+    }
+
+    .row.mb-4.g-3 .card-header .card-title {
+        font-size: 1.25rem !important; 
+        font-weight: bold; 
+    }
+
+    .row.mb-4 .flex-grow-1 {
+        min-width: 0; 
+    }
 </style>
 @endpush
 
 @push('scripts')
 <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 <script>
-    // Inisialisasi variabel global di awal untuk chart instances
     window.chartDepositoPokok = null;
     window.chartCoF = null;
     window.chartPengembalian = null;
     window.chartSisaDeposito = null;
 
-    // Store chart options globally for re-rendering
-    // PASTIKAN data ini diisi di Livewire/PHP backend Anda agar tidak kosong
     window.chartOptions = {
         depositoPokok: @json($chartDepositoPokok),
         coF: @json($chartCoF),
@@ -255,12 +302,52 @@
         sisaDeposito: @json($chartSisaDeposito)
     };
 
-    function initSelect2() {
-        const selectIds = [
-            'filterBulanDepositoPokok', 'filterBulanCoF', 'filterBulanPengembalian', 'filterBulanSisaDeposito'
-        ];
+    function refreshChartOptionsFromDom() {
+        const holder = document.getElementById('chart-data-json');
+        if (!holder) {
+            return false;
+        }
         
-        // Hancurkan instance yang sudah ada
+        const parseJson = (attr) => {
+            try {
+                const dataAttr = holder.getAttribute('data-' + attr);
+                if (!dataAttr) {
+                    return { series: [], categories: [] };
+                }
+                const parsed = JSON.parse(dataAttr);
+                // Pastikan struktur data benar
+                if (!parsed.series) parsed.series = [];
+                if (!parsed.categories) parsed.categories = [];
+                
+                return parsed;
+            } catch (e) {
+                console.error('Error parsing chart data for', attr, ':', e);
+                return { series: [], categories: [] };
+            }
+        };
+        
+        const newOptions = {
+            depositoPokok: parseJson('deposito'),
+            coF: parseJson('cof'),
+            pengembalian: parseJson('pengembalian'),
+            sisaDeposito: parseJson('sisa')
+        };
+        
+        // Update window.chartOptions
+        window.chartOptions = newOptions;
+        return true;
+    }
+
+    function initSelect2() {
+        const filterMapping = {
+            'filterBulanDepositoPokok': 'selectedMonthDepositoPokok',
+            'filterBulanCoF': 'selectedMonthCoF',
+            'filterBulanPengembalian': 'selectedMonthPengembalian',
+            'filterBulanSisaDeposito': 'selectedMonthSisaDeposito'
+        };
+        
+        const selectIds = Object.keys(filterMapping);
+        
         selectIds.forEach(function(id) {
             const $select = $('#' + id);
             if ($select.length && $select.hasClass('select2-hidden-accessible')) {
@@ -268,12 +355,12 @@
             }
         });
 
-        // Inisialisasi Select2
         selectIds.forEach(function(id) {
             const $select = $('#' + id);
             if (!$select.length) return;
             
-            const width = 150; 
+            const width = 150;
+            const propertyName = filterMapping[id];
             
             $select.select2({
                 placeholder: $select.attr('data-placeholder') || 'Pilih...',
@@ -283,7 +370,6 @@
                 dropdownAutoWidth: false
             });
             
-            // Force set width after initialization
             setTimeout(function() {
                 $select.next('.select2-container').css({
                     'width': width + 'px',
@@ -292,32 +378,90 @@
                 });
             }, 10);
             
-            // Handle change events and dispatch to Livewire
-            $select.off('change.livewire'); // Hapus event listener lama
+            $select.off('change.livewire');
             $select.on('change.livewire', function() {
                 const bulan = $(this).val();
-                const componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                const $component = $(this).closest('[wire\\:id]');
+                const componentId = $component.attr('wire:id');
+                
+                console.log('Filter changed:', propertyName, '=', bulan);
+                
                 if (componentId && typeof Livewire !== 'undefined') {
-                    // Mengirim nilai ke properti $selectedMonth
-                    Livewire.find(componentId).set('selectedMonth', bulan || null);
+                    const component = Livewire.find(componentId);
+                    if (component) {
+                        // Set property - Livewire akan otomatis trigger re-render
+                        component.set(propertyName, bulan || null);
+                        console.log('Property set:', propertyName, '=', bulan);
+                        
+                        // Setelah property di-set, tunggu update dan refresh chart
+                        setTimeout(() => {
+                            console.log('Manually refreshing charts after filter change...');
+                            refreshChartOptionsFromDom();
+                            initCharts();
+                        }, 500);
+                    }
                 }
             });
         });
     }
 
+    function updateChart(chartInstance, newData, colors = ['#71dd37']) {
+        if (!chartInstance) return false;
+        
+        if (!newData) {
+            newData = { series: [], categories: [] };
+        }
+        
+        try {
+            // Pastikan struktur data benar
+            const series = newData.series || [];
+            const categories = newData.categories || [];
+            
+            // Jika data kosong, return false untuk trigger destroy dan recreate
+            // Ini memastikan chart benar-benar clear
+            const hasData = series.length > 0 && categories.length > 0;
+            if (!hasData) {
+                return false; // Return false untuk trigger destroy dan recreate
+            }
+            
+            // Update series terlebih dahulu
+            chartInstance.updateSeries(series, false); // false = tidak animate
+            
+            // Update xaxis categories dan legend
+            chartInstance.updateOptions({
+                xaxis: {
+                    categories: categories
+                },
+                legend: {
+                    show: series.length > 1
+                },
+                colors: colors
+            }, false, true); // false = tidak animate, true = updateSeries juga
+            
+            return true;
+        } catch (e) {
+            console.error('Error updating chart:', e);
+            // Jika update gagal, destroy dan recreate
+            try {
+                chartInstance.destroy();
+            } catch (destroyErr) {
+                console.error('Error destroying chart:', destroyErr);
+            }
+            return false; // Return false untuk trigger recreate
+        }
+    }
+
     function initCharts() {
+        console.log('initCharts called');
+        
         if (typeof ApexCharts === 'undefined') {
             console.error('ApexCharts is not loaded');
             return;
         }
 
-        // Penghancuran (Destroy) Chart yang Aman
-        if (window.chartDepositoPokok) window.chartDepositoPokok.destroy();
-        if (window.chartCoF) window.chartCoF.destroy();
-        if (window.chartPengembalian) window.chartPengembalian.destroy();
-        if (window.chartSisaDeposito) window.chartSisaDeposito.destroy();
-        
-        // Fungsi pembantu untuk format Rupiah
+        refreshChartOptionsFromDom();
+        console.log('Chart options after refresh:', window.chartOptions);
+
         const formatterRupiah = function(val) {
             if (val === 0) return 'Rp. 0';
             const numVal = parseFloat(val);
@@ -327,9 +471,8 @@
             return 'Rp. ' + formatted;
         };
         
-        // Opsi Dasar untuk Bar Chart
         const baseBarOptions = (data, colors = ['#71dd37']) => ({
-            series: data.series,
+            series: data.series || [],
             chart: {
                 type: 'bar',
                 height: 350,
@@ -360,15 +503,15 @@
                 padding: { top: 10, right: 10, bottom: 0, left: 10 }
             },
             xaxis: {
-                categories: data.categories,
-                labels: { style: { fontSize: '12px', colors: '#697a8d' } },
+                categories: data.categories || [],
+                labels: { style: { fontSize: '14px', colors: '#697a8d' } }, 
                 axisBorder: { show: true, color: '#e0e0e0' },
                 axisTicks: { show: true, color: '#e0e0e0' }
             },
             yaxis: {
                 labels: {
                     formatter: formatterRupiah,
-                    style: { fontSize: '12px', colors: '#697a8d' }
+                    style: { fontSize: '14px', colors: '#697a8d' } 
                 },
                 min: 0,
                 max: 200000000, 
@@ -380,7 +523,7 @@
             fill: { opacity: 1 },
             colors: colors,
             legend: { 
-                show: data.series.length > 1, 
+                show: (data.series && data.series.length > 1) || false, 
                 position: 'top', 
                 horizontalAlign: 'right', 
                 markers: { width: 12, height: 12, radius: 12 } 
@@ -390,44 +533,157 @@
             }
         });
         
-        // Mendapatkan data chart dari Blade/PHP
         const chartData = {
-            depositoPokok: @json($chartDepositoPokok ?? ['series' => [], 'categories' => []]),
-            coF: @json($chartCoF ?? ['series' => [], 'categories' => []]),
-            pengembalian: @json($chartPengembalian ?? ['series' => [], 'categories' => []]),
-            sisaDeposito: @json($chartSisaDeposito ?? ['series' => [], 'categories' => []])
+            depositoPokok: window.chartOptions.depositoPokok ?? { series: [], categories: [] },
+            coF: window.chartOptions.coF ?? { series: [], categories: [] },
+            pengembalian: window.chartOptions.pengembalian ?? { series: [], categories: [] },
+            sisaDeposito: window.chartOptions.sisaDeposito ?? { series: [], categories: [] }
         };
+        
+        console.log('Chart data to render:', chartData);
 
-        // Chart 1: Total Deposito Pokok yang masuk Per Bulan
+        // Update existing charts or create new ones
         if (document.querySelector("#chartDepositoPokok")) {
-            const options = baseBarOptions(chartData.depositoPokok);
-            window.chartDepositoPokok = new ApexCharts(document.querySelector("#chartDepositoPokok"), options);
-            window.chartDepositoPokok.render();
+            const data = chartData.depositoPokok;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            console.log('Processing chartDepositoPokok, hasData:', hasData, 'data:', data);
+            
+            if (window.chartDepositoPokok) {
+                // Jika data kosong, destroy dan recreate untuk memastikan chart benar-benar clear
+                if (!hasData) {
+                    console.log('Destroying chartDepositoPokok because no data');
+                    try {
+                        window.chartDepositoPokok.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartDepositoPokok = null;
+                }
+                
+                if (window.chartDepositoPokok) {
+                    console.log('Updating existing chartDepositoPokok');
+                    const updated = updateChart(window.chartDepositoPokok, data);
+                    if (!updated) {
+                        console.log('Update failed, recreating chartDepositoPokok');
+                        // Recreate chart jika update gagal
+                        try {
+                            window.chartDepositoPokok.destroy();
+                        } catch (e) {}
+                        window.chartDepositoPokok = null;
+                    } else {
+                        console.log('ChartDepositoPokok updated successfully');
+                    }
+                }
+            }
+            
+            // Create chart jika belum ada
+            if (!window.chartDepositoPokok) {
+                console.log('Creating new chartDepositoPokok');
+                const options = baseBarOptions(data);
+                window.chartDepositoPokok = new ApexCharts(document.querySelector("#chartDepositoPokok"), options);
+                window.chartDepositoPokok.render();
+                console.log('ChartDepositoPokok rendered');
+            }
         }
 
-        // Chart 2: Total CoF per bulan
         if (document.querySelector("#chartCoF")) {
-            const options = baseBarOptions(chartData.coF);
-            window.chartCoF = new ApexCharts(document.querySelector("#chartCoF"), options);
-            window.chartCoF.render();
+            const data = chartData.coF;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            if (window.chartCoF) {
+                if (!hasData) {
+                    try {
+                        window.chartCoF.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartCoF = null;
+                }
+                
+                if (window.chartCoF) {
+                    const updated = updateChart(window.chartCoF, data);
+                    if (!updated) {
+                        try {
+                            window.chartCoF.destroy();
+                        } catch (e) {}
+                        window.chartCoF = null;
+                    }
+                }
+            }
+            
+            if (!window.chartCoF) {
+                const options = baseBarOptions(data);
+                window.chartCoF = new ApexCharts(document.querySelector("#chartCoF"), options);
+                window.chartCoF.render();
+            }
         }
 
-        // Chart 3: Total Pengembalian Pokok dan Bagi Hasil Perbulan 
         if (document.querySelector("#chartPengembalian")) {
-            const options = baseBarOptions(chartData.pengembalian, ['#71dd37', '#ffab00']);
-            window.chartPengembalian = new ApexCharts(document.querySelector("#chartPengembalian"), options);
-            window.chartPengembalian.render();
+            const data = chartData.pengembalian;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            if (window.chartPengembalian) {
+                if (!hasData) {
+                    try {
+                        window.chartPengembalian.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartPengembalian = null;
+                }
+                
+                if (window.chartPengembalian) {
+                    const updated = updateChart(window.chartPengembalian, data, ['#71dd37', '#ffab00']);
+                    if (!updated) {
+                        try {
+                            window.chartPengembalian.destroy();
+                        } catch (e) {}
+                        window.chartPengembalian = null;
+                    }
+                }
+            }
+            
+            if (!window.chartPengembalian) {
+                const options = baseBarOptions(data, ['#71dd37', '#ffab00']);
+                window.chartPengembalian = new ApexCharts(document.querySelector("#chartPengembalian"), options);
+                window.chartPengembalian.render();
+            }
         }
 
-        // Chart 4: Total Sisa Deposito Pokok dan CoF yang Belum Dikembalikan
         if (document.querySelector("#chartSisaDeposito")) {
-            const options = baseBarOptions(chartData.sisaDeposito, ['#71dd37', '#ffab00']);
-            window.chartSisaDeposito = new ApexCharts(document.querySelector("#chartSisaDeposito"), options);
-            window.chartSisaDeposito.render();
+            const data = chartData.sisaDeposito;
+            const hasData = data.series && data.series.length > 0 && data.categories && data.categories.length > 0;
+            
+            if (window.chartSisaDeposito) {
+                if (!hasData) {
+                    try {
+                        window.chartSisaDeposito.destroy();
+                    } catch (e) {
+                        console.error('Error destroying chart:', e);
+                    }
+                    window.chartSisaDeposito = null;
+                }
+                
+                if (window.chartSisaDeposito) {
+                    const updated = updateChart(window.chartSisaDeposito, data, ['#71dd37', '#ffab00']);
+                    if (!updated) {
+                        try {
+                            window.chartSisaDeposito.destroy();
+                        } catch (e) {}
+                        window.chartSisaDeposito = null;
+                    }
+                }
+            }
+            
+            if (!window.chartSisaDeposito) {
+                const options = baseBarOptions(data, ['#71dd37', '#ffab00']);
+                window.chartSisaDeposito = new ApexCharts(document.querySelector("#chartSisaDeposito"), options);
+                window.chartSisaDeposito.render();
+            }
         }
     }
 
-    // Function to resize all charts
     function resizeCharts() {
         const charts = [window.chartDepositoPokok, window.chartCoF, window.chartPengembalian, window.chartSisaDeposito];
         setTimeout(function() {
@@ -439,7 +695,6 @@
         }, 100);
     }
     
-    // Setup ResizeObserver for chart containers
     function setupResizeObservers() {
         const chartContainers = [
             document.querySelector("#chartDepositoPokok"),
@@ -458,15 +713,51 @@
         });
     }
 
-    // Initialize Select2 dan Charts pada DOM Ready
+    // Function untuk update chart ketika data berubah
+    let chartUpdateTimer = null;
+    function scheduleChartUpdate() {
+        if (chartUpdateTimer) {
+            clearTimeout(chartUpdateTimer);
+        }
+        chartUpdateTimer = setTimeout(() => {
+            console.log('Scheduled chart update triggered');
+            refreshChartOptionsFromDom();
+            initCharts();
+        }, 300);
+    }
+
+    // Setup MutationObserver untuk memantau perubahan pada chart-data-json
+    function setupChartDataObserver() {
+        const holder = document.getElementById('chart-data-json');
+        if (!holder) {
+            console.warn('chart-data-json not found for observer');
+            return;
+        }
+
+        const observer = new MutationObserver(function(mutations) {
+            console.log('Chart data changed in DOM');
+            scheduleChartUpdate();
+        });
+
+        observer.observe(holder, {
+            attributes: true,
+            attributeFilter: ['data-deposito', 'data-cof', 'data-pengembalian', 'data-sisa'],
+            childList: false,
+            subtree: false
+        });
+
+        console.log('Chart data observer setup complete');
+    }
+
     $(document).ready(function() {
         setTimeout(function() {
+            refreshChartOptionsFromDom();
             initSelect2(); 
             initCharts();
             setupResizeObservers();
+            setupChartDataObserver();
         }, 500);
         
-        // Listeners untuk perubahan layout (sidebar toggle)
         const menuToggle = document.querySelector('.layout-menu-toggle');
         if (menuToggle) {
             menuToggle.addEventListener('click', function() {
@@ -483,37 +774,115 @@
         });
     });
 
-    // Re-render saat Livewire selesai memuat atau memperbarui (Livewire 3+)
     document.addEventListener('livewire:navigated', function() {
         setTimeout(function() {
+            refreshChartOptionsFromDom();
             initSelect2(); 
             initCharts();
             setupResizeObservers();
+            setupChartDataObserver();
         }, 300);
     });
 
-    // Re-render saat Livewire component terupdate (penting untuk Select2 dan Chart)
     if (typeof Livewire !== 'undefined') {
+        // Hook untuk update setelah Livewire selesai morph
         Livewire.hook('morph.updated', ({ el, component }) => {
+            console.log('Livewire morph.updated triggered');
+            
+            // Setup observer ulang setelah morph
             setTimeout(() => {
-                // Re-initialize Select2
-                initSelect2(); 
-                
-                // Set value Select2 setelah re-init
-                const $component = $(el);
-                $component.find('#filterBulanDepositoPokok, #filterBulanCoF, #filterBulanPengembalian, #filterBulanSisaDeposito').each(function() {
-                    const $select = $(this);
-                    // Mengambil nilai dari properti $selectedMonth (yang kini mungkin null atau '')
-                    const value = component.get('selectedMonth') || ''; 
-                    
-                    if ($select.val() !== value) {
-                        $select.val(value).trigger('change.select2');
-                    }
-                });
-
-                // Re-initialize charts dengan data baru
-                initCharts(); 
+                setupChartDataObserver();
             }, 100);
+            
+            // Gunakan requestAnimationFrame untuk memastikan DOM sudah ter-update
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    console.log('Updating charts after morph...');
+                    
+                    initSelect2(); 
+                    
+                    const $component = $(el);
+                    const filterMapping = {
+                        'filterBulanDepositoPokok': 'selectedMonthDepositoPokok',
+                        'filterBulanCoF': 'selectedMonthCoF',
+                        'filterBulanPengembalian': 'selectedMonthPengembalian',
+                        'filterBulanSisaDeposito': 'selectedMonthSisaDeposito'
+                    };
+                    
+                    Object.keys(filterMapping).forEach(function(filterId) {
+                        const $select = $component.find('#' + filterId);
+                        if ($select.length) {
+                            const propertyName = filterMapping[filterId];
+                            const value = component.get(propertyName) || '';
+                            
+                            if ($select.val() !== value) {
+                                $select.val(value).trigger('change.select2');
+                            }
+                        }
+                    });
+
+                    // Pastikan data chart sudah ter-update di DOM sebelum membaca
+                    // Coba beberapa kali jika data belum tersedia
+                    let attempts = 0;
+                    const maxAttempts = 15;
+                    const checkAndUpdate = () => {
+                        const holder = document.getElementById('chart-data-json');
+                        if (!holder) {
+                            console.log('chart-data-json not found, attempt:', attempts);
+                            if (attempts < maxAttempts) {
+                                attempts++;
+                                setTimeout(checkAndUpdate, 100);
+                            }
+                            return;
+                        }
+                        
+                        // Pastikan data attributes sudah ter-update
+                        const hasData = holder.getAttribute('data-deposito') !== null;
+                        console.log('Has data attribute:', hasData, 'attempt:', attempts);
+                        
+                        if (hasData || attempts >= maxAttempts) {
+                            // Refresh data dari DOM
+                            const refreshed = refreshChartOptionsFromDom();
+                            console.log('Data refreshed:', refreshed);
+                            if (refreshed) {
+                                // Update charts dengan data baru
+                                console.log('Initializing charts...');
+                                initCharts();
+                                console.log('Charts initialized');
+                            } else if (attempts < maxAttempts) {
+                                attempts++;
+                                setTimeout(checkAndUpdate, 100);
+                            }
+                        } else {
+                            attempts++;
+                            setTimeout(checkAndUpdate, 100);
+                        }
+                    };
+                    checkAndUpdate();
+                }, 200);
+            });
+        });
+        
+        // Hook untuk update setelah request selesai
+        Livewire.hook('message.processed', (message, component) => {
+            console.log('Livewire message.processed triggered');
+            if (message.updateQueue && message.updateQueue.length > 0) {
+                setTimeout(() => {
+                    console.log('Updating charts after message processed...');
+                    refreshChartOptionsFromDom();
+                    initCharts();
+                }, 300);
+            }
+        });
+        
+        // Hook untuk update setelah component di-update
+        Livewire.hook('component.updated', (component) => {
+            console.log('Livewire component.updated triggered');
+            setTimeout(() => {
+                console.log('Updating charts after component updated...');
+                refreshChartOptionsFromDom();
+                initCharts();
+            }, 300);
         });
     }
 
