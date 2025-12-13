@@ -24,6 +24,7 @@ class MasterDebiturDanInvestor extends Model
         'nama',
         'alamat',
         'email',
+        'npa',
         'no_telepon',
         'status',
         'deposito',
@@ -49,6 +50,11 @@ class MasterDebiturDanInvestor extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function peminjamanFinlog()
+    {
+        return $this->hasMany(PeminjamanFinlog::class, 'id_debitur', 'id_debitur');
     }
 
     public function Debitur($query)

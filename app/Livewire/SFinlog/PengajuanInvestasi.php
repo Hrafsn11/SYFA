@@ -29,7 +29,7 @@ class PengajuanInvestasi extends Component
                                             ->where('flagging', 'ya')
                                             ->first();
         
-        $this->projects = CellsProject::orderBy('nama_project', 'asc')->get();
+        $this->projects = CellsProject::orderBy('nama_cells_bisnis', 'asc')->get();
 
         $this->setUrlSaveData('store_pengajuan_investasi_finlog', 'sfinlog.pengajuan-investasi.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_pengajuan_investasi_finlog', 'sfinlog.pengajuan-investasi.update', ["id" => "id_placeholder", "callback" => "afterAction"]);

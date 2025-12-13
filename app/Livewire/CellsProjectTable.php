@@ -2,18 +2,19 @@
 
 namespace App\Livewire;
 
-use App\Models\CellsProject;
 use App\Livewire\Traits\HasUniversalFormAction;
-use Rappasoft\LaravelLivewireTables\Views\Column;
+use App\Models\CellsProject;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class CellsProjectTable extends DataTableComponent
 {
     use HasUniversalFormAction;
 
     protected $model = CellsProject::class;
+
     protected $listeners = [
-        'refreshCellsProjectTable' => '$refresh'
+        'refreshCellsProjectTable' => '$refresh',
     ];
 
     public function configure(): void
@@ -23,15 +24,15 @@ class CellsProjectTable extends DataTableComponent
             ->setSearchEnabled()
             ->setSearchPlaceholder('Cari Project...')
             ->setSearchDebounce(500)
-            
+
             // Pagination
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            
+
             // Default Sort
             ->setDefaultSort('created_at', 'desc')
-            
+
             // Table Styling
             ->setTableAttributes([
                 'class' => 'table table-hover',
@@ -46,41 +47,71 @@ class CellsProjectTable extends DataTableComponent
             ->setPerPageFieldAttributes([
                 'class' => 'form-select',
             ])
-            
+
             // Disable Bulk Actions
             ->setBulkActionsDisabled();
     }
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return CellsProject::query()->select('id_cells_project', 'nama_project', 'created_at');
+        return CellsProject::query()
+            ->with('projects')
+            ->select('id_cells_project', 'nama_cells_bisnis', 'nama_pic', 'alamat', 'deskripsi_bidang', 'created_at');
     }
 
     public function columns(): array
     {
         $rowNumber = 0;
+
         return [
-            Column::make("No")
-                ->label(function($row) use (&$rowNumber) {
+            Column::make('No')
+                ->label(function ($row) use (&$rowNumber) {
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
-                    return '<div class="text-center">' . $number . '</div>';
+
+                    return '<div class="text-center">'.$number.'</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
-            
-            Column::make("Nama Project", "nama_project")
+
+            Column::make('Nama Cells Bisnis', 'nama_cells_bisnis')
                 ->sortable()
                 ->searchable(),
-            
-            Column::make("Aksi")
+
+            Column::make('Projects', 'id_cells_project')
                 ->label(function ($row) {
-                    $this->setUrlLoadData('get_data_' . $row->id_cells_project, 'master-data.cells-project.edit', ['id' => $row->id_cells_project, 'callback' => 'editData']);
-                    
-                    $editBtn = '<button class="btn btn-sm btn-icon btn-text-primary rounded-pill" wire:click=\'' . $this->urlAction['get_data_' . $row->id_cells_project] . '\' type="button" title="Edit"><i class="ti ti-edit"></i></button>';
-                    $deleteBtn = '<button class="btn btn-sm btn-icon btn-text-danger rounded-pill cells-project-delete-btn" type="button" data-id="' . $row->id_cells_project . '" title="Hapus"><i class="ti ti-trash"></i></button>';
-                    
-                    return '<div class="d-flex justify-content-center align-items-center gap-2">' . $editBtn . $deleteBtn . '</div>';
+                    if ($row->projects->isEmpty()) {
+                        return '<span class="badge bg-label-secondary">Belum ada project</span>';
+                    }
+
+                    $badges = $row->projects->map(function ($project) {
+                        return '<span class="badge bg-label-primary me-1 mb-1">'.e($project->nama_project).'</span>';
+                    })->implode('');
+
+                    return '<div class="d-flex flex-wrap">'.$badges.'</div>';
+                })
+                ->html(),
+
+            Column::make('Nama PIC', 'nama_pic')
+                ->sortable()
+                ->searchable(),
+
+            Column::make('Alamat', 'alamat')
+                ->sortable()
+                ->searchable(),
+
+            Column::make('Deskripsi Bidang', 'deskripsi_bidang')
+                ->sortable()
+                ->searchable(),
+
+            Column::make('Aksi')
+                ->label(function ($row) {
+                    $this->setUrlLoadData('get_data_'.$row->id_cells_project, 'master-data.cells-project.edit', ['id' => $row->id_cells_project, 'callback' => 'editData']);
+
+                    $editBtn = '<button class="btn btn-sm btn-icon btn-text-primary rounded-pill" wire:click=\''.$this->urlAction['get_data_'.$row->id_cells_project].'\' type="button" title="Edit"><i class="ti ti-edit"></i></button>';
+                    $deleteBtn = '<button class="btn btn-sm btn-icon btn-text-danger rounded-pill cells-project-delete-btn" type="button" data-id="'.$row->id_cells_project.'" title="Hapus"><i class="ti ti-trash"></i></button>';
+
+                    return '<div class="d-flex justify-content-center align-items-center gap-2">'.$editBtn.$deleteBtn.'</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),

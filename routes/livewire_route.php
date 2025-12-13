@@ -48,6 +48,12 @@ Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsPro
 Route::get('sfinlog/pengajuan-investasi', \App\Livewire\SFinlog\PengajuanInvestasi::class)->name('sfinlog.pengajuan-investasi.index');
 Route::get('sfinlog/pengajuan-investasi/detail/{id}', \App\Livewire\SFinlog\PengajuanInvestasiDetail::class)->name('sfinlog.pengajuan-investasi.detail');
 
+// SFinlog - Peminjaman Dana
+Route::get('sfinlog/peminjaman', \App\Livewire\SFinlog\Peminjaman::class)->name('sfinlog.peminjaman.index');
+Route::get('sfinlog/peminjaman/create', \App\Livewire\SFinlog\PeminjamanCreate::class)->name('sfinlog.peminjaman.create');
+Route::get('sfinlog/peminjaman/detail/{id}', \App\Livewire\SFinlog\PeminjamanDetail::class)->name('sfinlog.peminjaman.detail');
+
+
 
 
 

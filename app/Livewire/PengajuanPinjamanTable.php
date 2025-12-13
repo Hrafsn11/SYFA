@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\PengajuanPeminjaman;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Illuminate\Support\Facades\DB;
 
 class PengajuanPinjamanTable extends DataTableComponent
 {
@@ -50,19 +51,9 @@ class PengajuanPinjamanTable extends DataTableComponent
     {
         return PengajuanPeminjaman::query()
             ->with(['debitur', 'instansi'])
-            ->select('pengajuan_peminjaman.id_pengajuan_peminjaman', 
-                    'pengajuan_peminjaman.nomor_peminjaman', 
-                    'pengajuan_peminjaman.id_debitur', 
-                    'pengajuan_peminjaman.jenis_pembiayaan', 
-                    'pengajuan_peminjaman.sumber_pembiayaan', 
-                    'pengajuan_peminjaman.id_instansi', 
-                    'pengajuan_peminjaman.total_pinjaman', 
-                    'pengajuan_peminjaman.total_bagi_hasil', 
-                    'pengajuan_peminjaman.status', 
-                    'pengajuan_peminjaman.is_active', 
-                    'pengajuan_peminjaman.harapan_tanggal_pencairan', 
-                    'pengajuan_peminjaman.created_at',
-                    'pengajuan_peminjaman.lampiran_sid');
+            ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
+            ->select('pengajuan_peminjaman.*', 
+                    DB::raw('master_debitur_dan_investor.nama as nama_perusahaan'));
     }
 
     public function columns(): array
@@ -86,11 +77,16 @@ class PengajuanPinjamanTable extends DataTableComponent
                 
             Column::make('Nama Perusahaan')
                 ->label(function ($row) {
-                    $namaDebitur = $row->debitur->nama ?? '-';
+                    $namaDebitur = $row->nama_perusahaan ?: ($row->debitur->nama ?? '-');
                     return '<div class="text-start">'.$namaDebitur.'</div>';
                 })
-                ->html()
-                ->searchable(),
+                ->sortable(function ($builder, $direction) {
+                    return $builder->orderBy('master_debitur_dan_investor.nama', $direction);
+                })
+                ->searchable(function ($builder, $term) {
+                    return $builder->orWhere('master_debitur_dan_investor.nama', 'like', '%'.$term.'%');
+                })
+                ->html(),
                 
             Column::make('Jenis Pembiayaan', 'jenis_pembiayaan')
                 ->sortable()

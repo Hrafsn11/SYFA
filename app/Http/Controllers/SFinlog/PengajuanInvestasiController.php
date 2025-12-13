@@ -370,7 +370,7 @@ class PengajuanInvestasiController extends Controller
                 'tanggal_kontrak' => $tanggalKontrak,
                 'nama_investor' => $pengajuan->nama_investor,
                 'nama_perusahaan' => $pengajuan->nama_investor,
-                'project' => $pengajuan->project->nama_project ?? '-',
+                'project' => $pengajuan->project->nama_cells_bisnis ?? '-',
                 'nominal_investasi' => $pengajuan->nominal_investasi,
                 'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
                 'lama_investasi' => $pengajuan->lama_investasi,
