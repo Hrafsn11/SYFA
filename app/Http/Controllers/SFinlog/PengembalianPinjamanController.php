@@ -4,37 +4,40 @@ namespace App\Http\Controllers\SFinlog;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\PengembalianPinjamanFinlog;
+use App\Http\Requests\SFinlog\PengembalianPinjamanFinlogRequest;
+use Illuminate\Support\Facades\Storage;
 
 class PengembalianPinjamanController extends Controller
 {
     /**
-     * Display a listing of pengembalian pinjaman for SFinlog
+     * Store pengembalian pinjaman (Alternative jika tidak pakai Livewire)
      */
-    public function index()
+    public function store(PengembalianPinjamanFinlogRequest $request)
     {
-        // TODO: Implementasi logika index khusus SFinlog
-        return view('livewire.sfinlog.pengembalian-pinjaman.index');
-    }
-
-    /**
-     * Show the form for creating a new pengembalian pinjaman for SFinlog
-     */
-    public function create()
-    {
-        // TODO: Implementasi logika create khusus SFinlog
-        return view('livewire.sfinlog.pengembalian-pinjaman.create', [
-            'pengajuanPeminjaman' => collect([]),
-            'namaPerusahaan' => '',
-        ]);
-    }
-
-    /**
-     * Store a newly created pengembalian pinjaman for SFinlog
-     */
-    public function store(Request $request)
-    {
-        // TODO: Implementasi logika store khusus SFinlog
-        return redirect()->route('sfinlog.pengembalian.index');
+        try {
+            $validated = $request->validated();
+            
+            // Handle file upload jika ada
+            if ($request->hasFile('bukti_pembayaran')) {
+                $file = $request->file('bukti_pembayaran');
+                $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . $file->extension();
+                $path = $file->storeAs('pengembalian_finlog', $filename, 'public');
+                $validated['bukti_pembayaran'] = $path;
+            }
+            
+            PengembalianPinjamanFinlog::create($validated);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengembalian pinjaman berhasil disimpan!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 

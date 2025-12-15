@@ -31,4 +31,12 @@ class CellsProject extends Model
     {
         return $this->hasMany(Project::class, 'id_cells_project', 'id_cells_project');
     }
+
+    /**
+     * Relasi ke PengembalianPinjamanFinlog
+     */
+    public function pengembalianPinjaman()
+    {
+        return $this->hasMany(PengembalianPinjamanFinlog::class, 'id_cells_project', 'id_cells_project');
+    }
 }

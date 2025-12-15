@@ -120,8 +120,12 @@
                 <span class="menu-header-text">Pengembalian</span>
             </li>
 
-            <li class="menu-item {{ RouteHelper::routeIs('pengembalian.index') ? 'active' : '' }}">
-                <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
+            <li class="menu-item {{ RouteHelper::routeIs('pengembalian.index') || RouteHelper::routeIs('sfinlog.pengembalian-pinjaman.index') ? 'active' : '' }}">
+                @if ($isSFinlog)
+                    <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}" class="menu-link">
+                @else
+                    <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
+                @endif
                     <i class="menu-icon tf-icons ti ti-wallet"></i>
                     <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
                 </a>

@@ -16,7 +16,7 @@
 
     <div class="card">
         <div class="card-datatable table-responsive">
-            <livewire:sfinlog.peminjaman-finlog-table />
+            <livewire:SFinlog.peminjaman-finlog-table />
         </div>
     </div>
 
