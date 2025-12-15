@@ -4,14 +4,15 @@ namespace App\Livewire\MasterData;
 
 use Livewire\Component;
 use App\Attributes\FieldInput;
+use App\Livewire\Traits\HasModal;
 use App\Livewire\Traits\HasValidate;
 use App\Http\Requests\MasterKolRequest;
-use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Traits\HandlesPermissions;
+use App\Livewire\Traits\HasUniversalFormAction;
 
 class MasterKol extends Component
 {    
-    use HasUniversalFormAction, HasValidate, HandlesPermissions;
+    use HasUniversalFormAction, HasValidate, HasModal, HandlesPermissions;
     private string $validateClass = MasterKolRequest::class;
     
     #[FieldInput]

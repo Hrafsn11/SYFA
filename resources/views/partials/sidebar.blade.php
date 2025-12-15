@@ -30,20 +30,24 @@
     <ul class="menu-inner py-1 mb-3">
         <!-- Dashboard -->
         @if ($isSFinance)
-            <li class="menu-item {{ RouteHelper::routeIs('dashboard.*') || RouteHelper::routeIs('dashboard.pembiayaan') || RouteHelper::routeIs('dashboard.investasi-deposito') ? 'open' : '' }}">
+            <li
+                class="menu-item {{ RouteHelper::routeIs('dashboard.*') || RouteHelper::routeIs('dashboard.pembiayaan') || RouteHelper::routeIs('dashboard.investasi-deposito') ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="menu-icon tf-icons ti ti-smart-home"></i>
                     <div data-i18n="Dashboard">Dashboard</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ RouteHelper::routeIs('dashboard.pembiayaan') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.pembiayaan') }}" class="menu-link">
+                        <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.pembiayaan') }}"
+                            class="menu-link">
                             <div data-i18n="Dashboard Pembiayaan SFinance">Dashboard Pembiayaan SFinance</div>
                         </a>
                     </li>
                     <li class="menu-item {{ RouteHelper::routeIs('dashboard.investasi-deposito') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.investasi-deposito') }}" class="menu-link">
-                            <div data-i18n="Pembiayaan Investasi Deposito SFinance">Pembiayaan Investasi Deposito SFinance</div>
+                        <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.investasi-deposito') }}"
+                            class="menu-link">
+                            <div data-i18n="Pembiayaan Investasi Deposito SFinance">Pembiayaan Investasi Deposito
+                                SFinance</div>
                         </a>
                     </li>
                 </ul>
@@ -64,10 +68,16 @@
             </li>
 
             @can('peminjaman_dana.view')
-                <li class="menu-item {{ RouteHelper::routeIs('peminjaman*') ? 'active' : '' }}">
-                    <a href="{{ RouteHelper::route('peminjaman') }}" class="menu-link">
-                        <i class="menu-icon tf-icons ti ti-briefcase"></i>
-                        <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
+                <li class="menu-item {{ RouteHelper::is('peminjaman') ? 'active' : '' }}">
+                    @if ($isSFinlog)
+                        <a href="{{ route('sfinlog.peminjaman.index') }}" class="menu-link">
+                        @elseif($isSFinance)
+                            <a href="{{ route('sfinance.peminjaman') }}" class="menu-link">
+                            @else
+                                <a href="{{ route('peminjaman') }}" class="menu-link">
+                    @endif
+                    <i class="menu-icon tf-icons ti ti-briefcase"></i>
+                    <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>
                     </a>
                 </li>
             @endcan
@@ -219,7 +229,8 @@
                             </a>
                         </li> --}}
                         <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
-                            <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}" class="menu-link">
+                            <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}"
+                                class="menu-link">
                                 <div data-i18n="Cells Project">Cells Project</div>
                             </a>
                         </li>

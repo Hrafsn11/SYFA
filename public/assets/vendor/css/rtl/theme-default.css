@@ -1271,7 +1271,7 @@ a:hover {
   .select2-container--default
   .select2-selection--multiple
   .select2-selection__choice {
-  background: rgba(115, 103, 240, 0.16) !important;
+    background: rgba(19, 171, 171, 0.16) !important;
   color: #13abab !important;
 }
 
@@ -1313,12 +1313,12 @@ table.dataTable.dtr-column > tbody > tr > th.control:before {
 .datepicker table tr td.range.highlighted,
 .datepicker table tr td.range.today {
   color: #13abab !important;
-  background: #e9e7fd !important;
+  background: #d1f2f2 !important;
 }
 .datepicker table tr td.range.focused,
 .datepicker table tr td.range.highlighted.focused,
 .datepicker table tr td.range.today.focused {
-  background: #dddbfb !important;
+  background: #b8e8e8 !important;
 }
 .datepicker table tr td.range.disabled,
 .datepicker table tr td.range.highlighted.disabled,
@@ -1329,14 +1329,14 @@ table.dataTable.dtr-column > tbody > tr > th.control:before {
 .datepicker table tr td.today:not(.active),
 .datepicker table tr td.today:not(.active):hover {
   color: #13abab;
-  background-color: #e9e7fd;
+  background-color: #d1f2f2;
 }
 
 .flatpickr-day.today,
 .flatpickr-day.today:hover {
   color: #13abab !important;
-  border-color: #e9e7fd;
-  background-color: #e9e7fd !important;
+  border-color: #d1f2f2;
+  background-color: #d1f2f2 !important;
 }
 .flatpickr-day.inRange,
 .flatpickr-day.nextMonthDay.inRange,
@@ -1345,8 +1345,8 @@ table.dataTable.dtr-column > tbody > tr > th.control:before {
 .flatpickr-day.prevMonthDay.today.inRange,
 .flatpickr-day.nextMonthDay.today.inRange {
   color: #13abab !important;
-  background: #e9e7fd !important;
-  border-color: #e9e7fd !important;
+  background: #d1f2f2 !important;
+  border-color: #d1f2f2 !important;
 }
 .flatpickr-day.selected,
 .flatpickr-day.selected.inRange,

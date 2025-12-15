@@ -45,16 +45,34 @@
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($invoice['due_date'])->format('d F Y') }}
                                                         </td>
-                                                        <td><a href="#"
-                                                                class="text-primary">{{ $invoice['dokumen_invoice'] }}</a>
+                                                        <td>
+                                                            @if(!empty($invoice['dokumen_invoice']))
+                                                                <a href="#" class="text-primary">{{ $invoice['dokumen_invoice'] }}</a>
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
-                                                        <td><a href="#"
-                                                                class="text-primary">{{ $invoice['dokumen_kontrak'] }}</a>
+                                                        <td>
+                                                            @if(!empty($invoice['dokumen_kontrak']))
+                                                                <a href="#" class="text-primary">{{ $invoice['dokumen_kontrak'] }}</a>
+                                                            @else
+                                                                -
+                                                            @endif
                                                         </td>
-                                                        <td><a href="#"
-                                                                class="text-primary">{{ $invoice['dokumen_so'] }}</a></td>
-                                                        <td><a href="#"
-                                                                class="text-primary">{{ $invoice['dokumen_bast'] }}</a></td>
+                                                        <td>
+                                                            @if(!empty($invoice['dokumen_so']))
+                                                                <a href="#" class="text-primary">{{ $invoice['dokumen_so'] }}</a>
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if(!empty($invoice['dokumen_bast']))
+                                                                <a href="#" class="text-primary">{{ $invoice['dokumen_bast'] }}</a>
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </td>
                                                         <td>
                                                             <a href="#" class="btn btn-sm btn-outline-primary btn-edit-invoice" data-idx="{{ $index }}" title="Edit"><i class="fas fa-edit"></i></a>
                                                         </td>
@@ -98,7 +116,7 @@
                                             @foreach ($po_financing_data as $index => $po)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $po['no_invoice'] }}</td>
+                                                    <td>{{ $po['no_kontrak'] }}</td>
                                                     <td>{{ $po['nama_client'] }}</td>
                                                     <td>Rp. {{ number_format((int) $po['nilai_invoice'], 0, ',', '.') }}
                                                     </td>
@@ -107,17 +125,37 @@
                                                     <td>Rp.
                                                         {{ number_format((int) $po['nilai_bagi_hasil'], 0, ',', '.') }}
                                                     </td>
-                                                    <td>{{ \Carbon\Carbon::parse($po['invoice_date'])->format('d F Y') }}
+                                                    <td>{{ \Carbon\Carbon::parse($po['kontrak_date'])->format('d F Y') }}
                                                     </td>
                                                     <td>{{ \Carbon\Carbon::parse($po['due_date'])->format('d F Y') }}</td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $po['dokumen_kontrak'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $po['dokumen_so'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $po['dokumen_bast'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $po['dokumen_lainnya'] }}</a></td>
+                                                    <td>
+                                                        @if(!empty($po['dokumen_kontrak']))
+                                                            <a href="#" class="text-primary">{{ $po['dokumen_kontrak'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($po['dokumen_so']))
+                                                            <a href="#" class="text-primary">{{ $po['dokumen_so'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($po['dokumen_bast']))
+                                                            <a href="#" class="text-primary">{{ $po['dokumen_bast'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($po['dokumen_lainnya']))
+                                                            <a href="#" class="text-primary">{{ $po['dokumen_lainnya'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
                                                     <td><a href="#"><i class="fas fa-edit"></i></a></td>
                                                 </tr>
                                             @endforeach
@@ -153,16 +191,26 @@
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $inst['no_invoice'] }}</td>
-                                                    <td>{{ $inst['nama_client'] }}</td>
+                                                    <td>{{ $inst['nama_client'] ?? '' }}</td>
                                                     <td>Rp. {{ number_format((int) $inst['nilai_invoice'], 0, ',', '.') }}
                                                     </td>
                                                     <td>{{ \Carbon\Carbon::parse($inst['invoice_date'])->format('d F Y') }}
                                                     </td>
                                                     <td>{{ $inst['nama_barang'] }}</td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $inst['dokumen_invoice'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $inst['dokumen_lainnya'] }}</a></td>
+                                                    <td>
+                                                        @if(!empty($inst['dokumen_invoice']))
+                                                            <a href="#" class="text-primary">{{ $inst['dokumen_invoice'] }}</a>
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($inst['dokumen_lainnya']))
+                                                            <a href="#" class="text-primary">{{ $inst['dokumen_lainnya'] }}</a>
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endif
+                                                    </td>
                                                     <td><a href="#"><i class="fas fa-edit"></i></a></td>
                                                 </tr>
                                             @endforeach
@@ -201,7 +249,7 @@
                                             @foreach ($factoring_data as $index => $fact)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $fact['no_invoice'] }}</td>
+                                                    <td>{{ $fact['no_kontrak'] }}</td>
                                                     <td>{{ $fact['nama_client'] }}</td>
                                                     <td>Rp. {{ number_format((int) $fact['nilai_invoice'], 0, ',', '.') }}
                                                     </td>
@@ -210,18 +258,38 @@
                                                     <td>Rp.
                                                         {{ number_format((int) $fact['nilai_bagi_hasil'], 0, ',', '.') }}
                                                     </td>
-                                                    <td>{{ \Carbon\Carbon::parse($fact['invoice_date'])->format('d F Y') }}
+                                                    <td>{{ \Carbon\Carbon::parse($fact['kontrak_date'])->format('d F Y') }}
                                                     </td>
                                                     <td>{{ \Carbon\Carbon::parse($fact['due_date'])->format('d F Y') }}
                                                     </td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $fact['dokumen_invoice'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $fact['dokumen_kontrak'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $fact['dokumen_so'] }}</a></td>
-                                                    <td><a href="#"
-                                                            class="text-primary">{{ $fact['dokumen_bast'] }}</a></td>
+                                                    <td>
+                                                        @if(!empty($fact['dokumen_invoice']))
+                                                            <a href="#" class="text-primary">{{ $fact['dokumen_invoice'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($fact['dokumen_kontrak']))
+                                                            <a href="#" class="text-primary">{{ $fact['dokumen_kontrak'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($fact['dokumen_so']))
+                                                            <a href="#" class="text-primary">{{ $fact['dokumen_so'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(!empty($fact['dokumen_bast']))
+                                                            <a href="#" class="text-primary">{{ $fact['dokumen_bast'] }}</a>
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
                                                     <td><a href="#"><i class="fas fa-edit"></i></a></td>
 
                                                 </tr>

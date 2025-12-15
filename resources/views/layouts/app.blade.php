@@ -240,56 +240,7 @@
     
     <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
     @endassets
-    <!-- Main JS -->
-
-    <!-- Cleave.js Rupiah Helper -->
-    <script>
-        // Global function untuk inisialisasi Cleave.js pada input rupiah
-        window.initCleaveRupiah = function() {
-            // Selector untuk semua input yang perlu format rupiah
-            const rupiahInputs = document.querySelectorAll('.input-rupiah, [data-format="rupiah"]');
-
-            rupiahInputs.forEach(function(input) {
-                // Skip jika sudah di-initialize
-                if (input.dataset.cleaveInitialized === 'true') {
-                    return;
-                }
-
-                // Initialize Cleave.js
-                new Cleave(input, {
-                    numeral: true,
-                    numeralThousandsGroupStyle: 'thousand',
-                    numeralDecimalScale: 0,
-                    prefix: 'Rp ',
-                    rawValueTrimPrefix: true,
-                    noImmediatePrefix: false
-                });
-
-                // Mark as initialized
-                input.dataset.cleaveInitialized = 'true';
-            });
-        };
-
-        // Function untuk get raw value (angka saja tanpa format)
-        window.getCleaveRawValue = function(element) {
-            if (!element) return 0;
-            const value = element.value.replace(/[^0-9]/g, '');
-            return parseInt(value) || 0;
-        };
-
-        // Function untuk set value dengan format rupiah
-        window.setCleaveValue = function(element, value) {
-            if (!element) return;
-            // Remove existing Cleave instance if any
-            if (element._vCleave) {
-                element._vCleave.destroy();
-            }
-            // Set value
-            element.value = value;
-            // Reinitialize
-            window.initCleaveRupiah();
-        };
-    </script>    
+    <!-- Main JS -->   
     {{-- Custom page scripts --}}
     @stack('scripts')
 </body>

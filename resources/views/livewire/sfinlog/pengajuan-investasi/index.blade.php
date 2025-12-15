@@ -3,6 +3,7 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Pengajuan Investasi</h4>
+                @can('pengajuan_investasi_finlog.add')
                 @if($currentInvestor)
                 <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
                     id="btnTambahPengajuanInvestasi" data-bs-toggle="modal" data-bs-target="#modalPengajuanInvestasi">
@@ -10,13 +11,14 @@
                     Pengajuan Investasi
                 </button>
                 @endif
+                @endcan
             </div>
         </div>
     </div>
 
     <div class="card">
         <div class="card-datatable table-responsive">
-            <livewire:sfinlog.pengajuan-investasi-finlog-table />
+            <livewire:SFinlog.pengajuan-investasi-finlog-table />
         </div>
     </div>
     
@@ -48,7 +50,7 @@
                                         data-placeholder="Pilih Project" required>
                                         <option value=""></option>
                                         @foreach($projects as $project)
-                                            <option value="{{ $project->id_cells_project }}">{{ $project->nama_project }}</option>
+                                            <option value="{{ $project->id_cells_project }}">{{ $project->nama_cells_bisnis }}</option>
                                         @endforeach
                                     </select>
                                 </div>

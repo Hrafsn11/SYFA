@@ -1,4 +1,4 @@
-<div class="modal fade" id="modalPengembalian" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modal-pengembalian-invoice" tabindex="-1" aria-hidden="true" wire:ignore.self>
     <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -10,8 +10,12 @@
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label">Nominal Yang Dibayarkan <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control input-rupiah" id="nominal_yang_dibayarkan"
-                                placeholder="Rp. 0">
+                            <livewire:components.currency-field
+                                model_name="nominal_yang_dibayarkan"
+                                placeholder="Rp 0"
+                                prefix="Rp "
+                                :value="null"
+                            />
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -25,7 +29,7 @@
                                     <em>Upload file baru untuk mengganti</em>
                                 </small>
                             </div>
-                            <input type="file" class="form-control" id="bukti_pembayaran" accept=".pdf,.png,.jpg,.jpeg">
+                            <input type="file" class="form-control" id="bukti_pembayaran_invoice" accept=".pdf,.png,.jpg,.jpeg">
                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                         </div>
                     </div>
@@ -33,10 +37,11 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" id="btnSimpanPengembalianInvoice">
+                <button type="button" class="btn btn-primary" id="btnSavePengembalian">
                     Simpan <i class="ti ti-check ms-1"></i>
                 </button>
             </div>
         </div>
     </div>
 </div>
+

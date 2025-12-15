@@ -59,7 +59,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         $this->total_margin = (float) $this->program->total_margin;
         $this->total_cicilan = (float) $this->program->total_cicilan;
 
-        // Hitung sisa pinjaman untuk metode Anuitas
+        // Hitung sisa pinjaman untuk metode Efektif (Anuitas)
         $sisaPokok = $this->plafon_pembiayaan;
         
         $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item, $index) use (&$sisaPokok) {
@@ -79,8 +79,8 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'nominal_bayar' => (float) $item->nominal_bayar,
             ];
             
-            // Tambah sisa_pinjaman untuk metode Anuitas
-            if ($this->metode_perhitungan === 'Anuitas') {
+            // Tambah sisa_pinjaman untuk metode Efektif (Anuitas)
+            if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
                 $data['sisa_pinjaman'] = $sisaPokok;
                 if (!$item->is_grace_period) {
                     $sisaPokok -= (float) $item->pokok;
@@ -103,7 +103,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         $this->program->refresh();
         $this->program->load(['jadwalAngsuran' => fn ($query) => $query->orderBy('no')]);
         
-        // Hitung sisa pinjaman untuk metode Anuitas
+        // Hitung sisa pinjaman untuk metode Efektif (Anuitas)
         $sisaPokok = $this->plafon_pembiayaan;
         
         $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item, $index) use (&$sisaPokok) {
@@ -123,8 +123,8 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'nominal_bayar' => (float) $item->nominal_bayar,
             ];
             
-            // Tambah sisa_pinjaman untuk metode Anuitas
-            if ($this->metode_perhitungan === 'Anuitas') {
+            // Tambah sisa_pinjaman untuk metode Efektif (Anuitas)
+            if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
                 $data['sisa_pinjaman'] = $sisaPokok;
                 if (!$item->is_grace_period) {
                     $sisaPokok -= (float) $item->pokok;
@@ -150,7 +150,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         try {
             $this->validate([
                 'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
-                'metode_perhitungan' => 'required|in:Flat,Anuitas',
+                'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
                 'plafon_pembiayaan' => 'required|numeric|min:0',
                 'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
                 'jangka_waktu_total' => 'required|integer|min:1',
