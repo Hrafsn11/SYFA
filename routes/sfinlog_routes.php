@@ -112,9 +112,9 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
 // Report Penyaluran Dana Investasi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
 
-// Penyaluran Deposito
-Route::get('penyaluran-deposito', PenyaluranDepositoIndex::class)->name('penyaluran-deposito.index');
-Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
+// Penyaluran Deposito SFinlog
+Route::get('penyaluran-deposito-sfinlog', \App\Livewire\SFinlog\PenyaluranDepositoSfinlogIndex::class)->name('penyaluran-deposito-sfinlog.index');
+Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.')->group(function () {
     Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
     Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
     Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
