@@ -356,6 +356,9 @@
             // Initialize Cleave.js untuk format rupiah
             initCleaveRupiah();
 
+            // Initialize file validation
+            initFileValidation();
+
             // Pre-fill data in edit mode
             @if(isset($isEdit) && $isEdit && isset($pengajuan))
                 // Fill total pinjaman
@@ -711,6 +714,76 @@
 
         let editInvoiceIndex = -1;
 
+        const FileValidator = {
+            maxSize: 2 * 1024 * 1024, // 2MB in bytes
+            allowedTypes: ['pdf', 'docx', 'doc', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'rar', 'zip'],
+            
+            validate(file) {
+                if (!file) return { valid: false, message: 'Tidak ada file yang dipilih' };
+                
+                // Check file size
+                if (file.size > this.maxSize) {
+                    return { 
+                        valid: false, 
+                        message: `Ukuran file melebihi 2 MB<br>File Anda: ${(file.size / (1024 * 1024)).toFixed(2)} MB` 
+                    };
+                }
+                
+                // Check file type
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (!this.allowedTypes.includes(ext)) {
+                    return { 
+                        valid: false, 
+                        message: `Tipe file tidak diizinkan!<br>Format yang diperbolehkan: ${this.allowedTypes.join(', ')}` 
+                    };
+                }
+                
+                return { valid: true };
+            },
+            
+            showError(message, inputId = null) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validasi File Gagal!',
+                    html: message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-primary waves-effect waves-light'
+                    },
+                    buttonsStyling: false
+                });
+                
+                if (inputId) {
+                    const input = document.getElementById(inputId);
+                    if (input) input.value = '';
+                }
+            }
+        };
+
+        // Initialize file validation on all modal file inputs
+        function initFileValidation() {
+            const fileInputIds = [
+                'modal_dokumen_invoice', 'modal_dokumen_kontrak', 'modal_dokumen_so', 'modal_dokumen_bast',
+                'modal_dokumen_kontrak_po', 'modal_dokumen_so_po', 'modal_dokumen_bast_po', 'modal_dokumen_lainnya_po',
+                'modal_dokumen_invoice_inst', 'modal_dokumen_lainnya_inst',
+                'modal_dokumen_invoice_fact', 'modal_dokumen_kontrak_fact', 'modal_dokumen_so_fact', 'modal_dokumen_bast_fact'
+            ];
+            
+            fileInputIds.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const result = FileValidator.validate(file);
+                            if (!result.valid) {
+                                FileValidator.showError(result.message, id);
+                            }
+                        }
+                    });
+                }
+            });
+        }
 
         function saveInvoiceData() {
             if (currentJenisPembiayaan === 'Invoice Financing') {
