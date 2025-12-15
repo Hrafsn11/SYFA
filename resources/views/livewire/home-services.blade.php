@@ -81,7 +81,7 @@
                             <p class="text-muted mb-4 small flex-grow-1">
                                 Modul utama pengelolaan pembiayaan dan investasi SYFA.
                             </p>
-                            <a href="{{ route('sfinance.dashboard.index') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
+                            <a href="{{ route('sfinance.dashboard.pembiayaan') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
                                 Go to Application
                             </a>
                         </div>
@@ -101,7 +101,7 @@
                             <p class="text-muted mb-4 small flex-grow-1">
                                 Monitoring dan pencatatan transaksi keuangan operasional.
                             </p>
-                            <a href="{{ route('sfinlog.dashboard.index') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
+                            <a href="{{ route('sfinlog.dashboard.pembiayaan') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
                                 Go to Application
                             </a>
                         </div>
