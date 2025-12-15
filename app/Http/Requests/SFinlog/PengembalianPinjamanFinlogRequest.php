@@ -16,6 +16,8 @@ class PengembalianPinjamanFinlogRequest extends FormRequest
     {
         return [
             'id_pinjaman_finlog' => ['required', 'string', 'exists:peminjaman_finlog,id_peminjaman_finlog'],
+            // Support alternative field name coming from Livewire component
+            'id_peminjaman_finlog' => ['sometimes', 'string'],
             'id_cells_project' => ['required', 'string', 'exists:cells_projects,id_cells_project'],
             'id_project' => ['required', 'string', 'exists:projects,id_project'],
             'jumlah_pengembalian' => ['required', 'numeric', 'min:0'],
@@ -35,6 +37,7 @@ class PengembalianPinjamanFinlogRequest extends FormRequest
         return [
             'id_pinjaman_finlog.required' => 'Peminjaman Finlog wajib dipilih.',
             'id_pinjaman_finlog.exists' => 'Peminjaman Finlog tidak ditemukan.',
+            'id_peminjaman_finlog.string' => 'Format id peminjaman tidak valid.',
             'id_cells_project.required' => 'Cells Project wajib dipilih.',
             'id_cells_project.exists' => 'Cells Project tidak ditemukan.',
             'id_project.required' => 'Project wajib dipilih.',
@@ -54,5 +57,13 @@ class PengembalianPinjamanFinlogRequest extends FormRequest
             'status.required' => 'Status wajib dipilih.',
             'status.in' => 'Status tidak valid.',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        // Map Livewire field `id_peminjaman_finlog` to controller expected `id_pinjaman_finlog`
+        if ($this->has('id_peminjaman_finlog') && !$this->has('id_pinjaman_finlog')) {
+            $this->merge(['id_pinjaman_finlog' => $this->input('id_peminjaman_finlog')]);
+        }
     }
 }
