@@ -175,17 +175,23 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         try {
             DB::beginTransaction();
 
+            // Sanitasi metode_perhitungan
+            $metodeValid = trim($this->metode_perhitungan);
+            if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
+                throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
+            }
+
             $this->program->update([
                 'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
-                'metode_perhitungan' => $this->metode_perhitungan,
-                'plafon_pembiayaan' => $this->plafon_pembiayaan,
-                'suku_bunga_per_tahun' => $this->suku_bunga_per_tahun,
-                'jangka_waktu_total' => $this->jangka_waktu_total,
-                'masa_tenggang' => $this->masa_tenggang,
+                'metode_perhitungan' => $metodeValid,
+                'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
+                'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                'masa_tenggang' => (int) $this->masa_tenggang,
                 'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
-                'total_pokok' => $this->total_pokok,
-                'total_margin' => $this->total_margin,
-                'total_cicilan' => $this->total_cicilan,
+                'total_pokok' => (float) $this->total_pokok,
+                'total_margin' => (float) $this->total_margin,
+                'total_cicilan' => (float) $this->total_cicilan,
                 'updated_by' => Auth::id(),
             ]);
 
