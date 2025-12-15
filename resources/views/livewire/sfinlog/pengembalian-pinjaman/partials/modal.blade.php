@@ -14,31 +14,43 @@
                                 model_name="nominal_yang_dibayarkan"
                                 placeholder="Rp 0"
                                 prefix="Rp "
-                                :value="null"
+                                :value="0"
                             />
+                            @error('nominal_yang_dibayarkan') 
+                                <small class="text-danger">{{ $message }}</small> 
+                            @enderror
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label">Upload Bukti Pembayaran <span class="text-danger">*</span></label>
-                            <div id="currentFileInfo" class="alert alert-info mb-2" style="display: none;">
-                                <small>
-                                    <i class="ti ti-file me-1"></i>
-                                    File saat ini: <strong id="currentFileName"></strong>
-                                    <br>
-                                    <em>Upload file baru untuk mengganti</em>
+                            <input type="file" class="form-control" wire:model="bukti_pembayaran_invoice" 
+                                accept=".pdf,.png,.jpg,.jpeg">
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
+                            @error('bukti_pembayaran_invoice') 
+                                <small class="text-danger d-block">{{ $message }}</small> 
+                            @enderror
+                            
+                            <div wire:loading wire:target="bukti_pembayaran_invoice" class="mt-2">
+                                <small class="text-info">
+                                    <i class="ti ti-loader"></i> Uploading...
                                 </small>
                             </div>
-                            <input type="file" class="form-control" id="bukti_pembayaran_invoice" accept=".pdf,.png,.jpg,.jpeg">
-                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                <button type="button" class="btn btn-primary" id="btnSavePengembalian">
-                    Simpan <i class="ti ti-check ms-1"></i>
+                <button type="button" class="btn btn-primary" wire:click="addPengembalian" 
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="addPengembalian">
+                        Simpan <i class="ti ti-check ms-1"></i>
+                    </span>
+                    <span wire:loading wire:target="addPengembalian">
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        Menyimpan...
+                    </span>
                 </button>
             </div>
         </div>
