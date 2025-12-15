@@ -196,9 +196,10 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Nama Barang</label>
+                            <label class="form-label">Nama Barang <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="modal_nama_barang"
-                                placeholder="Masukkan Nama Barang">
+                                placeholder="Masukkan Nama Barang" required>
+                            <div class="invalid-feedback">Nama barang harus diisi.</div>
                         </div>
                     </div>
                     <div class="row mb-3">

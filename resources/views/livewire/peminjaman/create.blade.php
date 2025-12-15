@@ -716,7 +716,7 @@
 
         const FileValidator = {
             maxSize: 2 * 1024 * 1024, // 2MB in bytes
-            allowedTypes: ['pdf', 'docx', 'doc', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'rar', 'zip'],
+            allowedTypes: ['pdf', 'docx', 'doc', 'xls', 'xlsx', 'png', 'rar', 'zip'],
             
             validate(file) {
                 if (!file) return { valid: false, message: 'Tidak ada file yang dipilih' };
@@ -942,6 +942,16 @@
                 if (!no_invoice || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
                     alert('No. Invoice dan Nilai Invoice wajib diisi dan > 0');
                     return;
+                }
+
+                // Nama barang wajib untuk Installment
+                if (!nama_barang || String(nama_barang).trim() === '') {
+                    // mark input invalid and show message
+                    $('#modal_nama_barang').addClass('is-invalid');
+                    alert('Nama Barang wajib diisi untuk Installment.');
+                    return;
+                } else {
+                    $('#modal_nama_barang').removeClass('is-invalid');
                 }
 
                 // Duplicate check for installment invoices
@@ -1637,15 +1647,21 @@
                         .dokumen_lainnya_file);
                 });
                 
-                // Compute header totals for PO Financing
-                let sumPinjaman = 0;
-                let sumBagiHasil = 0;
-                poFinancingData.forEach(function(p) {
-                    sumPinjaman += Number(normalizeNumericForServer(p.nilai_pinjaman || 0) || 0);
-                    sumBagiHasil += Number(normalizeNumericForServer(p.nilai_bagi_hasil || 0) || 0);
-                });
-                fd.set('total_bagi_hasil', normalizeNumericForServer(sumBagiHasil));
-                fd.set('pembayaran_total', normalizeNumericForServer(sumPinjaman + sumBagiHasil));
+                // Compute header totals for PO Financing only if not already set
+                if (!fd.get('total_bagi_hasil') || fd.get('total_bagi_hasil') === '0') {
+                    let sumBagiHasil = 0;
+                    poFinancingData.forEach(function(p) {
+                        sumBagiHasil += Number(normalizeNumericForServer(p.nilai_bagi_hasil || 0) || 0);
+                    });
+                    fd.set('total_bagi_hasil', normalizeNumericForServer(sumBagiHasil));
+                }
+                
+                // Compute pembayaran_total if not already set
+                if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
+                    const tp = Number(fd.get('total_pinjaman') || 0);
+                    const bagi = Number(fd.get('total_bagi_hasil') || 0);
+                    fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
+                }
             }
 
             // Factoring append
@@ -1682,10 +1698,20 @@
                     sumInvoice += Number(normalizeNumericForServer(f.nilai_invoice || 0) || 0);
                 });
                 fd.set('total_nominal_yang_dialihkan', normalizeNumericForServer(sumInvoice));
-                // compute total_bagi_hasil as 2% fallback
-                const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
-                fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
-                fd.set('pembayaran_total', normalizeNumericForServer(sumInvoice + bagi));
+                
+                // compute total_bagi_hasil as 2% fallback only if not already set
+                if (!fd.get('total_bagi_hasil') || fd.get('total_bagi_hasil') === '0') {
+                    const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
+                    fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
+                }
+                
+                // compute pembayaran_total only if not already set
+                if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
+                    const tp = Number(fd.get('total_pinjaman') || 0);
+                    const bagi = Number(fd.get('total_bagi_hasil') || 0);
+                    fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
+                }
+                
                 if (!fd.get('status') || fd.get('status') === '') fd.set('status', 'submitted');
             }
 
@@ -1717,6 +1743,7 @@
                 const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit
                     ._computed : null;
                 if (computed) {
+                    // For Installment, we ALWAYS use computed values as they are calculated from nominal_pinjaman
                     fd.set('total_pinjaman', normalizeNumericForServer(computed.totalPinjaman));
                     fd.set('tenor_pembayaran', computed.tenor);
                     fd.set('pps', normalizeNumericForServer(computed.pps));
@@ -1724,11 +1751,13 @@
                     fd.set('total_pembayaran', normalizeNumericForServer(computed.total_pembayaran));
                     fd.set('yang_harus_dibayarkan', normalizeNumericForServer(computed.yang_harus_dibayarkan));
                 } else {
-                    // fallback: if not computed on client, rely on server to compute
-                    // But still clean the nominal_pinjaman value
+                    // fallback: if not computed on client, use the value from nominal_pinjaman field
+                    // This preserves existing value during edit mode
                     if (nominalElForSubmit) {
                         const cleanNominal = window.getCleaveRawValue(nominalElForSubmit) || 0;
-                        fd.set('total_pinjaman', normalizeNumericForServer(cleanNominal));
+                        if (cleanNominal && cleanNominal !== '0') {
+                            fd.set('total_pinjaman', normalizeNumericForServer(cleanNominal));
+                        }
                     }
                 }
             }
@@ -1744,29 +1773,29 @@
 
                 // Ensure total_pinjaman is present; compute from details if empty
                 let totalPinjamanValue = fd.get('total_pinjaman');
-                if (!totalPinjamanValue || totalPinjamanValue === '') {
+                if (!totalPinjamanValue || totalPinjamanValue === '' || totalPinjamanValue === '0') {
                     let sum = 0;
                     poFinancingData.forEach(function(p) {
                         sum += Number(normalizeNumericForServer(p.nilai_pinjaman || 0) || 0);
                     });
                     fd.set('total_pinjaman', normalizeNumericForServer(sum));
-                } else {
-                    fd.set('total_pinjaman', normalizeNumericForServer(totalPinjamanValue));
                 }
+                // Note: If totalPinjamanValue already exists and is not empty/zero, 
+                // keep the value that was already set earlier (line 1563) - don't normalize again
 
-                // Ensure total_bagi_hasil and pembayaran_total exist (we set total_bagi_hasil earlier from form if present)
+                // Ensure total_bagi_hasil and pembayaran_total exist
                 const existingBagi = fd.get('total_bagi_hasil') || 0;
                 if (!existingBagi || existingBagi === '0') {
                     // compute as 2% of total_pinjaman
-                    const tp = Number(normalizeNumericForServer(fd.get('total_pinjaman') || 0));
+                    const tp = Number(fd.get('total_pinjaman') || 0);
                     const bagi = Math.round(tp * 0.02 * 100) / 100;
                     fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
                     fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
                 } else {
                     // ensure pembayaran_total exists
                     if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
-                        const tp = Number(normalizeNumericForServer(fd.get('total_pinjaman') || 0));
-                        const bagi = Number(normalizeNumericForServer(fd.get('total_bagi_hasil') || 0));
+                        const tp = Number(fd.get('total_pinjaman') || 0);
+                        const bagi = Number(fd.get('total_bagi_hasil') || 0);
                         fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
                     }
                 }
