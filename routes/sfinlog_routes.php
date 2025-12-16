@@ -8,7 +8,6 @@ use App\Http\Controllers\SFinlog\KertasKerjaInvestorSFinlogController;
 use App\Http\Controllers\SFinlog\PeminjamanController;
 use App\Http\Controllers\SFinlog\PengajuanInvestasiController;
 use App\Http\Controllers\SFinlog\PengajuanRestrukturisasiController;
-use App\Http\Controllers\SFinlog\PengembalianInvestasiController;
 use App\Http\Controllers\SFinlog\PengembalianPinjamanController;
 use App\Http\Controllers\SFinlog\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\SFinlog\PenyaluranDepositoController;
@@ -113,7 +112,10 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
 
 // Pengembalian Investasi SFinlog
-Route::get('pengembalian-investasi', [PengembalianInvestasiController::class, 'index'])->name('pengembalian-investasi.index');
+Route::get('pengembalian-investasi', \App\Livewire\SFinlog\PengembalianInvestasiFinlog::class)->name('pengembalian-investasi.index');
+Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
+    Route::post('/', [\App\Http\Controllers\SFinlog\PengembalianInvestasiController::class, 'store'])->name('store');
+});
 
 // Penyaluran Deposito SFinlog
 Route::get('penyaluran-deposito-sfinlog', \App\Livewire\SFinlog\PenyaluranDepositoSfinlogIndex::class)->name('penyaluran-deposito-sfinlog.index');
