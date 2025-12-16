@@ -55,9 +55,6 @@ class PeminjamanController extends Controller
             
             DB::commit();
             
-            // Auto-update AR Perbulan
-            $this->autoUpdateARPerbulan($peminjaman->id_debitur, $peminjaman->created_at);
-            
             return Response::success($peminjaman, 'Pengajuan peminjaman berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -99,9 +96,6 @@ class PeminjamanController extends Controller
             $peminjaman->update($data);
             
             DB::commit();
-            
-            // Auto-update AR Perbulan
-            $this->autoUpdateARPerbulan($peminjaman->id_debitur, $peminjaman->created_at);
             
             return Response::success($peminjaman, 'Peminjaman berhasil diperbarui!');
         } catch (\Exception $e) {
@@ -207,35 +201,6 @@ class PeminjamanController extends Controller
         return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
     }
 
-    /**
-     * Auto-update AR Perbulan saat ada perubahan peminjaman
-     */
-    private function autoUpdateARPerbulan(string $id_debitur, $date): void
-    {
-        try {
-            $bulan = \Carbon\Carbon::parse($date)->format('Y-m');
-            
-            // Call ArPerbulanController untuk update AR
-            $arController = new \App\Http\Controllers\SFinlog\ArPerbulanController();
-            $request = new \Illuminate\Http\Request([
-                'id_debitur' => $id_debitur,
-                'bulan' => $bulan,
-            ]);
-            
-            $arController->updateAR($request);
-            
-            \Log::info('AR Perbulan auto-updated from PeminjamanController', [
-                'id_debitur' => $id_debitur,
-                'bulan' => $bulan,
-            ]);
-        } catch (\Exception $e) {
-            // Log error tapi tidak throw exception agar tidak mengganggu flow utama
-            \Log::error('Failed to auto-update AR Perbulan', [
-                'id_debitur' => $id_debitur,
-                'error' => $e->getMessage(),
-            ]);
-        }
-    }
 }
 
 

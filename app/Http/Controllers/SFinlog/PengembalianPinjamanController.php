@@ -31,10 +31,13 @@ class PengembalianPinjamanController extends Controller
             
             DB::commit();
             
-            // Auto-update AR Perbulan
+            // Auto-update AR Perbulan menggunakan Service
             $peminjaman = PeminjamanFinlog::find($pengembalian->id_pinjaman_finlog);
             if ($peminjaman) {
-                $this->autoUpdateARPerbulan($peminjaman->id_debitur, $pengembalian->created_at);
+                app(\App\Services\ArPerbulanFinlogService::class)->updateAROnPengembalian(
+                    $pengembalian->id_pinjaman_finlog,
+                    now()
+                );
             }
             
             return response()->json([
@@ -47,36 +50,6 @@ class PengembalianPinjamanController extends Controller
                 'success' => false,
                 'message' => 'Gagal menyimpan data: ' . $e->getMessage()
             ], 500);
-        }
-    }
-
-    /**
-     * Auto-update AR Perbulan saat ada pengembalian
-     */
-    private function autoUpdateARPerbulan(string $id_debitur, $date): void
-    {
-        try {
-            $bulan = \Carbon\Carbon::parse($date)->format('Y-m');
-            
-            // Call ArPerbulanController untuk update AR
-            $arController = new \App\Http\Controllers\SFinlog\ArPerbulanController();
-            $request = new \Illuminate\Http\Request([
-                'id_debitur' => $id_debitur,
-                'bulan' => $bulan,
-            ]);
-            
-            $arController->updateAR($request);
-            
-            \Log::info('AR Perbulan auto-updated from PengembalianPinjamanController', [
-                'id_debitur' => $id_debitur,
-                'bulan' => $bulan,
-            ]);
-        } catch (\Exception $e) {
-            // Log error tapi tidak throw exception agar tidak mengganggu flow utama
-            \Log::error('Failed to auto-update AR Perbulan from pengembalian', [
-                'id_debitur' => $id_debitur,
-                'error' => $e->getMessage(),
-            ]);
         }
     }
 }

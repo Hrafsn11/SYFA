@@ -161,6 +161,23 @@ class PengembalianPinjamanFinlogCreate extends Component
 
             DB::commit();
             Log::info('Pengembalian pinjaman saved successfully');
+            
+            // Auto-update AR Perbulan menggunakan Service
+            try {
+                app(\App\Services\ArPerbulanFinlogService::class)->updateAROnPengembalian(
+                    $this->id_peminjaman_finlog,
+                    now()
+                );
+                Log::info('AR Perbulan auto-updated from PengembalianPinjamanFinlogCreate', [
+                    'id_peminjaman_finlog' => $this->id_peminjaman_finlog,
+                ]);
+            } catch (\Exception $e) {
+                // Log error tapi tetap lanjut (jangan rollback)
+                Log::error('Failed to auto-update AR Perbulan from pengembalian', [
+                    'id_peminjaman_finlog' => $this->id_peminjaman_finlog,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             $this->showToast('success', 'Data pengembalian pinjaman berhasil disimpan!');
 
