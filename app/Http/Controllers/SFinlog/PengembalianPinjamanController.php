@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class PengembalianPinjamanController extends Controller
 {
-    /**
-     * Store pengembalian pinjaman (Alternative jika tidak pakai Livewire)
-     */
     public function store(PengembalianPinjamanFinlogRequest $request)
     {
         try {

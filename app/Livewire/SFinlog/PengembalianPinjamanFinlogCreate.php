@@ -41,7 +41,7 @@ class PengembalianPinjamanFinlogCreate extends Component
     public $pengembalianList = [];
     public $id_cells_project = '';
     public $id_project = '';
-   
+
     // User state
     public $currentUserId = null;
     public $currentDebitur = null;
@@ -57,14 +57,14 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         $this->currentUserId = auth()->id();
         $this->currentDebitur = MasterDebiturDanInvestor::where('user_id', $this->currentUserId)->first();
-        
-        $this->nama_perusahaan = $this->currentDebitur 
-            ? $this->currentDebitur->nama 
+
+        $this->nama_perusahaan = $this->currentDebitur
+            ? $this->currentDebitur->nama
             : auth()->user()->name;
-        
+
         if (!$this->currentDebitur) {
             $this->hasNoData = true;
-            $this->showToast('warning', 'Anda belum terdaftar sebagai debitur. Silakan hubungi admin.');
+            $this->showToast('warning', 'Anda belum terdaftar sebagai debitur.');
         }
     }
 
@@ -77,7 +77,7 @@ class PengembalianPinjamanFinlogCreate extends Component
 
         $this->id_peminjaman_finlog = $value;
         $this->value = $value;
-        
+
         if (empty($value)) {
             $this->resetPeminjamanData();
             return;
@@ -93,16 +93,16 @@ class PengembalianPinjamanFinlogCreate extends Component
         }
 
         $this->id_peminjaman_finlog = $value;
-        
-        empty($value) 
-            ? $this->resetPeminjamanData() 
+
+        empty($value)
+            ? $this->resetPeminjamanData()
             : $this->loadPeminjamanData($value);
     }
 
     public function addPengembalian()
     {
         $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
-        
+
         $this->validate([
             'nominal_yang_dibayarkan' => 'required|numeric|min:1',
             'bukti_pembayaran_invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -122,7 +122,7 @@ class PengembalianPinjamanFinlogCreate extends Component
 
         $this->reset(['nominal_yang_dibayarkan', 'bukti_pembayaran_invoice']);
         $this->calculateRemainingBalance();
-        
+
         $this->dispatch('close-pengembalian-modal');
         $this->showToast('success', 'Pengembalian invoice berhasil ditambahkan!');
     }
@@ -132,11 +132,11 @@ class PengembalianPinjamanFinlogCreate extends Component
         if (isset($this->pengembalianList[$index]['bukti_file'])) {
             Storage::disk('public')->delete($this->pengembalianList[$index]['bukti_file']);
         }
-        
+
         unset($this->pengembalianList[$index]);
         $this->pengembalianList = array_values($this->pengembalianList);
         $this->calculateRemainingBalance();
-        
+
         $this->showToast('success', 'Pengembalian invoice berhasil dihapus!');
     }
 
@@ -146,7 +146,7 @@ class PengembalianPinjamanFinlogCreate extends Component
             Log::warning('Double submission attempt prevented');
             return;
         }
-        
+
         $this->isSubmitting = true;
 
         if (!$this->validateBeforeStore()) {
@@ -156,26 +156,25 @@ class PengembalianPinjamanFinlogCreate extends Component
 
         try {
             DB::beginTransaction();
-            
+
             $this->saveAllPayments();
-            
+
             DB::commit();
             Log::info('Pengembalian pinjaman saved successfully');
-            
+
             $this->showToast('success', 'Data pengembalian pinjaman berhasil disimpan!');
-            
+
             return $this->redirect(route('sfinlog.pengembalian-pinjaman.index'), navigate: true);
-            
         } catch (\Exception $e) {
             DB::rollBack();
             $this->cleanupTemporaryFiles();
             $this->isSubmitting = false;
-            
+
             Log::error('Pengembalian pinjaman store failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             $this->showToast('error', 'Gagal menyimpan data: ' . $e->getMessage());
         }
     }
@@ -188,10 +187,10 @@ class PengembalianPinjamanFinlogCreate extends Component
     }
 
     // ============================================
-    // Private Methods - Data Loading
+    // Public Methods - Data Loading
     // ============================================
 
-    private function loadPeminjamanData($peminjamanId)
+    public function loadPeminjamanData($peminjamanId)
     {
         $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject.projects'])
             ->where('id_peminjaman_finlog', $peminjamanId)
@@ -233,8 +232,8 @@ class PengembalianPinjamanFinlogCreate extends Component
         $project = $projects->firstWhere('id_project', $peminjaman->nama_project)
             ?? $projects->firstWhere('nama_project', $peminjaman->nama_project)
             ?? \App\Models\Project::where('id_project', $peminjaman->nama_project)
-                ->orWhere('nama_project', $peminjaman->nama_project)
-                ->first();
+            ->orWhere('nama_project', $peminjaman->nama_project)
+            ->first();
 
         if ($project) {
             $this->id_project = $project->id_project ?? $this->id_project;
@@ -277,9 +276,9 @@ class PengembalianPinjamanFinlogCreate extends Component
 
         $totalPaid = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_peminjaman_finlog)
             ->sum('jumlah_pengembalian');
-        
+
         $newPayments = array_sum(array_column($this->pengembalianList, 'nominal'));
-        
+
         $this->allocatePayment($totalPaid + $newPayments);
     }
 
@@ -287,14 +286,14 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         $sisaBagiHasil = $this->nilai_bagi_hasil;
         $sisaPinjaman = $this->nilai_pinjaman;
-        
+
         if ($totalPayment >= $sisaBagiHasil) {
             $sisaPinjaman = max(0, $sisaPinjaman - ($totalPayment - $sisaBagiHasil));
             $sisaBagiHasil = 0;
         } else {
             $sisaBagiHasil -= $totalPayment;
         }
-        
+
         $this->sisa_bagi_hasil = max(0, $sisaBagiHasil);
         $this->sisa_utang = max(0, $sisaPinjaman);
     }
@@ -320,23 +319,34 @@ class PengembalianPinjamanFinlogCreate extends Component
 
     private function saveAllPayments()
     {
+        // Ensure we have peminjaman data
+        if (!$this->selectedPeminjaman) {
+            $this->selectedPeminjaman = PeminjamanFinlog::find($this->id_peminjaman_finlog);
+        }
+
+        // Ensure we have nilai_pinjaman and nilai_bagi_hasil
+        if (!$this->nilai_pinjaman || !$this->nilai_bagi_hasil) {
+            $this->nilai_pinjaman = $this->selectedPeminjaman->nilai_pinjaman ?? 0;
+            $this->nilai_bagi_hasil = $this->selectedPeminjaman->nilai_bagi_hasil ?? 0;
+        }
+
         $jatuhTempo = $this->selectedPeminjaman->rencana_tgl_pengembalian;
-        
+
         // Calculate starting balance
         [$sisaBagiHasil, $sisaPinjaman] = $this->calculateStartingBalance();
 
         foreach ($this->pengembalianList as $pengembalian) {
             $nominalPembayaran = $pengembalian['nominal'];
-            
+
             // Calculate balance after this payment
             [$sisaBagiHasil, $sisaPinjaman] = $this->calculateBalanceAfterPayment(
                 $nominalPembayaran,
                 $sisaBagiHasil,
                 $sisaPinjaman
             );
-            
+
             $totalSisaPinjaman = $sisaPinjaman + $sisaBagiHasil;
-            
+
             PengembalianPinjamanFinlog::create([
                 'id_pinjaman_finlog' => $this->id_peminjaman_finlog,
                 'id_cells_project' => $this->id_cells_project,
@@ -352,7 +362,7 @@ class PengembalianPinjamanFinlogCreate extends Component
                 'status' => $this->determineStatusForPayment($totalSisaPinjaman, $jatuhTempo),
             ]);
         }
-        
+
         $this->sisa_utang = $sisaPinjaman;
         $this->sisa_bagi_hasil = $sisaBagiHasil;
     }
@@ -361,17 +371,17 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         $totalPaidBefore = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_peminjaman_finlog)
             ->sum('jumlah_pengembalian');
-        
+
         $sisaBagiHasil = $this->nilai_bagi_hasil;
         $sisaPinjaman = $this->nilai_pinjaman;
-        
+
         if ($totalPaidBefore >= $sisaBagiHasil) {
             $sisaPinjaman = max(0, $sisaPinjaman - ($totalPaidBefore - $sisaBagiHasil));
             $sisaBagiHasil = 0;
         } else {
             $sisaBagiHasil -= $totalPaidBefore;
         }
-        
+
         return [$sisaBagiHasil, $sisaPinjaman];
     }
 
@@ -383,7 +393,7 @@ class PengembalianPinjamanFinlogCreate extends Component
         } else {
             $sisaBagiHasil -= $nominal;
         }
-        
+
         return [$sisaBagiHasil, $sisaPinjaman];
     }
 
@@ -392,11 +402,11 @@ class PengembalianPinjamanFinlogCreate extends Component
         if ($totalSisa <= 0) {
             return self::STATUS_LUNAS;
         }
-        
+
         if ($jatuhTempo && now()->gt($jatuhTempo)) {
             return self::STATUS_TERLAMBAT;
         }
-        
+
         return self::STATUS_BELUM_LUNAS;
     }
 
@@ -423,16 +433,22 @@ class PengembalianPinjamanFinlogCreate extends Component
         }
     }
 
-    // ============================================
-    // Private Methods - Utilities
-    // ============================================
-
     private function resetPeminjamanData()
     {
         $this->reset([
-            'selectedPeminjaman', 'cells_bisnis', 'nama_project', 'tanggal_pencairan',
-            'top', 'jatuh_tempo', 'nilai_pinjaman', 'nilai_bagi_hasil', 'total_pinjaman',
-            'sisa_utang', 'sisa_bagi_hasil', 'id_cells_project', 'id_project'
+            'selectedPeminjaman',
+            'cells_bisnis',
+            'nama_project',
+            'tanggal_pencairan',
+            'top',
+            'jatuh_tempo',
+            'nilai_pinjaman',
+            'nilai_bagi_hasil',
+            'total_pinjaman',
+            'sisa_utang',
+            'sisa_bagi_hasil',
+            'id_cells_project',
+            'id_project'
         ]);
     }
 
@@ -441,7 +457,7 @@ class PengembalianPinjamanFinlogCreate extends Component
         if (empty($value)) {
             return 0;
         }
-        
+
         $cleaned = preg_replace('/[^0-9]/', '', $value);
         return is_numeric($cleaned) ? (float) $cleaned : 0;
     }

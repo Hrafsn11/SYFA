@@ -1,7 +1,8 @@
 <div>
     {{-- Header Section --}}
     <div class="mb-4">
-        <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}" class="btn btn-outline-primary mb-3">
+        <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}"
+            class="btn btn-outline-primary mb-3">
             <i class="fa-solid fa-arrow-left me-2"></i>
             Kembali
         </a>
@@ -15,7 +16,8 @@
                 {{-- Nama Perusahaan --}}
                 <div class="mb-3">
                     <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                    <input type="text" class="form-control" id="nama_perusahaan" value="{{ $nama_perusahaan }}" readonly>
+                    <input type="text" class="form-control" id="nama_perusahaan" value="{{ $nama_perusahaan }}"
+                        readonly>
                 </div>
 
                 {{-- Kode Peminjaman --}}
@@ -23,17 +25,11 @@
                     <label for="kode_peminjaman" class="form-label">
                         Kode Peminjaman <span class="text-danger">*</span>
                     </label>
-                    <livewire:components.select2 
-                        :list_data="$peminjamanList"
-                        value_name="id"
-                        value_label="text"
-                        data_placeholder="Pilih Kode Peminjaman"
-                        model_name="id_peminjaman_finlog"
-                        :value="$id_peminjaman_finlog"
-                        :key="'select2-peminjaman-' . now()->timestamp"
-                    />
-                    @error('id_peminjaman_finlog') 
-                        <small class="text-danger">{{ $message }}</small> 
+                    <livewire:components.select2 :list_data="$peminjamanList" value_name="id" value_label="text"
+                        data_placeholder="Pilih Kode Peminjaman" model_name="id_peminjaman_finlog" :value="$id_peminjaman_finlog"
+                        :key="'select2-peminjaman-' . now()->timestamp" />
+                    @error('id_peminjaman_finlog')
+                        <small class="text-danger">{{ $message }}</small>
                     @enderror
                 </div>
 
@@ -72,11 +68,13 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Nilai Pinjaman</label>
-                                <input type="text" class="form-control" value="Rp {{ number_format($nilai_pinjaman, 0, ',', '.') }}" readonly>
+                                <input type="text" class="form-control"
+                                    value="Rp {{ number_format($nilai_pinjaman, 0, ',', '.') }}" readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Bagi Hasil</label>
-                                <input type="text" class="form-control" value="Rp {{ number_format($nilai_bagi_hasil, 0, ',', '.') }}" readonly>
+                                <input type="text" class="form-control"
+                                    value="Rp {{ number_format($nilai_bagi_hasil, 0, ',', '.') }}" readonly>
                             </div>
                         </div>
 
@@ -84,7 +82,8 @@
                         <div class="row mb-3">
                             <div class="col-12">
                                 <label class="form-label">Total Pinjaman</label>
-                                <input type="text" class="form-control" value="Rp {{ number_format($total_pinjaman, 0, ',', '.') }}" readonly>
+                                <input type="text" class="form-control"
+                                    value="Rp {{ number_format($total_pinjaman, 0, ',', '.') }}" readonly>
                             </div>
                         </div>
 
@@ -109,16 +108,13 @@
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td>Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
                                                 <td>
-                                                    <a href="{{ Storage::url($item['bukti_file']) }}" 
-                                                        target="_blank" 
+                                                    <a href="{{ Storage::url($item['bukti_file']) }}" target="_blank"
                                                         class="btn btn-sm btn-outline-info">
                                                         <i class="ti ti-eye me-1"></i> Lihat
                                                     </a>
                                                 </td>
                                                 <td class="text-center">
-                                                    <button 
-                                                        type="button" 
-                                                        class="btn btn-sm btn-danger" 
+                                                    <button type="button" class="btn btn-sm btn-danger"
                                                         wire:click="removePengembalian({{ $index }})"
                                                         wire:confirm="Apakah Anda yakin ingin menghapus pengembalian ini?">
                                                         <i class="ti ti-trash"></i>
@@ -138,7 +134,8 @@
                         </div>
 
                         {{-- Button Tambah --}}
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modal-pengembalian-invoice">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#modal-pengembalian-invoice">
                             <i class="fa-solid fa-plus me-1"></i>
                             Tambah
                         </button>
@@ -149,11 +146,13 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Sisa Bayar Pokok</label>
-                        <input type="text" class="form-control" value="Rp {{ number_format($sisa_utang, 0, ',', '.') }}" readonly>
+                        <input type="text" class="form-control"
+                            value="Rp {{ number_format($sisa_utang, 0, ',', '.') }}" readonly>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Sisa Bagi Hasil</label>
-                        <input type="text" class="form-control" value="Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}" readonly>
+                        <input type="text" class="form-control"
+                            value="Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}" readonly>
                     </div>
                 </div>
 
@@ -170,7 +169,8 @@
                             <i class="ti ti-device-floppy me-1"></i> Simpan Data
                         </span>
                         <span wire:loading>
-                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            <span class="spinner-border spinner-border-sm me-1" role="status"
+                                aria-hidden="true"></span>
                             Menyimpan...
                         </span>
                     </button>
@@ -183,66 +183,79 @@
     @include('livewire.sfinlog.pengembalian-pinjaman.partials.modal')
 </div>
 
+
 @push('scripts')
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        let currentPeminjamanId = null;
-        let isSubmitting = false;
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            let currentPeminjamanId = null;
+            let isSubmitting = false;
 
-        // Utility: Show SweetAlert
-        const showAlert = (icon, html, title) => {
-            const titles = { error: 'Error!', success: 'Berhasil!', warning: 'Perhatian' };
-            Swal.fire({
-                icon,
-                title: title || titles[icon],
-                html,
-                ...(icon === 'success' && { timer: 2500, showConfirmButton: false })
+            // Utility: Show SweetAlert
+            const showAlert = (icon, html, title) => {
+                const titles = {
+                    error: 'Error!',
+                    success: 'Berhasil!',
+                    warning: 'Perhatian'
+                };
+                Swal.fire({
+                    icon,
+                    title: title || titles[icon],
+                    html,
+                    ...(icon === 'success' && {
+                        timer: 2500,
+                        showConfirmButton: false
+                    })
+                });
+            };
+
+            // Listen: Select2 Changed Event
+            Livewire.on('select2-changed', (event) => {
+                const data = event[0] || event;
+
+                if (data.modelName === 'id_peminjaman_finlog') {
+                    currentPeminjamanId = data.value;
+
+                    if (currentPeminjamanId) {
+                        @this.set('id_peminjaman_finlog', currentPeminjamanId);
+                        @this.call('loadPeminjamanData', currentPeminjamanId);
+                    } else {
+                        @this.set('id_peminjaman_finlog', '');
+                        @this.call('resetPeminjamanData');
+                    }
+                }
             });
-        };
 
-        // Listen: Select2 Changed Event
-        Livewire.on('select2-changed', (event) => {
-            const data = event[0] || event;
-            
-            if (data.modelName === 'id_peminjaman_finlog') {
-                currentPeminjamanId = data.value;
-                @this.set('id_peminjaman_finlog', currentPeminjamanId || '');
+            // Listen: Form Submit (Prevent Double Submission)
+            const form = document.querySelector('form[wire\\:submit\\.prevent="store"]');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+
+                    isSubmitting = true;
+
+                    if (currentPeminjamanId) {
+                        @this.set('id_peminjaman_finlog', currentPeminjamanId);
+                    }
+
+                    setTimeout(() => isSubmitting = false, 2000);
+                }, true);
             }
-        });
 
-        // Listen: Form Submit (Prevent Double Submission)
-        const form = document.querySelector('form[wire\\:submit\\.prevent="store"]');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                if (isSubmitting) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    return false;
-                }
-                
-                isSubmitting = true;
-                
-                // Ensure value is set before submission
-                if (currentPeminjamanId) {
-                    @this.set('id_peminjaman_finlog', currentPeminjamanId);
-                }
-                
-                // Reset flag after delay
-                setTimeout(() => isSubmitting = false, 2000);
-            }, true);
-        }
+            // Listen: Alert Events
+            Livewire.on('alert', (data) => {
+                isSubmitting = false;
+                const eventData = data[0] || data;
+                showAlert(eventData.icon, eventData.html);
+            });
 
-        // Listen: Alert Events
-        Livewire.on('alert', (data) => {
-            isSubmitting = false;
-            const eventData = data[0] || data;
-            showAlert(eventData.icon, eventData.html);
+            // Listen: Close Modal Event
+            Livewire.on('close-pengembalian-modal', () => {
+                $('#modal-pengembalian-invoice').modal('hide');
+            });
         });
-
-        // Listen: Close Modal Event
-        Livewire.on('close-pengembalian-modal', () => {
-            $('#modal-pengembalian-invoice').modal('hide');
-        });
-    });
-</script>
+    </script>
 @endpush

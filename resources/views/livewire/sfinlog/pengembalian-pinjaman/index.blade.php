@@ -16,7 +16,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-
+                    <livewire:pengembalian-peminjaman-finlog-table />
                 </div>
             </div>
         </div>
