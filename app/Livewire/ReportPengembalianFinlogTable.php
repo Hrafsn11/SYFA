@@ -7,19 +7,16 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\PengembalianPinjamanFinlog;
 use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
-class PengembalianPeminjamanFinlogTable extends DataTableComponent
+class ReportPengembalianFinlogTable extends DataTableComponent
 {
     protected $model = PengembalianPinjamanFinlog::class;
-
-    protected $listeners = ['refreshPengembalianPeminjamanFinlogTable' => '$refresh'];
 
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengembalian_pinjaman_finlog')
             ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari Pengembalian...')
+            ->setSearchPlaceholder('Cari Report Pengembalian...')
             ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
@@ -42,18 +39,12 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             return PengembalianPinjamanFinlog::query()->whereRaw('1 = 0');
         }
 
-        // Get latest pengembalian per kode pinjaman (id_pinjaman_finlog)
-        // Using subquery to get max id for each id_pinjaman_finlog
-        $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
-            ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
-            ->join('peminjaman_finlog as pf', 'ppf.id_pinjaman_finlog', '=', 'pf.id_peminjaman_finlog')
-            ->where('pf.id_debitur', $currentDebitur->id_debitur)
-            ->groupBy('ppf.id_pinjaman_finlog')
-            ->pluck('latest_id');
-
+        // Filter by user's debitur - show ALL pengembalian records
         return PengembalianPinjamanFinlog::query()
             ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
-            ->whereIn('id_pengembalian_pinjaman_finlog', $latestIds);
+            ->whereHas('peminjamanFinlog', function ($query) use ($currentDebitur) {
+                $query->where('id_debitur', $currentDebitur->id_debitur);
+            });
     }
 
     public function columns(): array
@@ -98,6 +89,22 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             Column::make('Tanggal Pengembalian', 'tanggal_pengembalian')
                 ->sortable()
                 ->format(fn($value) => '<div class="text-center">' . ($value ? $value->format('d/m/Y') : '-') . '</div>')
+                ->html(),
+
+            Column::make('Jatuh Tempo', 'jatuh_tempo')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-center">' . ($value ? $value->format('d/m/Y') : '-') . '</div>')
+                ->html(),
+
+            Column::make('Bukti Pembayaran', 'bukti_pembayaran')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value, $row) {
+                    if ($value) {
+                        return '<div class="text-center"><a href="' . asset('storage/' . $value) . '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="ti ti-file-text"></i></a></div>';
+                    }
+                    return '<div class="text-center"><span class="text-muted">-</span></div>';
+                })
                 ->html(),
 
             Column::make('Status', 'status')

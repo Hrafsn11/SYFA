@@ -62,3 +62,5 @@ Route::get('sfinlog/ar-perbulan', \App\Livewire\Sfinlog\ArPerbulan::class)->name
 
 // SFinlog - AR Performance
 Route::get('sfinlog/ar-performance', \App\Livewire\Sfinlog\ArPerformanceIndex::class)->name('sfinlog.ar-performance.index');
+// SFinlog - Report Pengembalian
+Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('sfinlog.report-pengembalian.index');

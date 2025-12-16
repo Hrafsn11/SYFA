@@ -139,7 +139,11 @@
             </li>
 
             <li class="menu-item {{ RouteHelper::routeIs('report-pengembalian*') ? 'active' : '' }}">
-                <a href="{{ RouteHelper::route('report-pengembalian.index') }}" class="menu-link">
+                @if ($isSFinlog)
+                    <a wire:navigate.hover href="{{ route('sfinlog.report-pengembalian.index') }}" class="menu-link">
+                @else
+                    <a wire:navigate.hover href="{{ RouteHelper::route('report-pengembalian.index') }}" class="menu-link">
+                @endif
                     <i class="menu-icon tf-icons ti ti-file-text"></i>
                     <div data-i18n="Report Pengembalian">Report Pengembalian</div>
                 </a>
