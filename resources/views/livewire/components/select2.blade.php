@@ -47,6 +47,7 @@
 
                 $select.off('select2:select.select2-livewire').on('select2:select.select2-livewire', function (e) {
                     const selectedValue = $(this).val();
+                    const modelName = selectId;
                     
                     const componentElement = $select.closest('[wire\\:id]').first();
                     if (componentElement.length) {
@@ -59,6 +60,12 @@
                                     const currentValue = component.get('value');
                                     if (currentValue !== selectedValue) {
                                         component.set('value', selectedValue);
+                                        
+                                        // Emit Livewire event untuk handling custom
+                                        component.dispatch('select2-changed', { 
+                                            value: selectedValue, 
+                                            modelName: modelName 
+                                        });
                                     }
                                 }
                             } catch (e) {
@@ -69,6 +76,8 @@
                 });
 
                 $select.off('select2:clear.select2-livewire').on('select2:clear.select2-livewire', function () {
+                    const modelName = selectId;
+                    
                     const componentElement = $select.closest('[wire\\:id]').first();
                     if (componentElement.length) {
                         const componentId = componentElement.attr('wire:id');
@@ -77,6 +86,12 @@
                                 const component = Livewire.find(componentId);
                                 if (component) {
                                     component.set('value', null);
+                                    
+                                    // Emit Livewire event untuk handling custom
+                                    component.dispatch('select2-changed', { 
+                                        value: null, 
+                                        modelName: modelName 
+                                    });
                                 }
                             } catch (e) {
                                 console.warn('Livewire component not found:', componentId);

@@ -145,24 +145,24 @@
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen Kontrak  <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="modal_dokumen_kontrak_po">
-                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen SO</label>
                             <input type="file" class="form-control" id="modal_dokumen_so_po">
-                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen BAST</label>
                             <input type="file" class="form-control" id="modal_dokumen_bast_po">
-                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen Lainnya</label>
                             <input type="file" class="form-control" id="modal_dokumen_lainnya_po">
-                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                     </div>
                 </div>
@@ -196,9 +196,10 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Nama Barang</label>
+                            <label class="form-label">Nama Barang <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="modal_nama_barang"
-                                placeholder="Masukkan Nama Barang">
+                                placeholder="Masukkan Nama Barang" required>
+                            <div class="invalid-feedback">Nama barang harus diisi.</div>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -206,12 +207,12 @@
                             <label class="form-label">Upload Dokumen Invoice <span
                                     class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="modal_dokumen_invoice_inst">
-                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen Lainnya</label>
                             <input type="file" class="form-control" id="modal_dokumen_lainnya_inst">
-                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                     </div>
                 </div>
@@ -272,20 +273,24 @@
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen Invoice <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="modal_dokumen_invoice_fact">
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen Kontrak <span class="text-danger">*</span></label>
                             <input type="file" class="form-control" id="modal_dokumen_kontrak_fact">
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen SO</label>
                             <input type="file" class="form-control" id="modal_dokumen_so_fact">
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Upload Dokumen BAST</label>
                             <input type="file" class="form-control" id="modal_dokumen_bast_fact">
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                         </div>
                     </div>
                 </div>

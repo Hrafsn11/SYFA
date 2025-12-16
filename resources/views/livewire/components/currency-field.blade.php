@@ -92,14 +92,20 @@
                     }
 
                     const modelName = input.dataset.modelName || '{{ $model_name }}';
+                    const cleaveInstance = input._cleaveInstance || initCleaveForCurrencyField(inputId);
                     
+                    if (!cleaveInstance) {
+                        return;
+                    }
+                    
+                    const rawValue = cleaveInstance.getRawValue();
                     const currentValue = component.get(modelName);
 
-                    if (String(currentValue || '') === String($input.val() || '')) {
+                    if (String(currentValue || '') === String(rawValue || '')) {
                         return;
                     }
 
-                    component.set(modelName, $input.val());
+                    component.set(modelName, rawValue);
                 } catch (e) {
                     console.warn('Livewire component not found:', componentId, e);
                 }
@@ -175,6 +181,11 @@
 
                 $input.off('blur.currency-field');
                 $input.on('blur.currency-field', () => {
+                    syncInputToComponent();
+                });
+                
+                $input.off('input.currency-field');
+                $input.on('input.currency-field', () => {
                     syncInputToComponent();
                 });
             }
