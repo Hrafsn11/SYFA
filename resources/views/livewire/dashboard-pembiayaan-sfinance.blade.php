@@ -322,7 +322,10 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="chartComparison" wire:key="chart-comparison-{{ $bulan1 }}-{{ $bulan2 }}-{{ $tahun }}" style="min-height: 300px;"></div>
+                    <div id="chartComparison" 
+                         wire:key="chart-comparison-{{ $bulan1 }}-{{ $bulan2 }}-{{ $tahun }}"
+                         data-comparison-data="{{ json_encode($chartData['comparison'] ?? []) }}"
+                         style="min-height: 300px;"></div>
                 </div>
             </div>
         </div>
@@ -526,6 +529,12 @@
                 if (parent) componentId = parent.getAttribute('wire:id');
                 if (componentId && typeof Livewire !== 'undefined') {
                     console.log('Comparison1 filter changed to:', bulan);
+                    // Destroy chart before updating filter
+                    if (chartComparison) {
+                        chartComparison.destroy();
+                        chartComparison = null;
+                    }
+                    // Just set the property - morph.updated hook will trigger reinit
                     Livewire.find(componentId).set('bulan1', bulan || null);
                 }
             });
@@ -538,6 +547,12 @@
                 if (parent) componentId = parent.getAttribute('wire:id');
                 if (componentId && typeof Livewire !== 'undefined') {
                     console.log('Comparison2 filter changed to:', bulan);
+                    // Destroy chart before updating filter
+                    if (chartComparison) {
+                        chartComparison.destroy();
+                        chartComparison = null;
+                    }
+                    // Just set the property - morph.updated hook will trigger reinit
                     Livewire.find(componentId).set('bulan2', bulan || null);
                 }
             });
@@ -854,73 +869,82 @@
                 chartPembayaranPiutang.render();
             }
 
-            // Chart Comparison
-            const comparisonOptions = {
-                series: [
-                    {
-                        name: @json($chartData['comparison']['nama_bulan1'] ?? 'Bulan 1'),
-                        data: @json($chartData['comparison']['bulan1'])
-                    },
-                    {
-                        name: @json($chartData['comparison']['nama_bulan2'] ?? 'Bulan 2'),
-                        data: @json($chartData['comparison']['bulan2'])
-                    },
-                    {
-                        name: 'Selisih',
-                        data: @json($chartData['comparison']['selisih'])
-                    }
-                ],
-                chart: {
-                    type: 'bar',
-                    height: 300,
-                    toolbar: { show: false }
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded'
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    show: true,
-                    width: 2,
-                    colors: ['transparent']
-                },
-                xaxis: {
-                    categories: @json($chartData['comparison']['categories'] ?? [])
-                },
-                yaxis: {
-                    labels: {
-                        formatter: function(val) {
-                            return 'Rp. ' + val.toLocaleString('id-ID');
-                        }
-                    }
-                },
-                fill: {
-                    opacity: 1
-                },
-                colors: ['#71dd37', '#ffab00', '#ff3e1d'],
-                legend: {
-                    position: 'top',
-                    horizontalAlign: 'right'
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return 'Rp ' + val.toLocaleString('id-ID');
-                        }
-                    }
-                }
-            };
+            // Chart Comparison - data will be loaded from data attribute in initCharts()
 
             const chartComparisonEl = document.querySelector("#chartComparison");
             if (chartComparisonEl) {
+                // Read fresh data from data attribute
+                const comparisonData = JSON.parse(chartComparisonEl.getAttribute('data-comparison-data') || '{}');
+                
+                const comparisonOptions = {
+                    series: [
+                        {
+                            name: 'AR',
+                            data: comparisonData.ar || []
+                        },
+                        {
+                            name: 'Utang Pengembalian Deposito',
+                            data: comparisonData.utang_pengembalian_deposito || []
+                        }
+                    ],
+                    chart: {
+                        type: 'bar',
+                        height: 300,
+                        toolbar: { show: false }
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            columnWidth: '55%',
+                            endingShape: 'rounded'
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    xaxis: {
+                        categories: comparisonData.categories || []
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: function(val) {
+                                if (val >= 1000000000) {
+                                    return 'Rp ' + (val / 1000000000).toFixed(0) + 'M';
+                                } else if (val >= 1000000) {
+                                    return 'Rp ' + (val / 1000000).toFixed(0) + 'M';
+                                }
+                                return 'Rp ' + val.toLocaleString('id-ID');
+                            }
+                        }
+                    },
+                    fill: {
+                        opacity: 1
+                    },
+                    colors: ['#71dd37', '#ffab00'],
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'right'
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return 'Rp ' + val.toLocaleString('id-ID');
+                            }
+                        }
+                    }
+                };
+                
+                console.log('Initializing comparison chart with categories:', comparisonOptions.xaxis.categories);
                 chartComparison = new ApexCharts(chartComparisonEl, comparisonOptions);
                 chartComparison.render();
+                console.log('Comparison chart rendered');
+            } else {
+                console.warn('Chart comparison element not found');
             }
         }
 
@@ -1040,8 +1064,8 @@
                         setTimeout(() => {
                             initCharts();
                         }, 200);
-                    }, 100);
-                }, 150);
+                    }, 300);
+                }, 200);
             });
         });
 
