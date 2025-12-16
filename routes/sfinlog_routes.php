@@ -126,11 +126,5 @@ Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.
 Route::get('kertas-kerja-investor-sfinlog', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('kertas-kerja-investor-sfinlog.index');
 
 // Pengembalian Investasi
-Route::get('pengembalian-investasi', PengembalianInvestasi::class)->name('pengembalian-investasi.index');
-Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
-    Route::post('/', [PengembalianInvestasiController::class, 'store'])->name('store');
-    Route::get('{id}/edit', [PengembalianInvestasiController::class, 'edit'])->name('edit');
-    Route::put('{id}', [PengembalianInvestasiController::class, 'update'])->name('update');
-    Route::delete('{id}', [PengembalianInvestasiController::class, 'destroy'])->name('destroy');
-});
+Route::get('/pengembalian-investasi', [PengembalianInvestasiController::class, 'index']);
 
