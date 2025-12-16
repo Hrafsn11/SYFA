@@ -16,29 +16,88 @@ class PengajuanPinjamanRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     * Normalize sumber_pembiayaan to proper case for consistency.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('sumber_pembiayaan')) {
+            $sumber = $this->input('sumber_pembiayaan');
+            if (strtolower($sumber) === 'eksternal') {
+                $this->merge(['sumber_pembiayaan' => 'Eksternal']);
+            } elseif (strtolower($sumber) === 'internal') {
+                $this->merge(['sumber_pembiayaan' => 'Internal']);
+            }
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        $jenisPembiayaan = $this->input('jenis_pembiayaan');
+        
         $validate = [
-            'sumber_pembiayaan' => 'required|in:Eksternal,Internal',
-            'id_instansi' => 'required_if:sumber_pembiayaan,Eksternal|exists:master_sumber_pendanaan_eksternal,id_instansi',
+            // Always required for all types
             'nama_rekening' => 'required',
-            'lampiran_sid' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'tujuan_pembiayaan' => 'required',
+            'tujuan_pembiayaan' => 'nullable|required_unless:jenis_pembiayaan,Factoring,Installment',
             'jenis_pembiayaan' => 'required|in:' . implode(',', JenisPembiayaanEnum::getConstants()),
-            'harapan_tanggal_pencairan' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
-            'rencana_tgl_pembayaran' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
-            'tenor_pembayaran' => 'required_if:jenis_pembiayaan,Installment|in:3,6,9,12',
-            'catatan_lainnya' => 'required',
+            'catatan_lainnya' => 'nullable',
+            
+            // Only for Invoice Financing & PO Financing
+            'sumber_pembiayaan' => 'nullable|required_if:jenis_pembiayaan,Invoice Financing,PO Financing|in:Eksternal,Internal,eksternal,internal',
+            'id_instansi' => 'nullable|required_if:sumber_pembiayaan,Eksternal,eksternal|exists:master_sumber_pendanaan_eksternal,id_instansi',
+            'lampiran_sid' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    $jenisPembiayaan = $this->input('jenis_pembiayaan');
+                    // Only validate for Invoice Financing or PO Financing
+                    if (in_array($jenisPembiayaan, ['Invoice Financing', 'PO Financing'])) {
+                        // Check if file is required
+                        if (!$value && !$this->input('lampiran_sid_current')) {
+                            $fail('Lampiran SID harus diupload untuk ' . $jenisPembiayaan . '.');
+                            return;
+                        }
+                        // Validate file type if uploaded
+                        if ($value) {
+                            if (!$value->isValid()) {
+                                $fail('Lampiran SID tidak valid.');
+                                return;
+                            }
+                            $allowedMimes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/png', 'image/jpeg', 'image/jpg', 'application/x-rar-compressed', 'application/zip'];
+                            $allowedExtensions = ['pdf', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'rar', 'zip'];
+                            $extension = strtolower($value->getClientOriginalExtension());
+                            
+                            if (!in_array($value->getMimeType(), $allowedMimes) && !in_array($extension, $allowedExtensions)) {
+                                $fail('Lampiran SID harus berupa file PDF, DOCX, XLS, PNG, RAR, atau ZIP.');
+                                return;
+                            }
+                            if ($value->getSize() > 2048 * 1024) {
+                                $fail('Lampiran SID maksimal 2MB.');
+                                return;
+                            }
+                        }
+                    }
+                },
+            ],
+            
+            // Only for non-Installment types (Invoice, PO, Factoring)
+            'harapan_tanggal_pencairan' => 'nullable|required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
+            'rencana_tgl_pembayaran' => 'nullable|required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
+            
+            // Only for Installment
+            'tenor_pembayaran' => 'nullable|required_if:jenis_pembiayaan,Installment|in:3,6,9,12',
         ];
 
         $jenisPembiayaan = $this->input('jenis_pembiayaan');
-        $formDataInvoice = $this->input('form_data_invoice', []);
+        // Handle both 'form_data_invoice' (Invoice/PO) and 'details' (Factoring/Installment) keys
+        $formDataInvoice = $this->input('form_data_invoice', $this->input('details', []));
+        $invoiceKey = $this->has('form_data_invoice') ? 'form_data_invoice' : 'details';
         
-        if ($jenisPembiayaan) {
+        if ($jenisPembiayaan && !empty($formDataInvoice)) {
             $invoiceRequest = new InvoicePengajuanPinjamanRequest();
             $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, $formDataInvoice);
             
@@ -47,7 +106,8 @@ class PengajuanPinjamanRequest extends FormRequest
                     $rule = array_merge($rule, ['distinct']);
                 }
 
-                $validate["form_data_invoice.*.{$key}"] = $rule;
+                // Apply rules to the correct key (form_data_invoice or details)
+                $validate["{$invoiceKey}.*.{$key}"] = $rule;
             }
         }
 
@@ -57,18 +117,23 @@ class PengajuanPinjamanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'sumber_pembiayaan.required' => 'Sumber pembiayaan harus dipilih.',
-            'sumber_pembiayaan.in' => 'Sumber pembiayaan harus diisi.',
-            'id_instansi.required_if' => 'Instansi harus dipilih.',
-            'id_instansi.exists' => 'Instansi tidak valid.',
+            // Common fields
             'nama_rekening.required' => 'Nama rekening harus diisi.',
-            'lampiran_sid.required' => 'Lampiran SID harus diupload.',
+            'tujuan_pembiayaan.required' => 'Tujuan pembiayaan harus diisi.',
+            'jenis_pembiayaan.required' => 'Jenis pembiayaan harus dipilih.',
+            'jenis_pembiayaan.in' => 'Jenis pembiayaan tidak valid.',
+            
+            // Invoice & PO Financing specific
+            'sumber_pembiayaan.required_if' => 'Sumber pembiayaan harus dipilih untuk Invoice Financing atau PO Financing.',
+            'sumber_pembiayaan.in' => 'Sumber pembiayaan tidak valid.',
+            'id_instansi.required_if' => 'Instansi harus dipilih ketika sumber pembiayaan Eksternal.',
+            'id_instansi.exists' => 'Instansi tidak valid.',
+            'lampiran_sid.required_if' => 'Lampiran SID harus diupload untuk Invoice Financing atau PO Financing.',
             'lampiran_sid.image' => 'Lampiran SID harus berupa gambar.',
             'lampiran_sid.mimes' => 'Lampiran SID harus berupa gambar JPEG, PNG, atau JPG.',
             'lampiran_sid.max' => 'Lampiran SID tidak boleh lebih besar dari 2MB.',
-            'tujuan_pembiayaan.required' => 'Tujuan pembiayaan harus diisi.',
-            'jenis_pembiayaan.required' => 'Jenis pembiayaan harus dipilih.',
-            'jenis_pembiayaan.in' => 'Jenis pembiayaan harus diisi.',
+            
+            // Form data invoice/contract
             'form_data_invoice.required' => 'Data invoice harus diisi.',
             'form_data_invoice.min' => 'Data invoice minimal 1 item.',
             'form_data_invoice.*.no_invoice.required' => 'No. invoice harus diisi.',
@@ -95,12 +160,11 @@ class PengajuanPinjamanRequest extends FormRequest
             'form_data_invoice.*.dokumen_bast.mimes' => 'Dokumen BAST harus berupa file PDF, DOCX, XLS, PNG, RAR, atau ZIP.',
             'form_data_invoice.*.dokumen_bast.max' => 'Dokumen BAST tidak boleh lebih besar dari 2MB.',
             'harapan_tanggal_pencairan.required_unless' => 'Harapan tanggal pencairan harus diisi.',
-            'harapan_tanggal_pencairan.date_format' => 'Harapan tanggal pencairan harus berupa tanggal.',
+            'harapan_tanggal_pencairan.date_format' => 'Harapan tanggal pencairan harus berupa tanggal dengan format yang valid (YYYY-MM-DD).',
             'rencana_tgl_pembayaran.required_unless' => 'Rencana tanggal pembayaran harus diisi.',
-            'rencana_tgl_pembayaran.date_format' => 'Rencana tanggal pembayaran harus berupa tanggal.',
-            'tenor_pembayaran.required_if' => 'Tenor pembayaran harus diisi.',
-            'tenor_pembayaran.in' => 'Tenor pembayaran harus diisi.',
-            'catatan_lainnya.required' => 'Catatan lainnya harus diisi.',
+            'rencana_tgl_pembayaran.date_format' => 'Rencana tanggal pembayaran harus berupa tanggal dengan format yang valid (YYYY-MM-DD).',
+            'tenor_pembayaran.required_if' => 'Tenor pembayaran harus diisi untuk Installment.',
+            'tenor_pembayaran.in' => 'Tenor pembayaran harus 3, 6, 9, atau 12 bulan.',
         ];
     }
 }

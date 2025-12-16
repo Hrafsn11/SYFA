@@ -43,8 +43,8 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-    'checkPermission', // Permission handling middleware
-    'setActiveModule', // Set active module based on route
+    'checkPermission',
+    'setActiveModule',
 ])->group(function () {
 
     require __DIR__.'/livewire_route.php';
@@ -125,9 +125,9 @@ Route::middleware([
     // Detail restrukturisasi menggunakan Controller dengan Pure AJAX (bukan Livewire component)
     Route::get('detail-restrukturisasi/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('detail-restrukturisasi');
 
-    Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
-    Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
-    Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+    // Pengembalian Pinjaman - Migrated to Livewire (see routes/livewire_route.php)
+    // Index and Create routes are handled by Livewire components
+    Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
 
     // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
     // Route::get('debitur-piutang', function () {

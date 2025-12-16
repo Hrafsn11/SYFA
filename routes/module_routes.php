@@ -75,10 +75,8 @@ Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->grou
     Route::get('detail/{id}', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
 });
 
-// Pengembalian Routes
-Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
-Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
-Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+
+Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
 
 // Debitur Piutang
 Route::get('debitur-piutang', DebiturPiutangIndex::class)->name('debitur-piutang.index');

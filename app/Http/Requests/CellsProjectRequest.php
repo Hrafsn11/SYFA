@@ -14,11 +14,11 @@ class CellsProjectRequest extends FormRequest
     public function rules(): array
     {
         $validate = [
-            'nama_project' => [
+            'nama_cells_bisnis' => [
                 'required',
                 'string',
                 'max:255',
-                'unique:cells_projects,nama_project'
+                'unique:cells_projects,nama_cells_bisnis'
             ],
             'nama_pic' => [
                 'required',
@@ -36,14 +36,23 @@ class CellsProjectRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'projects' => [
+                'nullable',
+                'array'
+            ],
+            'projects.*' => [
+                'required',
+                'string',
+                'max:255'
+            ],
         ];
 
         if ($this->id_cells_project) {
-            $validate['nama_project'] = [
+            $validate['nama_cells_bisnis'] = [
                 'required',
                 'string',
                 'max:255',
-                'unique:cells_projects,nama_project,' . $this->id_cells_project . ',id_cells_project'
+                'unique:cells_projects,nama_cells_bisnis,' . $this->id_cells_project . ',id_cells_project'
             ];
             $validate['nama_pic'] = [
                 'required',
@@ -61,6 +70,15 @@ class CellsProjectRequest extends FormRequest
                 'string',
                 'max:255',
             ];
+            $validate['projects'] = [
+                'nullable',
+                'array'
+            ];
+            $validate['projects.*'] = [
+                'required',
+                'string',
+                'max:255'
+            ];
         }
 
         return $validate;
@@ -69,10 +87,10 @@ class CellsProjectRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'nama_project.required' => 'Nama project harus diisi',
-            'nama_project.string' => 'Nama project harus berupa text',
-            'nama_project.max' => 'Nama project maksimal 255 karakter',
-            'nama_project.unique' => 'Nama project sudah terdaftar',
+            'nama_cells_bisnis.required' => 'Nama cells bisnis harus diisi',
+            'nama_cells_bisnis.string' => 'Nama cells bisnis harus berupa text',
+            'nama_cells_bisnis.max' => 'Nama cells bisnis maksimal 255 karakter',
+            'nama_cells_bisnis.unique' => 'Nama cells bisnis sudah terdaftar',
             'nama_pic.required' => 'Nama PIC harus diisi',
             'nama_pic.string' => 'Nama PIC harus berupa text',
             'nama_pic.max' => 'Nama PIC maksimal 255 karakter',
@@ -83,6 +101,10 @@ class CellsProjectRequest extends FormRequest
             'deskripsi_bidang.required' => 'Deskripsi bidang harus diisi',
             'deskripsi_bidang.string' => 'Deskripsi bidang harus berupa text',
             'deskripsi_bidang.max' => 'Deskripsi bidang maksimal 255 karakter',
+            'projects.array' => 'Projects harus berupa array',
+            'projects.*.required' => 'Nama project harus diisi',
+            'projects.*.string' => 'Nama project harus berupa text',
+            'projects.*.max' => 'Nama project maksimal 255 karakter',
         ];
     }
 }

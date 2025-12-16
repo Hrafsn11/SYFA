@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\CellsProject;
+use App\Models\Project;
 use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
@@ -37,6 +38,7 @@ class PeminjamanCreate extends Component
     public $catatan;
     
     public $projects = [];
+    public $availableProjects = [];
     public $currentDebitur = null;
     public $nama_perusahaan = '';
 
@@ -51,9 +53,28 @@ class PeminjamanCreate extends Component
             $this->nama_perusahaan = $this->currentDebitur->nama;
         }
         
-        $this->projects = CellsProject::orderBy('nama_project', 'asc')->get();
+        $this->projects = CellsProject::orderBy('nama_cells_bisnis', 'asc')->get();
 
         $this->setUrlSaveData('store_peminjaman_finlog', 'sfinlog.peminjaman.store', ["callback" => "afterAction"]);
+    }
+
+    public function updatedIdCellsProject($value)
+    {
+        $this->nama_project = null;
+        
+        if ($value) {
+            $cellsProject = CellsProject::with('projects')->find($value);
+            $this->availableProjects = $cellsProject && $cellsProject->projects 
+                ? $cellsProject->projects->map(function($project) {
+                    return [
+                        'id_project' => $project->id_project,
+                        'nama_project' => $project->nama_project
+                    ];
+                })->toArray() 
+                : [];
+        } else {
+            $this->availableProjects = [];
+        }
     }
 
     public function setterFormData()
