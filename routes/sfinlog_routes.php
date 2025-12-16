@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\Dashboard;
-use App\Http\Controllers\SFinlog\ArPerformanceController;
 use App\Http\Controllers\SFinlog\ArPerbulanController;
 use App\Http\Controllers\SFinlog\DebiturPiutangController;
 use App\Http\Controllers\SFinlog\KertasKerjaInvestorSFinlogController;
@@ -38,10 +37,10 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
 Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
 
 
-// AR Performance
-Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
-Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
-Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
+// AR Performance - Moved to Livewire (see livewire_route.php)
+// Index route: sfinlog.ar-performance.index
+// AJAX endpoints (needed for modal)
+Route::get('ar-performance/transactions', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'getTransactions'])->name('ar-performance.transactions');
 
 // Restrukturisasi Routes
 Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {

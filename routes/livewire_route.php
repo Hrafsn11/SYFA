@@ -59,3 +59,6 @@ Route::get('sfinlog/pengembalian-pinjaman/create', \App\Livewire\SFinlog\Pengemb
 
 // SFinlog - AR Perbulan
 Route::get('sfinlog/ar-perbulan', \App\Livewire\Sfinlog\ArPerbulan::class)->name('sfinlog.ar-perbulan.index');
+
+// SFinlog - AR Performance
+Route::get('sfinlog/ar-performance', \App\Livewire\Sfinlog\ArPerformanceIndex::class)->name('sfinlog.ar-performance.index');
