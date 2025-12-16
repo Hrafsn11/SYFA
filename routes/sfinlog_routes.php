@@ -17,7 +17,6 @@ use App\Http\Controllers\SFinlog\EvaluasiRestrukturisasiController;
 use App\Livewire\DebiturPiutangIndex;
 use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
 use App\Livewire\PengembalianInvestasi;
-use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
 
 // Dashboard
@@ -59,7 +58,9 @@ Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->
 
 // Program Restrukturisasi Routes
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-    Route::get('/', function () {return view('livewire.sfinlog.program-restrukturisasi.index');})->name('index');
+    Route::get('/', function () {
+        return view('livewire.sfinlog.program-restrukturisasi.index');
+    })->name('index');
     Route::get('create', \App\Livewire\ProgramRestrukturisasiCreate::class)->name('create');
     Route::get('{id}', \App\Livewire\ProgramRestrukturisasiShow::class)->name('show');
     Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasiEdit::class)->name('edit');
@@ -80,8 +81,8 @@ Route::get('debitur-piutang', DebiturPiutangIndex::class)->name('debitur-piutang
 Route::get('debitur-piutang/histori', [DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
 Route::get('debitur-piutang/summary', [DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
 
-// Report Pengembalian
-Route::get('report-pengembalian', ReportPengembalian::class)->name('report-pengembalian.index');
+// Report Pengembalian Finlog
+Route::get('report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('report-pengembalian.index');
 
 // Investasi Routes
 Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
@@ -107,7 +108,7 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
     Route::post('{id}/upload-bukti', [PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
     Route::get('{id}/preview-kontrak', [PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
     Route::post('{id}/generate-kontrak', [PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
-    
+
     Route::get('history/{historyId}', [PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history-detail');
 });
 
@@ -135,4 +136,3 @@ Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(
     Route::put('{id}', [PengembalianInvestasiController::class, 'update'])->name('update');
     Route::delete('{id}', [PengembalianInvestasiController::class, 'destroy'])->name('destroy');
 });
-
