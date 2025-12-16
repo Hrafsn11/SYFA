@@ -112,6 +112,9 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
 // Report Penyaluran Dana Investasi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
 
+// Pengembalian Investasi SFinlog
+Route::get('pengembalian-investasi', [PengembalianInvestasiController::class, 'index'])->name('pengembalian-investasi.index');
+
 // Penyaluran Deposito SFinlog
 Route::get('penyaluran-deposito-sfinlog', \App\Livewire\SFinlog\PenyaluranDepositoSfinlogIndex::class)->name('penyaluran-deposito-sfinlog.index');
 Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.')->group(function () {
@@ -124,7 +127,3 @@ Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.
 
 // Kertas Kerja Investor SFinlog
 Route::get('kertas-kerja-investor-sfinlog', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('kertas-kerja-investor-sfinlog.index');
-
-// Pengembalian Investasi
-Route::get('/pengembalian-investasi', [PengembalianInvestasiController::class, 'index']);
-

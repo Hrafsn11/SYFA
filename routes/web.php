@@ -163,14 +163,6 @@ Route::middleware([
         Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
     });
 
-    // Pengembalian Investasi Routes 
-    Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
-        Route::post('/', [\App\Http\Controllers\PengembalianInvestasiController::class, 'store'])->name('store');
-        Route::get('{id}/edit', [\App\Http\Controllers\PengembalianInvestasiController::class, 'edit'])->name('edit');
-        Route::put('{id}', [\App\Http\Controllers\PengembalianInvestasiController::class, 'update'])->name('update');
-        Route::delete('{id}', [\App\Http\Controllers\PengembalianInvestasiController::class, 'destroy'])->name('destroy');
-    });
-
     // Form Kerja Investor Routes (Legacy - redirect to pengajuan-investasi)
     Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
         Route::get('/', [\App\Http\Controllers\PengajuanInvestasiController::class, 'index'])->name('index');
