@@ -33,9 +33,10 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::get('{id}/show-kontrak', [PeminjamanController::class, 'showKontrak'])->name('show-kontrak');
 });
 
-// AR Perbulan
-Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
+// AR Perbulan - Handled by Livewire (see livewire_route.php)
+// Index route: sfinlog.ar-perbulan.index
 Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
+
 
 // AR Performance
 Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');

@@ -432,6 +432,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Auto-update AR Perbulan saat status berubah ke "Selesai"
+            app(\App\Services\ArPerbulanFinlogService::class)->updateAROnSelesai(
+                $this->peminjaman->id_debitur,
+                now()
+            );
+            
             $this->reset(['bukti_transfer']);
             $this->loadData();
             $this->dispatch('refreshData');
