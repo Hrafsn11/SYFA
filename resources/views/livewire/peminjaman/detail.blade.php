@@ -466,6 +466,8 @@
                                                             <th>NAMA CLIENT</th>
                                                             <th>NILAI PINJAMAN</th>
                                                             <th>NILAI BAGI HASIL</th>
+                                                            <th>KONTRAK DATE</th>
+                                                            <th>DUE DATE</th>
                                                             <th>DOKUMEN KONTRAK</th>
                                                             <th>DOKUMEN SO</th>
                                                             <th>DOKUMEN BAST</th>
@@ -484,9 +486,12 @@
                                                                 <td>Rp.
                                                                     {{ number_format($po['nilai_pinjaman'] ?? 0, 0, ',', '.') }}
                                                                 </td>
+
                                                                 <td>Rp.
                                                                     {{ number_format($po['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}
                                                                 </td>
+                                                                <td>{{ $po['kontrak_date'] ?? '-' }}</td>
+                                                                <td>{{ $po['due_date'] ?? '-' }}</td>
 
                                                                 <td>
                                                                     @if (!empty($po['dokumen_kontrak']))
@@ -515,7 +520,7 @@
                                                             </tr>
                                                         @empty
                                                             <tr>
-                                                                <td colspan="9" class="text-center">Tidak ada data PO
+                                                                <td colspan="11" class="text-center">Tidak ada data PO
                                                                 </td>
                                                             </tr>
                                                         @endforelse
