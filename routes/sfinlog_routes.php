@@ -34,6 +34,7 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::post('update-npa-status', [PeminjamanController::class, 'updateNpaStatus'])->name('update-npa-status');
     Route::get('data', [PeminjamanController::class, 'getData'])->name('data');
     Route::get('{id}/show-kontrak', [PeminjamanController::class, 'showKontrak'])->name('show-kontrak');
+    Route::get('{id}/download-sertifikat', [PeminjamanController::class, 'downloadSertifikat'])->name('download-sertifikat');
 });
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
@@ -113,6 +114,7 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
     Route::post('{id}/upload-bukti', [PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
     Route::get('{id}/preview-kontrak', [PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
     Route::post('{id}/generate-kontrak', [PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
+    Route::get('{id}/download-sertifikat', [PengajuanInvestasiController::class, 'downloadSertifikat'])->name('download-sertifikat');
 
     Route::get('history/{historyId}', [PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history-detail');
 });

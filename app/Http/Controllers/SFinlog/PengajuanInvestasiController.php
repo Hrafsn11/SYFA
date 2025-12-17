@@ -406,4 +406,87 @@ class PengajuanInvestasiController extends Controller
 
         return HistoryStatusPengajuanInvestasiFinlog::create(array_merge($defaultData, $data));
     }
+
+    /**
+     * Download Certificate for Pengajuan Investasi Finlog
+     * 
+     * Method ini digunakan untuk generate dan download sertifikat investasi
+     * Hanya bisa diakses jika status pengajuan = "Selesai"
+     * 
+     * @param int $id - ID pengajuan investasi finlog
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function downloadSertifikat($id)
+    {
+        try {
+            // 1. Ambil data pengajuan dengan relasi investor
+            $pengajuan = PengajuanInvestasiFinlog::with('investor')->findOrFail($id);
+            
+            // 2. Validasi: Hanya status "Selesai" yang bisa cetak sertifikat
+            if ($pengajuan->status !== 'Selesai') {
+                return redirect()->back()->with('error', 
+                    'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai');
+            }
+
+            // 3. Generate Nomor Sertifikat
+            // Format: DCI (Deposito Certificate Investment) + TAHUN + NOMOR URUT 4 DIGIT
+            // Contoh: DCI20250001, DCI20250002, dst.
+            $year = date('Y');
+            $countThisYear = PengajuanInvestasiFinlog::whereYear('created_at', $year)
+                ->where('status', 'Selesai')
+                ->where('id_pengajuan_investasi_finlog', '<=', $pengajuan->id_pengajuan_investasi_finlog)
+                ->count();
+            
+            $nomorSertifikat = 'DCI' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
+
+            // 4. Tentukan deskripsi
+            $deskripsi = 'INVESTASI DEPOSITO FINLOG';
+
+            // 5. Hitung jangka waktu investasi
+            // Dari tanggal_investasi sampai tanggal_berakhir_investasi
+            $tanggalInvestasiCarbon = \Carbon\Carbon::parse($pengajuan->tanggal_investasi);
+            $tanggalBerakhirCarbon = \Carbon\Carbon::parse($pengajuan->tanggal_berakhir_investasi);
+
+            // 6. Format tanggal untuk ditampilkan (bahasa Indonesia)
+            $tanggalInvestasi = $tanggalInvestasiCarbon->translatedFormat('d F Y');
+            $tanggalBerakhir = $tanggalBerakhirCarbon->translatedFormat('d F Y');
+            $jangkaWaktu = $tanggalInvestasi . ' - ' . $tanggalBerakhir;
+
+            // 7. Siapkan data untuk view sertifikat
+            $data = [
+                // Nama deposan/investor
+                'nama_deposan' => $pengajuan->nama_investor,
+                
+                // Nomor sertifikat yang sudah digenerate
+                'nomor_deposito' => $nomorSertifikat,
+                
+                // Deskripsi jenis investasi
+                'deskripsi' => $deskripsi,
+                
+                // Nilai deposito/investasi (formatted Rupiah tanpa desimal)
+                'nilai_deposito' => 'Rp ' . number_format($pengajuan->nominal_investasi, 0, ',', '.'),
+                
+                // Kode transaksi (nomor kontrak)
+                'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
+                
+                // Jangka waktu (range tanggal)
+                'jangka_waktu' => $jangkaWaktu,
+                
+                // Bagi hasil (persentase per tahun)
+                'bagi_hasil' => $pengajuan->persentase_bagi_hasil . ' % P.A NET',
+                
+                // Nilai investasi dalam text (formatted Rupiah dengan 2 desimal)
+                // Digunakan di halaman 2 sertifikat
+                'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->nominal_investasi, 2, ',', '.'),
+            ];
+
+            // 8. Return view sertifikat (menggunakan view yang sama dengan S-Finance)
+            return view('livewire.pengajuan-investasi.sertifikat', compact('data'));
+            
+        } catch (\Exception $e) {
+            // Handle error dan redirect kembali dengan pesan error
+            return redirect()->back()->with('error', 
+                'Gagal menggenerate sertifikat: ' . $e->getMessage());
+        }
+    }
 }
