@@ -35,12 +35,7 @@
                     @error('id_pinjaman_finlog')
                         <small class="text-danger">{{ $message }}</small>
                     @enderror
-                    @if ($id_pinjaman_finlog)
-                        <small class="text-muted d-block mt-1">
-                            <i class="ti ti-check-circle text-success"></i> Kode peminjaman terpilih (ID:
-                            {{ $id_pinjaman_finlog }})
-                        </small>
-                    @endif
+
                 </div>
 
                 {{-- Peminjaman Details Card --}}

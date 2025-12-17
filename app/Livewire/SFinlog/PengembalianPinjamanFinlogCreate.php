@@ -106,7 +106,7 @@ class PengembalianPinjamanFinlogCreate extends Component
         try {
             $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
 
-        
+
             $this->validate([
                 'nominal_yang_dibayarkan' => 'required|numeric|min:1',
                 'bukti_pembayaran_invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -119,7 +119,7 @@ class PengembalianPinjamanFinlogCreate extends Component
 
             $this->pengembalian_list[] = [
                 'nominal' => $this->nominal_yang_dibayarkan,
-                'bukti_file' => $this->bukti_pembayaran_invoice, 
+                'bukti_file' => $this->bukti_pembayaran_invoice,
             ];
 
             $this->calculateRemainingBalance();
@@ -294,7 +294,7 @@ class PengembalianPinjamanFinlogCreate extends Component
             ->get()
             ->map(fn($item) => (object)[
                 'id' => $item->id_peminjaman_finlog,
-                'text' => $item->nomor_peminjaman . ' - ' . ($item->cellsProject->nama_cells_bisnis ?? ''),
+                'text' => $item->nomor_peminjaman,
             ])
             ->all();
     }
