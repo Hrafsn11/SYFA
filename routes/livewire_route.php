@@ -64,3 +64,6 @@ Route::get('sfinlog/ar-perbulan', \App\Livewire\Sfinlog\ArPerbulan::class)->name
 Route::get('sfinlog/ar-performance', \App\Livewire\Sfinlog\ArPerformanceIndex::class)->name('sfinlog.ar-performance.index');
 // SFinlog - Report Pengembalian
 Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('sfinlog.report-pengembalian.index');
+
+// SFinlog - Debitur Piutang
+Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');

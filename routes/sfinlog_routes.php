@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 // Dashboard Pembiayaan SFinlog
 use App\Livewire\SFinlog\DashboardPembiayaanSfinlog;
 use App\Livewire\SFinlog\DashboardInvestasiDepositoSfinlog;
+
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinlog::class)->name('dashboard.pembiayaan');
 
 // Dashboard Investasi Deposito SFinlog
@@ -86,7 +87,7 @@ Route::post('pengembalian-pinjaman/store', [PengembalianPinjamanController::clas
     ->name('pengembalian-pinjaman.store');
 
 // Debitur Piutang
-Route::get('debitur-piutang', DebiturPiutangIndex::class)->name('debitur-piutang.index');
+
 Route::get('debitur-piutang/histori', [DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
 Route::get('debitur-piutang/summary', [DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
 

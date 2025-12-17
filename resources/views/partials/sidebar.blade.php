@@ -143,32 +143,38 @@
                 <span class="menu-header-text">Pengembalian</span>
             </li>
 
-            <li class="menu-item {{ RouteHelper::routeIs('pengembalian.index') || RouteHelper::routeIs('sfinlog.pengembalian-pinjaman.index') ? 'active' : '' }}">
+            <li
+                class="menu-item {{ RouteHelper::routeIs('pengembalian.index') || RouteHelper::routeIs('sfinlog.pengembalian-pinjaman.index') ? 'active' : '' }}">
                 @if ($isSFinlog)
                     <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}" class="menu-link">
-                @else
-                    <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
+                    @else
+                        <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
                 @endif
-                    <i class="menu-icon tf-icons ti ti-wallet"></i>
-                    <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
+                <i class="menu-icon tf-icons ti ti-wallet"></i>
+                <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
                 </a>
             </li>
 
             <li class="menu-item {{ RouteHelper::routeIs('debitur-piutang*') ? 'active' : '' }}">
-                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-receipt"></i>
-                    <div data-i18n="Debitur Piutang">Debitur Piutang</div>
+                @if ($isSFinlog)
+                    <a href="{{ route('sfinlog.debitur-piutang.index') }}" class="menu-link">
+                    @else
+                        <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
+                @endif
+                <i class="menu-icon tf-icons ti ti-receipt"></i>
+                <div data-i18n="Debitur Piutang">Debitur Piutang</div>
                 </a>
             </li>
 
             <li class="menu-item {{ RouteHelper::routeIs('report-pengembalian*') ? 'active' : '' }}">
                 @if ($isSFinlog)
                     <a wire:navigate.hover href="{{ route('sfinlog.report-pengembalian.index') }}" class="menu-link">
-                @else
-                    <a wire:navigate.hover href="{{ RouteHelper::route('report-pengembalian.index') }}" class="menu-link">
+                    @else
+                        <a wire:navigate.hover href="{{ RouteHelper::route('report-pengembalian.index') }}"
+                            class="menu-link">
                 @endif
-                    <i class="menu-icon tf-icons ti ti-file-text"></i>
-                    <div data-i18n="Report Pengembalian">Report Pengembalian</div>
+                <i class="menu-icon tf-icons ti ti-file-text"></i>
+                <div data-i18n="Report Pengembalian">Report Pengembalian</div>
                 </a>
             </li>
 
@@ -191,12 +197,14 @@
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*report-penyaluran-dana-investasi*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('report-penyaluran-dana-investasi.index') }}" class="menu-link">
+                        <a href="{{ RouteHelper::route('report-penyaluran-dana-investasi.index') }}"
+                            class="menu-link">
                             <div data-i18n="Report Penyaluran Dana Investasi">Report Penyaluran Dana Investasi</div>
                         </a>
                     </li>
 
-                    <li class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
+                    <li
+                        class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
                         @if ($isSFinance)
                             <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link">
                                 <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
