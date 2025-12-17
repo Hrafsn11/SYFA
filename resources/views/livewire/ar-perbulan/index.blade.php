@@ -13,6 +13,9 @@
                             <button class="btn btn-sm btn-outline-secondary" type="button" id="clear-filter" title="Reset Filter">
                                 <i class="ti ti-x"></i>
                             </button>
+                            <button class="btn btn-sm btn-success" type="button" wire:click="exportToExcel" title="Export ke Excel">
+                                <i class="ti ti-file-excel"></i> Export
+                            </button>
                         </div>
                     </div>
                 </div>
