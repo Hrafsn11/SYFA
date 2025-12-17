@@ -102,11 +102,17 @@ class KertasKerjaInvestorSFinlogController extends Controller
             $pembayaranBulan = $pengembalianPerBulan->get($id, collect());
             $total = $totalPengembalian->get($id);
             
-            // Bagi hasil per bulan = persentase bagi hasil / 12
+            // Bagi hasil (nominal/pa) = bagi hasil(%pa) × nominal deposito / 100
+            $bagiHasilNominalPa = ($inv->persentase_bagi_hasil * $inv->nominal_investasi) / 100;
+            
+            // Bagi hasil (%bulan) = bagi hasil(%pa) / 12
             $bagiHasilPerBulan = $inv->persentase_bagi_hasil / 12;
             
-            // COF per bulan = nominal investasi * bagi hasil per bulan / 100
-            $cofBulan = ($inv->nominal_investasi * $bagiHasilPerBulan) / 100;
+            // Bagi hasil (COF/bulan) = bagi hasil (nominal/pa) / 12
+            $cofBulan = $bagiHasilNominalPa / 12;
+            
+            // Bagi hasil per nominal = lama deposito(bulan) × bagi hasil(COF/bulan)
+            $bagiHasilPerNominal = $inv->lama_investasi * $cofBulan;
             
             // COF per akhir periode (31 Desember tahun yang dipilih)
             $tanggalMulai = \Carbon\Carbon::parse($inv->tanggal_investasi);
@@ -141,8 +147,8 @@ class KertasKerjaInvestorSFinlogController extends Controller
             // Sisa pokok = nominal investasi - total pokok yang sudah dikembalikan
             $sisaPokok = max(0, $inv->nominal_investasi - $totalPokokDikembalikan);
             
-            // Sisa bagi hasil = nominal bagi hasil yang didapat - total bagi hasil yang sudah dibayar
-            $sisaBagiHasil = max(0, ($inv->nominal_bagi_hasil_yang_didapat ?? 0) - $totalBagiHasilDibayar);
+            // Sisa bagi hasil = bagi hasil per nominal - total bagi hasil yang sudah dibayar
+            $sisaBagiHasil = max(0, $bagiHasilPerNominal - $totalBagiHasilDibayar);
             
             return [
                 'id' => $id,
@@ -152,7 +158,8 @@ class KertasKerjaInvestorSFinlogController extends Controller
                 'nominal_deposito' => $inv->nominal_investasi,
                 'lama_deposito' => $inv->lama_investasi,
                 'bagi_hasil_pa' => $inv->persentase_bagi_hasil,
-                'bagi_hasil_nominal' => $inv->nominal_bagi_hasil_yang_didapat ?? 0,
+                'bagi_hasil_nominal_pa' => $bagiHasilNominalPa,
+                'bagi_hasil_per_nominal' => $bagiHasilPerNominal,
                 'bagi_hasil_per_bulan' => $bagiHasilPerBulan,
                 'cof_bulan' => $cofBulan,
                 'cof_akhir_periode' => $cofAkhirPeriode,

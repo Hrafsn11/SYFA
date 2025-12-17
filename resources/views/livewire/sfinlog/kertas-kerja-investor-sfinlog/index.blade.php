@@ -67,9 +67,9 @@
                                             <th class="text-center">Lama Deposito (Bulan)</th>
                                             <th class="text-center">Bagi Hasil (%PA)</th>
                                             <th class="text-center">Bagi Hasil (Nominal/PA)</th>
+                                            <th class="text-center">Bagi Hasil Per Nominal</th>
                                             <th class="text-center">Bagi Hasil (%Bulan)</th>
                                             <th class="text-center">Bagi Hasil (COF/Bulan)</th>
-                                            <th class="text-center">CoF Per Akhir Des {{ $year }}</th>
                                             <th class="text-center">Status</th>
                                         </tr>
                                     </thead>
@@ -86,13 +86,13 @@
                                                 <td class="text-center">{{ $row['lama_deposito'] }} Bulan</td>
                                                 <td class="text-center">{{ number_format($row['bagi_hasil_pa'], 2) }}%</td>
                                                 <td class="text-center">Rp
-                                                    {{ number_format($row['bagi_hasil_nominal'], 0, ',', '.') }}</td>
+                                                    {{ number_format($row['bagi_hasil_nominal_pa'], 0, ',', '.') }}</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['bagi_hasil_per_nominal'], 0, ',', '.') }}</td>
                                                 <td class="text-center">
                                                     {{ number_format($row['bagi_hasil_per_bulan'], 2) }}%</td>
                                                 <td class="text-center">Rp
                                                     {{ number_format($row['cof_bulan'], 0, ',', '.') }}</td>
-                                                <td class="text-center">Rp
-                                                    {{ number_format($row['cof_akhir_periode'], 0, ',', '.') }}</td>
                                                 <td class="text-center">
                                                     @if ($row['status'] === 'Lunas')
                                                         <span class="badge bg-label-success">Lunas</span>
