@@ -52,6 +52,29 @@
                     </li>
                 </ul>
             </li>
+        @elseif ($isSFinlog)
+            <li
+                class="menu-item {{ RouteHelper::routeIs('dashboard.*') || RouteHelper::routeIs('dashboard.pembiayaan') || RouteHelper::routeIs('dashboard.investasi-deposito') ? 'open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons ti ti-smart-home"></i>
+                    <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ RouteHelper::routeIs('dashboard.pembiayaan') ? 'active' : '' }}">
+                        <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.pembiayaan') }}"
+                            class="menu-link">
+                            <div data-i18n="Dashboard Pembiayaan SFinlog">Dashboard Pembiayaan SFinlog</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ RouteHelper::routeIs('dashboard.investasi-deposito') ? 'active' : '' }}">
+                        <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.investasi-deposito') }}"
+                            class="menu-link">
+                            <div data-i18n="Dashboard Investasi Deposito SFinlog">Dashboard Investasi Deposito
+                                SFinlog</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
         @else
             <li class="menu-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
                 <a wire:navigate.hover href="{{ route('dashboard.index') }}" class="menu-link">
