@@ -18,8 +18,13 @@ use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
 use App\Livewire\PengembalianInvestasi;
 use Illuminate\Support\Facades\Route;
 
-// Dashboard
-Route::get('dashboard', Dashboard::class)->name('dashboard.index');
+// Dashboard Pembiayaan SFinlog
+use App\Livewire\Sfinlog\DashboardPembiayaanSfinlog;
+use App\Livewire\Sfinlog\DashboardInvestasiDepositoSfinlog;
+Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinlog::class)->name('dashboard.pembiayaan');
+
+// Dashboard Investasi Deposito SFinlog
+Route::get('dashboard/investasi-deposito', DashboardInvestasiDepositoSfinlog::class)->name('dashboard.investasi-deposito');
 
 // Peminjaman
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
@@ -115,9 +120,9 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
 // Report Penyaluran Dana Investasi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
 
-// Penyaluran Deposito
-Route::get('penyaluran-deposito', PenyaluranDepositoIndex::class)->name('penyaluran-deposito.index');
-Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
+// Penyaluran Deposito SFinlog
+Route::get('penyaluran-deposito-sfinlog', \App\Livewire\SFinlog\PenyaluranDepositoSfinlogIndex::class)->name('penyaluran-deposito-sfinlog.index');
+Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.')->group(function () {
     Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
     Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
     Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
