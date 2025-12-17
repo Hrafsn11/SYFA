@@ -188,10 +188,20 @@
                         </a>
                     </li>
 
-                    <li class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
-                            <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
-                        </a>
+                    <li class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
+                        @if ($isSFinance)
+                            <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link">
+                                <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
+                            </a>
+                        @elseif($isSFinlog)
+                            <a href="{{ route('sfinlog.penyaluran-deposito-sfinlog.index') }}" class="menu-link">
+                                <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
+                            </a>
+                        @else
+                            <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
+                                <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
+                            </a>
+                        @endif
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*kertas-kerja-investor*') ? 'active' : '' }}">
