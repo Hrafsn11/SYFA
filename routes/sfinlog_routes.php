@@ -23,12 +23,16 @@ Route::get('dashboard', Dashboard::class)->name('dashboard.index');
 
 // Peminjaman
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
-    Route::post('/', [PeminjamanController::class, 'store'])->name('store');
-    Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
-    Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
+    // Static & Specific Routes FIRST
     Route::post('update-npa-status', [PeminjamanController::class, 'updateNpaStatus'])->name('update-npa-status');
     Route::get('data', [PeminjamanController::class, 'getData'])->name('data');
     Route::get('{id}/show-kontrak', [PeminjamanController::class, 'showKontrak'])->name('show-kontrak');
+    Route::get('download-kontrak/{id}', [PeminjamanController::class, 'downloadKontrakPdf'])->name('download-kontrak');
+
+    // Dynamic / Standard Resource Routes LAST
+    Route::post('/', [PeminjamanController::class, 'store'])->name('store');
+    Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
+    Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
 });
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
@@ -74,7 +78,7 @@ Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->grou
 // Index route: sfinlog.pengembalian-pinjaman.index
 // Optional: provide a POST endpoint for non-Livewire submissions or UniversalFormAction
 Route::post('pengembalian-pinjaman/store', [PengembalianPinjamanController::class, 'store'])
-    ->name('sfinlog.pengembalian-pinjaman.store');
+    ->name('pengembalian-pinjaman.store');
 
 // Debitur Piutang
 Route::get('debitur-piutang', DebiturPiutangIndex::class)->name('debitur-piutang.index');
@@ -107,6 +111,7 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
     Route::post('{id}/approval', [PengajuanInvestasiController::class, 'approval'])->name('approval');
     Route::post('{id}/upload-bukti', [PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
     Route::get('{id}/preview-kontrak', [PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
+    Route::get('{id}/download-kontrak', [PengajuanInvestasiController::class, 'downloadKontrakPdf'])->name('download-kontrak');
     Route::post('{id}/generate-kontrak', [PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
 
     Route::get('history/{historyId}', [PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history-detail');

@@ -20,12 +20,20 @@ class PeminjamanController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $data = $request->validated();
 
-            $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
-                          'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
-            
+            $fileFields = [
+                'dokumen_mitra',
+                'form_new_customer',
+                'dokumen_kerja_sama',
+                'dokumen_npa',
+                'akta_perusahaan',
+                'ktp_owner',
+                'ktp_pic',
+                'surat_izin_usaha'
+            ];
+
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
                     $file = $request->file($field);
@@ -33,28 +41,25 @@ class PeminjamanController extends Controller
                     $data[$field] = $file->storeAs('peminjaman_finlog', $fileName, 'public');
                 }
             }
-            
-            // Generate nomor peminjaman dengan format PMJ-TAHUNBULAN-SLOG-RUNNINGTEXT
-            $yearMonth = date('Ym'); // Format: 202512
+
+            $yearMonth = date('Ym'); 
             $lastPeminjaman = PeminjamanFinlog::where('nomor_peminjaman', 'LIKE', "PMJ-{$yearMonth}-SLOG-%")
-                                             ->orderBy('nomor_peminjaman', 'desc')
-                                             ->first();
-            
+                ->orderBy('nomor_peminjaman', 'desc')
+                ->first();
+
             if ($lastPeminjaman) {
-                // Ambil running text terakhir dan tambah 1
                 $lastNumber = (int) substr($lastPeminjaman->nomor_peminjaman, -2);
                 $runningText = str_pad($lastNumber + 1, 2, '0', STR_PAD_LEFT);
             } else {
-                // Jika belum ada peminjaman di bulan ini, mulai dari 01
                 $runningText = '01';
             }
-            
+
             $data['nomor_peminjaman'] = "PMJ-{$yearMonth}-SLOG-{$runningText}";
-            
+
             $peminjaman = PeminjamanFinlog::create($data);
-            
+
             DB::commit();
-            
+
             return Response::success($peminjaman, 'Pengajuan peminjaman berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -62,41 +67,46 @@ class PeminjamanController extends Controller
         }
     }
 
-    /**
-     * Update the specified peminjaman for SFinlog
-     */
     public function update(PeminjamanRequest $request, $id)
     {
         try {
             DB::beginTransaction();
-            
+
             $peminjaman = PeminjamanFinlog::findOrFail($id);
-            
+
             if ($peminjaman->status !== 'Draft') {
                 return Response::error('Peminjaman tidak dapat diubah setelah disubmit');
             }
-            
+
             $data = $request->validated();
-            
-            $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
-                          'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
-            
+
+            $fileFields = [
+                'dokumen_mitra',
+                'form_new_customer',
+                'dokumen_kerja_sama',
+                'dokumen_npa',
+                'akta_perusahaan',
+                'ktp_owner',
+                'ktp_pic',
+                'surat_izin_usaha'
+            ];
+
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
                     if ($peminjaman->{$field} && \Storage::disk('public')->exists($peminjaman->{$field})) {
                         \Storage::disk('public')->delete($peminjaman->{$field});
                     }
-                    
+
                     $file = $request->file($field);
                     $fileName = time() . '_' . $field . '_' . $file->getClientOriginalName();
                     $data[$field] = $file->storeAs('peminjaman_finlog', $fileName, 'public');
                 }
             }
-            
+
             $peminjaman->update($data);
-            
+
             DB::commit();
-            
+
             return Response::success($peminjaman, 'Peminjaman berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -104,23 +114,28 @@ class PeminjamanController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         try {
             DB::beginTransaction();
 
             $peminjaman = PeminjamanFinlog::findOrFail($id);
-            
+
             if ($peminjaman->status !== 'Draft') {
                 return Response::error('Peminjaman hanya dapat dihapus jika masih berstatus Draft');
             }
 
-            $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
-                          'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
-            
+            $fileFields = [
+                'dokumen_mitra',
+                'form_new_customer',
+                'dokumen_kerja_sama',
+                'dokumen_npa',
+                'akta_perusahaan',
+                'ktp_owner',
+                'ktp_pic',
+                'surat_izin_usaha'
+            ];
+
             foreach ($fileFields as $field) {
                 if ($peminjaman->{$field}) {
                     \Storage::disk('public')->delete($peminjaman->{$field});
@@ -138,53 +153,60 @@ class PeminjamanController extends Controller
         }
     }
 
-    /**
-     * Update NPA status for current user's debitur
-     */
     public function updateNpaStatus(Request $request)
     {
         try {
             $debitur = auth()->user()->debitur;
-            
+
             if (!$debitur) {
                 return Response::error('Data debitur tidak ditemukan');
             }
-            
+
             $debitur->update(['npa' => true]);
-            
+
             return Response::success($debitur, 'Status NPA berhasil diperbarui');
         } catch (\Exception $e) {
             return Response::error(null, 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Show kontrak peminjaman
-     */
     public function showKontrak($id)
     {
-        $peminjaman = PeminjamanFinlog::with([
-            'debitur',
-            'cellsProject'
-        ])->findOrFail($id);
+        $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->findOrFail($id);
+        $data = $this->prepareContractData($peminjaman);
 
-        // Prepare data untuk kontrak
-        $data = [
+        return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
+    }
+
+    public function downloadKontrakPdf($id)
+    {
+        $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->findOrFail($id);
+        $data = $this->prepareContractData($peminjaman);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('livewire.sfinlog.peminjaman.partials.show-kontrak-pdf', compact('peminjaman', 'data'));
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->stream('Kontrak-Pembiayaan-' . $peminjaman->nomor_kontrak . '.pdf');
+    }
+
+    private function prepareContractData($peminjaman)
+    {
+        return [
             'nomor_kontrak' => $peminjaman->nomor_kontrak,
             'tanggal_kontrak' => now()->toDateString(),
-            
-            // Data Principal (Cells Project)
+
+            // Principal / Cells
             'nama_principal' => $peminjaman->cellsProject->nama_cells_bisnis ?? '-',
             'nama_pic' => $peminjaman->cellsProject->nama_pic ?? '-',
             'alamat_principal' => $peminjaman->cellsProject->alamat ?? '-',
             'deskripsi_bidang' => $peminjaman->cellsProject->deskripsi_bidang ?? '-',
-            
-            // Data Debitur (Perusahaan)
+
+            // Debitur
             'nama_perusahaan' => $peminjaman->debitur->nama ?? '-',
             'nama_ceo' => $peminjaman->debitur->nama_ceo ?? '-',
             'alamat_perusahaan' => $peminjaman->debitur->alamat ?? '-',
-            
-            // Detail Pembiayaan
+
+            // Details
             'tujuan_pembiayaan' => $peminjaman->nama_project ?? '-',
             'nilai_pembiayaan' => $peminjaman->nilai_pinjaman ?? 0,
             'tenor_pembiayaan' => $peminjaman->durasi_project ?? 0,
@@ -192,15 +214,10 @@ class PeminjamanController extends Controller
             'bagi_hasil' => $peminjaman->nilai_bagi_hasil ?? 0,
             'persentase_bagi_hasil' => $peminjaman->presentase_bagi_hasil ?? 0,
             'jaminan' => $peminjaman->jaminan ?? '-',
-            
-            // Tanggal
+
+            // Dates
             'tanggal_pencairan' => $peminjaman->harapan_tanggal_pencairan,
             'tanggal_pengembalian' => $peminjaman->rencana_tgl_pengembalian,
         ];
-
-        return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
     }
-
 }
-
-
