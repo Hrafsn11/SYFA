@@ -5,6 +5,7 @@ namespace App\Livewire\SFinlog;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Locked;
 use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasModal;
 use App\Models\PeminjamanFinlog;
@@ -18,9 +19,14 @@ class PengembalianPinjamanFinlogCreate extends Component
 {
     use WithFileUploads, HasModal;
 
-    // Form fields
-    #[FieldInput] public $id_peminjaman_finlog = '';
-    #[FieldInput] public $nama_perusahaan = '';
+    // Form fields - bisa di-update dari frontend
+    #[FieldInput] 
+    public $id_peminjaman_finlog = '';
+    
+    // Nama perusahaan is locked after mount
+    #[Locked]
+    public $nama_perusahaan = '';
+    
     #[FieldInput] public $cells_bisnis = '';
     #[FieldInput] public $nama_project = '';
     #[FieldInput] public $tanggal_pencairan = '';
@@ -32,8 +38,13 @@ class PengembalianPinjamanFinlogCreate extends Component
     #[FieldInput] public $sisa_utang = 0;
     #[FieldInput] public $sisa_bagi_hasil = 0;
     #[FieldInput] public $catatan = '';
-    #[FieldInput] public $nominal_yang_dibayarkan = 0;
-    #[FieldInput] public $bukti_pembayaran_invoice = null;
+    
+    // Modal fields - dengan validasi real-time untuk file upload
+    public $nominal_yang_dibayarkan = 0;
+    public $bukti_pembayaran_invoice = null;
+    
+    // Configure file upload behavior
+    protected $maxUploadSize = 2048; // 2MB in KB
 
     // Component state
     public $value = ''; // Required by Select2
@@ -42,9 +53,13 @@ class PengembalianPinjamanFinlogCreate extends Component
     public $id_cells_project = '';
     public $id_project = '';
 
-    // User state
+    // User state - READ ONLY, pakai #[Locked]
+    #[Locked]
     public $currentUserId = null;
+    
+    #[Locked]
     public $currentDebitur = null;
+    
     public $hasNoData = false;
     public $isSubmitting = false;
 
@@ -75,15 +90,18 @@ class PengembalianPinjamanFinlogCreate extends Component
             return;
         }
 
-        $this->id_peminjaman_finlog = $value;
+        // Set both properties
         $this->value = $value;
-
+        $this->id_peminjaman_finlog = $value;
+        
+        // Load or reset data
         if (empty($value)) {
             $this->resetPeminjamanData();
-            return;
+        } else {
+            $this->loadPeminjamanData($value);
         }
-
-        $this->loadPeminjamanData($value);
+        
+        Log::info('Select2 changed', ['value' => $value, 'id_peminjaman_finlog' => $this->id_peminjaman_finlog]);
     }
 
     public function updatedValue($value)
@@ -92,39 +110,83 @@ class PengembalianPinjamanFinlogCreate extends Component
             return;
         }
 
+        // Update id_peminjaman_finlog
         $this->id_peminjaman_finlog = $value;
 
-        empty($value)
-            ? $this->resetPeminjamanData()
-            : $this->loadPeminjamanData($value);
+        if (empty($value)) {
+            $this->resetPeminjamanData();
+        } else {
+            $this->loadPeminjamanData($value);
+        }
+        
+        Log::info('updatedValue called', ['value' => $value, 'id_peminjaman_finlog' => $this->id_peminjaman_finlog]);
+    }
+    
+    // Add a dedicated updater for id_peminjaman_finlog
+    public function updatedIdPeminjamanFinlog($value)
+    {
+        $this->value = $value;
+        
+        if (empty($value)) {
+            $this->resetPeminjamanData();
+        } else {
+            $this->loadPeminjamanData($value);
+        }
+        
+        Log::info('updatedIdPeminjamanFinlog called', ['value' => $value]);
     }
 
     public function addPengembalian()
     {
-        $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
+        try {
+            // Sanitize input
+            $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
 
-        $this->validate([
-            'nominal_yang_dibayarkan' => 'required|numeric|min:1',
-            'bukti_pembayaran_invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ], [
-            'nominal_yang_dibayarkan.required' => 'Nominal wajib diisi.',
-            'nominal_yang_dibayarkan.numeric' => 'Nominal harus berupa angka.',
-            'nominal_yang_dibayarkan.min' => 'Nominal minimal Rp 1.',
-            'bukti_pembayaran_invoice.required' => 'Bukti pembayaran wajib diunggah.',
-            'bukti_pembayaran_invoice.mimes' => 'File harus berupa PDF, JPG, JPEG, atau PNG.',
-            'bukti_pembayaran_invoice.max' => 'Ukuran file maksimal 2MB.',
-        ]);
+            // Validate
+            $this->validate([
+                'nominal_yang_dibayarkan' => 'required|numeric|min:1',
+                'bukti_pembayaran_invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            ], [
+                'nominal_yang_dibayarkan.required' => 'Nominal wajib diisi.',
+                'nominal_yang_dibayarkan.numeric' => 'Nominal harus berupa angka.',
+                'nominal_yang_dibayarkan.min' => 'Nominal minimal Rp 1.',
+                'bukti_pembayaran_invoice.required' => 'Bukti pembayaran wajib diunggah.',
+                'bukti_pembayaran_invoice.mimes' => 'File harus berupa PDF, JPG, JPEG, atau PNG.',
+                'bukti_pembayaran_invoice.max' => 'Ukuran file maksimal 2MB.',
+            ]);
 
-        $this->pengembalianList[] = [
-            'nominal' => $this->nominal_yang_dibayarkan,
-            'bukti_file' => $this->storeTemporaryFile(),
-        ];
+            // Store file temporary BEFORE adding to list
+            $tempFilePath = $this->storeTemporaryFile();
+            
+            if (!$tempFilePath) {
+                throw new \Exception('Gagal menyimpan file. Silakan coba lagi.');
+            }
+            
+            // Add to pengembalianList
+            $this->pengembalianList[] = [
+                'nominal' => $this->nominal_yang_dibayarkan,
+                'bukti_file' => $tempFilePath,
+            ];
 
-        $this->reset(['nominal_yang_dibayarkan', 'bukti_pembayaran_invoice']);
-        $this->calculateRemainingBalance();
+            // Calculate remaining balance
+            $this->calculateRemainingBalance();
+            
+            // Reset modal fields only
+            $this->reset(['nominal_yang_dibayarkan', 'bukti_pembayaran_invoice']);
 
-        $this->dispatch('close-pengembalian-modal');
-        $this->showToast('success', 'Pengembalian invoice berhasil ditambahkan!');
+            // Dispatch events to close modal
+            $this->dispatch('close-pengembalian-modal');
+            Log::info('Modal close event dispatched');
+            
+            $this->showToast('success', 'Pengembalian invoice berhasil ditambahkan!');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw validation exceptions
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error adding pengembalian: ' . $e->getMessage());
+            $this->showToast('error', 'Gagal menambahkan pengembalian: ' . $e->getMessage());
+        }
     }
 
     public function removePengembalian($index)
@@ -179,9 +241,11 @@ class PengembalianPinjamanFinlogCreate extends Component
                 ]);
             }
 
-            $this->showToast('success', 'Data pengembalian pinjaman berhasil disimpan!');
+            // Use session flash for success message on next page
+            session()->flash('success', 'Data pengembalian pinjaman berhasil disimpan!');
 
-            return $this->redirect(route('sfinlog.pengembalian-pinjaman.index'), navigate: true);
+            // Full page redirect (not Livewire navigate) for clean page reload
+            return redirect()->route('sfinlog.pengembalian-pinjaman.index');
         } catch (\Exception $e) {
             DB::rollBack();
             $this->cleanupTemporaryFiles();
@@ -321,6 +385,25 @@ class PengembalianPinjamanFinlogCreate extends Component
 
     private function validateBeforeStore()
     {
+        // Log current state for debugging
+        Log::info('Validating before store', [
+            'id_peminjaman_finlog' => $this->id_peminjaman_finlog,
+            'value' => $this->value,
+            'selectedPeminjaman' => $this->selectedPeminjaman?->id_peminjaman_finlog ?? 'null',
+            'pengembalianList_count' => count($this->pengembalianList)
+        ]);
+        
+        // Try to recover id_peminjaman_finlog from value or selectedPeminjaman
+        if (empty($this->id_peminjaman_finlog)) {
+            if (!empty($this->value)) {
+                $this->id_peminjaman_finlog = $this->value;
+                Log::info('Recovered id_peminjaman_finlog from value', ['id_peminjaman_finlog' => $this->id_peminjaman_finlog]);
+            } elseif ($this->selectedPeminjaman) {
+                $this->id_peminjaman_finlog = $this->selectedPeminjaman->id_peminjaman_finlog;
+                Log::info('Recovered id_peminjaman_finlog from selectedPeminjaman', ['id_peminjaman_finlog' => $this->id_peminjaman_finlog]);
+            }
+        }
+        
         if (empty($this->id_peminjaman_finlog)) {
             $this->showToast('error', 'Silakan pilih kode peminjaman terlebih dahulu!');
             return false;
@@ -429,16 +512,64 @@ class PengembalianPinjamanFinlogCreate extends Component
 
     private function storeTemporaryFile()
     {
-        $filename = 'temp_' . uniqid() . '.' . $this->bukti_pembayaran_invoice->extension();
-        return $this->bukti_pembayaran_invoice->storeAs('temp', $filename, 'public');
+        try {
+            if (!$this->bukti_pembayaran_invoice) {
+                throw new \Exception('File tidak ditemukan');
+            }
+            
+            // Generate unique filename
+            $extension = $this->bukti_pembayaran_invoice->extension();
+            $filename = 'temp_' . time() . '_' . uniqid() . '.' . $extension;
+            
+            // Store with better error handling
+            $path = $this->bukti_pembayaran_invoice->storeAs('temp', $filename, 'public');
+            
+            if (!$path) {
+                throw new \Exception('Gagal menyimpan file ke storage');
+            }
+            
+            // Verify file was stored
+            if (!Storage::disk('public')->exists($path)) {
+                throw new \Exception('File tidak ditemukan setelah upload');
+            }
+            
+            Log::info('File stored temporarily', ['path' => $path, 'size' => $this->bukti_pembayaran_invoice->getSize()]);
+            
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('Failed to store temporary file: ' . $e->getMessage());
+            throw new \Exception('Gagal mengunggah file: ' . $e->getMessage());
+        }
     }
 
     private function moveToPermanentStorage($tempPath)
     {
-        $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . pathinfo($tempPath, PATHINFO_EXTENSION);
-        $newPath = 'pengembalian_finlog/' . $filename;
-        Storage::disk('public')->move($tempPath, $newPath);
-        return $newPath;
+        try {
+            if (!Storage::disk('public')->exists($tempPath)) {
+                throw new \Exception('File temporary tidak ditemukan: ' . $tempPath);
+            }
+            
+            $extension = pathinfo($tempPath, PATHINFO_EXTENSION);
+            $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . $extension;
+            $newPath = 'pengembalian_finlog/' . $filename;
+            
+            // Ensure directory exists
+            Storage::disk('public')->makeDirectory('pengembalian_finlog');
+            
+            // Move file
+            $moved = Storage::disk('public')->move($tempPath, $newPath);
+            
+            if (!$moved) {
+                throw new \Exception('Gagal memindahkan file ke penyimpanan permanen');
+            }
+            
+            Log::info('File moved to permanent storage', ['from' => $tempPath, 'to' => $newPath]);
+            
+            return $newPath;
+        } catch (\Exception $e) {
+            Log::error('Failed to move file to permanent storage: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     private function cleanupTemporaryFiles()

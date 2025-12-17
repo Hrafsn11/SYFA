@@ -14,24 +14,33 @@
         <div class="card-body">
             <form wire:submit.prevent="store">
                 {{-- Nama Perusahaan --}}
-                <div class="mb-3">
-                    <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
-                    <input type="text" class="form-control" id="nama_perusahaan" value="{{ $nama_perusahaan }}"
-                        readonly>
-                </div>
+            <div class="mb-3">
+                <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
+                <input type="text" class="form-control" id="nama_perusahaan" 
+                    value="{{ $nama_perusahaan }}" readonly>
+            </div>
 
-                {{-- Kode Peminjaman --}}
-                <div class="mb-3">
-                    <label for="kode_peminjaman" class="form-label">
-                        Kode Peminjaman <span class="text-danger">*</span>
-                    </label>
+            {{-- Kode Peminjaman --}}
+            <div class="mb-3" wire:key="select2-container-{{ $currentUserId ?? 'guest' }}">
+                <label for="kode_peminjaman" class="form-label">
+                    Kode Peminjaman <span class="text-danger">*</span>
+                </label>
+                {{-- Hidden input to preserve value --}}
+                <input type="hidden" wire:model="id_peminjaman_finlog" id="hidden_id_peminjaman_finlog">
+                <div wire:ignore>
                     <livewire:components.select2 :list_data="$peminjamanList" value_name="id" value_label="text"
                         data_placeholder="Pilih Kode Peminjaman" model_name="id_peminjaman_finlog" :value="$id_peminjaman_finlog"
-                        :key="'select2-peminjaman-' . now()->timestamp" />
-                    @error('id_peminjaman_finlog')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
+                        :key="'select2-peminjaman-finlog'" />
                 </div>
+                @error('id_peminjaman_finlog')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+                @if($id_peminjaman_finlog)
+                    <small class="text-muted d-block mt-1">
+                        <i class="ti ti-check-circle text-success"></i> Kode peminjaman terpilih (ID: {{ $id_peminjaman_finlog }})
+                    </small>
+                @endif
+            </div>
 
                 {{-- Peminjaman Details Card --}}
                 <div class="card border shadow-none mb-4" wire:key="peminjaman-detail-{{ $id_peminjaman_finlog }}">
@@ -88,7 +97,7 @@
                         </div>
 
                         {{-- List Pengembalian Invoice Table --}}
-                        <div class="card shadow-none border mb-3">
+                        <div class="card shadow-none border mb-3" wire:key="pengembalian-table-container">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">List Pengembalian Invoice</h5>
                             </div>
@@ -104,7 +113,7 @@
                                     </thead>
                                     <tbody>
                                         @forelse($pengembalianList as $index => $item)
-                                            <tr>
+                                            <tr wire:key="pengembalian-row-{{ $index }}-{{ md5($item['bukti_file']) }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td>Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
                                                 <td>
@@ -183,12 +192,11 @@
     @include('livewire.sfinlog.pengembalian-pinjaman.partials.modal')
 </div>
 
-
 @push('scripts')
     <script>
         document.addEventListener('livewire:initialized', () => {
-            let currentPeminjamanId = null;
             let isSubmitting = false;
+            let cachedPeminjamanId = @js($id_peminjaman_finlog);
 
             // Utility: Show SweetAlert
             const showAlert = (icon, html, title) => {
@@ -208,24 +216,23 @@
                 });
             };
 
-            // Listen: Select2 Changed Event
             Livewire.on('select2-changed', (event) => {
                 const data = event[0] || event;
-
-                if (data.modelName === 'id_peminjaman_finlog') {
-                    currentPeminjamanId = data.value;
-
-                    if (currentPeminjamanId) {
-                        @this.set('id_peminjaman_finlog', currentPeminjamanId);
-                        @this.call('loadPeminjamanData', currentPeminjamanId);
-                    } else {
-                        @this.set('id_peminjaman_finlog', '');
-                        @this.call('resetPeminjamanData');
-                    }
+                if (data.modelName === 'id_peminjaman_finlog' && data.value) {
+                    cachedPeminjamanId = data.value;
+                    console.log('Cached peminjaman ID:', cachedPeminjamanId);
                 }
             });
 
-            // Listen: Form Submit (Prevent Double Submission)
+            Livewire.hook('request', ({ options, payload, respond, succeed, fail }) => {
+                // Restore cached ID if it's missing
+                const currentId = @this.get('id_peminjaman_finlog');
+                if (!currentId && cachedPeminjamanId) {
+                    console.log('Restoring cached peminjaman ID:', cachedPeminjamanId);
+                    @this.set('id_peminjaman_finlog', cachedPeminjamanId, false);
+                }
+            });
+
             const form = document.querySelector('form[wire\\:submit\\.prevent="store"]');
             if (form) {
                 form.addEventListener('submit', (e) => {
@@ -234,13 +241,14 @@
                         e.stopImmediatePropagation();
                         return false;
                     }
-
-                    isSubmitting = true;
-
-                    if (currentPeminjamanId) {
-                        @this.set('id_peminjaman_finlog', currentPeminjamanId);
+                    
+                    const currentId = @this.get('id_peminjaman_finlog');
+                    if (!currentId && cachedPeminjamanId) {
+                        console.log('Setting peminjaman ID before submit:', cachedPeminjamanId);
+                        @this.set('id_peminjaman_finlog', cachedPeminjamanId, false);
                     }
-
+                    
+                    isSubmitting = true;
                     setTimeout(() => isSubmitting = false, 2000);
                 }, true);
             }
@@ -259,3 +267,4 @@
         });
     </script>
 @endpush
+
