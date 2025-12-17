@@ -242,11 +242,6 @@
                                 <div data-i18n="Cells Project">Cells Project</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
-                            <a href="#" class="menu-link">
-                                <div data-i18n="Menu Lainnya">Menu Lainnya</div>
-                            </a>
-                        </li>
                     </ul>
                 </li>
             @endcan
@@ -263,12 +258,12 @@
                 </a>
             </li>
 
-            <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
+            {{-- <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
                 <a href="{{ route('matrixscore') }}" class="menu-link">
                     <i class="menu-icon tf-icons ti ti-user"></i>
                     <div data-i18n="Config Matrix Score">Config Matrix Score</div>
                 </a>
-            </li>
+            </li> --}}
 
             <!-- Access Control Section - Only in Master Data Module -->
             @role('super-admin')

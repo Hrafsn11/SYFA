@@ -20,6 +20,7 @@ class CellsProject extends Model
         'nama_pic',
         'alamat',
         'deskripsi_bidang',
+        'tanda_tangan_pic',
     ];
 
     public function peminjamanFinlog()
