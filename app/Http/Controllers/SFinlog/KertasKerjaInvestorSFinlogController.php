@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanInvestasiFinlog;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class KertasKerjaInvestorSFinlogController extends Controller
 {
@@ -15,10 +17,40 @@ class KertasKerjaInvestorSFinlogController extends Controller
     public function index(Request $request)
     {
         $year = $request->get('year', date('Y'));
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
         
         $data = $this->getKertasKerjaData($year);
         
-        return view('livewire.sfinlog.kertas-kerja-investor-sfinlog.index', compact('data', 'year'));
+        // Paginate the collection
+        $paginatedData = $this->paginateCollection($data, $perPage, $page, $request);
+        
+        return view('livewire.sfinlog.kertas-kerja-investor-sfinlog.index', [
+            'data' => $paginatedData,
+            'year' => $year,
+            'perPage' => $perPage
+        ]);
+    }
+    
+    /**
+     * Paginate a collection
+     */
+    private function paginateCollection($items, $perPage, $page, $request)
+    {
+        $total = $items->count();
+        $offset = ($page - 1) * $perPage;
+        $itemsForCurrentPage = $items->slice($offset, $perPage)->values();
+        
+        return new LengthAwarePaginator(
+            $itemsForCurrentPage,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
     }
     
     /**
