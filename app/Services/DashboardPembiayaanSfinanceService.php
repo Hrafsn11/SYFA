@@ -399,6 +399,7 @@ class DashboardPembiayaanSfinanceService
 
     /**
      * Get comparison chart data (AR vs Utang Pengembalian Deposito)
+     * Structure: X-axis = months, Series = [AR, Utang Pengembalian Deposito]
      */
     public function getComparisonData(?string $bulan1 = null, ?string $bulan2 = null, ?int $tahun = null): array
     {
@@ -406,7 +407,7 @@ class DashboardPembiayaanSfinanceService
         $bulan2 = $bulan2 ?? date('m', strtotime('-1 month'));
         $tahun = $tahun ?? date('Y');
         
-        // Convert bulan to integer for getting month name
+        // Convert bulan to integer
         $bulan1Int = is_numeric($bulan1) ? (int)$bulan1 : (int)date('m');
         $bulan2Int = is_numeric($bulan2) ? (int)$bulan2 : (int)date('m', strtotime('-1 month'));
         
@@ -420,8 +421,6 @@ class DashboardPembiayaanSfinanceService
         $namaBulan1 = $bulanNama[$bulan1Int] ?? 'Bulan 1';
         $namaBulan2 = $bulanNama[$bulan2Int] ?? 'Bulan 2';
         
-        $categories = ['AR', 'Utang Pengembalian Deposito'];
-        
         // Get AR for bulan1 and bulan2
         $arBulan1 = $this->getARForMonth($bulan1, $tahun);
         $arBulan2 = $this->getARForMonth($bulan2, $tahun);
@@ -430,16 +429,14 @@ class DashboardPembiayaanSfinanceService
         $utangBulan1 = $this->getUtangPengembalianDepositoForMonth($bulan1, $tahun);
         $utangBulan2 = $this->getUtangPengembalianDepositoForMonth($bulan2, $tahun);
         
+        // Calculate selisih (difference)
+        $arSelisih = $arBulan1 - $arBulan2;
+        $utangSelisih = $utangBulan1 - $utangBulan2;
+        
         return [
-            'categories' => $categories,
-            'bulan1' => [$arBulan1, $utangBulan1],
-            'bulan2' => [$arBulan2, $utangBulan2],
-            'selisih' => [
-                $arBulan1 - $arBulan2,
-                $utangBulan1 - $utangBulan2,
-            ],
-            'nama_bulan1' => $namaBulan1,
-            'nama_bulan2' => $namaBulan2,
+            'categories' => [$namaBulan1, $namaBulan2, 'Selisih'],
+            'ar' => [$arBulan1, $arBulan2, $arSelisih],
+            'utang_pengembalian_deposito' => [$utangBulan1, $utangBulan2, $utangSelisih],
         ];
     }
 
@@ -447,44 +444,58 @@ class DashboardPembiayaanSfinanceService
 
     /**
      * Get AR total for a specific month
+     * Query ke ar_perbulan per bulan dan tahun yang spesifik
+     * Return 0 jika tidak ada data (bukan fallback sample)
      */
     private function getARForMonth(string $bulan, int $tahun): float
     {
         // Convert bulan to integer
         $bulanInt = is_numeric($bulan) ? (int)$bulan : (int)date('m');
-        $endOfMonth = Carbon::create($tahun, $bulanInt, 1)->endOfMonth();
+        $startOfMonth = Carbon::create($tahun, $bulanInt, 1);
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
         
+        // Query ar_perbulan untuk bulan dan tahun spesifik
         $result = DB::table('ar_perbulan')
-            ->where('periode', '<=', $endOfMonth->format('Y-m-d'))
-            ->selectRaw('
-                COALESCE(SUM(sisa_ar_total), 0) as total
-            ')
+            ->whereBetween('periode', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
+            ->orderBy('periode', 'desc')
+            ->select('sisa_ar_total')
             ->first();
         
-        return (float)($result->total ?? 0);
+        // Return 0 jika tidak ada data - jangan bikin sample data
+        if (!$result) {
+            return 0.0;
+        }
+        
+        return (float)($result->sisa_ar_total ?? 0);
     }
 
     /**
      * Get Utang Pengembalian Deposito for a specific month
+     * Ambil semua investasi yang tanggal investasinya hingga akhir bulan
+     * Hitung total belum dikembalikan (jumlah - total_kembali)
      */
     private function getUtangPengembalianDepositoForMonth(string $bulan, int $tahun): float
     {
         // Convert bulan to integer
         $bulanInt = is_numeric($bulan) ? (int)$bulan : (int)date('m');
-        $endOfMonth = Carbon::create($tahun, $bulanInt, 1)->endOfMonth();
+        $startOfMonth = Carbon::create($tahun, $bulanInt, 1);
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
         
-        // Calculate total deposito yang harus dikembalikan ke investor
-        $result = DB::table('pengajuan_investasi as pi')
-            ->leftJoin('penyaluran_deposito as pd', 'pi.id_pengajuan_investasi', '=', 'pd.id_pengajuan_investasi')
+        // Query pengajuan_investasi - ambil yang tanggal investasi sampai akhir bulan ini
+        // Hitung sisa yang belum dikembalikan
+        $results = DB::table('pengajuan_investasi as pi')
             ->whereNotNull('pi.nomor_kontrak')
             ->where('pi.nomor_kontrak', '!=', '')
-            ->whereDate('pi.tanggal_investasi', '<=', $endOfMonth)
-            ->selectRaw('
-                COALESCE(SUM(pi.jumlah_investasi - COALESCE(pi.total_kembali_dari_penyaluran, 0)), 0) as total
-            ')
-            ->first();
+            ->whereDate('pi.tanggal_investasi', '<=', $endOfMonth->format('Y-m-d'))
+            ->select(
+                DB::raw('pi.jumlah_investasi - COALESCE(pi.total_kembali_dari_penyaluran, 0) as sisa')
+            )
+            ->get();
         
-        return (float)($result->total ?? 0);
+        $total = $results->sum('sisa');
+        
+        // Return 0 jika tidak ada data - jangan bikin sample data
+        return (float)($total ?? 0);
     }
 
     /**
