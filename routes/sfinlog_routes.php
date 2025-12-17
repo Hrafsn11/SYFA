@@ -133,4 +133,6 @@ Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.
 });
 
 // Kertas Kerja Investor SFinlog
-Route::get('kertas-kerja-investor-sfinlog', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('kertas-kerja-investor-sfinlog.index');
+Route::prefix('kertas-kerja-investor-sfinlog')->name('kertas-kerja-investor-sfinlog.')->group(function () {
+    Route::get('/', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('index');
+});
