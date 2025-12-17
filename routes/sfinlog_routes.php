@@ -21,8 +21,8 @@ use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
 
 // Dashboard Pembiayaan SFinlog
-use App\Livewire\Sfinlog\DashboardPembiayaanSfinlog;
-use App\Livewire\Sfinlog\DashboardInvestasiDepositoSfinlog;
+use App\Livewire\SFinlog\DashboardPembiayaanSfinlog;
+use App\Livewire\SFinlog\DashboardInvestasiDepositoSfinlog;
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinlog::class)->name('dashboard.pembiayaan');
 
 // Dashboard Investasi Deposito SFinlog
