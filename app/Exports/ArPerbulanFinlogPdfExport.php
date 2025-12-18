@@ -18,11 +18,11 @@ class ArPerbulanFinlogPdfExport
         $query = ArPerbulanFinlog::query();
 
         if ($this->selectedMonth) {
-            $query->where('periode', 'like', $this->selectedMonth . '%');
+            $query->where('bulan', $this->selectedMonth);
         }
 
-        return $query->orderBy('periode', 'desc')
-            ->orderBy('nama_debitur', 'asc')
+        return $query->orderBy('bulan', 'desc')
+            ->orderBy('nama_perusahaan', 'asc')
             ->get();
     }
 
