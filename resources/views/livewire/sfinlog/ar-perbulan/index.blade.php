@@ -13,6 +13,27 @@
                             <button class="btn btn-sm btn-outline-secondary" type="button" id="clear-filter-sfinlog" title="Reset Filter">
                                 <i class="ti ti-x"></i>
                             </button>
+                            <button type="button" class="btn btn-sm btn-info" wire:click="exportToExcel" wire:loading.attr="disabled" title="Export ke Excel">
+                                <i class="ti ti-file-spreadsheet"></i>
+                                <span wire:loading.remove>Excel</span>
+                                <span wire:loading>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" wire:click="exportToPdf" wire:loading.attr="disabled" title="Export ke PDF">
+                                <i class="ti ti-file-pdf"></i>
+                                <span wire:loading.remove>PDF</span>
+                                <span wire:loading>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-success" wire:click="exportToZip" wire:loading.attr="disabled" title="Export sebagai ZIP (Excel + PDF)">
+                                <i class="ti ti-file-zip"></i> 
+                                <span wire:loading.remove>ZIP</span>
+                                <span wire:loading>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>
