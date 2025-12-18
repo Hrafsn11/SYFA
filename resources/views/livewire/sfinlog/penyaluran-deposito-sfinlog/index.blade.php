@@ -17,7 +17,7 @@
     <div class="card">
         <div class="card-body p-0">
             <div class="card-datatable">
-                <livewire:sfinlog.penyaluran-deposito-sfinlog-table />
+                <livewire:SFinlog.penyaluran-deposito-sfinlog-table />
             </div>
         </div>
     </div>
