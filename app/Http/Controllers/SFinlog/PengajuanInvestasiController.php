@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengajuanInvestasiController extends Controller
 {
@@ -75,16 +76,16 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $pengajuan = PengajuanInvestasiFinlog::with([
-                'investor', 
-                'project', 
-                'histories' => function($query) {
+                'investor',
+                'project',
+                'histories' => function ($query) {
                     $query->orderBy('created_at', 'desc');
                 },
                 'histories.submitBy',
                 'histories.approvedBy',
                 'histories.rejectedBy'
             ])->findOrFail($id);
-            
+
             return Response::success($pengajuan, 'Data pengajuan investasi berhasil diambil');
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal mengambil data');
@@ -113,7 +114,7 @@ class PengajuanInvestasiController extends Controller
             DB::beginTransaction();
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
-            
+
             if ($pengajuan->status !== 'Draft') {
                 return Response::error('Pengajuan tidak dapat diubah setelah disubmit');
             }
@@ -155,7 +156,7 @@ class PengajuanInvestasiController extends Controller
             DB::beginTransaction();
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
-            
+
             if ($pengajuan->status !== 'Draft') {
                 return Response::error('Pengajuan hanya dapat dihapus jika masih berstatus Draft');
             }
@@ -353,36 +354,65 @@ class PengajuanInvestasiController extends Controller
     /**
      * Preview Kontrak
      */
+
+    /**
+     * Preview Kontrak
+     */
     public function previewKontrak(Request $request, $id)
     {
         try {
             $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
-            
-            $nomorKontrak = $pengajuan->nomor_kontrak ?? $request->input('nomor_kontrak', 'DRAFT-' . date('Ymd-His'));
-            
-            $historySelesai = HistoryStatusPengajuanInvestasiFinlog::where('id_pengajuan_investasi_finlog', $id)
-                ->where('status', 'Selesai')
-                ->first();
-            $tanggalKontrak = $historySelesai ? $historySelesai->date : now()->toDateString();
-            
-            $data = [
-                'nomor_kontrak' => $nomorKontrak,
-                'tanggal_kontrak' => $tanggalKontrak,
-                'nama_investor' => $pengajuan->nama_investor,
-                'nama_perusahaan' => $pengajuan->nama_investor,
-                'project' => $pengajuan->project->nama_cells_bisnis ?? '-',
-                'nominal_investasi' => $pengajuan->nominal_investasi,
-                'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
-                'lama_investasi' => $pengajuan->lama_investasi,
-                'tanggal_investasi' => $pengajuan->tanggal_investasi,
-                'tanggal_berakhir' => $pengajuan->tanggal_berakhir_investasi,
-                'alamat' => $pengajuan->investor->alamat ?? '-',
-            ];
-            
+            $data = $this->prepareContractData($pengajuan, $request->input('nomor_kontrak'));
+
             return view('livewire.sfinlog.pengajuan-investasi.preview-kontrak', compact('data', 'pengajuan'));
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal memuat preview kontrak');
         }
+    }
+
+    /**
+     * Download Kontrak PDF
+     */
+    public function downloadKontrakPdf($id)
+    {
+        try {
+            $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
+            $data = $this->prepareContractData($pengajuan);
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('livewire.sfinlog.pengajuan-investasi.preview-kontrak-pdf', compact('data', 'pengajuan'));
+            $pdf->setPaper('A4', 'portrait');
+
+            return $pdf->stream('Kontrak-Investasi-' . $data['nomor_kontrak'] . '.pdf');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e, 'Gagal generate PDF kontrak');
+        }
+    }
+
+    /**
+     * Helper: Prepare data array for contract view
+     */
+    private function prepareContractData($pengajuan, $nomorKontrakInput = null)
+    {
+        $nomorKontrak = $pengajuan->nomor_kontrak ?? ($nomorKontrakInput ?? 'DRAFT-' . date('Ymd-His'));
+
+        $historySelesai = HistoryStatusPengajuanInvestasiFinlog::where('id_pengajuan_investasi_finlog', $pengajuan->id_pengajuan_investasi_finlog)
+            ->where('status', 'Selesai')
+            ->first();
+        $tanggalKontrak = $historySelesai ? $historySelesai->date : now()->toDateString();
+
+        return [
+            'nomor_kontrak' => $nomorKontrak,
+            'tanggal_kontrak' => $tanggalKontrak,
+            'nama_investor' => $pengajuan->nama_investor,
+            'nama_perusahaan' => $pengajuan->nama_investor, // Asumsi dari code lama sama
+            'project' => $pengajuan->project->nama_cells_bisnis ?? '-',
+            'nominal_investasi' => $pengajuan->nominal_investasi,
+            'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
+            'lama_investasi' => $pengajuan->lama_investasi,
+            'tanggal_investasi' => $pengajuan->tanggal_investasi,
+            'tanggal_berakhir' => $pengajuan->tanggal_berakhir_investasi,
+            'alamat' => $pengajuan->investor->alamat ?? '-',
+        ];
     }
 
     /**
@@ -405,5 +435,88 @@ class PengajuanInvestasiController extends Controller
         ];
 
         return HistoryStatusPengajuanInvestasiFinlog::create(array_merge($defaultData, $data));
+    }
+
+    /**
+     * Download Certificate for Pengajuan Investasi Finlog
+     * 
+     * Method ini digunakan untuk generate dan download sertifikat investasi
+     * Hanya bisa diakses jika status pengajuan = "Selesai"
+     * 
+     * @param int $id - ID pengajuan investasi finlog
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function downloadSertifikat($id)
+    {
+        try {
+            // 1. Ambil data pengajuan dengan relasi investor
+            $pengajuan = PengajuanInvestasiFinlog::with('investor')->findOrFail($id);
+            
+            // 2. Validasi: Hanya status "Selesai" yang bisa cetak sertifikat
+            if ($pengajuan->status !== 'Selesai') {
+                return redirect()->back()->with('error', 
+                    'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai');
+            }
+
+            // 3. Generate Nomor Sertifikat
+            // Format: DCI (Deposito Certificate Investment) + TAHUN + NOMOR URUT 4 DIGIT
+            // Contoh: DCI20250001, DCI20250002, dst.
+            $year = date('Y');
+            $countThisYear = PengajuanInvestasiFinlog::whereYear('created_at', $year)
+                ->where('status', 'Selesai')
+                ->where('id_pengajuan_investasi_finlog', '<=', $pengajuan->id_pengajuan_investasi_finlog)
+                ->count();
+            
+            $nomorSertifikat = 'DCI' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
+
+            // 4. Tentukan deskripsi
+            $deskripsi = 'INVESTASI DEPOSITO FINLOG';
+
+            // 5. Hitung jangka waktu investasi
+            // Dari tanggal_investasi sampai tanggal_berakhir_investasi
+            $tanggalInvestasiCarbon = \Carbon\Carbon::parse($pengajuan->tanggal_investasi);
+            $tanggalBerakhirCarbon = \Carbon\Carbon::parse($pengajuan->tanggal_berakhir_investasi);
+
+            // 6. Format tanggal untuk ditampilkan (bahasa Indonesia)
+            $tanggalInvestasi = $tanggalInvestasiCarbon->translatedFormat('d F Y');
+            $tanggalBerakhir = $tanggalBerakhirCarbon->translatedFormat('d F Y');
+            $jangkaWaktu = $tanggalInvestasi . ' - ' . $tanggalBerakhir;
+
+            // 7. Siapkan data untuk view sertifikat
+            $data = [
+                // Nama deposan/investor
+                'nama_deposan' => $pengajuan->nama_investor,
+                
+                // Nomor sertifikat yang sudah digenerate
+                'nomor_deposito' => $nomorSertifikat,
+                
+                // Deskripsi jenis investasi
+                'deskripsi' => $deskripsi,
+                
+                // Nilai deposito/investasi (formatted Rupiah tanpa desimal)
+                'nilai_deposito' => 'Rp ' . number_format($pengajuan->nominal_investasi, 0, ',', '.'),
+                
+                // Kode transaksi (nomor kontrak)
+                'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
+                
+                // Jangka waktu (range tanggal)
+                'jangka_waktu' => $jangkaWaktu,
+                
+                // Bagi hasil (persentase per tahun)
+                'bagi_hasil' => $pengajuan->persentase_bagi_hasil . ' % P.A NET',
+                
+                // Nilai investasi dalam text (formatted Rupiah dengan 2 desimal)
+                // Digunakan di halaman 2 sertifikat
+                'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->nominal_investasi, 2, ',', '.'),
+            ];
+
+            // 8. Return view sertifikat (menggunakan view yang sama dengan S-Finance)
+            return view('livewire.pengajuan-investasi.sertifikat', compact('data'));
+            
+        } catch (\Exception $e) {
+            // Handle error dan redirect kembali dengan pesan error
+            return redirect()->back()->with('error', 
+                'Gagal menggenerate sertifikat: ' . $e->getMessage());
+        }
     }
 }

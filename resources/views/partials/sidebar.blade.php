@@ -143,24 +143,38 @@
                 <span class="menu-header-text">Pengembalian</span>
             </li>
 
-            <li class="menu-item {{ RouteHelper::routeIs('pengembalian.index') ? 'active' : '' }}">
-                <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-wallet"></i>
-                    <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
+            <li
+                class="menu-item {{ RouteHelper::routeIs('pengembalian.index') || RouteHelper::routeIs('sfinlog.pengembalian-pinjaman.index') ? 'active' : '' }}">
+                @if ($isSFinlog)
+                    <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}" class="menu-link">
+                    @else
+                        <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
+                @endif
+                <i class="menu-icon tf-icons ti ti-wallet"></i>
+                <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
                 </a>
             </li>
 
             <li class="menu-item {{ RouteHelper::routeIs('debitur-piutang*') ? 'active' : '' }}">
-                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-receipt"></i>
-                    <div data-i18n="Debitur Piutang">Debitur Piutang</div>
+                @if ($isSFinlog)
+                    <a href="{{ route('sfinlog.debitur-piutang.index') }}" class="menu-link">
+                    @else
+                        <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
+                @endif
+                <i class="menu-icon tf-icons ti ti-receipt"></i>
+                <div data-i18n="Debitur Piutang">Debitur Piutang</div>
                 </a>
             </li>
 
             <li class="menu-item {{ RouteHelper::routeIs('report-pengembalian*') ? 'active' : '' }}">
-                <a href="{{ RouteHelper::route('report-pengembalian.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-file-text"></i>
-                    <div data-i18n="Report Pengembalian">Report Pengembalian</div>
+                @if ($isSFinlog)
+                    <a wire:navigate.hover href="{{ route('sfinlog.report-pengembalian.index') }}" class="menu-link">
+                    @else
+                        <a wire:navigate.hover href="{{ RouteHelper::route('report-pengembalian.index') }}"
+                            class="menu-link">
+                @endif
+                <i class="menu-icon tf-icons ti ti-file-text"></i>
+                <div data-i18n="Report Pengembalian">Report Pengembalian</div>
                 </a>
             </li>
 
@@ -183,12 +197,14 @@
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*report-penyaluran-dana-investasi*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('report-penyaluran-dana-investasi.index') }}" class="menu-link">
+                        <a href="{{ RouteHelper::route('report-penyaluran-dana-investasi.index') }}"
+                            class="menu-link">
                             <div data-i18n="Report Penyaluran Dana Investasi">Report Penyaluran Dana Investasi</div>
                         </a>
                     </li>
 
-                    <li class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
+                    <li
+                        class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
                         @if ($isSFinance)
                             <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link">
                                 <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
@@ -272,11 +288,6 @@
                                 <div data-i18n="Cells Project">Cells Project</div>
                             </a>
                         </li>
-                        <li class="menu-item {{ request()->is('master-data/lainnya') ? 'active' : '' }}">
-                            <a href="#" class="menu-link">
-                                <div data-i18n="Menu Lainnya">Menu Lainnya</div>
-                            </a>
-                        </li>
                     </ul>
                 </li>
             @endcan
@@ -293,12 +304,12 @@
                 </a>
             </li>
 
-            <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
+            {{-- <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
                 <a href="{{ route('matrixscore') }}" class="menu-link">
                     <i class="menu-icon tf-icons ti ti-user"></i>
                     <div data-i18n="Config Matrix Score">Config Matrix Score</div>
                 </a>
-            </li>
+            </li> --}}
 
             <!-- Access Control Section - Only in Master Data Module -->
             @role('super-admin')

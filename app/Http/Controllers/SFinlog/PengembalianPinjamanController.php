@@ -2,39 +2,67 @@
 
 namespace App\Http\Controllers\SFinlog;
 
+use App\Helpers\Response;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\PengembalianPinjamanFinlog;
+use App\Models\PeminjamanFinlog;
+use App\Http\Requests\SFinlog\PengembalianPinjamanFinlogRequest;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class PengembalianPinjamanController extends Controller
 {
-    /**
-     * Display a listing of pengembalian pinjaman for SFinlog
-     */
-    public function index()
+    public function store(PengembalianPinjamanFinlogRequest $request)
     {
-        // TODO: Implementasi logika index khusus SFinlog
-        return view('livewire.sfinlog.pengembalian-pinjaman.index');
-    }
+        try {
+            DB::beginTransaction();
 
-    /**
-     * Show the form for creating a new pengembalian pinjaman for SFinlog
-     */
-    public function create()
-    {
-        // TODO: Implementasi logika create khusus SFinlog
-        return view('livewire.sfinlog.pengembalian-pinjaman.create', [
-            'pengajuanPeminjaman' => collect([]),
-            'namaPerusahaan' => '',
-        ]);
-    }
+            $id_peminjaman_finlog = $request->input('id_pinjaman_finlog');
 
-    /**
-     * Store a newly created pengembalian pinjaman for SFinlog
-     */
-    public function store(Request $request)
-    {
-        // TODO: Implementasi logika store khusus SFinlog
-        return redirect()->route('sfinlog.pengembalian.index');
+            $listPengembalian = $request->input('pengembalian_list', []);
+
+
+            foreach ($listPengembalian as $index => $item) {
+
+                $path = null;
+                if (isset($item['bukti_file']) && $item['bukti_file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . $item['bukti_file']->extension();
+                    $path = $item['bukti_file']->storeAs('pengembalian_finlog', $filename, 'public');
+                }
+
+                $nominal = (float) ($item['nominal'] ?? 0);
+
+                PengembalianPinjamanFinlog::create([
+                    'id_pinjaman_finlog' => $id_peminjaman_finlog,
+                    'id_cells_project' => $item['id_cells_project'] ?? null,
+                    'id_project' => $item['id_project'] ?? null,
+                    'jumlah_pengembalian' => $nominal,
+                    'sisa_pinjaman' => $item['sisa_pinjaman'] ?? 0,
+                    'sisa_bagi_hasil' => $item['sisa_bagi_hasil'] ?? 0,
+                    'total_sisa_pinjaman' => $item['total_sisa_pinjaman'] ?? 0,
+                    'tanggal_pengembalian' => now(),
+                    'bukti_pembayaran' => $path,
+                    'jatuh_tempo' => $item['jatuh_tempo'] ?? null,
+                    'catatan' => $item['catatan'] ?? null,
+                    'status' => $item['status'] ?? 'Belum Lunas',
+                ]);
+            }
+
+            DB::commit();
+
+
+            app(\App\Services\ArPerbulanFinlogService::class)->updateAROnPengembalian(
+                $id_peminjaman_finlog,
+                now()
+            );
+
+            return Response::success([
+                'redirect' => route('sfinlog.pengembalian-pinjaman.index')
+            ], 'Semua data pengembalian berhasil disimpan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorCatch($e);
+        }
     }
 }
-

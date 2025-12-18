@@ -73,4 +73,17 @@ class PeminjamanFinlog extends Model
     {
         return $this->hasMany(HistoryPengajuanPinjamanFinlog::class, 'id_peminjaman_finlog', 'id_peminjaman_finlog');
     }
+
+    /**
+     * Relasi ke PengembalianPinjamanFinlog
+     */
+    public function pengembalianPinjaman()
+    {
+        return $this->hasMany(PengembalianPinjamanFinlog::class, 'id_pinjaman_finlog', 'id_peminjaman_finlog');
+    }
+
+    public function latestPengembalian()
+    {
+        return $this->hasOne(PengembalianPinjamanFinlog::class, 'id_pinjaman_finlog', 'id_peminjaman_finlog')->latestOfMany('created_at');
+    }
 }

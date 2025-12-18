@@ -56,7 +56,7 @@ class CellsProjectTable extends DataTableComponent
     {
         return CellsProject::query()
             ->with('projects')
-            ->select('id_cells_project', 'nama_cells_bisnis', 'nama_pic', 'alamat', 'deskripsi_bidang', 'created_at');
+            ->select('id_cells_project', 'nama_cells_bisnis', 'nama_pic', 'alamat', 'deskripsi_bidang', 'tanda_tangan_pic', 'created_at');
     }
 
     public function columns(): array
@@ -69,7 +69,7 @@ class CellsProjectTable extends DataTableComponent
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
 
-                    return '<div class="text-center">'.$number.'</div>';
+                    return '<div class="text-center">' . $number . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
@@ -85,16 +85,27 @@ class CellsProjectTable extends DataTableComponent
                     }
 
                     $badges = $row->projects->map(function ($project) {
-                        return '<span class="badge bg-label-primary me-1 mb-1">'.e($project->nama_project).'</span>';
+                        return '<span class="badge bg-label-primary me-1 mb-1">' . e($project->nama_project) . '</span>';
                     })->implode('');
 
-                    return '<div class="d-flex flex-wrap">'.$badges.'</div>';
+                    return '<div class="d-flex flex-wrap">' . $badges . '</div>';
                 })
                 ->html(),
 
             Column::make('Nama PIC', 'nama_pic')
                 ->sortable()
                 ->searchable(),
+
+            Column::make('Tanda Tangan', 'tanda_tangan_pic')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value, $row) {
+                    if ($value) {
+                        return '<div class="text-center"><a href="' . asset('storage/' . $value) . '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="ti ti-file-text"></i></a></div>';
+                    }
+                    return '<div class="text-center"><span class="text-muted">-</span></div>';
+                })
+                ->html(),
 
             Column::make('Alamat', 'alamat')
                 ->sortable()
@@ -106,12 +117,12 @@ class CellsProjectTable extends DataTableComponent
 
             Column::make('Aksi')
                 ->label(function ($row) {
-                    $this->setUrlLoadData('get_data_'.$row->id_cells_project, 'master-data.cells-project.edit', ['id' => $row->id_cells_project, 'callback' => 'editData']);
+                    $this->setUrlLoadData('get_data_' . $row->id_cells_project, 'master-data.cells-project.edit', ['id' => $row->id_cells_project, 'callback' => 'editData']);
 
-                    $editBtn = '<button class="btn btn-sm btn-icon btn-text-primary rounded-pill" wire:click=\''.$this->urlAction['get_data_'.$row->id_cells_project].'\' type="button" title="Edit"><i class="ti ti-edit"></i></button>';
-                    $deleteBtn = '<button class="btn btn-sm btn-icon btn-text-danger rounded-pill cells-project-delete-btn" type="button" data-id="'.$row->id_cells_project.'" title="Hapus"><i class="ti ti-trash"></i></button>';
+                    $editBtn = '<button class="btn btn-sm btn-icon btn-text-primary rounded-pill" wire:click=\'' . $this->urlAction['get_data_' . $row->id_cells_project] . '\' type="button" title="Edit"><i class="ti ti-edit"></i></button>';
+                    $deleteBtn = '<button class="btn btn-sm btn-icon btn-text-danger rounded-pill cells-project-delete-btn" type="button" data-id="' . $row->id_cells_project . '" title="Hapus"><i class="ti ti-trash"></i></button>';
 
-                    return '<div class="d-flex justify-content-center align-items-center gap-2">'.$editBtn.$deleteBtn.'</div>';
+                    return '<div class="d-flex justify-content-center align-items-center gap-2">' . $editBtn . $deleteBtn . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
