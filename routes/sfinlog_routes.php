@@ -7,7 +7,6 @@ use App\Http\Controllers\SFinlog\KertasKerjaInvestorSFinlogController;
 use App\Http\Controllers\SFinlog\PeminjamanController;
 use App\Http\Controllers\SFinlog\PengajuanInvestasiController;
 use App\Http\Controllers\SFinlog\PengajuanRestrukturisasiController;
-use App\Http\Controllers\SFinlog\PengembalianInvestasiController;
 use App\Http\Controllers\SFinlog\PengembalianPinjamanController;
 use App\Http\Controllers\SFinlog\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\SFinlog\PenyaluranDepositoController;
@@ -39,6 +38,7 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::post('/', [PeminjamanController::class, 'store'])->name('store');
     Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
     Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
+    Route::get('{id}/download-sertifikat', [PeminjamanController::class, 'downloadSertifikat'])->name('download-sertifikat');
 });
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
@@ -119,12 +119,19 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
     Route::get('{id}/preview-kontrak', [PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
     Route::get('{id}/download-kontrak', [PengajuanInvestasiController::class, 'downloadKontrakPdf'])->name('download-kontrak');
     Route::post('{id}/generate-kontrak', [PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
+    Route::get('{id}/download-sertifikat', [PengajuanInvestasiController::class, 'downloadSertifikat'])->name('download-sertifikat');
 
     Route::get('history/{historyId}', [PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history-detail');
 });
 
 // Report Penyaluran Dana Investasi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
+
+// Pengembalian Investasi SFinlog
+Route::get('pengembalian-investasi', \App\Livewire\SFinlog\PengembalianInvestasiFinlog::class)->name('pengembalian-investasi.index');
+Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
+    Route::post('/', [\App\Http\Controllers\SFinlog\PengembalianInvestasiController::class, 'store'])->name('store');
+});
 
 // Penyaluran Deposito SFinlog
 Route::get('penyaluran-deposito-sfinlog', \App\Livewire\SFinlog\PenyaluranDepositoSfinlogIndex::class)->name('penyaluran-deposito-sfinlog.index');
@@ -137,13 +144,6 @@ Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.
 });
 
 // Kertas Kerja Investor SFinlog
-Route::get('kertas-kerja-investor-sfinlog', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('kertas-kerja-investor-sfinlog.index');
-
-// Pengembalian Investasi
-Route::get('pengembalian-investasi', PengembalianInvestasi::class)->name('pengembalian-investasi.index');
-Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
-    Route::post('/', [PengembalianInvestasiController::class, 'store'])->name('store');
-    Route::get('{id}/edit', [PengembalianInvestasiController::class, 'edit'])->name('edit');
-    Route::put('{id}', [PengembalianInvestasiController::class, 'update'])->name('update');
-    Route::delete('{id}', [PengembalianInvestasiController::class, 'destroy'])->name('destroy');
+Route::prefix('kertas-kerja-investor-sfinlog')->name('kertas-kerja-investor-sfinlog.')->group(function () {
+    Route::get('/', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('index');
 });

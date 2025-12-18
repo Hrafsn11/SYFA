@@ -233,8 +233,13 @@
                     </li>
 
                     <li class="menu-item {{ RouteHelper::is('*pengembalian-investasi*') ? 'active' : '' }}">
-                        <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian-investasi.index') }}"
-                            class="menu-link">
+                        @if ($isSFinance)
+                            <a wire:navigate.hover href="{{ route('sfinance.pengembalian-investasi.index') }}" class="menu-link">
+                        @elseif($isSFinlog)
+                            <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-investasi.index') }}" class="menu-link">
+                        @else
+                            <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian-investasi.index') }}" class="menu-link">
+                        @endif
                             <div data-i18n="Pengembalian Investasi">Pengembalian Investasi</div>
                         </a>
                     </li>
