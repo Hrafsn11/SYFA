@@ -58,4 +58,12 @@ Route::get('sfinlog/pengembalian-pinjaman', \App\Livewire\SFinlog\PengembalianPi
 Route::get('sfinlog/pengembalian-pinjaman/create', \App\Livewire\SFinlog\PengembalianPinjamanFinlogCreate::class)->name('sfinlog.pengembalian-pinjaman.create');
 
 // SFinlog - AR Perbulan
-Route::get('sfinlog/ar-perbulan', \App\Livewire\Sfinlog\ArPerbulan::class)->name('sfinlog.ar-perbulan.index');
+Route::get('sfinlog/ar-perbulan', \App\Livewire\SFinlog\ArPerbulan::class)->name('sfinlog.ar-perbulan.index');
+
+// SFinlog - AR Performance
+Route::get('sfinlog/ar-performance', \App\Livewire\SFinlog\ArPerformanceIndex::class)->name('sfinlog.ar-performance.index');
+// SFinlog - Report Pengembalian
+Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('sfinlog.report-pengembalian.index');
+
+// SFinlog - Debitur Piutang
+Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');

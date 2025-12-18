@@ -21,20 +21,25 @@
                 </div>
 
                 {{-- Kode Peminjaman --}}
-                <div class="mb-3">
+                <div class="mb-3" wire:key="select2-container-{{ $currentUserId ?? 'guest' }}">
                     <label for="kode_peminjaman" class="form-label">
                         Kode Peminjaman <span class="text-danger">*</span>
                     </label>
-                    <livewire:components.select2 :list_data="$peminjamanList" value_name="id" value_label="text"
-                        data_placeholder="Pilih Kode Peminjaman" model_name="id_peminjaman_finlog" :value="$id_peminjaman_finlog"
-                        :key="'select2-peminjaman-' . now()->timestamp" />
-                    @error('id_peminjaman_finlog')
+                    {{-- Hidden input to preserve value --}}
+                    <input type="hidden" wire:model="id_pinjaman_finlog" id="hidden_id_pinjaman_finlog">
+                    <div wire:ignore>
+                        <livewire:components.select2 :list_data="$peminjamanList" value_name="id" value_label="text"
+                            data_placeholder="Pilih Kode Peminjaman" model_name="id_pinjaman_finlog" :value="$id_pinjaman_finlog"
+                            :key="'select2-peminjaman-finlog-v2'" />
+                    </div>
+                    @error('id_pinjaman_finlog')
                         <small class="text-danger">{{ $message }}</small>
                     @enderror
+
                 </div>
 
                 {{-- Peminjaman Details Card --}}
-                <div class="card border shadow-none mb-4" wire:key="peminjaman-detail-{{ $id_peminjaman_finlog }}">
+                <div class="card border shadow-none mb-4" wire:key="peminjaman-detail-{{ $id_pinjaman_finlog }}">
                     <div class="card-body">
                         {{-- Row 1: Cells Bisnis & Nama Project --}}
                         <div class="row mb-3">
@@ -88,11 +93,16 @@
                         </div>
 
                         {{-- List Pengembalian Invoice Table --}}
-                        <div class="card shadow-none border mb-3">
+                        <div class="card shadow-none border mb-3" wire:key="pengembalian-table-container">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">List Pengembalian Invoice</h5>
                             </div>
                             <div class="table-responsive">
+                                @error('pengembalian_list')
+                                    <div class="alert alert-danger m-3">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                                 <table class="table table-bordered mb-0">
                                     <thead>
                                         <tr>
@@ -103,8 +113,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($pengembalianList as $index => $item)
-                                            <tr>
+                                        @forelse($pengembalian_list as $index => $item)
+                                            <tr wire:key="pengembalian-row-{{ $index }}">
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td>Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
                                                 <td>
@@ -183,78 +193,29 @@
     @include('livewire.sfinlog.pengembalian-pinjaman.partials.modal')
 </div>
 
-
 @push('scripts')
     <script>
         document.addEventListener('livewire:initialized', () => {
-            let currentPeminjamanId = null;
-            let isSubmitting = false;
-
-            // Utility: Show SweetAlert
-            const showAlert = (icon, html, title) => {
-                const titles = {
-                    error: 'Error!',
-                    success: 'Berhasil!',
-                    warning: 'Perhatian'
-                };
-                Swal.fire({
-                    icon,
-                    title: title || titles[icon],
-                    html,
-                    ...(icon === 'success' && {
-                        timer: 2500,
-                        showConfirmButton: false
-                    })
-                });
-            };
-
-            // Listen: Select2 Changed Event
-            Livewire.on('select2-changed', (event) => {
-                const data = event[0] || event;
-
-                if (data.modelName === 'id_peminjaman_finlog') {
-                    currentPeminjamanId = data.value;
-
-                    if (currentPeminjamanId) {
-                        @this.set('id_peminjaman_finlog', currentPeminjamanId);
-                        @this.call('loadPeminjamanData', currentPeminjamanId);
-                    } else {
-                        @this.set('id_peminjaman_finlog', '');
-                        @this.call('resetPeminjamanData');
-                    }
-                }
-            });
-
-            // Listen: Form Submit (Prevent Double Submission)
-            const form = document.querySelector('form[wire\\:submit\\.prevent="store"]');
-            if (form) {
-                form.addEventListener('submit', (e) => {
-                    if (isSubmitting) {
-                        e.preventDefault();
-                        e.stopImmediatePropagation();
-                        return false;
-                    }
-
-                    isSubmitting = true;
-
-                    if (currentPeminjamanId) {
-                        @this.set('id_peminjaman_finlog', currentPeminjamanId);
-                    }
-
-                    setTimeout(() => isSubmitting = false, 2000);
-                }, true);
-            }
-
             // Listen: Alert Events
             Livewire.on('alert', (data) => {
-                isSubmitting = false;
                 const eventData = data[0] || data;
-                showAlert(eventData.icon, eventData.html);
+                Swal.fire({
+                    icon: eventData.icon,
+                    title: eventData.icon === 'error' ? 'Error!' : (eventData.icon === 'success' ?
+                        'Berhasil!' : 'Perhatian'),
+                    html: eventData.html,
+                    timer: eventData.icon === 'success' ? 2500 : undefined,
+                    showConfirmButton: eventData.icon !== 'success'
+                });
             });
 
             // Listen: Close Modal Event
             Livewire.on('close-pengembalian-modal', () => {
-                $('#modal-pengembalian-invoice').modal('hide');
+                const modalEl = document.getElementById('modal-pengembalian-invoice');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.hide();
+                }
             });
         });
     </script>

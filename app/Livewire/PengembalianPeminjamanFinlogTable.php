@@ -5,7 +5,9 @@ namespace App\Livewire;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use App\Models\PengembalianPinjamanFinlog;
+use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class PengembalianPeminjamanFinlogTable extends DataTableComponent
 {
@@ -32,8 +34,26 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
 
     public function builder(): Builder
     {
+        // Get current user's debitur
+        $currentDebitur = MasterDebiturDanInvestor::where('user_id', auth()->id())->first();
+
+        if (!$currentDebitur) {
+            // Return empty query if user is not a debitur
+            return PengembalianPinjamanFinlog::query()->whereRaw('1 = 0');
+        }
+
+        // Get latest pengembalian per kode pinjaman (id_pinjaman_finlog)
+        // Using subquery to get max id for each id_pinjaman_finlog
+        $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
+            ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
+            ->join('peminjaman_finlog as pf', 'ppf.id_pinjaman_finlog', '=', 'pf.id_peminjaman_finlog')
+            ->where('pf.id_debitur', $currentDebitur->id_debitur)
+            ->groupBy('ppf.id_pinjaman_finlog')
+            ->pluck('latest_id');
+
         return PengembalianPinjamanFinlog::query()
-            ->with(['peminjamanFinlog', 'cellsProject', 'project']);
+            ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
+            ->whereIn('id_pengembalian_pinjaman_finlog', $latestIds);
     }
 
     public function columns(): array

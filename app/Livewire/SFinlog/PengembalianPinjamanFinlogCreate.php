@@ -5,48 +5,65 @@ namespace App\Livewire\SFinlog;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Locked;
 use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasModal;
+use App\Livewire\Traits\HasValidate;
+use App\Livewire\Traits\HasUniversalFormAction;
 use App\Models\PeminjamanFinlog;
 use App\Models\PengembalianPinjamanFinlog;
 use App\Models\MasterDebiturDanInvestor;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\SFinlog\PengembalianPinjamanFinlogRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class PengembalianPinjamanFinlogCreate extends Component
 {
-    use WithFileUploads, HasModal;
+    use WithFileUploads, HasModal, HasValidate, HasUniversalFormAction;
+
+    public $validateClass = PengembalianPinjamanFinlogRequest::class;
 
     // Form fields
-    #[FieldInput] public $id_peminjaman_finlog = '';
-    #[FieldInput] public $nama_perusahaan = '';
-    #[FieldInput] public $cells_bisnis = '';
-    #[FieldInput] public $nama_project = '';
-    #[FieldInput] public $tanggal_pencairan = '';
-    #[FieldInput] public $top = '';
-    #[FieldInput] public $jatuh_tempo = '';
-    #[FieldInput] public $nilai_pinjaman = 0;
-    #[FieldInput] public $nilai_bagi_hasil = 0;
-    #[FieldInput] public $total_pinjaman = 0;
-    #[FieldInput] public $sisa_utang = 0;
-    #[FieldInput] public $sisa_bagi_hasil = 0;
-    #[FieldInput] public $catatan = '';
-    #[FieldInput] public $nominal_yang_dibayarkan = 0;
-    #[FieldInput] public $bukti_pembayaran_invoice = null;
+    #[FieldInput]
+    public string $id_pinjaman_finlog = '';
 
-    // Component state
-    public $value = ''; // Required by Select2
-    public $selectedPeminjaman = null;
-    public $pengembalianList = [];
-    public $id_cells_project = '';
-    public $id_project = '';
+    #[Locked]
+    public string $nama_perusahaan = '';
 
-    // User state
-    public $currentUserId = null;
-    public $currentDebitur = null;
-    public $hasNoData = false;
-    public $isSubmitting = false;
+    #[FieldInput] public string $cells_bisnis = '';
+    #[FieldInput] public string $nama_project = '';
+    #[FieldInput] public string $tanggal_pencairan = '';
+    #[FieldInput] public string $top = '';
+    #[FieldInput] public string $jatuh_tempo = '';
+    #[FieldInput] public float $nilai_pinjaman = 0;
+    #[FieldInput] public float $nilai_bagi_hasil = 0;
+    #[FieldInput] public float $total_pinjaman = 0;
+    #[FieldInput] public float $sisa_utang = 0;
+    #[FieldInput] public float $sisa_bagi_hasil = 0;
+    #[FieldInput] public string $catatan = '';
+
+    public array $pengembalian_list = [];
+
+
+    // Modal fields
+    public float $nominal_yang_dibayarkan = 0;
+    public $bukti_pembayaran_invoice;
+
+    // Configuration
+    protected int $maxUploadSize = 2048; // 2MB
+
+    // State
+    public string $value = '';
+    public ?PeminjamanFinlog $selectedPeminjaman = null;
+    public string $id_cells_project = '';
+    public string $id_project = '';
+
+    // User State
+    #[Locked] public $currentUserId;
+    #[Locked] public $currentDebitur;
+
+    public bool $hasNoData = false;
+    public bool $isSubmitting = false;
 
     // Constants
     private const STATUS_LUNAS = 'Lunas';
@@ -57,125 +74,150 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         $this->currentUserId = auth()->id();
         $this->currentDebitur = MasterDebiturDanInvestor::where('user_id', $this->currentUserId)->first();
-
-        $this->nama_perusahaan = $this->currentDebitur
-            ? $this->currentDebitur->nama
-            : auth()->user()->name;
+        $this->nama_perusahaan = $this->currentDebitur->nama ?? auth()->user()->name;
 
         if (!$this->currentDebitur) {
             $this->hasNoData = true;
             $this->showToast('warning', 'Anda belum terdaftar sebagai debitur.');
         }
+
+        // Setup URL Action via Trait
+        $this->setUrlSaveData('url_simpan', 'sfinlog.pengembalian-pinjaman.store');
     }
 
     #[On('select2-changed')]
     public function onSelect2Changed($value, $modelName)
     {
-        if ($modelName !== 'id_peminjaman_finlog') {
-            return;
+        if ($modelName === 'id_pinjaman_finlog') {
+            $this->id_pinjaman_finlog = $value;
+            $this->value = $value;
+            $this->loadPeminjamanData($value);
         }
-
-        $this->id_peminjaman_finlog = $value;
-        $this->value = $value;
-
-        if (empty($value)) {
-            $this->resetPeminjamanData();
-            return;
-        }
-
-        $this->loadPeminjamanData($value);
     }
 
-    public function updatedValue($value)
+    public function updatedIdPinjamanFinlog($value)
     {
-        if ($this->id_peminjaman_finlog === $value) {
-            return;
-        }
-
-        $this->id_peminjaman_finlog = $value;
-
-        empty($value)
-            ? $this->resetPeminjamanData()
-            : $this->loadPeminjamanData($value);
+        $this->value = $value;
+        $this->loadPeminjamanData($value);
     }
 
     public function addPengembalian()
     {
-        $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
+        try {
+            $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
 
-        $this->validate([
-            'nominal_yang_dibayarkan' => 'required|numeric|min:1',
-            'bukti_pembayaran_invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ], [
-            'nominal_yang_dibayarkan.required' => 'Nominal wajib diisi.',
-            'nominal_yang_dibayarkan.numeric' => 'Nominal harus berupa angka.',
-            'nominal_yang_dibayarkan.min' => 'Nominal minimal Rp 1.',
-            'bukti_pembayaran_invoice.required' => 'Bukti pembayaran wajib diunggah.',
-            'bukti_pembayaran_invoice.mimes' => 'File harus berupa PDF, JPG, JPEG, atau PNG.',
-            'bukti_pembayaran_invoice.max' => 'Ukuran file maksimal 2MB.',
-        ]);
 
-        $this->pengembalianList[] = [
-            'nominal' => $this->nominal_yang_dibayarkan,
-            'bukti_file' => $this->storeTemporaryFile(),
-        ];
+            $this->validate([
+                'nominal_yang_dibayarkan' => 'required|numeric|min:1',
+                'bukti_pembayaran_invoice' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            ], [
+                'nominal_yang_dibayarkan.required' => 'Nominal wajib diisi.',
+                'nominal_yang_dibayarkan.min' => 'Nominal minimal Rp 1.',
+                'bukti_pembayaran_invoice.required' => 'Bukti pembayaran wajib diunggah.',
+                'bukti_pembayaran_invoice.max' => 'Ukuran file maksimal 2MB.',
+            ]);
 
-        $this->reset(['nominal_yang_dibayarkan', 'bukti_pembayaran_invoice']);
-        $this->calculateRemainingBalance();
+            $this->pengembalian_list[] = [
+                'nominal' => $this->nominal_yang_dibayarkan,
+                'bukti_file' => $this->bukti_pembayaran_invoice,
+            ];
 
-        $this->dispatch('close-pengembalian-modal');
-        $this->showToast('success', 'Pengembalian invoice berhasil ditambahkan!');
+            $this->calculateRemainingBalance();
+            $this->resetModalFields();
+
+            $this->dispatch('close-pengembalian-modal');
+            $this->showToast('success', 'Pengembalian invoice berhasil ditambahkan!');
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            Log::error('Error adding pengembalian', ['message' => $e->getMessage()]);
+            $this->showToast('error', 'Gagal menambahkan pengembalian: ' . $e->getMessage());
+        }
     }
 
-    public function removePengembalian($index)
+    public function removePengembalian(int $index)
     {
-        if (isset($this->pengembalianList[$index]['bukti_file'])) {
-            Storage::disk('public')->delete($this->pengembalianList[$index]['bukti_file']);
-        }
-
-        unset($this->pengembalianList[$index]);
-        $this->pengembalianList = array_values($this->pengembalianList);
+        array_splice($this->pengembalian_list, $index, 1);
         $this->calculateRemainingBalance();
-
         $this->showToast('success', 'Pengembalian invoice berhasil dihapus!');
     }
 
     public function store()
     {
-        if ($this->isSubmitting) {
-            Log::warning('Double submission attempt prevented');
-            return;
+        if (empty($this->id_pinjaman_finlog)) {
+            if (!empty($this->value)) {
+                $this->id_pinjaman_finlog = $this->value;
+            } elseif ($this->selectedPeminjaman) {
+                $this->id_pinjaman_finlog = $this->selectedPeminjaman->id_peminjaman_finlog;
+            }
         }
 
-        $this->isSubmitting = true;
+        $this->saveData('sfinlog.pengembalian-pinjaman.store');
+    }
 
-        if (!$this->validateBeforeStore()) {
-            $this->isSubmitting = false;
-            return;
+    public function setterFormData()
+    {
+        if ($this->id_pinjaman_finlog) {
+            $peminjaman = PeminjamanFinlog::find($this->id_pinjaman_finlog);
+            if ($peminjaman) {
+                $this->nilai_pinjaman = $peminjaman->nilai_pinjaman ?? 0;
+                $this->nilai_bagi_hasil = $peminjaman->nilai_bagi_hasil ?? 0;
+                $this->selectedPeminjaman = $peminjaman;
+            }
         }
 
-        try {
-            DB::beginTransaction();
+        $payloadList = [];
+        $totalPaidSoFar = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_pinjaman_finlog)
+            ->sum('jumlah_pengembalian');
 
-            $this->saveAllPayments();
+        foreach ($this->pengembalian_list as $payment) {
+            $nominal = $payment['nominal'];
+            $totalPaidSoFar += $nominal;
 
-            DB::commit();
-            Log::info('Pengembalian pinjaman saved successfully');
+            // Calculate state AFTER this specific payment
+            $initialBagiHasil = $this->nilai_bagi_hasil;
+            $initialUtang = $this->nilai_pinjaman;
 
-            $this->showToast('success', 'Data pengembalian pinjaman berhasil disimpan!');
+            $paidToBagiHasil = min($totalPaidSoFar, $initialBagiHasil);
+            $remainderForUtang = max(0, $totalPaidSoFar - $initialBagiHasil);
+            $paidToUtang = min($remainderForUtang, $initialUtang);
 
-            return $this->redirect(route('sfinlog.pengembalian-pinjaman.index'), navigate: true);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            $this->cleanupTemporaryFiles();
-            $this->isSubmitting = false;
+            $sisaBagiHasil = max(0, $initialBagiHasil - $paidToBagiHasil);
+            $sisaUtang = max(0, $initialUtang - $paidToUtang);
+            $totalSisa = $sisaBagiHasil + $sisaUtang;
 
-            Log::error('Pengembalian pinjaman store failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            $status = $this->determineStatus($totalSisa);
 
-            $this->showToast('error', 'Gagal menyimpan data: ' . $e->getMessage());
+            $payloadList[] = [
+                'nominal' => $nominal,
+                'bukti_file' => $payment['bukti_file'],
+                'id_cells_project' => $this->id_cells_project,
+                'id_project' => $this->id_project,
+                'sisa_pinjaman' => $sisaUtang,
+                'sisa_bagi_hasil' => $sisaBagiHasil,
+                'total_sisa_pinjaman' => $totalSisa,
+                'jatuh_tempo' => $this->selectedPeminjaman->rencana_tgl_pengembalian,
+                'catatan' => $this->catatan,
+                'status' => $status,
+            ];
+        }
+
+        $this->form_data = [
+            'id_pinjaman_finlog' => $this->id_pinjaman_finlog,
+            'pengembalian_list' => $payloadList
+        ];
+    }
+
+    public function afterSave($payload)
+    {
+        if ($payload && isset($payload->error) && $payload->error === false) {
+            $data = $payload->data ?? [];
+            $data = is_array($data) ? $data : (array) $data;
+
+            session()->flash('success', $payload->message ?? 'Berhasil disimpan');
+
+            $redirectUrl = $data['redirect'] ?? route('sfinlog.pengembalian-pinjaman.index');
+            return redirect()->to($redirectUrl);
         }
     }
 
@@ -186,20 +228,21 @@ class PengembalianPinjamanFinlogCreate extends Component
         ]);
     }
 
-    // ============================================
-    // Public Methods - Data Loading
-    // ============================================
-
-    public function loadPeminjamanData($peminjamanId)
+    public function loadPeminjamanData($id)
     {
+        if (empty($id)) {
+            $this->resetPeminjamanData();
+            return;
+        }
+
         $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject.projects'])
-            ->where('id_peminjaman_finlog', $peminjamanId)
+            ->where('id_peminjaman_finlog', $id)
             ->where('status', 'Selesai')
             ->first();
 
         if (!$peminjaman) {
             $this->resetPeminjamanData();
-            $this->showToast('error', 'Data peminjaman tidak ditemukan atau belum selesai!');
+            $this->showToast('error', 'Data peminjaman tidak valid.');
             return;
         }
 
@@ -208,7 +251,7 @@ class PengembalianPinjamanFinlogCreate extends Component
         $this->calculateRemainingBalance();
     }
 
-    private function populateFormFields($peminjaman)
+    private function populateFormFields(PeminjamanFinlog $peminjaman)
     {
         $this->cells_bisnis = $peminjaman->cellsProject?->nama_cells_bisnis ?? '-';
         $this->id_cells_project = $peminjaman->id_cells_project ?? '';
@@ -216,38 +259,32 @@ class PengembalianPinjamanFinlogCreate extends Component
         $this->nama_project = $this->resolveProjectName($peminjaman);
         $this->tanggal_pencairan = $peminjaman->harapan_tanggal_pencairan?->format('d/m/Y') ?? '-';
         $this->jatuh_tempo = $peminjaman->rencana_tgl_pengembalian?->format('d/m/Y') ?? '-';
-        $this->top = $peminjaman->top ?? 0;
+        $this->top = $peminjaman->top ?? '0';
         $this->nilai_pinjaman = $peminjaman->nilai_pinjaman ?? 0;
         $this->nilai_bagi_hasil = $peminjaman->nilai_bagi_hasil ?? 0;
         $this->total_pinjaman = $peminjaman->total_pinjaman ?? 0;
     }
 
-    private function resolveProjectName($peminjaman)
+    private function resolveProjectName(PeminjamanFinlog $peminjaman): string
     {
-        if (!$peminjaman->cellsProject || empty($peminjaman->nama_project)) {
-            return '-';
-        }
+        if (!$peminjaman->cellsProject || empty($peminjaman->nama_project)) return '-';
 
         $projects = $peminjaman->cellsProject->projects ?? collect();
         $project = $projects->firstWhere('id_project', $peminjaman->nama_project)
             ?? $projects->firstWhere('nama_project', $peminjaman->nama_project)
-            ?? \App\Models\Project::where('id_project', $peminjaman->nama_project)
-            ->orWhere('nama_project', $peminjaman->nama_project)
-            ->first();
+            ?? \App\Models\Project::where('id_project', $peminjaman->nama_project)->orWhere('nama_project', $peminjaman->nama_project)->first();
 
         if ($project) {
-            $this->id_project = $project->id_project ?? $this->id_project;
-            return $project->nama_project ?? '-';
+            $this->id_project = $project->id_project;
+            return $project->nama_project;
         }
 
         return '-';
     }
 
-    private function getPeminjamanList()
+    private function getPeminjamanList(): array
     {
-        if (!$this->currentDebitur) {
-            return [];
-        }
+        if (!$this->currentDebitur) return [];
 
         return PeminjamanFinlog::query()
             ->with(['debitur', 'cellsProject'])
@@ -262,175 +299,38 @@ class PengembalianPinjamanFinlogCreate extends Component
             ->all();
     }
 
-    // ============================================
-    // Private Methods - Calculations
-    // ============================================
-
     private function calculateRemainingBalance()
     {
-        if (empty($this->id_peminjaman_finlog)) {
-            $this->sisa_bagi_hasil = 0;
-            $this->sisa_utang = 0;
+        if (empty($this->id_pinjaman_finlog)) {
+            $this->resetBalanceFields();
             return;
         }
 
-        $totalPaid = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_peminjaman_finlog)
+        $dbPayments = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_pinjaman_finlog)
             ->sum('jumlah_pengembalian');
 
-        $newPayments = array_sum(array_column($this->pengembalianList, 'nominal'));
+        $newPayments = array_sum(array_column($this->pengembalian_list, 'nominal'));
+        $totalPaid = $dbPayments + $newPayments;
 
-        $this->allocatePayment($totalPaid + $newPayments);
+        $initialBagiHasil = $this->nilai_bagi_hasil;
+        $initialUtang = $this->nilai_pinjaman;
+
+        $paidToBagiHasil = min($totalPaid, $initialBagiHasil);
+        $remainderForUtang = max(0, $totalPaid - $initialBagiHasil);
+        $paidToUtang = min($remainderForUtang, $initialUtang);
+
+        $this->sisa_bagi_hasil = max(0, $initialBagiHasil - $paidToBagiHasil);
+        $this->sisa_utang = max(0, $initialUtang - $paidToUtang);
     }
 
-    private function allocatePayment($totalPayment)
+    private function determineStatus($totalSisa)
     {
-        $sisaBagiHasil = $this->nilai_bagi_hasil;
-        $sisaPinjaman = $this->nilai_pinjaman;
-
-        if ($totalPayment >= $sisaBagiHasil) {
-            $sisaPinjaman = max(0, $sisaPinjaman - ($totalPayment - $sisaBagiHasil));
-            $sisaBagiHasil = 0;
-        } else {
-            $sisaBagiHasil -= $totalPayment;
-        }
-
-        $this->sisa_bagi_hasil = max(0, $sisaBagiHasil);
-        $this->sisa_utang = max(0, $sisaPinjaman);
-    }
-
-    // ============================================
-    // Private Methods - Storage & Validation
-    // ============================================
-
-    private function validateBeforeStore()
-    {
-        if (empty($this->id_peminjaman_finlog)) {
-            $this->showToast('error', 'Silakan pilih kode peminjaman terlebih dahulu!');
-            return false;
-        }
-
-        if (empty($this->pengembalianList)) {
-            $this->showToast('error', 'Silakan tambahkan minimal 1 pengembalian invoice!');
-            return false;
-        }
-
-        return true;
-    }
-
-    private function saveAllPayments()
-    {
-        // Ensure we have peminjaman data
-        if (!$this->selectedPeminjaman) {
-            $this->selectedPeminjaman = PeminjamanFinlog::find($this->id_peminjaman_finlog);
-        }
-
-        // Ensure we have nilai_pinjaman and nilai_bagi_hasil
-        if (!$this->nilai_pinjaman || !$this->nilai_bagi_hasil) {
-            $this->nilai_pinjaman = $this->selectedPeminjaman->nilai_pinjaman ?? 0;
-            $this->nilai_bagi_hasil = $this->selectedPeminjaman->nilai_bagi_hasil ?? 0;
-        }
+        if ($totalSisa <= 0) return self::STATUS_LUNAS;
 
         $jatuhTempo = $this->selectedPeminjaman->rencana_tgl_pengembalian;
-
-        // Calculate starting balance
-        [$sisaBagiHasil, $sisaPinjaman] = $this->calculateStartingBalance();
-
-        foreach ($this->pengembalianList as $pengembalian) {
-            $nominalPembayaran = $pengembalian['nominal'];
-
-            // Calculate balance after this payment
-            [$sisaBagiHasil, $sisaPinjaman] = $this->calculateBalanceAfterPayment(
-                $nominalPembayaran,
-                $sisaBagiHasil,
-                $sisaPinjaman
-            );
-
-            $totalSisaPinjaman = $sisaPinjaman + $sisaBagiHasil;
-
-            PengembalianPinjamanFinlog::create([
-                'id_pinjaman_finlog' => $this->id_peminjaman_finlog,
-                'id_cells_project' => $this->id_cells_project,
-                'id_project' => $this->id_project,
-                'jumlah_pengembalian' => $nominalPembayaran,
-                'sisa_pinjaman' => $sisaPinjaman,
-                'sisa_bagi_hasil' => $sisaBagiHasil,
-                'total_sisa_pinjaman' => $totalSisaPinjaman,
-                'tanggal_pengembalian' => now(),
-                'bukti_pembayaran' => $this->moveToPermanentStorage($pengembalian['bukti_file']),
-                'jatuh_tempo' => $jatuhTempo,
-                'catatan' => $this->catatan,
-                'status' => $this->determineStatusForPayment($totalSisaPinjaman, $jatuhTempo),
-            ]);
-        }
-
-        $this->sisa_utang = $sisaPinjaman;
-        $this->sisa_bagi_hasil = $sisaBagiHasil;
-    }
-
-    private function calculateStartingBalance()
-    {
-        $totalPaidBefore = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_peminjaman_finlog)
-            ->sum('jumlah_pengembalian');
-
-        $sisaBagiHasil = $this->nilai_bagi_hasil;
-        $sisaPinjaman = $this->nilai_pinjaman;
-
-        if ($totalPaidBefore >= $sisaBagiHasil) {
-            $sisaPinjaman = max(0, $sisaPinjaman - ($totalPaidBefore - $sisaBagiHasil));
-            $sisaBagiHasil = 0;
-        } else {
-            $sisaBagiHasil -= $totalPaidBefore;
-        }
-
-        return [$sisaBagiHasil, $sisaPinjaman];
-    }
-
-    private function calculateBalanceAfterPayment($nominal, $sisaBagiHasil, $sisaPinjaman)
-    {
-        if ($nominal >= $sisaBagiHasil) {
-            $sisaPinjaman = max(0, $sisaPinjaman - ($nominal - $sisaBagiHasil));
-            $sisaBagiHasil = 0;
-        } else {
-            $sisaBagiHasil -= $nominal;
-        }
-
-        return [$sisaBagiHasil, $sisaPinjaman];
-    }
-
-    private function determineStatusForPayment($totalSisa, $jatuhTempo)
-    {
-        if ($totalSisa <= 0) {
-            return self::STATUS_LUNAS;
-        }
-
-        if ($jatuhTempo && now()->gt($jatuhTempo)) {
-            return self::STATUS_TERLAMBAT;
-        }
+        if ($jatuhTempo && now()->gt($jatuhTempo)) return self::STATUS_TERLAMBAT;
 
         return self::STATUS_BELUM_LUNAS;
-    }
-
-    private function storeTemporaryFile()
-    {
-        $filename = 'temp_' . uniqid() . '.' . $this->bukti_pembayaran_invoice->extension();
-        return $this->bukti_pembayaran_invoice->storeAs('temp', $filename, 'public');
-    }
-
-    private function moveToPermanentStorage($tempPath)
-    {
-        $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . pathinfo($tempPath, PATHINFO_EXTENSION);
-        $newPath = 'pengembalian_finlog/' . $filename;
-        Storage::disk('public')->move($tempPath, $newPath);
-        return $newPath;
-    }
-
-    private function cleanupTemporaryFiles()
-    {
-        foreach ($this->pengembalianList as $pengembalian) {
-            if (isset($pengembalian['bukti_file'])) {
-                Storage::disk('public')->delete($pengembalian['bukti_file']);
-            }
-        }
     }
 
     private function resetPeminjamanData()
@@ -445,21 +345,27 @@ class PengembalianPinjamanFinlogCreate extends Component
             'nilai_pinjaman',
             'nilai_bagi_hasil',
             'total_pinjaman',
-            'sisa_utang',
-            'sisa_bagi_hasil',
             'id_cells_project',
             'id_project'
         ]);
+        $this->resetBalanceFields();
+    }
+
+    private function resetBalanceFields()
+    {
+        $this->sisa_utang = 0;
+        $this->sisa_bagi_hasil = 0;
+    }
+
+    private function resetModalFields()
+    {
+        $this->reset(['nominal_yang_dibayarkan', 'bukti_pembayaran_invoice']);
     }
 
     private function sanitizeCurrency($value)
     {
-        if (empty($value)) {
-            return 0;
-        }
-
-        $cleaned = preg_replace('/[^0-9]/', '', $value);
-        return is_numeric($cleaned) ? (float) $cleaned : 0;
+        if (is_numeric($value)) return (float) $value;
+        return (float) preg_replace('/[^0-9]/', '', $value);
     }
 
     private function showToast($type, $message)

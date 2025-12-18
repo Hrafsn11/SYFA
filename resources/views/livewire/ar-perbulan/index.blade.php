@@ -13,6 +13,14 @@
                             <button class="btn btn-sm btn-outline-secondary" type="button" id="clear-filter" title="Reset Filter">
                                 <i class="ti ti-x"></i>
                             </button>
+                            <button type="button" class="btn btn-sm btn-success" wire:click="exportToZip" wire:loading.attr="disabled">
+                                <i class="ti ti-file-zip"></i> 
+                                <span wire:loading.remove>Export (Excel + PDF)</span>
+                                <span wire:loading>
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Generating...
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </div>

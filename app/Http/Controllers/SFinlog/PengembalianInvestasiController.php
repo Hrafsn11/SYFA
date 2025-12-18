@@ -3,56 +3,56 @@
 namespace App\Http\Controllers\SFinlog;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Helpers\Response;
+use App\Http\Requests\SFinlog\PengembalianInvestasiFinlogRequest;
+use App\Models\PengajuanInvestasiFinlog;
+use App\Models\PengembalianInvestasiFinlog;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PengembalianInvestasiController extends Controller
 {
-    /**
-     * Store a newly created pengembalian investasi for SFinlog
-     */
-    public function store(Request $request)
+    public function index()
     {
-        // TODO: Implementasi logika store khusus SFinlog
-        return response()->json([
-            'success' => true,
-            'message' => 'Data pengembalian investasi berhasil ditambahkan untuk SFinlog'
-        ]);
+        return view('livewire.sfinlog.pengembalian-investasi-sfinlog.index');
     }
 
     /**
-     * Show the form for editing the specified resource for SFinlog
+     * Store pengembalian investasi untuk SFinlog
      */
-    public function edit($id)
+    public function store(PengembalianInvestasiFinlogRequest $request)
     {
-        // TODO: Implementasi logika edit khusus SFinlog
-        return response()->json([
-            'success' => true,
-            'data' => []
-        ]);
-    }
+        try {
+            $validated = $request->validated();
 
-    /**
-     * Update the specified resource for SFinlog
-     */
-    public function update(Request $request, $id)
-    {
-        // TODO: Implementasi logika update khusus SFinlog
-        return response()->json([
-            'success' => true,
-            'message' => 'Data pengembalian investasi berhasil diupdate untuk SFinlog'
-        ]);
-    }
+            DB::beginTransaction();
 
-    /**
-     * Remove the specified resource for SFinlog
-     */
-    public function destroy($id)
-    {
-        // TODO: Implementasi logika destroy khusus SFinlog
-        return response()->json([
-            'success' => true,
-            'message' => 'Data pengembalian investasi berhasil dihapus untuk SFinlog'
-        ]);
+            // Catatan: untuk SFinlog kita mapping langsung ke pengajuan_investasi_finlog
+            $pengajuan = PengajuanInvestasiFinlog::findOrFail($validated['id_pengajuan_investasi_finlog']);
+
+            $file = null;
+            if ($request->bukti_transfer) {
+                $file = Storage::disk('public')->put('bukti_pengembalian_investasi_finlog', $request->bukti_transfer);
+            }
+
+            $pengembalian = PengembalianInvestasiFinlog::create([
+                'id_pengajuan_investasi_finlog' => $pengajuan->id_pengajuan_investasi_finlog,
+                'dana_pokok_dibayar' => $validated['dana_pokok_dibayar'] ?? 0,
+                'bagi_hasil_dibayar' => $validated['bagi_hasil_dibayar'] ?? 0,
+                'bukti_transfer' => $file,
+                'tanggal_pengembalian' => $validated['tanggal_pengembalian'],
+                'created_by' => auth()->id(),
+            ]);
+
+            // Untuk sementara: belum ada kolom sisa_pokok / sisa_bagi_hasil di tabel finlog,
+            // jadi di sini belum ada update ke pengajuan_investasi_finlog.
+
+            DB::commit();
+
+            return Response::success($pengembalian, 'Data pengembalian investasi SFinlog berhasil ditambahkan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorCatch($e);
+        }
     }
 }
-

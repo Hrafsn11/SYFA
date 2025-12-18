@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SFinlog;
 
+use App\Helpers\Response;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PengembalianPinjamanFinlog;
@@ -16,68 +17,52 @@ class PengembalianPinjamanController extends Controller
     {
         try {
             DB::beginTransaction();
-            
-            $validated = $request->validated();
-            
-            // Handle file upload jika ada
-            if ($request->hasFile('bukti_pembayaran')) {
-                $file = $request->file('bukti_pembayaran');
-                $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . $file->extension();
-                $path = $file->storeAs('pengembalian_finlog', $filename, 'public');
-                $validated['bukti_pembayaran'] = $path;
+
+            $id_peminjaman_finlog = $request->input('id_pinjaman_finlog');
+
+            $listPengembalian = $request->input('pengembalian_list', []);
+
+
+            foreach ($listPengembalian as $index => $item) {
+
+                $path = null;
+                if (isset($item['bukti_file']) && $item['bukti_file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $filename = 'pengembalian_' . time() . '_' . uniqid() . '.' . $item['bukti_file']->extension();
+                    $path = $item['bukti_file']->storeAs('pengembalian_finlog', $filename, 'public');
+                }
+
+                $nominal = (float) ($item['nominal'] ?? 0);
+
+                PengembalianPinjamanFinlog::create([
+                    'id_pinjaman_finlog' => $id_peminjaman_finlog,
+                    'id_cells_project' => $item['id_cells_project'] ?? null,
+                    'id_project' => $item['id_project'] ?? null,
+                    'jumlah_pengembalian' => $nominal,
+                    'sisa_pinjaman' => $item['sisa_pinjaman'] ?? 0,
+                    'sisa_bagi_hasil' => $item['sisa_bagi_hasil'] ?? 0,
+                    'total_sisa_pinjaman' => $item['total_sisa_pinjaman'] ?? 0,
+                    'tanggal_pengembalian' => now(),
+                    'bukti_pembayaran' => $path,
+                    'jatuh_tempo' => $item['jatuh_tempo'] ?? null,
+                    'catatan' => $item['catatan'] ?? null,
+                    'status' => $item['status'] ?? 'Belum Lunas',
+                ]);
             }
-            
-            $pengembalian = PengembalianPinjamanFinlog::create($validated);
-            
+
             DB::commit();
-            
-            // Auto-update AR Perbulan
-            $peminjaman = PeminjamanFinlog::find($pengembalian->id_pinjaman_finlog);
-            if ($peminjaman) {
-                $this->autoUpdateARPerbulan($peminjaman->id_debitur, $pengembalian->created_at);
-            }
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengembalian pinjaman berhasil disimpan!'
-            ]);
+
+
+            app(\App\Services\ArPerbulanFinlogService::class)->updateAROnPengembalian(
+                $id_peminjaman_finlog,
+                now()
+            );
+
+            return Response::success([
+                'redirect' => route('sfinlog.pengembalian-pinjaman.index')
+            ], 'Semua data pengembalian berhasil disimpan!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan data: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Auto-update AR Perbulan saat ada pengembalian
-     */
-    private function autoUpdateARPerbulan(string $id_debitur, $date): void
-    {
-        try {
-            $bulan = \Carbon\Carbon::parse($date)->format('Y-m');
-            
-            // Call ArPerbulanController untuk update AR
-            $arController = new \App\Http\Controllers\SFinlog\ArPerbulanController();
-            $request = new \Illuminate\Http\Request([
-                'id_debitur' => $id_debitur,
-                'bulan' => $bulan,
-            ]);
-            
-            $arController->updateAR($request);
-            
-            \Log::info('AR Perbulan auto-updated from PengembalianPinjamanController', [
-                'id_debitur' => $id_debitur,
-                'bulan' => $bulan,
-            ]);
-        } catch (\Exception $e) {
-            // Log error tapi tidak throw exception agar tidak mengganggu flow utama
-            \Log::error('Failed to auto-update AR Perbulan from pengembalian', [
-                'id_debitur' => $id_debitur,
-                'error' => $e->getMessage(),
-            ]);
+            return Response::errorCatch($e);
         }
     }
 }
-
