@@ -1,20 +1,270 @@
-@extends('layouts.app')
+<div>
+    {{-- Header Section --}}
+    <div class="mb-4">
+        <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}"
+            class="btn btn-outline-primary mb-3">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Kembali
+        </a>
+        <h4 class="fw-bold">Menu Pengembalian Peminjaman Finlog</h4>
+    </div>
 
-@section('content')
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="fw-bold">Tambah Pengembalian Pinjaman - SFinlog</h4>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">Form Tambah Pengembalian Pinjaman untuk modul SFinlog.</p>
-                    <!-- TODO: Implementasi form tambah pengembalian pinjaman untuk SFinlog -->
-                </div>
+    {{-- Main Form Card --}}
+    <div class="card">
+        <div class="card-body">
+            <form wire:submit.prevent="store">
+                {{-- Nama Perusahaan --}}
+            <div class="mb-3">
+                <label for="nama_perusahaan" class="form-label">Nama Perusahaan</label>
+                <input type="text" class="form-control" id="nama_perusahaan" 
+                    value="{{ $nama_perusahaan }}" readonly>
             </div>
+
+            {{-- Kode Peminjaman --}}
+            <div class="mb-3" wire:key="select2-container-{{ $currentUserId ?? 'guest' }}">
+                <label for="kode_peminjaman" class="form-label">
+                    Kode Peminjaman <span class="text-danger">*</span>
+                </label>
+                {{-- Hidden input to preserve value --}}
+                <input type="hidden" wire:model="id_peminjaman_finlog" id="hidden_id_peminjaman_finlog">
+                <div wire:ignore>
+                    <livewire:components.select2 :list_data="$peminjamanList" value_name="id" value_label="text"
+                        data_placeholder="Pilih Kode Peminjaman" model_name="id_peminjaman_finlog" :value="$id_peminjaman_finlog"
+                        :key="'select2-peminjaman-finlog'" />
+                </div>
+                @error('id_peminjaman_finlog')
+                    <small class="text-danger">{{ $message }}</small>
+                @enderror
+                @if($id_peminjaman_finlog)
+                    <small class="text-muted d-block mt-1">
+                        <i class="ti ti-check-circle text-success"></i> Kode peminjaman terpilih (ID: {{ $id_peminjaman_finlog }})
+                    </small>
+                @endif
+            </div>
+
+                {{-- Peminjaman Details Card --}}
+                <div class="card border shadow-none mb-4" wire:key="peminjaman-detail-{{ $id_peminjaman_finlog }}">
+                    <div class="card-body">
+                        {{-- Row 1: Cells Bisnis & Nama Project --}}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Cells Bisnis</label>
+                                <input type="text" class="form-control" value="{{ $cells_bisnis }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nama Project</label>
+                                <input type="text" class="form-control" value="{{ $nama_project }}" readonly>
+                            </div>
+                        </div>
+
+                        {{-- Row 2: Tanggal, TOP, Jatuh Tempo --}}
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Tanggal Pencairan</label>
+                                <input type="text" class="form-control" value="{{ $tanggal_pencairan }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">TOP</label>
+                                <input type="text" class="form-control" value="{{ $top }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Jatuh Tempo</label>
+                                <input type="text" class="form-control" value="{{ $jatuh_tempo }}" readonly>
+                            </div>
+                        </div>
+
+                        {{-- Row 3: Nilai Pinjaman & Bagi Hasil --}}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nilai Pinjaman</label>
+                                <input type="text" class="form-control"
+                                    value="Rp {{ number_format($nilai_pinjaman, 0, ',', '.') }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Bagi Hasil</label>
+                                <input type="text" class="form-control"
+                                    value="Rp {{ number_format($nilai_bagi_hasil, 0, ',', '.') }}" readonly>
+                            </div>
+                        </div>
+
+                        {{-- Row 4: Total Pinjaman --}}
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">Total Pinjaman</label>
+                                <input type="text" class="form-control"
+                                    value="Rp {{ number_format($total_pinjaman, 0, ',', '.') }}" readonly>
+                            </div>
+                        </div>
+
+                        {{-- List Pengembalian Invoice Table --}}
+                        <div class="card shadow-none border mb-3" wire:key="pengembalian-table-container">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">List Pengembalian Invoice</h5>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%" class="text-center">No</th>
+                                            <th>Nominal Yang Dibayarkan</th>
+                                            <th>Bukti Pembayaran</th>
+                                            <th width="10%" class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($pengembalianList as $index => $item)
+                                            <tr wire:key="pengembalian-row-{{ $index }}-{{ md5($item['bukti_file']) }}">
+                                                <td class="text-center">{{ $index + 1 }}</td>
+                                                <td>Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
+                                                <td>
+                                                    <a href="{{ Storage::url($item['bukti_file']) }}" target="_blank"
+                                                        class="btn btn-sm btn-outline-info">
+                                                        <i class="ti ti-eye me-1"></i> Lihat
+                                                    </a>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        wire:click="removePengembalian({{ $index }})"
+                                                        wire:confirm="Apakah Anda yakin ingin menghapus pengembalian ini?">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted">
+                                                    Belum ada pengembalian invoice
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {{-- Button Tambah --}}
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                            data-bs-target="#modal-pengembalian-invoice">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Tambah
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Sisa Pembayaran --}}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Sisa Bayar Pokok</label>
+                        <input type="text" class="form-control"
+                            value="Rp {{ number_format($sisa_utang, 0, ',', '.') }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Sisa Bagi Hasil</label>
+                        <input type="text" class="form-control"
+                            value="Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}" readonly>
+                    </div>
+                </div>
+
+                {{-- Catatan --}}
+                <div class="mb-3">
+                    <label for="catatan" class="form-label">Catatan Lainnya</label>
+                    <textarea wire:model="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan" rows="3"></textarea>
+                </div>
+
+                {{-- Submit Button --}}
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                        <span wire:loading.remove>
+                            <i class="ti ti-device-floppy me-1"></i> Simpan Data
+                        </span>
+                        <span wire:loading>
+                            <span class="spinner-border spinner-border-sm me-1" role="status"
+                                aria-hidden="true"></span>
+                            Menyimpan...
+                        </span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+
+    {{-- Modal Pengembalian Invoice --}}
+    @include('livewire.sfinlog.pengembalian-pinjaman.partials.modal')
 </div>
-@endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            let isSubmitting = false;
+            let cachedPeminjamanId = @js($id_peminjaman_finlog);
+
+            // Utility: Show SweetAlert
+            const showAlert = (icon, html, title) => {
+                const titles = {
+                    error: 'Error!',
+                    success: 'Berhasil!',
+                    warning: 'Perhatian'
+                };
+                Swal.fire({
+                    icon,
+                    title: title || titles[icon],
+                    html,
+                    ...(icon === 'success' && {
+                        timer: 2500,
+                        showConfirmButton: false
+                    })
+                });
+            };
+
+            Livewire.on('select2-changed', (event) => {
+                const data = event[0] || event;
+                if (data.modelName === 'id_peminjaman_finlog' && data.value) {
+                    cachedPeminjamanId = data.value;
+                    console.log('Cached peminjaman ID:', cachedPeminjamanId);
+                }
+            });
+
+            Livewire.hook('request', ({ options, payload, respond, succeed, fail }) => {
+                // Restore cached ID if it's missing
+                const currentId = @this.get('id_peminjaman_finlog');
+                if (!currentId && cachedPeminjamanId) {
+                    console.log('Restoring cached peminjaman ID:', cachedPeminjamanId);
+                    @this.set('id_peminjaman_finlog', cachedPeminjamanId, false);
+                }
+            });
+
+            const form = document.querySelector('form[wire\\:submit\\.prevent="store"]');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    if (isSubmitting) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                    
+                    const currentId = @this.get('id_peminjaman_finlog');
+                    if (!currentId && cachedPeminjamanId) {
+                        console.log('Setting peminjaman ID before submit:', cachedPeminjamanId);
+                        @this.set('id_peminjaman_finlog', cachedPeminjamanId, false);
+                    }
+                    
+                    isSubmitting = true;
+                    setTimeout(() => isSubmitting = false, 2000);
+                }, true);
+            }
+
+            // Listen: Alert Events
+            Livewire.on('alert', (data) => {
+                isSubmitting = false;
+                const eventData = data[0] || data;
+                showAlert(eventData.icon, eventData.html);
+            });
+
+            // Listen: Close Modal Event
+            Livewire.on('close-pengembalian-modal', () => {
+                $('#modal-pengembalian-invoice').modal('hide');
+            });
+        });
+    </script>
+@endpush
 

@@ -200,6 +200,90 @@ class PeminjamanController extends Controller
 
         return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
     }
+
+    /**
+     * Download Certificate for Peminjaman Finlog
+     * 
+     * Method ini digunakan untuk generate dan download sertifikat peminjaman
+     * Hanya bisa diakses jika status peminjaman = "Selesai"
+     * 
+     * @param int $id - ID peminjaman finlog
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function downloadSertifikat($id)
+    {
+        try {
+            // 1. Ambil data peminjaman dengan relasi debitur
+            $peminjaman = PeminjamanFinlog::with('debitur')->findOrFail($id);
+            
+            // 2. Validasi: Hanya status "Selesai" yang bisa cetak sertifikat
+            if ($peminjaman->status !== 'Selesai') {
+                return redirect()->back()->with('error', 
+                    'Sertifikat hanya tersedia untuk peminjaman yang sudah selesai');
+            }
+
+            // 3. Generate Nomor Sertifikat
+            // Format: DCF (Deposito Certificate Finglog) + TAHUN + NOMOR URUT 4 DIGIT
+            // Contoh: DCF20250001, DCF20250002, dst.
+            $year = date('Y');
+            $countThisYear = PeminjamanFinlog::whereYear('created_at', $year)
+                ->where('status', 'Selesai')
+                ->where('id', '<=', $peminjaman->id)
+                ->count();
+            
+            $nomorSertifikat = 'DCF' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
+
+            // 4. Tentukan deskripsi
+            $deskripsi = 'PEMINJAMAN FINLOG';
+
+            // 5. Hitung jangka waktu peminjaman
+            // Dari harapan_tanggal_pencairan sampai rencana_tgl_pengembalian
+            $tanggalPencairanCarbon = \Carbon\Carbon::parse($peminjaman->harapan_tanggal_pencairan);
+            $tanggalPengembalianCarbon = \Carbon\Carbon::parse($peminjaman->rencana_tgl_pengembalian);
+
+            // 6. Format tanggal untuk ditampilkan (bahasa Indonesia)
+            $tanggalPencairan = $tanggalPencairanCarbon->translatedFormat('d F Y');
+            $tanggalPengembalian = $tanggalPengembalianCarbon->translatedFormat('d F Y');
+            $jangkaWaktu = $tanggalPencairan . ' - ' . $tanggalPengembalian;
+
+            // 7. Siapkan data untuk view sertifikat
+            $data = [
+                // Nama peminjam (dari nama perusahaan debitur)
+                'nama_peminjam' => $peminjaman->debitur->nama ?? $peminjaman->nama_perusahaan ?? '-',
+                
+                // Nomor sertifikat yang sudah digenerate
+                'nomor_sertifikat' => $nomorSertifikat,
+                
+                // Deskripsi jenis peminjaman
+                'deskripsi' => $deskripsi,
+                
+                // Nilai pinjaman (formatted Rupiah tanpa desimal)
+                'nilai_pinjaman' => 'Rp ' . number_format($peminjaman->nilai_pinjaman, 0, ',', '.'),
+                
+                // Kode transaksi (nomor peminjaman)
+                'kode_transaksi' => $peminjaman->nomor_peminjaman,
+                
+                // Jangka waktu (range tanggal)
+                'jangka_waktu' => $jangkaWaktu,
+                
+                // Bagi hasil (persentase per tahun)
+                'bagi_hasil' => $peminjaman->presentase_bagi_hasil . ' % P.A NET',
+                
+                // Nilai pinjaman dalam text (formatted Rupiah dengan 2 desimal)
+                // Digunakan di halaman 2 sertifikat
+                'nilai_pinjaman_text' => 'Rp. ' . number_format($peminjaman->nilai_pinjaman, 2, ',', '.'),
+            ];
+
+            // 8. Return view sertifikat
+            return view('livewire.sfinlog.peminjaman.sertifikat', compact('data'));
+            
+        } catch (\Exception $e) {
+            // Handle error dan redirect kembali dengan pesan error
+            return redirect()->back()->with('error', 
+                'Gagal menggenerate sertifikat: ' . $e->getMessage());
+        }
+    }
+
 }
 
 

@@ -518,9 +518,9 @@ class PeminjamanController extends Controller
             $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'nullable|date_format:Y-m-d|sometimes';
+            $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
             $rules['total_bagi_hasil'] = 'nullable';
-            $rules['rencana_tgl_pembayaran'] = 'nullable|date_format:Y-m-d|sometimes';
+            $rules['rencana_tgl_pembayaran'] = 'required|date_format:Y-m-d';
             $rules['pembayaran_total'] = 'nullable';
 
         } elseif ($jenisPembiayaan === 'Installment') {
@@ -546,8 +546,10 @@ class PeminjamanController extends Controller
             $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'nullable|date_format:Y-m-d|sometimes';
-            $rules['rencana_tgl_pembayaran'] = 'nullable|date_format:Y-m-d|sometimes';
+            $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
+            $rules['total_bagi_hasil'] = 'nullable';
+            $rules['rencana_tgl_pembayaran'] = 'required|date_format:Y-m-d';
+            $rules['pembayaran_total'] = 'nullable';
 
         } elseif ($jenisPembiayaan === 'Factoring') {
             $rules['details'] = 'required|array|min:1';
@@ -561,11 +563,27 @@ class PeminjamanController extends Controller
             $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'nullable|date_format:Y-m-d|sometimes';
+            $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
             $rules['total_bagi_hasil'] = 'nullable';
-            $rules['rencana_tgl_pembayaran'] = 'nullable|date_format:Y-m-d|sometimes';
+            $rules['rencana_tgl_pembayaran'] = 'required|date_format:Y-m-d';
             $rules['pembayaran_total'] = 'nullable';
             $rules['total_nominal_yang_dialihkan'] = 'nullable';
+        }
+
+        // Merge detail-level validation rules (invoice/po/factoring/installment)
+        // so that fields like `nama_barang` (Installment) are validated on update as well.
+        $formDataInvoice = $request->input('form_data_invoice', $request->input('details', []));
+        $invoiceKey = $request->has('form_data_invoice') ? 'form_data_invoice' : 'details';
+        if ($jenisPembiayaan && !empty($formDataInvoice)) {
+            $invoiceRequest = new \App\Http\Requests\InvoicePengajuanPinjamanRequest();
+            $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, $formDataInvoice);
+            foreach ($invoiceRules as $key => $rule) {
+                // keep distinct for invoice/kontrak identifiers when adding
+                if ($key === 'no_invoice' || $key === 'no_kontrak') {
+                    $rule = array_merge((array) $rule, ['distinct']);
+                }
+                $rules["{$invoiceKey}.*.{$key}"] = $rule;
+            }
         }
 
         $validated = $request->validate($rules);
@@ -595,7 +613,8 @@ class PeminjamanController extends Controller
             }
 
             // Update pengajuan peminjaman header
-            $pengajuan->update([
+            // Prepare update data
+            $updateData = [
                 'id_debitur' => $validated['id_debitur'],
                 'nama_bank' => $validated['nama_bank'] ?? null,
                 'no_rekening' => $validated['no_rekening'] ?? null,
@@ -606,21 +625,39 @@ class PeminjamanController extends Controller
                 'lampiran_sid' => $lampiran_sid_path,
                 'nilai_kol' => $validated['nilai_kol'] ?? null,
                 'tujuan_pembiayaan' => $validated['tujuan_pembiayaan'] ?? null,
-                'total_pinjaman' => isset($validated['total_pinjaman']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['total_pinjaman']) : null,
                 'harapan_tanggal_pencairan' => $validated['harapan_tanggal_pencairan'] ?? null,
-                'total_bagi_hasil' => isset($validated['total_bagi_hasil']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['total_bagi_hasil']) : null,
                 'rencana_tgl_pembayaran' => $validated['rencana_tgl_pembayaran'] ?? null,
-                'pembayaran_total' => isset($validated['pembayaran_total']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['pembayaran_total']) : null,
                 'catatan_lainnya' => $validated['catatan_lainnya'] ?? null,
                 'tenor_pembayaran' => $validated['tenor_pembayaran'] ?? null,
                 'persentase_bagi_hasil' => $validated['persentase_bagi_hasil'] ?? null,
-                'pps' => isset($validated['pps']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['pps']) : null,
-                's_finance' => isset($validated['sfinance']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['sfinance']) : null,
-                'yang_harus_dibayarkan' => isset($validated['yang_harus_dibayarkan']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['yang_harus_dibayarkan']) : null,
-                'total_nominal_yang_dialihkan' => isset($validated['total_nominal_yang_dialihkan']) ? str_replace(['Rp', 'Rp.', ',', '.', ' '], '', $validated['total_nominal_yang_dialihkan']) : null,
                 'updated_by' => auth()->id(),
                 'status' => 'Draft',
-            ]);
+            ];
+
+            // Only update fields that are present in request to avoid overwriting with null
+            if ($request->has('total_pinjaman')) {
+                $updateData['total_pinjaman'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('total_pinjaman'));
+            }
+            if ($request->has('total_bagi_hasil')) {
+                $updateData['total_bagi_hasil'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('total_bagi_hasil'));
+            }
+            if ($request->has('pembayaran_total')) {
+                $updateData['pembayaran_total'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('pembayaran_total'));
+            }
+            if ($request->has('pps')) {
+                $updateData['pps'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('pps'));
+            }
+            if ($request->has('sfinance')) {
+                $updateData['s_finance'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('sfinance'));
+            }
+            if ($request->has('yang_harus_dibayarkan')) {
+                $updateData['yang_harus_dibayarkan'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('yang_harus_dibayarkan'));
+            }
+            if ($request->has('total_nominal_yang_dialihkan')) {
+                $updateData['total_nominal_yang_dialihkan'] = str_replace(['Rp', 'Rp.', ',', ' '], '', $request->input('total_nominal_yang_dialihkan'));
+            }
+
+            $pengajuan->update($updateData);
 
             $historyPengajuan = HistoryStatusPengajuanPinjaman::create([
                 'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,

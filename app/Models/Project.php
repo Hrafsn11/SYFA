@@ -24,4 +24,20 @@ class Project extends Model
     {
         return $this->belongsTo(CellsProject::class, 'id_cells_project', 'id_cells_project');
     }
+
+    /**
+     * Relasi ke PengembalianPinjamanFinlog
+     */
+    public function pengembalianPinjaman()
+    {
+        return $this->hasMany(PengembalianPinjamanFinlog::class, 'id_project', 'id_project');
+    }
+
+    /**
+     * Relasi ke PeminjamanFinlog
+     */
+    public function peminjamanFinlog()
+    {
+        return $this->hasMany(PeminjamanFinlog::class, 'nama_project', 'id_project');
+    }
 }
