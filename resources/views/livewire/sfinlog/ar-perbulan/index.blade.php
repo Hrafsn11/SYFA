@@ -20,7 +20,7 @@
 
             <div class="card">
                 <div class="card-datatable">
-                    <livewire:sfinlog.ar-perbulan-table />
+                    <livewire:SFinlog.ar-perbulan-table />
                 </div>
             </div>
         </div>
