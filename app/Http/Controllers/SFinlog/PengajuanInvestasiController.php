@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengajuanInvestasiController extends Controller
 {
@@ -75,16 +76,16 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $pengajuan = PengajuanInvestasiFinlog::with([
-                'investor', 
-                'project', 
-                'histories' => function($query) {
+                'investor',
+                'project',
+                'histories' => function ($query) {
                     $query->orderBy('created_at', 'desc');
                 },
                 'histories.submitBy',
                 'histories.approvedBy',
                 'histories.rejectedBy'
             ])->findOrFail($id);
-            
+
             return Response::success($pengajuan, 'Data pengajuan investasi berhasil diambil');
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal mengambil data');
@@ -113,7 +114,7 @@ class PengajuanInvestasiController extends Controller
             DB::beginTransaction();
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
-            
+
             if ($pengajuan->status !== 'Draft') {
                 return Response::error('Pengajuan tidak dapat diubah setelah disubmit');
             }
@@ -155,7 +156,7 @@ class PengajuanInvestasiController extends Controller
             DB::beginTransaction();
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
-            
+
             if ($pengajuan->status !== 'Draft') {
                 return Response::error('Pengajuan hanya dapat dihapus jika masih berstatus Draft');
             }
@@ -353,36 +354,65 @@ class PengajuanInvestasiController extends Controller
     /**
      * Preview Kontrak
      */
+
+    /**
+     * Preview Kontrak
+     */
     public function previewKontrak(Request $request, $id)
     {
         try {
             $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
-            
-            $nomorKontrak = $pengajuan->nomor_kontrak ?? $request->input('nomor_kontrak', 'DRAFT-' . date('Ymd-His'));
-            
-            $historySelesai = HistoryStatusPengajuanInvestasiFinlog::where('id_pengajuan_investasi_finlog', $id)
-                ->where('status', 'Selesai')
-                ->first();
-            $tanggalKontrak = $historySelesai ? $historySelesai->date : now()->toDateString();
-            
-            $data = [
-                'nomor_kontrak' => $nomorKontrak,
-                'tanggal_kontrak' => $tanggalKontrak,
-                'nama_investor' => $pengajuan->nama_investor,
-                'nama_perusahaan' => $pengajuan->nama_investor,
-                'project' => $pengajuan->project->nama_cells_bisnis ?? '-',
-                'nominal_investasi' => $pengajuan->nominal_investasi,
-                'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
-                'lama_investasi' => $pengajuan->lama_investasi,
-                'tanggal_investasi' => $pengajuan->tanggal_investasi,
-                'tanggal_berakhir' => $pengajuan->tanggal_berakhir_investasi,
-                'alamat' => $pengajuan->investor->alamat ?? '-',
-            ];
-            
+            $data = $this->prepareContractData($pengajuan, $request->input('nomor_kontrak'));
+
             return view('livewire.sfinlog.pengajuan-investasi.preview-kontrak', compact('data', 'pengajuan'));
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal memuat preview kontrak');
         }
+    }
+
+    /**
+     * Download Kontrak PDF
+     */
+    public function downloadKontrakPdf($id)
+    {
+        try {
+            $pengajuan = PengajuanInvestasiFinlog::with(['investor', 'project'])->findOrFail($id);
+            $data = $this->prepareContractData($pengajuan);
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('livewire.sfinlog.pengajuan-investasi.preview-kontrak-pdf', compact('data', 'pengajuan'));
+            $pdf->setPaper('A4', 'portrait');
+
+            return $pdf->stream('Kontrak-Investasi-' . $data['nomor_kontrak'] . '.pdf');
+        } catch (\Exception $e) {
+            return Response::errorCatch($e, 'Gagal generate PDF kontrak');
+        }
+    }
+
+    /**
+     * Helper: Prepare data array for contract view
+     */
+    private function prepareContractData($pengajuan, $nomorKontrakInput = null)
+    {
+        $nomorKontrak = $pengajuan->nomor_kontrak ?? ($nomorKontrakInput ?? 'DRAFT-' . date('Ymd-His'));
+
+        $historySelesai = HistoryStatusPengajuanInvestasiFinlog::where('id_pengajuan_investasi_finlog', $pengajuan->id_pengajuan_investasi_finlog)
+            ->where('status', 'Selesai')
+            ->first();
+        $tanggalKontrak = $historySelesai ? $historySelesai->date : now()->toDateString();
+
+        return [
+            'nomor_kontrak' => $nomorKontrak,
+            'tanggal_kontrak' => $tanggalKontrak,
+            'nama_investor' => $pengajuan->nama_investor,
+            'nama_perusahaan' => $pengajuan->nama_investor, // Asumsi dari code lama sama
+            'project' => $pengajuan->project->nama_cells_bisnis ?? '-',
+            'nominal_investasi' => $pengajuan->nominal_investasi,
+            'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,
+            'lama_investasi' => $pengajuan->lama_investasi,
+            'tanggal_investasi' => $pengajuan->tanggal_investasi,
+            'tanggal_berakhir' => $pengajuan->tanggal_berakhir_investasi,
+            'alamat' => $pengajuan->investor->alamat ?? '-',
+        ];
     }
 
     /**
