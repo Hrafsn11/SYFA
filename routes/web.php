@@ -263,6 +263,10 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'destroy'])->name('destroy');
     });
 
+    // Global Search
+    Route::get('search', \App\Http\Controllers\GlobalSearchController::class)->name('search');
+    Route::get('search/api', [\App\Http\Controllers\GlobalSearchController::class, 'api'])->name('search.api');
+    
     
 });
 
