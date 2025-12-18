@@ -38,7 +38,6 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::post('/', [PeminjamanController::class, 'store'])->name('store');
     Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
     Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
-    Route::get('{id}/download-sertifikat', [PeminjamanController::class, 'downloadSertifikat'])->name('download-sertifikat');
 });
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
