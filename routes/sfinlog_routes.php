@@ -50,6 +50,7 @@ Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->na
 // Index route: sfinlog.ar-performance.index
 // AJAX endpoints (needed for modal)
 Route::get('ar-performance/transactions', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'getTransactions'])->name('ar-performance.transactions');
+Route::get('ar-performance/export-pdf', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
 // Restrukturisasi Routes
 Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {
