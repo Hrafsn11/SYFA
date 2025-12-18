@@ -131,11 +131,6 @@ class PeminjamanFinlogTable extends DataTableComponent
                     $btn = '<div class="btn-group" role="group">';
                     $btn .= '<a href="'.$detailUrl.'" class="btn btn-sm btn-info"><i class="ti ti-eye"></i></a>';
                     
-                    if ($row->status === 'Selesai') {
-                        $sertifikatUrl = route('sfinlog.peminjaman.download-sertifikat', ['id' => $row->id_peminjaman_finlog]);
-                        $btn .= '<a href="'.$sertifikatUrl.'" class="btn btn-sm btn-success" target="_blank" title="Download Sertifikat"><i class="ti ti-certificate"></i></a>';
-                    }
-                    
                     // $btn .= '<button type="button" class="btn btn-sm btn-warning" onclick="editPeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-edit"></i></button>';
                     // $btn .= '<button type="button" class="btn btn-sm btn-danger" onclick="deletePeminjaman(\''.$row->id_peminjaman_finlog.'\')"><i class="ti ti-trash"></i></button>';
                     $btn .= '</div>';
