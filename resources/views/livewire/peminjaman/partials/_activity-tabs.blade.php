@@ -99,12 +99,12 @@
                                                 $description = 'Dokumen bukti transfer telah diupload.';
                                                 break;
                                             case 'Menunggu Konfirmasi Debitur':
-                                                $displayText = 'Menunggu Konfirmasi Debitur';
-                                                $description = 'Menunggu konfirmasi penerimaan dari debitur.';
+                                                $displayText = 'Upload Bukti Transfer';
+                                                $description = 'Bukti transfer telah diupload. Menunggu konfirmasi dari debitur.';
                                                 break;
                                             case 'Dana Sudah Dicairkan':
                                                 $displayText = 'Dana Sudah Dicairkan';
-                                                $description = 'Dana telah dicairkan dan diterima debitur.';
+                                                $description = 'Dana telah dicairkan dan dikonfirmasi oleh debitur.';
                                                 break;
                                             case 'Konfirmasi Disetujui Debitur':
                                                 $displayText = 'Konfirmasi Disetujui Debitur';
@@ -134,18 +134,18 @@
                             </small>
                         </div>
                         <div class="col-6 col-md-3 text-end">
-                            @if($history->status != 'Generate Kontrak' && $history->status != 'Dana Sudah Dicairkan' && $history->status != 'Submit Dokumen' && $history->status != 'Upload Dokumen' && $history->status != 'Menunggu Konfirmasi Debitur')
-                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Detail" 
-                                        onclick="showHistory('{{ $history->id_history_status_pengajuan_pinjaman }}')">
-                                    <i class="ti ti-file"></i>
-                                </button>
-                            @elseif($history->status == 'Generate Kontrak')
+                            @if($history->status == 'Generate Kontrak')
                                 <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Preview Kontrak" onclick="previewKontrakActivity()">
                                     <i class="ti ti-file-text"></i>
                                 </button>
-                            @elseif($history->status == 'Upload Dokumen')
-                                <button type="button" class="btn btn-icon btn-sm btn-label-success" title="Upload Dokumen">
-                                    <i class="ti ti-upload"></i>
+                            @elseif($history->status == 'Menunggu Konfirmasi Debitur' && $peminjaman['upload_bukti_transfer'])
+                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" onclick="previewBuktiTransfer('{{ asset('storage/' . $peminjaman['upload_bukti_transfer']) }}')">
+                                    <i class="ti ti-file-text"></i>
+                                </button>
+                            @elseif($history->status != 'Submit Dokumen' && $history->status != 'Upload Dokumen' && $history->status != 'Menunggu Konfirmasi Debitur' && $history->status != 'Dana Sudah Dicairkan')
+                                <button type="button" class="btn btn-icon btn-sm btn-label-primary" title="Detail" 
+                                        onclick="showHistory('{{ $history->id_history_status_pengajuan_pinjaman }}')">
+                                    <i class="ti ti-file"></i>
                                 </button>
                             @endif
                         </div>

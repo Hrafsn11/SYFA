@@ -1,14 +1,12 @@
 <?php
 
 use App\Livewire\Dashboard;
-use App\Http\Controllers\SFinlog\ArPerformanceController;
 use App\Http\Controllers\SFinlog\ArPerbulanController;
 use App\Http\Controllers\SFinlog\DebiturPiutangController;
 use App\Http\Controllers\SFinlog\KertasKerjaInvestorSFinlogController;
 use App\Http\Controllers\SFinlog\PeminjamanController;
 use App\Http\Controllers\SFinlog\PengajuanInvestasiController;
 use App\Http\Controllers\SFinlog\PengajuanRestrukturisasiController;
-use App\Http\Controllers\SFinlog\PengembalianInvestasiController;
 use App\Http\Controllers\SFinlog\PengembalianPinjamanController;
 use App\Http\Controllers\SFinlog\PenyaluranDanaInvestasiController;
 use App\Http\Controllers\SFinlog\PenyaluranDepositoController;
@@ -17,12 +15,12 @@ use App\Http\Controllers\SFinlog\EvaluasiRestrukturisasiController;
 use App\Livewire\DebiturPiutangIndex;
 use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
 use App\Livewire\PengembalianInvestasi;
-use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
 
 // Dashboard Pembiayaan SFinlog
 use App\Livewire\SFinlog\DashboardPembiayaanSfinlog;
 use App\Livewire\SFinlog\DashboardInvestasiDepositoSfinlog;
+
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinlog::class)->name('dashboard.pembiayaan');
 
 // Dashboard Investasi Deposito SFinlog
@@ -30,22 +28,28 @@ Route::get('dashboard/investasi-deposito', DashboardInvestasiDepositoSfinlog::cl
 
 // Peminjaman
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
-    Route::post('/', [PeminjamanController::class, 'store'])->name('store');
-    Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
-    Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
+    // Static & Specific Routes FIRST
     Route::post('update-npa-status', [PeminjamanController::class, 'updateNpaStatus'])->name('update-npa-status');
     Route::get('data', [PeminjamanController::class, 'getData'])->name('data');
     Route::get('{id}/show-kontrak', [PeminjamanController::class, 'showKontrak'])->name('show-kontrak');
+    Route::get('download-kontrak/{id}', [PeminjamanController::class, 'downloadKontrakPdf'])->name('download-kontrak');
+
+    // Dynamic / Standard Resource Routes LAST
+    Route::post('/', [PeminjamanController::class, 'store'])->name('store');
+    Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
+    Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
+    Route::get('{id}/download-sertifikat', [PeminjamanController::class, 'downloadSertifikat'])->name('download-sertifikat');
 });
 
-// AR Perbulan
-Route::get('ar-perbulan', [ArPerbulanController::class, 'index'])->name('ar-perbulan.index');
+// AR Perbulan - Handled by Livewire (see livewire_route.php)
+// Index route: sfinlog.ar-perbulan.index
 Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
 
-// AR Performance
-Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
-Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
-Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
+
+// AR Performance - Moved to Livewire (see livewire_route.php)
+// Index route: sfinlog.ar-performance.index
+// AJAX endpoints (needed for modal)
+Route::get('ar-performance/transactions', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'getTransactions'])->name('ar-performance.transactions');
 
 // Restrukturisasi Routes
 Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {
@@ -64,7 +68,9 @@ Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->
 
 // Program Restrukturisasi Routes
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-    Route::get('/', function () {return view('livewire.sfinlog.program-restrukturisasi.index');})->name('index');
+    Route::get('/', function () {
+        return view('livewire.sfinlog.program-restrukturisasi.index');
+    })->name('index');
     Route::get('create', \App\Livewire\ProgramRestrukturisasiCreate::class)->name('create');
     Route::get('{id}', \App\Livewire\ProgramRestrukturisasiShow::class)->name('show');
     Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasiEdit::class)->name('edit');
@@ -73,18 +79,20 @@ Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->grou
     Route::get('detail/{id}', [ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
 });
 
-// Pengembalian Routes
-Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
-Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
-Route::post('pengembalian', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+// Pengembalian Pinjaman - Handled by Livewire (see livewire_route.php)
+// Route pengembalian untuk SFinlog sudah menggunakan Livewire component
+// Index route: sfinlog.pengembalian-pinjaman.index
+// Optional: provide a POST endpoint for non-Livewire submissions or UniversalFormAction
+Route::post('pengembalian-pinjaman/store', [PengembalianPinjamanController::class, 'store'])
+    ->name('pengembalian-pinjaman.store');
 
 // Debitur Piutang
-Route::get('debitur-piutang', DebiturPiutangIndex::class)->name('debitur-piutang.index');
+
 Route::get('debitur-piutang/histori', [DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
 Route::get('debitur-piutang/summary', [DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
 
-// Report Pengembalian
-Route::get('report-pengembalian', ReportPengembalian::class)->name('report-pengembalian.index');
+// Report Pengembalian Finlog
+Route::get('report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('report-pengembalian.index');
 
 // Investasi Routes
 Route::prefix('form-kerja-investor')->name('form-kerja-investor.')->group(function () {
@@ -109,13 +117,21 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
     Route::post('{id}/approval', [PengajuanInvestasiController::class, 'approval'])->name('approval');
     Route::post('{id}/upload-bukti', [PengajuanInvestasiController::class, 'uploadBuktiTransfer'])->name('upload-bukti');
     Route::get('{id}/preview-kontrak', [PengajuanInvestasiController::class, 'previewKontrak'])->name('preview-kontrak');
+    Route::get('{id}/download-kontrak', [PengajuanInvestasiController::class, 'downloadKontrakPdf'])->name('download-kontrak');
     Route::post('{id}/generate-kontrak', [PengajuanInvestasiController::class, 'generateKontrak'])->name('generate-kontrak');
-    
+    Route::get('{id}/download-sertifikat', [PengajuanInvestasiController::class, 'downloadSertifikat'])->name('download-sertifikat');
+
     Route::get('history/{historyId}', [PengajuanInvestasiController::class, 'getHistoryDetail'])->name('history-detail');
 });
 
 // Report Penyaluran Dana Investasi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
+
+// Pengembalian Investasi SFinlog
+Route::get('pengembalian-investasi', \App\Livewire\SFinlog\PengembalianInvestasiFinlog::class)->name('pengembalian-investasi.index');
+Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
+    Route::post('/', [\App\Http\Controllers\SFinlog\PengembalianInvestasiController::class, 'store'])->name('store');
+});
 
 // Penyaluran Deposito SFinlog
 Route::get('penyaluran-deposito-sfinlog', \App\Livewire\SFinlog\PenyaluranDepositoSfinlogIndex::class)->name('penyaluran-deposito-sfinlog.index');
@@ -128,14 +144,6 @@ Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.
 });
 
 // Kertas Kerja Investor SFinlog
-Route::get('kertas-kerja-investor-sfinlog', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('kertas-kerja-investor-sfinlog.index');
-
-// Pengembalian Investasi
-Route::get('pengembalian-investasi', PengembalianInvestasi::class)->name('pengembalian-investasi.index');
-Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
-    Route::post('/', [PengembalianInvestasiController::class, 'store'])->name('store');
-    Route::get('{id}/edit', [PengembalianInvestasiController::class, 'edit'])->name('edit');
-    Route::put('{id}', [PengembalianInvestasiController::class, 'update'])->name('update');
-    Route::delete('{id}', [PengembalianInvestasiController::class, 'destroy'])->name('destroy');
+Route::prefix('kertas-kerja-investor-sfinlog')->name('kertas-kerja-investor-sfinlog.')->group(function () {
+    Route::get('/', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('index');
 });
-

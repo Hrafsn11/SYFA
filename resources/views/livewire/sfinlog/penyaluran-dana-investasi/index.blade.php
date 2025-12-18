@@ -8,7 +8,7 @@
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-datatable">
-                        <livewire:sfinlog.penyaluran-dana-investasi-table />
+                        <livewire:SFinlog.penyaluran-dana-investasi-table />
                     </div>
                 </div>
             </div>

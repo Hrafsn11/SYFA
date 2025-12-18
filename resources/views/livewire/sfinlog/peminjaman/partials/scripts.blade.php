@@ -9,14 +9,30 @@
                 ...(icon === 'success' && { timer: 2000, showConfirmButton: false }) 
             });
 
+
+        // Livewire alert listener with immediate reload for success
         Livewire.on('alert', (event) => {
             const { icon, title, text } = event;
-            alert(icon, text, title);
-        });
-
-        // Livewire refresh listener
-        Livewire.on('refreshData', () => {
-            @this.call('refreshData');
+            
+            if (icon === 'success') {
+                // For success, show alert and reload immediately
+                // This prevents Livewire from re-rendering before reload
+                Swal.fire({ 
+                    icon, 
+                    title, 
+                    text,
+                    timer: 1500,
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+                
+                // Reload page immediately (don't wait for Swal to close)
+                // This happens BEFORE Livewire can re-render
+                setTimeout(() => location.reload(), 100);
+            } else {
+                // For error/warning, show normally without reload
+                alert(icon, text, title);
+            }
         });
 
         // Step 1: Submit Pengajuan
@@ -24,18 +40,17 @@
             $('#modalSubmitPengajuan').modal('show');
         });
 
+
         $('#btnKonfirmasiSubmit').click(function() {
             const btn = $(this);
             btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Memproses...');
             
-            @this.call('submitPengajuan').then(() => {
-                $(document.activeElement).blur();
-                $('#modalSubmitPengajuan').modal('hide');
-                btn.prop('disabled', false).html('<i class="ti ti-send me-1"></i>Ya, Submit');
-            }).catch((error) => {
-                btn.prop('disabled', false).html('<i class="ti ti-send me-1"></i>Ya, Submit');
-                console.error('Error:', error);
-            });
+            // Close modal first
+            $(document.activeElement).blur();
+            $('#modalSubmitPengajuan').modal('hide');
+            
+            // Call Livewire - redirect will happen automatically
+            @this.call('submitPengajuan');
         });
 
         // Step 2: Validasi Investment Officer

@@ -20,6 +20,7 @@ class CellsProject extends Model
         'nama_pic',
         'alamat',
         'deskripsi_bidang',
+        'tanda_tangan_pic',
     ];
 
     public function peminjamanFinlog()
@@ -30,5 +31,13 @@ class CellsProject extends Model
     public function projects()
     {
         return $this->hasMany(Project::class, 'id_cells_project', 'id_cells_project');
+    }
+
+    /**
+     * Relasi ke PengembalianPinjamanFinlog
+     */
+    public function pengembalianPinjaman()
+    {
+        return $this->hasMany(PengembalianPinjamanFinlog::class, 'id_cells_project', 'id_cells_project');
     }
 }

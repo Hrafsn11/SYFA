@@ -84,9 +84,9 @@ class PengajuanPinjamanRequest extends FormRequest
                 },
             ],
             
-            // Only for non-Installment types (Invoice, PO, Factoring)
-            'harapan_tanggal_pencairan' => 'nullable|required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
-            'rencana_tgl_pembayaran' => 'nullable|required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
+            // Required for Invoice Financing, PO Financing, and Factoring
+            'harapan_tanggal_pencairan' => 'required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
+            'rencana_tgl_pembayaran' => 'required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
             
             // Only for Installment
             'tenor_pembayaran' => 'nullable|required_if:jenis_pembiayaan,Installment|in:3,6,9,12',

@@ -17,21 +17,25 @@
                         <!-- Search and Filter -->
                         <div class="row mx-2 mt-3 align-items-center mb-3">
                             <div class="col-md-2">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2">Show</span>
-                                    <select class="form-select" style="width: auto;">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                    <span class="ms-2">Entries</span>
-                                </div>
+                                <form method="GET" action="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}" id="perPageForm">
+                                    <input type="hidden" name="year" value="{{ $year }}">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">Show</span>
+                                        <select class="form-select" style="width: auto;" name="per_page" id="perPageSelect" onchange="document.getElementById('perPageForm').submit();">
+                                            <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                            <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                            <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                            <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                                        </select>
+                                        <span class="ms-2">Entries</span>
+                                    </div>
+                                </form>
                             </div>
 
                             <div class="col-md-3">
                                 <!-- Year Filter -->
                                 <form method="GET" action="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}">
+                                    <input type="hidden" name="per_page" value="{{ $perPage }}">
                                     <div class="input-group">
                                         <input type="text" class="form-control" placeholder="Select Year" id="flatpickr-year"
                                             name="year" value="{{ $year }}" />
@@ -58,41 +62,37 @@
                                         <tr>
                                             <th class="text-center" width="5%">No</th>
                                             <th class="text-center">Tanggal Uang Masuk</th>
-                                            <th class="text-center">Deposito</th>
                                             <th class="text-center">Deposan</th>
-                                            <th class="text-center">Nominal Deposit</th>
+                                            <th class="text-center">Nominal Deposito</th>
                                             <th class="text-center">Lama Deposito (Bulan)</th>
                                             <th class="text-center">Bagi Hasil (%PA)</th>
-                                            <th class="text-center">Bagi Hasil Nominal</th>
+                                            <th class="text-center">Bagi Hasil (Nominal/PA)</th>
+                                            <th class="text-center">Bagi Hasil Per Nominal</th>
                                             <th class="text-center">Bagi Hasil (%Bulan)</th>
                                             <th class="text-center">Bagi Hasil (COF/Bulan)</th>
-                                            <th class="text-center">CoF Per Akhir Des {{ $year }}</th>
                                             <th class="text-center">Status</th>
-                                            <th class="text-center">Tanggal Pengembalian</th>
-
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($data as $index => $row)
                                             <tr>
-                                                <td class="text-center">{{ $index + 1 }}</td>
+                                                <td class="text-center">{{ $data->firstItem() + $index }}</td>
                                                 <td class="text-center">
                                                     {{ \Carbon\Carbon::parse($row['tanggal_uang_masuk'])->format('d-m-Y') }}
                                                 </td>
-                                                <td class="text-center">{{ $row['deposito'] ?? '-' }}</td>
                                                 <td class="text-center">{{ $row['deposan'] }}</td>
                                                 <td class="text-center">Rp
                                                     {{ number_format($row['nominal_deposito'], 0, ',', '.') }}</td>
                                                 <td class="text-center">{{ $row['lama_deposito'] }} Bulan</td>
                                                 <td class="text-center">{{ number_format($row['bagi_hasil_pa'], 2) }}%</td>
                                                 <td class="text-center">Rp
-                                                    {{ number_format($row['bagi_hasil_nominal'], 0, ',', '.') }}</td>
+                                                    {{ number_format($row['bagi_hasil_nominal_pa'], 0, ',', '.') }}</td>
+                                                <td class="text-center">Rp
+                                                    {{ number_format($row['bagi_hasil_per_nominal'], 0, ',', '.') }}</td>
                                                 <td class="text-center">
                                                     {{ number_format($row['bagi_hasil_per_bulan'], 2) }}%</td>
                                                 <td class="text-center">Rp
                                                     {{ number_format($row['cof_bulan'], 0, ',', '.') }}</td>
-                                                <td class="text-center">Rp
-                                                    {{ number_format($row['cof_akhir_periode'], 0, ',', '.') }}</td>
                                                 <td class="text-center">
                                                     @if ($row['status'] === 'Lunas')
                                                         <span class="badge bg-label-success">Lunas</span>
@@ -100,13 +100,10 @@
                                                         <span class="badge bg-label-warning">Aktif</span>
                                                     @endif
                                                 </td>
-                                                <td class="text-center">
-                                                    {{ $row['tgl_pengembalian'] ? \Carbon\Carbon::parse($row['tgl_pengembalian'])->format('d-m-Y') : '-' }}
-                                                </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="13" class="text-center">Tidak ada data</td>
+                                                <td colspan="11" class="text-center">Tidak ada data</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -215,25 +212,12 @@
                         <div class="row mx-2 mt-3 mb-3">
                             <div class="col-sm-12 col-md-6">
                                 <div class="dataTables_info">
-                                    Menampilkan data
+                                    Menampilkan {{ $data->firstItem() ?? 0 }} sampai {{ $data->lastItem() ?? 0 }} dari {{ $data->total() }} data
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-6">
                                 <div class="dataTables_paginate paging_simple_numbers">
-                                    <ul class="pagination">
-                                        <li class="paginate_button page-item previous disabled">
-                                            <a href="#" class="page-link">Sebelumnya</a>
-                                        </li>
-                                        <li class="paginate_button page-item active">
-                                            <a href="#" class="page-link">1</a>
-                                        </li>
-                                        <li class="paginate_button page-item">
-                                            <a href="#" class="page-link">2</a>
-                                        </li>
-                                        <li class="paginate_button page-item next">
-                                            <a href="#" class="page-link">Selanjutnya</a>
-                                        </li>
-                                    </ul>
+                                    {{ $data->appends(request()->query())->links('pagination::bootstrap-5') }}
                                 </div>
                             </div>
                         </div>
