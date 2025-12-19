@@ -128,6 +128,7 @@ Route::middleware([
     // Pengembalian Pinjaman - Migrated to Livewire (see routes/livewire_route.php)
     // Index and Create routes are handled by Livewire components
     Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+    Route::get('pengembalian/export-pdf', [PengembalianPinjamanController::class, 'exportPdf'])->name('pengembalian.export-pdf');
 
     // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
     // Route::get('debitur-piutang', function () {
