@@ -34,7 +34,16 @@ class RoleManagement extends Component
             })->paginate(10);
 
         $allPermissions = ModelsPermission::all()->mapToGroups(function ($permission) {
-            [$group, $action] = explode('.', $permission->name);
+            $parts = explode('.', $permission->name);
+            
+            if (count($parts) >= 3 && $parts[0] === 'sfinance' && $parts[1] === 'menu') {
+                $group = 'sfinance.menu';
+                $action = implode('.', array_slice($parts, 2)); 
+            } else {
+                $action = array_pop($parts); 
+                $group = implode('.', $parts); 
+            }
+            
             return [$group => ['id' => $permission->id, 'name' => $action]];
         });
 
