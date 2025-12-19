@@ -152,6 +152,7 @@ Route::middleware([
     Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
     Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
+    Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
