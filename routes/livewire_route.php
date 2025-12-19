@@ -27,6 +27,7 @@ Route::get('config-matrix-pinjaman', \App\Livewire\ConfigMatrixPinjaman\Index::c
 Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
     Route::get('/', \App\Livewire\PengembalianPinjaman\Index::class)->name('index');
     Route::get('create', \App\Livewire\PengembalianPinjaman\Create::class)->name('create');
+    Route::get('detail/{id}', \App\Livewire\PengembalianPinjaman\Detail::class)->name('detail');
 });
 
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
