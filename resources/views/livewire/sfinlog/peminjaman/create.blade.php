@@ -60,16 +60,24 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                                        <div class="col-md-3 mb-3">
                         <label for="durasi_project" class="form-label">Durasi Project (Bulan) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project" class="form-control"
-                            placeholder="Masukkan durasi project" wire:model="durasi_project" required>
+                            placeholder="Masukkan durasi bulan" wire:model="durasi_project" value="0" min="0" required>
                         @error('durasi_project')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-
+                    <div class="col-md-3 mb-3">
+                        <label for="durasi_project_hari" class="form-label">Durasi Project (Hari) <span
+                                class="text-danger">*</span></label>
+                        <input type="number" id="durasi_project_hari" class="form-control"
+                            placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" value="0" min="0" required>
+                        @error('durasi_project_hari')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
                     <div class="col-md-6 mb-3">
                         <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
                                 class="text-danger">*</span></label>
@@ -186,7 +194,7 @@
                 <h5 class="mb-3">Dokumen Persyaratan</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan</label>
+                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan (Kontrak/PO/Invoice/PKS)</label>
                         <input type="file" id="dokumen_mitra" class="form-control"
                             wire:model.blur="dokumen_mitra" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
@@ -229,10 +237,9 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="akta_perusahaan" class="form-label">Akta Perusahaan <span
-                                class="text-danger">*</span></label>
+                        <label for="akta_perusahaan" class="form-label">Akta Perusahaan</label>
                         <input type="file" id="akta_perusahaan" class="form-control"
-                            wire:model.blur="akta_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
+                            wire:model.blur="akta_perusahaan" accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
                         @error('akta_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
@@ -240,10 +247,9 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="ktp_owner" class="form-label">KTP Owner <span
-                                class="text-danger">*</span></label>
+                        <label for="ktp_owner" class="form-label">KTP Owner Perusahaan</label>
                         <input type="file" id="ktp_owner" class="form-control" wire:model.blur="ktp_owner"
-                            accept=".jpg,.jpeg,.png,.pdf" required>
+                            accept=".jpg,.jpeg,.png,.pdf">
                         <small class="text-muted">Format: JPG, PNG, PDF (Max: 2MB)</small>
                         @error('ktp_owner')
                             <span class="text-danger">{{ $message }}</span>
