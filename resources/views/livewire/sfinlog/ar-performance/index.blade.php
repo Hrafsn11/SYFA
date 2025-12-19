@@ -55,7 +55,7 @@
             </div>
         @else
             {{-- Table Component --}}
-            <livewire:sfinlog.ar-performance-table :arData="$arData" :tahun="$tahun" :bulan="$bulan" :key="$tahun.'-'.$bulan" />
+            <livewire:SFinlog.ar-performance-table :arData="$arData" :tahun="$tahun" :bulan="$bulan" :key="$tahun.'-'.$bulan" />
         @endif
     </div>
     

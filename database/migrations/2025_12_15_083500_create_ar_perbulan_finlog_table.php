@@ -13,32 +13,32 @@ return new class extends Migration
     {
         Schema::create('ar_perbulan_finlog', function (Blueprint $table) {
             $table->ulid('id_ar_perbulan_finlog')->primary();
-            $table->ulid('id_debitur');
-            $table->string('nama_perusahaan');
+            
+            $table->foreignUlid('id_debitur')
+                ->constrained('master_debitur_dan_investor', 'id_debitur')
+                ->onDelete('cascade');
+            
+            $table->string('nama_perusahaan')->nullable();
             $table->date('periode');
-            $table->string('bulan', 10); // Format: 'Y-m' (2025-12)
-            $table->decimal('total_pinjaman_pokok', 20, 2)->default(0);
-            $table->decimal('total_bagi_hasil', 20, 2)->default(0);
-            $table->decimal('total_pengembalian_pokok', 20, 2)->default(0);
-            $table->decimal('total_pengembalian_bagi_hasil', 20, 2)->default(0);
-            $table->decimal('sisa_ar_pokok', 20, 2)->default(0);
-            $table->decimal('sisa_bagi_hasil', 20, 2)->default(0);
-            $table->decimal('sisa_ar_total', 20, 2)->default(0);
+            $table->string('bulan', 7);
+            
+            $table->decimal('total_pinjaman_pokok', 15, 2)->default(0);
+            $table->decimal('total_bagi_hasil', 15, 2)->default(0);
+            $table->decimal('total_pengembalian_pokok', 15, 2)->default(0);
+            $table->decimal('total_pengembalian_bagi_hasil', 15, 2)->default(0);
+            
+            $table->decimal('sisa_ar_pokok', 15, 2)->default(0);
+            $table->decimal('sisa_bagi_hasil', 15, 2)->default(0);
+            $table->decimal('sisa_ar_total', 15, 2)->default(0);
+            
             $table->integer('jumlah_pinjaman')->default(0);
             $table->enum('status', ['active', 'lunas', 'archived'])->default('active');
+            
             $table->timestamps();
             $table->softDeletes();
-
-            // Indexes
-            $table->index(['id_debitur', 'bulan']);
-            $table->index('bulan');
-            $table->index('status');
-
-            // Foreign key
-            $table->foreign('id_debitur')
-                ->references('id_debitur')
-                ->on('master_debitur_dan_investor')
-                ->onDelete('cascade');
+            
+            $table->index(['id_debitur', 'bulan'], 'idx_debitur_bulan');
+            $table->unique(['id_debitur', 'bulan'], 'unique_debitur_bulan');
         });
     }
 
