@@ -151,7 +151,7 @@
                         <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
                 @endif
                 <i class="menu-icon tf-icons ti ti-wallet"></i>
-                <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
+                <div data-i18n="Pengembalian Peminjaman">Pengembalian Peminjaman</div>
                 </a>
             </li>
 
