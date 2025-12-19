@@ -1202,6 +1202,61 @@ class PeminjamanController extends Controller
                 
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_validasi_dokumen_disetujui');
                 $historyData['current_step'] = 3;
+
+                $nominalPengajuan = $peminjaman->total_pinjaman;
+                if ($historyData['nominal_yang_disetujui'] != $nominalPengajuan) {
+                    $ratio = $historyData['nominal_yang_disetujui'] / $nominalPengajuan;
+                    
+                    $buktiPeminjaman = BuktiPeminjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)->get();
+                    
+                    $persentaseBagiHasil = ($peminjaman->persentase_bagi_hasil ?? 2) / 100;
+                    
+                    $totalPinjamanBaru = 0;
+                    $totalBagiHasilBaru = 0;
+                    
+                    if ($peminjaman->jenis_pembiayaan === 'Installment') {
+                        foreach ($buktiPeminjaman as $bukti) {
+                            $nilaiInvoiceLama = $bukti->nilai_invoice ?? 0;
+                            $nilaiInvoiceBaru = round($nilaiInvoiceLama * $ratio);
+                            
+                            $bukti->update([
+                                'nilai_invoice' => $nilaiInvoiceBaru,
+                            ]);
+                            
+                            $totalPinjamanBaru += $nilaiInvoiceBaru;
+                        }
+                        $totalBagiHasilBaru = $historyData['nominal_yang_disetujui'] * $persentaseBagiHasil;
+                    } else {
+                        foreach ($buktiPeminjaman as $bukti) {
+                            $nilaiPinjamanLama = $bukti->nilai_pinjaman ?? 0;
+                            $nilaiPinjamanBaru = round($nilaiPinjamanLama * $ratio);
+                            
+                            $nilaiBagiHasilBaru = round($nilaiPinjamanBaru * $persentaseBagiHasil);
+                            
+                            $bukti->update([
+                                'nilai_pinjaman' => $nilaiPinjamanBaru,
+                                'nilai_bagi_hasil' => $nilaiBagiHasilBaru,
+                            ]);
+                            
+                            $totalPinjamanBaru += $nilaiPinjamanBaru;
+                            $totalBagiHasilBaru += $nilaiBagiHasilBaru;
+                        }
+                    }
+                    
+                    $updateData = [
+                        'total_pinjaman' => $historyData['nominal_yang_disetujui'],
+                        'total_bagi_hasil' => $totalBagiHasilBaru,
+                        'pembayaran_total' => $historyData['nominal_yang_disetujui'] + $totalBagiHasilBaru,
+                    ];
+                    
+                    if ($peminjaman->jenis_pembiayaan === 'Installment') {
+                        $updateData['pps'] = $totalBagiHasilBaru * 0.40;
+                        $updateData['s_finance'] = $totalBagiHasilBaru * 0.60;
+                        $updateData['yang_harus_dibayarkan'] = ($historyData['nominal_yang_disetujui'] + $totalBagiHasilBaru) / ($peminjaman->tenor_pembayaran ?? 1);
+                    }
+                    
+                    $peminjaman->update($updateData);
+                }
             } elseif ($status === 'Validasi Ditolak') {
                 $historyData['validasi_dokumen'] = 'ditolak';
                 $historyData['reject_by'] = auth()->id();
