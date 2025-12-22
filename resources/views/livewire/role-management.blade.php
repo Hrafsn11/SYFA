@@ -152,6 +152,7 @@
                                         'peminjaman' => 'Peminjaman',
                                         'investasi' => 'Investasi',
                                         'sfinlog' => 'S-Finlog',
+                                        'menu_sfinance' => 'Menu SFinance',
                                     ];
 
                                     $groupPrefixes = [
@@ -160,6 +161,7 @@
                                         'peminjaman' => ['peminjaman', 'peminjaman_dana'],
                                         'investasi' => ['investasi', 'penyaluran_deposito'],
                                         'sfinlog' => ['pengajuan_investasi_finlog'],
+                                        'menu_sfinance' => ['sfinance'],
                                     ];
                                 @endphp
 
@@ -226,13 +228,14 @@
                                                                                 'master_data' => 'master data',
                                                                                 'pengajuan_investasi_finlog' =>
                                                                                     'pengajuan investasi finlog',
+                                                                                'sfinance.menu' => 'menu sfinance',
                                                                             ];
 
                                                                             $name_group = $groupMap[$group] ?? $group;
                                                                             $alwaysUppercase = ['isps', 'ism'];
                                                                             foreach ($alwaysUppercase as $word) {
                                                                                 $name_group = preg_replace_callback(
-                                                                                    "/\b$word\b/i",
+                                                                                    "/\\b$word\\b/i",
                                                                                     function ($matches) {
                                                                                         return strtoupper($matches[0]);
                                                                                     },
