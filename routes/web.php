@@ -128,6 +128,7 @@ Route::middleware([
     // Pengembalian Pinjaman - Migrated to Livewire (see routes/livewire_route.php)
     // Index and Create routes are handled by Livewire components
     Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+    Route::get('pengembalian/export-pdf', [PengembalianPinjamanController::class, 'exportPdf'])->name('pengembalian.export-pdf');
 
     // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
     // Route::get('debitur-piutang', function () {
@@ -151,6 +152,7 @@ Route::middleware([
     Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
     Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
+    Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
@@ -255,6 +257,10 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'destroy'])->name('destroy');
     });
 
+    // Global Search
+    Route::get('search', \App\Http\Controllers\GlobalSearchController::class)->name('search');
+    Route::get('search/api', [\App\Http\Controllers\GlobalSearchController::class, 'api'])->name('search.api');
+    
     
 });
 

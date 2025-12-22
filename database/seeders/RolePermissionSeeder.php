@@ -50,8 +50,23 @@ class RolePermissionSeeder extends Seeder
             'permissions.edit',
             'permissions.delete',
 
-            // Dashboard
-            'dashboard.view',
+            // Menu Sfinance
+            'sfinance.menu.dashboard_pembiayaan',
+            'sfinance.menu.dashboard_pembiayaan_investasi',
+            'sfinance.menu.pengajuan_peminjaman',
+            'sfinance.menu.ar_perbulan',
+            'sfinance.menu.ar_performance',
+            'sfinance.menu.pengajuan_restukturisasi',
+            'sfinance.menu.program_restukturisasi',
+            'sfinance.menu.pengembalian_dana',
+            'sfinance.menu.debitur_piutang',
+            'sfinance.menu.report_pengembalian',
+            'sfinance.menu.pengajuan_investasi',
+            'sfinance.menu.report_penyaluran_dana',
+            'sfinance.menu.penyaluran_deposito',
+            'sfinance.menu.kertas_kerja_sfinance',
+            'sfinance.menu.pengembalian_investasi',
+  
 
             // Settings
             'settings.view',
@@ -64,7 +79,7 @@ class RolePermissionSeeder extends Seeder
             'master_data.delete',
 
             // Peminjaman Management
-            'peminjaman_dana.view',
+           
             'peminjaman_dana.add',
             'peminjaman_dana.edit',
             'peminjaman_dana.active/non_active',
@@ -127,7 +142,6 @@ class RolePermissionSeeder extends Seeder
             'users.edit',
             'roles.view',
             'permissions.view',
-            'dashboard.view',
             'settings.view',
         ]);
 
@@ -137,21 +151,25 @@ class RolePermissionSeeder extends Seeder
         $moderatorRole->syncPermissions([
             'users.view',
             'users.edit',
-            'dashboard.view',
         ]);
 
         $userRole = Role::firstOrCreate(['name' => 'user']);
         // Remove all previous permissions before syncing
         $userRole->permissions()->detach();
         $userRole->syncPermissions([
-            'dashboard.view',
         ]);
 
         $debiturRole = Role::firstOrCreate(['name' => 'Debitur', 'restriction' => 0]);
 
         $debiturRole->permissions()->detach();
         $debiturRole->syncPermissions([
-            'peminjaman_dana.view',
+            'sfinance.menu.pengajuan_peminjaman',
+            'sfinance.menu.pengajuan_restukturisasi',
+            'sfinance.menu.pengajuan_investasi',
+            'sfinance.menu.pengembalian_dana',
+            'sfinance.menu.pengembalian_investasi',
+            'sfinance.menu.report_penyaluran_dana',
+           
             'peminjaman_dana.add',
             'peminjaman_dana.edit',
             'peminjaman_dana.pengajuan_peminjaman',
@@ -167,7 +185,23 @@ class RolePermissionSeeder extends Seeder
         $financeRole = Role::firstOrCreate(['name' => 'Finance SKI', 'restriction' => 0]);
         $financeRole->permissions()->detach();
         $financeRole->syncPermissions([
-            'peminjaman_dana.view',
+            'sfinance.menu.dashboard_pembiayaan',
+            'sfinance.menu.dashboard_pembiayaan_investasi',
+            'sfinance.menu.pengajuan_peminjaman',
+            'sfinance.menu.ar_perbulan',
+            'sfinance.menu.ar_performance',
+            'sfinance.menu.pengajuan_restukturisasi',
+            'sfinance.menu.program_restukturisasi',
+            'sfinance.menu.pengembalian_dana',
+            'sfinance.menu.debitur_piutang',
+            'sfinance.menu.report_pengembalian',
+            'sfinance.menu.pengajuan_investasi',
+            'sfinance.menu.report_penyaluran_dana',
+            'sfinance.menu.penyaluran_deposito',
+            'sfinance.menu.kertas_kerja_sfinance',
+            'sfinance.menu.pengembalian_investasi',
+  
+           
             'peminjaman_dana.validasi_dokumen',
             'peminjaman_dana.upload_dokumen_transfer',
 
@@ -184,7 +218,16 @@ class RolePermissionSeeder extends Seeder
         $ceoRole = Role::firstOrCreate(['name' => 'CEO SKI', 'restriction' => 0]);
         $ceoRole->permissions()->detach();
         $ceoRole->syncPermissions([
-            'peminjaman_dana.view',
+            'sfinance.menu.pengembalian_dana',
+            'sfinance.menu.report_pengembalian',
+            'sfinance.menu.ar_performance',
+            'sfinance.menu.ar_perbulan',
+            'sfinance.menu.debitur_piutang',
+            'sfinance.menu.pengajuan_investasi',
+            'sfinance.menu.pengajuan_peminjaman',
+            'sfinance.menu.pengajuan_restukturisasi',
+
+           
             'peminjaman_dana.validasi_ceo_ski',
 
             'pengajuan_restrukturisasi.persetujuan_ceo_ski',
@@ -194,7 +237,7 @@ class RolePermissionSeeder extends Seeder
         $direkturRole = Role::firstOrCreate(['name' => 'Direktur SKI', 'restriction' => 0]);
         $direkturRole->permissions()->detach();
         $direkturRole->syncPermissions([
-            'peminjaman_dana.view',
+            'sfinance.menu.pengajuan_peminjaman',
             'peminjaman_dana.validasi_direktur',
 
             'pengajuan_restrukturisasi.persetujuan_direktur',

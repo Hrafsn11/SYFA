@@ -1,5 +1,61 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    @media (min-width: 768px) and (max-width: 1199.98px) {
+        .dataTables_wrapper .row.mx-2 > div[class*="col-md"] {
+            margin-bottom: 0.75rem;
+        }
+        
+        #perPageForm {
+            width: 100%;
+        }
+        
+        #perPageForm .d-flex {
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+        
+        #perPageForm .form-select-sm {
+            flex-shrink: 0;
+        }
+        
+        #perPageForm span {
+            white-space: nowrap;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .dataTables_wrapper .row.mx-2 {
+            margin-left: 0.5rem !important;
+            margin-right: 0.5rem !important;
+        }
+        
+        .dataTables_wrapper .row.mx-2 > div {
+            margin-bottom: 0.75rem;
+        }
+        
+        .input-group-sm {
+            width: 100%;
+        }
+        
+        .search-input {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        
+        #perPageForm {
+            width: 100%;
+        }
+        
+        #perPageForm .d-flex {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
     <div class="row">
         <div class="row">
@@ -14,29 +70,27 @@
             <div class="card">
                 <div class="card-datatable table-responsive">
                     <div class="dataTables_wrapper dt-bootstrap5 no-footer">
-                        <!-- Search and Filter -->
-                        <div class="row mx-2 mt-3 align-items-center mb-3">
-                            <div class="col-md-2">
+                        <div class="row mx-2 mt-3 align-items-center mb-3 g-2">
+                            <div class="col-12 col-sm-12 col-md-12 col-lg-2 col-xl-2">
                                 <form method="GET" action="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}" id="perPageForm">
                                     <input type="hidden" name="year" value="{{ $year }}">
-                                    <div class="d-flex align-items-center">
-                                        <span class="me-2">Show</span>
-                                        <select class="form-select" style="width: auto;" name="per_page" id="perPageSelect" onchange="document.getElementById('perPageForm').submit();">
+                                    <div class="d-flex align-items-center flex-nowrap">
+                                        <span class="me-2 text-nowrap">Show</span>
+                                        <select class="form-select form-select-sm" style="width: auto; min-width: 60px; flex-shrink: 0;" name="per_page" id="perPageSelect" onchange="document.getElementById('perPageForm').submit();">
                                             <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
                                             <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
                                             <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
                                             <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
                                         </select>
-                                        <span class="ms-2">Entries</span>
+                                        <span class="ms-2 text-nowrap">Entries</span>
                                     </div>
                                 </form>
                             </div>
 
-                            <div class="col-md-3">
-                                <!-- Year Filter -->
+                            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-3">
                                 <form method="GET" action="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}">
                                     <input type="hidden" name="per_page" value="{{ $perPage }}">
-                                    <div class="input-group">
+                                    <div class="input-group input-group-sm">
                                         <input type="text" class="form-control" placeholder="Select Year" id="flatpickr-year"
                                             name="year" value="{{ $year }}" />
                                         <button type="submit" class="btn btn-primary">
@@ -46,9 +100,9 @@
                                 </form>
                             </div>
 
-                            <div class="col-md-7">
+                            <div class="col-12 col-sm-12 col-md-12 col-lg-6 col-xl-7">
                                 <div class="d-flex justify-content-end">
-                                    <input type="search" class="form-control search-input" placeholder="Cari..." />
+                                    <input type="search" class="form-control form-control-sm search-input" placeholder="Cari..." style="max-width: 300px;" />
                                 </div>
                             </div>
                         </div>

@@ -45,13 +45,15 @@
                     </div>
 
                     <div class="col-md-6  mb-3">
-                        <label for="nama_project" class="form-label">Nama Project <span class="text-danger">*</span></label>
+                        <label for="nama_project" class="form-label">Nama Project <span
+                                class="text-danger">*</span></label>
                         <div wire:ignore>
                             <select id="nama_project" name="nama_project" class="form-select select2"
                                 data-placeholder="Pilih Project" required>
                                 <option value=""></option>
                                 @foreach ($availableProjects as $project)
-                                    <option value="{{ $project['nama_project'] }}">{{ $project['nama_project'] }}</option>
+                                    <option value="{{ $project['nama_project'] }}">{{ $project['nama_project'] }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -60,16 +62,24 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                                        <div class="col-md-3 mb-3">
                         <label for="durasi_project" class="form-label">Durasi Project (Bulan) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project" class="form-control"
-                            placeholder="Masukkan durasi project" wire:model="durasi_project" required>
+                            placeholder="Masukkan durasi bulan" wire:model="durasi_project" value="0" min="0" required>
                         @error('durasi_project')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-
+                    <div class="col-md-3 mb-3">
+                        <label for="durasi_project_hari" class="form-label">Durasi Project (Hari) <span
+                                class="text-danger">*</span></label>
+                        <input type="number" id="durasi_project_hari" class="form-control"
+                            placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" value="0" min="0" required>
+                        @error('durasi_project_hari')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
                     <div class="col-md-6 mb-3">
                         <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
                                 class="text-danger">*</span></label>
@@ -186,7 +196,7 @@
                 <h5 class="mb-3">Dokumen Persyaratan</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan</label>
+                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan (Kontrak/PO/Invoice/PKS)</label>
                         <input type="file" id="dokumen_mitra" class="form-control"
                             wire:model.blur="dokumen_mitra" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
@@ -229,10 +239,9 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="akta_perusahaan" class="form-label">Akta Perusahaan <span
-                                class="text-danger">*</span></label>
+                        <label for="akta_perusahaan" class="form-label">Akta Perusahaan</label>
                         <input type="file" id="akta_perusahaan" class="form-control"
-                            wire:model.blur="akta_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
+                            wire:model.blur="akta_perusahaan" accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
                         @error('akta_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
@@ -240,10 +249,9 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="ktp_owner" class="form-label">KTP Owner <span
-                                class="text-danger">*</span></label>
+                        <label for="ktp_owner" class="form-label">KTP Owner Perusahaan</label>
                         <input type="file" id="ktp_owner" class="form-control" wire:model.blur="ktp_owner"
-                            accept=".jpg,.jpeg,.png,.pdf" required>
+                            accept=".jpg,.jpeg,.png,.pdf">
                         <small class="text-muted">Format: JPG, PNG, PDF (Max: 2MB)</small>
                         @error('ktp_owner')
                             <span class="text-danger">{{ $message }}</span>
@@ -342,24 +350,25 @@
                 })
                 .on('change', async function() {
                     const cellsProjectId = $(this).val();
-                    
+
                     // Reset nama_project dropdown
                     $('#nama_project').val('').trigger('change');
-                    
+
                     // Update Livewire
                     await @this.set('id_cells_project', cellsProjectId);
-                    
+
                     // Get updated availableProjects from Livewire
                     const projects = @this.availableProjects || [];
-                    
+
                     // Update nama_project dropdown
                     const $namaProject = $('#nama_project');
                     $namaProject.empty().append('<option value=""></option>');
-                    
+
                     projects.forEach(project => {
-                        $namaProject.append(new Option(project.nama_project, project.nama_project, false, false));
+                        $namaProject.append(new Option(project.nama_project, project.nama_project,
+                            false, false));
                     });
-                    
+
                     $namaProject.trigger('change');
                 });
 
@@ -402,12 +411,10 @@
             // Calculations
             const hitungBagiHasil = () => {
                 const nilaiPinjaman = getCleave('nilai_pinjaman');
-                const durasiProject = parseInt($('#durasi_project').val()) || 0;
                 const persentaseBagiHasil = parseFloat($('#presentase_bagi_hasil').val()) || 0;
 
-                if (nilaiPinjaman > 0 && durasiProject > 0 && persentaseBagiHasil > 0) {
-                    const bagiHasilTotal = Math.round((nilaiPinjaman * persentaseBagiHasil / 100) *
-                        durasiProject);
+                if (nilaiPinjaman > 0 && persentaseBagiHasil > 0) {
+                    const bagiHasilTotal = Math.round(nilaiPinjaman * persentaseBagiHasil / 100);
                     const totalPinjaman = nilaiPinjaman + bagiHasilTotal;
                     setCleave('nilai_bagi_hasil', bagiHasilTotal);
                     setCleave('total_pinjaman', totalPinjaman);

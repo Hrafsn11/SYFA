@@ -56,4 +56,52 @@ class ArPerformanceFinlogController extends Controller
             'message' => 'Cache cleared successfully'
         ]);
     }
+
+    public function exportPDF(Request $request)
+    {
+        $tahun = $request->input('tahun', date('Y'));
+        $bulan = $request->input('bulan', null);
+
+        // Normalize bulan: convert empty string to null
+        if ($bulan === '' || $bulan === '0') {
+            $bulan = null;
+        }
+
+        // Get fresh data based on filters using SFinlog service
+        $arData = $this->arService->getArPerformanceData($tahun, $bulan, false);
+
+        // Prepare bulan name
+        $bulanNama = [
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+        ];
+
+        // Build title
+        $title = 'Daftar AR Performance - SFinlog';
+        if ($bulan) {
+            $title .= ' - ' . ($bulanNama[$bulan] ?? $bulan);
+        }
+        $title .= ' Tahun ' . $tahun;
+
+        // Generate filename
+        $filename = 'AR_Performance_SFinlog';
+        if ($bulan) {
+            $filename .= '_' . ($bulanNama[$bulan] ?? $bulan);
+        }
+        $filename .= '_' . $tahun . '.pdf';
+
+        // Generate PDF
+        $pdf = Pdf::loadView('livewire.sfinlog.ar-performance.export-pdf', [
+            'arData' => $arData,
+            'tahun' => $tahun,
+            'bulan' => $bulan,
+            'bulanNama' => $bulanNama,
+            'title' => $title
+        ]);
+
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->download($filename);
+    }
 }

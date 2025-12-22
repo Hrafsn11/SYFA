@@ -9,8 +9,8 @@ use App\Services\ArPerformanceFinlogService;
 class ArPerformanceIndex extends Component
 {
     // Filters
-    public $tahun = '';
-    public $bulan = '';
+    public $tahun;
+    public $bulan;
 
     // Inject Service
     protected $arPerformanceService;
@@ -23,7 +23,7 @@ class ArPerformanceIndex extends Component
     public function mount()
     {
         $this->tahun = date('Y');
-        $this->bulan = ''; // Default: semua bulan
+        $this->bulan = null; // Default: semua bulan
     }
 
     public function render()

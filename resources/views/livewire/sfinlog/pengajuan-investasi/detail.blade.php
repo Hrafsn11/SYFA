@@ -385,7 +385,24 @@
     };
     
     $(document).ready(() => {
-        $('.bs-datepicker').datepicker({format: 'yyyy-mm-dd', autoclose: true, todayHighlight: true, orientation: 'bottom auto'});
+        const initDatepicker = (selector) => {
+            $(selector).datepicker('destroy').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true,
+                orientation: 'bottom auto'
+            }).on('changeDate', function(e) {
+                if (e.date) {
+                    const y = e.date.getFullYear();
+                    const m = String(e.date.getMonth() + 1).padStart(2, '0');
+                    const d = String(e.date.getDate()).padStart(2, '0');
+                    $(this).val(`${y}-${m}-${d}`);
+                }
+            });
+        };
+        
+        initDatepicker('.bs-datepicker');
+        $('#modalValidasiFinanceSKI, #modalGenerateKontrak').on('shown.bs.modal', () => initDatepicker('.bs-datepicker'));
         
         // Finance SKI
         $('#btnValidasiFinanceSKI').click(() => modal('modalValidasiFinanceSKI'));
@@ -412,7 +429,8 @@
         $('#formGenerateKontrak').submit(e => {
             e.preventDefault();
             const n = $('#nomor_kontrak').val();
-            n ? ajax.post(url('/generate-kontrak'), {nomor_kontrak: n}).done(r => ajax.respond(r, 'Kontrak berhasil digenerate!', 'modalGenerateKontrak')).fail(x => alert('error', errMsg(x))) : alert('error', 'Nomor kontrak wajib diisi');
+            const t = $('#tanggal_kontrak').val();
+            n ? ajax.post(url('/generate-kontrak'), {nomor_kontrak: n, tanggal_kontrak: t}).done(r => ajax.respond(r, 'Kontrak berhasil digenerate!', 'modalGenerateKontrak')).fail(x => alert('error', errMsg(x))) : alert('error', 'Nomor kontrak wajib diisi');
         });
         
         // Preview
