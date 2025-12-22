@@ -220,6 +220,13 @@ class PengembalianPeminjamanTable extends DataTableComponent
                     return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ($value ?: 'Belum Lunas') . '</span></div>';
                 })
                 ->html(),
+
+            Column::make('Aksi')
+                ->label(fn ($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
+                    'id' => $row->ulid
+                ])->render())
+                ->html()
+                ->excludeFromColumnSelect(),
         ];
     }
 }

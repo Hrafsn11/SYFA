@@ -67,6 +67,21 @@
                             @endif
                         </div>
 
+                        @if($bulan_berjalan > 0)
+                            <div class="col-12 mb-3">
+                                <div class="alert alert-info mb-0">
+                                    <i class="ti ti-info-circle me-2"></i>
+                                    <strong>Bulan Berjalan: {{ $bulan_berjalan }} / {{ $lama_investasi ?? 0 }}</strong>
+                                    @if($is_bulan_terakhir)
+                                        <span class="badge bg-success ms-2">Bulan Terakhir</span>
+                                    @endif
+                                    @if($info_periode)
+                                        <br><small>{{ $info_periode }}</small>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
                         @if($jumlah_transaksi > 0)
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Total Pokok Sudah Dikembalikan</label>
@@ -84,7 +99,7 @@
 
                         @php
                             $sisaBagiHasil = $sisaBagiHasilInfo ?? 0;
-                            $canPayBagiHasil = $sisaBagiHasil > 0;
+                            $canPayBagiHasil = $sisaBagiHasil > 0 && ($bisa_bayar_bagi_hasil ?? false);
                         @endphp
                         <div class="col-md-6 mb-3 form-group">
                             <label for="bagi_hasil_dibayar_finlog" class="form-label">
@@ -101,15 +116,21 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             @if(!$canPayBagiHasil)
-                                <small class="text-success">
-                                    Bagi Hasil sudah lunas, tidak perlu diisi lagi.
-                                </small>
+                                @if($sisaBagiHasil <= 0)
+                                    <small class="text-success">
+                                        Bagi Hasil sudah lunas, tidak perlu diisi lagi.
+                                    </small>
+                                @else
+                                    <small class="text-warning">
+                                        Bagi Hasil hanya dapat dibayarkan di bulan genap (bulan ke-2, 4, 6, dst) atau bulan terakhir.
+                                    </small>
+                                @endif
                             @endif
                         </div>
 
                         @php
                             $sisaPokokInfo = max(0, ($nominal_investasi ?? 0) - ($total_pokok_dikembalikan ?? 0));
-                            $canPayPokok = $sisaBagiHasil <= 0 && $sisaPokokInfo > 0;
+                            $canPayPokok = ($bisa_bayar_pokok ?? false) && $sisaPokokInfo > 0;
                         @endphp
 
                         <div class="col-md-6 mb-3 form-group">
@@ -126,14 +147,20 @@
                             @error('dana_pokok_dibayar')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            @if(!$canPayPokok && $sisaBagiHasil > 0)
-                                <small class="text-danger">
-                                    Dana pokok baru bisa dibayarkan jika Bagi Hasil sudah lunas.
-                                </small>
-                            @elseif(!$canPayPokok && $sisaPokokInfo <= 0)
-                                <small class="text-success">
-                                    Dana pokok sudah lunas, tidak perlu diisi lagi.
-                                </small>
+                            @if(!$canPayPokok)
+                                @if(!($is_bulan_terakhir ?? false))
+                                    <small class="text-warning">
+                                        Dana pokok hanya dapat dibayarkan di bulan terakhir investasi (bulan ke-{{ $lama_investasi ?? 0 }}).
+                                    </small>
+                                @elseif($sisaBagiHasil > 0)
+                                    <small class="text-danger">
+                                        Dana pokok baru bisa dibayarkan jika Bagi Hasil sudah lunas.
+                                    </small>
+                                @elseif($sisaPokokInfo <= 0)
+                                    <small class="text-success">
+                                        Dana pokok sudah lunas, tidak perlu diisi lagi.
+                                    </small>
+                                @endif
                             @endif
                         </div>
 

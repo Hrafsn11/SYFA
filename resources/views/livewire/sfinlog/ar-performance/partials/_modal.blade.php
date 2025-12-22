@@ -95,7 +95,7 @@
         function updateExportLink() {
             const tahun = @this.tahun;
             const bulan = @this.bulan || '';
-            let url = "{{ route('ar-performance.export-pdf') }}";
+            let url = "{{ route('sfinlog.ar-performance.export-pdf') }}";
             url += '?tahun=' + tahun;
             if (bulan) {
                 url += '&bulan=' + bulan;
@@ -163,9 +163,9 @@
 
             $('#modalTitle').text(`${debiturName} - ${categoryLabels[category]}`);
 
-            $tbody.html(`
+                            $tbody.html(`
                 <tr>
-                    <td colspan="7" class="text-center">
+                    <td colspan="6" class="text-center">
                         <div class="spinner-border spinner-border-sm me-2"></div>
                         Memuat data...
                     </td>

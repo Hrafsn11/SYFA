@@ -10,6 +10,7 @@ use App\Services\ArPerbulanService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\PengembalianPinjamanRequest;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengembalianPinjamanController extends Controller
 {
@@ -157,6 +158,51 @@ class PengembalianPinjamanController extends Controller
                 throw $e;
             }
         });
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+
+        if (!$debitur) {
+            abort(404);
+        }
+
+        // Ambil data sama seperti di DataTable (hanya record terakhir per nomor_peminjaman + invoice_dibayarkan)
+        $latestRecords = \DB::table('pengembalian_pinjaman as pp1')
+            ->select('pp1.ulid')
+            ->joinSub(
+                \DB::table('pengembalian_pinjaman')
+                    ->select('nomor_peminjaman', 'invoice_dibayarkan', \DB::raw('MAX(created_at) as max_created'))
+                    ->whereIn('id_pengajuan_peminjaman', function ($subQuery) use ($debitur) {
+                        $subQuery->select('id_pengajuan_peminjaman')
+                            ->from('pengajuan_peminjaman')
+                            ->where('id_debitur', $debitur->id_debitur);
+                    })
+                    ->groupBy('nomor_peminjaman', 'invoice_dibayarkan'),
+                'latest',
+                function ($join) {
+                    $join->on('pp1.nomor_peminjaman', '=', 'latest.nomor_peminjaman')
+                        ->on('pp1.invoice_dibayarkan', '=', 'latest.invoice_dibayarkan')
+                        ->on('pp1.created_at', '=', 'latest.max_created');
+                }
+            )
+            ->pluck('ulid');
+
+        $data = PengembalianPinjaman::with(['pengembalianInvoices'])
+            ->whereIn('ulid', $latestRecords)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $html = view('exports.pengembalian-pinjaman-index-pdf', [
+            'items' => $data,
+        ])->render();
+
+        $fileName = 'Pengembalian_Pinjaman_' . now()->format('Ymd') . '.pdf';
+
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'landscape');
+
+        return $pdf->download($fileName);
     }
 
     private function parseDate($dateString)

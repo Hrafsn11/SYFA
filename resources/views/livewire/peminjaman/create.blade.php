@@ -774,6 +774,14 @@
                 if (input) {
                     input.addEventListener('change', function(e) {
                         const file = e.target.files[0];
+                        try {
+                            // remove invalid marker when user selects a file
+                            const $el = $(this);
+                            $el.removeClass('is-invalid');
+                            $el.parent().find('.existing-file-info').remove();
+                        } catch (err) {
+                            // ignore
+                        }
                         if (file) {
                             const result = FileValidator.validate(file);
                             if (!result.valid) {
@@ -808,7 +816,16 @@
 
                 // Basic validation
                 if (!no_invoice || nilai_pinjaman <= 0) {
-                    alert('No. Invoice dan Nilai Pinjaman wajib diisi dan > 0');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'No. Invoice dan Nilai Pinjaman wajib diisi dan > 0',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -817,7 +834,16 @@
                     return it.no_invoice === no_invoice;
                 });
                 if (duplicateIndex !== -1 && (editInvoiceIndex === -1 || duplicateIndex !== editInvoiceIndex)) {
-                    alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -874,13 +900,31 @@
 
                 // Basic validation
                 if (!no_kontrak || nilai_pinjaman <= 0) {
-                    alert('No. Kontrak dan Nilai Pinjaman wajib diisi dan > 0');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'No. Kontrak dan Nilai Pinjaman wajib diisi dan > 0',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
                 
                 // Validate kontrak_date is required
                 if (!kontrak_date) {
-                    alert('Kontrak Date wajib diisi');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'Kontrak Date wajib diisi',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -889,8 +933,16 @@
                     return it.no_kontrak === no_kontrak;
                 });
                 if (dupPo !== -1 && (editInvoiceIndex === -1 || dupPo !== editInvoiceIndex)) {
-                    alert(
-                        'Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -940,7 +992,16 @@
 
                 // Basic validation
                 if (!no_invoice || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
-                    alert('No. Invoice dan Nilai Invoice wajib diisi dan > 0');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'No. Invoice dan Nilai Invoice wajib diisi dan > 0',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -948,7 +1009,16 @@
                 if (!nama_barang || String(nama_barang).trim() === '') {
                     // mark input invalid and show message
                     $('#modal_nama_barang').addClass('is-invalid');
-                    alert('Nama Barang wajib diisi untuk Installment.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'Nama Barang wajib diisi untuk Installment.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 } else {
                     $('#modal_nama_barang').removeClass('is-invalid');
@@ -959,7 +1029,16 @@
                     return it.no_invoice === no_invoice;
                 });
                 if (dupInst !== -1 && (editInvoiceIndex === -1 || dupInst !== editInvoiceIndex)) {
-                    alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -1009,16 +1088,64 @@
                 const dokumen_so_file = document.getElementById('modal_dokumen_so_fact').files[0] || null;
                 const dokumen_bast_file = document.getElementById('modal_dokumen_bast_fact').files[0] || null;
 
-                // Basic validation
-                if (!no_kontrak || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
-                    alert('No. Kontrak dan Nilai Invoice wajib diisi dan > 0');
+                // Basic validation — require uploaded invoice and kontrak files for Factoring
+                // When editing, existing.dokumen_* counts as present
+                const existingFact = (editInvoiceIndex >= 0) ? factoringData[editInvoiceIndex] : null;
+                const hasInvoice = dokumen_invoice_file || (existingFact && existingFact.dokumen_invoice);
+                const hasKontrak = dokumen_kontrak_file || (existingFact && existingFact.dokumen_kontrak);
+
+                if (!hasInvoice || !hasKontrak) {
+                    const invFileEl = $('#modal_dokumen_invoice_fact');
+                    const kontrakFileEl = $('#modal_dokumen_kontrak_fact');
+                    // mark missing inputs (only if no existing file and no new file)
+                    if (!hasInvoice && invFileEl.length) invFileEl.addClass('is-invalid');
+                    if (!hasKontrak && kontrakFileEl.length) kontrakFileEl.addClass('is-invalid');
+
+                    let missingMsg = [];
+                    if (!hasInvoice) missingMsg.push('Dokumen Invoice');
+                    if (!hasKontrak) missingMsg.push('Dokumen Kontrak');
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: missingMsg.join(' dan ') + ' wajib diunggah.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        // focus the first missing file input
+                        if (!hasInvoice && invFileEl.length) invFileEl.focus();
+                        else if (!hasKontrak && kontrakFileEl.length) kontrakFileEl.focus();
+                    });
+
                     return;
+                } else {
+                    // clear markers when files are present
+                    $('#modal_dokumen_invoice_fact').removeClass('is-invalid');
+                    $('#modal_dokumen_kontrak_fact').removeClass('is-invalid');
                 }
                 
                 // Validate kontrak_date is required
                 if (!kontrak_date) {
-                    alert('Kontrak Date wajib diisi');
+                    const kontrakDateEl = $('#modal_contract_date_fact');
+                    if (kontrakDateEl.length) kontrakDateEl.addClass('is-invalid');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'Kontrak Date wajib diisi',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        if (kontrakDateEl.length) kontrakDateEl.focus();
+                    });
                     return;
+                } else {
+                    $('#modal_contract_date_fact').removeClass('is-invalid');
                 }
 
                 // Duplicate check for Factoring contract numbers (block on save)
@@ -1026,8 +1153,16 @@
                     return it.no_kontrak === no_kontrak;
                 });
                 if (dupFact !== -1 && (editInvoiceIndex === -1 || dupFact !== editInvoiceIndex)) {
-                    alert(
-                        'Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -1507,29 +1642,46 @@
             $('#btnHapusDataModal').off('click').on('click', function(e) {
                 e.preventDefault();
                 if (typeof editInvoiceIndex !== 'undefined' && editInvoiceIndex >= 0) {
-                    if (!confirm('Yakin ingin menghapus data ini?')) return;
-                    switch (currentJenisPembiayaan) {
-                        case 'Invoice Financing':
-                            invoiceFinancingData.splice(editInvoiceIndex, 1);
-                            renderInvoiceTables();
-                            updateTotalFromInvoiceFinancing(); // Update totals after delete
-                            break;
-                        case 'PO Financing':
-                            poFinancingData.splice(editInvoiceIndex, 1);
-                            renderPOFinancingTable();
-                            updateTotalFromPOFinancing(); // Update totals after delete
-                            break;
-                        case 'Installment':
-                            installmentData.splice(editInvoiceIndex, 1);
-                            renderInstallmentTable();
-                            break;
-                        case 'Factoring':
-                            factoringData.splice(editInvoiceIndex, 1);
-                            renderFactoringTable();
-                            updateTotalFromFactoring(); // Update totals after delete
-                            break;
-                    }
-                    editInvoiceIndex = -1;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Konfirmasi Hapus',
+                        text: 'Yakin ingin menghapus data ini?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            confirmButton: 'btn btn-danger me-2',
+                            cancelButton: 'btn btn-secondary'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (!result.isConfirmed) return;
+                        
+                        switch (currentJenisPembiayaan) {
+                            case 'Invoice Financing':
+                                invoiceFinancingData.splice(editInvoiceIndex, 1);
+                                renderInvoiceTables();
+                                updateTotalFromInvoiceFinancing(); // Update totals after delete
+                                break;
+                            case 'PO Financing':
+                                poFinancingData.splice(editInvoiceIndex, 1);
+                                renderPOFinancingTable();
+                                updateTotalFromPOFinancing(); // Update totals after delete
+                                break;
+                            case 'Installment':
+                                installmentData.splice(editInvoiceIndex, 1);
+                                renderInstallmentTable();
+                                break;
+                            case 'Factoring':
+                                factoringData.splice(editInvoiceIndex, 1);
+                                renderFactoringTable();
+                                updateTotalFromFactoring(); // Update totals after delete
+                                break;
+                        }
+                        editInvoiceIndex = -1;
+                        if (typeof modalInstance !== 'undefined' && modalInstance) modalInstance.hide();
+                    });
+                    return;
                 }
                 if (typeof modalInstance !== 'undefined' && modalInstance) modalInstance.hide();
             });
@@ -1541,6 +1693,70 @@
             return parseFloat(x).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
+        // Function to handle form data submission
+        function submitFormData(fd, postUrl) {
+            $.ajax({
+                url: postUrl,
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                beforeSend: function() {
+                    // optional: show loader
+                },
+                success: function(resp) {
+                    if (resp.success || resp.message) {
+                        const message = isEdit ? 'Pengajuan pinjaman berhasil diupdate!' : 'Peminjaman berhasil disimpan!';
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: message,
+                            confirmButtonText: 'Oke',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        }).then(() => {
+                            window.location.href = '{{ route("peminjaman") }}';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: resp.message || 'Terjadi kesalahan',
+                            confirmButtonText: 'Oke',
+                            customClass: {
+                                confirmButton: 'btn btn-primary'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let msg = 'Terjadi kesalahan';
+                    if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        msg += ':\n' + Object.values(errors).flat().join('\n');
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: msg,
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+        }
+
         $('#formPeminjaman').on('submit', function(e) {
             e.preventDefault();
 
@@ -1549,10 +1765,42 @@
 
             // Basic client-side check depending on selected jenis pembiayaan
             if (currentJenisPembiayaan === 'Invoice Financing' && invoiceFinancingData.length === 0) {
-                if (!confirm('Anda belum menambahkan invoice, lanjutkan menyimpan?')) return;
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Konfirmasi',
+                    text: 'Anda belum menambahkan invoice, lanjutkan menyimpan?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Lanjutkan',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-2',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (!result.isConfirmed) return;
+                    submitFormData(fd, postUrl);
+                });
+                return;
             }
             if (currentJenisPembiayaan === 'PO Financing' && poFinancingData.length === 0) {
-                if (!confirm('Anda belum menambahkan kontrak PO, lanjutkan menyimpan?')) return;
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Konfirmasi',
+                    text: 'Anda belum menambahkan kontrak PO, lanjutkan menyimpan?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Lanjutkan',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-2',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (!result.isConfirmed) return;
+                    submitFormData(fd, postUrl);
+                });
+                return;
             }
 
             // Append master id (if available)
@@ -1813,55 +2061,8 @@
                 }
             }
 
-            // send via AJAX
-            $.ajax({
-                url: postUrl,
-                method: 'POST',
-                data: fd,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
-                },
-                beforeSend: function() {
-                    // optional: show loader
-                },
-                success: function(resp) {
-                    if (resp.success || resp.message) {
-                        const message = isEdit ? 'Pengajuan pinjaman berhasil diupdate!' : 'Peminjaman berhasil disimpan!';
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: message,
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.href = '{{ route("peminjaman") }}';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: resp.message || 'Terjadi kesalahan',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    let msg = 'Terjadi kesalahan';
-                    if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                    if (xhr.responseJSON && xhr.responseJSON.errors) {
-                        const errors = xhr.responseJSON.errors;
-                        msg += ':\n' + Object.values(errors).flat().join('\n');
-                    }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal!',
-                        text: msg,
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
+            // send via AJAX using helper function
+            submitFormData(fd, postUrl);
         });
 
         function handleJenisPembiayaanChange(jenisPembiayaan) {

@@ -5,9 +5,18 @@
             <h4 class="fw-bold mb-1">AR Performance - SFinlog</h4>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('sfinlog.ar-performance.export-pdf', ['tahun' => $tahun, 'bulan' => $bulan]) }}" 
+               class="btn btn-primary btn-sm" 
+               target="_blank"
+               title="Export ke PDF"
+               wire:key="export-pdf-{{ $tahun }}-{{ $bulan ?? 'all' }}"
+               id="btnExportPDF">
+                <i class="ti ti-file-type-pdf me-1"></i>
+                Export PDF
+            </a>
             <div wire:ignore style="width: 180px; flex-shrink: 0;">
                 <select id="filterBulan" class="form-select" style="width: 100%;">
-                    <option value="">Semua Bulan</option>
+                    <option value="" {{ $bulan == null || $bulan == '' ? 'selected' : '' }}>Semua Bulan</option>
                     @php
                         $bulanNama = [
                             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -16,7 +25,7 @@
                         ];
                     @endphp
                     @for($month = 1; $month <= 12; $month++)
-                        <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}">
+                        <option value="{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}" {{ $bulan == str_pad($month, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
                             {{ $bulanNama[$month] }}
                         </option>
                     @endfor
@@ -25,7 +34,7 @@
             <div wire:ignore>
                 <select id="filterTahun" class="form-select" style="width: 150px;">
                     @for($year = date('Y'); $year >= 2020; $year--)
-                        <option value="{{ $year }}">{{ $year }}</option>
+                        <option value="{{ $year }}" {{ $tahun == $year ? 'selected' : '' }}>{{ $year }}</option>
                     @endfor
                 </select>
             </div>
@@ -87,23 +96,6 @@
 @push('scripts')
 <script>
     document.addEventListener('livewire:init', () => {
-        // Initialize Select2
-        $('#filterBulan').select2({
-            minimumResultsForSearch: Infinity
-        }).on('change', function(e) {
-            @this.set('bulan', e.target.value);
-        });
-        
-        $('#filterTahun').select2({
-            minimumResultsForSearch: Infinity
-        }).on('change', function(e) {
-            @this.set('tahun', e.target.value);
-        });
-        
-        // Set initial values
-        $('#filterBulan').val(@this.bulan || '').trigger('change.select2');
-        $('#filterTahun').val(@this.tahun).trigger('change.select2');
-        
         Livewire.on('show-alert', (event) => {
             const data = event[0] || event;
             Swal.fire({

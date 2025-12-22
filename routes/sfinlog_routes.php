@@ -38,7 +38,6 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::post('/', [PeminjamanController::class, 'store'])->name('store');
     Route::put('{id}', [PeminjamanController::class, 'update'])->name('update');
     Route::delete('{id}', [PeminjamanController::class, 'destroy'])->name('destroy');
-    Route::get('{id}/download-sertifikat', [PeminjamanController::class, 'downloadSertifikat'])->name('download-sertifikat');
 });
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
@@ -50,6 +49,7 @@ Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->na
 // Index route: sfinlog.ar-performance.index
 // AJAX endpoints (needed for modal)
 Route::get('ar-performance/transactions', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'getTransactions'])->name('ar-performance.transactions');
+Route::get('ar-performance/export-pdf', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
 // Restrukturisasi Routes
 Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {

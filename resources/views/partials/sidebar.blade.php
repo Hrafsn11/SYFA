@@ -119,24 +119,28 @@
                 </a>
             </li>
 
-            <!-- Restrukturisasi Section -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Restrukturisasi</span>
-            </li>
 
-            <li class="menu-item {{ RouteHelper::routeIs('pengajuan-restrukturisasi*') ? 'active' : '' }}">
-                <a href="{{ RouteHelper::route('pengajuan-restrukturisasi.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-file-text"></i>
-                    <div data-i18n="Pengajuan Restrukturisasi">Pengajuan Restrukturisasi</div>
-                </a>
-            </li>
+            @if (!$isSFinlog)
+                <!-- Restrukturisasi Section -->
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Restrukturisasi</span>
+                </li>
 
-            <li class="menu-item {{ RouteHelper::routeIs('program-restrukturisasi*') ? 'active' : '' }}">
-                <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link">
-                    <i class="menu-icon tf-icons ti ti-calculator"></i>
-                    <div data-i18n="Program Restrukturisasi">Program Restrukturisasi</div>
-                </a>
-            </li>
+                <li class="menu-item {{ RouteHelper::routeIs('pengajuan-restrukturisasi*') ? 'active' : '' }}">
+                    <a href="{{ RouteHelper::route('pengajuan-restrukturisasi.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-file-text"></i>
+                        <div data-i18n="Pengajuan Restrukturisasi">Pengajuan Restrukturisasi</div>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ RouteHelper::routeIs('program-restrukturisasi*') ? 'active' : '' }}">
+                    <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link">
+                        <i class="menu-icon tf-icons ti ti-calculator"></i>
+                        <div data-i18n="Program Restrukturisasi">Program Restrukturisasi</div>
+                    </a>
+                </li>
+            @endif
+
 
             <!-- Pengembalian Section -->
             <li class="menu-header small text-uppercase">
@@ -151,7 +155,7 @@
                         <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian.index') }}" class="menu-link">
                 @endif
                 <i class="menu-icon tf-icons ti ti-wallet"></i>
-                <div data-i18n="Pengembalian Dana">Pengembalian Dana</div>
+                <div data-i18n="Pengembalian Peminjaman">Pengembalian Peminjaman</div>
                 </a>
             </li>
 

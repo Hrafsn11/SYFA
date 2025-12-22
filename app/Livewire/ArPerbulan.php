@@ -6,6 +6,7 @@ use App\Exports\ArPerbulanExport;
 use App\Exports\ArPerbulanPdfExport;
 use Livewire\Component;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Excel as ExcelWriter;
 use Mpdf\Mpdf;
 use ZipArchive;
 
@@ -78,7 +79,7 @@ class ArPerbulan extends Component
             $excelFile = $tempDir . '/' . $baseName . '.xlsx';
             $excelContent = Excel::raw(
                 new ArPerbulanExport($this->selectedMonth),
-                \Maatwebsite\Excel\Excel::XLSX
+                ExcelWriter::XLSX
             );
             file_put_contents($excelFile, $excelContent);
 

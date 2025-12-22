@@ -7,7 +7,7 @@
     </div>
 
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-        <!-- Search -->
+        {{-- <!-- Search -->
         <div class="navbar-nav align-items-center">
             <div class="nav-item navbar-search-wrapper mb-0">
                 <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
@@ -16,7 +16,7 @@
                 </a>
             </div>
         </div>
-        <!-- /Search -->
+        <!-- /Search --> --}}
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
             <!-- Home Icon -->
@@ -158,11 +158,13 @@
         </ul>
     </div>
 
-    <div class="navbar-search-wrapper search-input-wrapper d-none">
-        <input type="text" class="form-control search-input container-xxl border-0" placeholder="Search..."
-            aria-label="Search..." />
+    {{-- <div class="navbar-search-wrapper search-input-wrapper d-none">
+        <input type="text" class="form-control search-input container-xxl border-0" 
+            placeholder="Cari halaman, debitur, peminjaman..." 
+            aria-label="Search..." 
+            autocomplete="off" />
         <i class="ti ti-x search-toggler cursor-pointer"></i>
-    </div>
+    </div> --}}
 </nav>
 
 <script>
@@ -213,4 +215,204 @@
             setTimeout(initNavbarDropdowns, 100);
         });
     })();
+
+    // // Global Search with Typeahead (menggunakan struktur Vuexy template)
+    // (function() {
+    //     if (typeof $ === 'undefined' || typeof $.fn.typeahead === 'undefined') {
+    //         console.warn('jQuery or Typeahead.js not loaded');
+    //         return;
+    //     }
+
+    //     var searchInput = $('.search-input'),
+    //         searchInputWrapper = $('.search-input-wrapper'),
+    //         contentBackdrop = $('.content-backdrop');
+
+    //     if (!searchInput.length) return;
+
+    //     // Filter config untuk typeahead
+    //     var filterConfig = function(data) {
+    //         return function findMatches(q, cb) {
+    //             var matches = [];
+    //             data.filter(function(i) {
+    //                 if (i.name.toLowerCase().includes(q.toLowerCase())) {
+    //                     matches.push(i);
+    //                 }
+    //             });
+    //             cb(matches);
+    //         };
+    //     };
+
+    //     // Fetch search data dari API
+    //     function fetchSearchData(query, cb) {
+    //         $.ajax({
+    //             url: '{{ route("search.api") }}',
+    //             data: { q: query },
+    //             dataType: 'json',
+    //             success: function(data) {
+    //                 cb(data);
+    //             },
+    //             error: function() {
+    //                 cb({ pages: [], debitur: [], peminjaman: [], investasi: [] });
+    //             }
+    //         });
+    //     }
+
+    //     // Init typeahead
+    //     searchInput.typeahead(
+    //         {
+    //             hint: false,
+    //             classNames: {
+    //                 menu: 'tt-menu navbar-search-suggestion',
+    //                 cursor: 'active',
+    //                 suggestion: 'suggestion d-flex justify-content-between px-4 py-2 w-100'
+    //             }
+    //         },
+    //         // Pages
+    //         {
+    //             name: 'pages',
+    //             display: 'name',
+    //             limit: 5,
+    //             async: true,
+    //             source: function(query, syncResults, asyncResults) {
+    //                 fetchSearchData(query, function(data) {
+    //                     asyncResults(data.pages || []);
+    //                 });
+    //             },
+    //             templates: {
+    //                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Pages</h6>',
+    //                 suggestion: function(item) {
+    //                     return '<a href="' + item.url + '">' +
+    //                         '<div>' +
+    //                         '<i class="ti ' + item.icon + ' me-2"></i>' +
+    //                         '<span class="align-middle">' + item.name + '</span>' +
+    //                         '</div>' +
+    //                         '</a>';
+    //                 },
+    //                 notFound: '<div class="not-found px-4 py-2">' +
+    //                     '<h6 class="suggestions-header text-primary mb-2">Pages</h6>' +
+    //                     '<p class="py-2 mb-0"><i class="ti ti-alert-circle ti-xs me-2"></i> Tidak ada halaman</p>' +
+    //                     '</div>'
+    //             }
+    //         },
+    //         // Debitur & Investor
+    //         {
+    //             name: 'debitur',
+    //             display: 'name',
+    //             limit: 4,
+    //             async: true,
+    //             source: function(query, syncResults, asyncResults) {
+    //                 fetchSearchData(query, function(data) {
+    //                     asyncResults(data.debitur || []);
+    //                 });
+    //             },
+    //             templates: {
+    //                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Debitur & Investor</h6>',
+    //                 suggestion: function(item) {
+    //                     var subtitle = item.subtitle ? '<small class="text-muted">' + item.subtitle + '</small>' : '';
+    //                     return '<a href="' + item.url + '">' +
+    //                         '<div class="d-flex align-items-center w-100">' +
+    //                         '<i class="ti ti-users me-3"></i>' +
+    //                         '<div class="w-100">' +
+    //                         '<h6 class="mb-0">' + item.name + '</h6>' +
+    //                         subtitle +
+    //                         '</div>' +
+    //                         '</div>' +
+    //                         '</a>';
+    //                 },
+    //                 notFound: '<div class="not-found px-4 py-2">' +
+    //                     '<p class="py-2 mb-0"><i class="ti ti-alert-circle ti-xs me-2"></i> Tidak ada debitur</p>' +
+    //                     '</div>'
+    //             }
+    //         },
+    //         // Peminjaman
+    //         {
+    //             name: 'peminjaman',
+    //             display: 'name',
+    //             limit: 4,
+    //             async: true,
+    //             source: function(query, syncResults, asyncResults) {
+    //                 fetchSearchData(query, function(data) {
+    //                     var combined = (data.pengajuan_peminjaman || []).concat(data.sfinlog_peminjaman || []);
+    //                     asyncResults(combined);
+    //                 });
+    //             },
+    //             templates: {
+    //                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Peminjaman</h6>',
+    //                 suggestion: function(item) {
+    //                     var subtitle = item.subtitle ? '<small class="text-muted">' + item.subtitle + '</small>' : '';
+    //                     return '<a href="' + item.url + '">' +
+    //                         '<div class="d-flex align-items-center w-100">' +
+    //                         '<i class="ti ti-briefcase me-3"></i>' +
+    //                         '<div class="w-100">' +
+    //                         '<h6 class="mb-0">' + item.name + '</h6>' +
+    //                         subtitle +
+    //                         '</div>' +
+    //                         '</div>' +
+    //                         '</a>';
+    //                 }
+    //             }
+    //         },
+    //         // Investasi
+    //         {
+    //             name: 'investasi',
+    //             display: 'name',
+    //             limit: 4,
+    //             async: true,
+    //             source: function(query, syncResults, asyncResults) {
+    //                 fetchSearchData(query, function(data) {
+    //                     asyncResults(data.pengajuan_investasi || []);
+    //                 });
+    //             },
+    //             templates: {
+    //                 header: '<h6 class="suggestions-header text-primary mb-0 mx-4 mt-3 pb-2">Investasi</h6>',
+    //                 suggestion: function(item) {
+    //                     var subtitle = item.subtitle ? '<small class="text-muted">' + item.subtitle + '</small>' : '';
+    //                     return '<a href="' + item.url + '">' +
+    //                         '<div class="d-flex align-items-center w-100">' +
+    //                         '<i class="ti ti-coin me-3"></i>' +
+    //                         '<div class="w-100">' +
+    //                         '<h6 class="mb-0">' + item.name + '</h6>' +
+    //                         subtitle +
+    //                         '</div>' +
+    //                         '</div>' +
+    //                         '</a>';
+    //                 }
+    //             }
+    //         }
+    //     )
+    //     .bind('typeahead:render', function() {
+    //         contentBackdrop.addClass('show').removeClass('fade');
+    //     })
+    //     .bind('typeahead:select', function(ev, suggestion) {
+    //         if (suggestion.url) {
+    //             window.location = suggestion.url;
+    //         }
+    //     })
+    //     .bind('typeahead:close', function() {
+    //         searchInput.val('');
+    //         searchInput.typeahead('val', '');
+    //         searchInputWrapper.addClass('d-none');
+    //         contentBackdrop.addClass('fade').removeClass('show');
+    //     });
+
+    //     // Handle keyup untuk backdrop
+    //     searchInput.on('keyup', function() {
+    //         if (searchInput.val() == '') {
+    //             contentBackdrop.addClass('fade').removeClass('show');
+    //         }
+    //     });
+
+    //     // Init PerfectScrollbar
+    //     var psSearch;
+    //     $('.navbar-search-suggestion').each(function() {
+    //         psSearch = new PerfectScrollbar($(this)[0], {
+    //             wheelPropagation: false,
+    //             suppressScrollX: true
+    //         });
+    //     });
+
+    //     searchInput.on('keyup', function() {
+    //         if (psSearch) psSearch.update();
+    //     });
+    // })();
 </script>
