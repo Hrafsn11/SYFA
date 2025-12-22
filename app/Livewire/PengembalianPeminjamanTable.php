@@ -167,12 +167,12 @@ class PengembalianPeminjamanTable extends DataTableComponent
                 })
                 ->html(),
 
-            // Column::make('Aksi')
-            //     ->label(fn ($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
-            //         'id' => $row->ulid
-            //     ])->render())
-            //     ->html()
-            //     ->excludeFromColumnSelect(),
+            Column::make('Aksi')
+                ->label(fn ($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
+                    'id' => $row->ulid
+                ])->render())
+                ->html()
+                ->excludeFromColumnSelect(),
         ];
     }
 }

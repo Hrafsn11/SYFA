@@ -70,8 +70,11 @@ class PeminjamanFinlogTable extends DataTableComponent
                 ->sortable(),
             Column::make('Durasi project', 'durasi_project')
                 ->sortable()
-                ->format(function ($value) {
-                    return $value . ' bulan';
+                ->label(function ($row) {
+                    $bulan = $row->durasi_project ?? 0;
+                    $hari = $row->durasi_project_hari ?? 0;
+                    
+                    return $bulan . ' Bulan ' . $hari . ' Hari';
                 }),
             Column::make('Nib perusahaan', 'nib_perusahaan')
                 ->sortable(),
