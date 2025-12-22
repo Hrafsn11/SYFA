@@ -21,6 +21,7 @@ class PeminjamanFinlog extends Model
         'id_cells_project',
         'nama_project',
         'durasi_project',
+        'durasi_project_hari',
         'nib_perusahaan',
         'nilai_pinjaman',
         'presentase_bagi_hasil',
@@ -55,6 +56,7 @@ class PeminjamanFinlog extends Model
         'harapan_tanggal_pencairan' => 'date',
         'rencana_tgl_pengembalian' => 'date',
         'durasi_project' => 'integer',
+        'durasi_project_hari' => 'integer',
         'top' => 'integer',
         'current_step' => 'integer',
     ];

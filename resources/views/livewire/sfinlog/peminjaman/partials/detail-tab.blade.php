@@ -99,10 +99,16 @@
                 <p class="fw-bold mb-0">{{ $peminjaman->cellsProject->nama_cells_bisnis ?? '-' }}</p>
             </div>
         </div>
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="mb-0">
+                <small class="text-light fw-semibold d-block mb-1">Durasi Project (Bulan)</small>
+                <p class="fw-bold mb-0">{{ $peminjaman->durasi_project ?? 0 }} Bulan</p>
+            </div>
+        </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
-                <small class="text-light fw-semibold d-block mb-1">Durasi Project</small>
-                <p class="fw-bold mb-0">{{ $peminjaman->durasi_project ?? 0 }} Bulan</p>
+                <small class="text-light fw-semibold d-block mb-1">Durasi Project (Hari)</small>
+                <p class="fw-bold mb-0">{{ $peminjaman->durasi_project_hari ?? 0 }} Hari</p>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
