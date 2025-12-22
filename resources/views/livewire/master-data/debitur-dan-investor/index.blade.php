@@ -140,7 +140,7 @@
             title: 'Konfirmasi status',
             text: 'Apakah Anda yakin ingin '+ (status == 'active' ? 'menonaktifkan' : 'mengaktifkan') +' data ini?',
             icon: 'warning',
-            confirmButtonText: 'Hapus',
+            confirmButtonText: 'OK',
             cancelButtonText: 'Batal',
         }, () => {
             @this.saveData("master-data.debitur-investor.toggle-status", {"id" : id, "callback" : "afterAction"});

@@ -19,4 +19,14 @@ class MasterSumberPendanaanEksternal extends Model
         'nama_instansi',
         'persentase_bagi_hasil'
     ];
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'id_instansi';
+    }
 }
