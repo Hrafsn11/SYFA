@@ -49,7 +49,7 @@ class MasterSumberPendanaanEksternalController extends Controller
         try {
             $item = MasterSumberPendanaanEksternal::where('id_instansi', $id)->firstOrFail();
             $item->delete();
-            return Response::success(null , 'Sumber Pendanaan berhasil dihapus');
+            return Response::success(null, 'Sumber Pendanaan berhasil dihapus');
         } catch (\Exception $e) {
             return Response::errorCatch($e);
         }
