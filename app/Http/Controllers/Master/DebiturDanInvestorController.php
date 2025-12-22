@@ -52,7 +52,14 @@ class DebiturDanInvestorController extends Controller
             }
 
             $validated['user_id'] = $user->id;
-            unset($validated['password'], $validated['password_confirmation']);
+
+            // Remove password keys safely before creating debitur
+            if (isset($validated['password'])) {
+                unset($validated['password']);
+            }
+            if (isset($validated['password_confirmation'])) {
+                unset($validated['password_confirmation']);
+            }
 
             $debitur = MasterDebiturDanInvestor::create($validated);
             $debitur->load('kol', 'user');
@@ -128,7 +135,7 @@ class DebiturDanInvestorController extends Controller
                     $user->email = $validated['email'];
 
                     // Update password only if provided
-                    if (!empty($validated['password'])) {
+                    if (isset($validated['password']) && !empty($validated['password'])) {
                         $user->password = Hash::make($validated['password']);
                     }
 
@@ -136,10 +143,15 @@ class DebiturDanInvestorController extends Controller
                 }
             }
 
-            unset($validated['password'], $validated['password_confirmation']); // Remove password from debitur data
-            $debitur->update($validated);
+            // Remove password keys safely from debitur data
+            if (isset($validated['password'])) {
+                unset($validated['password']);
+            }
+            if (isset($validated['password_confirmation'])) {
+                unset($validated['password_confirmation']);
+            }
 
-            // dd($debitur);
+            $debitur->update($validated);
 
             DB::commit();
             return Response::success(null, 'Debitur berhasil diupdate');
