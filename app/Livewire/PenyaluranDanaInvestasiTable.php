@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PenyaluranDeposito;
 use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -9,7 +10,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class PenyaluranDanaInvestasiTable extends DataTableComponent
 {
-    use HasUniversalFormAction;
+    use HasUniversalFormAction, HasDebiturAuthorization;
 
     protected $model = PenyaluranDeposito::class;
 
@@ -31,8 +32,9 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return PenyaluranDeposito::query()
+        $query = PenyaluranDeposito::query()
             ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->leftJoin('master_debitur_dan_investor', 'pi.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->leftJoin(
                 \DB::raw('(
                     SELECT 
@@ -62,6 +64,8 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 \DB::raw('COALESCE(pd_sum.total_disalurkan_sum, 0) as total_disalurkan'),
                 \DB::raw('(pi.jumlah_investasi - COALESCE(pd_sum.total_disalurkan_sum, 0)) as sisa_dana')
             ]);
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array
