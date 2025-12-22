@@ -45,13 +45,15 @@
                     </div>
 
                     <div class="col-md-6  mb-3">
-                        <label for="nama_project" class="form-label">Nama Project <span class="text-danger">*</span></label>
+                        <label for="nama_project" class="form-label">Nama Project <span
+                                class="text-danger">*</span></label>
                         <div wire:ignore>
                             <select id="nama_project" name="nama_project" class="form-select select2"
                                 data-placeholder="Pilih Project" required>
                                 <option value=""></option>
                                 @foreach ($availableProjects as $project)
-                                    <option value="{{ $project['nama_project'] }}">{{ $project['nama_project'] }}</option>
+                                    <option value="{{ $project['nama_project'] }}">{{ $project['nama_project'] }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -342,24 +344,25 @@
                 })
                 .on('change', async function() {
                     const cellsProjectId = $(this).val();
-                    
+
                     // Reset nama_project dropdown
                     $('#nama_project').val('').trigger('change');
-                    
+
                     // Update Livewire
                     await @this.set('id_cells_project', cellsProjectId);
-                    
+
                     // Get updated availableProjects from Livewire
                     const projects = @this.availableProjects || [];
-                    
+
                     // Update nama_project dropdown
                     const $namaProject = $('#nama_project');
                     $namaProject.empty().append('<option value=""></option>');
-                    
+
                     projects.forEach(project => {
-                        $namaProject.append(new Option(project.nama_project, project.nama_project, false, false));
+                        $namaProject.append(new Option(project.nama_project, project.nama_project,
+                            false, false));
                     });
-                    
+
                     $namaProject.trigger('change');
                 });
 
@@ -402,12 +405,10 @@
             // Calculations
             const hitungBagiHasil = () => {
                 const nilaiPinjaman = getCleave('nilai_pinjaman');
-                const durasiProject = parseInt($('#durasi_project').val()) || 0;
                 const persentaseBagiHasil = parseFloat($('#presentase_bagi_hasil').val()) || 0;
 
-                if (nilaiPinjaman > 0 && durasiProject > 0 && persentaseBagiHasil > 0) {
-                    const bagiHasilTotal = Math.round((nilaiPinjaman * persentaseBagiHasil / 100) *
-                        durasiProject);
+                if (nilaiPinjaman > 0 && persentaseBagiHasil > 0) {
+                    const bagiHasilTotal = Math.round(nilaiPinjaman * persentaseBagiHasil / 100);
                     const totalPinjaman = nilaiPinjaman + bagiHasilTotal;
                     setCleave('nilai_bagi_hasil', bagiHasilTotal);
                     setCleave('total_pinjaman', totalPinjaman);
