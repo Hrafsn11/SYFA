@@ -35,8 +35,10 @@ class PengembalianPinjamanFinlogCreate extends Component
     #[FieldInput] public string $tanggal_pencairan = '';
     #[FieldInput] public string $top = '';
     #[FieldInput] public string $jatuh_tempo = '';
+    #[FieldInput] public int $jumlah_minggu_keterlambatan = 0;
     #[FieldInput] public float $nilai_pinjaman = 0;
     #[FieldInput] public float $nilai_bagi_hasil = 0;
+    #[FieldInput] public float $nilai_bagi_hasil_saat_ini = 0;
     #[FieldInput] public float $total_pinjaman = 0;
     #[FieldInput] public float $sisa_utang = 0;
     #[FieldInput] public float $sisa_bagi_hasil = 0;
@@ -162,6 +164,9 @@ class PengembalianPinjamanFinlogCreate extends Component
             if ($peminjaman) {
                 $this->nilai_pinjaman = $peminjaman->nilai_pinjaman ?? 0;
                 $this->nilai_bagi_hasil = $peminjaman->nilai_bagi_hasil ?? 0;
+                if ($this->nilai_bagi_hasil_saat_ini <= 0) {
+                    $this->nilai_bagi_hasil_saat_ini = $this->nilai_bagi_hasil;
+                }
                 $this->selectedPeminjaman = $peminjaman;
             }
         }
@@ -263,6 +268,26 @@ class PengembalianPinjamanFinlogCreate extends Component
         $this->nilai_pinjaman = $peminjaman->nilai_pinjaman ?? 0;
         $this->nilai_bagi_hasil = $peminjaman->nilai_bagi_hasil ?? 0;
         $this->total_pinjaman = $peminjaman->total_pinjaman ?? 0;
+
+        // Hitung jumlah minggu keterlambatan (mengikuti logika di DebiturPiutangFinlogTable)
+        if (!$peminjaman->rencana_tgl_pengembalian || $peminjaman->status === 'Lunas') {
+            $this->jumlah_minggu_keterlambatan = 0;
+        } elseif (now()->gt($peminjaman->rencana_tgl_pengembalian)) {
+            $this->jumlah_minggu_keterlambatan = abs(now()->diffInWeeks($peminjaman->rencana_tgl_pengembalian));
+        } else {
+            $this->jumlah_minggu_keterlambatan = 0;
+        }
+
+        // Hitung Bagi Hasil saat ini (termasuk keterlambatan)
+        // Logika: total = Bagi Hasil TOP + (Bagi Hasil per Minggu * jumlah_minggu_keterlambatan)
+        // dengan Bagi Hasil per Minggu = nilai_bagi_hasil / 4 (mengikuti DebiturPiutangFinlogTable)
+        if ($this->jumlah_minggu_keterlambatan > 0) {
+            $bagiHasilPerMinggu = $this->nilai_bagi_hasil / 4;
+            $this->nilai_bagi_hasil_saat_ini = $this->nilai_bagi_hasil + ($bagiHasilPerMinggu * $this->jumlah_minggu_keterlambatan);
+        } else {
+            // Jika tidak terlambat, gunakan nilai bagi hasil awal
+            $this->nilai_bagi_hasil_saat_ini = $this->nilai_bagi_hasil;
+        }
     }
 
     private function resolveProjectName(PeminjamanFinlog $peminjaman): string
@@ -312,7 +337,8 @@ class PengembalianPinjamanFinlogCreate extends Component
         $newPayments = array_sum(array_column($this->pengembalian_list, 'nominal'));
         $totalPaid = $dbPayments + $newPayments;
 
-        $initialBagiHasil = $this->nilai_bagi_hasil;
+        // Gunakan nilai_bagi_hasil_saat_ini (sudah termasuk denda keterlambatan bila ada)
+        $initialBagiHasil = $this->nilai_bagi_hasil_saat_ini ?: $this->nilai_bagi_hasil;
         $initialUtang = $this->nilai_pinjaman;
 
         $paidToBagiHasil = min($totalPaid, $initialBagiHasil);
