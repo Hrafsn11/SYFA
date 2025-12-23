@@ -52,8 +52,8 @@ class DebiturPiutangFinlogTable extends DataTableComponent
             Column::make('Tgl Pencairan', 'harapan_tanggal_pencairan')
                 ->format(fn($val) => $val ? $val->format('d/m/Y') : '-'),
 
-            Column::make('Bagi Hasil', 'nilai_bagi_hasil')
-                ->format(fn($val) => 'Rp ' . number_format($val, 0, ',', '.')),
+            Column::make('Bagi Hasil (%)')
+                ->label(fn() => '2.00%'),
 
             Column::make('Bagi Hasil (TOP)', 'nilai_bagi_hasil')
                 ->format(fn($val) => 'Rp ' . number_format($val, 0, ',', '.')),
@@ -61,13 +61,46 @@ class DebiturPiutangFinlogTable extends DataTableComponent
             Column::make('Bagi Hasil / Minggu', 'nilai_bagi_hasil')
                 ->format(fn($val) => 'Rp ' . number_format($val / 4, 0, ',', '.')),
 
-            Column::make('Terlambat (Minggu)')
+            Column::make('Bagi Hasil per Minggu (Keterlambatan)')
                 ->label(function ($row) {
-                    if (!$row->rencana_tgl_pengembalian || $row->status === 'Lunas') return '-';
-                    if (now()->gt($row->rencana_tgl_pengembalian)) {
-                        return abs(now()->diffInWeeks($row->rencana_tgl_pengembalian)) . ' Minggu';
+                    // Tidak dihitung jika belum jatuh tempo atau sudah lunas
+                    if (
+                        !$row->rencana_tgl_pengembalian ||
+                        $row->status === 'Lunas' ||
+                        now()->lte($row->rencana_tgl_pengembalian)
+                    ) {
+                        return '-';
                     }
-                    return '-';
+
+                    // Jumlah minggu keterlambatan
+                    $mingguTerlambat = abs(
+                        now()->diffInWeeks($row->rencana_tgl_pengembalian)
+                    );
+
+                    // Bagi hasil per minggu
+                    $bagiHasilPerMinggu = $row->nilai_bagi_hasil / 4;
+
+                    // Bagi hasil TOP (awal)
+                    $bagiHasilTOP = $row->nilai_bagi_hasil;
+
+                    // Total yang harus dibayar
+                    $total = ($bagiHasilPerMinggu * $mingguTerlambat) + $bagiHasilTOP;
+
+                    return 'Rp ' . number_format($total, 0, ',', '.');
+                }),
+
+
+            Column::make('Jumlah Minggu Keterlambatan')
+                ->label(function ($row) {
+                    if (!$row->rencana_tgl_pengembalian || $row->status === 'Lunas') {
+                        return 0;
+                    }
+
+                    if (now()->gt($row->rencana_tgl_pengembalian)) {
+                        return abs(now()->diffInWeeks($row->rencana_tgl_pengembalian));
+                    }
+
+                    return 0;
                 }),
 
             Column::make('Total Bagi Hasil', 'nilai_bagi_hasil')

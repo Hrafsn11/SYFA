@@ -52,8 +52,15 @@ class DebiturDanInvestorController extends Controller
             }
 
             $validated['user_id'] = $user->id;
-            unset($validated['password'], $validated['password_confirmation']);
-            
+
+            // Remove password keys safely before creating debitur
+            if (isset($validated['password'])) {
+                unset($validated['password']);
+            }
+            if (isset($validated['password_confirmation'])) {
+                unset($validated['password_confirmation']);
+            }
+
             $debitur = MasterDebiturDanInvestor::create($validated);
             $debitur->load('kol', 'user');
 
@@ -73,6 +80,7 @@ class DebiturDanInvestorController extends Controller
             $result = [
                 'nama' => $debitur->nama,
                 'deposito' => $debitur->deposito,
+                'alamat' => $debitur->alamat,
                 'email' => $debitur->email,
                 'no_telepon' => $debitur->no_telepon,
                 'nama_bank' => $debitur->nama_bank,
@@ -95,7 +103,7 @@ class DebiturDanInvestorController extends Controller
 
         $result['id'] = $debitur->id_debitur;
         $result['flagging'] = $debitur->flagging;
-        
+
         return Response::success($result, 'Debitur berhasil ditemukan');
     }
 
@@ -114,7 +122,7 @@ class DebiturDanInvestorController extends Controller
                 if ($file && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                     Storage::disk('public')->delete($debitur->tanda_tangan);
                 }
-                
+
                 $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
                 $validated['tanda_tangan'] = $file;
             }
@@ -125,20 +133,25 @@ class DebiturDanInvestorController extends Controller
                 if ($user) {
                     $user->name = $validated['nama'];
                     $user->email = $validated['email'];
-                    
+
                     // Update password only if provided
-                    if (!empty($validated['password'])) {
+                    if (isset($validated['password']) && !empty($validated['password'])) {
                         $user->password = Hash::make($validated['password']);
                     }
-                    
+
                     $user->save();
                 }
             }
 
-            unset($validated['password'], $validated['password_confirmation']); // Remove password from debitur data
-            $debitur->update($validated);
+            // Remove password keys safely from debitur data
+            if (isset($validated['password'])) {
+                unset($validated['password']);
+            }
+            if (isset($validated['password_confirmation'])) {
+                unset($validated['password_confirmation']);
+            }
 
-            // dd($debitur);
+            $debitur->update($validated);
 
             DB::commit();
             return Response::success(null, 'Debitur berhasil diupdate');
@@ -165,22 +178,24 @@ class DebiturDanInvestorController extends Controller
 
     public function toggleStatus($id)
     {
-        $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
-        
-        $newStatus = $debitur->status === 'active' ? 'non active' : 'active';
-        $debitur->update(['status' => $newStatus]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Status berhasil diubah menjadi ' . ucfirst($newStatus),
-            'status' => $newStatus
-        ]);
+        try {
+            $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
+
+            $newStatus = $debitur->status === 'active' ? 'non active' : 'active';
+            $debitur->update(['status' => $newStatus]);
+
+            return Response::success([
+                'status' => $newStatus
+            ], 'Status berhasil diubah menjadi ' . ucfirst($newStatus));
+        } catch (\Exception $e) {
+            return Response::errorCatch($e);
+        }
     }
 
     public function historyKol($id)
     {
         $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->with('kol')->firstOrFail();
-        
+
         return view('livewire.kol-history.index', [
             'debitur' => $debitur
         ]);
@@ -190,15 +205,15 @@ class DebiturDanInvestorController extends Controller
     {
         try {
             $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
-            
+
             // Delete file if exists
             if ($debitur->tanda_tangan && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                 Storage::disk('public')->delete($debitur->tanda_tangan);
             }
-            
+
             // Update database
             $debitur->update(['tanda_tangan' => null]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Tanda tangan berhasil dihapus'

@@ -3,7 +3,8 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Config Matrix Nominal Peminjaman</h4>
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3" data-bs-toggle="modal" data-bs-target="#modalConfigMatrix" id="btnTambahConfig">
+                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                    data-bs-toggle="modal" data-bs-target="#modalConfigMatrix" id="btnTambahConfig">
                     <i class="fa-solid fa-plus"></i>
                     Tambah Data
                 </button>
@@ -21,7 +22,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalConfigMatrix" tabindex="-1" >
+    <div class="modal fade" id="modalConfigMatrix" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -32,19 +33,23 @@
                     <div class="modal-body">
                         <div class="mb-3 form-group">
                             <label for="nominal" class="form-label">Nominal <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control input-rupiah" id="nominal" placeholder="Masukkan nominal" data-format="rupiah" wire:model.blur="nominal">
+                            <input type="text" class="form-control input-rupiah" id="nominal"
+                                placeholder="Masukkan nominal" data-format="rupiah">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
-                            <label for="approve_oleh" class="form-label">Approve Oleh <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="approve_oleh" placeholder="Masukkan nama approver" wire:model.blur="approve_oleh">
+                            <label for="approve_oleh" class="form-label">Approve Oleh <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="approve_oleh"
+                                placeholder="Masukkan nama approver" wire:model.blur="approve_oleh">
                             <div class="invalid-feedback"></div>
-                        </div>    
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-primary">
-                            <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="saveData"></span>
+                            <span class="spinner-border spinner-border-sm me-2" wire:loading
+                                wire:target="saveData"></span>
                             Simpan
                         </button>
                     </div>
@@ -55,47 +60,90 @@
 </div>
 
 @push('scripts')
-<script>
-    function afterAction(payload) {
-        Livewire.dispatch('refreshConfigMatrixTable');
-        $('.modal').modal('hide');
-    }
+    <script>
+        let cleaveNominal = null;
 
-    function editData(payload) {
-        const data = payload.data;
-        
-        const modal = $('#modalConfigMatrix');
-        const form = modal.find('form');
+        $(document).ready(function() {
+            // Initialize Cleave.js for nominal input
+            if ($('#nominal').length) {
+                cleaveNominal = new Cleave('#nominal', {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand',
+                    numeralDecimalScale: 0,
+                    prefix: 'Rp ',
+                    rawValueTrimPrefix: true
+                });
 
-        form.attr('wire:submit', `{!! $urlAction["update_config"] !!}`.replace('id_placeholder', data.id_matrix_pinjaman));
-
-        // ubah title modal
-        modal.find('.modal-title').text('Edit KOL');
-        // tampilkan modal
-        modal.modal('show');
-
-        @this.set('nominal', data.nominal);
-        @this.set('approve_oleh', data.approve_oleh);
-    }
-
-    $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form').attr('wire:submit', `{!! $urlAction["store_config"] !!}`);
-        $(this).find('.modal-title').text('Tambah KOL');
-    });
-
-    $(document).on('click', '.config-delete-btn', function(e) {
-        e.preventDefault();
-        const id = $(this).data('id');
-
-        sweetAlertConfirm({
-            title: 'Konfirmasi Hapus',
-            text: 'Apakah Anda yakin ingin menghapus data config matrix ini? Tindakan ini tidak dapat dibatalkan.',
-            icon: 'warning',
-            confirmButtonText: 'Hapus',
-            cancelButtonText: 'Batal',
-        }, () => {
-            @this.saveData("config-matrix-pinjaman.destroy", {"id" : id, "callback" : "afterAction"});
+                // Sync raw value to Livewire on blur
+                $('#nominal').on('blur', function() {
+                    const rawValue = cleaveNominal.getRawValue();
+                    @this.set('nominal', rawValue);
+                });
+            }
         });
-    });
-</script>
+
+        function afterAction(payload) {
+            Livewire.dispatch('refreshConfigMatrixTable');
+            $('.modal').modal('hide');
+
+            // Clear form
+            if (cleaveNominal) {
+                cleaveNominal.setRawValue('');
+            }
+            $('#approve_oleh').val('');
+        }
+
+        function editData(payload) {
+            const data = payload.data;
+
+            const modal = $('#modalConfigMatrix');
+            const form = modal.find('form');
+
+            form.attr('wire:submit', `{!! $urlAction['update_config'] !!}`.replace('id_placeholder', data.id_matrix_pinjaman));
+
+            // ubah title modal
+            modal.find('.modal-title').text('Edit Config Matrix');
+            // tampilkan modal
+            modal.modal('show');
+
+            // Set nominal dengan Cleave.js
+            if (cleaveNominal) {
+                cleaveNominal.setRawValue(data.nominal);
+            } else {
+                $('#nominal').val(data.nominal);
+            }
+
+            @this.set('nominal', data.nominal);
+            @this.set('approve_oleh', data.approve_oleh);
+        }
+
+        $('.modal').on('hide.bs.modal', function() {
+            $(this).find('form').attr('wire:submit', `{!! $urlAction['store_config'] !!}`);
+            $(this).find('.modal-title').text('Tambah Config Matrix');
+
+            // Clear form
+            if (cleaveNominal) {
+                cleaveNominal.setRawValue('');
+            }
+            $('#approve_oleh').val('');
+        });
+
+        $(document).on('click', '.config-delete-btn', function(e) {
+            e.preventDefault();
+            const id = $(this).data('id');
+
+            sweetAlertConfirm({
+                title: 'Konfirmasi Hapus',
+                text: 'Apakah Anda yakin ingin menghapus data config matrix ini? Tindakan ini tidak dapat dibatalkan.',
+                icon: 'warning',
+                confirmButtonText: 'Hapus',
+                cancelButtonText: 'Batal',
+            }, () => {
+                @this.saveData("config-matrix-pinjaman.destroy", {
+                    "id": id,
+                    "callback": "afterAction"
+                });
+            });
+        });
+    </script>
 @endpush
