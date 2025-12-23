@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengajuanPeminjaman;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class PengajuanPinjamanTable extends DataTableComponent
 {
+    use HasDebiturAuthorization;
+
     protected $model = PengajuanPeminjaman::class;
 
     protected $listeners = ['refreshPengajuanPinjamanTable' => '$refresh'];
@@ -49,11 +52,13 @@ class PengajuanPinjamanTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return PengajuanPeminjaman::query()
+        $query = PengajuanPeminjaman::query()
             ->with(['debitur', 'instansi'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
             ->select('pengajuan_peminjaman.*', 
                     DB::raw('master_debitur_dan_investor.nama as nama_perusahaan'));
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array

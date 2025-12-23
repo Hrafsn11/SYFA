@@ -12,7 +12,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Cek pengembalian dana jatuh tempo setiap hari jam 09:00
+        $schedule->command('sfinlog:check-pengembalian-jatuh-tempo')
+            ->dailyAt('09:00')
+            ->timezone('Asia/Jakarta');
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengembalianInvestasi;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,6 +11,8 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 
 class PengembalianInvestasiTable extends DataTableComponent
 {
+    use HasDebiturAuthorization;
+
     protected $model = PengembalianInvestasi::class;
 
     protected $listeners = ['refreshPengembalianInvestasiTable' => '$refresh'];
@@ -33,18 +36,22 @@ class PengembalianInvestasiTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        return PengembalianInvestasi::query()
+        $query = PengembalianInvestasi::query()
             ->with('pengajuanInvestasi:id_pengajuan_investasi,nomor_kontrak,nama_investor,jumlah_investasi,status')
+            ->leftJoin('pengajuan_investasi as pi', 'pengembalian_investasi.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->leftJoin('master_debitur_dan_investor', 'pi.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->select([
-                'id_pengembalian_investasi',
-                'id_pengajuan_investasi',
-                'dana_pokok_dibayar',
-                'bagi_hasil_dibayar',
-                'total_dibayar',
-                'bukti_transfer',
-                'tanggal_pengembalian',
-                'created_at',
+                'pengembalian_investasi.id_pengembalian_investasi',
+                'pengembalian_investasi.id_pengajuan_investasi',
+                'pengembalian_investasi.dana_pokok_dibayar',
+                'pengembalian_investasi.bagi_hasil_dibayar',
+                'pengembalian_investasi.total_dibayar',
+                'pengembalian_investasi.bukti_transfer',
+                'pengembalian_investasi.tanggal_pengembalian',
+                'pengembalian_investasi.created_at',
             ]);
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array

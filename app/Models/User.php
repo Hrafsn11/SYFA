@@ -89,4 +89,22 @@ class User extends Authenticatable
     {
         return $this->hasOne(MasterDebiturDanInvestor::class, 'user_id', 'id');
     }
+
+    /**
+     * Alias for debitur() relation - for better semantic naming.
+     */
+    public function debiturInvestor()
+    {
+        return $this->debitur();
+    }
+
+    public function notifs()
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id')->where('status_hide', 'unhide');
+    }
+
+    public function unread_notifs()
+    {
+        return $this->hasMany(Notification::class, 'user_id', 'id')->where('status', 'unread')->where('status_hide', 'unhide');
+    }
 }

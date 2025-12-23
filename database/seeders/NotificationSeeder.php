@@ -1,0 +1,20 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class NotificationSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        //
+        $this->call([
+            \Database\Seeders\NotificationSFinanceSeeder::class,
+            \Database\Seeders\NotificationSFinlogSeeder::class,
+        ]);
+    }
+}

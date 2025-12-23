@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SFinlog;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengembalianInvestasiFinlog;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -9,6 +10,8 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PengembalianInvestasiFinlogTable extends DataTableComponent
 {
+    use HasDebiturAuthorization;
+
     protected $model = PengembalianInvestasiFinlog::class;
 
     protected $listeners = ['refreshPengembalianInvestasiFinlogTable' => '$refresh'];
@@ -32,19 +35,22 @@ class PengembalianInvestasiFinlogTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        return PengembalianInvestasiFinlog::query()
+        $query = PengembalianInvestasiFinlog::query()
             ->leftJoin(
                 'pengajuan_investasi_finlog as pif',
                 'pengembalian_investasi_finlog.id_pengajuan_investasi_finlog',
                 '=',
                 'pif.id_pengajuan_investasi_finlog'
             )
+            ->leftJoin('master_debitur_dan_investor', 'pif.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->select([
                 'pengembalian_investasi_finlog.*',
                 'pif.nomor_kontrak',
                 'pif.nama_investor',
                 'pif.nominal_investasi',
             ]);
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array
