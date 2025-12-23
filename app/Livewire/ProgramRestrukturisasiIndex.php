@@ -170,7 +170,9 @@ class ProgramRestrukturisasiIndex extends DataTableComponent
             Column::make('Aksi')
                 ->label(function ($row) {
                     $detailUrl = route('program-restrukturisasi.show', $row->id_program_restrukturisasi);
-                    $editUrl   = route('program-restrukturisasi.edit', $row->id_program_restrukturisasi);
+                    $editUrl   = auth()->user()->can('program_restrukturisasi.edit')
+                        ? route('program-restrukturisasi.edit', $row->id_program_restrukturisasi)
+                        : null;
 
                     return view('components.table-actions', compact('detailUrl', 'editUrl'));
                 })

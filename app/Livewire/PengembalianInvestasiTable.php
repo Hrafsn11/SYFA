@@ -108,6 +108,36 @@ class PengembalianInvestasiTable extends DataTableComponent
                 'pi.nama_investor as pi_nama_investor',
             ]);
 
+        $user = auth()->user();
+        $hasUnrestrictedRole = false;
+
+        if ($user) {
+            if ($user->hasRole('super-admin')) {
+                $hasUnrestrictedRole = true;
+            } else {
+                $roles = $user->roles;
+                $hasUnrestrictedRole = $roles->contains(function ($role) {
+                    return $role->restriction == 1;  // Finance SKI, CEO, Direktur
+                });
+            }
+        }
+
+        if (!$hasUnrestrictedRole) {
+            $investor = \App\Models\MasterDebiturDanInvestor::where('user_id', $user->id)
+                ->where('flagging', 'ya')  // ya = Investor
+                ->first();
+
+            if (!$investor) {
+                return PengembalianInvestasi::query()->whereRaw('1 = 0');
+            }
+
+            $query->whereIn('pengembalian_investasi.id_pengajuan_investasi', function ($subQuery) use ($investor) {
+                $subQuery->select('id_pengajuan_investasi')
+                    ->from('pengajuan_investasi')
+                    ->where('id_debitur_dan_investor', $investor->id_debitur);
+            });
+        }
+
         // Custom search for joined tables
         if ($search = $this->getSearch()) {
             $query->where(function ($q) use ($search) {

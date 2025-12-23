@@ -14,6 +14,13 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengembalianPinjamanController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:pengembalian_pinjaman.add')->only(['create', 'store']);
+
+        $this->middleware('can:pengembalian_pinjaman.edit')->only(['edit', 'update']);
+    }
+
     /**
      * Show the form for creating a new resource.
      */

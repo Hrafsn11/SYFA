@@ -29,6 +29,8 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
 
     public function mount(?string $id = null): void
     {
+        abort_unless(auth()->user()->can('program_restrukturisasi.edit'), 403, 'Unauthorized');
+
         $this->tanggal_mulai_cicilan = date('Y-m-d');
 
         if ($id === null) {

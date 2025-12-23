@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Auth;
 
 class PengajuanInvestasiController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:investasi.add')->only(['create', 'store']);
+        $this->middleware('can:investasi.edit')->only(['edit', 'update']);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -411,7 +417,7 @@ class PengajuanInvestasiController extends Controller
             DB::beginTransaction();
 
             // Update nomor kontrak and status to completed (Step 6: Selesai)
-        $pengajuan->update([
+            $pengajuan->update([
                 'nomor_kontrak' => $request->input('nomor_kontrak'),
                 'status' => 'Selesai',
                 'current_step' => 6,

@@ -4,11 +4,13 @@
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Penyaluran Deposito</h4>
 
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                    id="btnTambahPenyaluran" data-bs-toggle="modal" data-bs-target="#modalPenyaluranDeposito">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Tambah Penyaluran</span>
-                </button>
+                @can('penyaluran_deposito.add')
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        id="btnTambahPenyaluran" data-bs-toggle="modal" data-bs-target="#modalPenyaluranDeposito">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Penyaluran</span>
+                    </button>
+                @endcan
 
             </div>
         </div>

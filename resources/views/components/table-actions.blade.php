@@ -2,7 +2,9 @@
     <a href="{{ $detailUrl }}" class="btn btn-sm btn-info" title="Detail Program">
         <i class="ti ti-eye"></i>
     </a>
-    <a href="{{ $editUrl }}" class="btn btn-sm btn-warning" title="Edit Program">
-        <i class="ti ti-pencil"></i>
-    </a>
+    @if (isset($editUrl) && $editUrl)
+        <a href="{{ $editUrl }}" class="btn btn-sm btn-warning" title="Edit Program">
+            <i class="ti ti-pencil"></i>
+        </a>
+    @endif
 </div>

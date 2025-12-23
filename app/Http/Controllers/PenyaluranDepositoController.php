@@ -12,6 +12,13 @@ use App\Http\Requests\PenyaluranDepositoRequest;
 
 class PenyaluranDepositoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:penyaluran_deposito.add')->only(['store']);
+        $this->middleware('can:penyaluran_deposito.edit')->only(['edit', 'update']);
+        $this->middleware('can:penyaluran_deposito.upload_bukti')->only(['uploadBukti']);
+    }
+
     public function index()
     {
         return view('livewire.penyaluran-deposito.index');

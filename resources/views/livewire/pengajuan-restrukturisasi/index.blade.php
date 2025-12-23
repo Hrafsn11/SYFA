@@ -11,11 +11,13 @@
                 <h4 class="fw-bold mb-1">Pengajuan Restrukturisasi
                 </h4>
             </div>
-            <button type="button" class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal"
-                data-bs-target="#modalRestrukturisasi" id="btnTambahRestrukturisasi">
-                <i class="ti ti-plus me-1"></i>
-                <span>Ajukan Restrukturisasi</span>
-            </button>
+            @can('pengajuan_restrukturisasi.add')
+                <button type="button" class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal"
+                    data-bs-target="#modalRestrukturisasi" id="btnTambahRestrukturisasi">
+                    <i class="ti ti-plus me-1"></i>
+                    <span>Ajukan Restrukturisasi</span>
+                </button>
+            @endcan
         </div>
 
         <div class="card">
