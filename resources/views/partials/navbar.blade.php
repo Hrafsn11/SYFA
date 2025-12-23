@@ -103,7 +103,7 @@
                                                     <span class="badge badge-dot bg-primary"></span>
                                                 </a>
                                             @endif
-                                            <a href="javascript:void(0)" class="dropdown-notifications-archive" data-id="{{ $notif->id }}">
+                                            <a href="javascript:void(0)" class="dropdown-notifications-archive" data-id="{{ $notif->id_notification }}">
                                                 <span class="ti ti-x"></span>
                                             </a>
                                         </div>
