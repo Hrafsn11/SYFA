@@ -67,6 +67,32 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.kertas_kerja_sfinance',
             'sfinance.menu.pengembalian_investasi',
   
+            // Menu SFinlog
+            'sfinlog.menu.dashboard_pembiayaan',
+            'sfinlog.menu.dashboard_investasi_deposito',
+            'sfinlog.menu.peminjaman_dana',
+            'sfinlog.menu.ar_perbulan',
+            'sfinlog.menu.ar_performance',
+            'sfinlog.menu.pengembalian_dana',
+            'sfinlog.menu.debitur_piutang',
+            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.pengajuan_investasi',
+            'sfinlog.menu.penyaluran_deposito',
+            'sfinlog.menu.report_penyaluran_dana',
+            'sfinlog.menu.kertas_kerja_investor',
+            'sfinlog.menu.pengembalian_investasi',
+
+            // Peminjaman Finlog (8-step approval)
+            'peminjaman_finlog.view',
+            'peminjaman_finlog.add',
+            'peminjaman_finlog.edit',
+            'peminjaman_finlog.delete',
+            'peminjaman_finlog.validasi_io',              // Step 2
+            'peminjaman_finlog.persetujuan_debitur',      // Step 3
+            'peminjaman_finlog.persetujuan_finance_ski',  // Step 4
+            'peminjaman_finlog.persetujuan_ceo_finlog',   // Step 5
+            'peminjaman_finlog.generate_kontrak',         // Step 6
+            'peminjaman_finlog.upload_bukti',             // Step 7
 
             // Settings
             'settings.view',
@@ -133,7 +159,10 @@ class RolePermissionSeeder extends Seeder
         $superAdminRole->permissions()->detach();
         $superAdminRole->syncPermissions(Permission::all());
 
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $adminRole = Role::updateOrCreate(
+            ['name' => 'admin'],
+            ['restriction' => 1]
+        );
         // Remove all previous permissions before syncing
         $adminRole->permissions()->detach();
         $adminRole->syncPermissions([
@@ -145,7 +174,10 @@ class RolePermissionSeeder extends Seeder
             'settings.view',
         ]);
 
-        $moderatorRole = Role::firstOrCreate(['name' => 'moderator']);
+        $moderatorRole = Role::updateOrCreate(
+            ['name' => 'moderator'],
+            ['restriction' => 1]
+        );
         // Remove all previous permissions before syncing
         $moderatorRole->permissions()->detach();
         $moderatorRole->syncPermissions([
@@ -153,38 +185,70 @@ class RolePermissionSeeder extends Seeder
             'users.edit',
         ]);
 
-        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userRole = Role::updateOrCreate(
+            ['name' => 'user'],
+            ['restriction' => 0]
+        );
         // Remove all previous permissions before syncing
         $userRole->permissions()->detach();
         $userRole->syncPermissions([
         ]);
 
-        $debiturRole = Role::firstOrCreate(['name' => 'Debitur', 'restriction' => 0]);
+        $debiturRole = Role::updateOrCreate(
+            ['name' => 'Debitur'],
+            ['restriction' => 0]
+        );
 
         $debiturRole->permissions()->detach();
         $debiturRole->syncPermissions([
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
-            'sfinance.menu.pengajuan_investasi',
             'sfinance.menu.pengembalian_dana',
+            
+            'sfinance.menu.pengajuan_investasi',
+            'sfinance.menu.penyaluran_deposito', 
             'sfinance.menu.pengembalian_investasi',
-            'sfinance.menu.report_penyaluran_dana',
-           
+            
+            'sfinlog.menu.peminjaman_dana',
+            'sfinlog.menu.pengembalian_dana',
+            
+            'sfinlog.menu.pengajuan_investasi',
+            'sfinlog.menu.penyaluran_deposito',
+            'sfinlog.menu.pengembalian_investasi',
+            
+            // SFinance Peminjaman
             'peminjaman_dana.add',
             'peminjaman_dana.edit',
             'peminjaman_dana.pengajuan_peminjaman',
             'peminjaman_dana.persetujuan_debitur',
             'peminjaman_dana.konfirmasi_debitur',
             
+            // SFinlog Peminjaman
+            'peminjaman_finlog.view',
+            'peminjaman_finlog.add',
+            'peminjaman_finlog.edit',
+            'peminjaman_finlog.persetujuan_debitur',  // Step 3 approval
+            
+            // Restrukturisasi
             'pengajuan_restrukturisasi.view',
             'pengajuan_restrukturisasi.add',
             'pengajuan_restrukturisasi.edit',
             'pengajuan_restrukturisasi.ajukan_restrukturisasi',
+            
+            // SFinlog Investasi (untuk user dengan flagging = 'ya')
+            'pengajuan_investasi_finlog.view',
+            'pengajuan_investasi_finlog.add',
+            'pengajuan_investasi_finlog.edit',
+            'pengajuan_investasi_finlog.delete',
         ]);
 
-        $financeRole = Role::firstOrCreate(['name' => 'Finance SKI', 'restriction' => 0]);
+        $financeRole = Role::updateOrCreate(
+            ['name' => 'Finance SKI'],
+            ['restriction' => 1]
+        );
         $financeRole->permissions()->detach();
         $financeRole->syncPermissions([
+            // SFinance Menu
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
             'sfinance.menu.pengajuan_peminjaman',
@@ -200,22 +264,50 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.penyaluran_deposito',
             'sfinance.menu.kertas_kerja_sfinance',
             'sfinance.menu.pengembalian_investasi',
+            
+            // SFinlog Menu
+            'sfinlog.menu.dashboard_pembiayaan',
+            'sfinlog.menu.dashboard_investasi_deposito',
+            'sfinlog.menu.peminjaman_dana',
+            'sfinlog.menu.ar_perbulan',
+            'sfinlog.menu.ar_performance',
+            'sfinlog.menu.pengembalian_dana',
+            'sfinlog.menu.debitur_piutang',
+            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.pengajuan_investasi',
+            'sfinlog.menu.penyaluran_deposito',
+            'sfinlog.menu.report_penyaluran_dana',
+            'sfinlog.menu.kertas_kerja_investor',
+            'sfinlog.menu.pengembalian_investasi',
   
-           
+            // SFinance Permissions
             'peminjaman_dana.validasi_dokumen',
+            'peminjaman_dana.generate_kontrak',  // Step 6 Generate Kontrak
             'peminjaman_dana.upload_dokumen_transfer',
-
             'pengajuan_restrukturisasi.validasi_dokumen',
             'investasi.validasi_bagi_hasil',
             'investasi.generate_kontrak',
-            'pengajuan_investasi_finlog.view',
-            'pengajuan_investasi_finlog.validasi_finance_ski',
-            'pengajuan_investasi_finlog.upload_bukti',
-            'pengajuan_investasi_finlog.generate_kontrak',
             'penyaluran_deposito.edit',
+            
+            // SFinlog Peminjaman
+            'peminjaman_finlog.view',
+            'peminjaman_finlog.add',
+            'peminjaman_finlog.persetujuan_finance_ski',  // Step 4
+            'peminjaman_finlog.generate_kontrak',         // Step 6
+            'peminjaman_finlog.upload_bukti',             // Step 7
+            
+            // SFinlog Investasi
+            'pengajuan_investasi_finlog.view',
+            'pengajuan_investasi_finlog.add',
+            'pengajuan_investasi_finlog.validasi_finance_ski',  // Step 2
+            'pengajuan_investasi_finlog.upload_bukti',          // Step 4
+            'pengajuan_investasi_finlog.generate_kontrak',      // Step 5
         ]);
 
-        $ceoRole = Role::firstOrCreate(['name' => 'CEO SKI', 'restriction' => 0]);
+        $ceoRole = Role::updateOrCreate(
+            ['name' => 'CEO SKI'],
+            ['restriction' => 1]
+        );
         $ceoRole->permissions()->detach();
         $ceoRole->syncPermissions([
             'sfinance.menu.pengembalian_dana',
@@ -234,7 +326,10 @@ class RolePermissionSeeder extends Seeder
             'investasi.validasi_ceo_ski',
         ]);
 
-        $direkturRole = Role::firstOrCreate(['name' => 'Direktur SKI', 'restriction' => 0]);
+        $direkturRole = Role::updateOrCreate(
+            ['name' => 'Direktur SKI'],
+            ['restriction' => 1]
+        );
         $direkturRole->permissions()->detach();
         $direkturRole->syncPermissions([
             'sfinance.menu.pengajuan_peminjaman',
@@ -243,11 +338,43 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_restrukturisasi.persetujuan_direktur',
         ]);
 
-        $ceoFinlogRole = Role::firstOrCreate(['name' => 'CEO S-Finlog', 'restriction' => 0]);
+        $ceoFinlogRole = Role::updateOrCreate(
+            ['name' => 'CEO S-Finlog'],
+            ['restriction' => 1]
+        );
         $ceoFinlogRole->permissions()->detach();
         $ceoFinlogRole->syncPermissions([
+            // Menu SFinlog
+            'sfinlog.menu.dashboard_pembiayaan',
+            'sfinlog.menu.dashboard_investasi_deposito',
+            'sfinlog.menu.peminjaman_dana',
+            'sfinlog.menu.pengajuan_investasi',
+            
+            // Peminjaman Finlog
+            'peminjaman_finlog.view',
+            'peminjaman_finlog.add',
+            'peminjaman_finlog.persetujuan_ceo_finlog',  // Step 5 approval
+            
+            // Investasi Finlog
             'pengajuan_investasi_finlog.view',
-            'pengajuan_investasi_finlog.validasi_ceo_finlog',
+            'pengajuan_investasi_finlog.add',
+            'pengajuan_investasi_finlog.validasi_ceo_finlog',  // Step 3 approval
+        ]);
+
+        $ioRole = Role::updateOrCreate(
+            ['name' => 'IO (Investment Officer)'],
+            ['restriction' => 1]
+        );
+        $ioRole->permissions()->detach();
+        $ioRole->syncPermissions([
+            // Menu SFinlog
+            'sfinlog.menu.dashboard_pembiayaan',
+            'sfinlog.menu.peminjaman_dana',
+            
+            // Peminjaman Finlog
+            'peminjaman_finlog.view',
+            'peminjaman_finlog.add',
+            'peminjaman_finlog.validasi_io',  // Step 2 validation
         ]);
 
 
