@@ -62,5 +62,93 @@ class ListNotifSFinlog
 
         sendNotification($data);
     }
+
+    public static function pengembalianDana($peminjaman, $pengembalian = null)
+    {
+        // Notifikasi saat debitur melakukan pengembalian dana
+        $notif = NotificationFeature::where('name', 'pengembalian_dana_pinjaman_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $peminjaman->debitur->nama ?? 'N/A',
+            '[[nomor.peminjaman]]' => $peminjaman->nomor_peminjaman ?? 'N/A',
+            '[[nama.project]]' => $peminjaman->nama_project ?? 'N/A',
+        ];
+
+        // Generate link ke detail peminjaman
+        $link = route('sfinlog.peminjaman.detail', $peminjaman->id_peminjaman_finlog);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianDanaJatuhTempo($peminjaman, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pengembalian dana mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pengembalian_dana_jatuh_tempo_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $peminjaman->debitur->nama ?? 'N/A',
+            '[[nomor.peminjaman]]' => $peminjaman->nomor_peminjaman ?? 'N/A',
+            '[[nama.project]]' => $peminjaman->nama_project ?? 'N/A',
+            '[[tanggal.jatuh.tempo]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke detail peminjaman
+        $link = route('sfinlog.peminjaman.detail', $peminjaman->id_peminjaman_finlog);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianDanaTelat($peminjaman)
+    {
+        // Notifikasi saat debitur telat dalam pengembalian dana
+        $notif = NotificationFeature::where('name', 'pengembalian_dana_telat_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $peminjaman->debitur->nama ?? 'N/A',
+            '[[nomor.peminjaman]]' => $peminjaman->nomor_peminjaman ?? 'N/A',
+            '[[nama.project]]' => $peminjaman->nama_project ?? 'N/A',
+        ];
+
+        // Generate link ke detail peminjaman
+        $link = route('sfinlog.peminjaman.detail', $peminjaman->id_peminjaman_finlog);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }
 

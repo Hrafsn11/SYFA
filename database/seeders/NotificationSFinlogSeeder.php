@@ -146,6 +146,62 @@ class NotificationSFinlogSeeder extends Seeder
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Debitur [[nama.debitur]] telah mengonfirmasi penerimaan dana pinjaman.',
         ]);
+
+        // ============================================
+        // NOTIFICATION FEATURES UNTUK PENGEMBALIAN DANA
+        // ============================================
+
+        // 12. Pengembalian Dana - SKI Finance
+        $pengembalian_dana = NotificationFeature::firstOrCreate([
+            'name' => 'pengembalian_dana_pinjaman_finlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_dana->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Debitur [[nama.debitur]] telah melakukan pembayaran pengembalian dana pinjaman.',
+        ]);
+
+        // 13. Pengembalian Dana Jatuh Tempo - Debitur dan SKI Finance
+        $pengembalian_jatuh_tempo = NotificationFeature::firstOrCreate([
+            'name' => 'pengembalian_dana_jatuh_tempo_finlog',
+            'module' => 's_finlog',
+        ]);
+
+        // Notifikasi untuk Debitur
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pengembalian dana pinjaman debitur [[nama.debitur]] akan segera jatuh tempo pada [[tanggal.jatuh.tempo]].',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengembalian dana pinjaman debitur [[nama.debitur]] akan segera jatuh tempo pada [[tanggal.jatuh.tempo]].',
+        ]);
+
+        // 14. Pengembalian Dana Telat - Debitur dan SKI Finance
+        $pengembalian_telat = NotificationFeature::firstOrCreate([
+            'name' => 'pengembalian_dana_telat_finlog',
+            'module' => 's_finlog',
+        ]);
+
+        // Notifikasi untuk Debitur
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_telat->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Debitur [[nama.debitur]] telah melewati tanggal jatuh tempo dan belum melakukan pembayaran pengembalian dana.',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_telat->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Debitur [[nama.debitur]] telah melewati tanggal jatuh tempo dan belum melakukan pembayaran pengembalian dana.',
+        ]);
     }
 }
 
