@@ -37,18 +37,20 @@ class ListNotifSFinance
             $notif = NotificationFeature::where('name', 'konfirmasi_ditolak_debitur_peminjaman')->first();
         }
 
+
         $notif_variable = [
-            '[[nama.debitur]]' => $peminjaman->debitur->nama_debitur,
+            '[[nama.debitur]]' => $peminjaman->debitur->nama ?? null,
         ];
 
         $link = route('peminjaman.detail', $peminjaman->id_pengajuan_peminjaman);
 
-        $data = [
-            'notif_variable' => $notif_variable,
-            'link' => $link,
-            'notif' => $notif,
-        ];
-
-        sendNotification($data);
+        if($notif) {
+            $data = [
+                'notif_variable' => $notif_variable,
+                'link' => $link,
+                'notif' => $notif,
+            ];
+            sendNotification($data);
+        }
     }
 }
