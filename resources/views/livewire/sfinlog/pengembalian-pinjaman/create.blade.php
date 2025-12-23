@@ -69,17 +69,25 @@
                             </div>
                         </div>
 
-                        {{-- Row 3: Nilai Pinjaman & Bagi Hasil --}}
+                        {{-- Row 3: Nilai Pinjaman, Bagi Hasil & Keterlambatan --}}
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            {{-- Nilai Pinjaman --}}
+                            <div class="col-md-4">
                                 <label class="form-label">Nilai Pinjaman</label>
                                 <input type="text" class="form-control"
                                     value="Rp {{ number_format($nilai_pinjaman, 0, ',', '.') }}" readonly>
                             </div>
-                            <div class="col-md-6">
+                             {{-- Bagi Hasil (termasuk keterlambatan jika ada) --}}
+                            <div class="col-md-4">
                                 <label class="form-label">Bagi Hasil</label>
                                 <input type="text" class="form-control"
-                                    value="Rp {{ number_format($nilai_bagi_hasil, 0, ',', '.') }}" readonly>
+                                     value="Rp {{ number_format($nilai_bagi_hasil_saat_ini ?? $nilai_bagi_hasil, 0, ',', '.') }}"
+                                     readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Jumlah Minggu Keterlambatan</label>
+                                <input type="text" class="form-control"
+                                    value="{{ $jumlah_minggu_keterlambatan }} Minggu" readonly>
                             </div>
                         </div>
 
