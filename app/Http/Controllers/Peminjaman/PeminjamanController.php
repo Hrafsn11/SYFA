@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\MasterDebiturDanInvestor;
 use App\Services\PeminjamanNumberService;
 use App\Enums\PengajuanPeminjamanStatusEnum;
+use App\Helpers\ListNotifSFinance;
 use App\Models\HistoryStatusPengajuanPinjaman;
 use App\Models\MasterSumberPendanaanEksternal;
 use App\Http\Requests\PengajuanPinjamanRequest;
@@ -1157,6 +1158,7 @@ class PeminjamanController extends Controller
             $peminjaman->save();
 
             // Create history record
+
             $historyData = [
                 'id_pengajuan_peminjaman' => $peminjaman->id_pengajuan_peminjaman,
                 'id_config_matrix_peminjaman' => $request->input('id_config_matrix_peminjaman'),
@@ -1402,6 +1404,7 @@ class PeminjamanController extends Controller
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);
+            ListNotifSFinance::menuPeminjaman($status, $peminjaman);
 
             DB::commit();
 
