@@ -304,102 +304,109 @@
                 @endcanany
             @endif
 
-            @if ($isMasterData)
-                <!-- Master Data Section -->
-                <li class="menu-header small text-uppercase">
-                    <span class="menu-header-text">Master Data</span>
-                </li>
+        @else
+            {{-- Master Data Sidebar --}}
+            <li class="menu-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
+                <a wire:navigate.hover href="{{ route('dashboard.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-smart-home"></i>
+                    <div data-i18n="Dashboard">Dashboard</div>
+                </a>
+            </li>
 
-                @can('master_data.view')
-                    <li class="menu-item {{ request()->routeIs('master-data.*') ? 'open' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons ti ti-database"></i>
-                            <div data-i18n="Master Data">Master Data</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('master-data.kol.*') ? 'active' : '' }}">
-                                <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
-                                    <div data-i18n="KOL">KOL</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
-                                    class="menu-link">
-                                    <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
-                                </a>
-                            </li>
-                            <li class="menu-item">
-                                <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}"
-                                    class="menu-link">
-                                    <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
-                                </a>
-                            </li>
-                            {{-- <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
-                                <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
-                                    <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
-                                </a>
-                            </li> --}}
-                            <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
-                                <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}"
-                                    class="menu-link">
-                                    <div data-i18n="Cells Project">Cells Project</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                @endcan
+            <!-- Master Data Section -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Master Data</span>
+            </li>
 
-                <!-- Configuration Section -->
-                <li class="menu-header small text-uppercase">
-                    <span class="menu-header-text">Configuration</span>
-                </li>
-
-                <li class="menu-item {{ request()->routeIs('config-matrix-pinjaman.index') ? 'active' : '' }}">
-                    <a wire:navigate.hover href="{{ route('config-matrix-pinjaman.index') }}" class="menu-link">
-                        <i class="menu-icon tf-icons ti ti-building"></i>
-                        <div data-i18n="Config Matrix Pinjaman">Config Matrix Pinjaman</div>
+            @can('master_data.view')
+                <li class="menu-item {{ request()->routeIs('master-data.*') ? 'open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ti ti-database"></i>
+                        <div data-i18n="Master Data">Master Data</div>
                     </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('master-data.kol.*') ? 'active' : '' }}">
+                            <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
+                                <div data-i18n="KOL">KOL</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
+                                class="menu-link">
+                                <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}"
+                                class="menu-link">
+                                <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
+                            </a>
+                        </li>
+                        {{-- <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
+                            <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
+                                <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
+                            </a>
+                        </li> --}}
+                        <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
+                            <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}"
+                                class="menu-link">
+                                <div data-i18n="Cells Project">Cells Project</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endcan
+
+            <!-- Configuration Section -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Configuration</span>
+            </li>
+
+            <li class="menu-item {{ request()->routeIs('config-matrix-pinjaman.index') ? 'active' : '' }}">
+                <a wire:navigate.hover href="{{ route('config-matrix-pinjaman.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-building"></i>
+                    <div data-i18n="Config Matrix Pinjaman">Config Matrix Pinjaman</div>
+                </a>
+            </li>
+
+            {{-- <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
+                <a href="{{ route('matrixscore') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-user"></i>
+                    <div data-i18n="Config Matrix Score">Config Matrix Score</div>
+                </a>
+            </li> --}}
+
+            <!-- Access Control Section - Only in Master Data Module -->
+            @role('super-admin')
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Access Control</span>
                 </li>
 
-                {{-- <li class="menu-item {{ request()->routeIs('matrixscore') ? 'active' : '' }}">
-                    <a href="{{ route('matrixscore') }}" class="menu-link">
-                        <i class="menu-icon tf-icons ti ti-user"></i>
-                        <div data-i18n="Config Matrix Score">Config Matrix Score</div>
+                <li
+                    class="menu-item {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'open' : '' }}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons ti ti-settings"></i>
+                        <div data-i18n="Roles & Permissions">Roles & Permissions</div>
                     </a>
-                </li> --}}
-
-                <!-- Access Control Section - Only in Master Data Module -->
-                @role('super-admin')
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Access Control</span>
-                    </li>
-
-                    <li
-                        class="menu-item {{ request()->routeIs('users.*') || request()->routeIs('roles.*') || request()->routeIs('permissions.*') ? 'open' : '' }}">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons ti ti-settings"></i>
-                            <div data-i18n="Roles & Permissions">Roles & Permissions</div>
-                        </a>
-                        <ul class="menu-sub">
-                            <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                                <a href="{{ route('users.index') }}" class="menu-link">
-                                    <div data-i18n="Users">Users</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                                <a href="{{ route('roles.index') }}" class="menu-link">
-                                    <div data-i18n="Roles">Roles</div>
-                                </a>
-                            </li>
-                            <li class="menu-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
-                                <a href="{{ route('permissions.index') }}" class="menu-link">
-                                    <div data-i18n="Permissions">Permissions</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                @endrole
-            @endif
+                    <ul class="menu-sub">
+                        <li class="menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                            <a href="{{ route('users.index') }}" class="menu-link">
+                                <div data-i18n="Users">Users</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                            <a href="{{ route('roles.index') }}" class="menu-link">
+                                <div data-i18n="Roles">Roles</div>
+                            </a>
+                        </li>
+                        <li class="menu-item {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+                            <a href="{{ route('permissions.index') }}" class="menu-link">
+                                <div data-i18n="Permissions">Permissions</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            @endrole
         @endif
     </ul>
 </aside>
