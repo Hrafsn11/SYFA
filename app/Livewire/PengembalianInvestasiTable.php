@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengembalianInvestasi;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,6 +12,8 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class PengembalianInvestasiTable extends DataTableComponent
 {
+    use HasDebiturAuthorization;
+
     protected $model = PengembalianInvestasi::class;
 
     protected $listeners = ['refreshPengembalianInvestasiTable' => '$refresh'];

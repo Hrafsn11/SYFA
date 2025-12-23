@@ -11,11 +11,28 @@ trait HasDebiturAuthorization
     {
         $user = auth()->user();
 
-        if (!$user || $user->hasRole(['super-admin', 'admin', 'sfinance'])) {
+        if (!$user || $user->hasRole('super-admin')) {
             return $query;
         }
 
-        return $query->where('master_debitur_dan_investor.user_id', $user->id);
+        $roles = $user->roles;
+        $hasUnrestrictedRole = $roles->contains(function ($role) {
+            return $role->restriction == 1;
+        });
+
+        if ($hasUnrestrictedRole) {
+            return $query;
+        }
+
+        $debiturInvestor = $user->debiturInvestor;
+
+        if ($debiturInvestor) {
+            $query->where('master_debitur_dan_investor.user_id', $user->id);
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        return $query;
     }
 
     protected function getLatestPengembalianSubquery()

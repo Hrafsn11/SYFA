@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SFinlog;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinlog;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PengembalianPinjamanFinlog;
@@ -51,6 +52,11 @@ class PengembalianPinjamanController extends Controller
 
             DB::commit();
 
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $peminjaman = PeminjamanFinlog::with('debitur')->findOrFail($id_peminjaman_finlog);
+            
+            // Kirim notifikasi pengembalian dana
+            ListNotifSFinlog::pengembalianDana($peminjaman);
 
             app(\App\Services\ArPerbulanFinlogService::class)->updateAROnPengembalian(
                 $id_peminjaman_finlog,

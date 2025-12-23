@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SFinlog;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Models\PenyaluranDepositoSfinlog;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +11,7 @@ use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PenyaluranDanaInvestasiTable extends DataTableComponent
 {
-    use HasUniversalFormAction;
+    use HasUniversalFormAction, HasDebiturAuthorization;
 
     protected $model = PenyaluranDepositoSfinlog::class;
 
@@ -32,8 +33,9 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        return PenyaluranDepositoSfinlog::query()
+        $query = PenyaluranDepositoSfinlog::query()
             ->leftJoin('pengajuan_investasi_finlog as pif', 'penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog', '=', 'pif.id_pengajuan_investasi_finlog')
+            ->leftJoin('master_debitur_dan_investor', 'pif.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->leftJoin(
                 \DB::raw('(
                     SELECT 
@@ -64,6 +66,8 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 \DB::raw('COALESCE(pds_sum.total_disalurkan_sum, 0) as total_disalurkan'),
                 \DB::raw('(pif.nominal_investasi - COALESCE(pds_sum.total_disalurkan_sum, 0)) as sisa_dana')
             ]);
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array

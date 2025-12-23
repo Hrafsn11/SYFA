@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PenyaluranDeposito;
 use App\Livewire\Traits\HasUniversalFormAction;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,7 +12,7 @@ use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class PenyaluranDanaInvestasiTable extends DataTableComponent
 {
-    use HasUniversalFormAction;
+    use HasUniversalFormAction, HasDebiturAuthorization;
 
     protected $model = PenyaluranDeposito::class;
 
@@ -94,6 +95,7 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
     {
         $query = PenyaluranDeposito::query()
             ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->leftJoin('master_debitur_dan_investor', 'pi.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->leftJoin(
                 \DB::raw('(
                     SELECT 

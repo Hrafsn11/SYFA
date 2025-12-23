@@ -14,6 +14,7 @@ class NotificationSeeder extends Seeder
         //
         $this->call([
             \Database\Seeders\NotificationSFinanceSeeder::class,
+            \Database\Seeders\NotificationSFinlogSeeder::class,
         ]);
     }
 }
