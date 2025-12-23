@@ -1,5 +1,6 @@
 <div class="services-wrapper mx-auto pt-5">
-    <div class="row align-items-center mb-5 header-offset">
+    {{-- Header with User Profile --}}
+    <div class="d-flex justify-content-between align-items-center mb-5 header-offset">
         <div class="col-md-6 d-flex align-items-center gap-3">
             <div class="app-brand-logo">
                 <img src="{{ asset('assets/img/logo.png') }}" alt="Logo" width="40" />
@@ -11,141 +12,147 @@
 
         <div class="col-md-6 d-flex justify-content-end">
             <div class="dropdown">
-                <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;">
-                    <div class="text-end me-2">
-                        <div class="fw-semibold">
+                <div class="d-flex align-items-center gap-3 cursor-pointer" data-bs-toggle="dropdown"
+                    aria-expanded="false" style="cursor: pointer;">
+                    <div class="text-end me-2" style="max-width: 200px;">
+                        <div class="fw-semibold text-truncate">
                             {{ auth()->user()->name ?? 'Super Admin' }}
                         </div>
-                        <small class="text-muted">
-                            {{ auth()->user()->currentTeam->name ?? 'Super Admin' }}
+                        <small class="text-muted d-block text-truncate">
+                            {{ auth()->user()->currentTeam->name ?? "Super Admin's Team" }}
                         </small>
                     </div>
                     <div class="position-relative">
-                        <span class="avatar avatar-sm rounded-circle bg-label-warning d-inline-flex align-items-center justify-content-center">
+                        <span
+                            class="avatar avatar-sm rounded-circle bg-label-warning d-inline-flex align-items-center justify-content-center">
                             <i class="ti ti-award fs-5 text-warning"></i>
                         </span>
-                        <span class="position-absolute bottom-0 end-0 translate-middle p-1 bg-success border border-2 border-card rounded-circle">
+                        <span
+                            class="position-absolute bottom-0 end-0 translate-middle p-1 bg-success border border-2 border-card rounded-circle">
                             <span class="visually-hidden">Online</span>
                         </span>
                     </div>
                 </div>
 
-                <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width: 14rem;">
+                <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <div class="dropdown-item p-3 border-bottom d-flex align-items-center">
-                            <span class="avatar avatar-sm rounded-circle bg-label-warning me-3">
-                                <i class="ti ti-user fs-5 text-warning"></i>
-                            </span>
-                            <div class="d-flex flex-column">
-                                <p class="mb-0 fw-semibold">{{ auth()->user()->name ?? 'Super Admin' }}</p>
-                                <small class="text-muted">{{ auth()->user()->email ?? 'superadmin@syfa.test' }}</small>
+                        <a class="dropdown-item mt-0" href="#">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-2">
+                                    <div class="avatar avatar-online">
+                                        <span class="avatar-initial rounded-circle bg-label-warning">
+                                            <i class="ti ti-user text-warning"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-0">{{ auth()->user()->name ?? 'Super Admin' }}</h6>
+                                    <small class="text-muted">{{ auth()->user()->email ?? 'admin@admin.com' }}</small>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </li>
-                    
-                    <li><hr class="dropdown-divider my-1"></li>
-
                     <li>
-                        <form method="POST" action="{{ route('logout') }}" class="w-full">
-                            @csrf
-                            <button type="submit" class="dropdown-item">
-                                <i class="ti ti-logout me-2"></i>
-                                Logout
-                            </button>
-                        </form>
+                        <div class="dropdown-divider my-1 mx-n2"></div>
+                    </li>
+                    <li>
+                        <div class="d-grid px-2 pt-2 pb-1">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-danger d-flex w-100">
+                                    <small class="align-middle">Logout</small>
+                                    <i class="ti ti-logout ms-2 ti-14px"></i>
+                                </button>
+                            </form>
+                        </div>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
-
-    <div class="card border-0 shadow-sm main-card">
-        <div class="card-body px-4 py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="fw-bold mb-1">Services</h4>
+    {{-- Services Grid --}}
+    <div class="row g-4 justify-content-center mt-5">
+        {{-- SFinance Card --}}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 border service-card shadow-none">
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                    <span class="badge bg-label-primary text-uppercase mb-3 px-3 py-2 fw-semibold">Core</span>
+                    <div class="mb-3">
+                        <div class="icon-wrapper bg-light-primary rounded-circle p-3 mb-2">
+                            <i class="ti ti-building-bank text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                    <h5 class="mb-2 fw-bold">SFinance</h5>
+                    <p class="text-muted mb-4 small flex-grow-1">
+                        Modul utama pengelolaan pembiayaan dan investasi SYFA
+                    </p>
+                    <a href="{{ route('sfinance.dashboard.pembiayaan') }}" class="btn btn-primary w-100 fw-semibold">
+                        Go to Application
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <div class="row g-4">
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="card h-100 border-0 service-card">
-                        <div class="card-body d-flex flex-column align-items-center text-center position-relative">
-                            <span class="badge bg-success text-uppercase fw-semibold small badge-top-right">
-                                CORE
-                            </span>
-                            <div class="service-icon mb-3 mt-4">
-                                <i class="ti ti-gauge text-primary icon-size-lg"></i>
-                            </div>
-                            <h5 class="mb-1 fw-semibold">SFinance</h5>
-                            <p class="text-muted mb-4 small flex-grow-1">
-                                Modul utama pengelolaan pembiayaan dan investasi SYFA.
-                            </p>
-                            <a href="{{ route('sfinance.dashboard.pembiayaan') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
-                                Go to Application
-                            </a>
+        {{-- SFinlog Card --}}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 border service-card shadow-none">
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                    <span class="badge bg-label-info text-uppercase mb-3 px-3 py-2 fw-semibold">Support</span>
+                    <div class="mb-3">
+                        <div class="icon-wrapper bg-light-info rounded-circle p-3 mb-2">
+                            <i class="ti ti-clipboard-data text-info" style="font-size: 3rem;"></i>
                         </div>
                     </div>
+                    <h5 class="mb-2 fw-bold">SFinlog</h5>
+                    <p class="text-muted mb-4 small flex-grow-1">
+                        Monitoring dan pencatatan transaksi keuangan operasional
+                    </p>
+                    <a href="{{ route('sfinlog.dashboard.pembiayaan') }}" class="btn btn-info w-100 fw-semibold">
+                        Go to Application
+                    </a>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="card h-100 border-0 service-card">
-                        <div class="card-body d-flex flex-column align-items-center text-center position-relative">
-                            <span class="badge bg-info text-uppercase fw-semibold small badge-top-right">
-                                SUPPORT
-                            </span>
-                            <div class="service-icon mb-3 mt-4">
-                                <i class="ti ti-clipboard-text text-info icon-size-lg"></i>
-                            </div>
-                            <h5 class="mb-1 fw-semibold">SFinlog</h5>
-                            <p class="text-muted mb-4 small flex-grow-1">
-                                Monitoring dan pencatatan transaksi keuangan operasional.
-                            </p>
-                            <a href="{{ route('sfinlog.dashboard.pembiayaan') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
-                                Go to Application
-                            </a>
+        {{-- Master Data & Configuration Card --}}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 border service-card shadow-none">
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                    <span class="badge bg-label-warning text-uppercase mb-3 px-3 py-2 fw-semibold">Configuration</span>
+                    <div class="mb-3">
+                        <div class="icon-wrapper bg-light-warning rounded-circle p-3 mb-2">
+                            <i class="ti ti-database-cog text-warning" style="font-size: 3rem;"></i>
                         </div>
                     </div>
+                    <h5 class="mb-2 fw-bold">Master Data</h5>
+                    <p class="text-muted mb-4 small flex-grow-1">
+                        Pengaturan master data, parameter sistem, dan konfigurasi aplikasi
+                    </p>
+                    <a href="{{ route('master-data.kol.index') }}" class="btn btn-warning w-100 fw-semibold">
+                        Go to Application
+                    </a>
                 </div>
+            </div>
+        </div>
 
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="card h-100 border-0 service-card">
-                        <div class="card-body d-flex flex-column align-items-center text-center position-relative">
-                            <span class="badge bg-primary text-uppercase fw-semibold small badge-top-right">
-                                CONFIGURATION
-                            </span>
-                            <div class="service-icon mb-3 mt-4">
-                                <i class="ti ti-settings-cog text-warning icon-size-lg"></i>
-                            </div>
-                            <h5 class="mb-1 fw-semibold text-center">Master Data &amp; Configuration</h5>
-                            <p class="text-muted mb-4 small flex-grow-1">
-                                Pengaturan master data, parameter sistem, dan konfigurasi aplikasi.
-                            </p>
-                            <a href="{{ route('master-data.kol.index') }}" class="btn btn-primary fw-semibold px-4 mt-auto">
-                                Go to Application
-                            </a>
+
+        {{-- Portofolio Card --}}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 border service-card shadow-none">
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                    <span class="badge bg-label-success text-uppercase mb-3 px-3 py-2 fw-semibold">Insight</span>
+                    <div class="mb-3">
+                        <div class="icon-wrapper bg-light-success rounded-circle p-3 mb-2">
+                            <i class="ti ti-chart-pie-2 text-success" style="font-size: 3rem;"></i>
                         </div>
                     </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="card h-100 border-0 service-card">
-                        <div class="card-body d-flex flex-column align-items-center text-center position-relative">
-                            <span class="badge bg-success text-uppercase fw-semibold small badge-top-right">
-                                INSIGHT
-                            </span>
-                            <div class="service-icon mb-3 mt-4">
-                                <i class="ti ti-chart-line text-success icon-size-lg"></i>
-                            </div>
-                            <h5 class="mb-1 fw-semibold">Portofolio</h5>
-                            <p class="text-muted mb-4 small flex-grow-1">
-                                Ringkasan kinerja portofolio pembiayaan dan investasi.
-                            </p>
-                            <a href="#" class="btn btn-primary fw-semibold px-4 mt-auto">
-                                Go to Application
-                            </a>
-                        </div>
-                    </div>
+                    <h5 class="mb-2 fw-bold">Portofolio</h5>
+                    <p class="text-muted mb-4 small flex-grow-1">
+                        Ringkasan kinerja portofolio pembiayaan dan investasi
+                    </p>
+                    <a href="#" class="btn btn-success w-100 fw-semibold">
+                        Go to Application
+                    </a>
                 </div>
             </div>
         </div>
@@ -154,6 +161,7 @@
 
 @push('styles')
     <style>
+        /* Layout */
         .services-wrapper {
             max-width: 1400px;
         }
@@ -162,51 +170,85 @@
             padding-top: 30px;
         }
 
-        .service-card {
-            border-radius: 1rem;
-            border: 1px solid #e2e6f0;
-            box-shadow: 0 0.75rem 1.5rem rgba(15, 23, 42, 0.06);
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-            min-height: 370px; 
-            display: flex;
-            flex-direction: column;
-        }
-
-        .service-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 1.25rem 2rem rgba(15, 23, 42, 0.08);
-        }
-
-        .service-card .card-body {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; 
-        }
-
-        .service-icon .icon-size-lg {
-            padding: 1.5rem;
-            border-radius: 50%;
-            font-size: 3.2rem;
-            display: inline-flex;
-        }
-
-        .badge-top-right {
-            position: absolute;
-            top: 0;
-            right: 0;
-            margin-top: 1rem;
-            margin-right: 1rem;
-            padding: 0.3rem 0.75rem;
-            border-radius: 0.5rem;
-        }
-
+        /* Main Card */
         .main-card {
-            min-height: 480px; 
+            border-radius: 0.5rem;
+            min-height: 480px;
         }
 
+        /* Service Card - Clean & Formal */
+        .service-card {
+            border-radius: 0.5rem;
+            border: 1px solid #e2e6f0;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            min-height: 400px;
+        }
+
+        /* Icon Wrapper - Simple Circle */
+        .icon-wrapper {
+            width: 100px;
+            height: 100px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Light Background Colors */
+        .bg-light-primary {
+            background-color: rgba(105, 108, 255, 0.08);
+        }
+
+        .bg-light-info {
+            background-color: rgba(3, 195, 236, 0.08);
+        }
+
+        .bg-light-warning {
+            background-color: rgba(255, 171, 0, 0.08);
+        }
+
+        .bg-light-success {
+            background-color: rgba(113, 221, 55, 0.08);
+        }
+
+        /* Badge */
+        .service-card .badge {
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Button */
+        .service-card .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+        }
+
+        /* Typography */
+        .service-card h5 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-card p {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* User Dropdown */
         .cursor-pointer {
             cursor: pointer;
         }
 
+        /* Responsive */
+        @media (max-width: 768px) {
+            .icon-wrapper {
+                width: 80px;
+                height: 80px;
+            }
+
+            .icon-wrapper i {
+                font-size: 2.5rem !important;
+            }
+        }
     </style>
 @endpush
