@@ -1404,7 +1404,12 @@ class PeminjamanController extends Controller
             }
 
             HistoryStatusPengajuanPinjaman::create($historyData);
-            ListNotifSFinance::menuPeminjaman($status, $peminjaman);
+
+            $history = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)->where('nominal_yang_disetujui', '!=', null)->latest()->first();
+            $nominalDisetujui = $historyData['nominal_yang_disetujui'] ?? ($history ? $history->nominal_yang_disetujui : 0);
+
+
+            ListNotifSFinance::menuPeminjaman($status, $peminjaman, $nominalDisetujui);
 
             DB::commit();
 

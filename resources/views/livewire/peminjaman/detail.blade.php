@@ -665,6 +665,7 @@
                                         
                                         @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan' && $peminjaman['current_step'] == 7)
                                             <!-- Upload Form - Show only when status is NOT 'Dana Sudah Dicairkan' -->
+                                            @can('peminjaman_dana.upload_dokumen_transfer')
                                             <div class="mt-5" id="uploadDokumenSection">
                                                 <hr class="my-4">
                                                 <h6 class="text-dark mb-3">Upload Dokumen Transfer</h6>
@@ -672,7 +673,6 @@
                                                 <div class="card border-1 shadow-none">
                                                     <div class="card-body">
                                                         <form id="formUploadDokumenTransfer" class="row g-3">
-                                                            @can('peminjaman_dana.upload_dokumen_transfer')
                                                             <div class="col-12">
                                                                 <label for="dokumenTransfer" class="form-label">
                                                                     <i class="ti ti-upload me-2"></i>
@@ -695,11 +695,11 @@
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                            @endcan
                                                         </form>
                                                     </div>
                                                 </div>
                                             </div>
+                                            @endcan
                                         @endif
                                         <!-- End Upload/View Dokumen Section -->
                                     </div>
