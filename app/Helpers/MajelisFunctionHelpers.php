@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Notification;
+use App\Models\NotificationFeatureDetail;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 
 if (!function_exists('rupiahFormatter')) {
@@ -388,6 +392,43 @@ if (!function_exists('createTemporaryUploadedFileFromArray')) {
             }
             
             return null;
+        }
+    }
+}
+
+if (!function_exists('sendNotification')) {
+    function sendNotification($data)
+    {
+        $detail_notif = NotificationFeatureDetail::where('notification_feature_id', $data['notif']->id_notification_feature)->get();
+
+        if(count($detail_notif) > 0) {
+            foreach($detail_notif as $key1 => $value1) {
+                $role_assigned = json_decode($value1->role_assigned);
+                if ($role_assigned) {
+                    $message_replaced = str_replace(array_keys($data['notif_variable']), array_values($data['notif_variable']), $value1->message);
+                    foreach($role_assigned as $key2 => $value2) {
+                        $role = Role::find($value2);
+                        if(isset($role)) {
+                            $roleName = $role->name;
+                            $user_temp = User::role($roleName)
+                            ->pluck('id')
+                            ->toArray();
+
+                            if (count($user_temp) > 0) {
+                                foreach ($user_temp as $key3 => $value3) {
+                                    $not = new Notification();
+                                    $not->type = 'info';
+                                    $not->status = 'unread';
+                                    $not->content = $message_replaced;
+                                    $not->link = $data['link'];
+                                    $not->user_id = $value3;
+                                    $not->save();
+                                }
+                            }
+                        }
+                    }
+                }
+            }   
         }
     }
 }
