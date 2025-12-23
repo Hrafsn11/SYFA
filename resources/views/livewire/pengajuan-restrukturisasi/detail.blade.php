@@ -20,34 +20,6 @@
                 </div>
             </div>
 
-            {{-- <!-- Alert Messages -->
-            @if ($restrukturisasi['status'] === 'Draft')
-                <div class="alert alert-info mb-4" role="alert" id="alertDraft">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Pengajuan restrukturisasi masih dalam status <strong>Draft</strong>. Silakan klik tombol <strong>"Submit
-                        Pengajuan"</strong> untuk melanjutkan proses evaluasi.
-                </div>
-            @elseif($restrukturisasi['status'] === 'Perbaikan Dokumen')
-                <div class="alert alert-warning mb-4" role="alert" id="alertPerbaikan">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Pengajuan restrukturisasi Anda <strong>memerlukan perbaikan dokumen</strong>. Pengajuan ditolak pada tahap evaluasi. 
-                    Silakan perbaiki data/dokumen yang diperlukan, lalu klik <strong>"Submit Ulang Pengajuan"</strong> untuk diproses kembali.
-                    <br><small class="mt-2 d-block">Cek tab <strong>Activity</strong> untuk melihat alasan penolakan.</small>
-                </div>
-            @elseif($restrukturisasi['status'] === 'Ditolak')
-                <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
-                    <i class="fas fa-times-circle me-2"></i>
-                    Pengajuan restrukturisasi Anda <strong>Ditolak</strong>. Proses restrukturisasi telah berakhir dan tidak dapat diajukan kembali.
-                    <br><small class="mt-2 d-block">Cek tab <strong>Activity</strong> untuk melihat alasan penolakan.</small>
-                </div>
-            @else
-                <div class="alert alert-warning mb-4" role="alert" id="alertPeninjauan">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Pengajuan Restrukturisasi sedang kami tinjau. Harap tunggu beberapa saat hingga proses verifikasi
-                    selesai.
-                </div>
-            @endif --}}
-
             <!-- Tabs -->
             <div class="card mb-4">
                 <div class="card-header p-0">

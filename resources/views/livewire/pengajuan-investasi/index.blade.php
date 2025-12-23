@@ -36,13 +36,14 @@
                         </div>
                         <form id="formTambahFormKerjaInvestor" novalidate>
                             <input type="hidden" id="editFormKerjaInvestorId" value="">
-                            <input type="hidden" id="id_debitur_dan_investor" value="{{ optional($investor)->id_debitur ?? '' }}">
+                            <input type="hidden" id="id_debitur_dan_investor"
+                                value="{{ optional($investor)->id_debitur ?? '' }}">
                             <div class="row">
                                 <div class="col-lg-12 mb-3">
                                     <label for="nama_investor" class="form-label">Nama Investor <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="nama_investor"
-                                        name="nama_investor" placeholder="Nama Investor" required readonly>
+                                    <input type="text" class="form-control" id="nama_investor" name="nama_investor"
+                                        placeholder="Nama Investor" required readonly>
                                 </div>
                                 <div class="col-12 mb-3" id="div-deposito">
                                     <label class="form-label">Deposito <span class="text-danger">*</span></label>
@@ -73,7 +74,8 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="lama-investasi" class="form-label">Lama Berinvestasi (Bulan) <span class="text-danger">*</span></label>
+                                    <label for="lama-investasi" class="form-label">Lama Berinvestasi (Bulan) <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="lama_investasi"
                                         placeholder="Masukkan lama berinvestasi" required>
                                 </div>
@@ -84,7 +86,8 @@
                                         name="jumlah_investasi" placeholder="Rp 0" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="bagi_hasil" class="form-label">Bagi Hasil (%)/Tahun <span class="text-danger">*</span></label>
+                                    <label for="bagi_hasil" class="form-label">Bagi Hasil (%)/Tahun <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="bagi_hasil" name="bagi_hasil_pertahun"
                                         placeholder="Masukan bagi hasil" min="0" max="100" step="0.01"
                                         required>
@@ -95,8 +98,8 @@
                                 <div class="col-lg-12 mb-3">
                                     <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bagi Hasil Yang Didapat
                                         <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control input-rupiah non-editable" id="bagi_hasil_keseluruhan"
-                                        placeholder="Rp 0" required disabled readonly>
+                                    <input type="text" class="form-control input-rupiah non-editable"
+                                        id="bagi_hasil_keseluruhan" placeholder="Rp 0" required disabled readonly>
                                 </div>
                             </div>
                         </form>
@@ -146,15 +149,40 @@
         $(document).ready(function() {
             const $modal = $('#modalFormKerjaInvestor');
             const $form = $('#formTambahFormKerjaInvestor');
-            const INVESTOR = { nama: '{{ optional($investor)->nama ?? '' }}', deposito: '{{ optional($investor)->deposito ?? '' }}', id: '{{ optional($investor)->id_debitur ?? '' }}' };
+            const INVESTOR = {
+                nama: '{{ optional($investor)->nama ?? '' }}',
+                deposito: '{{ optional($investor)->deposito ?? '' }}',
+                id: '{{ optional($investor)->id_debitur ?? '' }}'
+            };
             const CSRF = '{{ csrf_token() }}';
-            let cleaveInstances = {}, deleteId = null;
+            let cleaveInstances = {},
+                deleteId = null;
 
-            const alert = (icon, html, title = icon === 'error' ? 'Error!' : icon === 'success' ? 'Berhasil!' : 'Perhatian') => 
-                Swal.fire({ icon, title, [icon === 'error' || icon === 'warning' ? 'html' : 'text']: html, ...(icon === 'success' && { timer: 2000, showConfirmButton: false }) });
+            const alert = (icon, html, title = icon === 'error' ? 'Error!' : icon === 'success' ? 'Berhasil!' :
+                    'Perhatian') =>
+                Swal.fire({
+                    icon,
+                    title,
+                    [icon === 'error' || icon === 'warning' ? 'html' : 'text']: html,
+                    confirmButtonText: 'OK',
+                    showCancelButton: false,
+                    showConfirmButton: true,
+                    showDenyButton: false,
+                    showCloseButton: false,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: true
+                });
 
-            const cleaveConfig = { numeral: true, numeralThousandsGroupStyle: 'thousand', numeralDecimalScale: 0, prefix: 'Rp ', rawValueTrimPrefix: true, noImmediatePrefix: false };
-            
+            const cleaveConfig = {
+                numeral: true,
+                numeralThousandsGroupStyle: 'thousand',
+                numeralDecimalScale: 0,
+                prefix: 'Rp ',
+                rawValueTrimPrefix: true,
+                noImmediatePrefix: false
+            };
+
             const initCleave = () => ['jumlah_investasi', 'bagi_hasil_keseluruhan'].forEach(id => {
                 cleaveInstances[id]?.destroy();
                 cleaveInstances[id] = new Cleave(`#${id}`, cleaveConfig);
@@ -163,50 +191,72 @@
             const getCleave = (id) => parseInt(cleaveInstances[id]?.getRawValue()) || 0;
             const setCleave = (id, val) => cleaveInstances[id]?.setRawValue(val);
 
-            $('#bs-datepicker-tanggal-pembayaran').datepicker({ format: 'yyyy-mm-dd', todayHighlight: true, autoclose: true, orientation: 'bottom auto', startDate: 'today' });
+            $('#bs-datepicker-tanggal-pembayaran').datepicker({
+                format: 'yyyy-mm-dd',
+                todayHighlight: true,
+                autoclose: true,
+                orientation: 'bottom auto',
+                startDate: 'today'
+            });
 
             const resetForm = () => {
                 $form[0].reset();
                 $form.removeClass('was-validated');
-                $('#editFormKerjaInvestorId, #modalTambahFormKerjaInvestorLabel').val('').filter(':last').text('Tambah Pengajuan Investasi');
+                $('#editFormKerjaInvestorId, #modalTambahFormKerjaInvestorLabel').val('').filter(':last').text(
+                    'Tambah Pengajuan Investasi');
                 $('#btnHapusFormKerjaInvestor').addClass('d-none');
                 ['jumlah_investasi', 'bagi_hasil_keseluruhan'].forEach(id => setCleave(id, 0));
             };
 
             const setDepositoMode = (deposito) => {
                 const isReguler = deposito === 'reguler';
-                $('#bagi_hasil').val(isReguler ? '10' : '').prop({ readonly: isReguler, disabled: isReguler }).toggleClass('non-editable', isReguler);
+                $('#bagi_hasil').val(isReguler ? '10' : '').prop({
+                    readonly: isReguler,
+                    disabled: isReguler
+                }).toggleClass('non-editable', isReguler);
                 $('#bagi-hasil-hint').toggleClass('d-none', isReguler);
                 calculateBagiHasil();
             };
 
             const calculateBagiHasil = () => {
-                const [jumlah, persen, lama] = [getCleave('jumlah_investasi'), parseFloat($('#bagi_hasil').val()) || 0, parseInt($('#lama_investasi').val()) || 0];
-                setCleave('bagi_hasil_keseluruhan', (jumlah > 0 && persen > 0 && lama > 0) ? Math.round((jumlah * persen / 100) / 12 * lama) : 0);
+                const [jumlah, persen, lama] = [getCleave('jumlah_investasi'), parseFloat($('#bagi_hasil')
+                    .val()) || 0, parseInt($('#lama_investasi').val()) || 0];
+                setCleave('bagi_hasil_keseluruhan', (jumlah > 0 && persen > 0 && lama > 0) ? Math.round((
+                    jumlah * persen / 100) / 12 * lama) : 0);
             };
 
             $('#btnTambahFormKerjaInvestor').click(() => {
-                if (!INVESTOR.nama || !INVESTOR.deposito) return alert('warning', 'Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.', 'Data Investor Tidak Ditemukan');
-                
+                if (!INVESTOR.nama || !INVESTOR.deposito) return alert('warning',
+                    'Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.',
+                    'Data Investor Tidak Ditemukan');
+
                 resetForm();
                 $('#nama_investor').val(INVESTOR.nama);
                 $('#id_debitur_dan_investor').val(INVESTOR.id);
                 const deposito = INVESTOR.deposito.toLowerCase();
-                $('input[name="deposito"]').prop({ checked: false, disabled: true }).filter(`[value="${deposito}"]`).prop('checked', true);
+                $('input[name="deposito"]').prop({
+                    checked: false,
+                    disabled: true
+                }).filter(`[value="${deposito}"]`).prop('checked', true);
                 setDepositoMode(deposito);
                 $modal.modal('show');
                 setTimeout(initCleave, 100);
             });
 
             $modal.on('shown.bs.modal', () => !cleaveInstances.jumlah_investasi && initCleave())
-                  .on('hidden.bs.modal', () => (resetForm(), $('#btnSimpanSpinner').addClass('d-none'), $('#btnSimpanFormKerjaInvestor').prop('disabled', false)));
+                .on('hidden.bs.modal', () => (resetForm(), $('#btnSimpanSpinner').addClass('d-none'), $(
+                    '#btnSimpanFormKerjaInvestor').prop('disabled', false)));
 
             $('#jumlah_investasi, #bagi_hasil, #lama_investasi').on('input', calculateBagiHasil);
 
             $('#btnHapusFormKerjaInvestor').click((e) => {
                 e.preventDefault();
                 const id = $('#editFormKerjaInvestorId').val();
-                if (id) { deleteId = id; $modal.modal('hide'); $('#modalConfirmDeleteInvestor').modal('show'); }
+                if (id) {
+                    deleteId = id;
+                    $modal.modal('hide');
+                    $('#modalConfirmDeleteInvestor').modal('show');
+                }
             });
 
             $('#btnConfirmDeleteInvestor').click(function() {
@@ -218,8 +268,12 @@
                 $.ajax({
                     url: `/pengajuan-investasi/${deleteId}`,
                     method: 'DELETE',
-                    data: { _token: CSRF },
-                    success: (res) => !res.error && ($('#modalConfirmDeleteInvestor').modal('hide'), Livewire.dispatch('refreshPengajuanInvestasiTable'), alert('success', res.message || 'Data berhasil dihapus'), deleteId = null),
+                    data: {
+                        _token: CSRF
+                    },
+                    success: (res) => !res.error && ($('#modalConfirmDeleteInvestor').modal('hide'),
+                        Livewire.dispatch('refreshPengajuanInvestasiTable'), alert('success',
+                            res.message || 'Data berhasil dihapus'), deleteId = null),
                     complete: () => ($spinner.addClass('d-none'), $(this).prop('disabled', false))
                 });
             });
@@ -228,8 +282,11 @@
 
             $('#btnSimpanFormKerjaInvestor').click(function() {
                 if (!$form[0].checkValidity()) return $form.addClass('was-validated');
-                if (!$('input[name="deposito"]:checked').val()) return alert('warning', 'Pilih jenis deposito terlebih dahulu');
-                if (!INVESTOR.id) return alert('warning', 'ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.', 'Data Investor Tidak Ditemukan');
+                if (!$('input[name="deposito"]:checked').val()) return alert('warning',
+                    'Pilih jenis deposito terlebih dahulu');
+                if (!INVESTOR.id) return alert('warning',
+                    'ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.',
+                    'Data Investor Tidak Ditemukan');
 
                 const editId = $('#editFormKerjaInvestorId').val();
                 const deposito = $('input[name="deposito"]:checked').val();
@@ -246,7 +303,9 @@
                     jumlah_investasi: getCleave('jumlah_investasi'),
                     bagi_hasil_pertahun: $('#bagi_hasil').val(),
                     _token: CSRF,
-                    ...(editId && { _method: 'PUT' })
+                    ...(editId && {
+                        _method: 'PUT'
+                    })
                 };
 
                 $('input[name="deposito"]').prop('disabled', true);
@@ -254,11 +313,17 @@
                 $(this).prop('disabled', true);
 
                 $.ajax({
-                    url: editId ? `/pengajuan-investasi/${editId}` : '{{ route('pengajuan-investasi.store') }}',
+                    url: editId ? `/pengajuan-investasi/${editId}` :
+                        '{{ route('pengajuan-investasi.store') }}',
                     method: 'POST',
                     data,
-                    success: (res) => !res.error && ($modal.modal('hide'), Livewire.dispatch('refreshPengajuanInvestasiTable'), alert('success', res.message || (editId ? 'Data berhasil diupdate' : 'Data berhasil ditambahkan'))),
-                    error: (xhr) => alert('error', xhr.responseJSON?.errors ? Object.values(xhr.responseJSON.errors).flat().join('<br>') : xhr.responseJSON?.message || 'Terjadi kesalahan saat menyimpan data', 'Gagal!'),
+                    success: (res) => !res.error && ($modal.modal('hide'), Livewire.dispatch(
+                        'refreshPengajuanInvestasiTable'), alert('success', res.message || (
+                        editId ? 'Data berhasil diupdate' : 'Data berhasil ditambahkan'
+                    ))),
+                    error: (xhr) => alert('error', xhr.responseJSON?.errors ? Object.values(xhr
+                            .responseJSON.errors).flat().join('<br>') : xhr.responseJSON
+                        ?.message || 'Terjadi kesalahan saat menyimpan data', 'Gagal!'),
                     complete: () => ($spinner.addClass('d-none'), $(this).prop('disabled', false))
                 });
             });
@@ -266,7 +331,8 @@
             $(document).on('click', '.investor-detail-btn', (e) => {
                 e.preventDefault();
                 const id = $(e.currentTarget).data('id');
-                id ? window.location.href = `/pengajuan-investasi/${id}` : alert('error', 'ID tidak ditemukan');
+                id ? window.location.href = `/pengajuan-investasi/${id}` : alert('error',
+                    'ID tidak ditemukan');
             });
 
             $(document).on('click', '.investor-edit-btn', (e) => {
@@ -281,7 +347,7 @@
                         if (!res.error && res.data) {
                             const d = res.data;
                             resetForm();
-                            
+
                             Object.entries({
                                 editFormKerjaInvestorId: d.id_pengajuan_investasi,
                                 id_debitur_dan_investor: d.id_debitur_dan_investor,
@@ -290,23 +356,31 @@
                                 bagi_hasil: d.bagi_hasil_pertahun
                             }).forEach(([id, val]) => $(`#${id}`).val(val));
 
-                            $('#modalTambahFormKerjaInvestorLabel').text('Edit Pengajuan Investasi');
+                            $('#modalTambahFormKerjaInvestorLabel').text(
+                                'Edit Pengajuan Investasi');
                             $('#btnHapusFormKerjaInvestor').removeClass('d-none');
 
                             const deposito = d.deposito?.toLowerCase();
                             if (deposito) {
-                                $('input[name="deposito"]').prop({ checked: false, disabled: true }).filter(`[value="${deposito}"]`).prop('checked', true);
+                                $('input[name="deposito"]').prop({
+                                    checked: false,
+                                    disabled: true
+                                }).filter(`[value="${deposito}"]`).prop('checked', true);
                                 setDepositoMode(deposito);
                             }
 
-                            d.tanggal_investasi && $('#bs-datepicker-tanggal-pembayaran').datepicker('setDate', d.tanggal_investasi);
-                            
+                            d.tanggal_investasi && $('#bs-datepicker-tanggal-pembayaran')
+                                .datepicker('setDate', d.tanggal_investasi);
+
                             $modal.modal('show');
                             setTimeout(() => {
                                 initCleave();
                                 setTimeout(() => {
-                                    setCleave('jumlah_investasi', d.jumlah_investasi || 0);
-                                    setCleave('bagi_hasil_keseluruhan', d.nominal_bagi_hasil_yang_didapatkan || 0);
+                                    setCleave('jumlah_investasi', d
+                                        .jumlah_investasi || 0);
+                                    setCleave('bagi_hasil_keseluruhan', d
+                                        .nominal_bagi_hasil_yang_didapatkan ||
+                                        0);
                                 }, 50);
                             }, 100);
                         }

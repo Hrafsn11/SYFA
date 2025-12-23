@@ -81,10 +81,16 @@ class ReportPengembalianTable extends DataTableComponent
             ->select([
                 'report_pengembalian.*',
                 'pengajuan_peminjaman.id_debitur',
+                'pengajuan_peminjaman.id_pengajuan_peminjaman',
                 'master_debitur_dan_investor.user_id',
+                'bukti_peminjaman.due_date as bp_due_date',
             ])
             ->leftJoin('pengajuan_peminjaman', 'report_pengembalian.nomor_peminjaman', '=', 'pengajuan_peminjaman.nomor_peminjaman')
-            ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur');
+            ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
+            ->leftJoin('bukti_peminjaman', function ($join) {
+                $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'bukti_peminjaman.id_pengajuan_peminjaman')
+                    ->on('report_pengembalian.nomor_invoice', '=', 'bukti_peminjaman.no_invoice');
+            });
 
         return $this->applyDebiturAuthorization($query);
     }
@@ -115,13 +121,15 @@ class ReportPengembalianTable extends DataTableComponent
                 ->format(fn($value) => '<div class="text-center"><strong>' . ($value ?: '-') . '</strong></div>')
                 ->html(),
 
-            Column::make('Due Date', 'due_date')
-                ->sortable()
-                ->format(function ($value) {
-                    if (!$value) {
+            Column::make('Due Date')
+                ->format(function ($value, $row) {
+                    // Use due_date from bukti_peminjaman first, fallback to report_pengembalian
+                    $dueDate = $row->bp_due_date ?: $row->due_date;
+
+                    if (!$dueDate) {
                         return '<div class="text-center">-</div>';
                     }
-                    return '<div class="text-center">' . date('d-m-Y', strtotime($value)) . '</div>';
+                    return '<div class="text-center">' . date('d-m-Y', strtotime($dueDate)) . '</div>';
                 })
                 ->html(),
 

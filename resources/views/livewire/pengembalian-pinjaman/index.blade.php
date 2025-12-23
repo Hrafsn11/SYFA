@@ -5,7 +5,7 @@
                 <h4 class="fw-bold mb-0">Pengembalian Peminjaman</h4>
                 
                 <div class="d-flex gap-2">
-                    <a href="{{ route('pengembalian.export-pdf') }}" class="btn btn-outline-secondary" target="_blank">
+                    <a href="{{ route('pengembalian.export-pdf') }}" class="btn btn-success" target="_blank">
                         <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
                     </a>
                     
