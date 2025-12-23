@@ -4,6 +4,7 @@ use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
@@ -261,6 +262,11 @@ Route::middleware([
     Route::get('search', \App\Http\Controllers\GlobalSearchController::class)->name('search');
     Route::get('search/api', [\App\Http\Controllers\GlobalSearchController::class, 'api'])->name('search.api');
     
+    Route::get('notif-read/{id}', [NotificationController::class, 'read_redirect']);
+    Route::post('notif-hide/{id}', [NotificationController::class, 'hide_redirect']);
+    Route::post('notif-read-all', [NotificationController::class, 'readall']);
+    Route::get('/check-notifications', [NotificationController::class, 'checkNew']);
+    Route::resource('notification', NotificationController::class);
     
 });
 
