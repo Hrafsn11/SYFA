@@ -330,13 +330,13 @@
                                 <div data-i18n="KOL">KOL</div>
                             </a>
                         </li>
-                        <li class="menu-item">
+                        <li class="menu-item {{ request()->routeIs('master-data.sumber-pendanaan-eksternal.*') ? 'active' : '' }}">
                             <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
                                 class="menu-link">
                                 <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
                             </a>
                         </li>
-                        <li class="menu-item">
+                        <li class="menu-item {{ request()->routeIs('master-data.debitur-investor.*') ? 'active' : '' }}">
                             <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}"
                                 class="menu-link">
                                 <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
@@ -347,7 +347,7 @@
                                 <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
                             </a>
                         </li> --}}
-                        <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
+                        <li class="menu-item {{ request()->routeIs('master-data.cells-project.*') ? 'active' : '' }}">
                             <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}"
                                 class="menu-link">
                                 <div data-i18n="Cells Project">Cells Project</div>
