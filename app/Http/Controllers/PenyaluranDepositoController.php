@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\PenyaluranDeposito;
 use App\Models\PengajuanInvestasi;
 use Illuminate\Support\Facades\Storage;
@@ -70,7 +71,30 @@ class PenyaluranDepositoController extends Controller
         try {
             DB::beginTransaction();
 
+            // Store old nominal for recalculation
+            $oldNominal = floatval($penyaluran->nominal_yang_disalurkan);
+            $newNominal = floatval($validated['nominal_yang_disalurkan']);
+
+            // Update penyaluran record
             $penyaluran->update($validated);
+
+            // If nominal changed, update parent table
+            if ($oldNominal != $newNominal) {
+                $pengajuan = PengajuanInvestasi::findOrFail($penyaluran->id_pengajuan_investasi);
+
+                // Recalculate: subtract old, add new
+                $pengajuan->total_disalurkan = floatval($pengajuan->total_disalurkan) - $oldNominal + $newNominal;
+                $pengajuan->save();
+
+                \Log::info('PenyaluranDeposito Updated', [
+                    'id' => $id,
+                    'old_nominal' => $oldNominal,
+                    'new_nominal' => $newNominal,
+                    'pengajuan_id' => $pengajuan->id_pengajuan_investasi,
+                    'old_total_disalurkan' => floatval($pengajuan->total_disalurkan) + $oldNominal - $newNominal,
+                    'new_total_disalurkan' => $pengajuan->total_disalurkan,
+                ]);
+            }
 
             DB::commit();
             return Response::success(null, 'Data penyaluran deposito berhasil diupdate');
@@ -86,7 +110,7 @@ class PenyaluranDepositoController extends Controller
             DB::beginTransaction();
 
             $penyaluran = PenyaluranDeposito::where('id_penyaluran_deposito', $id)->firstOrFail();
-            
+
             $pengajuan = PengajuanInvestasi::findOrFail($penyaluran->id_pengajuan_investasi);
             $pengajuan->total_disalurkan -= $penyaluran->nominal_yang_disalurkan;
             $pengajuan->save();
@@ -94,7 +118,7 @@ class PenyaluranDepositoController extends Controller
             if ($penyaluran->bukti_pengembalian && Storage::disk('public')->exists($penyaluran->bukti_pengembalian)) {
                 Storage::disk('public')->delete($penyaluran->bukti_pengembalian);
             }
-            
+
             $penyaluran->delete();
 
             DB::commit();
@@ -112,20 +136,20 @@ class PenyaluranDepositoController extends Controller
             DB::beginTransaction();
 
             $penyaluran = PenyaluranDeposito::where('id_penyaluran_deposito', $id)->firstOrFail();
-            
+
             $isFirstUpload = empty($penyaluran->bukti_pengembalian);
-            
+
             if ($request->hasFile('bukti_pengembalian')) {
                 // Delete old file if exists
                 if ($penyaluran->bukti_pengembalian && Storage::disk('public')->exists($penyaluran->bukti_pengembalian)) {
                     Storage::disk('public')->delete($penyaluran->bukti_pengembalian);
                 }
-                
+
                 // Store new file
                 $file = Storage::disk('public')->put('bukti_pengembalian', $request->file('bukti_pengembalian'));
                 $penyaluran->update(['bukti_pengembalian' => $file]);
 
-             
+
                 if ($isFirstUpload) {
                     $pengajuan = PengajuanInvestasi::findOrFail($penyaluran->id_pengajuan_investasi);
                     $pengajuan->total_kembali_dari_penyaluran += $penyaluran->nominal_yang_disalurkan;
@@ -142,4 +166,3 @@ class PenyaluranDepositoController extends Controller
         }
     }
 }
-

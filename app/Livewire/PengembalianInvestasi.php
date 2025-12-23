@@ -15,12 +15,12 @@ use App\Http\Requests\PengembalianInvestasiRequest;
 class PengembalianInvestasi extends Component
 {
     use HasUniversalFormAction, HasValidate, WithFileUploads;
-    
+
     private string $validateClass = PengembalianInvestasiRequest::class;
 
     #[ParameterIDRoute]
     public $id;
-    
+
     #[FieldInput]
     public $id_pengajuan_investasi, $dana_pokok_dibayar, $bagi_hasil_dibayar, $bukti_transfer, $tanggal_pengembalian;
 
@@ -40,11 +40,11 @@ class PengembalianInvestasi extends Component
     {
         $this->setUrlSaveData('store_pengembalian_investasi', 'pengembalian-investasi.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_pengembalian_investasi', 'pengembalian-investasi.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
-        
+
         $this->tanggal_pengembalian = date('Y-m-d');
     }
 
-    
+
     public function getPengajuanInvestasiProperty()
     {
         return PengajuanInvestasi::query()
@@ -82,21 +82,30 @@ class PengembalianInvestasi extends Component
             $this->nominal_investasi = $investasi->jumlah_investasi;
             $this->lama_investasi = $investasi->lama_investasi;
             $this->bagi_hasil_total = $investasi->nominal_bagi_hasil_yang_didapatkan;
-            $this->sisa_pokok = $investasi->sisa_pokok;
-            $this->sisa_bagi_hasil = $investasi->sisa_bagi_hasil;
-            
-            $this->dana_tersedia = $investasi->dana_tersedia;
+
+            // Calculate sisa dana di perusahaan first (using accessor)
             $this->sisa_dana_di_perusahaan = $investasi->sisa_dana_di_perusahaan;
 
-            $hasHistory = ($this->sisa_pokok < $this->nominal_investasi) || 
-                          ($this->sisa_bagi_hasil < $this->bagi_hasil_total);
+            // For DISPLAY: Show actual balance after accounting for penyaluran
+            // This makes it clearer for users
+            $totalDisalurkan = floatval($investasi->total_disalurkan ?? 0);
+            $sisaPokokDisplay = floatval($investasi->sisa_pokok ?? 0) - $totalDisalurkan;
+
+            $this->sisa_pokok = max(0, $sisaPokokDisplay);  // Show actual remaining
+            $this->sisa_bagi_hasil = $investasi->sisa_bagi_hasil;
+
+            // Dana tersedia = what can actually be returned now
+            $this->dana_tersedia = $investasi->dana_tersedia;
+
+            $hasHistory = ($investasi->sisa_pokok < $this->nominal_investasi) ||
+                ($investasi->sisa_bagi_hasil < $this->bagi_hasil_total);
 
             if ($hasHistory) {
                 $pengembalian = ModelsPengembalianInvestasi::getTotalDikembalikan($idPengajuanInvestasi);
                 $this->total_pokok_dikembalikan = $pengembalian->total_pokok ?? 0;
                 $this->total_bagi_hasil_dikembalikan = $pengembalian->total_bagi_hasil ?? 0;
                 $this->jumlah_transaksi = $pengembalian->jumlah_transaksi ?? 0;
-                
+
                 $this->history = [];
             } else {
                 $this->total_pokok_dikembalikan = 0;
@@ -104,7 +113,6 @@ class PengembalianInvestasi extends Component
                 $this->jumlah_transaksi = 0;
                 $this->history = [];
             }
-
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal memuat data kontrak: ' . $e->getMessage());
         }
@@ -153,8 +161,8 @@ class PengembalianInvestasi extends Component
         return view('livewire.pengembalian-investasi.index', [
             'pengajuanInvestasi' => $this->pengajuanInvestasi,
         ])
-        ->layout('layouts.app', [
-            'title' => 'Pengembalian Investasi'
-        ]);
+            ->layout('layouts.app', [
+                'title' => 'Pengembalian Investasi'
+            ]);
     }
 }
