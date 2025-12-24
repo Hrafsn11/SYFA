@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
@@ -156,6 +157,12 @@ class PengembalianPinjamanController extends Controller
 
                 // 4. Update AR
                 app(ArPerbulanService::class)->updateAROnPengembalian($validated['kode_peminjaman'], now());
+
+                // 5. Load relasi untuk notifikasi
+                $pengembalian->load('pengembalianInvoices');
+
+                // 6. Kirim notifikasi saat debitur melakukan pengembalian dana
+                ListNotifSFinance::pengembalianDana($pengembalian);
 
                 return Response::success([
                     'redirect' => route('pengembalian.index')
