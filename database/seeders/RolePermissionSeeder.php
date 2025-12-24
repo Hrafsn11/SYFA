@@ -81,12 +81,17 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_finlog.add',
             'peminjaman_finlog.edit',
             'peminjaman_finlog.delete',
-            'peminjaman_finlog.validasi_io',              // Step 2
-            'peminjaman_finlog.persetujuan_debitur',      // Step 3
-            'peminjaman_finlog.persetujuan_finance_ski',  // Step 4
-            'peminjaman_finlog.persetujuan_ceo_finlog',   // Step 5
-            'peminjaman_finlog.generate_kontrak',         // Step 6
-            'peminjaman_finlog.upload_bukti',             // Step 7
+            'peminjaman_finlog.submit',
+            'peminjaman_finlog.validasi_io',
+            'peminjaman_finlog.persetujuan_debitur',
+            'peminjaman_finlog.persetujuan_finance_ski',
+            'peminjaman_finlog.persetujuan_ceo_finlog',
+            'peminjaman_finlog.generate_kontrak',
+            'peminjaman_finlog.upload_bukti',
+            // Pengembalian Pinjaman Finlog
+            'pengembalian_pinjaman_finlog.view',
+            'pengembalian_pinjaman_finlog.add',
+            'pengembalian_pinjaman_finlog.edit',
             // Settings
             'settings.view',
             'settings.edit',
@@ -135,15 +140,23 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_investasi_finlog.edit',
             'pengajuan_investasi_finlog.delete',
             'pengajuan_investasi_finlog.submit',
+            'pengajuan_investasi_finlog.validasi_io',
+            'peminjaman_finlog.persetujuan_debitur',
             'pengajuan_investasi_finlog.validasi_finance_ski',
             'pengajuan_investasi_finlog.validasi_ceo_finlog',
             'pengajuan_investasi_finlog.upload_bukti',
             'pengajuan_investasi_finlog.generate_kontrak',
-            // Penyaluran Deposito
+            // Penyaluran Deposito (SFinance)
             'penyaluran_deposito.view',
             'penyaluran_deposito.add',
             'penyaluran_deposito.edit',
             'penyaluran_deposito.upload_bukti',
+            // Penyaluran Deposito Finlog
+            'penyaluran_deposito_finlog.view',
+            'penyaluran_deposito_finlog.add',
+            'penyaluran_deposito_finlog.edit',
+            'penyaluran_deposito_finlog.delete',
+            'penyaluran_deposito_finlog.upload_bukti',
             // Program Restrukturisasi
             'program_restrukturisasi.view',
             'program_restrukturisasi.add',
@@ -209,11 +222,13 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
             'sfinance.menu.pengembalian_dana',
+            'sfinance.menu.report_pengembalian',
             'sfinance.menu.program_restukturisasi',
             'sfinance.menu.penyaluran_deposito',
 
             'sfinlog.menu.peminjaman_dana',
             'sfinlog.menu.pengembalian_dana',
+            'sfinlog.menu.report_pengembalian',
             'sfinlog.menu.penyaluran_deposito',
 
             // SFinance Peminjaman
@@ -228,7 +243,8 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_finlog.view',
             'peminjaman_finlog.add',
             'peminjaman_finlog.edit',
-            'peminjaman_finlog.persetujuan_debitur',  // Step 3 approval
+            'peminjaman_finlog.submit',
+            'peminjaman_finlog.persetujuan_debitur',
 
             // Restrukturisasi
             'pengajuan_restrukturisasi.view',
@@ -239,14 +255,22 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
 
-            // Pengembalian Pinjaman
+            // Pengembalian Pinjaman (SFinance)
             'pengembalian_pinjaman.view',
             'pengembalian_pinjaman.add',
             'pengembalian_pinjaman.edit',
 
+            // Pengembalian Pinjaman Finlog
+            'pengembalian_pinjaman_finlog.view',
+            'pengembalian_pinjaman_finlog.add',
+            'pengembalian_pinjaman_finlog.edit',
+
             // Penyaluran Deposito (Debitur can only view and upload bukti)
             'penyaluran_deposito.view',
             'penyaluran_deposito.upload_bukti',
+
+            // Penyaluran Deposito Finlog (Debitur hanya upload bukti)
+            'penyaluran_deposito_finlog.upload_bukti',
         ]);
 
         $investorRole = Role::updateOrCreate(
@@ -329,17 +353,26 @@ class RolePermissionSeeder extends Seeder
             'penyaluran_deposito.add',
             'penyaluran_deposito.edit',
 
+            // Penyaluran Deposito Finlog (Finance SKI full access)
+            'penyaluran_deposito_finlog.view',
+            'penyaluran_deposito_finlog.add',
+            'penyaluran_deposito_finlog.edit',
+            'penyaluran_deposito_finlog.delete',
+            'penyaluran_deposito_finlog.upload_bukti',
+
             // Pengembalian Investasi (Finance SKI can create/edit)
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
             'pengembalian_investasi.edit',
 
-            // SFinlog Peminjaman
+            // SFinlog Peminjaman (Finance SKI tidak bisa create, hanya approve & generate)
             'peminjaman_finlog.view',
-            'peminjaman_finlog.add',
             'peminjaman_finlog.persetujuan_finance_ski',  // Step 4
             'peminjaman_finlog.generate_kontrak',         // Step 6
             'peminjaman_finlog.upload_bukti',             // Step 7
+
+            // SFinlog Pengembalian (Finance SKI hanya view)
+            'pengembalian_pinjaman_finlog.view',
 
             // SFinlog Investasi
             'pengajuan_investasi_finlog.view',
@@ -385,10 +418,11 @@ class RolePermissionSeeder extends Seeder
             // Dashboard Access
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
-
-            // Menu Access
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
+
+            'sfinlog.menu.dashboard_pembiayaan',
+            'sfinlog.menu.dashboard_investasi_deposito',
 
             'peminjaman_dana.validasi_direktur',
             'pengajuan_restrukturisasi.persetujuan_direktur',
@@ -404,12 +438,15 @@ class RolePermissionSeeder extends Seeder
             'sfinlog.menu.dashboard_pembiayaan',
             'sfinlog.menu.dashboard_investasi_deposito',
             'sfinlog.menu.peminjaman_dana',
+            'sfinlog.menu.pengembalian_dana',
             'sfinlog.menu.pengajuan_investasi',
 
-            // Peminjaman Finlog
+            // Peminjaman Finlog (CEO Finlog tidak bisa create, hanya approve)
             'peminjaman_finlog.view',
-            'peminjaman_finlog.add',
             'peminjaman_finlog.persetujuan_ceo_finlog',  // Step 5 approval
+
+            // Pengembalian Pinjaman Finlog (CEO Finlog hanya view)
+            'pengembalian_pinjaman_finlog.view',
 
             // Investasi Finlog
             'pengajuan_investasi_finlog.view',
@@ -424,12 +461,10 @@ class RolePermissionSeeder extends Seeder
         $ioRole->permissions()->detach();
         $ioRole->syncPermissions([
             // Menu SFinlog
-            'sfinlog.menu.dashboard_pembiayaan',
             'sfinlog.menu.peminjaman_dana',
 
-            // Peminjaman Finlog
+            // Peminjaman Finlog (IO tidak bisa create, hanya validasi)
             'peminjaman_finlog.view',
-            'peminjaman_finlog.add',
             'peminjaman_finlog.validasi_io',  // Step 2 validation
         ]);
 
@@ -504,6 +539,16 @@ class RolePermissionSeeder extends Seeder
         ]);
         if (! $ceoFinlog->hasRole('CEO S-Finlog')) {
             $ceoFinlog->assignRole('CEO S-Finlog');
+        }
+
+        $io = User::firstOrCreate([
+            'email' => 'io@example.com',
+        ], [
+            'name' => 'Investment Officer',
+            'password' => bcrypt('password'),
+        ]);
+        if (! $io->hasRole('IO (Investment Officer)')) {
+            $io->assignRole('IO (Investment Officer)');
         }
 
         // Restore the original cache driver

@@ -14,6 +14,15 @@ use Illuminate\Support\Facades\DB;
 
 class PengembalianPinjamanController extends Controller
 {
+    /**
+     * Constructor - Middleware untuk permission
+     */
+    public function __construct()
+    {
+        // Store hanya bisa dilakukan oleh Debitur
+        $this->middleware('permission:pengembalian_pinjaman_finlog.add')->only(['store']);
+    }
+
     public function store(PengembalianPinjamanFinlogRequest $request)
     {
         try {
@@ -54,7 +63,7 @@ class PengembalianPinjamanController extends Controller
 
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $peminjaman = PeminjamanFinlog::with('debitur')->findOrFail($id_peminjaman_finlog);
-            
+
             // Kirim notifikasi pengembalian dana
             ListNotifSFinlog::pengembalianDana($peminjaman);
 
