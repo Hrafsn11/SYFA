@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProgramRestrukturisasi;
 
 use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
+class Edit extends Create
 {
     public bool $isEdit = true;
     public ProgramRestrukturisasi $program;
@@ -41,6 +41,19 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
             'pengajuanRestrukturisasi.debitur',
             'jadwalAngsuran' => fn($query) => $query->orderBy('no'),
         ])->findOrFail($id);
+
+        // Authorization check: Debitur hanya bisa edit data miliknya
+        $user = Auth::user();
+        $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance', 'Finance SKI']);
+        
+        if (!$isAdmin) {
+            $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+            $pengajuanDebiturId = $this->program->pengajuanRestrukturisasi->id_debitur ?? null;
+            
+            if (!$debitur || $debitur->id_debitur !== $pengajuanDebiturId) {
+                abort(403, 'Anda tidak memiliki akses untuk mengedit data ini.');
+            }
+        }
 
         $pengajuan = $this->program->pengajuanRestrukturisasi;
 
@@ -515,5 +528,10 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'text' => 'Gagal mengupload bukti pembayaran: ' . $e->getMessage(),
             ]);
         }
+    }
+
+    public function render()
+    {
+        return view('livewire.program-restrukturisasi.edit')->layout('layouts.app');
     }
 }

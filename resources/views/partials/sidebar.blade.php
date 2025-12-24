@@ -166,7 +166,7 @@
                         </li>
                     @endcan
 
-                    @canany('sfinance.menu.program_restukturisasi')
+                    @can('sfinance.menu.program_restukturisasi')
                         <li class="menu-item {{ RouteHelper::routeIs('program-restrukturisasi*') ? 'active' : '' }}">
                             <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-calculator"></i>
