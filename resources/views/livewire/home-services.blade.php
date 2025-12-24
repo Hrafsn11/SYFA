@@ -115,47 +115,52 @@
         </div>
 
         {{-- Master Data & Configuration Card --}}
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 border service-card shadow-none">
-                <div class="card-body d-flex flex-column align-items-center text-center p-4">
-                    <span class="badge bg-label-warning text-uppercase mb-3 px-3 py-2 fw-semibold">Configuration</span>
-                    <div class="mb-3">
-                        <div class="icon-wrapper bg-light-warning rounded-circle p-3 mb-2">
-                            <i class="ti ti-database-cog text-warning" style="font-size: 3rem;"></i>
+        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor']))
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 border service-card shadow-none">
+                    <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                        <span
+                            class="badge bg-label-warning text-uppercase mb-3 px-3 py-2 fw-semibold">Configuration</span>
+                        <div class="mb-3">
+                            <div class="icon-wrapper bg-light-warning rounded-circle p-3 mb-2">
+                                <i class="ti ti-database-cog text-warning" style="font-size: 3rem;"></i>
+                            </div>
                         </div>
+                        <h5 class="mb-2 fw-bold">Master Data</h5>
+                        <p class="text-muted mb-4 small flex-grow-1">
+                            Pengaturan master data, parameter sistem, dan konfigurasi aplikasi
+                        </p>
+                        <a href="{{ route('master-data.kol.index') }}" class="btn btn-warning w-100 fw-semibold">
+                            Go to Application
+                        </a>
                     </div>
-                    <h5 class="mb-2 fw-bold">Master Data</h5>
-                    <p class="text-muted mb-4 small flex-grow-1">
-                        Pengaturan master data, parameter sistem, dan konfigurasi aplikasi
-                    </p>
-                    <a href="{{ route('master-data.kol.index') }}" class="btn btn-warning w-100 fw-semibold">
-                        Go to Application
-                    </a>
                 </div>
             </div>
-        </div>
+        @endif
 
 
         {{-- Portofolio Card --}}
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 border service-card shadow-none">
-                <div class="card-body d-flex flex-column align-items-center text-center p-4">
-                    <span class="badge bg-label-success text-uppercase mb-3 px-3 py-2 fw-semibold">Insight</span>
-                    <div class="mb-3">
-                        <div class="icon-wrapper bg-light-success rounded-circle p-3 mb-2">
-                            <i class="ti ti-chart-pie-2 text-success" style="font-size: 3rem;"></i>
+        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor']))
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 border service-card shadow-none">
+                    <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                        <span class="badge bg-label-success text-uppercase mb-3 px-3 py-2 fw-semibold">Insight</span>
+                        <div class="mb-3">
+                            <div class="icon-wrapper bg-light-success rounded-circle p-3 mb-2">
+                                <i class="ti ti-chart-pie-2 text-success" style="font-size: 3rem;"></i>
+                            </div>
                         </div>
+                        <h5 class="mb-2 fw-bold">Portofolio</h5>
+                        <p class="text-muted mb-4 small flex-grow-1">
+                            Ringkasan kinerja portofolio pembiayaan dan investasi
+                        </p>
+                        <a href="#" class="btn btn-success w-100 fw-semibold">
+                            Go to Application
+                        </a>
                     </div>
-                    <h5 class="mb-2 fw-bold">Portofolio</h5>
-                    <p class="text-muted mb-4 small flex-grow-1">
-                        Ringkasan kinerja portofolio pembiayaan dan investasi
-                    </p>
-                    <a href="#" class="btn btn-success w-100 fw-semibold">
-                        Go to Application
-                    </a>
                 </div>
             </div>
-        </div>
+        @endif
     </div>
 </div>
 

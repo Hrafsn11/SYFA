@@ -181,6 +181,10 @@ class PenyaluranDepositoTable extends DataTableComponent
                             </button>
                         </div>';
                     } else {
+                        if (!auth()->user()->can('penyaluran_deposito.upload_bukti')) {
+                            return '<div class="text-center"><span class="badge bg-secondary">Belum Upload</span></div>';
+                        }
+
                         return '<div class="text-center">
                             <button type="button" class="btn btn-sm btn-primary" onclick="uploadBukti(\'' . $row->id_penyaluran_deposito . '\')">
                                 <i class="ti ti-upload me-1"></i>Upload
@@ -192,6 +196,10 @@ class PenyaluranDepositoTable extends DataTableComponent
 
             Column::make('Aksi')
                 ->label(function ($row) {
+                    if (!auth()->user()->can('penyaluran_deposito.edit')) {
+                        return ''; // Return empty for Debitur
+                    }
+
                     $data = [
                         'id' => $row->id_penyaluran_deposito,
                         'id_pengajuan_investasi' => $row->id_pengajuan_investasi,

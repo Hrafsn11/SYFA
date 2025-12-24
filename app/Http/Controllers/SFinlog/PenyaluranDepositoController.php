@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SFinlog;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinlog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\PenyaluranDepositoSfinlog;
@@ -28,6 +29,9 @@ class PenyaluranDepositoController extends Controller
             $penyaluran->load('pengajuanInvestasiFinlog.project', 'cellsProject', 'project');
 
             DB::commit();
+
+            // Kirim notifikasi saat debitur menerima dana investasi
+            ListNotifSFinlog::penyaluranInvestasi($penyaluran);
 
             return Response::success(null, 'Data penyaluran deposito berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -128,6 +132,12 @@ class PenyaluranDepositoController extends Controller
                 // Store new file
                 $file = Storage::disk('public')->put('bukti_pengembalian', $request->file('bukti_pengembalian'));
                 $penyaluran->update(['bukti_pengembalian' => $file]);
+                
+                // Reload penyaluran dengan relasi
+                $penyaluran->load('pengajuanInvestasiFinlog.project', 'cellsProject', 'project');
+                
+                // Kirim notifikasi saat debitur mengembalikan dana investasi
+                ListNotifSFinlog::pengembalianInvestasi($penyaluran);
             }
 
             DB::commit();
