@@ -51,4 +51,104 @@ class ListNotifSFinance
 
         sendNotification($data);
     }
+
+    public static function pengembalianDana($pengembalian)
+    {
+        // Notifikasi saat debitur melakukan pengembalian dana
+        $notif = NotificationFeature::where('name', 'pengembalian_dana_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengembalian->load('pengajuanPeminjaman.debitur');
+
+        // Hitung total nominal yang dibayar
+        $totalDibayar = ($pengembalian->pengembalianInvoices->sum('nominal_yg_dibayarkan') ?? 0);
+        $nominalFormatted = 'Rp ' . number_format($totalDibayar, 0, ',', '.');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $pengembalian->pengajuanPeminjaman->debitur->nama_debitur ?? 'N/A',
+            '[[nominal]]' => $nominalFormatted,
+        ];
+
+        // Generate link ke pengembalian pinjaman
+        $link = route('pengembalian.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianDanaJatuhTempo($pengajuan, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pengembalian dana mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pengembalian_dana_jatuh_tempo_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('debitur');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke pengembalian pinjaman
+        $link = route('pengembalian.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianDanaTelat($pengajuan, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat debitur telat dalam pengembalian dana
+        $notif = NotificationFeature::where('name', 'pengembalian_dana_telat_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('debitur');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke pengembalian pinjaman
+        $link = route('pengembalian.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }
