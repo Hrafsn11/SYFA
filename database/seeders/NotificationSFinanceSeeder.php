@@ -165,10 +165,7 @@ class NotificationSFinanceSeeder extends Seeder
             'message' => 'Debitur [[nama.debitur]] telah menolak konfirmasi pencairan dana pinjaman.',
         ]);
 
-        // ============================================
         // NOTIFICATION FEATURES UNTUK PENGEMBALIAN DANA
-        // ============================================
-
         // 1. Pengembalian Dana - SKI Finance
         $pengembalian_dana = NotificationFeature::firstOrCreate([
             'name' => 'pengembalian_dana_sfinance',
@@ -219,6 +216,91 @@ class NotificationSFinanceSeeder extends Seeder
             'notification_feature_id' => $pengembalian_dana_telat->id_notification_feature,
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Debitur [[nama.debitur]] belum melakukan pembayaran meskipun telah melewati tanggal jatuh tempo [[tanggal]].',
+        ]);
+
+        // NOTIFICATION FEATURES UNTUK RESTRUKTURISASI
+        // 1. Pengajuan Restrukturisasi Baru - SKI Finance
+        $pengajuan_restrukturisasi_baru = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_baru_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_baru->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan restrukturisasi baru telah diterima dari debitur [[nama.debitur]].',
+        ]);
+
+        // 2. Pengajuan Restrukturisasi Disetujui oleh SKI Finance - Debitur
+        $pengajuan_restrukturisasi_disetujui_finance = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_disetujui_finance_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_disetujui_finance->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
+        ]);
+
+        // 3. Pengajuan Restrukturisasi Ditolak oleh SKI Finance - Debitur
+        $pengajuan_restrukturisasi_ditolak_finance = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_ditolak_finance_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_ditolak_finance->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
+        ]);
+
+        // 4. Pengajuan Restrukturisasi Disetujui oleh CEO SKI - SKI Finance
+        $pengajuan_restrukturisasi_disetujui_ceo = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_disetujui_ceo_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_disetujui_ceo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah disetujui oleh CEO SKI.',
+        ]);
+
+        // 5. Pengajuan Restrukturisasi Ditolak oleh CEO SKI - SKI Finance
+        $pengajuan_restrukturisasi_ditolak_ceo = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_ditolak_ceo_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_ditolak_ceo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah ditolak oleh CEO SKI.',
+        ]);
+
+        // 6. Pengajuan Restrukturisasi Disetujui oleh Direktur SKI - SKI Finance, CEO SKI, Debitur
+        $pengajuan_restrukturisasi_disetujui_direktur = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_disetujui_direktur_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_disetujui_direktur->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id, $ceo->id, $debitur->id]),
+            'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah disetujui oleh Direktur SKI.',
+        ]);
+
+        // 7. Pengajuan Restrukturisasi Ditolak oleh Direktur SKI - SKI Finance, CEO SKI, Debitur
+        $pengajuan_restrukturisasi_ditolak_direktur = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_restrukturisasi_ditolak_direktur_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_restrukturisasi_ditolak_direktur->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id, $ceo->id, $debitur->id]),
+            'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah ditolak oleh Direktur SKI.',
         ]);
     }
 }

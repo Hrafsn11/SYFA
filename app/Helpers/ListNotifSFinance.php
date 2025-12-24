@@ -154,4 +154,84 @@ class ListNotifSFinance
 
         sendNotification($data);
     }
+
+    public static function menuRestrukturisasi($status, $pengajuan, $step = null)
+    {
+        // Mapping status dan step ke notification feature
+        $notif = null;
+        
+        // Saat pengajuan baru di-submit (step 1 -> step 2, status menjadi 'Submit Dokumen')
+        if ($step == 1 && ($status === 'Submit Dokumen' || $status === 'Dalam Proses')) {
+            $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_baru_sfinance')->first();
+        } 
+        // Saat disetujui/ditolak oleh SKI Finance (step 2)
+        else if ($step == 2) {
+            // Cek dari history apakah approve atau reject
+            $history = \App\Models\HistoryStatusPengajuanRestrukturisasi::where('id_pengajuan_restrukturisasi', $pengajuan->id_pengajuan_restrukturisasi)
+                ->where('current_step', 2)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($history) {
+                if ($history->validasi_dokumen === 'disetujui') {
+                    $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_disetujui_finance_ski')->first();
+                } else if ($history->validasi_dokumen === 'ditolak') {
+                    $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_ditolak_finance_ski')->first();
+                }
+            }
+        }
+        // Saat disetujui/ditolak oleh CEO SKI (step 3)
+        else if ($step == 3) {
+            $history = \App\Models\HistoryStatusPengajuanRestrukturisasi::where('id_pengajuan_restrukturisasi', $pengajuan->id_pengajuan_restrukturisasi)
+                ->where('current_step', 3)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($history) {
+                if ($history->validasi_dokumen === 'disetujui') {
+                    $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_disetujui_ceo_ski')->first();
+                } else if ($history->validasi_dokumen === 'ditolak') {
+                    $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_ditolak_ceo_ski')->first();
+                }
+            }
+        }
+        // Saat disetujui/ditolak oleh Direktur SKI (step 4)
+        else if ($step == 4) {
+            $history = \App\Models\HistoryStatusPengajuanRestrukturisasi::where('id_pengajuan_restrukturisasi', $pengajuan->id_pengajuan_restrukturisasi)
+                ->where('current_step', 4)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($history) {
+                if ($history->validasi_dokumen === 'disetujui') {
+                    $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_disetujui_direktur_ski')->first();
+                } else if ($history->validasi_dokumen === 'ditolak') {
+                    $notif = NotificationFeature::where('name', 'pengajuan_restrukturisasi_ditolak_direktur_ski')->first();
+                }
+            }
+        }
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('debitur');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $pengajuan->debitur->nama ?? $pengajuan->debitur->nama_debitur ?? 'N/A',
+        ];
+
+        // Generate link ke detail pengajuan restrukturisasi
+        $link = route('pengajuan-restrukturisasi.show', $pengajuan->id_pengajuan_restrukturisasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }

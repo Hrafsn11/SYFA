@@ -11,6 +11,7 @@ use App\Models\{
     PengajuanRestrukturisasi,
     PersetujuanKomiteRestrukturisasi
 };
+use App\Helpers\ListNotifSFinance;
 use Carbon\Carbon;
 use Illuminate\Http\{JsonResponse, Request};
 use Illuminate\Support\Facades\{DB, Log};
@@ -75,15 +76,30 @@ class EvaluasiRestrukturisasiController extends Controller
             
             $history = $this->buildHistoryData($pengajuan, $validated);
             
-            if ($validated['action'] === 'approve') {
+            // Handle submit pengajuan (step 1 -> step 2)
+            if ($validated['action'] === 'approve' && $validated['step'] == 1) {
+                $pengajuan->status = 'Submit Dokumen';
+                $pengajuan->current_step = 2;
+                $pengajuan->save();
+                
+                $history['status'] = $pengajuan->status;
+                $history['current_step'] = $pengajuan->current_step;
+                $history['submit_by'] = auth()->id();
+            } else if ($validated['action'] === 'approve') {
                 $this->handleApproval($pengajuan, $validated['step'], $history);
             } else {
                 $this->handleRejection($pengajuan, $validated['step'], $history);
             }
 
-            HistoryStatusPengajuanRestrukturisasi::create($history);
+            $historyRecord = HistoryStatusPengajuanRestrukturisasi::create($history);
+
+            // Reload pengajuan dengan relasi
+            $pengajuan->load('debitur');
 
             DB::commit();
+
+            // Kirim notifikasi berdasarkan step dan action
+            ListNotifSFinance::menuRestrukturisasi($pengajuan->status, $pengajuan, $validated['step']);
 
             return $this->successResponse($pengajuan, 'Keputusan berhasil disimpan');
             
