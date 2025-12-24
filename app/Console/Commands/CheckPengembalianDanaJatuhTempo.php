@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\PeminjamanFinlog;
 use App\Models\PengembalianPinjamanFinlog;
+use App\Models\PenyaluranDepositoSfinlog;
 use App\Helpers\ListNotifSFinlog;
 use Carbon\Carbon;
 
@@ -71,7 +72,32 @@ class CheckPengembalianDanaJatuhTempo extends Command
             }
         }
 
-        $this->info("Pengecekan selesai. Notifikasi jatuh tempo: {$countJatuhTempo}, Notifikasi telat: {$countTelat}");
+        // ============================================
+        // CEK PENYALURAN INVESTASI JATUH TEMPO
+        // ============================================
+        $this->info('Memulai pengecekan penyaluran investasi jatuh tempo...');
+
+        $countInvestasiJatuhTempo = 0;
+
+        // Ambil semua penyaluran investasi yang belum lunas (belum ada bukti pengembalian)
+        $penyaluranInvestasiList = PenyaluranDepositoSfinlog::with(['cellsProject', 'project', 'pengajuanInvestasiFinlog'])
+            ->whereNull('bukti_pengembalian')
+            ->whereNotNull('tanggal_pengembalian')
+            ->get();
+
+        foreach ($penyaluranInvestasiList as $penyaluran) {
+            $jatuhTempo = Carbon::parse($penyaluran->tanggal_pengembalian);
+            
+            // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
+            if ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
+                // Mendekati jatuh tempo - kirim notifikasi
+                $this->info("Penyaluran investasi ID {$penyaluran->id_penyaluran_deposito_sfinlog} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinlog::pengembalianInvestasiJatuhTempo($penyaluran, $penyaluran->tanggal_pengembalian);
+                $countInvestasiJatuhTempo++;
+            }
+        }
+
+        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi jatuh tempo investasi: {$countInvestasiJatuhTempo}");
 
         return Command::SUCCESS;
     }

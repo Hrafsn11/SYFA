@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Models\NotificationFeature;
 use App\Models\PeminjamanFinlog;
 use App\Models\PengajuanInvestasiFinlog;
+use App\Models\PenyaluranDepositoSfinlog;
 
 class ListNotifSFinlog
 {
@@ -193,6 +194,154 @@ class ListNotifSFinlog
 
         // Generate link ke detail pengajuan investasi
         $link = route('sfinlog.pengajuan-investasi.show', $pengajuan->id_pengajuan_investasi_finlog);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function penyaluranInvestasi($penyaluran)
+    {
+        // Notifikasi saat debitur menerima dana investasi
+        $notif = NotificationFeature::where('name', 'debitur_menerima_dana_investasi_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $penyaluran->load('cellsProject', 'project', 'pengajuanInvestasiFinlog');
+
+        // Ambil nama project
+        $namaProject = $penyaluran->project->nama_project ?? $penyaluran->cellsProject->nama_cells_bisnis ?? 'N/A';
+
+        // Cari debitur dari peminjaman yang terkait dengan project yang sama
+        $debitur = null;
+        if ($penyaluran->id_project) {
+            $peminjaman = PeminjamanFinlog::where('nama_project', $penyaluran->id_project)
+                ->orWhere('id_cells_project', $penyaluran->id_cells_project)
+                ->with('debitur')
+                ->first();
+            $debitur = $peminjaman->debitur ?? null;
+        } elseif ($penyaluran->id_cells_project) {
+            $peminjaman = PeminjamanFinlog::where('id_cells_project', $penyaluran->id_cells_project)
+                ->with('debitur')
+                ->first();
+            $debitur = $peminjaman->debitur ?? null;
+        }
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $debitur->nama ?? $penyaluran->cellsProject->nama_cells_bisnis ?? 'N/A',
+            '[[nama.project]]' => $namaProject,
+        ];
+
+        // Generate link ke penyaluran dana investasi
+        $link = route('sfinlog.report-penyaluran-dana-investasi.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianInvestasi($penyaluran)
+    {
+        // Notifikasi saat debitur mengembalikan dana investasi
+        $notif = NotificationFeature::where('name', 'debitur_pengembalian_dana_investasi_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $penyaluran->load('cellsProject', 'project', 'pengajuanInvestasiFinlog');
+
+        // Ambil nama project
+        $namaProject = $penyaluran->project->nama_project ?? $penyaluran->cellsProject->nama_cells_bisnis ?? 'N/A';
+
+        // Cari debitur dari peminjaman yang terkait dengan project yang sama
+        $debitur = null;
+        if ($penyaluran->id_project) {
+            $peminjaman = PeminjamanFinlog::where('nama_project', $penyaluran->id_project)
+                ->orWhere('id_cells_project', $penyaluran->id_cells_project)
+                ->with('debitur')
+                ->first();
+            $debitur = $peminjaman->debitur ?? null;
+        } elseif ($penyaluran->id_cells_project) {
+            $peminjaman = PeminjamanFinlog::where('id_cells_project', $penyaluran->id_cells_project)
+                ->with('debitur')
+                ->first();
+            $debitur = $peminjaman->debitur ?? null;
+        }
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $debitur->nama ?? $penyaluran->cellsProject->nama_cells_bisnis ?? 'N/A',
+            '[[nama.project]]' => $namaProject,
+        ];
+
+        // Generate link ke penyaluran dana investasi
+        $link = route('sfinlog.report-penyaluran-dana-investasi.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianInvestasiJatuhTempo($penyaluran, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pengembalian investasi mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pengembalian_investasi_jatuh_tempo_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $penyaluran->load('cellsProject', 'project', 'pengajuanInvestasiFinlog');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Ambil nama project
+        $namaProject = $penyaluran->project->nama_project ?? $penyaluran->cellsProject->nama_cells_bisnis ?? 'N/A';
+
+        // Cari debitur dari peminjaman yang terkait dengan project yang sama
+        $debitur = null;
+        if ($penyaluran->id_project) {
+            $peminjaman = PeminjamanFinlog::where('nama_project', $penyaluran->id_project)
+                ->orWhere('id_cells_project', $penyaluran->id_cells_project)
+                ->with('debitur')
+                ->first();
+            $debitur = $peminjaman->debitur ?? null;
+        } elseif ($penyaluran->id_cells_project) {
+            $peminjaman = PeminjamanFinlog::where('id_cells_project', $penyaluran->id_cells_project)
+                ->with('debitur')
+                ->first();
+            $debitur = $peminjaman->debitur ?? null;
+        }
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $debitur->nama ?? $penyaluran->cellsProject->nama_cells_bisnis ?? 'N/A',
+            '[[nama.project]]' => $namaProject,
+            '[[tanggal.jatuh.tempo]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke penyaluran dana investasi
+        $link = route('sfinlog.report-penyaluran-dana-investasi.index');
 
         $data = [
             'notif_variable' => $notif_variable,
