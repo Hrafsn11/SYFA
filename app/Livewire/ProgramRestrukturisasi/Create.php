@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProgramRestrukturisasi;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -8,14 +8,16 @@ use App\Models\PengajuanRestrukturisasi;
 use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
 use App\Http\Requests\ProgramRestrukturisasiRequest;
+use App\Livewire\Traits\HandleComponentEvent;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-class ProgramRestrukturisasiCreate extends Component
+class Create extends Component
 {
     use WithFileUploads;
+    use HandleComponentEvent;
 
     public bool $isEdit = false;
     public string $pageTitle = 'Form Tambah Jenis Program Restrukturisasi';
@@ -58,12 +60,26 @@ class ProgramRestrukturisasiCreate extends Component
 
     protected function loadApprovedRestrukturisasi(?string $forceIncludeId = null): void
     {
+        $user = Auth::user();
+        $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance', 'Finance SKI']);
+
         $query = PengajuanRestrukturisasi::with('debitur')
             ->where(function ($q) {
                 $q->whereIn('status', $this->approvalStatuses());
             })
             ->whereNotNull('sisa_pokok_belum_dibayar')
             ->where('sisa_pokok_belum_dibayar', '>', 0);
+
+        if (!$isAdmin) {
+            $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+            
+            if ($debitur) {
+                $query->where('id_debitur', $debitur->id_debitur);
+            } else {
+                $this->approvedRestrukturisasi = collect([]);
+                return;
+            }
+        }
 
         if ($forceIncludeId) {
             $query->orWhere('id_pengajuan_restrukturisasi', $forceIncludeId);
@@ -72,6 +88,24 @@ class ProgramRestrukturisasiCreate extends Component
         $this->approvedRestrukturisasi = $query->orderBy('created_at', 'desc')->get();
     }
 
+    /**
+     * Override handleComponentEvent to trigger additional logic after Select2 changes
+     * This is called when Select2 component dispatches 'select2-updated' event
+     */
+    #[\Livewire\Attributes\On('select2-updated')]
+    #[\Livewire\Attributes\On('datepicker-updated')]
+    #[\Livewire\Attributes\On('currency-updated')]
+    public function handleComponentEvent($value, $modelName)
+    {
+        if (property_exists($this, $modelName)) {
+            $this->{$modelName} = $value;
+            
+            // Trigger additional logic based on which field changed
+            if ($modelName === 'id_pengajuan_restrukturisasi') {
+                $this->loadPengajuanData();
+            }
+        }
+    }
 
     public function updatedIdPengajuanRestrukturisasi()
     {
@@ -481,6 +515,6 @@ class ProgramRestrukturisasiCreate extends Component
 
     public function render()
     {
-        return view('livewire.program-restrukturisasi')->layout('layouts.app');
+        return view('livewire.program-restrukturisasi.create')->layout('layouts.app');
     }
 }

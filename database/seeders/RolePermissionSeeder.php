@@ -77,7 +77,6 @@ class RolePermissionSeeder extends Seeder
             'sfinlog.menu.report_penyaluran_dana',
             'sfinlog.menu.kertas_kerja_investor',
             'sfinlog.menu.pengembalian_investasi',
-            // Peminjaman Finlog (8-step approval)
             'peminjaman_finlog.view',
             'peminjaman_finlog.add',
             'peminjaman_finlog.edit',
@@ -369,12 +368,12 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.pengajuan_investasi',
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
+            'sfinance.menu.program_restukturisasi',  // Program Restrukturisasi menu
 
             'peminjaman_dana.validasi_ceo_ski',
             'investasi.validasi_ceo_ski',  // CEO can approve investasi
 
             'pengajuan_restrukturisasi.persetujuan_ceo_ski',
-            'investasi.validasi_ceo_ski',
         ]);
 
         $direkturRole = Role::updateOrCreate(
