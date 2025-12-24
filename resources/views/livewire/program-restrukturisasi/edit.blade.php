@@ -23,16 +23,13 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Pilih Pengajuan Restrukturisasi <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select @error('id_pengajuan_restrukturisasi') is-invalid @enderror"
-                            wire:model.live="id_pengajuan_restrukturisasi"
-                            @if ($isEdit) disabled @endif>
-                            <option value="">-- Pilih Pengajuan --</option>
-                            @foreach ($approvedRestrukturisasi as $item)
-                                <option value="{{ $item->id_pengajuan_restrukturisasi }}">
-                                    {{ $item->nomor_kontrak_pembiayaan }}
-                                </option>
-                            @endforeach
+                        {{-- In edit mode, just show a disabled select --}}
+                        <select class="form-select" disabled style="background-color: #f5f5f9;">
+                            <option value="{{ $id_pengajuan_restrukturisasi }}" selected>
+                                {{ $nomor_kontrak }} - {{ $nama_debitur }}
+                            </option>
                         </select>
+                        <small class="text-muted">Pengajuan tidak dapat diubah setelah program dibuat</small>
                         @error('id_pengajuan_restrukturisasi')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -71,18 +68,16 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
                                 class="text-danger">*</span></label>
-                        <select class="form-select @error('metode_perhitungan') is-invalid @enderror"
-                            wire:model.live="metode_perhitungan"
-                            @if ($isEdit) disabled style="background-color: #f5f5f9;" @endif>
-                            <option value="Flat">Metode Flat</option>
-                            <option value="Efektif (Anuitas)">Metode Efektif (Anuitas)</option>
+                        {{-- In edit mode, just show a disabled select --}}
+                        <select class="form-select" disabled style="background-color: #f5f5f9;">
+                            <option value="{{ $metode_perhitungan }}" selected>
+                                Metode {{ $metode_perhitungan }}
+                            </option>
                         </select>
-                        @if ($isEdit)
-                            <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program
-                                dibuat</small>
-                        @endif
+                        <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program
+                            dibuat</small>
                         @error('metode_perhitungan')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 

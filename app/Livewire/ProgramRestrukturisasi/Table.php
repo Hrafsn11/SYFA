@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProgramRestrukturisasi;
 
 use App\Models\ProgramRestrukturisasi;
 use Illuminate\Database\Eloquent\Builder;
@@ -9,7 +9,7 @@ use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
-class ProgramRestrukturisasiIndex extends DataTableComponent
+class Table extends DataTableComponent
 {
     protected $model = ProgramRestrukturisasi::class;
 
@@ -36,7 +36,9 @@ class ProgramRestrukturisasiIndex extends DataTableComponent
     public function builder(): Builder
     {
         $user = Auth::user();
-        $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance']);
+        
+        
+        $isAdmin = $user && $user->roles()->where('restriction', 1)->exists();
 
         $query = ProgramRestrukturisasi::query()
             ->with(['pengajuanRestrukturisasi.debitur', 'creator']);
