@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 class ProgramRestrukturisasiController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:program_restrukturisasi.add')->only(['create', 'store']);
+    }
+
     /**
      * Display the form for creating a new program restrukturisasi
      */
@@ -16,10 +21,10 @@ class ProgramRestrukturisasiController extends Controller
     {
         // Get approved restrukturisasi (status = 'Selesai' atau status yang mengandung 'Disetujui')
         $approvedRestrukturisasi = PengajuanRestrukturisasi::with('debitur')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('status', 'Selesai')
-                      ->orWhere('status', 'Disetujui CEO SKI')
-                      ->orWhere('status', 'Disetujui Direktur SKI');
+                    ->orWhere('status', 'Disetujui CEO SKI')
+                    ->orWhere('status', 'Disetujui Direktur SKI');
             })
             ->whereNotNull('sisa_pokok_belum_dibayar')
             ->where('sisa_pokok_belum_dibayar', '>', 0)
@@ -36,10 +41,10 @@ class ProgramRestrukturisasiController extends Controller
     {
         try {
             $data = PengajuanRestrukturisasi::with('debitur')
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('status', 'Selesai')
-                          ->orWhere('status', 'Disetujui CEO SKI')
-                          ->orWhere('status', 'Disetujui Direktur SKI');
+                        ->orWhere('status', 'Disetujui CEO SKI')
+                        ->orWhere('status', 'Disetujui Direktur SKI');
                 })
                 ->whereNotNull('sisa_pokok_belum_dibayar')
                 ->where('sisa_pokok_belum_dibayar', '>', 0)
@@ -55,7 +60,7 @@ class ProgramRestrukturisasiController extends Controller
                 ->map(function ($item) {
                     // Get nama debitur from relationship if available
                     $namaDebitur = $item->debitur ? $item->debitur->nama : $item->nama_debitur;
-                    
+
                     return [
                         'id' => $item->id_pengajuan_restrukturisasi,
                         'nama_debitur' => $namaDebitur,
@@ -78,10 +83,10 @@ class ProgramRestrukturisasiController extends Controller
         try {
             $restrukturisasi = PengajuanRestrukturisasi::with('debitur')
                 ->where('id_pengajuan_restrukturisasi', $id)
-                ->where(function($query) {
+                ->where(function ($query) {
                     $query->where('status', 'Selesai')
-                          ->orWhere('status', 'Disetujui CEO SKI')
-                          ->orWhere('status', 'Disetujui Direktur SKI');
+                        ->orWhere('status', 'Disetujui CEO SKI')
+                        ->orWhere('status', 'Disetujui Direktur SKI');
                 })
                 ->firstOrFail();
 
@@ -148,4 +153,3 @@ class ProgramRestrukturisasiController extends Controller
         }
     }
 }
-

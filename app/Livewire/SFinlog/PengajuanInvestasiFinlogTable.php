@@ -2,12 +2,15 @@
 
 namespace App\Livewire\SFinlog;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengajuanInvestasiFinlog;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 
 class PengajuanInvestasiFinlogTable extends DataTableComponent
 {
+    use HasDebiturAuthorization;
+
     protected $model = PengajuanInvestasiFinlog::class;
 
     protected $listeners = ['refreshPengajuanInvestasiFinlogTable' => '$refresh'];
@@ -48,9 +51,12 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return PengajuanInvestasiFinlog::query()
+        $query = PengajuanInvestasiFinlog::query()
             ->with(['investor', 'project'])
+            ->leftJoin('master_debitur_dan_investor', 'pengajuan_investasi_finlog.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->select('pengajuan_investasi_finlog.*');
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array

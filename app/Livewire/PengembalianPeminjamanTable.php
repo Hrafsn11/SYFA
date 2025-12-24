@@ -82,9 +82,20 @@ class PengembalianPeminjamanTable extends DataTableComponent
     public function builder(): Builder
     {
         $user = Auth::user();
-        $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance']);
+        
+        $hasUnrestrictedRole = false;
+        if ($user) {
+            if ($user->hasRole('super-admin')) {
+                $hasUnrestrictedRole = true;
+            } else {
+                $roles = $user->roles;
+                $hasUnrestrictedRole = $roles->contains(function ($role) {
+                    return $role->restriction == 1;
+                });
+            }
+        }
 
-        if ($isAdmin) {
+        if ($hasUnrestrictedRole) {
             $latestRecords = DB::table('pengembalian_pinjaman as pp1')
                 ->select('pp1.ulid')
                 ->joinSub(
@@ -100,6 +111,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
                 )
                 ->pluck('ulid');
         } else {
+            // Restricted users (Debitur) can only see their own records
             $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
 
             if (!$debitur) {

@@ -13,10 +13,10 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
 {
     public bool $isEdit = true;
     public ProgramRestrukturisasi $program;
-    
+
     // Property untuk file upload per angsuran
     public $buktiPembayaranFiles = [];
-    
+
     // Property untuk modal upload
     public $showUploadModal = false;
     public $selectedAngsuranIndex = null;
@@ -25,10 +25,12 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
 
     public string $pageTitle = 'Edit Program Restrukturisasi';
     public string $pageSubtitle = 'Perbarui parameter program restrukturisasi';
-    public string $submitLabel = 'Perbarui Program Restrukturisasi';
+    public string $submitLabel = 'Perbarui Restrukturisasi';
 
     public function mount(?string $id = null): void
     {
+        abort_unless(auth()->user()->can('program_restrukturisasi.edit'), 403, 'Unauthorized');
+
         $this->tanggal_mulai_cicilan = date('Y-m-d');
 
         if ($id === null) {
@@ -37,7 +39,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
 
         $this->program = ProgramRestrukturisasi::with([
             'pengajuanRestrukturisasi.debitur',
-            'jadwalAngsuran' => fn ($query) => $query->orderBy('no'),
+            'jadwalAngsuran' => fn($query) => $query->orderBy('no'),
         ])->findOrFail($id);
 
         $pengajuan = $this->program->pengajuanRestrukturisasi;
@@ -46,11 +48,11 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         $this->nama_debitur = $pengajuan?->debitur?->nama ?? $pengajuan?->nama_perusahaan ?? '-';
         $this->nomor_kontrak = $pengajuan?->nomor_kontrak_pembiayaan ?? '-';
         $this->metode_perhitungan = $this->program->metode_perhitungan;
-        
+
         // [FIX] Float cast
         $this->plafon_pembiayaan = (float) $this->program->plafon_pembiayaan;
         $this->suku_bunga_per_tahun = (float) $this->program->suku_bunga_per_tahun;
-        
+
         $this->jangka_waktu_total = (int) $this->program->jangka_waktu_total;
         $this->masa_tenggang = (int) $this->program->masa_tenggang;
         $this->tanggal_mulai_cicilan = optional($this->program->tanggal_mulai_cicilan)->format('Y-m-d');
@@ -61,7 +63,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
 
         // Hitung sisa pinjaman untuk metode Efektif (Anuitas)
         $sisaPokok = $this->plafon_pembiayaan;
-        
+
         $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item, $index) use (&$sisaPokok) {
             $data = [
                 'id' => $item->id_jadwal_angsuran,
@@ -78,7 +80,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'tanggal_bayar' => $item->tanggal_bayar ? optional($item->tanggal_bayar)->format('Y-m-d') : null,
                 'nominal_bayar' => (float) $item->nominal_bayar,
             ];
-            
+
             // Tambah sisa_pinjaman untuk metode Efektif (Anuitas)
             if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
                 $data['sisa_pinjaman'] = $sisaPokok;
@@ -87,7 +89,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                     if ($sisaPokok < 0) $sisaPokok = 0;
                 }
             }
-            
+
             return $data;
         })->toArray();
 
@@ -101,11 +103,11 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
     protected function loadData()
     {
         $this->program->refresh();
-        $this->program->load(['jadwalAngsuran' => fn ($query) => $query->orderBy('no')]);
-        
+        $this->program->load(['jadwalAngsuran' => fn($query) => $query->orderBy('no')]);
+
         // Hitung sisa pinjaman untuk metode Efektif (Anuitas)
         $sisaPokok = $this->plafon_pembiayaan;
-        
+
         $this->jadwal_angsuran = $this->program->jadwalAngsuran->map(function ($item, $index) use (&$sisaPokok) {
             $data = [
                 'id' => $item->id_jadwal_angsuran,
@@ -122,7 +124,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'tanggal_bayar' => $item->tanggal_bayar ? optional($item->tanggal_bayar)->format('Y-m-d') : null,
                 'nominal_bayar' => (float) $item->nominal_bayar,
             ];
-            
+
             // Tambah sisa_pinjaman untuk metode Efektif (Anuitas)
             if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
                 $data['sisa_pinjaman'] = $sisaPokok;
@@ -131,9 +133,50 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                     if ($sisaPokok < 0) $sisaPokok = 0;
                 }
             }
-            
+
             return $data;
         })->toArray();
+    }
+
+    /**
+     * Override hitungJadwalAngsuran to preserve existing data
+     * When user recalculates in edit mode, we need to keep status & bukti_pembayaran
+     */
+    public function hitungJadwalAngsuran()
+    {
+        // Save current jadwal data (status, bukti_pembayaran, etc)
+        $oldJadwalData = [];
+        foreach ($this->jadwal_angsuran as $index => $item) {
+            $oldJadwalData[$item['no']] = [
+                'id' => $item['id'] ?? null,
+                'status' => $item['status'] ?? 'Belum Jatuh Tempo',
+                'bukti_pembayaran' => $item['bukti_pembayaran'] ?? null,
+                'tanggal_bayar' => $item['tanggal_bayar'] ?? null,
+                'nominal_bayar' => $item['nominal_bayar'] ?? 0,
+            ];
+        }
+
+        // Call parent to recalculate
+        parent::hitungJadwalAngsuran();
+
+        // Merge back the preserved data
+        foreach ($this->jadwal_angsuran as $index => $item) {
+            $no = $item['no'];
+            if (isset($oldJadwalData[$no])) {
+                $this->jadwal_angsuran[$index]['id'] = $oldJadwalData[$no]['id'];
+                $this->jadwal_angsuran[$index]['status'] = $oldJadwalData[$no]['status'];
+                $this->jadwal_angsuran[$index]['bukti_pembayaran'] = $oldJadwalData[$no]['bukti_pembayaran'];
+                $this->jadwal_angsuran[$index]['tanggal_bayar'] = $oldJadwalData[$no]['tanggal_bayar'];
+                $this->jadwal_angsuran[$index]['nominal_bayar'] = $oldJadwalData[$no]['nominal_bayar'];
+            } else {
+                // New installment (if jangka_waktu increased)
+                $this->jadwal_angsuran[$index]['id'] = null;
+                $this->jadwal_angsuran[$index]['status'] = 'Belum Jatuh Tempo';
+                $this->jadwal_angsuran[$index]['bukti_pembayaran'] = null;
+                $this->jadwal_angsuran[$index]['tanggal_bayar'] = null;
+                $this->jadwal_angsuran[$index]['nominal_bayar'] = 0;
+            }
+        }
     }
 
     public function simpan()
@@ -162,7 +205,6 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'suku_bunga_per_tahun.max' => 'Suku bunga tidak boleh lebih dari 100%.',
                 'jadwal_angsuran.required' => 'Mohon hitung jadwal angsuran sebelum menyimpan.',
             ]);
-
         } catch (ValidationException $e) {
             $this->dispatch('swal:modal', [
                 'type' => 'error',
@@ -196,7 +238,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
             ]);
 
             // Simpan mapping bukti pembayaran berdasarkan nomor angsuran
-            $buktiMapping = $this->program->jadwalAngsuran->keyBy('no')->map(function($item) {
+            $buktiMapping = $this->program->jadwalAngsuran->keyBy('no')->map(function ($item) {
                 return [
                     'bukti_pembayaran' => $item->bukti_pembayaran,
                     'tanggal_bayar' => $item->tanggal_bayar,
@@ -204,14 +246,14 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                     'status' => $item->status,
                 ];
             });
-            
+
             // Delete dan recreate jadwal angsuran
             $this->program->jadwalAngsuran()->delete();
 
             foreach ($this->jadwal_angsuran as $item) {
                 $no = $item['no'];
                 $existingData = $buktiMapping->get($no);
-                
+
                 $this->program->jadwalAngsuran()->create([
                     'no' => $no,
                     'tanggal_jatuh_tempo' => \Carbon\Carbon::parse($item['tanggal_jatuh_tempo_raw']),
@@ -236,7 +278,6 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'text' => 'Program restrukturisasi berhasil diperbarui!',
                 'redirect_url' => route('program-restrukturisasi.index')
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error updating: ' . $e->getMessage());
@@ -272,7 +313,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
             $previousIndex = $index - 1;
             if (isset($this->jadwal_angsuran[$previousIndex])) {
                 $previousAngsuran = $this->jadwal_angsuran[$previousIndex];
-                
+
                 // Cek apakah angsuran sebelumnya sudah lunas
                 if ($previousAngsuran['status'] !== 'Lunas' || empty($previousAngsuran['bukti_pembayaran'])) {
                     $this->dispatch('swal:modal', [
@@ -299,7 +340,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
         $this->selectedAngsuranNo = $noAngsuran;
         $this->uploadFile = null;
         $this->showUploadModal = true;
-        
+
         // Dispatch event untuk trigger JavaScript buka modal
         $this->dispatch('open-upload-modal');
     }
@@ -386,7 +427,7 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
             }
 
             $index = $this->selectedAngsuranIndex;
-            
+
             if (!isset($this->jadwal_angsuran[$index])) {
                 $this->dispatch('swal:modal', [
                     'type' => 'error',
@@ -452,7 +493,6 @@ class ProgramRestrukturisasiEdit extends ProgramRestrukturisasiCreate
                 'title' => 'Berhasil',
                 'text' => 'Bukti pembayaran berhasil diupload dan status angsuran telah diperbarui menjadi Lunas.',
             ]);
-
         } catch (ValidationException $e) {
             DB::rollBack();
             $errors = collect($e->errors())->flatten()->join(', ');
