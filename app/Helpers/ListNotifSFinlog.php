@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\NotificationFeature;
 use App\Models\PeminjamanFinlog;
+use App\Models\PengajuanInvestasiFinlog;
 
 class ListNotifSFinlog
 {
@@ -141,6 +142,57 @@ class ListNotifSFinlog
 
         // Generate link ke detail peminjaman
         $link = route('sfinlog.peminjaman.detail', $peminjaman->id_peminjaman_finlog);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function menuPengajuanInvestasi($status, $pengajuan)
+    {
+        // Mapping status dari history ke notification feature name
+        if($status === 'Menunggu Validasi Finance SKI') {
+            $notif = NotificationFeature::where('name', 'pengajuan_investasi_baru_finlog')->first();
+        } else if($status === 'Dokumen Tervalidasi') {
+            $notif = NotificationFeature::where('name', 'disetujui_ski_finance_investasi_finlog')->first();
+        } else if($status === 'Ditolak' || (str_contains($status, 'Ditolak') && $pengajuan->current_step == 2)) {
+            // Ditolak di step 2 (SKI Finance)
+            $notif = NotificationFeature::where('name', 'ditolak_ski_finance_investasi_finlog')->first();
+        } else if($status === 'Disetujui CEO Finlog' || $status === 'Menunggu Upload Bukti Transfer') {
+            $notif = NotificationFeature::where('name', 'disetujui_ceo_ski_investasi_finlog')->first();
+        } else if(str_contains($status, 'Ditolak CEO') || (str_contains($status, 'Ditolak') && $pengajuan->current_step == 3)) {
+            // Ditolak di step 3 (CEO)
+            $notif = NotificationFeature::where('name', 'ditolak_ceo_ski_investasi_finlog')->first();
+        } else if($status === 'Bukti Transfer Diupload') {
+            // Investasi berhasil ditransfer oleh investor
+            $notif = NotificationFeature::where('name', 'investasi_berhasil_ditransfer_finlog')->first();
+        } else if($status === 'Selesai' && $pengajuan->nomor_kontrak) {
+            // Kontrak sudah dibuat (saat generate kontrak, status menjadi Selesai)
+            $notif = NotificationFeature::where('name', 'kontrak_investasi_dibuat_finlog')->first();
+        }
+
+        // Jika notification feature tidak ditemukan, skip pengiriman notifikasi
+        if (!$notif) {
+            return;
+        }
+
+        // Format nominal untuk notifikasi
+        $nominal = $pengajuan->nominal_investasi ?? 0;
+        $nominalFormatted = 'Rp ' . number_format($nominal, 0, ',', '.');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.investor]]' => $pengajuan->nama_investor ?? $pengajuan->investor->nama ?? 'N/A',
+            '[[nomor.pengajuan]]' => $pengajuan->nomor_pengajuan ?? 'N/A',
+            '[[nominal]]' => $nominalFormatted,
+        ];
+
+        // Generate link ke detail pengajuan investasi
+        $link = route('sfinlog.pengajuan-investasi.show', $pengajuan->id_pengajuan_investasi_finlog);
 
         $data = [
             'notif_variable' => $notif_variable,
