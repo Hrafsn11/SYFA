@@ -11,6 +11,7 @@ use App\Models\EvaluasiKelayakanDebitur;
 use App\Models\EvaluasiAnalisaRestrukturisasi;
 use App\Models\PersetujuanKomiteRestrukturisasi;
 use App\Models\HistoryStatusPengajuanRestrukturisasi;
+use App\Helpers\ListNotifSFinance;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
@@ -265,7 +266,13 @@ class ValidasiPengajuanRestrukturisasi extends Component
                 'submit_by' => auth()->id(),
             ]);
 
+            // Reload pengajuan dengan relasi
+            $this->pengajuan->load('debitur');
+
             DB::commit();
+
+            // Kirim notifikasi saat pengajuan baru di-submit
+            ListNotifSFinance::menuRestrukturisasi($this->pengajuan->status, $this->pengajuan, 1);
 
             session()->flash('success', 'Pengajuan berhasil disubmit!');
             $this->dispatch('evaluasiSaved', message: 'Pengajuan berhasil disubmit!');
