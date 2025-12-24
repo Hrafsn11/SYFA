@@ -1,7 +1,19 @@
 <div>
-    <div class="row mb-4">
-        <div class="col-12">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
             <h4 class="fw-bold mb-0">Debitur Piutang</h4>
+            <p class="text-muted mb-0">Data piutang debitur dan riwayat pembayaran</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <button wire:click="export" class="btn btn-success" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="export" class="d-flex align-items-center">
+                    <i class="ti ti-file-spreadsheet me-1"></i> Export Excel
+                </span>
+                <span wire:loading wire:target="export">
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Generating...
+                </span>
+            </button>
         </div>
     </div>
 

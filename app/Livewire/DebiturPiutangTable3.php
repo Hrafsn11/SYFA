@@ -17,7 +17,8 @@ class DebiturPiutangTable3 extends DataTableComponent
     {
         $this->setPrimaryKey('id_pengajuan_peminjaman');
         $this->setTableAttributes(['class' => 'table-bordered table-hover']);
-        $this->setPaginationStatus(false);
+        $this->setPerPageAccepted([10, 25, 50, 100]);
+        $this->setPerPage(10);
         $this->setPerPageVisibilityStatus(false);
         $this->setSearchVisibilityStatus(false);
         $this->setFiltersVisibilityStatus(false);

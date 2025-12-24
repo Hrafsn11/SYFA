@@ -15,39 +15,43 @@
                 <div class="card-datatable table-responsive">
                     <div class="dataTables_wrapper dt-bootstrap5 no-footer">
                         <!-- Search and Filter -->
-                        <div class="row mx-2 mt-3 align-items-center mb-3">
-                            <div class="col-md-2">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2">Show</span>
-                                    <select class="form-select" style="width: auto;">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                    <span class="ms-2">Entries</span>
-                                </div>
-                            </div>
+                        <form method="GET" action="{{ route('kertas-kerja-investor-sfinance.index') }}" id="filterForm">
+                            <input type="hidden" name="year" value="{{ $year }}" id="yearInput">
+                            <input type="hidden" name="page" value="1" id="pageInput">
 
-                            <div class="col-md-3">
-                                <!-- Year Filter -->
-                                <form method="GET" action="{{ route('kertas-kerja-investor-sfinance.index') }}">
+                            <div class="row mx-2 mt-3 align-items-center mb-3">
+                                <div class="col-md-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="me-2">Show</span>
+                                        <select name="per_page" class="form-select" style="width: auto;" id="perPageSelect">
+                                            <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                            <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                            <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                            <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                                        </select>
+                                        <span class="ms-2">Entries</span>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <!-- Year Filter -->
                                     <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Select Year" id="flatpickr-year"
-                                            name="year" value="{{ $year }}" />
-                                        <button type="submit" class="btn btn-primary">
+                                        <input type="text" class="form-control" placeholder="Select Year"
+                                            id="flatpickr-year" value="{{ $year }}" />
+                                        <button type="button" class="btn btn-primary" id="filterYearBtn">
                                             <i class="ti ti-filter"></i>
                                         </button>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
 
-                            <div class="col-md-7">
-                                <div class="d-flex justify-content-end">
-                                    <input type="search" class="form-control search-input" placeholder="Cari..." />
+                                <div class="col-md-7">
+                                    <div class="d-flex justify-content-end">
+                                        <input type="search" name="search" class="form-control" placeholder="Cari..."
+                                            value="{{ $search }}" id="searchInput">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
 
                         <!-- Table -->
                         <div style="overflow-x: auto; white-space: nowrap;">
@@ -73,7 +77,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($data as $index => $row)
+                                        @forelse($paginatedData as $index => $row)
                                             <tr>
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td class="text-center">
@@ -133,7 +137,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($data as $row)
+                                        @forelse($paginatedData as $row)
                                             <tr>
                                                 <td class="text-center">Rp {{ number_format($row['jan'], 0, ',', '.') }}
                                                 </td>
@@ -182,7 +186,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($data as $row)
+                                        @forelse($paginatedData as $row)
                                             <tr>
                                                 <td class="text-center">Rp
                                                     {{ number_format($row['pengembalian_pokok'], 0, ',', '.') }}</td>
@@ -215,23 +219,33 @@
                         <div class="row mx-2 mt-3 mb-3">
                             <div class="col-sm-12 col-md-6">
                                 <div class="dataTables_info">
-                                    Menampilkan data
+                                    Menampilkan {{ $pagination['from'] }} sampai {{ $pagination['to'] }} dari
+                                    {{ $pagination['total'] }} data
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-6">
                                 <div class="dataTables_paginate paging_simple_numbers">
                                     <ul class="pagination">
-                                        <li class="paginate_button page-item previous disabled">
-                                            <a href="#" class="page-link">Sebelumnya</a>
+                                        <!-- Previous -->
+                                        <li
+                                            class="paginate_button page-item {{ $pagination['current_page'] == 1 ? 'disabled' : '' }}">
+                                            <a href="#" class="page-link"
+                                                onclick="goToPage({{ $pagination['current_page'] - 1 }}); return false;">Sebelumnya</a>
                                         </li>
-                                        <li class="paginate_button page-item active">
-                                            <a href="#" class="page-link">1</a>
-                                        </li>
-                                        <li class="paginate_button page-item">
-                                            <a href="#" class="page-link">2</a>
-                                        </li>
-                                        <li class="paginate_button page-item next">
-                                            <a href="#" class="page-link">Selanjutnya</a>
+
+                                        @for ($i = 1; $i <= $pagination['last_page']; $i++)
+                                            <li
+                                                class="paginate_button page-item {{ $pagination['current_page'] == $i ? 'active' : '' }}">
+                                                <a href="#" class="page-link"
+                                                    onclick="goToPage({{ $i }}); return false;">{{ $i }}</a>
+                                            </li>
+                                        @endfor
+
+                                        <!-- Next -->
+                                        <li
+                                            class="paginate_button page-item {{ $pagination['current_page'] >= $pagination['last_page'] ? 'disabled' : '' }}">
+                                            <a href="#" class="page-link"
+                                                onclick="goToPage({{ $pagination['current_page'] + 1 }}); return false;">Selanjutnya</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -255,6 +269,37 @@
                 dateFormat: "Y",
                 defaultDate: "{{ $year }}"
             });
+
+            // Per page change
+            $('#perPageSelect').on('change', function() {
+                $('#pageInput').val(1); // Reset to page 1
+                $('#filterForm').submit();
+            });
+
+            // Search with debounce
+            let searchTimeout;
+            $('#searchInput').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    $('#pageInput').val(1); // Reset to page 1
+                    $('#filterForm').submit();
+                }, 500);
+            });
+
+            // Year filter button
+            $('#filterYearBtn').on('click', function() {
+                const selectedYear = $('#flatpickr-year').val();
+                $('#yearInput').val(selectedYear);
+                $('#pageInput').val(1); // Reset to page 1
+                $('#filterForm').submit();
+            });
         });
+
+        // Pagination function
+        function goToPage(page) {
+            if (page < 1 || page > {{ $pagination['last_page'] }}) return;
+            $('#pageInput').val(page);
+            $('#filterForm').submit();
+        }
     </script>
 @endpush
