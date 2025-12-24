@@ -504,4 +504,67 @@ class ListNotifSFinance
 
         sendNotification($data);
     }
+
+    public static function pengembalianInvestasiKeInvestorJatuhTempo($pengajuan, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pengembalian investasi ke investor mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pengembalian_investasi_ke_investor_jatuh_tempo_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('investor');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.investor]]' => $pengajuan->nama_investor ?? $pengajuan->investor->nama ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke pengembalian investasi
+        $link = route('pengembalian-investasi.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function transferPengembalianInvestasiKeInvestor($pengembalian)
+    {
+        // Notifikasi saat SKI Finance melakukan transfer pengembalian investasi ke investor
+        $notif = NotificationFeature::where('name', 'transfer_pengembalian_investasi_ke_investor_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengembalian->load('pengajuanInvestasi.investor');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.investor]]' => $pengembalian->pengajuanInvestasi->nama_investor ?? 
+                                   $pengembalian->pengajuanInvestasi->investor->nama ?? 'N/A',
+        ];
+
+        // Generate link ke pengembalian investasi
+        $link = route('pengembalian-investasi.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }

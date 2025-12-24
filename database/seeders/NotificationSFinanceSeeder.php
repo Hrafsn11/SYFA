@@ -488,5 +488,38 @@ class NotificationSFinanceSeeder extends Seeder
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Pengembalian dana investasi debitur [[nama.debitur]] akan jatuh tempo pada [[tanggal]].',
         ]);
+
+        // NOTIFICATION FEATURES UNTUK PENGEMBALIAN INVESTASI KE INVESTOR
+        // 1. Pengembalian Investasi Ke Investor Jatuh Tempo - SKI Finance dan Investor
+        $pengembalian_investasi_ke_investor_jatuh_tempo = NotificationFeature::firstOrCreate([
+            'name' => 'pengembalian_investasi_ke_investor_jatuh_tempo_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_investasi_ke_investor_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengembalian dana investasi [[nama.investor]] akan jatuh tempo pada [[tanggal]].',
+        ]);
+
+        // Notifikasi untuk Investor
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_investasi_ke_investor_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Pengembalian dana investasi [[nama.investor]] akan jatuh tempo pada [[tanggal]].',
+        ]);
+
+        // 2. Transfer Pengembalian Investasi Ke Investor - Investor
+        $transfer_pengembalian_investasi_ke_investor = NotificationFeature::firstOrCreate([
+            'name' => 'transfer_pengembalian_investasi_ke_investor_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $transfer_pengembalian_investasi_ke_investor->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].',
+        ]);
     }
 }
