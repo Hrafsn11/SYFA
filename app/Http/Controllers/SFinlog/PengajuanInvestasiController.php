@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SFinlog;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinlog;
 use App\Models\PengajuanInvestasiFinlog;
 use App\Models\HistoryStatusPengajuanInvestasiFinlog;
 use App\Http\Requests\SFinlog\PengajuanInvestasiFinlogRequest;
@@ -55,13 +56,18 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::create($payload);
 
-            $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
+            $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
                 'status' => 'Menunggu Validasi Finance SKI',
                 'current_step' => 2,
                 'submit_step1_by' => Auth::id(),
             ]);
 
             DB::commit();
+
+            // Reload pengajuan dengan relasi investor untuk notifikasi
+            $pengajuan->refresh();
+            $pengajuan->load('investor');
+            ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
 
             return Response::success($pengajuan, 'Pengajuan investasi berhasil dibuat!');
         } catch (\Exception $e) {
@@ -247,9 +253,14 @@ class PengajuanInvestasiController extends Controller
                 $historyData['approve_by'] = Auth::id();
             }
 
-            $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, $historyData);
+            $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, $historyData);
 
             DB::commit();
+
+            // Reload pengajuan dengan relasi investor untuk notifikasi
+            $pengajuan->refresh();
+            $pengajuan->load('investor');
+            ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
 
             return Response::success([
                 'status' => $status,
@@ -301,7 +312,7 @@ class PengajuanInvestasiController extends Controller
                     'current_step' => 5,
                 ]);
 
-                $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
+                $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
                     'status' => 'Bukti Transfer Diupload',
                     'current_step' => 5,
                     'approve_by' => Auth::id(),
@@ -309,6 +320,14 @@ class PengajuanInvestasiController extends Controller
             }
 
             DB::commit();
+
+            // Reload pengajuan dengan relasi investor untuk notifikasi
+            $pengajuan->refresh();
+            $pengajuan->load('investor');
+            if (isset($history)) {
+                // Notifikasi investasi berhasil ditransfer
+                ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
+            }
 
             return Response::success($pengajuan, 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {
@@ -336,13 +355,19 @@ class PengajuanInvestasiController extends Controller
             ]);
 
             // Create history for "Selesai"
-            $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
+            $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'approve_by' => Auth::id(),
             ]);
 
             DB::commit();
+
+            // Reload pengajuan dengan relasi investor untuk notifikasi
+            $pengajuan->refresh();
+            $pengajuan->load('investor');
+            // Notifikasi kontrak dibuat (karena ada nomor_kontrak)
+            ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
 
             return Response::success($pengajuan, 'Kontrak berhasil digenerate!');
         } catch (\Exception $e) {
