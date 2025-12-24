@@ -355,5 +355,92 @@ class NotificationSFinanceSeeder extends Seeder
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Debitur [[nama.debitur]] terlambat melakukan pembayaran restrukturisasi setelah tanggal jatuh tempo [[tanggal]].',
         ]);
+
+        // NOTIFICATION FEATURES UNTUK PENGAJUAN INVESTASI
+        $investor = Role::firstOrCreate(['name' => 'Investor', 'guard_name' => 'web'], ['restriction' => 0]);
+
+        // 1. Pengajuan Investasi Baru - SKI Finance
+        $pengajuan_investasi_baru = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_investasi_baru_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_baru->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan investasi baru telah diterima dari investor [[nama.investor]].',
+        ]);
+
+        // 2. Pengajuan Investasi Disetujui oleh SKI Finance - Investor
+        $pengajuan_investasi_disetujui_finance = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_investasi_disetujui_finance_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_disetujui_finance->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh SKI Finance.',
+        ]);
+
+        // 3. Pengajuan Investasi Ditolak oleh SKI Finance - Investor
+        $pengajuan_investasi_ditolak_finance = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_investasi_ditolak_finance_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_ditolak_finance->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh SKI Finance.',
+        ]);
+
+        // 4. Pengajuan Investasi Disetujui oleh CEO SKI - SKI Finance
+        $pengajuan_investasi_disetujui_ceo = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_investasi_disetujui_ceo_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_disetujui_ceo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh CEO SKI.',
+        ]);
+
+        // 5. Pengajuan Investasi Ditolak oleh CEO SKI - SKI Finance
+        $pengajuan_investasi_ditolak_ceo = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_investasi_ditolak_ceo_ski',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_ditolak_ceo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh CEO SKI.',
+        ]);
+
+        // 6. Kontrak Investasi Dibuat - Investor
+        $kontrak_investasi_dibuat = NotificationFeature::firstOrCreate([
+            'name' => 'kontrak_investasi_dibuat_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $kontrak_investasi_dibuat->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Kontrak investasi dengan investor [[nama.investor]] telah berhasil dibuat.',
+        ]);
+
+        // 7. Investasi Berhasil Ditransfer (Status Selesai) - SKI Finance
+        $investasi_berhasil_ditransfer = NotificationFeature::firstOrCreate([
+            'name' => 'investasi_berhasil_ditransfer_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $investasi_berhasil_ditransfer->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Dana investasi dari investor [[nama.investor]] sebesar [[nominal]] telah diterima. Status investasi: Selesai.',
+        ]);
     }
 }

@@ -339,4 +339,70 @@ class ListNotifSFinance
 
         sendNotification($data);
     }
+
+    public static function menuPengajuanInvestasi($status, $pengajuan, $nominal = 0)
+    {
+        // Mapping status ke notification feature
+        $notif = null;
+        
+        if ($status === 'Submit Dokumen') {
+            $notif = NotificationFeature::where('name', 'pengajuan_investasi_baru_sfinance')->first();
+        } else if ($status === 'Dokumen Tervalidasi') {
+            $notif = NotificationFeature::where('name', 'pengajuan_investasi_disetujui_finance_ski')->first();
+        } else if ($status === 'Ditolak' || str_contains($status, 'Ditolak')) {
+            // Cek dari history apakah ditolak di step 2 (SKI Finance) atau step 3 (CEO SKI)
+            $history = \App\Models\HistoryStatusPengajuanInvestor::where('id_pengajuan_investasi', $pengajuan->id_pengajuan_investasi)
+                ->where('validasi_bagi_hasil', 'ditolak')
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            if ($history) {
+                if ($history->current_step == 2) {
+                    $notif = NotificationFeature::where('name', 'pengajuan_investasi_ditolak_finance_ski')->first();
+                } else if ($history->current_step == 3) {
+                    $notif = NotificationFeature::where('name', 'pengajuan_investasi_ditolak_ceo_ski')->first();
+                }
+            }
+        } else if ($status === 'Disetujui oleh CEO SKI') {
+            $notif = NotificationFeature::where('name', 'pengajuan_investasi_disetujui_ceo_ski')->first();
+        } else if ($status === 'Generate Kontrak') {
+            $notif = NotificationFeature::where('name', 'kontrak_investasi_dibuat_sfinance')->first();
+        } else if ($status === 'Selesai') {
+            // Cek apakah sudah ada nomor kontrak (berarti sudah generate kontrak sebelumnya)
+            if ($pengajuan->nomor_kontrak) {
+                $notif = NotificationFeature::where('name', 'investasi_berhasil_ditransfer_sfinance')->first();
+            }
+        }
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('investor');
+
+        // Format nominal jika ada
+        $nominalFormatted = $nominal > 0 ? 'Rp ' . number_format($nominal, 0, ',', '.') : '';
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.investor]]' => $pengajuan->nama_investor ?? $pengajuan->investor->nama ?? 'N/A',
+        ];
+
+        // Tambahkan nominal jika ada
+        if ($nominalFormatted) {
+            $notif_variable['[[nominal]]'] = $nominalFormatted;
+        }
+
+        // Generate link ke detail pengajuan investasi
+        $link = route('pengajuan-investasi.show', $pengajuan->id_pengajuan_investasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }
