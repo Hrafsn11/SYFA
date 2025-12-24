@@ -442,5 +442,51 @@ class NotificationSFinanceSeeder extends Seeder
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Dana investasi dari investor [[nama.investor]] sebesar [[nominal]] telah diterima. Status investasi: Selesai.',
         ]);
+        
+        // NOTIFICATION FEATURES UNTUK PENYALURAN INVESTASI
+
+        // 1. Debitur Menerima Dana Investasi - Debitur
+        $debitur_menerima_dana_investasi = NotificationFeature::firstOrCreate([
+            'name' => 'debitur_menerima_dana_investasi_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $debitur_menerima_dana_investasi->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Debitur [[nama.debitur]] telah menerima dana investasi sebesar [[nominal]].',
+        ]);
+
+        // 2. Debitur Mengembalikan Dana Investasi - SKI Finance
+        $debitur_mengembalikan_dana_investasi = NotificationFeature::firstOrCreate([
+            'name' => 'debitur_mengembalikan_dana_investasi_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $debitur_mengembalikan_dana_investasi->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Debitur [[nama.debitur]] telah mengembalikan dana investasi sebesar [[nominal]].',
+        ]);
+
+        // 3. Pengembalian Investasi Jatuh Tempo - Debitur dan SKI Finance
+        $pengembalian_investasi_jatuh_tempo = NotificationFeature::firstOrCreate([
+            'name' => 'pengembalian_investasi_jatuh_tempo_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        // Notifikasi untuk Debitur
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_investasi_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pengembalian dana investasi debitur [[nama.debitur]] akan jatuh tempo pada [[tanggal]].',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_investasi_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengembalian dana investasi debitur [[nama.debitur]] akan jatuh tempo pada [[tanggal]].',
+        ]);
     }
 }

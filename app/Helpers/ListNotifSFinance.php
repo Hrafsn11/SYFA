@@ -405,4 +405,103 @@ class ListNotifSFinance
 
         sendNotification($data);
     }
+
+    public static function penyaluranInvestasi($penyaluran)
+    {
+        // Notifikasi saat debitur menerima dana investasi
+        $notif = NotificationFeature::where('name', 'debitur_menerima_dana_investasi_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $penyaluran->load('debitur', 'pengajuanInvestasi');
+
+        // Format nominal
+        $nominalFormatted = 'Rp ' . number_format($penyaluran->nominal_yang_disalurkan, 0, ',', '.');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $penyaluran->debitur->nama ?? $penyaluran->debitur->nama_debitur ?? 'N/A',
+            '[[nominal]]' => $nominalFormatted,
+        ];
+
+        // Generate link ke penyaluran deposito (atau bisa ke pengajuan investasi)
+        $link = route('penyaluran-deposito.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianInvestasi($penyaluran)
+    {
+        // Notifikasi saat debitur mengembalikan dana investasi
+        $notif = NotificationFeature::where('name', 'debitur_mengembalikan_dana_investasi_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $penyaluran->load('debitur', 'pengajuanInvestasi');
+
+        // Format nominal
+        $nominalFormatted = 'Rp ' . number_format($penyaluran->nominal_yang_disalurkan, 0, ',', '.');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $penyaluran->debitur->nama ?? $penyaluran->debitur->nama_debitur ?? 'N/A',
+            '[[nominal]]' => $nominalFormatted,
+        ];
+
+        // Generate link ke penyaluran deposito
+        $link = route('penyaluran-deposito.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pengembalianInvestasiJatuhTempo($penyaluran, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pengembalian investasi mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pengembalian_investasi_jatuh_tempo_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $penyaluran->load('debitur', 'pengajuanInvestasi');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $penyaluran->debitur->nama ?? $penyaluran->debitur->nama_debitur ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke penyaluran deposito
+        $link = route('penyaluran-deposito.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }

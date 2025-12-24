@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\PenyaluranDeposito;
@@ -39,6 +40,9 @@ class PenyaluranDepositoController extends Controller
             $pengajuan->save();
 
             DB::commit();
+
+            // Kirim notifikasi saat debitur menerima dana investasi
+            ListNotifSFinance::penyaluranInvestasi($penyaluran);
 
             return Response::success(null, 'Data penyaluran deposito berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -161,6 +165,12 @@ class PenyaluranDepositoController extends Controller
                     $pengajuan = PengajuanInvestasi::findOrFail($penyaluran->id_pengajuan_investasi);
                     $pengajuan->total_kembali_dari_penyaluran += $penyaluran->nominal_yang_disalurkan;
                     $pengajuan->save();
+
+                    // Reload penyaluran dengan relasi untuk notifikasi
+                    $penyaluran->load('debitur', 'pengajuanInvestasi');
+
+                    // Kirim notifikasi saat debitur mengembalikan dana investasi
+                    ListNotifSFinance::pengembalianInvestasi($penyaluran);
                 }
             }
 
