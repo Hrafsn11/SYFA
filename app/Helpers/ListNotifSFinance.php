@@ -234,4 +234,109 @@ class ListNotifSFinance
 
         sendNotification($data);
     }
+
+    public static function pembayaranRestrukturisasi($jadwalAngsuran)
+    {
+        // Notifikasi saat debitur melakukan pembayaran restrukturisasi
+        $notif = NotificationFeature::where('name', 'pembayaran_restrukturisasi_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+
+        // Format nominal
+        $nominalFormatted = 'Rp ' . number_format($jadwalAngsuran->nominal_bayar ?? $jadwalAngsuran->total_cicilan, 0, ',', '.');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama ?? 
+                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama_debitur ?? 
+                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->nama_perusahaan ?? 'N/A',
+            '[[nominal]]' => $nominalFormatted,
+        ];
+
+        // Generate link ke program restrukturisasi
+        $link = route('program-restrukturisasi.show', $jadwalAngsuran->programRestrukturisasi->id_program_restrukturisasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pembayaranRestrukturisasiJatuhTempo($jadwalAngsuran, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pembayaran restrukturisasi mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pembayaran_restrukturisasi_jatuh_tempo_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama ?? 
+                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama_debitur ?? 
+                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->nama_perusahaan ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke program restrukturisasi
+        $link = route('program-restrukturisasi.show', $jadwalAngsuran->programRestrukturisasi->id_program_restrukturisasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function pembayaranRestrukturisasiTelat($jadwalAngsuran, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat debitur telat dalam pembayaran restrukturisasi
+        $notif = NotificationFeature::where('name', 'pembayaran_restrukturisasi_telat_sfinance')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama ?? 
+                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama_debitur ?? 
+                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->nama_perusahaan ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke program restrukturisasi
+        $link = route('program-restrukturisasi.show', $jadwalAngsuran->programRestrukturisasi->id_program_restrukturisasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }

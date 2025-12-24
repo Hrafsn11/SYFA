@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
 use App\Models\BuktiPeminjaman;
+use App\Models\JadwalAngsuran;
 use App\Helpers\ListNotifSFinance;
 use Carbon\Carbon;
 
@@ -23,7 +24,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
      *
      * @var string
      */
-    protected $description = 'Cek dan kirim notifikasi untuk pengembalian dana SFinance yang mendekati jatuh tempo atau sudah telat';
+    protected $description = 'Cek dan kirim notifikasi untuk pengembalian dana dan pembayaran restrukturisasi SFinance yang mendekati jatuh tempo atau sudah telat';
 
     /**
      * Execute the console command.
@@ -98,7 +99,41 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
             }
         }
 
-        $this->info("Pengecekan selesai. Notifikasi jatuh tempo: {$countJatuhTempo}, Notifikasi telat: {$countTelat}");
+        // ============================================
+        // CEK PEMBAYARAN RESTRUKTURISASI JATUH TEMPO
+        // ============================================
+        $this->info('Memulai pengecekan pembayaran restrukturisasi jatuh tempo...');
+
+        $countRestrukturisasiJatuhTempo = 0;
+        $countRestrukturisasiTelat = 0;
+
+        // Ambil semua jadwal angsuran yang belum lunas
+        $jadwalAngsuranList = JadwalAngsuran::with(['programRestrukturisasi.pengajuanRestrukturisasi.debitur'])
+            ->where('status', '!=', 'Lunas')
+            ->whereNull('bukti_pembayaran')
+            ->whereNotNull('tanggal_jatuh_tempo')
+            ->get();
+
+        foreach ($jadwalAngsuranList as $jadwalAngsuran) {
+            $jatuhTempo = Carbon::parse($jadwalAngsuran->tanggal_jatuh_tempo);
+            
+            // Cek apakah sudah melewati jatuh tempo (telat)
+            if ($today->gt($jatuhTempo)) {
+                // Sudah telat - kirim notifikasi telat
+                $this->info("Jadwal angsuran no {$jadwalAngsuran->no} sudah telat (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinance::pembayaranRestrukturisasiTelat($jadwalAngsuran, $jadwalAngsuran->tanggal_jatuh_tempo);
+                $countRestrukturisasiTelat++;
+            } 
+            // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
+            elseif ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
+                // Mendekati jatuh tempo - kirim notifikasi
+                $this->info("Jadwal angsuran no {$jadwalAngsuran->no} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinance::pembayaranRestrukturisasiJatuhTempo($jadwalAngsuran, $jadwalAngsuran->tanggal_jatuh_tempo);
+                $countRestrukturisasiJatuhTempo++;
+            }
+        }
+
+        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi jatuh tempo restrukturisasi: {$countRestrukturisasiJatuhTempo}, Notifikasi telat restrukturisasi: {$countRestrukturisasiTelat}");
 
         return Command::SUCCESS;
     }

@@ -302,5 +302,58 @@ class NotificationSFinanceSeeder extends Seeder
             'role_assigned' => json_encode([$finance->id, $ceo->id, $debitur->id]),
             'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah ditolak oleh Direktur SKI.',
         ]);
+
+        // NOTIFICATION FEATURES UNTUK PEMBAYARAN RESTRUKTURISASI
+        // 1. Pembayaran Restrukturisasi - SKI Finance
+        $pembayaran_restrukturisasi = NotificationFeature::firstOrCreate([
+            'name' => 'pembayaran_restrukturisasi_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pembayaran_restrukturisasi->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Debitur [[nama.debitur]] telah melakukan pembayaran restrukturisasi sebesar [[nominal]].',
+        ]);
+
+        // 2. Pembayaran Restrukturisasi Jatuh Tempo - Debitur dan SKI Finance
+        $pembayaran_restrukturisasi_jatuh_tempo = NotificationFeature::firstOrCreate([
+            'name' => 'pembayaran_restrukturisasi_jatuh_tempo_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        // Notifikasi untuk Debitur
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pembayaran_restrukturisasi_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pembayaran restrukturisasi debitur [[nama.debitur]] akan jatuh tempo pada [[tanggal]].',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pembayaran_restrukturisasi_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pembayaran restrukturisasi debitur [[nama.debitur]] akan jatuh tempo pada [[tanggal]].',
+        ]);
+
+        // 3. Pembayaran Restrukturisasi Telat - Debitur dan SKI Finance
+        $pembayaran_restrukturisasi_telat = NotificationFeature::firstOrCreate([
+            'name' => 'pembayaran_restrukturisasi_telat_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        // Notifikasi untuk Debitur
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pembayaran_restrukturisasi_telat->id_notification_feature,
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Debitur [[nama.debitur]] terlambat melakukan pembayaran restrukturisasi setelah tanggal jatuh tempo [[tanggal]].',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pembayaran_restrukturisasi_telat->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Debitur [[nama.debitur]] terlambat melakukan pembayaran restrukturisasi setelah tanggal jatuh tempo [[tanggal]].',
+        ]);
     }
 }
