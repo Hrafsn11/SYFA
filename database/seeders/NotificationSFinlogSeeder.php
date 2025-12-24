@@ -341,6 +341,42 @@ class NotificationSFinlogSeeder extends Seeder
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Pengembalian dana investasi akan jatuh tempo pada [[tanggal.jatuh.tempo]]. Mohon memastikan kesiapan pembayaran.',
         ]);
+
+        // ============================================
+        // NOTIFICATION FEATURES UNTUK PENGEMBALIAN INVESTASI KE INVESTOR
+        // ============================================
+
+        // 25. Pengembalian Investasi Ke Investor Jatuh Tempo - SKI Finance dan Investor
+        $pengembalian_investasi_ke_investor_jatuh_tempo = NotificationFeature::firstOrCreate([
+            'name' => 'pengembalian_investasi_ke_investor_jatuh_tempo_finlog',
+            'module' => 's_finlog',
+        ]);
+
+        // Notifikasi untuk SKI Finance
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_investasi_ke_investor_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengembalian dana investasi akan jatuh tempo pada [[tanggal.jatuh.tempo]]. Mohon memastikan kesiapan pembayaran.',
+        ]);
+
+        // Notifikasi untuk Investor
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengembalian_investasi_ke_investor_jatuh_tempo->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Pengembalian dana investasi akan jatuh tempo pada [[tanggal.jatuh.tempo]]. Mohon memastikan kesiapan pembayaran.',
+        ]);
+
+        // 26. Transfer Pengembalian Investasi Ke Investor - Investor
+        $transfer_pengembalian_investasi_ke_investor = NotificationFeature::firstOrCreate([
+            'name' => 'transfer_pengembalian_investasi_ke_investor_finlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $transfer_pengembalian_investasi_ke_investor->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].',
+        ]);
     }
 }
 

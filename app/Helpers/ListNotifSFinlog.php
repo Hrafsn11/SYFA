@@ -351,5 +351,67 @@ class ListNotifSFinlog
 
         sendNotification($data);
     }
+
+    public static function pengembalianInvestasiKeInvestorJatuhTempo($pengajuan, $tanggalJatuhTempo)
+    {
+        // Notifikasi saat tanggal pengembalian investasi ke investor mendekati jatuh tempo
+        $notif = NotificationFeature::where('name', 'pengembalian_investasi_ke_investor_jatuh_tempo_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('investor');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.investor]]' => $pengajuan->nama_investor ?? $pengajuan->investor->nama ?? 'N/A',
+            '[[tanggal.jatuh.tempo]]' => $tanggalFormatted,
+        ];
+
+        // Generate link ke pengembalian investasi
+        $link = route('sfinlog.pengembalian-investasi.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function transferPengembalianInvestasiKeInvestor($pengembalian)
+    {
+        // Notifikasi saat SKI Finance melakukan transfer pengembalian investasi ke investor
+        $notif = NotificationFeature::where('name', 'transfer_pengembalian_investasi_ke_investor_finlog')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengembalian->load('pengajuan.investor');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.investor]]' => $pengembalian->pengajuan->nama_investor ?? $pengembalian->pengajuan->investor->nama ?? 'N/A',
+        ];
+
+        // Generate link ke pengembalian investasi
+        $link = route('sfinlog.pengembalian-investasi.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+        ];
+
+        sendNotification($data);
+    }
 }
 

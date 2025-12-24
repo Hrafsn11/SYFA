@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use App\Models\PeminjamanFinlog;
 use App\Models\PengembalianPinjamanFinlog;
 use App\Models\PenyaluranDepositoSfinlog;
+use App\Models\PengajuanInvestasiFinlog;
+use App\Models\PengembalianInvestasiFinlog;
 use App\Helpers\ListNotifSFinlog;
 use Carbon\Carbon;
 
@@ -97,7 +99,43 @@ class CheckPengembalianDanaJatuhTempo extends Command
             }
         }
 
-        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi jatuh tempo investasi: {$countInvestasiJatuhTempo}");
+        // ============================================
+        // CEK PENGEMBALIAN INVESTASI KE INVESTOR JATUH TEMPO
+        // ============================================
+        $this->info('Memulai pengecekan pengembalian investasi ke investor jatuh tempo...');
+
+        $countInvestasiKeInvestorJatuhTempo = 0;
+
+        // Ambil semua pengajuan investasi yang sudah memiliki kontrak dan belum lunas
+        $pengajuanInvestasiList = PengajuanInvestasiFinlog::with(['investor'])
+            ->whereNotNull('nomor_kontrak')
+            ->where('nomor_kontrak', '!=', '')
+            ->whereNotNull('tanggal_berakhir_investasi')
+            ->get();
+
+        foreach ($pengajuanInvestasiList as $pengajuan) {
+            $jatuhTempo = Carbon::parse($pengajuan->tanggal_berakhir_investasi);
+            
+            // Cek apakah sudah lunas (total pengembalian >= nominal investasi + bagi hasil)
+            $totalPengembalian = PengembalianInvestasiFinlog::getTotalDikembalikan($pengajuan->id_pengajuan_investasi_finlog);
+            $totalDibayar = $totalPengembalian->total_semua ?? 0;
+            $totalHarusDibayar = ($pengajuan->nominal_investasi ?? 0) + ($pengajuan->nominal_bagi_hasil_yang_didapat ?? 0);
+            
+            if ($totalDibayar >= $totalHarusDibayar) {
+                // Sudah lunas, skip
+                continue;
+            }
+
+            // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
+            if ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
+                // Mendekati jatuh tempo - kirim notifikasi
+                $this->info("Pengajuan investasi {$pengajuan->nomor_kontrak} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinlog::pengembalianInvestasiKeInvestorJatuhTempo($pengajuan, $pengajuan->tanggal_berakhir_investasi);
+                $countInvestasiKeInvestorJatuhTempo++;
+            }
+        }
+
+        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi jatuh tempo investasi: {$countInvestasiJatuhTempo}, Notifikasi jatuh tempo investasi ke investor: {$countInvestasiKeInvestorJatuhTempo}");
 
         return Command::SUCCESS;
     }

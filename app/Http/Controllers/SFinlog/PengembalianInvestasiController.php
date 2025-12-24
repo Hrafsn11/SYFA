@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SFinlog;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinlog;
 use App\Http\Requests\SFinlog\PengembalianInvestasiFinlogRequest;
 use App\Models\PengajuanInvestasiFinlog;
 use App\Models\PengembalianInvestasiFinlog;
@@ -44,10 +45,16 @@ class PengembalianInvestasiController extends Controller
                 'created_by' => auth()->id(),
             ]);
 
+            // Load relasi untuk notifikasi
+            $pengembalian->load('pengajuan.investor');
+
             // Untuk sementara: belum ada kolom sisa_pokok / sisa_bagi_hasil di tabel finlog,
             // jadi di sini belum ada update ke pengajuan_investasi_finlog.
 
             DB::commit();
+
+            // Kirim notifikasi saat SKI Finance melakukan transfer pengembalian investasi ke investor
+            ListNotifSFinlog::transferPengembalianInvestasiKeInvestor($pengembalian);
 
             return Response::success($pengembalian, 'Data pengembalian investasi SFinlog berhasil ditambahkan');
         } catch (\Exception $e) {
