@@ -21,20 +21,21 @@
                                     $persen = $summaryData['total_disbursement_percentage'] ?? 0;
                                     $isIncrease = $summaryData['total_disbursement_is_increase'] ?? false;
                                     $isNew = $summaryData['total_disbursement_is_new'] ?? false;
+                                    // Sesuai TC-DASH-001: Turun = Merah (Indikasi negatif)
+                                    $color = $isIncrease ? 'text-success' : 'text-danger';
+                                    $icon = $isIncrease ? 'ti-arrow-up-right' : 'ti-arrow-down-right';
                                 @endphp
                                 <span class="me-1">
                                     @if($isNew)
                                         <i class="ti ti-sparkles text-info"></i>
-                                    @elseif($isIncrease)
-                                        <i class="ti ti-arrow-up-right text-success"></i>
                                     @else
-                                        <i class="ti ti-arrow-down-right text-danger"></i>
+                                        <i class="ti {{ $icon }} {{ $color }}"></i>
                                     @endif
                                 </span>
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryData['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-success' : 'text-danger' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryData['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $color }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryData['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -59,20 +60,20 @@
                                     $persen = $summaryDataPembayaran['total_pembayaran_masuk_percentage'] ?? 0;
                                     $isIncrease = $summaryDataPembayaran['total_pembayaran_masuk_is_increase'] ?? false;
                                     $isNew = $summaryDataPembayaran['total_pembayaran_masuk_is_new'] ?? false;
+                                    $color = $isIncrease ? 'text-success' : 'text-danger';
+                                    $icon = $isIncrease ? 'ti-arrow-up-right' : 'ti-arrow-down-right';
                                 @endphp
                                 <span class="me-1">
                                     @if($isNew)
                                         <i class="ti ti-sparkles text-info"></i>
-                                    @elseif($isIncrease)
-                                        <i class="ti ti-arrow-up-right text-success"></i>
                                     @else
-                                        <i class="ti ti-arrow-down-right text-danger"></i>
+                                        <i class="ti {{ $icon }} {{ $color }}"></i>
                                     @endif
                                 </span>
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryDataPembayaran['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-success' : 'text-danger' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataPembayaran['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $color }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataPembayaran['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -97,20 +98,21 @@
                                     $persen = $summaryDataSisa['total_sisa_belum_terbayar_percentage'] ?? 0;
                                     $isIncrease = $summaryDataSisa['total_sisa_belum_terbayar_is_increase'] ?? false;
                                     $isNew = $summaryDataSisa['total_sisa_belum_terbayar_is_new'] ?? false;
+                                    // Sisa Naik = Merah (Buruk), Sisa Turun = Hijau (Bagus)
+                                    $color = $isIncrease ? 'text-danger' : 'text-success';
+                                    $icon = $isIncrease ? 'ti-arrow-up-right' : 'ti-arrow-down-right';
                                 @endphp
                                 <span class="me-1">
                                     @if($isNew)
                                         <i class="ti ti-sparkles text-info"></i>
-                                    @elseif($isIncrease)
-                                        <i class="ti ti-arrow-up-right text-danger"></i>
                                     @else
-                                        <i class="ti ti-arrow-down-right text-success"></i>
+                                        <i class="ti {{ $icon }} {{ $color }}"></i>
                                     @endif
                                 </span>
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryDataSisa['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataSisa['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $color }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataSisa['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -135,25 +137,26 @@
                                     $persen = $summaryDataOutstanding['total_outstanding_piutang_percentage'] ?? 0;
                                     $isIncrease = $summaryDataOutstanding['total_outstanding_piutang_is_increase'] ?? false;
                                     $isNew = $summaryDataOutstanding['total_outstanding_piutang_is_new'] ?? false;
+                                    // Sesuai TC-DASH-004: Outstanding Naik = Merah (Bahaya)
+                                    $color = $isIncrease ? 'text-danger' : 'text-success';
+                                    $icon = $isIncrease ? 'ti-arrow-up-right' : 'ti-arrow-down-right';
                                 @endphp
                                 <span class="me-1">
                                     @if($isNew)
                                         <i class="ti ti-sparkles text-info"></i>
-                                    @elseif($isIncrease)
-                                        <i class="ti ti-arrow-up-right text-danger"></i>
                                     @else
-                                        <i class="ti ti-arrow-down-right text-success"></i>
+                                        <i class="ti {{ $icon }} {{ $color }}"></i>
                                     @endif
                                 </span>
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryDataOutstanding['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataOutstanding['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $color }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataOutstanding['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
                         <div class="rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0; background: #28c76f;">
-                            <i class="ti ti-currency-dollar text-white fs-5"></i>
+                            <i class="ti ti-report-money text-white fs-5"></i>
                         </div>
                     </div>
                 </div>
@@ -171,11 +174,7 @@
                         <select id="filterBulanDisbursement" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @php
-                                $bulanNama = [
-                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                                ];
+                                $bulanNama = [1=>'Januari', 2=>'Februari', 3=>'Maret', 4=>'April', 5=>'Mei', 6=>'Juni', 7=>'Juli', 8=>'Agustus', 9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember'];
                             @endphp
                             @foreach(range(1,12) as $b)
                                 <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ $bulanDisbursement == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
@@ -279,11 +278,11 @@
         </div>
     </div>
 
-    {{-- Row 4: Table and Comparison --}}
+    {{-- Row 4: Table and Comparison (Side-by-Side like Sfinlog) --}}
     <div class="row g-4 mb-4">
         {{-- AR Table --}}
         <div class="col-12 col-xl-6">
-            <div class="card">
+            <div class="card h-100">
                 <div class="card-header">
                     <h5 class="card-title mb-3">Total AR yang Terbagi Berdasarkan Kriteria Keterlambatan</h5>
                 </div>
@@ -349,7 +348,7 @@
         
         {{-- Comparison Chart --}}
         <div class="col-12 col-xl-6">
-            <div class="card">
+            <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Perbandingan AR dan Utang Pengembalian Deposito Perbulan</h5>
                     <div class="d-flex gap-2">
@@ -376,13 +375,13 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {{-- Passing formatted data via data attribute --}}
+                    {{-- Chart container with data attribute --}}
                     <div id="chartComparison" 
                          wire:key="chart-comparison-{{ $bulan1 }}-{{ $bulan2 }}-{{ $tahun }}"
                          data-comparison-data="{{ json_encode($chartData['comparison'] ?? []) }}"
                          style="min-height: 300px;"></div>
                     
-                    {{-- Selisih / Perubahan --}}
+                    {{-- Selisih / Perubahan Boxes (Sesuai Sfinlog) --}}
                     <div class="row g-3 mt-4">
                         <div class="col-12 col-md-6">
                             <div class="p-3 rounded-3" style="background-color: #f0f7ff;">
@@ -483,7 +482,6 @@
         
         let chartDisbursement, chartPembayaran, chartSisaBelumTerbayar, chartPembayaranPiutang, chartComparison;
 
-        // Initialize Select2
         function initSelect2() {
             const selectIds = [
                 'filterBulanDisbursement', 'filterBulanPembayaran', 'filterBulanSisa', 
@@ -579,9 +577,9 @@
             });
 
             // 1. Disbursement
-            const elDisb = document.querySelector("#chartDisbursement");
-            if (elDisb) {
-                chartDisbursement = new ApexCharts(elDisb, getBarOptions(
+            const disbursementEl = document.querySelector("#chartDisbursement");
+            if (disbursementEl) {
+                chartDisbursement = new ApexCharts(disbursementEl, getBarOptions(
                     [
                         { name: 'Pokok', data: @json($chartData['disbursement']['pokok'] ?? []) },
                         { name: 'Bagi Hasil', data: @json($chartData['disbursement']['bagi_hasil'] ?? []) }
@@ -592,9 +590,9 @@
             }
 
             // 2. Pembayaran
-            const elPemb = document.querySelector("#chartPembayaran");
-            if (elPemb) {
-                chartPembayaran = new ApexCharts(elPemb, getBarOptions(
+            const pembayaranEl = document.querySelector("#chartPembayaran");
+            if (pembayaranEl) {
+                chartPembayaran = new ApexCharts(pembayaranEl, getBarOptions(
                     [
                         { name: 'Pokok', data: @json($chartData['pembayaran']['pokok'] ?? []) },
                         { name: 'Bagi Hasil', data: @json($chartData['pembayaran']['bagi_hasil'] ?? []) }
@@ -605,10 +603,10 @@
             }
 
             // 3. Sisa
-            const elSisa = document.querySelector("#chartSisaBelumTerbayar");
-            if (elSisa) {
+            const sisaEl = document.querySelector("#chartSisaBelumTerbayar");
+            if (sisaEl) {
                 const sisaData = @json($chartData['sisa_belum_terbayar'] ?? []);
-                chartSisaBelumTerbayar = new ApexCharts(elSisa, getBarOptions(
+                chartSisaBelumTerbayar = new ApexCharts(sisaEl, getBarOptions(
                     [
                         { name: 'Pokok', data: sisaData.pokok || [] },
                         { name: 'Bagi Hasil', data: sisaData.bagi_hasil || [] }
@@ -619,9 +617,9 @@
             }
 
             // 4. Piutang
-            const elPiutang = document.querySelector("#chartPembayaranPiutang");
-            if (elPiutang) {
-                chartPembayaranPiutang = new ApexCharts(elPiutang, getBarOptions(
+            const piutangEl = document.querySelector("#chartPembayaranPiutang");
+            if (piutangEl) {
+                chartPembayaranPiutang = new ApexCharts(piutangEl, getBarOptions(
                     [
                         { name: 'Pokok', data: @json($chartData['pembayaran_piutang_tahun']['pokok'] ?? []) },
                         { name: 'Bagi Hasil', data: @json($chartData['pembayaran_piutang_tahun']['bagi_hasil'] ?? []) }
@@ -651,7 +649,7 @@
 
         // Init
         function initializeDashboard() {
-            if (typeof ApexCharts === 'undefined' || typeof $ === 'undefined') {
+            if (typeof ApexCharts === 'undefined') {
                 setTimeout(initializeDashboard, 200); return;
             }
             try { initSelect2(); initCharts(); } catch(e) { console.error(e); }
