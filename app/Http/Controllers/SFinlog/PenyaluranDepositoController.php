@@ -14,6 +14,19 @@ use App\Http\Requests\SFinlog\PenyaluranDepositoSfinlogRequest;
 
 class PenyaluranDepositoController extends Controller
 {
+    /**
+     * Constructor - Middleware untuk permission
+     */
+    public function __construct()
+    {
+        // Finance SKI can do CRUD
+        $this->middleware('permission:penyaluran_deposito_finlog.add')->only(['store']);
+        $this->middleware('permission:penyaluran_deposito_finlog.edit')->only(['edit', 'update']);
+        $this->middleware('permission:penyaluran_deposito_finlog.delete')->only(['destroy']);
+
+        // Both Finance SKI and Debitur can upload bukti
+        $this->middleware('permission:penyaluran_deposito_finlog.upload_bukti')->only(['uploadBukti']);
+    }
 
     /**
      * Store a newly created penyaluran deposito for SFinlog
@@ -101,7 +114,7 @@ class PenyaluranDepositoController extends Controller
             if ($penyaluran->bukti_pengembalian && Storage::disk('public')->exists($penyaluran->bukti_pengembalian)) {
                 Storage::disk('public')->delete($penyaluran->bukti_pengembalian);
             }
-            
+
             $penyaluran->delete();
 
             DB::commit();
@@ -122,20 +135,20 @@ class PenyaluranDepositoController extends Controller
             DB::beginTransaction();
 
             $penyaluran = PenyaluranDepositoSfinlog::where('id_penyaluran_deposito_sfinlog', $id)->firstOrFail();
-            
+
             if ($request->hasFile('bukti_pengembalian')) {
                 // Delete old file if exists
                 if ($penyaluran->bukti_pengembalian && Storage::disk('public')->exists($penyaluran->bukti_pengembalian)) {
                     Storage::disk('public')->delete($penyaluran->bukti_pengembalian);
                 }
-                
+
                 // Store new file
                 $file = Storage::disk('public')->put('bukti_pengembalian', $request->file('bukti_pengembalian'));
                 $penyaluran->update(['bukti_pengembalian' => $file]);
-                
+
                 // Reload penyaluran dengan relasi
                 $penyaluran->load('pengajuanInvestasiFinlog.project', 'cellsProject', 'project');
-                
+
                 // Kirim notifikasi saat debitur mengembalikan dana investasi
                 ListNotifSFinlog::pengembalianInvestasi($penyaluran);
             }

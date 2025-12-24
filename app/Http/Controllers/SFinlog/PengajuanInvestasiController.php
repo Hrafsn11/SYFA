@@ -11,6 +11,7 @@ use App\Http\Requests\SFinlog\PengajuanInvestasiFinlogRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -260,7 +261,17 @@ class PengajuanInvestasiController extends Controller
             // Reload pengajuan dengan relasi investor untuk notifikasi
             $pengajuan->refresh();
             $pengajuan->load('investor');
-            ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
+
+            // Try to send notification - don't fail the whole request if notification fails
+            try {
+                ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
+            } catch (\Exception $notifException) {
+                // Log notification error but don't stop the process
+                Log::error('Failed to send notification for pengajuan investasi', [
+                    'pengajuan_id' => $pengajuan->id_pengajuan_investasi_finlog,
+                    'error' => $notifException->getMessage()
+                ]);
+            }
 
             return Response::success([
                 'status' => $status,
@@ -268,6 +279,15 @@ class PengajuanInvestasiController extends Controller
             ], 'Status berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Log detailed error for debugging
+            Log::error('Failed to update pengajuan investasi status', [
+                'pengajuan_id' => $id,
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
             return Response::errorCatch($e, 'Gagal memperbarui status');
         }
     }
@@ -476,11 +496,13 @@ class PengajuanInvestasiController extends Controller
         try {
             // 1. Ambil data pengajuan dengan relasi investor
             $pengajuan = PengajuanInvestasiFinlog::with('investor')->findOrFail($id);
-            
+
             // 2. Validasi: Hanya status "Selesai" yang bisa cetak sertifikat
             if ($pengajuan->status !== 'Selesai') {
-                return redirect()->back()->with('error', 
-                    'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai');
+                return redirect()->back()->with(
+                    'error',
+                    'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai'
+                );
             }
 
             // 3. Generate Nomor Sertifikat
@@ -491,7 +513,7 @@ class PengajuanInvestasiController extends Controller
                 ->where('status', 'Selesai')
                 ->where('id_pengajuan_investasi_finlog', '<=', $pengajuan->id_pengajuan_investasi_finlog)
                 ->count();
-            
+
             $nomorSertifikat = 'DCI' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
             // 4. Tentukan deskripsi
@@ -511,25 +533,25 @@ class PengajuanInvestasiController extends Controller
             $data = [
                 // Nama deposan/investor
                 'nama_deposan' => $pengajuan->nama_investor,
-                
+
                 // Nomor sertifikat yang sudah digenerate
                 'nomor_deposito' => $nomorSertifikat,
-                
+
                 // Deskripsi jenis investasi
                 'deskripsi' => $deskripsi,
-                
+
                 // Nilai deposito/investasi (formatted Rupiah tanpa desimal)
                 'nilai_deposito' => 'Rp ' . number_format($pengajuan->nominal_investasi, 0, ',', '.'),
-                
+
                 // Kode transaksi (nomor kontrak)
                 'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
-                
+
                 // Jangka waktu (range tanggal)
                 'jangka_waktu' => $jangkaWaktu,
-                
+
                 // Bagi hasil (persentase per tahun)
                 'bagi_hasil' => $pengajuan->persentase_bagi_hasil . ' % P.A NET',
-                
+
                 // Nilai investasi dalam text (formatted Rupiah dengan 2 desimal)
                 // Digunakan di halaman 2 sertifikat
                 'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->nominal_investasi, 2, ',', '.'),
@@ -537,11 +559,12 @@ class PengajuanInvestasiController extends Controller
 
             // 8. Return view sertifikat (menggunakan view yang sama dengan S-Finance)
             return view('livewire.pengajuan-investasi.sertifikat', compact('data'));
-            
         } catch (\Exception $e) {
             // Handle error dan redirect kembali dengan pesan error
-            return redirect()->back()->with('error', 
-                'Gagal menggenerate sertifikat: ' . $e->getMessage());
+            return redirect()->back()->with(
+                'error',
+                'Gagal menggenerate sertifikat: ' . $e->getMessage()
+            );
         }
     }
 }
