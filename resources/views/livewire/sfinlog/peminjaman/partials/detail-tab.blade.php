@@ -3,54 +3,66 @@
         <h5 class="mb-3 mb-md-4">Detail Peminjaman</h5>
         <div class="d-flex gap-2">
             {{-- Step 1: Draft - Button Submit Pengajuan --}}
-            @if ($currentStep == 1 && $status == 'Draft')
-                <button type="button" class="btn btn-success" id="btnSubmitPengajuan">
-                    <i class="ti ti-send me-2"></i>
-                    Submit Pengajuan
-                </button>
-            @endif
+            @can('peminjaman_finlog.submit')
+                @if ($currentStep == 1)
+                    <button type="button" class="btn btn-success" id="btnSubmitPengajuan">
+                        <i class="ti ti-send me-2"></i>
+                        Submit Pengajuan
+                    </button>
+                @endif
+            @endcan
 
             {{-- Step 2: Validasi Investment Officer --}}
-            @if ($currentStep == 2 && $status == 'Menunggu Persetujuan')
-                <button type="button" class="btn btn-primary" id="btnValidasiIO">
-                    <i class="ti ti-check me-2"></i>
-                    Validasi Investment Officer
-                </button>
-            @endif
+            @can('peminjaman_finlog.validasi_io')
+                @if ($currentStep == 2)
+                    <button type="button" class="btn btn-primary" id="btnValidasiIO">
+                        <i class="ti ti-check me-2"></i>
+                        Validasi Investment Officer
+                    </button>
+                @endif
+            @endcan
 
             {{-- Step 3: Persetujuan Debitur --}}
-            @if ($currentStep == 3 && $status == 'Menunggu Persetujuan')
-                <button type="button" class="btn btn-primary" id="btnPersetujuanDebitur">
-                    <i class="ti ti-check me-2"></i>
-                    Konfirmasi Debitur
-                </button>
-            @endif
+            @can('peminjaman_finlog.persetujuan_debitur')
+                @if ($currentStep == 3)
+                    <button type="button" class="btn btn-primary" id="btnPersetujuanDebitur">
+                        <i class="ti ti-check me-2"></i>
+                        Konfirmasi Debitur
+                    </button>
+                @endif
+            @endcan
 
             {{-- Step 4: Persetujuan SKI Finance --}}
-            @if ($currentStep == 4 && $status == 'Menunggu Persetujuan')
-                <button type="button" class="btn btn-primary" id="btnPersetujuanSKIFinance">
-                    <i class="ti ti-check me-2"></i>
-                    Persetujuan SKI Finance
-                </button>
-            @endif
+            @can('peminjaman_finlog.persetujuan_finance_ski')
+                @if ($currentStep == 4)
+                    <button type="button" class="btn btn-primary" id="btnPersetujuanSKIFinance">
+                        <i class="ti ti-check me-2"></i>
+                        Persetujuan SKI Finance
+                    </button>
+                @endif
+            @endcan
 
             {{-- Step 5: Persetujuan CEO SKI Finlog --}}
-            @if ($currentStep == 5 && $status == 'Menunggu Persetujuan')
-                <button type="button" class="btn btn-primary" id="btnPersetujuanCEOFinlog">
-                    <i class="ti ti-check me-2"></i>
-                    Persetujuan CEO Finlog
-                </button>
-            @endif
+            @can('peminjaman_finlog.persetujuan_ceo_finlog')
+                @if ($currentStep == 5)
+                    <button type="button" class="btn btn-primary" id="btnPersetujuanCEOFinlog">
+                        <i class="ti ti-check me-2"></i>
+                        Persetujuan CEO Finlog
+                    </button>
+                @endif
+            @endcan
 
             {{-- Step 6: Generate Kontrak - Button ada di Tab Kontrak --}}
 
             {{-- Step 7: Upload Bukti Transfer --}}
-            @if ($currentStep == 7 && $status == 'Dicairkan')
-                <button type="button" class="btn btn-success" id="btnUploadBuktiTransfer">
-                    <i class="ti ti-upload me-2"></i>
-                    Upload Bukti Transfer
-                </button>
-            @endif
+            @can('peminjaman_finlog.upload_bukti')
+                @if ($currentStep == 7)
+                    <button type="button" class="btn btn-success" id="btnUploadBuktiTransfer">
+                        <i class="ti ti-upload me-2"></i>
+                        Upload Bukti Transfer
+                    </button>
+                @endif
+            @endcan
 
             {{-- Status Ditolak --}}
             @if ($status == 'Ditolak')
@@ -99,7 +111,7 @@
                 <p class="fw-bold mb-0">{{ $peminjaman->cellsProject->nama_cells_bisnis ?? '-' }}</p>
             </div>
         </div>
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Durasi Project (Bulan)</small>
                 <p class="fw-bold mb-0">{{ $peminjaman->durasi_project ?? 0 }} Bulan</p>

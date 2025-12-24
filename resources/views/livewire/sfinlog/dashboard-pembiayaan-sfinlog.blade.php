@@ -8,6 +8,7 @@
 
     {{-- Summary Cards Row 1 --}}
     <div class="row g-4 mb-4">
+        {{-- Card Disbursement --}}
         <div class="col-12 col-md-6 col-xl-3">
             <div class="card h-100">
                 <div class="card-body">
@@ -33,7 +34,7 @@
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryData['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ $persen }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryData['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryData['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -45,6 +46,7 @@
             </div>
         </div>
 
+        {{-- Card Pembayaran --}}
         <div class="col-12 col-md-6 col-xl-3">
             <div class="card">
                 <div class="card-body">
@@ -70,7 +72,7 @@
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryDataPembayaran['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ $persen }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataPembayaran['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataPembayaran['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -82,6 +84,7 @@
             </div>
         </div>
 
+        {{-- Card Sisa --}}
         <div class="col-12 col-md-6 col-xl-3">
             <div class="card">
                 <div class="card-body">
@@ -107,7 +110,7 @@
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryDataSisa['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ $persen }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataSisa['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataSisa['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -119,6 +122,7 @@
             </div>
         </div>
 
+        {{-- Card Outstanding --}}
         <div class="col-12 col-md-6 col-xl-3">
             <div class="card">
                 <div class="card-body">
@@ -144,7 +148,7 @@
                                 @if($isNew)
                                     <small class="fw-semibold text-info">Baru 100% dari {{ $summaryDataOutstanding['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @else
-                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ $persen }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataOutstanding['previous_month_name'] ?? 'bulan lalu' }}</small>
+                                    <small class="fw-semibold {{ $isIncrease ? 'text-danger' : 'text-success' }}">{{ number_format($persen, 1) }}% {{ $isIncrease ? 'naik' : 'turun' }} dari {{ $summaryDataOutstanding['previous_month_name'] ?? 'bulan lalu' }}</small>
                                 @endif
                             </div>
                         </div>
@@ -163,20 +167,26 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Total Disburse Pokok dan Bagi Hasil Perbulan</h5>
-                    <select wire:model.live="bulanDisbursement" class="form-select form-select-sm select2" style="max-width: 150px;">
-                        @foreach(range(1,12) as $b)
-                            <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}">{{ DateTime::createFromFormat('!m', $b)->format('F') }}</option>
-                        @endforeach
-                    </select>
+                    <div wire:ignore style="width: 150px; flex-shrink: 0;">
+                        <select id="filterBulanDisbursement" class="form-select select2" data-placeholder="Pilih Bulan">
+                            <option value=""></option>
+                            @foreach(range(1,12) as $b)
+                                <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ $bulanDisbursement == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                    {{ DateTime::createFromFormat('!m', $b)->format('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div id="chartDisbursement">
-                        @unless($hasDataDisbursement)
-                            <div class="text-center text-muted py-5">
-                                <p>Tidak ada data untuk periode yang dipilih</p>
-                            </div>
-                        @endunless
-                    </div>
+                    {{-- Gunakan wire:key untuk memaksa refresh saat filter berubah --}}
+                    @if($hasDataDisbursement)
+                        <div id="chartDisbursement" wire:key="chart-disbursement-{{ $bulanDisbursement }}-{{ $tahun }}" style="min-height: 300px;"></div>
+                    @else
+                        <div class="text-center text-muted py-5">
+                            <p>Tidak ada data untuk periode yang dipilih</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -185,20 +195,25 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Total Pembayaran Pokok dan Bagi Hasil Perbulan</h5>
-                    <select wire:model.live="bulanPembayaran" class="form-select form-select-sm select2" style="max-width: 150px;">
-                        @foreach(range(1,12) as $b)
-                            <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}">{{ DateTime::createFromFormat('!m', $b)->format('F') }}</option>
-                        @endforeach
-                    </select>
+                    <div wire:ignore style="width: 150px; flex-shrink: 0;">
+                        <select id="filterBulanPembayaran" class="form-select select2" data-placeholder="Pilih Bulan">
+                            <option value=""></option>
+                            @foreach(range(1,12) as $b)
+                                <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ $bulanPembayaran == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                    {{ DateTime::createFromFormat('!m', $b)->format('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div id="chartPembayaran">
-                        @unless($hasDataPembayaran)
-                            <div class="text-center text-muted py-5">
-                                <p>Tidak ada data untuk periode yang dipilih</p>
-                            </div>
-                        @endunless
-                    </div>
+                    @if($hasDataPembayaran)
+                        <div id="chartPembayaran" wire:key="chart-pembayaran-{{ $bulanPembayaran }}-{{ $tahun }}" style="min-height: 300px;"></div>
+                    @else
+                        <div class="text-center text-muted py-5">
+                            <p>Tidak ada data untuk periode yang dipilih</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -210,20 +225,25 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Total Sisa yang Belum Terbayar Perbulan</h5>
-                    <select wire:model.live="bulanSisa" class="form-select form-select-sm select2" style="max-width: 150px;">
-                        @foreach(range(1,12) as $b)
-                            <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}">{{ DateTime::createFromFormat('!m', $b)->format('F') }}</option>
-                        @endforeach
-                    </select>
+                    <div wire:ignore style="width: 150px; flex-shrink: 0;">
+                        <select id="filterBulanSisa" class="form-select select2" data-placeholder="Pilih Bulan">
+                            <option value=""></option>
+                            @foreach(range(1,12) as $b)
+                                <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ $bulanSisa == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                    {{ DateTime::createFromFormat('!m', $b)->format('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div id="chartSisaBelumTerbayar">
-                        @unless($hasDataSisa)
-                            <div class="text-center text-muted py-5">
-                                <p>Tidak ada data untuk periode yang dipilih</p>
-                            </div>
-                        @endunless
-                    </div>
+                    @if($hasDataSisa)
+                        <div id="chartSisaBelumTerbayar" wire:key="chart-sisa-{{ $bulanSisa }}-{{ $tahun }}" style="min-height: 300px;"></div>
+                    @else
+                        <div class="text-center text-muted py-5">
+                            <p>Tidak ada data untuk periode yang dipilih</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -232,20 +252,22 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Total Pembayaran Piutang Per Tahun</h5>
-                    <select wire:model.live="tahunPiutang" class="form-select form-select-sm select2" style="max-width: 120px;">
-                        @foreach(range(date('Y')-5, date('Y')+1) as $t)
-                            <option value="{{ $t }}">{{ $t }}</option>
-                        @endforeach
-                    </select>
+                    <div wire:ignore style="width: 150px; flex-shrink: 0;">
+                        <select id="filterTahunPiutang" class="form-select select2" data-placeholder="Pilih Tahun">
+                            @foreach(range(date('Y')-5, date('Y')+1) as $t)
+                                <option value="{{ $t }}" {{ $tahunPiutang == $t ? 'selected' : '' }}>{{ $t }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div id="chartPembayaranPiutang">
-                        @unless($hasDataPiutang)
-                            <div class="text-center text-muted py-5">
-                                <p>Tidak ada data untuk periode yang dipilih</p>
-                            </div>
-                        @endunless
-                    </div>
+                    @if($hasDataPiutang)
+                        <div id="chartPembayaranPiutang" wire:key="chart-piutang-{{ $tahunPiutang }}" style="min-height: 300px;"></div>
+                    @else
+                        <div class="text-center text-muted py-5">
+                            <p>Tidak ada data untuk periode yang dipilih</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -253,30 +275,37 @@
 
     {{-- AR Table Row --}}
     <div class="row g-4 mb-4">
-        <div class="col-12">
+        <div class="col-12 col-xl-6">
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-3">Total AR yang Terbagi Berdasarkan Kriteria Keterlambatan</h5>
-                    <div class="row g-3">
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label small">Bulan</label>
-                            <select wire:model.live="bulanTable" class="form-select form-select-sm">
-                                @foreach(range(1,12) as $b)
-                                    <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}">{{ DateTime::createFromFormat('!m', $b)->format('F') }}</option>
-                                @endforeach
-                            </select>
+                            <div wire:ignore>
+                                <select id="filterBulanTable" class="form-select select2" data-placeholder="Pilih Bulan">
+                                    <option value=""></option>
+                                    @foreach(range(1,12) as $b)
+                                        <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ $bulanTable == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
+                                            {{ DateTime::createFromFormat('!m', $b)->format('F') }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small">Tahun</label>
-                            <select wire:model.live="tahunTable" class="form-select form-select-sm">
-                                @foreach(range(date('Y')-5, date('Y')+1) as $t)
-                                    <option value="{{ $t }}">{{ $t }}</option>
-                                @endforeach
-                            </select>
+                            <div wire:ignore>
+                                <select id="filterTahunTable" class="form-select select2" data-placeholder="Pilih Tahun">
+                                    @foreach(range(date('Y')-5, date('Y')+1) as $t)
+                                        <option value="{{ $t }}" {{ $tahunTable == $t ? 'selected' : '' }}>{{ $t }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-sm">
                             <thead>
@@ -312,17 +341,15 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    {{-- Comparison Chart Row --}}
-    <div class="row g-4 mb-4">
-        <div class="col-12">
+        
+        {{-- Comparison Chart Row --}}
+        <div class="col-12 col-xl-6">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Perbandingan AR dan Utang Pengembalian Deposito Perbulan</h5>
                     <div class="d-flex gap-2">
                         <div wire:ignore style="width: 120px; flex-shrink: 0;">
-                            <select id="filterBulanComparison1" class="form-select form-select-sm select2" data-placeholder="Bulan 1">
+                            <select id="filterBulanComparison1" class="form-select select2" data-placeholder="Bulan 1">
                                 <option value=""></option>
                                 @foreach(range(1,12) as $b)
                                     <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ ($bulan1 ?? '') == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>{{ DateTime::createFromFormat('!m', $b)->format('F') }}</option>
@@ -330,7 +357,7 @@
                             </select>
                         </div>
                         <div wire:ignore style="width: 120px; flex-shrink: 0;">
-                            <select id="filterBulanComparison2" class="form-select form-select-sm select2" data-placeholder="Bulan 2">
+                            <select id="filterBulanComparison2" class="form-select select2" data-placeholder="Bulan 2">
                                 <option value=""></option>
                                 @foreach(range(1,12) as $b)
                                     <option value="{{ str_pad($b, 2, '0', STR_PAD_LEFT) }}" {{ ($bulan2 ?? '') == str_pad($b, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>{{ DateTime::createFromFormat('!m', $b)->format('F') }}</option>
@@ -340,7 +367,11 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="chartComparison"></div>
+                    {{-- Passing formatted data via data attribute --}}
+                    <div id="chartComparison" 
+                         wire:key="chart-comparison-{{ $bulan1 }}-{{ $bulan2 }}-{{ $tahun }}"
+                         data-comparison-data="{{ json_encode($chartData['comparison'] ?? []) }}"
+                         style="min-height: 300px;"></div>
                     
                     {{-- Selisih / Perubahan --}}
                     <div class="row g-3 mt-4">
@@ -393,119 +424,45 @@
 
 @push('vendor-scripts')
 <script src="{{ asset('assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @endpush
 
 @push('styles')
 <style>
-    /* Form Select Base Styling */
-    .form-select.form-select-sm {
-        font-size: 0.95rem;
-        padding: 0.25rem 1.75rem 0.25rem 0.75rem;
-        border: 1px solid #d9dee3;
-        border-radius: 0.375rem;
-        background-color: #fff;
-        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-    }
-    
-    .form-select.form-select-sm:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
-    }
-    
-    /* Select2 Container Styling */
-    .select2-container--default .select2-selection--single {
-        border: 1px solid #d9dee3 !important;
-        border-radius: 0.375rem !important;
-        height: 31px !important;
-        padding: 0 !important;
-        font-size: 0.95rem !important;
-    }
-    
-    .select2-container--default.select2-container--focus .select2-selection--single {
-        border-color: #86b7fe !important;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
-    }
-    
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 31px !important;
-        padding-left: 0.75rem !important;
-        color: #212529;
-    }
-    
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 31px !important;
-        right: 0.75rem !important;
-    }
-    
-    .select2-container--default .select2-selection--single .select2-selection__arrow b {
-        margin-top: 5px !important;
-    }
-    
-    /* Select2 Dropdown Styling */
-    .select2-dropdown {
-        border: 1px solid #d9dee3 !important;
-        border-radius: 0.375rem !important;
-        margin-top: 0.25rem;
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-    }
-    
-    .select2-results__option {
-        padding: 8px 0.75rem !important;
-        font-size: 0.95rem;
-    }
-    
-    .select2-results__option--highlighted {
-        background-color: #28c76f !important;
-        color: #fff !important;
-    }
-    
-    .select2-results__option--selected {
-        background-color: #e8f5e9 !important;
-        color: #212529 !important;
-    }
-    
-    .select2-container--default .select2-results__option[aria-selected=true] {
-        background-color: #e8f5e9 !important;
-        color: #212529 !important;
-    }
-    
-    /* Container Width Control */
+    /* Fix Select2 dropdown width - Copy from Sfinance */
     .select2-container {
-        min-width: 100px !important;
-        max-width: 100% !important;
-    }
-    
-    .select2-container.form-select-sm {
         width: 100% !important;
     }
     
-    /* Dropdown Menu Positioning */
-    .select2-dropdown.select2-dropdown--below {
-        border-top: none;
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
+    #filterBulanDisbursement + .select2-container,
+    #filterBulanPembayaran + .select2-container,
+    #filterBulanSisa + .select2-container {
+        width: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
     }
     
-    .select2-dropdown.select2-dropdown--above {
-        border-bottom: none;
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
+    #filterBulanComparison1 + .select2-container,
+    #filterBulanComparison2 + .select2-container {
+        width: 120px !important;
+        min-width: 120px !important;
+        max-width: 120px !important;
     }
     
-    /* Search Field in Dropdown */
-    .select2-search--dropdown .select2-search__field {
-        border: 1px solid #d9dee3 !important;
-        border-radius: 0.375rem !important;
-        padding: 0.5rem 0.75rem !important;
-        font-size: 0.95rem !important;
+    /* Override purple theme color for Select2 */
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #0d6efd !important;
+        color: #fff !important;
     }
     
-    .select2-search--dropdown .select2-search__field:focus {
+    .select2-container--default.select2-container--focus .select2-selection,
+    .select2-container--default.select2-container--open .select2-selection {
         border-color: #86b7fe !important;
-        outline: 0 !important;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important;
+    }
+    
+    .select2-container--default.select2-container--focus .select2-selection:focus,
+    .select2-container--default.select2-container--open .select2-selection:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     }
 </style>
 @endpush
@@ -517,14 +474,136 @@
         
         let chartDisbursement, chartPembayaran, chartSisaBelumTerbayar, chartPembayaranPiutang, chartComparison;
 
-        function initCharts() {
-            // Check if ApexCharts is available
-            if (typeof ApexCharts === 'undefined') {
-                console.error('ApexCharts is not loaded');
-                return;
+        // Initialize Select2 (Sama persis dengan Sfinance)
+        function initSelect2() {
+            // Destroy existing instances first
+            const selectIds = [
+                'filterBulanDisbursement', 'filterBulanPembayaran', 'filterBulanSisa', 
+                'filterTahunPiutang', 'filterBulanTable', 'filterTahunTable',
+                'filterBulanComparison1', 'filterBulanComparison2'
+            ];
+            
+            selectIds.forEach(function(id) {
+                const $select = $('#' + id);
+                if ($select.length && $select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+            });
+
+            // Initialize Select2 with consistent styling
+            function initSelect(id, width, placeholder) {
+                const $select = $('#' + id);
+                if (!$select.length) return;
+                
+                $select.select2({
+                    placeholder: placeholder || 'Pilih...',
+                    minimumResultsForSearch: Infinity,
+                    width: 'resolve',
+                    allowClear: true,
+                    dropdownAutoWidth: false
+                });
+                
+                // Force set width after initialization
+                setTimeout(function() {
+                    $select.next('.select2-container').css({
+                        'width': width + 'px',
+                        'min-width': width + 'px',
+                        'max-width': width + 'px'
+                    });
+                }, 10);
             }
 
-            // Destroy existing charts first with robust error handling
+            // Initialize all selects
+            initSelect('filterBulanDisbursement', 150, 'Pilih Bulan');
+            initSelect('filterBulanPembayaran', 150, 'Pilih Bulan');
+            initSelect('filterBulanSisa', 150, 'Pilih Bulan');
+            initSelect('filterTahunPiutang', 150, 'Pilih Tahun');
+            initSelect('filterBulanTable', null, 'Pilih Bulan');
+            initSelect('filterTahunTable', null, 'Pilih Tahun');
+            initSelect('filterBulanComparison1', 120, 'Bulan 1');
+            initSelect('filterBulanComparison2', 120, 'Bulan 2');
+
+            // Handle change events with ISOLATED property mapping per filter
+            
+            $(document).off('change', '#filterBulanDisbursement');
+            $(document).on('change', '#filterBulanDisbursement', function() {
+                const bulan = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    Livewire.find(componentId).set('bulanDisbursement', bulan || null);
+                }
+            });
+
+            $(document).off('change', '#filterBulanPembayaran');
+            $(document).on('change', '#filterBulanPembayaran', function() {
+                const bulan = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    Livewire.find(componentId).set('bulanPembayaran', bulan || null);
+                }
+            });
+
+            $(document).off('change', '#filterBulanSisa');
+            $(document).on('change', '#filterBulanSisa', function() {
+                const bulan = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    Livewire.find(componentId).set('bulanSisa', bulan || null);
+                }
+            });
+
+            $(document).off('change', '#filterTahunPiutang');
+            $(document).on('change', '#filterTahunPiutang', function() {
+                const tahun = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    Livewire.find(componentId).set('tahunPiutang', tahun);
+                }
+            });
+
+            $(document).off('change', '#filterBulanTable');
+            $(document).on('change', '#filterBulanTable', function() {
+                const bulan = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    Livewire.find(componentId).set('bulanTable', bulan || null);
+                }
+            });
+
+            $(document).off('change', '#filterTahunTable');
+            $(document).on('change', '#filterTahunTable', function() {
+                const tahun = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    Livewire.find(componentId).set('tahunTable', tahun);
+                }
+            });
+
+            $(document).off('change', '#filterBulanComparison1');
+            $(document).on('change', '#filterBulanComparison1', function() {
+                const bulan = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    if (chartComparison) { chartComparison.destroy(); chartComparison = null; }
+                    Livewire.find(componentId).set('bulan1', bulan || null);
+                }
+            });
+
+            $(document).off('change', '#filterBulanComparison2');
+            $(document).on('change', '#filterBulanComparison2', function() {
+                const bulan = $(this).val();
+                let componentId = $(this).closest('[wire\\:id]').attr('wire:id');
+                if (componentId && typeof Livewire !== 'undefined') {
+                    if (chartComparison) { chartComparison.destroy(); chartComparison = null; }
+                    Livewire.find(componentId).set('bulan2', bulan || null);
+                }
+            });
+        }
+
+        function initCharts() {
+            if (typeof ApexCharts === 'undefined') return;
+
+            // Destroy existing charts
             const charts = [
                 { ref: chartDisbursement, name: 'Disbursement' },
                 { ref: chartPembayaran, name: 'Pembayaran' },
@@ -534,13 +613,7 @@
             ];
             
             charts.forEach(chart => {
-                try {
-                    if (chart.ref && typeof chart.ref.destroy === 'function') {
-                        chart.ref.destroy();
-                    }
-                } catch(e) {
-                    console.warn('Error destroying chart ' + chart.name + ':', e);
-                }
+                try { if (chart.ref) chart.ref.destroy(); } catch(e) {}
             });
             
             chartDisbursement = null;
@@ -549,429 +622,182 @@
             chartPembayaranPiutang = null;
             chartComparison = null;
 
-            // Helper function untuk check apakah data valid
-            const isValidChartData = (data) => {
-                return data && data.categories && data.categories.length > 0;
-            };
-
             // Chart Disbursement
-            const disbursementData = @json($chartData['disbursement'] ?? []);
-            if (isValidChartData(disbursementData)) {
-                const disbursementOptions = {
+            const disbursementEl = document.querySelector("#chartDisbursement");
+            if (disbursementEl) {
+                const options = {
                     series: [
-                        { name: 'Pokok', data: disbursementData.pokok ?? [] },
-                        { name: 'Bagi Hasil', data: disbursementData.bagi_hasil ?? [] }
+                        { name: 'Pokok', data: @json($chartData['disbursement']['pokok'] ?? []) },
+                        { name: 'Bagi Hasil', data: @json($chartData['disbursement']['bagi_hasil'] ?? []) }
                     ],
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: { show: false }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: '55%',
-                            endingShape: 'rounded'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    },
-                    xaxis: {
-                        categories: disbursementData.categories ?? []
-                    },
-                    yaxis: {},
-                    fill: {
-                        opacity: 1
-                    },
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: false, columnWidth: '55%', endingShape: 'rounded' } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] },
+                    xaxis: { categories: @json($chartData['disbursement']['categories'] ?? []) },
+                    yaxis: { labels: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } },
+                    fill: { opacity: 1 },
                     colors: ['#71dd37', '#ffab00'],
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'right'
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return "Rp " + val.toLocaleString('id-ID');
-                            }
-                        }
-                    }
+                    legend: { position: 'top', horizontalAlign: 'right' },
+                    tooltip: { y: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } }
                 };
-
-                const chartDisbursementEl = document.querySelector("#chartDisbursement");
-                if (chartDisbursementEl) {
-                    try {
-                        chartDisbursement = new ApexCharts(chartDisbursementEl, disbursementOptions);
-                        chartDisbursement.render();
-                    } catch(e) {
-                        console.error('Error rendering Disbursement chart:', e);
-                    }
-                }
+                chartDisbursement = new ApexCharts(disbursementEl, options);
+                chartDisbursement.render();
             }
 
             // Chart Pembayaran
-            const pembayaranData = @json($chartData['pembayaran'] ?? []);
-            if (isValidChartData(pembayaranData)) {
-                const pembayaranOptions = {
+            const pembayaranEl = document.querySelector("#chartPembayaran");
+            if (pembayaranEl) {
+                const options = {
                     series: [
-                        { name: 'Pokok', data: pembayaranData.pokok ?? [] },
-                        { name: 'Bagi Hasil', data: pembayaranData.bagi_hasil ?? [] }
+                        { name: 'Pokok', data: @json($chartData['pembayaran']['pokok'] ?? []) },
+                        { name: 'Bagi Hasil', data: @json($chartData['pembayaran']['bagi_hasil'] ?? []) }
                     ],
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: { show: false }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: '55%',
-                            endingShape: 'rounded'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    },
-                    xaxis: {
-                        categories: pembayaranData.categories ?? []
-                    },
-                    yaxis: {},
-                    fill: {
-                        opacity: 1
-                    },
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: false, columnWidth: '55%', endingShape: 'rounded' } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] },
+                    xaxis: { categories: @json($chartData['pembayaran']['categories'] ?? []) },
+                    yaxis: { labels: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } },
+                    fill: { opacity: 1 },
                     colors: ['#71dd37', '#ffab00'],
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'right'
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return "Rp " + val.toLocaleString('id-ID');
-                            }
-                        }
-                    }
+                    legend: { position: 'top', horizontalAlign: 'right' },
+                    tooltip: { y: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } }
                 };
-
-                const chartPembayaranEl = document.querySelector("#chartPembayaran");
-                if (chartPembayaranEl) {
-                    try {
-                        chartPembayaran = new ApexCharts(chartPembayaranEl, pembayaranOptions);
-                        chartPembayaran.render();
-                    } catch(e) {
-                        console.error('Error rendering Pembayaran chart:', e);
-                    }
-                }
+                chartPembayaran = new ApexCharts(pembayaranEl, options);
+                chartPembayaran.render();
             }
 
-            // Chart Sisa Belum Terbayar
-            const sisaData = @json($chartData['sisa_belum_terbayar'] ?? []);
-            if (isValidChartData(sisaData)) {
-                const sisaOptions = {
+            // Chart Sisa
+            const sisaEl = document.querySelector("#chartSisaBelumTerbayar");
+            if (sisaEl) {
+                const options = {
                     series: [
-                        { name: 'Pokok', data: sisaData.pokok || [] },
-                        { name: 'Bagi Hasil', data: sisaData.bagi_hasil || [] }
+                        { name: 'Pokok', data: @json($chartData['sisa_belum_terbayar']['pokok'] ?? []) },
+                        { name: 'Bagi Hasil', data: @json($chartData['sisa_belum_terbayar']['bagi_hasil'] ?? []) }
                     ],
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: { show: false }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: '55%',
-                            endingShape: 'rounded'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    },
-                    xaxis: {
-                        categories: sisaData.categories || []
-                    },
-                    yaxis: {},
-                    fill: {
-                        opacity: 1
-                    },
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: false, columnWidth: '55%', endingShape: 'rounded' } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] },
+                    xaxis: { categories: @json($chartData['sisa_belum_terbayar']['categories'] ?? []) },
+                    yaxis: { labels: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } },
+                    fill: { opacity: 1 },
                     colors: ['#71dd37', '#ffab00'],
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'right'
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return "Rp " + val.toLocaleString('id-ID');
-                            }
-                        }
-                    }
+                    legend: { position: 'top', horizontalAlign: 'right' },
+                    tooltip: { y: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } }
                 };
-
-                const chartSisaEl = document.querySelector("#chartSisaBelumTerbayar");
-                if (chartSisaEl) {
-                    try {
-                        chartSisaBelumTerbayar = new ApexCharts(chartSisaEl, sisaOptions);
-                        chartSisaBelumTerbayar.render();
-                    } catch(e) {
-                        console.error('Error rendering Sisa chart:', e);
-                    }
-                }
+                chartSisaBelumTerbayar = new ApexCharts(sisaEl, options);
+                chartSisaBelumTerbayar.render();
             }
 
-            // Chart Pembayaran Piutang
-            const piutangData = @json($chartData['pembayaran_piutang_tahun'] ?? []);
-            if (isValidChartData(piutangData)) {
-                const piutangOptions = {
+            // Chart Piutang
+            const piutangEl = document.querySelector("#chartPembayaranPiutang");
+            if (piutangEl) {
+                const options = {
                     series: [
-                        { name: 'Pokok', data: piutangData.pokok ?? [] },
-                        { name: 'Bagi Hasil', data: piutangData.bagi_hasil ?? [] }
+                        { name: 'Pokok', data: @json($chartData['pembayaran_piutang_tahun']['pokok'] ?? []) },
+                        { name: 'Bagi Hasil', data: @json($chartData['pembayaran_piutang_tahun']['bagi_hasil'] ?? []) }
                     ],
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: { show: false }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: '55%',
-                            endingShape: 'rounded'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    },
-                    xaxis: {
-                        categories: piutangData.categories ?? []
-                    },
-                    yaxis: {},
-                    fill: {
-                        opacity: 1
-                    },
-                    colors: ['#71dd37'],
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'right'
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return "Rp " + val.toLocaleString('id-ID');
-                            }
-                        }
-                    }
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: false, columnWidth: '55%', endingShape: 'rounded' } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] },
+                    xaxis: { categories: @json($chartData['pembayaran_piutang_tahun']['categories'] ?? []) },
+                    yaxis: { labels: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } },
+                    fill: { opacity: 1 },
+                    colors: ['#71dd37', '#ffab00'],
+                    legend: { position: 'top', horizontalAlign: 'right' },
+                    tooltip: { y: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } }
                 };
-
-                const chartPiutangEl = document.querySelector("#chartPembayaranPiutang");
-                if (chartPiutangEl) {
-                    try {
-                        chartPembayaranPiutang = new ApexCharts(chartPiutangEl, piutangOptions);
-                        chartPembayaranPiutang.render();
-                    } catch(e) {
-                        console.error('Error rendering Piutang chart:', e);
-                    }
-                }
+                chartPembayaranPiutang = new ApexCharts(piutangEl, options);
+                chartPembayaranPiutang.render();
             }
 
             // Chart Comparison
-            const comparisonData = @json($chartData['comparison'] ?? []);
-            if (comparisonData && comparisonData.categories) {
-                const comparisonOptions = {
+            const comparisonEl = document.querySelector("#chartComparison");
+            if (comparisonEl) {
+                // Read fresh data from data attribute that we formatted in Livewire
+                const comparisonData = JSON.parse(comparisonEl.getAttribute('data-comparison-data') || '{}');
+                
+                const options = {
                     series: [
-                        { name: 'AR', data: [comparisonData.ar_bulan2 || 0, comparisonData.ar_bulan1 || 0] },
-                        { name: 'Utang Pengembalian', data: [comparisonData.utang_bulan2 || 0, comparisonData.utang_bulan1 || 0] }
+                        { name: 'AR', data: comparisonData.ar || [] },
+                        { name: 'Utang Pengembalian', data: comparisonData.utang_pengembalian_deposito || [] }
                     ],
-                    chart: {
-                        type: 'bar',
-                        height: 350,
-                        toolbar: { show: false }
-                    },
-                    plotOptions: {
-                        bar: {
-                            horizontal: false,
-                            columnWidth: '55%',
-                            endingShape: 'rounded'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    },
-                    xaxis: {
-                        categories: comparisonData.categories || ['Bulan 1', 'Bulan 2']
-                    },
-                    yaxis: {},
-                    fill: {
-                        opacity: 1
-                    },
+                    chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                    plotOptions: { bar: { horizontal: false, columnWidth: '55%', endingShape: 'rounded' } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] },
+                    xaxis: { categories: comparisonData.categories || ['Bulan 2', 'Bulan 1'] },
+                    yaxis: { labels: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } },
+                    fill: { opacity: 1 },
                     colors: ['#71dd37', '#ffab00'],
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'right'
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return "Rp " + val.toLocaleString('id-ID');
-                            }
-                        }
-                    }
+                    legend: { position: 'top', horizontalAlign: 'right' },
+                    tooltip: { y: { formatter: (val) => "Rp " + val.toLocaleString('id-ID') } }
                 };
-
-                const chartComparisonEl = document.querySelector("#chartComparison");
-                if (chartComparisonEl) {
-                    try {
-                        chartComparison = new ApexCharts(chartComparisonEl, comparisonOptions);
-                        chartComparison.render();
-                    } catch(e) {
-                        console.error('Error rendering Comparison chart:', e);
-                    }
-                }
+                chartComparison = new ApexCharts(comparisonEl, options);
+                chartComparison.render();
             }
         }
 
-        // Initialize Select2 ONLY for chart filter dropdowns (not for comparison/table)
-        function initSelect2() {
-            if (typeof $ !== 'undefined' && $.fn.select2) {
-                try {
-                    // Initialize main chart filter selects (with select2 class)
-                    $('select.select2:not(#filterBulanComparison1):not(#filterBulanComparison2)').each(function() {
-                        try {
-                            if ($(this).hasClass('select2-hidden-accessible')) {
-                                $(this).select2('destroy');
-                            }
-                            
-                            $(this).select2({
-                                minimumResultsForSearch: Infinity,
-                                width: '100%',
-                                placeholder: 'Pilih Periode',
-                                allowClear: false,
-                                closeOnSelect: true
-                            });
-
-                        } catch(e) {
-                            console.warn('Error with Select2 on element:', $(this), e);
-                        }
-                    });
-
-                    // Initialize comparison chart selects separately with ID targeting
-                    // (these use wire:ignore and manual event handling)
-                    $('#filterBulanComparison1, #filterBulanComparison2').each(function() {
-                        try {
-                            if ($(this).hasClass('select2-hidden-accessible')) {
-                                $(this).select2('destroy');
-                            }
-                            
-                            $(this).select2({
-                                minimumResultsForSearch: Infinity,
-                                width: '100%',
-                                closeOnSelect: true
-                            });
-
-                        } catch(e) {
-                            console.warn('Error with comparison Select2:', $(this), e);
-                        }
-                    });
-
-                    // Add change event handlers for comparison selects to trigger Livewire update
-                    $('#filterBulanComparison1').on('change', function() {
-                        const value = $(this).val();
-                        if (window.Livewire && Livewire.first()) {
-                            Livewire.first().set('bulan1', value);
-                        }
-                    });
-
-                    $('#filterBulanComparison2').on('change', function() {
-                        const value = $(this).val();
-                        if (window.Livewire && Livewire.first()) {
-                            Livewire.first().set('bulan2', value);
-                        }
-                    });
-
-                } catch (error) {
-                    console.error('Error initializing Select2:', error);
-                }
-            }
-        }
-
-        // Initialize when everything is ready
+        // Main Initialization Logic
         function initializeDashboard() {
-            // Check if ApexCharts is loaded
-            if (typeof ApexCharts === 'undefined') {
-                console.log('ApexCharts not loaded yet, retrying...');
-                setTimeout(initializeDashboard, 500);
+            if (typeof ApexCharts === 'undefined' || typeof $ === 'undefined') {
+                setTimeout(initializeDashboard, 200);
                 return;
             }
             
-            // Check if jQuery is loaded
-            if (typeof $ === 'undefined') {
-                console.log('jQuery not loaded yet, retrying...');
-                setTimeout(initializeDashboard, 500);
-                return;
-            }
-            
-            // Initialize Select2 and Charts
-            try {
-                initSelect2();
-                initCharts();
-            } catch (error) {
-                console.error('Error initializing dashboard:', error);
+            // Collect existing charts
+            const chartSelectors = ['#chartDisbursement', '#chartPembayaran', '#chartSisaBelumTerbayar', '#chartPembayaranPiutang', '#chartComparison'];
+            const present = chartSelectors.filter(sel => document.querySelector(sel));
+
+            // Init Select2 regardless of charts
+            try { initSelect2(); } catch(e) { console.error(e); }
+
+            // If charts exist, init them
+            if (present.length > 0) {
+                try { initCharts(); } catch(e) { console.error(e); }
             }
         }
 
-        $(document).ready(function() {
-            // Wait for all scripts to load
-            setTimeout(function() {
-                initializeDashboard();
-            }, 500);
-        });
-
-        // Also initialize when Livewire is ready
+        // Event Listeners
+        $(document).ready(function() { setTimeout(initializeDashboard, 500); });
         document.addEventListener('livewire:init', function() {
-            setTimeout(function() {
-                initializeDashboard();
-            }, 300);
+            setTimeout(initializeDashboard, 300);
+            
+            // Re-init on updates
+            Livewire.hook('morph.updated', ({ el, component }) => {
+                setTimeout(() => {
+                    initSelect2();
+                    if (window._chartReinitTimeout) clearTimeout(window._chartReinitTimeout);
+                    window._chartReinitTimeout = setTimeout(() => {
+                        // Destroy first
+                        if(chartDisbursement) chartDisbursement.destroy();
+                        if(chartPembayaran) chartPembayaran.destroy();
+                        if(chartSisaBelumTerbayar) chartSisaBelumTerbayar.destroy();
+                        if(chartPembayaranPiutang) chartPembayaranPiutang.destroy();
+                        if(chartComparison) chartComparison.destroy();
+                        
+                        setTimeout(initCharts, 200);
+                    }, 300);
+                }, 200);
+            });
         });
 
-        // Reinitialize when Livewire updates
-        document.addEventListener('livewire:updated', function() {
-            // Give Livewire time to update the DOM before re-initializing
-            setTimeout(() => {
-                try {
-                    initSelect2();
-                    initCharts();
-                    console.log('Dashboard re-initialized after Livewire update');
-                } catch(e) {
-                    console.error('Error during Livewire update reinit:', e);
-                }
-            }, 300);
-        });
+        // Specific listeners for chart updates
+        const updateChart = (chartVar, destroyAndInit) => {
+            if (chartVar) chartVar.destroy();
+            setTimeout(initCharts, 100);
+        };
+
+        if (window.livewire) {
+            window.livewire.on('updateChartDisbursement', () => updateChart(chartDisbursement));
+            window.livewire.on('updateChartPembayaran', () => updateChart(chartPembayaran));
+            window.livewire.on('updateChartSisa', () => updateChart(chartSisaBelumTerbayar));
+            window.livewire.on('updateChartPiutang', () => updateChart(chartPembayaranPiutang));
+        }
     })();
 </script>
 @endpush
-
+</div>

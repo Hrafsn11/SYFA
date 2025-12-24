@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use App\Models\PengembalianPinjamanFinlog;
 use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,27 +30,92 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setBulkActionsDisabled();
+    }
+
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Bulan')
+                ->options([
+                    '' => 'Semua Bulan',
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("MONTH(pengembalian_pinjaman_finlog.tanggal_pengembalian) = ?", [$value]);
+                    }
+                }),
+
+            SelectFilter::make('Tahun')
+                ->options([
+                    '' => 'Semua Tahun',
+                    '2023' => '2023',
+                    '2024' => '2024',
+                    '2025' => '2025',
+                    '2026' => '2026',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("YEAR(pengembalian_pinjaman_finlog.tanggal_pengembalian) = ?", [$value]);
+                    }
+                }),
+        ];
     }
 
     public function builder(): Builder
     {
-        // Get current user's debitur
-        $currentDebitur = MasterDebiturDanInvestor::where('user_id', auth()->id())->first();
+        $user = auth()->user();
 
-        if (!$currentDebitur) {
-            // Return empty query if user is not a debitur
-            return PengembalianPinjamanFinlog::query()->whereRaw('1 = 0');
+        // Check if user has unrestricted role
+        $hasUnrestrictedRole = false;
+        if ($user) {
+            if ($user->hasRole('super-admin')) {
+                $hasUnrestrictedRole = true;
+            } else {
+                $roles = $user->roles;
+                $hasUnrestrictedRole = $roles->contains(function ($role) {
+                    return $role->restriction == 1;
+                });
+            }
         }
 
-        // Get latest pengembalian per kode pinjaman (id_pinjaman_finlog)
-        // Using subquery to get max id for each id_pinjaman_finlog
-        $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
-            ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
-            ->join('peminjaman_finlog as pf', 'ppf.id_pinjaman_finlog', '=', 'pf.id_peminjaman_finlog')
-            ->where('pf.id_debitur', $currentDebitur->id_debitur)
-            ->groupBy('ppf.id_pinjaman_finlog')
-            ->pluck('latest_id');
+        if ($hasUnrestrictedRole) {
+            // Unrestricted users (Finance SKI, CEO Finlog, etc) - see all data
+            $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
+                ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
+                ->groupBy('ppf.id_pinjaman_finlog')
+                ->pluck('latest_id');
+        } else {
+            // Restricted users (Debitur) - only see their own data
+            $currentDebitur = MasterDebiturDanInvestor::where('user_id', auth()->id())->first();
+
+            if (!$currentDebitur) {
+                // Return empty query if user is not a debitur
+                return PengembalianPinjamanFinlog::query()->whereRaw('1 = 0');
+            }
+
+            // Get latest pengembalian per pinjaman, filtered by debitur
+            $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
+                ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
+                ->join('peminjaman_finlog as pf', 'ppf.id_pinjaman_finlog', '=', 'pf.id_peminjaman_finlog')
+                ->where('pf.id_debitur', $currentDebitur->id_debitur)
+                ->groupBy('ppf.id_pinjaman_finlog')
+                ->pluck('latest_id');
+        }
 
         return PengembalianPinjamanFinlog::query()
             ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
@@ -68,6 +134,12 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
+
+            Column::make('Nama Perusahaan', 'peminjamanFinlog.debitur.nama')
+                ->sortable()
+                ->searchable()
+                ->format(fn($value) => '<div class="text-center">' . ($value ?: '-') . '</div>')
+                ->html(),
 
             Column::make('Kode Peminjaman', 'peminjamanFinlog.nomor_peminjaman')
                 ->sortable()

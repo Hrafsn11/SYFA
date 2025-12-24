@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\ProgramRestrukturisasi;
 
 use App\Models\ProgramRestrukturisasi;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
-class ProgramRestrukturisasiShow extends Component
+class Show extends Component
 {
     public ProgramRestrukturisasi $program;
 
@@ -15,6 +16,19 @@ class ProgramRestrukturisasiShow extends Component
             'pengajuanRestrukturisasi.debitur',
             'jadwalAngsuran' => fn ($query) => $query->orderBy('no'),
         ])->findOrFail($id);
+
+        // Authorization check: Debitur hanya bisa lihat data miliknya
+        $user = Auth::user();
+        $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance', 'Finance SKI', 'CEO SKI', 'Direktur SKI']);
+        
+        if (!$isAdmin) {
+            $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+            $pengajuanDebiturId = $this->program->pengajuanRestrukturisasi->id_debitur ?? null;
+            
+            if (!$debitur || $debitur->id_debitur !== $pengajuanDebiturId) {
+                abort(403, 'Anda tidak memiliki akses untuk melihat data ini.');
+            }
+        }
     }
 
     public function render()
@@ -36,7 +50,7 @@ class ProgramRestrukturisasiShow extends Component
             return $data;
         });
 
-        return view('livewire.program-restrukturisasi-show', [
+        return view('livewire.program-restrukturisasi.show', [
             'jadwal' => $this->program->jadwalAngsuran,
             'jadwalWithSisa' => $jadwalWithSisa,
         ])->layout('layouts.app');

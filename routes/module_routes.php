@@ -64,12 +64,12 @@ Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->
     Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
 });
 
-// Program Restrukturisasi Routes
+// Program Restrukturisasi Routes - Full Livewire
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-    Route::get('/', function () {return view('program-restrukturisasi.index');})->name('index');
-    Route::get('create', \App\Livewire\ProgramRestrukturisasiCreate::class)->name('create');
-    Route::get('{id}', \App\Livewire\ProgramRestrukturisasiShow::class)->name('show');
-    Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasiEdit::class)->name('edit');
+    Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');
+    Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
+    Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
+    Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
     Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
     Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
     Route::get('detail/{id}', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');

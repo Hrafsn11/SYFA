@@ -14,6 +14,24 @@ use Yajra\DataTables\Facades\DataTables;
 class PeminjamanController extends Controller
 {
     /**
+     * Constructor - Middleware untuk permission
+     */
+    public function __construct()
+    {
+        // Store & Update hanya bisa dilakukan oleh Debitur
+        $this->middleware('permission:peminjaman_finlog.add')->only(['store']);
+        $this->middleware('permission:peminjaman_finlog.edit')->only(['update']);
+        $this->middleware('permission:peminjaman_finlog.delete')->only(['destroy']);
+
+        // Method lainnya require view permission
+        $this->middleware('permission:peminjaman_finlog.view')->only([
+            'showKontrak',
+            'downloadKontrakPdf',
+            'downloadSertifikat'
+        ]);
+    }
+
+    /**
      * Store a newly created peminjaman for SFinlog
      */
     public function store(PeminjamanRequest $request)
@@ -42,7 +60,7 @@ class PeminjamanController extends Controller
                 }
             }
 
-            $yearMonth = date('Ym'); 
+            $yearMonth = date('Ym');
             $lastPeminjaman = PeminjamanFinlog::where('nomor_peminjaman', 'LIKE', "PMJ-{$yearMonth}-SLOG-%")
                 ->orderBy('nomor_peminjaman', 'desc')
                 ->first();
@@ -235,11 +253,13 @@ class PeminjamanController extends Controller
         try {
             // 1. Ambil data peminjaman dengan relasi debitur
             $peminjaman = PeminjamanFinlog::with('debitur')->findOrFail($id);
-            
+
             // 2. Validasi: Hanya status "Selesai" yang bisa cetak sertifikat
             if ($peminjaman->status !== 'Selesai') {
-                return redirect()->back()->with('error', 
-                    'Sertifikat hanya tersedia untuk peminjaman yang sudah selesai');
+                return redirect()->back()->with(
+                    'error',
+                    'Sertifikat hanya tersedia untuk peminjaman yang sudah selesai'
+                );
             }
 
             // 3. Generate Nomor Sertifikat
@@ -250,7 +270,7 @@ class PeminjamanController extends Controller
                 ->where('status', 'Selesai')
                 ->where('id', '<=', $peminjaman->id)
                 ->count();
-            
+
             $nomorSertifikat = 'DCF' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
             // 4. Tentukan deskripsi
@@ -270,25 +290,25 @@ class PeminjamanController extends Controller
             $data = [
                 // Nama peminjam (dari nama perusahaan debitur)
                 'nama_peminjam' => $peminjaman->debitur->nama ?? $peminjaman->nama_perusahaan ?? '-',
-                
+
                 // Nomor sertifikat yang sudah digenerate
                 'nomor_sertifikat' => $nomorSertifikat,
-                
+
                 // Deskripsi jenis peminjaman
                 'deskripsi' => $deskripsi,
-                
+
                 // Nilai pinjaman (formatted Rupiah tanpa desimal)
                 'nilai_pinjaman' => 'Rp ' . number_format($peminjaman->nilai_pinjaman, 0, ',', '.'),
-                
+
                 // Kode transaksi (nomor peminjaman)
                 'kode_transaksi' => $peminjaman->nomor_peminjaman,
-                
+
                 // Jangka waktu (range tanggal)
                 'jangka_waktu' => $jangkaWaktu,
-                
+
                 // Bagi hasil (persentase per tahun)
                 'bagi_hasil' => $peminjaman->presentase_bagi_hasil . ' % P.A NET',
-                
+
                 // Nilai pinjaman dalam text (formatted Rupiah dengan 2 desimal)
                 // Digunakan di halaman 2 sertifikat
                 'nilai_pinjaman_text' => 'Rp. ' . number_format($peminjaman->nilai_pinjaman, 2, ',', '.'),
@@ -296,12 +316,12 @@ class PeminjamanController extends Controller
 
             // 8. Return view sertifikat
             return view('livewire.sfinlog.peminjaman.sertifikat', compact('data'));
-            
         } catch (\Exception $e) {
             // Handle error dan redirect kembali dengan pesan error
-            return redirect()->back()->with('error', 
-                'Gagal menggenerate sertifikat: ' . $e->getMessage());
+            return redirect()->back()->with(
+                'error',
+                'Gagal menggenerate sertifikat: ' . $e->getMessage()
+            );
         }
     }
-
 }
