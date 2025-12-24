@@ -4,20 +4,20 @@ namespace App\Livewire;
 
 use App\Services\DashboardPembiayaanSfinanceService;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class DashboardPembiayaanSfinance extends Component
 {
-    // Filter properties - ISOLATED per chart to prevent state collision
-    public $bulanDisbursement;  // Filter for disbursement chart
-    public $bulanPembayaran;    // Filter for pembayaran chart
-    public $bulanSisa;          // Filter for sisa belum terbayar chart
-    public $bulanPiutang;       // Filter for piutang chart (deprecated, kept for backward compat)
-    public $tahun;              // Global year filter (affects all charts except piutang)
+    // Filter properties - ISOLATED per chart
+    public $bulanDisbursement;
+    public $bulanPembayaran;
+    public $bulanSisa;
+    public $tahun;              // Global year
     public $tahunPiutang;       // Separate year filter for piutang chart
-    public $bulan1;             // untuk comparison chart
-    public $bulan2;             // untuk comparison chart
-    public $bulanTable;         // Filter khusus untuk AR Table
-    public $tahunTable;         // Filter khusus untuk AR Table
+    public $bulan1;             // Comparison chart
+    public $bulan2;             // Comparison chart
+    public $bulanTable;         // AR Table filter
+    public $tahunTable;         // AR Table filter
 
     protected $service;
 
@@ -28,80 +28,61 @@ class DashboardPembiayaanSfinance extends Component
 
     public function mount()
     {
-        // Initialize all filters with current month/year using Carbon
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now();
         $currentMonth = $now->format('m');
         $currentYear = $now->format('Y');
+        $previousMonth = $now->copy()->subMonth()->format('m');
 
-        // Allow string 'now' to be passed in (for test/dev)
+        // Initialize with logic handling for 'now' or empty
         $this->tahun = ($this->tahun === 'now' || empty($this->tahun)) ? $currentYear : $this->tahun;
         $this->tahunPiutang = ($this->tahunPiutang === 'now' || empty($this->tahunPiutang)) ? $currentYear : $this->tahunPiutang;
+        
         $this->bulanDisbursement = ($this->bulanDisbursement === 'now' || empty($this->bulanDisbursement)) ? $currentMonth : $this->bulanDisbursement;
         $this->bulanPembayaran = ($this->bulanPembayaran === 'now' || empty($this->bulanPembayaran)) ? $currentMonth : $this->bulanPembayaran;
         $this->bulanSisa = ($this->bulanSisa === 'now' || empty($this->bulanSisa)) ? $currentMonth : $this->bulanSisa;
-        $this->bulanPiutang = ($this->bulanPiutang === 'now' || empty($this->bulanPiutang)) ? $currentMonth : $this->bulanPiutang;
+        
         $this->bulan1 = ($this->bulan1 === 'now' || empty($this->bulan1)) ? $currentMonth : $this->bulan1;
-        $this->bulan2 = ($this->bulan2 === 'now' || empty($this->bulan2)) ? $now->copy()->subMonth()->format('m') : $this->bulan2;
+        $this->bulan2 = ($this->bulan2 === 'now' || empty($this->bulan2)) ? $previousMonth : $this->bulan2;
+        
         $this->bulanTable = ($this->bulanTable === 'now' || empty($this->bulanTable)) ? $currentMonth : $this->bulanTable;
         $this->tahunTable = ($this->tahunTable === 'now' || empty($this->tahunTable)) ? $currentYear : $this->tahunTable;
     }
 
-    // Update methods untuk trigger re-render ketika filter berubah
+    // Update methods to trigger specific chart re-renders
     public function updatedBulanDisbursement()
     {
-        // Trigger re-render - only this chart affected
         $this->dispatch('updateChartDisbursement');
     }
 
     public function updatedBulanPembayaran()
     {
-        // Trigger re-render - only this chart affected
         $this->dispatch('updateChartPembayaran');
     }
 
     public function updatedBulanSisa()
     {
-        // Trigger re-render - only this chart affected
-    }
-
-    public function updatedBulanPiutang()
-    {
-        // Trigger re-render - only this chart affected
-    }
-
-    public function updatedTahun()
-    {
-        // Trigger re-render - affects all charts that use tahun
+        $this->dispatch('updateChartSisa');
     }
 
     public function updatedTahunPiutang()
     {
-        // Trigger re-render - only piutang chart affected
+        $this->dispatch('updateChartPiutang');
     }
 
-    public function updatedBulan1()
-    {
-        // Trigger re-render
-    }
+    // Comparison & Table updates are handled by wire:key auto-refresh logic usually, 
+    // but dispatching event doesn't hurt for consistency.
 
-    public function updatedBulan2()
-    {
-        // Trigger re-render
-    }
-
-    // Add listeners untuk update otomatis ketika property berubah
     protected $listeners = ['updated' => '$refresh'];
 
     public function render()
     {
-        // Get real data from service using ISOLATED filter values
-
-        // Isolasi summary card sesuai filter chart terkait
+        // 1. Summary Data
         $summaryData = $this->service->getSummaryData($this->bulanDisbursement, $this->tahun);
         $summaryDataPembayaran = $this->service->getSummaryData($this->bulanPembayaran, $this->tahun);
         $summaryDataSisa = $this->service->getSummaryData($this->bulanSisa, $this->tahun);
-        $summaryDataOutstanding = $this->service->getSummaryData(null, null); // always global
+        $summaryDataOutstanding = $this->service->getSummaryData(null, null); // Global
 
+        // 2. Chart Data
         $chartData = [
             'disbursement' => $this->service->getDisbursementData($this->bulanDisbursement, $this->tahun),
             'pembayaran' => $this->service->getPembayaranData($this->bulanPembayaran, $this->tahun),
@@ -110,13 +91,14 @@ class DashboardPembiayaanSfinance extends Component
             'comparison' => $this->service->getComparisonData($this->bulan1, $this->bulan2, $this->tahun),
         ];
 
-        // Check for empty states in chart data
+        // 3. Table Data
+        $arTableData = $this->service->getArTableData($this->bulanTable, $this->tahunTable);
+
+        // Check availability
         $hasDataDisbursement = !empty($chartData['disbursement']['categories']);
         $hasDataPembayaran = !empty($chartData['pembayaran']['categories']);
         $hasDataSisa = !empty($chartData['sisa_belum_terbayar']['categories']);
         $hasDataPiutang = !empty($chartData['pembayaran_piutang_tahun']['categories']);
-
-        $arTableData = $this->service->getArTableData($this->bulanTable, $this->tahunTable);
 
         return view('livewire.dashboard-pembiayaan-sfinance', [
             'summaryData' => $summaryData,
@@ -134,4 +116,3 @@ class DashboardPembiayaanSfinance extends Component
         ]);
     }
 }
-

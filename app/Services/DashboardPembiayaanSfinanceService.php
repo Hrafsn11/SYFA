@@ -407,11 +407,9 @@ class DashboardPembiayaanSfinanceService
         $bulan2 = $bulan2 ?? date('m', strtotime('-1 month'));
         $tahun = $tahun ?? date('Y');
         
-        // Convert bulan to integer
         $bulan1Int = is_numeric($bulan1) ? (int)$bulan1 : (int)date('m');
         $bulan2Int = is_numeric($bulan2) ? (int)$bulan2 : (int)date('m', strtotime('-1 month'));
         
-        // Get month names
         $bulanNama = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
@@ -421,26 +419,30 @@ class DashboardPembiayaanSfinanceService
         $namaBulan1 = $bulanNama[$bulan1Int] ?? 'Bulan 1';
         $namaBulan2 = $bulanNama[$bulan2Int] ?? 'Bulan 2';
         
-        // Get AR for bulan1 and bulan2
+        // Logic pengambilan data tetap menggunakan tabel Sfinance (tidak diubah)
         $arBulan1 = $this->getARForMonth($bulan1, $tahun);
         $arBulan2 = $this->getARForMonth($bulan2, $tahun);
         
-        // Get Utang Pengembalian Deposito for bulan1 and bulan2
         $utangBulan1 = $this->getUtangPengembalianDepositoForMonth($bulan1, $tahun);
         $utangBulan2 = $this->getUtangPengembalianDepositoForMonth($bulan2, $tahun);
         
-        // Calculate selisih (difference)
         $arSelisih = $arBulan1 - $arBulan2;
         $utangSelisih = $utangBulan1 - $utangBulan2;
         
+        // FORMAT RETURN DISAMAKAN DENGAN SFINLOG agar Blade bisa menampilkan selisih
         return [
-            'categories' => [$namaBulan1, $namaBulan2, 'Selisih'],
-            'ar' => [$arBulan1, $arBulan2, $arSelisih],
-            'utang_pengembalian_deposito' => [$utangBulan1, $utangBulan2, $utangSelisih],
+            'bulan1' => $namaBulan1,
+            'bulan2' => $namaBulan2,
+            'ar_bulan1' => $arBulan1,
+            'ar_bulan2' => $arBulan2,
+            'ar_selisih' => $arSelisih,
+            'utang_bulan1' => $utangBulan1,
+            'utang_bulan2' => $utangBulan2,
+            'utang_selisih' => $utangSelisih,
+            // Categories untuk Chart JS: [Data Kiri (Bulan Lama), Data Kanan (Bulan Baru)]
+            'categories' => [$namaBulan2, $namaBulan1], 
         ];
     }
-
-
 
     /**
      * Get AR total for a specific month
