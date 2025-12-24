@@ -45,10 +45,15 @@ class DebiturDanInvestorController extends Controller
                 'password' => Hash::make($validated['password']),
             ]);
 
-            $debiturRole = Role::firstOrCreate(['name' => 'Debitur', 'restriction' => 0]);
+            $roleName = $validated['flagging'] === 'ya' ? 'Investor' : 'Debitur';
 
-            if (! $user->hasRole('Debitur')) {
-                $user->assignRole('Debitur');
+            $role = Role::firstOrCreate([
+                'name' => $roleName,
+                'restriction' => 0
+            ]);
+
+            if (!$user->hasRole($roleName)) {
+                $user->assignRole($roleName);
             }
 
             $validated['user_id'] = $user->id;
@@ -66,7 +71,11 @@ class DebiturDanInvestorController extends Controller
 
             DB::commit();
 
-            return Response::success(null, 'Debitur berhasil ditambahkan dan akun pengguna dibuat');
+            $message = $roleName === 'Investor'
+                ? 'Investor berhasil ditambahkan dan akun pengguna dibuat'
+                : 'Debitur berhasil ditambahkan dan akun pengguna dibuat';
+
+            return Response::success(null, $message);
         } catch (\Exception $e) {
             DB::rollBack();
             return Response::errorCatch($e);
@@ -137,6 +146,22 @@ class DebiturDanInvestorController extends Controller
                     // Update password only if provided
                     if (isset($validated['password']) && !empty($validated['password'])) {
                         $user->password = Hash::make($validated['password']);
+                    }
+
+                    $oldFlagging = $debitur->flagging;
+                    $newFlagging = $validated['flagging'];
+
+                    if ($oldFlagging !== $newFlagging) {
+                        $oldRoleName = $oldFlagging === 'ya' ? 'Investor' : 'Debitur';
+                        $newRoleName = $newFlagging === 'ya' ? 'Investor' : 'Debitur';
+
+                        if ($user->hasRole($oldRoleName)) {
+                            $user->removeRole($oldRoleName);
+                        }
+
+                        if (!$user->hasRole($newRoleName)) {
+                            $user->assignRole($newRoleName);
+                        }
                     }
 
                     $user->save();

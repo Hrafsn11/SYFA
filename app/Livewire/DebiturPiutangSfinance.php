@@ -16,10 +16,16 @@ class DebiturPiutangSfinance extends DataTableComponent
 
     public function configure(): void
     {
-        $this->setPrimaryKey('id_pengajuan_peminjaman');
-        $this->setAdditionalSelects(['pengajuan_peminjaman.id_pengajuan_peminjaman']);
-        $this->setTableAttributes(['class' => 'table-responsive text-nowrap']);
-        $this->setPerPageAccepted([10, 25, 50, 100]);
+        $this->setPrimaryKey('id_pengajuan_peminjaman')
+            ->setAdditionalSelects(['pengajuan_peminjaman.id_pengajuan_peminjaman'])
+            ->setTableAttributes(['class' => 'table-responsive text-nowrap'])
+            ->setPerPageAccepted([10, 25, 50, 100])
+            ->setPerPage(10)
+            ->setDefaultSort('harapan_tanggal_pencairan', 'desc')
+            ->setColumnSelectStatus(true)
+            ->setSearchEnabled()
+            ->setSearchPlaceholder('Cari debitur, objek jaminan...')
+            ->setEmptyMessage('Tidak ada data debitur piutang');
     }
 
     public function builder(): Builder
@@ -51,6 +57,17 @@ class DebiturPiutangSfinance extends DataTableComponent
             ->leftJoin($this->getLatestPengembalianSubquery(), 'pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'pengembalian_pinjaman.id_pengajuan_peminjaman')
             ->whereIn('pengajuan_peminjaman.status', ['Aktif', 'Dana Sudah Dicairkan', 'Lunas', 'Tertunda', 'Ditolak']);
 
+        if ($search = $this->getSearch()) {
+            $query->where(function ($q) use ($search) {
+                $q->where('master_debitur_dan_investor.nama', 'LIKE', '%' . $search . '%')
+                    ->orWhere('bukti_peminjaman.nama_client', 'LIKE', '%' . $search . '%')
+                    ->orWhere('bukti_peminjaman.no_invoice', 'LIKE', '%' . $search . '%')
+                    ->orWhere('bukti_peminjaman.no_kontrak', 'LIKE', '%' . $search . '%')
+                    ->orWhere('pengajuan_peminjaman.nomor_peminjaman', 'LIKE', '%' . $search . '%')
+                    ->orWhere('pengajuan_peminjaman.status', 'LIKE', '%' . $search . '%');
+            });
+        }
+
         return $this->applyDebiturAuthorization($query);
     }
 
@@ -66,21 +83,38 @@ class DebiturPiutangSfinance extends DataTableComponent
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
-            Column::make('Nama Debitur')->label(fn($row) => $row->nama_debitur)->searchable(),
 
-            Column::make('Objek Jaminan')->label(fn($row) => $row->objek_jaminan),
+            Column::make('Nama Debitur', 'nama_debitur')
+                ->label(fn($row) => $row->nama_debitur)
+                ->sortable(),
 
-            Column::make('Tgl Pengajuan')->label(fn($row) => $row->harapan_tanggal_pencairan ? Carbon::parse($row->harapan_tanggal_pencairan)->format('d/m/Y') : '-'),
+            Column::make('Objek Jaminan', 'objek_jaminan')
+                ->label(fn($row) => $row->objek_jaminan)
+                ->sortable(),
 
-            Column::make('Nilai Yang Diajukan')->label(fn($row) => 'Rp ' . number_format($row->total_pinjaman ?? 0, 0, ',', '.')),
+            Column::make('Tgl Pengajuan', 'harapan_tanggal_pencairan')
+                ->label(fn($row) => $row->harapan_tanggal_pencairan ? Carbon::parse($row->harapan_tanggal_pencairan)->format('d/m/Y') : '-')
+                ->sortable(),
 
-            Column::make('Nilai Yang Dicairkan')->label(fn($row) => 'Rp ' . number_format($row->nilai_dicairkan ?? 0, 0, ',', '.')),
+            Column::make('Nilai Yang Diajukan', 'total_pinjaman')
+                ->label(fn($row) => 'Rp ' . number_format($row->total_pinjaman ?? 0, 0, ',', '.'))
+                ->sortable(),
 
-            Column::make('Tanggal Pencairan')->label(fn($row) => $row->tanggal_pencairan ? Carbon::parse($row->tanggal_pencairan)->format('d/m/Y') : '-'),
+            Column::make('Nilai Yang Dicairkan', 'nilai_dicairkan')
+                ->label(fn($row) => 'Rp ' . number_format($row->nilai_dicairkan ?? 0, 0, ',', '.'))
+                ->sortable(),
 
-            Column::make('Masa Penggunaan')->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' bulan'),
+            Column::make('Tanggal Pencairan', 'tanggal_pencairan')
+                ->label(fn($row) => $row->tanggal_pencairan ? Carbon::parse($row->tanggal_pencairan)->format('d/m/Y') : '-')
+                ->sortable(),
 
-            Column::make('Bagi Hasil Oleh Debitur')->label(fn($row) => 'Rp ' . number_format($row->total_bagi_hasil ?? 0, 0, ',', '.')),
+            Column::make('Masa Penggunaan', 'masa_penggunaan')
+                ->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' bulan')
+                ->sortable(),
+
+            Column::make('Bagi Hasil Oleh Debitur', 'total_bagi_hasil')
+                ->label(fn($row) => 'Rp ' . number_format($row->total_bagi_hasil ?? 0, 0, ',', '.'))
+                ->sortable(),
 
             Column::make('Nilai Yang Harus Dibayar')->label(function ($row) {
                 $nilaiDicairkan = $row->nilai_dicairkan ?? 0;
@@ -90,11 +124,17 @@ class DebiturPiutangSfinance extends DataTableComponent
 
             Column::make('Status', 'status')->sortable(),
 
-            Column::make('Tanggal Bayar')->label(fn($row) => $row->tanggal_bayar_terakhir ? Carbon::parse($row->tanggal_bayar_terakhir)->format('d/m/Y') : '-'),
+            Column::make('Tanggal Bayar', 'tanggal_bayar_terakhir')
+                ->label(fn($row) => $row->tanggal_bayar_terakhir ? Carbon::parse($row->tanggal_bayar_terakhir)->format('d/m/Y') : '-')
+                ->sortable(),
 
-            Column::make('Lama Pinjaman')->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' bulan'),
+            Column::make('Lama Pinjaman', 'masa_penggunaan')
+                ->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' bulan')
+                ->sortable(),
 
-            Column::make('Nilai Bayar')->label(fn($row) => 'Rp ' . number_format($row->nilai_bayar_total ?? 0, 0, ',', '.')),
+            Column::make('Nilai Bayar', 'nilai_bayar_total')
+                ->label(fn($row) => 'Rp ' . number_format($row->nilai_bayar_total ?? 0, 0, ',', '.'))
+                ->sortable(),
 
             Column::make('Total Sisa Pokok + Bagi Hasil')->label(function ($row) {
                 $sisaPokok = $row->sisa_pokok ?? 0;
@@ -102,11 +142,17 @@ class DebiturPiutangSfinance extends DataTableComponent
                 return 'Rp ' . number_format($sisaPokok + $sisaBagiHasil, 0, ',', '.');
             }),
 
-            Column::make('Total Kurang Bayar Bagi Hasil')->label(fn($row) => 'Rp ' . number_format($row->kurang_bayar_bagi_hasil ?? 0, 0, ',', '.')),
+            Column::make('Total Kurang Bayar Bagi Hasil', 'kurang_bayar_bagi_hasil')
+                ->label(fn($row) => 'Rp ' . number_format($row->kurang_bayar_bagi_hasil ?? 0, 0, ',', '.'))
+                ->sortable(),
 
-            Column::make('Nilai Pokok Yang Belum Bayar')->label(fn($row) => 'Rp ' . number_format($row->sisa_pokok ?? 0, 0, ',', '.')),
+            Column::make('Nilai Pokok Yang Belum Bayar', 'sisa_pokok')
+                ->label(fn($row) => 'Rp ' . number_format($row->sisa_pokok ?? 0, 0, ',', '.'))
+                ->sortable(),
 
-            Column::make('% Bagi Hasil')->label(fn($row) => ($row->persentase_bagi_hasil ?? 0) . '%'),
+            Column::make('% Bagi Hasil', 'persentase_bagi_hasil')
+                ->label(fn($row) => ($row->persentase_bagi_hasil ?? 0) . '%')
+                ->sortable(),
 
             Column::make('Bagi Hasil/Bulan')->label(function ($row) {
                 $bagiHasil = $row->total_bagi_hasil ?? 0;

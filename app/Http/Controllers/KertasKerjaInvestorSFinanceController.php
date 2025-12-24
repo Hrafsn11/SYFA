@@ -14,18 +14,34 @@ class KertasKerjaInvestorSFinanceController extends Controller
     public function index(Request $request)
     {
         $year = $request->get('year', date('Y'));
-        
-        $data = $this->getKertasKerjaData($year);
-        
-        return view('livewire.kertas-kerja-investor-sfinance.index', compact('data', 'year'));
+        $perPage = $request->get('per_page', 10);
+        $search = $request->get('search', '');
+        $page = $request->get('page', 1);
+
+        $data = $this->getKertasKerjaData($year, $search);
+
+        // Manual pagination
+        $total = $data->count();
+        $paginatedData = $data->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $pagination = [
+            'current_page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'last_page' => ceil($total / $perPage),
+            'from' => (($page - 1) * $perPage) + 1,
+            'to' => min($page * $perPage, $total),
+        ];
+
+        return view('livewire.kertas-kerja-investor-sfinance.index', compact('paginatedData', 'pagination', 'year', 'search', 'perPage'));
     }
-    
+
     /**
      * Get kertas kerja data with optimized queries (Separate Queries Strategy)
      */
-    private function getKertasKerjaData($year)
+    private function getKertasKerjaData($year, $search = '')
     {
-        $investasi = PengajuanInvestasi::query()
+        $query = PengajuanInvestasi::query()
             ->select([
                 'id_pengajuan_investasi',
                 'tanggal_investasi',
@@ -41,10 +57,20 @@ class KertasKerjaInvestorSFinanceController extends Controller
                 'nomor_kontrak'
             ])
             ->whereNotNull('nomor_kontrak')
-            ->where('nomor_kontrak', '!=', '')
-            ->orderBy('tanggal_investasi', 'desc')
-            ->get();
-        
+            ->where('nomor_kontrak', '!=', '');
+
+        // Apply search filter
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nomor_kontrak', 'LIKE', '%' . $search . '%')
+                    ->orWhere('nama_investor', 'LIKE', '%' . $search . '%')
+                    ->orWhere('deposito', 'LIKE', '%' . $search . '%')
+                    ->orWhere('status', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $investasi = $query->orderBy('tanggal_investasi', 'desc')->get();
+
         $pengembalianPerBulan = DB::table('pengembalian_investasi')
             ->select([
                 'id_pengajuan_investasi',
@@ -55,8 +81,8 @@ class KertasKerjaInvestorSFinanceController extends Controller
             ->whereYear('tanggal_pengembalian', $year)
             ->groupBy('id_pengajuan_investasi', DB::raw('MONTH(tanggal_pengembalian)'))
             ->get()
-            ->groupBy('id_pengajuan_investasi'); 
-        
+            ->groupBy('id_pengajuan_investasi');
+
         $totalPengembalian = DB::table('pengembalian_investasi')
             ->select([
                 'id_pengajuan_investasi',
@@ -65,8 +91,8 @@ class KertasKerjaInvestorSFinanceController extends Controller
             ])
             ->groupBy('id_pengajuan_investasi')
             ->get()
-            ->keyBy('id_pengajuan_investasi'); 
-        
+            ->keyBy('id_pengajuan_investasi');
+
         $tanggalPengembalianTerakhir = DB::table('pengembalian_investasi')
             ->select([
                 'id_pengajuan_investasi',
@@ -75,37 +101,37 @@ class KertasKerjaInvestorSFinanceController extends Controller
             ->groupBy('id_pengajuan_investasi')
             ->get()
             ->keyBy('id_pengajuan_investasi');
-        
-        $result = $investasi->map(function($inv) use ($pengembalianPerBulan, $totalPengembalian, $tanggalPengembalianTerakhir, $year) {
+
+        $result = $investasi->map(function ($inv) use ($pengembalianPerBulan, $totalPengembalian, $tanggalPengembalianTerakhir, $year) {
             $id = $inv->id_pengajuan_investasi;
             $pembayaranBulan = $pengembalianPerBulan->get($id, collect());
             $total = $totalPengembalian->get($id);
             $tglTerakhir = $tanggalPengembalianTerakhir->get($id);
-            
+
             $bagiHasilPerBulan = $inv->bagi_hasil_pertahun / 12;
             $cofBulan = ($inv->jumlah_investasi * $bagiHasilPerBulan) / 100;
-            
+
             $tanggalMulai = \Carbon\Carbon::parse($inv->tanggal_investasi);
             $tanggalAkhirPeriode = \Carbon\Carbon::create($year, 12, 31);
-            
+
             if ($tanggalMulai->year > $year) {
                 $cofAkhirPeriode = 0;
             } else {
                 $tanggalSekarang = \Carbon\Carbon::now();
                 $tanggalBatas = $tanggalAkhirPeriode->lt($tanggalSekarang) ? $tanggalAkhirPeriode : $tanggalSekarang;
-                
+
                 $bulanBerjalan = max(0, $tanggalMulai->diffInMonths($tanggalBatas) + 1);
-                
+
                 $totalSeharusnya = $cofBulan * $bulanBerjalan;
-                
+
                 $totalDibayar = DB::table('pengembalian_investasi')
                     ->where('id_pengajuan_investasi', $id)
                     ->where('tanggal_pengembalian', '<=', $tanggalBatas)
                     ->sum('bagi_hasil_dibayar');
-                
+
                 $cofAkhirPeriode = max(0, $totalSeharusnya - $totalDibayar);
             }
-            
+
             return [
                 'id' => $id,
                 'nomor_kontrak' => $inv->nomor_kontrak,
@@ -121,7 +147,7 @@ class KertasKerjaInvestorSFinanceController extends Controller
                 'cof_akhir_periode' => $cofAkhirPeriode,
                 'status' => $inv->status,
                 'tgl_pengembalian' => $tglTerakhir->tanggal_terakhir ?? null,
-                
+
                 'jan' => $pembayaranBulan->where('bulan', 1)->first()->total_bagi_hasil ?? 0,
                 'feb' => $pembayaranBulan->where('bulan', 2)->first()->total_bagi_hasil ?? 0,
                 'mar' => $pembayaranBulan->where('bulan', 3)->first()->total_bagi_hasil ?? 0,
@@ -134,7 +160,7 @@ class KertasKerjaInvestorSFinanceController extends Controller
                 'okt' => $pembayaranBulan->where('bulan', 10)->first()->total_bagi_hasil ?? 0,
                 'nov' => $pembayaranBulan->where('bulan', 11)->first()->total_bagi_hasil ?? 0,
                 'des' => $pembayaranBulan->where('bulan', 12)->first()->total_bagi_hasil ?? 0,
-                
+
                 'pengembalian_pokok' => $total->total_pokok_all ?? 0,
                 'pengembalian_bagi_hasil' => $total->total_bagi_hasil_all ?? 0,
                 'sisa_pokok' => $inv->sisa_pokok,
@@ -142,7 +168,7 @@ class KertasKerjaInvestorSFinanceController extends Controller
                 'total_belum_dikembalikan' => $inv->sisa_pokok + $inv->sisa_bagi_hasil,
             ];
         });
-        
+
         return $result;
     }
 }

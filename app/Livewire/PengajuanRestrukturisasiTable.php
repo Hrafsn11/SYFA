@@ -260,6 +260,10 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
 
     private function editButton(string $id, string $status): string
     {
+        if (!auth()->user()->can('pengajuan_restrukturisasi.edit')) {
+            return '';
+        }
+
         $isEditable = in_array($status, self::EDITABLE_STATUSES);
 
         if ($isEditable) {
