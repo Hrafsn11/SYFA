@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\PengembalianInvestasi;
@@ -63,7 +64,16 @@ class PengembalianInvestasiController extends Controller
 
             $investasi->update($updateData);
 
+            // Reload pengembalian dengan relasi untuk notifikasi
+            $pengembalian->load('pengajuanInvestasi.investor');
+
             DB::commit();
+
+            // Kirim notifikasi saat SKI Finance melakukan transfer pengembalian investasi ke investor
+            // Hanya jika ada bukti transfer (berarti sudah ditransfer)
+            if ($pengembalian->bukti_transfer) {
+                ListNotifSFinance::transferPengembalianInvestasiKeInvestor($pengembalian);
+            }
 
             return Response::success(null, 'Data pengembalian investasi berhasil ditambahkan');
         } catch (\Exception $e) {
