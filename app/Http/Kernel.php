@@ -60,6 +60,7 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'checkPermission' => \App\Http\Middleware\HandlePermissionDenied::class,
         'setActiveModule' => \App\Http\Middleware\SetActiveModule::class,
+        'redirectToAccessible' => \App\Http\Middleware\RedirectToFirstAccessibleRoute::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         'precognitive' => \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
