@@ -94,6 +94,8 @@ class PenyaluranDepositoTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
+        $user = auth()->user();
+
         $query = PenyaluranDeposito::query()
             ->with(['pengajuanInvestasi', 'debitur'])
             ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
@@ -103,6 +105,20 @@ class PenyaluranDepositoTable extends DataTableComponent
                 'pi.nomor_kontrak as pi_nomor_kontrak',
                 'mdi.nama as mdi_nama'
             ]);
+
+        // Restricted data access based on user role
+        $isUnrestricted = $user->hasRole('super-admin') ||
+            $user->roles()->where('restriction', 1)->exists();
+
+        if (!$isUnrestricted) {
+            // Debitur: only see their own data
+            if ($user->id_debitur) {
+                $query->where('penyaluran_deposito.id_debitur', $user->id_debitur);
+            } else {
+                // User is not Debitur and not unrestricted - show nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
 
         // Custom search for joined tables
         if ($search = $this->getSearch()) {

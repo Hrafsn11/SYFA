@@ -8,14 +8,15 @@
             </div>
             <form id="formTambahDebitur" wire:submit="{{ $urlAction['store_master_debitur_dan_investor'] }}">
                 <input type="hidden" id="hiddenFlagging" wire:model.blur="flagging">
-                    <div class="modal-body">
+                <div class="modal-body">
                     <div class="row">
                         <!-- Nama Perusahaan / Nama Investor -->
                         <div class="col-12 mb-3 form-group">
                             <label for="nama" class="form-label">
                                 <span id="label-nama">Nama Perusahaan</span> <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="nama" placeholder="Masukkan Nama Perusahaan" wire:model.blur="nama">
+                            <input type="text" class="form-control" id="nama"
+                                placeholder="Masukkan Nama Perusahaan" wire:model.blur="nama">
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -24,13 +25,15 @@
                             <label class="form-label">Deposito</label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="deposito_reguler" value="reguler" wire:model.blur="deposito">
+                                    <input class="form-check-input" type="radio" id="deposito_reguler" value="reguler"
+                                        wire:model.blur="deposito">
                                     <label class="form-check-label" for="deposito_reguler">
                                         Reguler
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="deposito_khusus" value="khusus" wire:model.blur="deposito">
+                                    <input class="form-check-input" type="radio" id="deposito_khusus" value="khusus"
+                                        wire:model.blur="deposito">
                                     <label class="form-check-label" for="deposito_khusus">
                                         Khusus
                                     </label>
@@ -42,7 +45,8 @@
                         <!-- Nama CEO (Hanya untuk Debitur) -->
                         <div class="col-12 mb-3 form-group debitur-section d-none">
                             <label for="nama_ceo" class="form-label">Nama CEO <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama_ceo" placeholder="Masukkan Nama CEO" wire:model.blur="nama_ceo">
+                            <input type="text" class="form-control" id="nama_ceo" placeholder="Masukkan Nama CEO"
+                                wire:model.blur="nama_ceo">
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -58,20 +62,24 @@
                         <!-- Email -->
                         <div class="col-md-6 mb-3 form-group">
                             <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" id="email" placeholder="Masukkan email" wire:model.blur="email">
+                            <input type="email" class="form-control" id="email" placeholder="Masukkan email"
+                                wire:model.blur="email">
                             <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- No. Telepon -->
                         <div class="col-md-6 mb-3 form-group">
-                            <label for="no_telepon" class="form-label">No. Telepon <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="no_telepon" placeholder="Masukkan no telepon" wire:model.blur="no_telepon">
+                            <label for="no_telepon" class="form-label">No. Telepon <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="no_telepon" placeholder="Masukkan no telepon"
+                                wire:model.blur="no_telepon">
                             <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- Nama Bank -->
                         <div class="col-md-6 mb-3 form-group">
-                            <label for="nama_bank" class="form-label">Nama Bank <span class="text-danger">*</span></label>
+                            <label for="nama_bank" class="form-label">Nama Bank <span
+                                    class="text-danger">*</span></label>
                             <select id="nama_bank" class="form-select select2" wire:model.blur="nama_bank">
                                 <option value="">Pilih Bank</option>
                                 @foreach ($banks as $b)
@@ -83,21 +91,25 @@
 
                         <!-- No. Rekening -->
                         <div class="col-md-6 mb-3 form-group">
-                            <label for="no_rek" class="form-label">No. Rekening <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="no_rek" placeholder="Masukkan no rekening" wire:model.blur="no_rek">
+                            <label for="no_rek" class="form-label">No. Rekening <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="no_rek"
+                                placeholder="Masukkan no rekening" wire:model.blur="no_rek">
                             <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- NPWP -->
                         <div class="col-md-6 mb-3 form-group debitur-section d-none">
                             <label for="npwp" class="form-label">NPWP</label>
-                            <input type="text" class="form-control" id="npwp" placeholder="Masukkan NPWP" wire:model.blur="npwp">
+                            <input type="text" class="form-control" id="npwp" placeholder="Masukkan NPWP"
+                                wire:model.blur="npwp">
                             <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- KOL Perusahaan (Hanya untuk Debitur) -->
                         <div class="col-12 mb-3 form-group debitur-section d-none">
-                            <label for="id_kol" class="form-label">KOL Perusahaan <span class="text-danger">*</span></label>
+                            <label for="id_kol" class="form-label">KOL Perusahaan <span
+                                    class="text-danger">*</span></label>
                             <select id="id_kol" class="form-select select2" wire:model.blur="id_kol">
                                 <option value="">Pilih KOL</option>
                                 @foreach ($kol as $kolItem)
@@ -115,23 +127,33 @@
                             <label class="form-label">
                                 <span id="label-ttd">Upload Tanda Tangan</span> <span class="text-danger">*</span>
                             </label>
-                            <input type="file" class="form-control" id="tanda_tangan" wire:model.blur="tanda_tangan" accept="image/jpeg,image/png,image/jpg">
-                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: jpg, png, jpeg)</small>
+                            <input type="file" class="form-control" id="tanda_tangan"
+                                wire:model.blur="tanda_tangan" accept="image/jpeg,image/png,image/jpg">
+                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: jpg, png,
+                                jpeg)</small>
                             <div class="invalid-feedback"></div>
                         </div>
 
                         <!-- Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password" class="form-label">Password <span class="text-danger" id="password-required">*</span></label>
-                            <input type="password" class="form-control" id="password" placeholder="Masukkan password" wire:model.blur="password" autocomplete="new-password">
+                            <label for="password" class="form-label">Password <span class="text-danger"
+                                    id="password-required">*</span></label>
+                            <input type="password" class="form-control" id="password"
+                                placeholder="Masukkan password" wire:model.blur="password"
+                                autocomplete="new-password">
                             <div class="invalid-feedback"></div>
-                            <small class="text-muted">Minimal 8 karakter</small>
+                            <small class="text-muted">
+                                Min. 8 karakter, harus ada huruf kapital, huruf kecil, dan angka.
+                            </small>
                         </div>
 
                         <!-- Confirm Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span></label>
-                            <input type="password" class="form-control" id="password_confirmation" wire:model.blur="password_confirmation" placeholder="Konfirmasi password" autocomplete="new-password">
+                            <label for="password_confirmation" class="form-label">Konfirmasi Password <span
+                                    class="text-danger" id="password-confirm-required">*</span></label>
+                            <input type="password" class="form-control" id="password_confirmation"
+                                wire:model.blur="password_confirmation" placeholder="Konfirmasi password"
+                                autocomplete="new-password">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -141,7 +163,8 @@
                         <i class="ti ti-trash me-1"></i> Hapus Data
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="saveData"></span>
+                        <span class="spinner-border spinner-border-sm me-2" wire:loading
+                            wire:target="saveData"></span>
                         Simpan
                     </button>
                 </div>

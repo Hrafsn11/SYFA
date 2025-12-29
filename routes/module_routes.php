@@ -22,10 +22,10 @@ use App\Livewire\PengembalianInvestasi;
 use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
 
-// Dashboard
-Route::get('dashboard', Dashboard::class)->name('dashboard.index');
-Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan');
-Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito');
+// Dashboard - Protected by permission
+Route::get('dashboard', Dashboard::class)->name('dashboard.index')->middleware('can:sfinance.menu.dashboard_pembiayaan');
+Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan')->middleware('can:sfinance.menu.dashboard_pembiayaan');
+Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito')->middleware('can:sfinance.menu.dashboard_pembiayaan_investasi');
 
 // Peminjaman Routes
 Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
