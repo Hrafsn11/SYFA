@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use App\Models\PengajuanInvestasi;
 use App\Models\HistoryStatusPengajuanInvestor;
 use App\Models\MasterDebiturDanInvestor;
@@ -227,7 +228,13 @@ class PengajuanInvestasiController extends Controller
 
             HistoryStatusPengajuanInvestor::create($historyData);
 
+            // Reload pengajuan dengan relasi
+            $pengajuan->load('investor');
+
             DB::commit();
+
+            // Kirim notifikasi berdasarkan status
+            ListNotifSFinance::menuPengajuanInvestasi($status, $pengajuan);
 
             return Response::success([
                 'status' => $status,
@@ -395,6 +402,9 @@ class PengajuanInvestasiController extends Controller
                     'current_step' => 5,
                     'submit_step1_by' => Auth::id(),
                 ]);
+
+                // Reload pengajuan dengan relasi
+                $pengajuan->load('investor');
             }
 
             DB::commit();
@@ -416,11 +426,9 @@ class PengajuanInvestasiController extends Controller
 
             DB::beginTransaction();
 
-            // Update nomor kontrak and status to completed (Step 6: Selesai)
+            // Update nomor kontrak first
             $pengajuan->update([
                 'nomor_kontrak' => $request->input('nomor_kontrak'),
-                'status' => 'Selesai',
-                'current_step' => 6,
                 'updated_by' => Auth::id(),
             ]);
 
@@ -434,6 +442,18 @@ class PengajuanInvestasiController extends Controller
                 'submit_step1_by' => Auth::id(),
             ]);
 
+            // Reload pengajuan dengan relasi untuk notifikasi kontrak dibuat
+            $pengajuan->load('investor');
+
+            // Kirim notifikasi untuk kontrak investasi dibuat
+            ListNotifSFinance::menuPengajuanInvestasi('Generate Kontrak', $pengajuan);
+
+            // Update status to completed (Step 6: Selesai)
+            $pengajuan->update([
+                'status' => 'Selesai',
+                'current_step' => 6,
+            ]);
+
             // Create history for "Selesai"
             HistoryStatusPengajuanInvestor::create([
                 'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
@@ -444,7 +464,14 @@ class PengajuanInvestasiController extends Controller
                 'submit_step1_by' => Auth::id(),
             ]);
 
+            // Reload pengajuan untuk memastikan nomor_kontrak ter-update
+            $pengajuan->refresh();
+            $pengajuan->load('investor');
+
             DB::commit();
+
+            // Kirim notifikasi untuk investasi berhasil ditransfer (status Selesai)
+            ListNotifSFinance::menuPengajuanInvestasi('Selesai', $pengajuan, $pengajuan->jumlah_investasi);
 
             return Response::success($pengajuan, 'Kontrak berhasil digenerate!');
         } catch (\Exception $e) {

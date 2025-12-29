@@ -4,6 +4,7 @@ namespace App\Livewire\ProgramRestrukturisasi;
 
 use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
+use App\Helpers\ListNotifSFinance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -493,7 +494,14 @@ class Edit extends Create
                 'nominal_bayar' => $angsuran['total_cicilan'],
             ]);
 
+            // Reload jadwal angsuran dengan relasi untuk notifikasi
+            $jadwalAngsuran->refresh();
+            $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+
             DB::commit();
+
+            // Kirim notifikasi saat debitur melakukan pembayaran restrukturisasi
+            ListNotifSFinance::pembayaranRestrukturisasi($jadwalAngsuran);
 
             // Reload data dulu
             $this->loadData();
