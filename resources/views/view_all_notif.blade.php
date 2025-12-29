@@ -42,9 +42,9 @@
                                         <li class="list-group-item list-group-item-action {{ $notif->status == 'read' ? 'marked-as-read' : '' }}">
                                             <div class="d-flex">
                                                 <div class="flex-grow-1">
-                                                    <a href="{{ url('notif-read/' . $notif->id) }}" class="text-black">
+                                                    <a href="{{ url('notif-read/' . $notif->id_notification) }}" class="text-black">
                                                         <p class="mb-0 notif-text" id="text-{{ $notif->id }}">{{ strip_tags($notif->content) }}</p>
-                                                        <small class="text-muted create">{{ $notif->created_at }}</small>
+                                                        <small class="text-muted create">{{ $notif->created_at->setTimezone('Asia/Jakarta') }}</small>
                                                     </a>
                                                     <span class="see-more" id="see-more-{{ $notif->id }}"></span>
                                                 </div>
