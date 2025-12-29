@@ -6,6 +6,9 @@ use Illuminate\Console\Command;
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
 use App\Models\BuktiPeminjaman;
+use App\Models\JadwalAngsuran;
+use App\Models\PenyaluranDeposito;
+use App\Models\PengajuanInvestasi;
 use App\Helpers\ListNotifSFinance;
 use Carbon\Carbon;
 
@@ -23,7 +26,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
      *
      * @var string
      */
-    protected $description = 'Cek dan kirim notifikasi untuk pengembalian dana SFinance yang mendekati jatuh tempo atau sudah telat';
+    protected $description = 'Cek dan kirim notifikasi untuk pengembalian dana, pembayaran restrukturisasi, pengembalian investasi, dan pengembalian investasi ke investor SFinance yang mendekati jatuh tempo atau sudah telat';
 
     /**
      * Execute the console command.
@@ -98,7 +101,103 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
             }
         }
 
-        $this->info("Pengecekan selesai. Notifikasi jatuh tempo: {$countJatuhTempo}, Notifikasi telat: {$countTelat}");
+        // ============================================
+        // CEK PEMBAYARAN RESTRUKTURISASI JATUH TEMPO
+        // ============================================
+        $this->info('Memulai pengecekan pembayaran restrukturisasi jatuh tempo...');
+
+        $countRestrukturisasiJatuhTempo = 0;
+        $countRestrukturisasiTelat = 0;
+
+        // Ambil semua jadwal angsuran yang belum lunas
+        $jadwalAngsuranList = JadwalAngsuran::with(['programRestrukturisasi.pengajuanRestrukturisasi.debitur'])
+            ->where('status', '!=', 'Lunas')
+            ->whereNull('bukti_pembayaran')
+            ->whereNotNull('tanggal_jatuh_tempo')
+            ->get();
+
+        foreach ($jadwalAngsuranList as $jadwalAngsuran) {
+            $jatuhTempo = Carbon::parse($jadwalAngsuran->tanggal_jatuh_tempo);
+            
+            // Cek apakah sudah melewati jatuh tempo (telat)
+            if ($today->gt($jatuhTempo)) {
+                // Sudah telat - kirim notifikasi telat
+                $this->info("Jadwal angsuran no {$jadwalAngsuran->no} sudah telat (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinance::pembayaranRestrukturisasiTelat($jadwalAngsuran, $jadwalAngsuran->tanggal_jatuh_tempo);
+                $countRestrukturisasiTelat++;
+            } 
+            // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
+            elseif ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
+                // Mendekati jatuh tempo - kirim notifikasi
+                $this->info("Jadwal angsuran no {$jadwalAngsuran->no} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinance::pembayaranRestrukturisasiJatuhTempo($jadwalAngsuran, $jadwalAngsuran->tanggal_jatuh_tempo);
+                $countRestrukturisasiJatuhTempo++;
+            }
+        }
+
+        // ============================================
+        // CEK PENGEMBALIAN INVESTASI JATUH TEMPO
+        // ============================================
+        $this->info('Memulai pengecekan pengembalian investasi jatuh tempo...');
+
+        $countInvestasiJatuhTempo = 0;
+
+        // Ambil semua penyaluran deposito yang belum dikembalikan (belum ada bukti_pengembalian)
+        $penyaluranList = PenyaluranDeposito::with(['debitur', 'pengajuanInvestasi'])
+            ->whereNull('bukti_pengembalian')
+            ->whereNotNull('tanggal_pengembalian')
+            ->get();
+
+        foreach ($penyaluranList as $penyaluran) {
+            $jatuhTempo = Carbon::parse($penyaluran->tanggal_pengembalian);
+            
+            // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
+            // Tidak perlu cek telat karena hanya perlu notifikasi sebelum jatuh tempo
+            if ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
+                // Mendekati jatuh tempo - kirim notifikasi
+                $this->info("Penyaluran deposito ID {$penyaluran->id_penyaluran_deposito} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                ListNotifSFinance::pengembalianInvestasiJatuhTempo($penyaluran, $penyaluran->tanggal_pengembalian);
+                $countInvestasiJatuhTempo++;
+            }
+        }
+
+        // CEK PENGEMBALIAN INVESTASI KE INVESTOR JATUH TEMPO
+        $this->info('Memulai pengecekan pengembalian investasi ke investor jatuh tempo...');
+
+        $countInvestasiKeInvestorJatuhTempo = 0;
+
+        // Ambil semua pengajuan investasi yang statusnya "Selesai" dan belum lunas (masih ada sisa_pokok atau sisa_bagi_hasil)
+        $pengajuanInvestasiList = PengajuanInvestasi::with('investor')
+            ->where('status', 'Selesai')
+            ->where(function ($query) {
+                $query->where('sisa_pokok', '>', 0)
+                      ->orWhere('sisa_bagi_hasil', '>', 0);
+            })
+            ->whereNotNull('tanggal_investasi')
+            ->get();
+
+        foreach ($pengajuanInvestasiList as $pengajuan) {
+            // Hitung tanggal jatuh tempo berdasarkan jenis deposito
+            $tanggalInvestasi = Carbon::parse($pengajuan->tanggal_investasi);
+            
+            if ($pengajuan->deposito === 'Reguler') {
+                // Regular: Always 31 December of investment year
+                $tanggalJatuhTempo = Carbon::createFromDate($tanggalInvestasi->year, 12, 31);
+            } else {
+                // Khusus: tanggal_investasi + lama_investasi months
+                $tanggalJatuhTempo = $tanggalInvestasi->copy()->addMonths($pengajuan->lama_investasi);
+            }
+
+            // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
+            if ($today->diffInDays($tanggalJatuhTempo) <= $daysBeforeDue && $today->lte($tanggalJatuhTempo)) {
+                // Mendekati jatuh tempo - kirim notifikasi
+                $this->info("Pengajuan investasi {$pengajuan->id_pengajuan_investasi} mendekati jatuh tempo (Jatuh tempo: {$tanggalJatuhTempo->format('d/m/Y')})");
+                ListNotifSFinance::pengembalianInvestasiKeInvestorJatuhTempo($pengajuan, $tanggalJatuhTempo->toDateString());
+                $countInvestasiKeInvestorJatuhTempo++;
+            }
+        }
+
+        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi jatuh tempo restrukturisasi: {$countRestrukturisasiJatuhTempo}, Notifikasi telat restrukturisasi: {$countRestrukturisasiTelat}, Notifikasi jatuh tempo investasi: {$countInvestasiJatuhTempo}, Notifikasi jatuh tempo investasi ke investor: {$countInvestasiKeInvestorJatuhTempo}");
 
         return Command::SUCCESS;
     }

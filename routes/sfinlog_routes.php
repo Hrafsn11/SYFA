@@ -15,16 +15,15 @@ use App\Http\Controllers\SFinlog\EvaluasiRestrukturisasiController;
 use App\Livewire\DebiturPiutangIndex;
 use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
 use App\Livewire\PengembalianInvestasi;
-use Illuminate\Support\Facades\Route;
-
-// Dashboard Pembiayaan SFinlog
 use App\Livewire\SFinlog\DashboardPembiayaanSfinlog;
 use App\Livewire\SFinlog\DashboardInvestasiDepositoSfinlog;
+use Illuminate\Support\Facades\Route;
 
-Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinlog::class)->name('dashboard.pembiayaan');
+// Dashboard Pembiayaan SFinlog - Protected by permission
+Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinlog::class)->name('dashboard.pembiayaan')->middleware('can:sfinlog.menu.dashboard_pembiayaan');
 
-// Dashboard Investasi Deposito SFinlog
-Route::get('dashboard/investasi-deposito', DashboardInvestasiDepositoSfinlog::class)->name('dashboard.investasi-deposito');
+// Dashboard Investasi Deposito SFinlog - Protected by permission
+Route::get('dashboard/investasi-deposito', DashboardInvestasiDepositoSfinlog::class)->name('dashboard.investasi-deposito')->middleware('can:sfinlog.menu.dashboard_investasi_deposito');
 
 // Peminjaman
 Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
