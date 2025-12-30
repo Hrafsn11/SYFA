@@ -110,7 +110,7 @@
                                 <td>Rp {{ number_format($invoice->nominal_yg_dibayarkan, 0, ',', '.') }}</td>
                                 <td>
                                     @if ($invoice->bukti_pembayaran)
-                                        <a href="{{ route('file.preview', ['filename' => $invoice->bukti_pembayaran]) }}"
+                                        <a href="{{ Storage::disk('public')->url($invoice->bukti_pembayaran) }}"
                                            class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
                                             Lihat Bukti
                                         </a>
@@ -120,7 +120,7 @@
                                 </td>
                                 <td class="text-center">
                                     @if ($invoice->bukti_pembayaran)
-                                        <a href="{{ route('file.preview', ['filename' => $invoice->bukti_pembayaran]) }}"
+                                        <a href="{{ Storage::disk('public')->url($invoice->bukti_pembayaran) }}"
                                            class="btn btn-sm btn-icon btn-text-primary rounded-pill"
                                            target="_blank" rel="noopener" title="Lihat Bukti">
                                             <i class="fa-solid fa-eye"></i>
