@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\MasterDebiturDanInvestor;
 use App\Models\Notification;
 use App\Models\NotificationFeatureDetail;
 use App\Models\Role;
@@ -410,10 +411,37 @@ if (!function_exists('sendNotification')) {
                         $role = Role::find($value2);
                         if(isset($role)) {
                             $roleName = $role->name;
-                            $user_temp = User::role($roleName)
-                            ->pluck('id')
-                            ->toArray();
 
+                            if (in_array($roleName, ['Debitur', 'Investor'])) {
+                                $debitur_and_investor = [];
+                                if(!empty($data['id_debitur'])) {
+                                    $debitur_and_investor[] = $data['id_debitur'];
+                                }
+                                if(!empty($data['id_investor'])) {
+                                    $debitur_and_investor[] = $data['id_investor'];
+                                }
+                                $user_temp = User::whereHas('debiturInvestor', function ($query) use ($debitur_and_investor) {
+                                    $query->whereIn('id_debitur', $debitur_and_investor);
+                                })->pluck('id')->toArray();
+                                // if($data['id_debitur']) {
+                                //     $user_debitur = User::whereHas('masterDebiturDanInvestor', function($query) use ($data) {
+                                //         $query->where('id_debitur', $data['id_debitur']);
+                                //     })->pluck('id')->toArray();
+                                // }
+
+                                // $user_investor = [];
+                                // if($data['id_investor']) {
+                                //     $user_investor = User::where('id', $data['id_investor'])
+                                //         ->pluck('id')
+                                //         ->toArray();
+                                // }
+
+                            } else {
+                                $user_temp = User::role($roleName)
+                                ->pluck('id')
+                                ->toArray();
+                            }
+                                                        
                             if (count($user_temp) > 0) {
                                 foreach ($user_temp as $key3 => $value3) {
                                     $not = new Notification();
