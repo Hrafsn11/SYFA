@@ -6,7 +6,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="fw-bold mb-0">AR Perbulan</h4>
                         <div>
-                            <button type="button" class="btn btn-sm btn-success" wire:click="exportToZip"
+                            <button type="button" class="btn btn-primary d-flex justify-center align-items-center gap-3" wire:click="exportToZip"
                                 wire:loading.attr="disabled">
                                 <i class="ti ti-file-zip"></i>
                                 <span wire:loading.remove>Export (Excel + PDF)</span>
