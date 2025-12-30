@@ -14,7 +14,8 @@ return new class extends Migration
         if (!Schema::hasTable('penyaluran_deposito_sfinlog')) {
             Schema::create('penyaluran_deposito_sfinlog', function (Blueprint $table) {
                 $table->ulid('id_penyaluran_deposito_sfinlog')->primary();
-                $table->foreignUlid('id_pengajuan_investasi_finlog')->constrained('pengajuan_investasi_finlog', 'id_pengajuan_investasi_finlog')->onDelete('cascade');
+                $table->ulid('id_pengajuan_investasi_finlog');
+                $table->foreign('id_pengajuan_investasi_finlog', 'penyaluran_pengajuan_fk')->references('id_pengajuan_investasi_finlog')->on('pengajuan_investasi_finlog')->onDelete('cascade');
                 $table->decimal('nominal_yang_disalurkan', 20, 2);
                 $table->date('tanggal_pengiriman_dana');
                 $table->date('tanggal_pengembalian');
