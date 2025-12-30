@@ -170,16 +170,23 @@
                                 </td>
                                 <td>
                                     @if ($invoice->bukti_pembayaran)
-                                        <a href="{{ route('file.preview', ['filename' => $invoice->bukti_pembayaran]) }}"
-                                            class="btn btn-sm btn-outline-success" target="_blank" rel="noopener">
-                                            <i class="ti ti-eye me-1"></i>
+                                        <a href="{{ Storage::disk('public')->url($invoice->bukti_pembayaran) }}"
+                                           class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
                                             Lihat Bukti
                                         </a>
                                     @else
-                                        <span class="badge bg-label-secondary">
-                                            <i class="ti ti-file-x me-1"></i>
-                                            Tidak ada
-                                        </span>
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if ($invoice->bukti_pembayaran)
+                                        <a href="{{ Storage::disk('public')->url($invoice->bukti_pembayaran) }}"
+                                           class="btn btn-sm btn-icon btn-text-primary rounded-pill"
+                                           target="_blank" rel="noopener" title="Lihat Bukti">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                    @else
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
                             </tr>

@@ -94,7 +94,7 @@
                                         <div class="flex-grow-1">
                                             <a href="/notif-read/{{ $notif->id_notification }}" class="text-black">
                                                 <h6 class="mb-1 d-block text-body">{{ strip_tags($notif->content) }}</h6>
-                                                <small class="text-muted">{{ $notif->created_at }}</small>
+                                                <small class="text-muted">{{ $notif->created_at->setTimezone('Asia/Jakarta') }}</small>
                                             </a>
                                         </div>
                                         <div class="flex-shrink-0 dropdown-notifications-actions">
