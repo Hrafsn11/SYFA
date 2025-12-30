@@ -466,6 +466,8 @@
                                                             <th>NAMA CLIENT</th>
                                                             <th>NILAI PINJAMAN</th>
                                                             <th>NILAI BAGI HASIL</th>
+                                                            <th>KONTRAK DATE</th>
+                                                            <th>DUE DATE</th>
                                                             <th>DOKUMEN KONTRAK</th>
                                                             <th>DOKUMEN SO</th>
                                                             <th>DOKUMEN BAST</th>
@@ -484,9 +486,12 @@
                                                                 <td>Rp.
                                                                     {{ number_format($po['nilai_pinjaman'] ?? 0, 0, ',', '.') }}
                                                                 </td>
+
                                                                 <td>Rp.
                                                                     {{ number_format($po['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}
                                                                 </td>
+                                                                <td>{{ $po['kontrak_date'] ?? '-' }}</td>
+                                                                <td>{{ $po['due_date'] ?? '-' }}</td>
 
                                                                 <td>
                                                                     @if (!empty($po['dokumen_kontrak']))
@@ -515,7 +520,7 @@
                                                             </tr>
                                                         @empty
                                                             <tr>
-                                                                <td colspan="9" class="text-center">Tidak ada data PO
+                                                                <td colspan="11" class="text-center">Tidak ada data PO
                                                                 </td>
                                                             </tr>
                                                         @endforelse
@@ -660,6 +665,7 @@
                                         
                                         @if(($peminjaman['status'] ?? '') !== 'Dana Sudah Dicairkan' && $peminjaman['current_step'] == 7)
                                             <!-- Upload Form - Show only when status is NOT 'Dana Sudah Dicairkan' -->
+                                            @can('peminjaman_dana.upload_dokumen_transfer')
                                             <div class="mt-5" id="uploadDokumenSection">
                                                 <hr class="my-4">
                                                 <h6 class="text-dark mb-3">Upload Dokumen Transfer</h6>
@@ -667,7 +673,6 @@
                                                 <div class="card border-1 shadow-none">
                                                     <div class="card-body">
                                                         <form id="formUploadDokumenTransfer" class="row g-3">
-                                                            @can('peminjaman_dana.upload_dokumen_transfer')
                                                             <div class="col-12">
                                                                 <label for="dokumenTransfer" class="form-label">
                                                                     <i class="ti ti-upload me-2"></i>
@@ -690,53 +695,11 @@
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                            @endcan
                                                         </form>
                                                     </div>
                                                 </div>
                                             </div>
-                                        @elseif($peminjaman['current_step'] == 8 || $peminjaman['current_step'] == 9)
-                                            <!-- Document View - Show when status is 'Dana Sudah Dicairkan' -->
-                                            <div class="mt-5" id="viewDokumenSection">
-                                                <hr class="my-4">
-                                                <h6 class="text-dark mb-3">Dokumen Bukti Transfer</h6>
-                                                
-                                                <div class="card border-1 shadow-none">
-                                                    <div class="card-body">
-                                                        <div class="row g-3">
-                                                            <div class="col-12">
-                                                                @if(!empty($peminjaman['upload_bukti_transfer']))
-                                                                    <div class="border rounded p-3 bg-light">
-                                                                        <div class="d-flex align-items-center justify-content-between">
-                                                                            <div>
-                                                                                <i class="ti ti-file-text me-2 text-primary"></i>
-                                                                                <strong>{{ basename($peminjaman['upload_bukti_transfer']) }}</strong>
-                                                                                <br>
-                                                                                <small class="text-muted">
-                                                                                    <i class="ti ti-calendar me-1"></i>
-                                                                                    Diupload pada: {{ now()->translatedFormat('j F Y H:i') }}
-                                                                                </small>
-                                                                            </div>
-                                                                            <a href="{{ asset('storage/' . $peminjaman['upload_bukti_transfer']) }}" 
-                                                                               target="_blank" 
-                                                                               class="btn btn-outline-primary btn-sm">
-                                                                                <i class="ti ti-eye me-2"></i>
-                                                                                Lihat Dokumen
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                @else
-                                                                    <div class="border rounded p-3 text-center bg-light">
-                                                                        <i class="ti ti-file-x text-muted mb-2" style="font-size: 2rem;"></i>
-                                                                        <p class="text-muted mb-0">Dokumen transfer belum tersedia</p>
-                                                                        <small class="text-muted">Status sudah dicairkan namun dokumen tidak ditemukan</small>
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            @endcan
                                         @endif
                                         <!-- End Upload/View Dokumen Section -->
                                     </div>
@@ -919,6 +882,29 @@
 
     <!-- Modal Modal -->
     @include('livewire.peminjaman.partials._modal-detail-peminjaman')
+
+    <!-- Modal Preview Bukti Transfer -->
+    <div class="modal fade" id="modalPreviewBukti" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Preview Bukti Transfer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="previewImage" src="" alt="Bukti Transfer" class="img-fluid d-none" style="max-height: 70vh;">
+                    <iframe id="previewPdf" src="" class="d-none" style="width: 100%; height: 70vh;" frameborder="0"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <a id="downloadBukti" href="" download class="btn btn-primary">
+                        <i class="ti ti-download me-1"></i>
+                        Download
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1866,6 +1852,20 @@
             document.body.appendChild(form);
             form.submit();
             document.body.removeChild(form);
+        }
+
+        // Global function untuk preview bukti transfer
+        function previewBuktiTransfer(fileUrl) {
+            const ext = fileUrl.split('.').pop().toLowerCase();
+            const $img = $('#previewImage'), $pdf = $('#previewPdf');
+            
+            $img.add($pdf).addClass('d-none');
+            $('#downloadBukti').attr('href', fileUrl);
+            
+            (['jpg', 'jpeg', 'png', 'gif'].includes(ext) ? $img : $pdf)
+                .attr('src', fileUrl).removeClass('d-none');
+            
+            new bootstrap.Modal($('#modalPreviewBukti')[0]).show();
         }
 
         // Global function untuk show history detail

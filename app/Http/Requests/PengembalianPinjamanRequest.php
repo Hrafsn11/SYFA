@@ -37,6 +37,7 @@ class PengembalianPinjamanRequest extends FormRequest
             'catatan' => 'nullable|string',
             'pengembalian_invoices' => 'required|array|min:1',
             'pengembalian_invoices.*.nominal' => 'required|numeric|min:1',
+            'pengembalian_invoices.*.file' => 'nullable', // Bisa berupa Object File (saat upload) atau String Path (setelah disave di Livewire)
         ];
     }
 

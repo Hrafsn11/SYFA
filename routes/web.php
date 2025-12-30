@@ -4,6 +4,7 @@ use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
@@ -47,16 +48,25 @@ Route::middleware([
     'setActiveModule',
 ])->group(function () {
 
-    require __DIR__.'/livewire_route.php';
+    require __DIR__ . '/livewire_route.php';
+
+    // Module Entry Points - Redirect to first accessible route based on user permissions
+    Route::get('sfinance', function () {
+        return \App\Helpers\ModuleRedirectHelper::redirectToFirstAccessible('sfinance');
+    })->name('sfinance.index');
+
+    Route::get('sfinlog', function () {
+        return \App\Helpers\ModuleRedirectHelper::redirectToFirstAccessible('sfinlog');
+    })->name('sfinlog.index');
 
     // Module Routes: SFinance
     Route::prefix('sfinance')->name('sfinance.')->group(function () {
-        require __DIR__.'/module_routes.php';
+        require __DIR__ . '/module_routes.php';
     });
 
     // Module Routes: SFinlog  
     Route::prefix('sfinlog')->name('sfinlog.')->group(function () {
-        require __DIR__.'/sfinlog_routes.php';
+        require __DIR__ . '/sfinlog_routes.php';
     });
 
     // User Management Routes - Example with permission middleware
@@ -107,16 +117,13 @@ Route::middleware([
         Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
     });
 
-    // Program Restrukturisasi Routes
+    // Program Restrukturisasi Routes - Full Livewire
     Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-        // Blade index + Livewire table (recommended)
-        Route::get('/', function () {return view('program-restrukturisasi.index');})->name('index');
-        // Livewire create form
-        Route::get('create', \App\Livewire\ProgramRestrukturisasiCreate::class)->name('create');
-        Route::get('{id}', \App\Livewire\ProgramRestrukturisasiShow::class)->name('show');
-        Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasiEdit::class)->name('edit');
-        // Controller version (fallback/alternative)
-        Route::get('create-old', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'create'])->name('create-old');
+        Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');
+        Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
+        Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
+        Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
+        // Controller endpoints (if still needed)
         Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
         Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
         Route::get('detail/{id}', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
@@ -128,12 +135,13 @@ Route::middleware([
     // Pengembalian Pinjaman - Migrated to Livewire (see routes/livewire_route.php)
     // Index and Create routes are handled by Livewire components
     Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+    Route::get('pengembalian/export-pdf', [PengembalianPinjamanController::class, 'exportPdf'])->name('pengembalian.export-pdf');
 
     // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
     // Route::get('debitur-piutang', function () {
     //     return view('livewire.debitur-piutang.index');
     // })->name('debitur-piutang.index');
-    
+
     // AJAX endpoints for Debitur Piutang modals (Table 2 & 3)
     Route::get('debitur-piutang/histori', [App\Http\Controllers\DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
     Route::get('debitur-piutang/summary', [App\Http\Controllers\DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
@@ -141,16 +149,17 @@ Route::middleware([
     // Ar Routes
     Route::get('ar-perbulan', ArPerbulan::class)->name('ar-perbulan.index');
     Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
-    
+
     // AR Performance - Migrated to Livewire (see routes/livewire_route.php)
     // Main route moved to Livewire
     // Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
-    
+
     // AJAX endpoints (still needed for modal)
     Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
     Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
     Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
+    Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
     Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
@@ -163,8 +172,9 @@ Route::middleware([
         Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
     });
 
-    // Pengembalian Investasi Routes 
+    // Pengembalian Investasi Routes
     Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PengembalianInvestasiController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\PengembalianInvestasiController::class, 'store'])->name('store');
         Route::get('{id}/edit', [\App\Http\Controllers\PengembalianInvestasiController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\PengembalianInvestasiController::class, 'update'])->name('update');
@@ -222,7 +232,7 @@ Route::middleware([
         Route::get('{id}/edit', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'edit'])->name('edit');
         Route::put('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'update'])->name('update');
         Route::delete('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'destroy'])->name('destroy');
-        
+
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('{id}/delete-signature', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'deleteSignature'])->name('delete-signature');
         Route::get('{id}/history-kol', \App\Livewire\KolHistoryIndex::class)->name('history-kol');
@@ -263,7 +273,14 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\CellsProjectController::class, 'destroy'])->name('destroy');
     });
 
-    
+    // Global Search
+    Route::get('search', \App\Http\Controllers\GlobalSearchController::class)->name('search');
+    Route::get('search/api', [\App\Http\Controllers\GlobalSearchController::class, 'api'])->name('search.api');
+    Route::get('notif-read/{id}', [NotificationController::class, 'read_redirect']);
+    Route::post('notif-hide/{id}', [NotificationController::class, 'hide_redirect']);
+    Route::post('notif-read-all', [NotificationController::class, 'readall']);
+    Route::get('/check-notifications', [NotificationController::class, 'checkNew']);
+    Route::resource('notification', NotificationController::class);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

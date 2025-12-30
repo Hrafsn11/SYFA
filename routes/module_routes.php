@@ -22,10 +22,10 @@ use App\Livewire\PengembalianInvestasi;
 use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
 
-// Dashboard
-Route::get('dashboard', Dashboard::class)->name('dashboard.index');
-Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan');
-Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito');
+// Dashboard - Protected by permission
+Route::get('dashboard', Dashboard::class)->name('dashboard.index')->middleware('can:sfinance.menu.dashboard_pembiayaan');
+Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan')->middleware('can:sfinance.menu.dashboard_pembiayaan');
+Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito')->middleware('can:sfinance.menu.dashboard_pembiayaan_investasi');
 
 // Peminjaman Routes
 Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
@@ -64,12 +64,12 @@ Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->
     Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
 });
 
-// Program Restrukturisasi Routes
+// Program Restrukturisasi Routes - Full Livewire
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-    Route::get('/', function () {return view('program-restrukturisasi.index');})->name('index');
-    Route::get('create', \App\Livewire\ProgramRestrukturisasiCreate::class)->name('create');
-    Route::get('{id}', \App\Livewire\ProgramRestrukturisasiShow::class)->name('show');
-    Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasiEdit::class)->name('edit');
+    Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');
+    Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
+    Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
+    Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
     Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
     Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
     Route::get('detail/{id}', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
@@ -131,7 +131,7 @@ Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(functi
 // Kertas Kerja Investor
 Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
 
-// Pengembalian Investasi
+// Pengembalian Investasi sfinance
 Route::get('pengembalian-investasi', PengembalianInvestasi::class)->name('pengembalian-investasi.index');
 Route::prefix('pengembalian-investasi')->name('pengembalian-investasi.')->group(function () {
     Route::post('/', [PengembalianInvestasiController::class, 'store'])->name('store');

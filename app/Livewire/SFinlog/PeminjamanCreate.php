@@ -20,7 +20,7 @@ class PeminjamanCreate extends Component
     private string $validateClass = PeminjamanRequest::class;
     
     #[FieldInput]
-    public $id_debitur, $id_cells_project, $nama_project, $durasi_project, $nib_perusahaan;
+    public $id_debitur, $id_cells_project, $nama_project, $durasi_project, $durasi_project_hari, $nib_perusahaan;
     
     #[FieldInput]
     public $nilai_pinjaman, $presentase_bagi_hasil, $nilai_bagi_hasil, $total_pinjaman;
@@ -54,6 +54,10 @@ class PeminjamanCreate extends Component
         }
         
         $this->projects = CellsProject::orderBy('nama_cells_bisnis', 'asc')->get();
+        
+        // Set default values
+        $this->durasi_project = 0;
+        $this->durasi_project_hari = 0;
 
         $this->setUrlSaveData('store_peminjaman_finlog', 'sfinlog.peminjaman.store', ["callback" => "afterAction"]);
     }

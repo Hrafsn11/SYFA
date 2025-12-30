@@ -1,0 +1,195 @@
+<?php
+
+namespace App\Livewire;
+
+use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
+use App\Models\PengembalianPinjamanFinlog;
+use App\Models\MasterDebiturDanInvestor;
+use Illuminate\Database\Eloquent\Builder;
+
+class ReportPengembalianFinlogTable extends DataTableComponent
+{
+    protected $model = PengembalianPinjamanFinlog::class;
+
+    public function configure(): void
+    {
+        $this->setPrimaryKey('id_pengembalian_pinjaman_finlog')
+            ->setSearchEnabled()
+            ->setSearchPlaceholder('Cari Report Pengembalian...')
+            ->setSearchDebounce(500)
+            ->setPerPageAccepted([10, 25, 50, 100])
+            ->setPerPageVisibilityEnabled()
+            ->setPerPage(10)
+            ->setDefaultSort('tanggal_pengembalian', 'desc')
+            ->setTableAttributes(['class' => 'table table-bordered table-hover'])
+            ->setTheadAttributes(['class' => 'table-light'])
+            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
+            ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
+            ->setBulkActionsDisabled();
+    }
+
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Bulan')
+                ->options([
+                    '' => 'Semua Bulan',
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("MONTH(pengembalian_pinjaman_finlog.tanggal_pengembalian) = ?", [$value]);
+                    }
+                }),
+
+            SelectFilter::make('Tahun')
+                ->options([
+                    '' => 'Semua Tahun',
+                    '2023' => '2023',
+                    '2024' => '2024',
+                    '2025' => '2025',
+                    '2026' => '2026',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("YEAR(pengembalian_pinjaman_finlog.tanggal_pengembalian) = ?", [$value]);
+                    }
+                }),
+        ];
+    }
+
+    public function builder(): Builder
+    {
+        $user = auth()->user();
+
+        // Check if user has unrestricted role
+        $hasUnrestrictedRole = false;
+        if ($user) {
+            if ($user->hasRole('super-admin')) {
+                $hasUnrestrictedRole = true;
+            } else {
+                $roles = $user->roles;
+                $hasUnrestrictedRole = $roles->contains(function ($role) {
+                    return $role->restriction == 1;
+                });
+            }
+        }
+
+        if ($hasUnrestrictedRole) {
+            // Unrestricted users (Finance SKI, CEO Finlog, etc) - see all report data
+            return PengembalianPinjamanFinlog::query()
+                ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project']);
+        } else {
+            // Restricted users (Debitur) - only see their own report data
+            $currentDebitur = MasterDebiturDanInvestor::where('user_id', auth()->id())->first();
+
+            if (!$currentDebitur) {
+                // Return empty query if user is not a debitur
+                return PengembalianPinjamanFinlog::query()->whereRaw('1 = 0');
+            }
+
+            // Filter by user's debitur - show ALL pengembalian records
+            return PengembalianPinjamanFinlog::query()
+                ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
+                ->whereHas('peminjamanFinlog', function ($query) use ($currentDebitur) {
+                    $query->where('id_debitur', $currentDebitur->id_debitur);
+                });
+        }
+    }
+
+    public function columns(): array
+    {
+        return [
+            Column::make('No')
+                ->label(function ($row, Column $column) {
+                    static $rowNumber = 0;
+                    $rowNumber++;
+                    $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
+                    return '<div class="text-center fw-semibold">' . $number . '</div>';
+                })
+                ->html()
+                ->excludeFromColumnSelect(),
+
+            Column::make('Nama Perusahaan', 'peminjamanFinlog.debitur.nama')
+                ->sortable()
+                ->searchable()
+                ->format(fn($value) => '<div class="text-center">' . ($value ?: '-') . '</div>')
+                ->html(),
+
+            Column::make('Kode Peminjaman', 'peminjamanFinlog.nomor_peminjaman')
+                ->sortable()
+                ->searchable()
+                ->format(fn($value) => '<span class="badge bg-primary">' . ($value ?? '-') . '</span>')
+                ->html(),
+
+            Column::make('Jumlah Pengembalian', 'jumlah_pengembalian')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-end">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+                ->html(),
+
+            Column::make('Sisa Pinjaman', 'sisa_pinjaman')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-end text-danger fw-semibold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+                ->html(),
+
+            Column::make('Sisa Bagi Hasil', 'sisa_bagi_hasil')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-end text-warning fw-semibold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+                ->html(),
+
+            Column::make('Total Sisa', 'total_sisa_pinjaman')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-end text-primary fw-bold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+                ->html(),
+
+            Column::make('Tanggal Pengembalian', 'tanggal_pengembalian')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-center">' . ($value ? $value->format('d/m/Y') : '-') . '</div>')
+                ->html(),
+
+            Column::make('Jatuh Tempo', 'jatuh_tempo')
+                ->sortable()
+                ->format(fn($value) => '<div class="text-center">' . ($value ? $value->format('d/m/Y') : '-') . '</div>')
+                ->html(),
+
+            Column::make('Bukti Pembayaran', 'bukti_pembayaran')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value, $row) {
+                    if ($value) {
+                        return '<div class="text-center"><a href="' . asset('storage/' . $value) . '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="ti ti-file-text"></i></a></div>';
+                    }
+                    return '<div class="text-center"><span class="text-muted">-</span></div>';
+                })
+                ->html(),
+
+            Column::make('Status', 'status')
+                ->sortable()
+                ->format(function ($value) {
+                    $badges = [
+                        'Lunas' => 'success',
+                        'Belum Lunas' => 'warning',
+                        'Terlambat' => 'danger',
+                    ];
+                    $badgeClass = $badges[$value] ?? 'secondary';
+                    return '<div class="text-center"><span class="badge bg-' . $badgeClass . '">' . $value . '</span></div>';
+                })
+                ->html(),
+        ];
+    }
+}

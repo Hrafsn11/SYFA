@@ -26,7 +26,8 @@ class PeminjamanRequest extends FormRequest
             'id_debitur' => ['required', 'exists:master_debitur_dan_investor,id_debitur'],
             'id_cells_project' => ['nullable', 'exists:cells_projects,id_cells_project'],
             'nama_project' => ['required', 'string', 'max:255'],
-            'durasi_project' => ['required', 'integer', 'min:1'],
+            'durasi_project' => ['required', 'integer', 'min:0'],
+            'durasi_project_hari' => ['required', 'integer', 'min:0'],
             'nib_perusahaan' => ['nullable', 'string', 'max:255'],
             
             'nilai_pinjaman' => ['required', 'numeric', 'min:0'],
@@ -91,7 +92,7 @@ class PeminjamanRequest extends FormRequest
                     $fail('Ukuran dokumen NPA maksimal 2MB.');
                 }
             }],
-            'akta_perusahaan' => ['required', function ($attribute, $value, $fail) {
+            'akta_perusahaan' => ['nullable', function ($attribute, $value, $fail) {
                 if (is_string($value)) return; // Already a stored path from Livewire
                 if (!$value instanceof \Illuminate\Http\UploadedFile) {
                     $fail('Akta perusahaan harus diupload.');
@@ -104,7 +105,7 @@ class PeminjamanRequest extends FormRequest
                     $fail('Ukuran akta perusahaan maksimal 2MB.');
                 }
             }],
-            'ktp_owner' => ['required', function ($attribute, $value, $fail) {
+            'ktp_owner' => ['nullable', function ($attribute, $value, $fail) {
                 if (is_string($value)) return; // Already a stored path from Livewire
                 if (!$value instanceof \Illuminate\Http\UploadedFile) {
                     $fail('KTP owner harus diupload.');
@@ -164,7 +165,11 @@ class PeminjamanRequest extends FormRequest
             
             'durasi_project.required' => 'Durasi project harus diisi.',
             'durasi_project.integer' => 'Durasi project harus berupa angka bulat.',
-            'durasi_project.min' => 'Durasi project minimal 1 bulan.',
+            'durasi_project.min' => 'Durasi project minimal 0 bulan.',
+            
+            'durasi_project_hari.required' => 'Durasi project (hari) harus diisi.',
+            'durasi_project_hari.integer' => 'Durasi project (hari) harus berupa angka bulat.',
+            'durasi_project_hari.min' => 'Durasi project (hari) minimal 0 hari.',
             
             'nib_perusahaan.string' => 'NIB perusahaan harus berupa teks.',
             'nib_perusahaan.max' => 'NIB perusahaan maksimal 255 karakter.',
@@ -209,12 +214,10 @@ class PeminjamanRequest extends FormRequest
             'dokumen_npa.mimes' => 'Dokumen NPA harus berformat PDF, JPG, JPEG, atau PNG.',
             'dokumen_npa.max' => 'Ukuran dokumen NPA maksimal 2MB.',
             
-            'akta_perusahaan.required' => 'Akta perusahaan harus diupload.',
             'akta_perusahaan.file' => 'Akta perusahaan harus berupa file.',
             'akta_perusahaan.mimes' => 'Akta perusahaan harus berformat PDF, JPG, JPEG, atau PNG.',
             'akta_perusahaan.max' => 'Ukuran akta perusahaan maksimal 2MB.',
             
-            'ktp_owner.required' => 'KTP owner harus diupload.',
             'ktp_owner.file' => 'KTP owner harus berupa file.',
             'ktp_owner.mimes' => 'KTP owner harus berformat PDF, JPG, JPEG, atau PNG.',
             'ktp_owner.max' => 'Ukuran KTP owner maksimal 2MB.',

@@ -21,6 +21,7 @@ class PeminjamanFinlog extends Model
         'id_cells_project',
         'nama_project',
         'durasi_project',
+        'durasi_project_hari',
         'nib_perusahaan',
         'nilai_pinjaman',
         'presentase_bagi_hasil',
@@ -55,6 +56,7 @@ class PeminjamanFinlog extends Model
         'harapan_tanggal_pencairan' => 'date',
         'rencana_tgl_pengembalian' => 'date',
         'durasi_project' => 'integer',
+        'durasi_project_hari' => 'integer',
         'top' => 'integer',
         'current_step' => 'integer',
     ];
@@ -72,5 +74,18 @@ class PeminjamanFinlog extends Model
     public function histories()
     {
         return $this->hasMany(HistoryPengajuanPinjamanFinlog::class, 'id_peminjaman_finlog', 'id_peminjaman_finlog');
+    }
+
+    /**
+     * Relasi ke PengembalianPinjamanFinlog
+     */
+    public function pengembalianPinjaman()
+    {
+        return $this->hasMany(PengembalianPinjamanFinlog::class, 'id_pinjaman_finlog', 'id_peminjaman_finlog');
+    }
+
+    public function latestPengembalian()
+    {
+        return $this->hasOne(PengembalianPinjamanFinlog::class, 'id_pinjaman_finlog', 'id_peminjaman_finlog')->latestOfMany('created_at');
     }
 }

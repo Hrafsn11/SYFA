@@ -2,119 +2,117 @@
 
 namespace App\Livewire;
 
+use App\Services\DashboardPembiayaanSfinanceService;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class DashboardPembiayaanSfinance extends Component
 {
-    // Filter properties
-    public $bulan;
-    public $tahun;
-    public $bulan1; // untuk comparison chart
-    public $bulan2; // untuk comparison chart
+    // Filter properties - ISOLATED per chart
+    public $bulanDisbursement;
+    public $bulanPembayaran;
+    public $bulanSisa;
+    public $tahun;              // Global year
+    public $tahunPiutang;       // Separate year filter for piutang chart
+    public $bulan1;             // Comparison chart
+    public $bulan2;             // Comparison chart
+    public $bulanTable;         // AR Table filter
+    public $tahunTable;         // AR Table filter
+
+    protected $service;
+
+    public function boot(DashboardPembiayaanSfinanceService $service)
+    {
+        $this->service = $service;
+    }
 
     public function mount()
     {
-        $this->tahun = date('Y');
-        $this->bulan = date('m');
-        $this->bulan1 = date('m');
-        $this->bulan2 = date('m', strtotime('-2 months'));
+        $now = Carbon::now();
+        $currentMonth = $now->format('m');
+        $currentYear = $now->format('Y');
+        $previousMonth = $now->copy()->subMonth()->format('m');
+
+        // Initialize with logic handling for 'now' or empty
+        $this->tahun = ($this->tahun === 'now' || empty($this->tahun)) ? $currentYear : $this->tahun;
+        $this->tahunPiutang = ($this->tahunPiutang === 'now' || empty($this->tahunPiutang)) ? $currentYear : $this->tahunPiutang;
+        
+        $this->bulanDisbursement = ($this->bulanDisbursement === 'now' || empty($this->bulanDisbursement)) ? $currentMonth : $this->bulanDisbursement;
+        $this->bulanPembayaran = ($this->bulanPembayaran === 'now' || empty($this->bulanPembayaran)) ? $currentMonth : $this->bulanPembayaran;
+        $this->bulanSisa = ($this->bulanSisa === 'now' || empty($this->bulanSisa)) ? $currentMonth : $this->bulanSisa;
+        
+        $this->bulan1 = ($this->bulan1 === 'now' || empty($this->bulan1)) ? $currentMonth : $this->bulan1;
+        $this->bulan2 = ($this->bulan2 === 'now' || empty($this->bulan2)) ? $previousMonth : $this->bulan2;
+        
+        $this->bulanTable = ($this->bulanTable === 'now' || empty($this->bulanTable)) ? $currentMonth : $this->bulanTable;
+        $this->tahunTable = ($this->tahunTable === 'now' || empty($this->tahunTable)) ? $currentYear : $this->tahunTable;
     }
+
+    // Update methods to trigger specific chart re-renders
+    public function updatedBulanDisbursement()
+    {
+        $this->dispatch('updateChartDisbursement');
+    }
+
+    public function updatedBulanPembayaran()
+    {
+        $this->dispatch('updateChartPembayaran');
+    }
+
+    public function updatedBulanSisa()
+    {
+        $this->dispatch('updateChartSisa');
+    }
+
+    public function updatedTahunPiutang()
+    {
+        $this->dispatch('updateChartPiutang');
+    }
+
+    // Comparison & Table updates are handled by wire:key auto-refresh logic usually, 
+    // but dispatching event doesn't hurt for consistency.
+
+    protected $listeners = ['updated' => '$refresh'];
 
     public function render()
     {
-        // Dummy data untuk frontend (nanti akan diganti dengan data real dari backend)
-        $summaryData = [
-            'total_disbursement' => 126500,
-            'total_pembayaran_masuk' => 126500,
-            'total_sisa_belum_terbayar' => 126500,
-            'total_outstanding_piutang' => 126500,
-        ];
+        // 1. Summary Data
+        $summaryData = $this->service->getSummaryData($this->bulanDisbursement, $this->tahun);
+        $summaryDataPembayaran = $this->service->getSummaryData($this->bulanPembayaran, $this->tahun);
+        $summaryDataSisa = $this->service->getSummaryData($this->bulanSisa, $this->tahun);
+        $summaryDataOutstanding = $this->service->getSummaryData(null, null); // Global
 
+        // 2. Chart Data
         $chartData = [
-            'disbursement' => $this->getDisbursementData(),
-            'pembayaran' => $this->getPembayaranData(),
-            'sisa_belum_terbayar' => $this->getSisaBelumTerbayarData(),
-            'pembayaran_piutang_tahun' => $this->getPembayaranPiutangTahunData(),
-            'comparison' => $this->getComparisonData(),
+            'disbursement' => $this->service->getDisbursementData($this->bulanDisbursement, $this->tahun),
+            'pembayaran' => $this->service->getPembayaranData($this->bulanPembayaran, $this->tahun),
+            'sisa_belum_terbayar' => $this->service->getSisaBelumTerbayarData($this->bulanSisa, $this->tahun),
+            'pembayaran_piutang_tahun' => $this->service->getPembayaranPiutangTahunData($this->tahunPiutang),
+            'comparison' => $this->service->getComparisonData($this->bulan1, $this->bulan2, $this->tahun),
         ];
 
-        $arTableData = $this->getArTableData();
+        // 3. Table Data
+        $arTableData = $this->service->getArTableData($this->bulanTable, $this->tahunTable);
+
+        // Check availability
+        $hasDataDisbursement = !empty($chartData['disbursement']['categories']);
+        $hasDataPembayaran = !empty($chartData['pembayaran']['categories']);
+        $hasDataSisa = !empty($chartData['sisa_belum_terbayar']['categories']);
+        $hasDataPiutang = !empty($chartData['pembayaran_piutang_tahun']['categories']);
 
         return view('livewire.dashboard-pembiayaan-sfinance', [
             'summaryData' => $summaryData,
+            'summaryDataPembayaran' => $summaryDataPembayaran,
+            'summaryDataSisa' => $summaryDataSisa,
+            'summaryDataOutstanding' => $summaryDataOutstanding,
             'chartData' => $chartData,
             'arTableData' => $arTableData,
+            'hasDataDisbursement' => $hasDataDisbursement,
+            'hasDataPembayaran' => $hasDataPembayaran,
+            'hasDataSisa' => $hasDataSisa,
+            'hasDataPiutang' => $hasDataPiutang,
         ])->layout('layouts.app', [
             'title' => 'Dashboard Pembiayaan Sfinance'
         ]);
     }
-
-    // Dummy data methods - akan diganti dengan data real dari service/model
-    private function getDisbursementData()
-    {
-        return [
-            'categories' => ['Tahun', 'Proses', 'Mudaha', 'Hukum', 'Kredit'],
-            'pokok' => [188000000, 150000000, 120000000, 100000000, 80000000],
-            'bagi_hasil' => [150000000, 120000000, 100000000, 110000000, 70000000],
-        ];
-    }
-
-    private function getPembayaranData()
-    {
-        return [
-            'categories' => ['Tahun', 'Proses', 'Mudaha', 'Hukum', 'Kredit'],
-            'pokok' => [180000000, 145000000, 115000000, 95000000, 75000000],
-            'bagi_hasil' => [145000000, 115000000, 95000000, 105000000, 65000000],
-        ];
-    }
-
-    private function getSisaBelumTerbayarData()
-    {
-        return [
-            'categories' => ['Tahun', 'Proses', 'Mudaha', 'Hukum', 'Kredit'],
-            'pokok' => [80000000, 50000000, 50000000, 50000000, 50000000],
-            'bagi_hasil' => [50000000, 50000000, 50000000, 50000000, 50000000],
-        ];
-    }
-
-    private function getPembayaranPiutangTahunData()
-    {
-        return [
-            'categories' => ['Tahun', 'Proses', 'Mudaha', 'Hukum', 'Kredit'],
-            'pokok' => [190000000, 155000000, 125000000, 105000000, 85000000],
-        ];
-    }
-
-    private function getComparisonData()
-    {
-        return [
-            'categories' => ['Tahun', 'Proses', 'Mudaha', 'Hukum', 'Kredit'],
-            'bulan1' => [190000000, 155000000, 125000000, 105000000, 85000000],
-            'bulan2' => [150000000, 120000000, 100000000, 95000000, 75000000],
-            'selisih' => [40000000, 35000000, 25000000, 10000000, 10000000],
-        ];
-    }
-
-    private function getArTableData()
-    {
-        return [
-            [
-                'debitur' => 'Ada wong sugih',
-                'del_1_30' => 55000000,
-                'del_31_60' => 0,
-                'del_61_90' => 0,
-                'npl_91_179' => 0,
-                'write_off' => 0,
-            ],
-            [
-                'debitur' => 'Super Admin',
-                'del_1_30' => 10000000,
-                'del_31_60' => 0,
-                'del_61_90' => 0,
-                'npl_91_179' => 0,
-                'write_off' => 0,
-            ],
-        ];
-    }
 }
-

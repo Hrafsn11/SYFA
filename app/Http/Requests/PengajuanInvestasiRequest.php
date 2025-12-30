@@ -24,36 +24,12 @@ class PengajuanInvestasiRequest extends FormRequest
     {
         // Detect which validation rules to use based on input fields
         // This is more reliable than checking method names
-        
+
         // Rules for uploadBuktiTransfer (has 'file' field)
         if ($this->hasFile('file')) {
             return [
                 'file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
             ];
-        }
-
-        // Rules for generateKontrak (has 'nomor_kontrak' field)
-        if ($this->has('nomor_kontrak')) {
-            $idPengajuan = $this->route('id');
-            
-            $rules = [
-                'nomor_kontrak' => [
-                    'required',
-                    'string',
-                    'max:255',
-                    Rule::unique('pengajuan_investasi', 'nomor_kontrak')
-                        ->ignore($idPengajuan, 'id_pengajuan_investasi')
-                ],
-            ];
-            
-            if ($this->has('tanggal_kontrak')) {
-                $rules['tanggal_kontrak'] = 'required|date';
-            }
-            if ($this->has('catatan_kontrak')) {
-                $rules['catatan_kontrak'] = 'nullable|string';
-            }
-            
-            return $rules;
         }
 
         // Rules for updateStatus (has 'status' field but not CRUD fields)
@@ -65,8 +41,9 @@ class PengajuanInvestasiRequest extends FormRequest
         }
 
         // Rules for store/update (CRUD operations - has main fields)
+        // IMPORTANT: This MUST be checked BEFORE standalone nomor_kontrak check
         if ($this->has('id_debitur_dan_investor')) {
-            return [
+            $rules = [
                 'id_debitur_dan_investor' => 'required|exists:master_debitur_dan_investor,id_debitur',
                 'nama_investor' => 'required|string|max:255',
                 'deposito' => 'required|in:Reguler,Khusus',
@@ -75,6 +52,44 @@ class PengajuanInvestasiRequest extends FormRequest
                 'jumlah_investasi' => 'required|numeric|min:0',
                 'bagi_hasil_pertahun' => 'required|integer|min:0|max:100',
             ];
+
+            // Add nomor_kontrak validation if present (for edit mode)
+            if ($this->has('nomor_kontrak')) {
+                $idPengajuan = $this->route('id');
+                $rules['nomor_kontrak'] = [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('pengajuan_investasi', 'nomor_kontrak')
+                        ->ignore($idPengajuan, 'id_pengajuan_investasi')
+                ];
+            }
+
+            return $rules;
+        }
+
+        // Rules for generateKontrak (standalone - ONLY when NO CRUD fields present)
+        if ($this->has('nomor_kontrak')) {
+            $idPengajuan = $this->route('id');
+
+            $rules = [
+                'nomor_kontrak' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('pengajuan_investasi', 'nomor_kontrak')
+                        ->ignore($idPengajuan, 'id_pengajuan_investasi')
+                ],
+            ];
+
+            if ($this->has('tanggal_kontrak')) {
+                $rules['tanggal_kontrak'] = 'required|date';
+            }
+            if ($this->has('catatan_kontrak')) {
+                $rules['catatan_kontrak'] = 'nullable|string';
+            }
+
+            return $rules;
         }
 
         return [];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use App\Models\PengajuanRestrukturisasi;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\PengajuanPeminjaman;
@@ -28,12 +29,18 @@ class PengajuanRestrukturisasiController extends Controller
         'dokumen_tanda_tangan',
     ];
 
+    public function __construct()
+    {
+        $this->middleware('can:pengajuan_restrukturisasi.add')->only(['store']);
+        $this->middleware('can:pengajuan_restrukturisasi.edit')->only(['edit', 'update']);
+    }
+
     public function index()
     {
         $debitur = $this->getCurrentDebitur();
         $debiturList = $this->getActiveDebiturList();
         $peminjamanList = $debitur ? $this->getPeminjamanList($debitur->id_debitur) : [];
-        
+
         return view('livewire.pengajuan-restrukturisasi.index', compact('debitur', 'debiturList', 'peminjamanList'));
     }
 
@@ -52,20 +59,20 @@ class PengajuanRestrukturisasiController extends Controller
         try {
             $pengajuan = PengajuanPeminjaman::findOrFail($id);
             $pengembalianTerakhir = $this->getLatestPengembalian($pengajuan->id_pengajuan_peminjaman);
-            
+
             $data = [
                 'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan,
                 'jumlah_plafon_awal' => $this->getJumlahPlafonAwal($pengajuan),
                 'sisa_pokok_belum_dibayar' => $this->getSisaPokok($pengembalianTerakhir, $pengajuan),
                 'tunggakan_margin_bunga' => $this->getTunggakanMargin($pengembalianTerakhir),
             ];
-            
+
             $jatuhTempo = $this->getJatuhTempoTerakhir($pengajuan->id_pengajuan_peminjaman);
             $data = array_merge($data, $jatuhTempo);
-            
+
             // Calculate DPD (Days Past Due)
             $data['status_dpd'] = $this->calculateDPD($jatuhTempo['jatuh_tempo_terakhir']);
-            
+
             return Response::success($data, 'Data pengajuan berhasil diambil');
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal mengambil data pengajuan');
@@ -76,11 +83,11 @@ class PengajuanRestrukturisasiController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $validated = $request->validated();
             $validated = $this->handleFileUploads($request, $validated);
             $validated['status'] = 'Draft';
-            
+
             // Calculate DPD if jatuh_tempo_terakhir is provided
             if (isset($validated['jatuh_tempo_terakhir'])) {
                 $validated['status_dpd'] = $this->calculateDPD($validated['jatuh_tempo_terakhir']);
@@ -101,15 +108,15 @@ class PengajuanRestrukturisasiController extends Controller
     {
         try {
             $pengajuan = PengajuanRestrukturisasi::with(['debitur', 'pengajuanPeminjaman'])->findOrFail($id);
-            
+
             // Load history
             $histories = HistoryStatusPengajuanRestrukturisasi::where('id_pengajuan_restrukturisasi', $id)
                 ->with(['submittedBy', 'approvedBy', 'rejectedBy'])
                 ->orderByDesc('created_at')
                 ->get();
-            
+
             $latestHistory = $histories->first();
-            
+
             // Convert to array format for view consistency
             $restrukturisasi = [
                 'id' => $pengajuan->id_pengajuan_restrukturisasi,
@@ -118,7 +125,7 @@ class PengajuanRestrukturisasiController extends Controller
                 'current_step' => $pengajuan->current_step ?? 1,
                 'data' => $pengajuan, // Full model for detailed access
             ];
-            
+
             return view('livewire.pengajuan-restrukturisasi.detail', compact('restrukturisasi', 'histories', 'latestHistory', 'pengajuan'));
         } catch (\Exception $e) {
             abort(404, 'Pengajuan restrukturisasi tidak ditemukan');
@@ -139,12 +146,12 @@ class PengajuanRestrukturisasiController extends Controller
     {
         try {
             $pengajuan = PengajuanRestrukturisasi::findOrFail($id);
-            
+
             DB::beginTransaction();
 
             $validated = $request->validated();
             $validated = $this->handleFileUploads($request, $validated, $pengajuan);
-            
+
             // Recalculate DPD if jatuh_tempo_terakhir is provided
             if (isset($validated['jatuh_tempo_terakhir'])) {
                 $validated['status_dpd'] = $this->calculateDPD($validated['jatuh_tempo_terakhir']);
@@ -221,7 +228,7 @@ class PengajuanRestrukturisasiController extends Controller
         if ($pengembalianTerakhir) {
             return $pengembalianTerakhir->sisa_bayar_pokok;
         }
-        
+
         return $this->getJumlahPlafonAwal($pengajuan);
     }
 

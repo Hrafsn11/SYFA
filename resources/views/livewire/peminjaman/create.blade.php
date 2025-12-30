@@ -356,6 +356,9 @@
             // Initialize Cleave.js untuk format rupiah
             initCleaveRupiah();
 
+            // Initialize file validation
+            initFileValidation();
+
             // Pre-fill data in edit mode
             @if(isset($isEdit) && $isEdit && isset($pengajuan))
                 // Fill total pinjaman
@@ -711,6 +714,84 @@
 
         let editInvoiceIndex = -1;
 
+        const FileValidator = {
+            maxSize: 2 * 1024 * 1024, // 2MB in bytes
+            allowedTypes: ['pdf', 'docx', 'doc', 'xls', 'xlsx', 'png', 'rar', 'zip'],
+            
+            validate(file) {
+                if (!file) return { valid: false, message: 'Tidak ada file yang dipilih' };
+                
+                // Check file size
+                if (file.size > this.maxSize) {
+                    return { 
+                        valid: false, 
+                        message: `Ukuran file melebihi 2 MB<br>File Anda: ${(file.size / (1024 * 1024)).toFixed(2)} MB` 
+                    };
+                }
+                
+                // Check file type
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (!this.allowedTypes.includes(ext)) {
+                    return { 
+                        valid: false, 
+                        message: `Tipe file tidak diizinkan!<br>Format yang diperbolehkan: ${this.allowedTypes.join(', ')}` 
+                    };
+                }
+                
+                return { valid: true };
+            },
+            
+            showError(message, inputId = null) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validasi File Gagal!',
+                    html: message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-primary waves-effect waves-light'
+                    },
+                    buttonsStyling: false
+                });
+                
+                if (inputId) {
+                    const input = document.getElementById(inputId);
+                    if (input) input.value = '';
+                }
+            }
+        };
+
+        // Initialize file validation on all modal file inputs
+        function initFileValidation() {
+            const fileInputIds = [
+                'modal_dokumen_invoice', 'modal_dokumen_kontrak', 'modal_dokumen_so', 'modal_dokumen_bast',
+                'modal_dokumen_kontrak_po', 'modal_dokumen_so_po', 'modal_dokumen_bast_po', 'modal_dokumen_lainnya_po',
+                'modal_dokumen_invoice_inst', 'modal_dokumen_lainnya_inst',
+                'modal_dokumen_invoice_fact', 'modal_dokumen_kontrak_fact', 'modal_dokumen_so_fact', 'modal_dokumen_bast_fact'
+            ];
+            
+            fileInputIds.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('change', function(e) {
+                        const file = e.target.files[0];
+                        try {
+                            // remove invalid marker when user selects a file
+                            const $el = $(this);
+                            $el.removeClass('is-invalid');
+                            $el.parent().find('.existing-file-info').remove();
+                        } catch (err) {
+                            // ignore
+                        }
+                        if (file) {
+                            const result = FileValidator.validate(file);
+                            if (!result.valid) {
+                                FileValidator.showError(result.message, id);
+                            }
+                        }
+                    });
+                }
+            });
+        }
 
         function saveInvoiceData() {
             if (currentJenisPembiayaan === 'Invoice Financing') {
@@ -735,7 +816,16 @@
 
                 // Basic validation
                 if (!no_invoice || nilai_pinjaman <= 0) {
-                    alert('No. Invoice dan Nilai Pinjaman wajib diisi dan > 0');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'No. Invoice dan Nilai Pinjaman wajib diisi dan > 0',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -744,7 +834,16 @@
                     return it.no_invoice === no_invoice;
                 });
                 if (duplicateIndex !== -1 && (editInvoiceIndex === -1 || duplicateIndex !== editInvoiceIndex)) {
-                    alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -801,13 +900,31 @@
 
                 // Basic validation
                 if (!no_kontrak || nilai_pinjaman <= 0) {
-                    alert('No. Kontrak dan Nilai Pinjaman wajib diisi dan > 0');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'No. Kontrak dan Nilai Pinjaman wajib diisi dan > 0',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
                 
                 // Validate kontrak_date is required
                 if (!kontrak_date) {
-                    alert('Kontrak Date wajib diisi');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'Kontrak Date wajib diisi',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -816,8 +933,16 @@
                     return it.no_kontrak === no_kontrak;
                 });
                 if (dupPo !== -1 && (editInvoiceIndex === -1 || dupPo !== editInvoiceIndex)) {
-                    alert(
-                        'Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Kontrak PO sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -867,8 +992,36 @@
 
                 // Basic validation
                 if (!no_invoice || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
-                    alert('No. Invoice dan Nilai Invoice wajib diisi dan > 0');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'No. Invoice dan Nilai Invoice wajib diisi dan > 0',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
+                }
+
+                // Nama barang wajib untuk Installment
+                if (!nama_barang || String(nama_barang).trim() === '') {
+                    // mark input invalid and show message
+                    $('#modal_nama_barang').addClass('is-invalid');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'Nama Barang wajib diisi untuk Installment.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
+                } else {
+                    $('#modal_nama_barang').removeClass('is-invalid');
                 }
 
                 // Duplicate check for installment invoices
@@ -876,7 +1029,16 @@
                     return it.no_invoice === no_invoice;
                 });
                 if (dupInst !== -1 && (editInvoiceIndex === -1 || dupInst !== editInvoiceIndex)) {
-                    alert('Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Invoice sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -926,16 +1088,64 @@
                 const dokumen_so_file = document.getElementById('modal_dokumen_so_fact').files[0] || null;
                 const dokumen_bast_file = document.getElementById('modal_dokumen_bast_fact').files[0] || null;
 
-                // Basic validation
-                if (!no_kontrak || Number(normalizeNumericForServer(nilai_invoice)) <= 0) {
-                    alert('No. Kontrak dan Nilai Invoice wajib diisi dan > 0');
+                // Basic validation — require uploaded invoice and kontrak files for Factoring
+                // When editing, existing.dokumen_* counts as present
+                const existingFact = (editInvoiceIndex >= 0) ? factoringData[editInvoiceIndex] : null;
+                const hasInvoice = dokumen_invoice_file || (existingFact && existingFact.dokumen_invoice);
+                const hasKontrak = dokumen_kontrak_file || (existingFact && existingFact.dokumen_kontrak);
+
+                if (!hasInvoice || !hasKontrak) {
+                    const invFileEl = $('#modal_dokumen_invoice_fact');
+                    const kontrakFileEl = $('#modal_dokumen_kontrak_fact');
+                    // mark missing inputs (only if no existing file and no new file)
+                    if (!hasInvoice && invFileEl.length) invFileEl.addClass('is-invalid');
+                    if (!hasKontrak && kontrakFileEl.length) kontrakFileEl.addClass('is-invalid');
+
+                    let missingMsg = [];
+                    if (!hasInvoice) missingMsg.push('Dokumen Invoice');
+                    if (!hasKontrak) missingMsg.push('Dokumen Kontrak');
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: missingMsg.join(' dan ') + ' wajib diunggah.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        // focus the first missing file input
+                        if (!hasInvoice && invFileEl.length) invFileEl.focus();
+                        else if (!hasKontrak && kontrakFileEl.length) kontrakFileEl.focus();
+                    });
+
                     return;
+                } else {
+                    // clear markers when files are present
+                    $('#modal_dokumen_invoice_fact').removeClass('is-invalid');
+                    $('#modal_dokumen_kontrak_fact').removeClass('is-invalid');
                 }
                 
                 // Validate kontrak_date is required
                 if (!kontrak_date) {
-                    alert('Kontrak Date wajib diisi');
+                    const kontrakDateEl = $('#modal_contract_date_fact');
+                    if (kontrakDateEl.length) kontrakDateEl.addClass('is-invalid');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validasi Gagal',
+                        text: 'Kontrak Date wajib diisi',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        if (kontrakDateEl.length) kontrakDateEl.focus();
+                    });
                     return;
+                } else {
+                    $('#modal_contract_date_fact').removeClass('is-invalid');
                 }
 
                 // Duplicate check for Factoring contract numbers (block on save)
@@ -943,8 +1153,16 @@
                     return it.no_kontrak === no_kontrak;
                 });
                 if (dupFact !== -1 && (editInvoiceIndex === -1 || dupFact !== editInvoiceIndex)) {
-                    alert(
-                        'Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Duplikasi Data',
+                        text: 'Nomor Kontrak Factoring sudah terdaftar di daftar. Silakan gunakan nomor lain atau edit entri yang ada.',
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
                     return;
                 }
 
@@ -1424,29 +1642,46 @@
             $('#btnHapusDataModal').off('click').on('click', function(e) {
                 e.preventDefault();
                 if (typeof editInvoiceIndex !== 'undefined' && editInvoiceIndex >= 0) {
-                    if (!confirm('Yakin ingin menghapus data ini?')) return;
-                    switch (currentJenisPembiayaan) {
-                        case 'Invoice Financing':
-                            invoiceFinancingData.splice(editInvoiceIndex, 1);
-                            renderInvoiceTables();
-                            updateTotalFromInvoiceFinancing(); // Update totals after delete
-                            break;
-                        case 'PO Financing':
-                            poFinancingData.splice(editInvoiceIndex, 1);
-                            renderPOFinancingTable();
-                            updateTotalFromPOFinancing(); // Update totals after delete
-                            break;
-                        case 'Installment':
-                            installmentData.splice(editInvoiceIndex, 1);
-                            renderInstallmentTable();
-                            break;
-                        case 'Factoring':
-                            factoringData.splice(editInvoiceIndex, 1);
-                            renderFactoringTable();
-                            updateTotalFromFactoring(); // Update totals after delete
-                            break;
-                    }
-                    editInvoiceIndex = -1;
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Konfirmasi Hapus',
+                        text: 'Yakin ingin menghapus data ini?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            confirmButton: 'btn btn-danger me-2',
+                            cancelButton: 'btn btn-secondary'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (!result.isConfirmed) return;
+                        
+                        switch (currentJenisPembiayaan) {
+                            case 'Invoice Financing':
+                                invoiceFinancingData.splice(editInvoiceIndex, 1);
+                                renderInvoiceTables();
+                                updateTotalFromInvoiceFinancing(); // Update totals after delete
+                                break;
+                            case 'PO Financing':
+                                poFinancingData.splice(editInvoiceIndex, 1);
+                                renderPOFinancingTable();
+                                updateTotalFromPOFinancing(); // Update totals after delete
+                                break;
+                            case 'Installment':
+                                installmentData.splice(editInvoiceIndex, 1);
+                                renderInstallmentTable();
+                                break;
+                            case 'Factoring':
+                                factoringData.splice(editInvoiceIndex, 1);
+                                renderFactoringTable();
+                                updateTotalFromFactoring(); // Update totals after delete
+                                break;
+                        }
+                        editInvoiceIndex = -1;
+                        if (typeof modalInstance !== 'undefined' && modalInstance) modalInstance.hide();
+                    });
+                    return;
                 }
                 if (typeof modalInstance !== 'undefined' && modalInstance) modalInstance.hide();
             });
@@ -1458,6 +1693,70 @@
             return parseFloat(x).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
+        // Function to handle form data submission
+        function submitFormData(fd, postUrl) {
+            $.ajax({
+                url: postUrl,
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                },
+                beforeSend: function() {
+                    // optional: show loader
+                },
+                success: function(resp) {
+                    if (resp.success || resp.message) {
+                        const message = isEdit ? 'Pengajuan pinjaman berhasil diupdate!' : 'Peminjaman berhasil disimpan!';
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: message,
+                            confirmButtonText: 'Oke',
+                            customClass: {
+                                confirmButton: 'btn btn-success'
+                            },
+                            buttonsStyling: false
+                        }).then(() => {
+                            window.location.href = '{{ route("peminjaman") }}';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: resp.message || 'Terjadi kesalahan',
+                            confirmButtonText: 'Oke',
+                            customClass: {
+                                confirmButton: 'btn btn-primary'
+                            },
+                            buttonsStyling: false
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let msg = 'Terjadi kesalahan';
+                    if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errors = xhr.responseJSON.errors;
+                        msg += ':\n' + Object.values(errors).flat().join('\n');
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: msg,
+                        confirmButtonText: 'Oke',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            });
+        }
+
         $('#formPeminjaman').on('submit', function(e) {
             e.preventDefault();
 
@@ -1466,10 +1765,42 @@
 
             // Basic client-side check depending on selected jenis pembiayaan
             if (currentJenisPembiayaan === 'Invoice Financing' && invoiceFinancingData.length === 0) {
-                if (!confirm('Anda belum menambahkan invoice, lanjutkan menyimpan?')) return;
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Konfirmasi',
+                    text: 'Anda belum menambahkan invoice, lanjutkan menyimpan?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Lanjutkan',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-2',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (!result.isConfirmed) return;
+                    submitFormData(fd, postUrl);
+                });
+                return;
             }
             if (currentJenisPembiayaan === 'PO Financing' && poFinancingData.length === 0) {
-                if (!confirm('Anda belum menambahkan kontrak PO, lanjutkan menyimpan?')) return;
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Konfirmasi',
+                    text: 'Anda belum menambahkan kontrak PO, lanjutkan menyimpan?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Lanjutkan',
+                    cancelButtonText: 'Batal',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-2',
+                        cancelButton: 'btn btn-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (!result.isConfirmed) return;
+                    submitFormData(fd, postUrl);
+                });
+                return;
             }
 
             // Append master id (if available)
@@ -1564,15 +1895,21 @@
                         .dokumen_lainnya_file);
                 });
                 
-                // Compute header totals for PO Financing
-                let sumPinjaman = 0;
-                let sumBagiHasil = 0;
-                poFinancingData.forEach(function(p) {
-                    sumPinjaman += Number(normalizeNumericForServer(p.nilai_pinjaman || 0) || 0);
-                    sumBagiHasil += Number(normalizeNumericForServer(p.nilai_bagi_hasil || 0) || 0);
-                });
-                fd.set('total_bagi_hasil', normalizeNumericForServer(sumBagiHasil));
-                fd.set('pembayaran_total', normalizeNumericForServer(sumPinjaman + sumBagiHasil));
+                // Compute header totals for PO Financing only if not already set
+                if (!fd.get('total_bagi_hasil') || fd.get('total_bagi_hasil') === '0') {
+                    let sumBagiHasil = 0;
+                    poFinancingData.forEach(function(p) {
+                        sumBagiHasil += Number(normalizeNumericForServer(p.nilai_bagi_hasil || 0) || 0);
+                    });
+                    fd.set('total_bagi_hasil', normalizeNumericForServer(sumBagiHasil));
+                }
+                
+                // Compute pembayaran_total if not already set
+                if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
+                    const tp = Number(fd.get('total_pinjaman') || 0);
+                    const bagi = Number(fd.get('total_bagi_hasil') || 0);
+                    fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
+                }
             }
 
             // Factoring append
@@ -1609,10 +1946,20 @@
                     sumInvoice += Number(normalizeNumericForServer(f.nilai_invoice || 0) || 0);
                 });
                 fd.set('total_nominal_yang_dialihkan', normalizeNumericForServer(sumInvoice));
-                // compute total_bagi_hasil as 2% fallback
-                const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
-                fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
-                fd.set('pembayaran_total', normalizeNumericForServer(sumInvoice + bagi));
+                
+                // compute total_bagi_hasil as 2% fallback only if not already set
+                if (!fd.get('total_bagi_hasil') || fd.get('total_bagi_hasil') === '0') {
+                    const bagi = Math.round(sumInvoice * 0.02 * 100) / 100;
+                    fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
+                }
+                
+                // compute pembayaran_total only if not already set
+                if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
+                    const tp = Number(fd.get('total_pinjaman') || 0);
+                    const bagi = Number(fd.get('total_bagi_hasil') || 0);
+                    fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
+                }
+                
                 if (!fd.get('status') || fd.get('status') === '') fd.set('status', 'submitted');
             }
 
@@ -1644,6 +1991,7 @@
                 const computed = (nominalElForSubmit && nominalElForSubmit._computed) ? nominalElForSubmit
                     ._computed : null;
                 if (computed) {
+                    // For Installment, we ALWAYS use computed values as they are calculated from nominal_pinjaman
                     fd.set('total_pinjaman', normalizeNumericForServer(computed.totalPinjaman));
                     fd.set('tenor_pembayaran', computed.tenor);
                     fd.set('pps', normalizeNumericForServer(computed.pps));
@@ -1651,11 +1999,13 @@
                     fd.set('total_pembayaran', normalizeNumericForServer(computed.total_pembayaran));
                     fd.set('yang_harus_dibayarkan', normalizeNumericForServer(computed.yang_harus_dibayarkan));
                 } else {
-                    // fallback: if not computed on client, rely on server to compute
-                    // But still clean the nominal_pinjaman value
+                    // fallback: if not computed on client, use the value from nominal_pinjaman field
+                    // This preserves existing value during edit mode
                     if (nominalElForSubmit) {
                         const cleanNominal = window.getCleaveRawValue(nominalElForSubmit) || 0;
-                        fd.set('total_pinjaman', normalizeNumericForServer(cleanNominal));
+                        if (cleanNominal && cleanNominal !== '0') {
+                            fd.set('total_pinjaman', normalizeNumericForServer(cleanNominal));
+                        }
                     }
                 }
             }
@@ -1671,29 +2021,29 @@
 
                 // Ensure total_pinjaman is present; compute from details if empty
                 let totalPinjamanValue = fd.get('total_pinjaman');
-                if (!totalPinjamanValue || totalPinjamanValue === '') {
+                if (!totalPinjamanValue || totalPinjamanValue === '' || totalPinjamanValue === '0') {
                     let sum = 0;
                     poFinancingData.forEach(function(p) {
                         sum += Number(normalizeNumericForServer(p.nilai_pinjaman || 0) || 0);
                     });
                     fd.set('total_pinjaman', normalizeNumericForServer(sum));
-                } else {
-                    fd.set('total_pinjaman', normalizeNumericForServer(totalPinjamanValue));
                 }
+                // Note: If totalPinjamanValue already exists and is not empty/zero, 
+                // keep the value that was already set earlier (line 1563) - don't normalize again
 
-                // Ensure total_bagi_hasil and pembayaran_total exist (we set total_bagi_hasil earlier from form if present)
+                // Ensure total_bagi_hasil and pembayaran_total exist
                 const existingBagi = fd.get('total_bagi_hasil') || 0;
                 if (!existingBagi || existingBagi === '0') {
                     // compute as 2% of total_pinjaman
-                    const tp = Number(normalizeNumericForServer(fd.get('total_pinjaman') || 0));
+                    const tp = Number(fd.get('total_pinjaman') || 0);
                     const bagi = Math.round(tp * 0.02 * 100) / 100;
                     fd.set('total_bagi_hasil', normalizeNumericForServer(bagi));
                     fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
                 } else {
                     // ensure pembayaran_total exists
                     if (!fd.get('pembayaran_total') || fd.get('pembayaran_total') === '0') {
-                        const tp = Number(normalizeNumericForServer(fd.get('total_pinjaman') || 0));
-                        const bagi = Number(normalizeNumericForServer(fd.get('total_bagi_hasil') || 0));
+                        const tp = Number(fd.get('total_pinjaman') || 0);
+                        const bagi = Number(fd.get('total_bagi_hasil') || 0);
                         fd.set('pembayaran_total', normalizeNumericForServer(tp + bagi));
                     }
                 }
@@ -1711,55 +2061,8 @@
                 }
             }
 
-            // send via AJAX
-            $.ajax({
-                url: postUrl,
-                method: 'POST',
-                data: fd,
-                processData: false,
-                contentType: false,
-                headers: {
-                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
-                },
-                beforeSend: function() {
-                    // optional: show loader
-                },
-                success: function(resp) {
-                    if (resp.success || resp.message) {
-                        const message = isEdit ? 'Pengajuan pinjaman berhasil diupdate!' : 'Peminjaman berhasil disimpan!';
-                        
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil!',
-                            text: message,
-                            confirmButtonText: 'OK'
-                        }).then(() => {
-                            window.location.href = '{{ route("peminjaman") }}';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: resp.message || 'Terjadi kesalahan',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                },
-                error: function(xhr) {
-                    let msg = 'Terjadi kesalahan';
-                    if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                    if (xhr.responseJSON && xhr.responseJSON.errors) {
-                        const errors = xhr.responseJSON.errors;
-                        msg += ':\n' + Object.values(errors).flat().join('\n');
-                    }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal!',
-                        text: msg,
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
+            // send via AJAX using helper function
+            submitFormData(fd, postUrl);
         });
 
         function handleJenisPembiayaanChange(jenisPembiayaan) {

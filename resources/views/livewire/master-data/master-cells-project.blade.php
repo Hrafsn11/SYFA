@@ -42,17 +42,39 @@
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
-                            <label for="nama_pic" class="form-label">Nama PIC <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nama_pic"
-                                placeholder="Masukkan Nama PIC" wire:model.blur="nama_pic">
+                            <label for="nama_pic" class="form-label">Nama PIC <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama_pic" placeholder="Masukkan Nama PIC"
+                                wire:model.blur="nama_pic">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
-                            <label for="alamat" class="form-label">Alamat <span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="alamat"
-                                placeholder="Masukkan Alamat" wire:model.blur="alamat">
+                            <label for="tanda_tangan_pic" class="form-label">Tanda Tangan PIC</label>
+                            <input type="file" class="form-control" id="tanda_tangan_pic"
+                                wire:model="tanda_tangan_pic" accept="image/*">
+                            <div class="text-muted small mt-1">Upload gambar (JPG, PNG) maks 2MB.</div>
+
+                            @if ($tanda_tangan_pic && !is_string($tanda_tangan_pic))
+                                <div class="mt-2">
+                                    <img src="{{ $tanda_tangan_pic->temporaryUrl() }}" alt="Preview"
+                                        class="img-thumbnail" style="max-height: 100px">
+                                </div>
+                            @elseif ($tanda_tangan_pic && is_string($tanda_tangan_pic))
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $tanda_tangan_pic) }}" alt="Current Signature"
+                                        class="img-thumbnail" style="max-height: 100px">
+                                </div>
+                            @endif
+
+                            <div class="invalid-feedback">
+                                @error('tanda_tangan_pic')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="mb-3 form-group">
+                            <label for="alamat" class="form-label">Alamat <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="alamat" placeholder="Masukkan Alamat"
+                                wire:model.blur="alamat">
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
@@ -174,11 +196,12 @@
 
             // ubah title modal
             modal.find('.modal-title').text('Edit Cells Project');
-            
+
             // Set cells project data
             @this.set('id_cells_project', data.id_cells_project);
             @this.set('nama_cells_bisnis', data.nama_cells_bisnis);
             @this.set('nama_pic', data.nama_pic);
+            @this.set('tanda_tangan_pic', data.tanda_tangan_pic); // Populate file path
             @this.set('alamat', data.alamat);
             @this.set('deskripsi_bidang', data.deskripsi_bidang);
 
@@ -191,7 +214,7 @@
             } else {
                 addProjectInput();
             }
-            
+
             // tampilkan modal
             modal.modal('show');
         }
@@ -202,6 +225,9 @@
             @this.set('id_cells_project', null);
             @this.set('nama_cells_bisnis', '');
             @this.set('nama_pic', '');
+            @this.set('tanda_tangan_pic', null);
+            // Reset input file value
+            $('#tanda_tangan_pic').val('');
             @this.set('alamat', '');
             @this.set('deskripsi_bidang', '');
             @this.set('projects', []);

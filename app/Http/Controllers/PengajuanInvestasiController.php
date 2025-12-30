@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use App\Models\PengajuanInvestasi;
 use App\Models\HistoryStatusPengajuanInvestor;
 use App\Models\MasterDebiturDanInvestor;
@@ -15,6 +16,12 @@ use Illuminate\Support\Facades\Auth;
 
 class PengajuanInvestasiController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:investasi.add')->only(['create', 'store']);
+        $this->middleware('can:investasi.edit')->only(['edit', 'update']);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -23,9 +30,9 @@ class PengajuanInvestasiController extends Controller
         // Get current logged in user's investor data if exists
         // flagging = 'ya' berarti Investor, 'tidak' berarti Debitur
         $investor = MasterDebiturDanInvestor::where('user_id', Auth::id())
-                                            ->where('flagging', 'ya')
-                                            ->first();
-        
+            ->where('flagging', 'ya')
+            ->first();
+
         return view('livewire.pengajuan-investasi.index', compact('investor'));
     }
 
@@ -36,9 +43,9 @@ class PengajuanInvestasiController extends Controller
     {
         // Get active investors (flagging = 'ya')
         $investors = MasterDebiturDanInvestor::where('flagging', 'ya')
-                                             ->where('status', 'Aktif')
-                                             ->get();
-        
+            ->where('status', 'Aktif')
+            ->get();
+
         return view('livewire.pengajuan-investasi.create', compact('investors'));
     }
 
@@ -99,12 +106,12 @@ class PengajuanInvestasiController extends Controller
     public function show($id)
     {
         $pengajuan = PengajuanInvestasi::with(['investor', 'histories.submittedBy', 'histories.approvedBy', 'histories.rejectedBy'])
-                                       ->findOrFail($id);
-        
+            ->findOrFail($id);
+
         $histories = $pengajuan->histories()
-                              ->orderBy('id_history_status_pengajuan_investor', 'desc')
-                              ->get();
-        
+            ->orderBy('id_history_status_pengajuan_investor', 'desc')
+            ->get();
+
         $latestHistory = $histories->first();
 
         // Prepare data array similar to peminjaman
@@ -149,7 +156,7 @@ class PengajuanInvestasiController extends Controller
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
             $status = $request->input('status');
-            
+
             DB::beginTransaction();
 
             // Determine next step based on status
@@ -162,8 +169,7 @@ class PengajuanInvestasiController extends Controller
                 // If rejected at Step 3 (Validasi CEO) -> jump to Step 6 (Selesai/Final)
                 elseif ($pengajuan->current_step == 3) {
                     $currentStep = 6;
-                }
-                else {
+                } else {
                     $currentStep = $pengajuan->current_step;
                 }
             } else {
@@ -222,7 +228,13 @@ class PengajuanInvestasiController extends Controller
 
             HistoryStatusPengajuanInvestor::create($historyData);
 
+            // Reload pengajuan dengan relasi
+            $pengajuan->load('investor');
+
             DB::commit();
+
+            // Kirim notifikasi berdasarkan status
+            ListNotifSFinance::menuPengajuanInvestasi($status, $pengajuan);
 
             return Response::success([
                 'status' => $status,
@@ -241,7 +253,7 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $history = HistoryStatusPengajuanInvestor::with(['submittedBy', 'approvedBy', 'rejectedBy'])
-                                                     ->findOrFail($historyId);
+                ->findOrFail($historyId);
 
             return Response::success($history, 'Data histori berhasil diambil');
         } catch (\Exception $e) {
@@ -255,7 +267,7 @@ class PengajuanInvestasiController extends Controller
     public function previewKontrak(Request $request, $id, KontrakInvestasiService $kontrakService)
     {
         $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
-        
+
         // Use nomor_kontrak from request if provided, otherwise use from database
         $nomorKontrak = $request->input('nomor_kontrak') ?? $pengajuan->nomor_kontrak;
         $kontrak = $kontrakService->generateKontrakData($pengajuan, $nomorKontrak);
@@ -270,18 +282,15 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
-            
+
             DB::beginTransaction();
 
             $validated = $request->validated();
 
-            // Ensure `nomor_kontrak` is unique
-            if (PengajuanInvestasi::where('nomor_kontrak', $validated['nomor_kontrak'])->where('id_pengajuan_investasi', '!=', $id)->exists()) {
-                return Response::error('Nomor kontrak sudah digunakan.');
-            }
+            // Note: nomor_kontrak uniqueness already validated in PengajuanInvestasiRequest
+            // No need to check again here
 
             $pengajuan->update(array_merge($validated, [
-                'nomor_kontrak' => $validated['nomor_kontrak'],
                 'updated_by' => Auth::id(),
             ]));
 
@@ -393,6 +402,9 @@ class PengajuanInvestasiController extends Controller
                     'current_step' => 5,
                     'submit_step1_by' => Auth::id(),
                 ]);
+
+                // Reload pengajuan dengan relasi
+                $pengajuan->load('investor');
             }
 
             DB::commit();
@@ -414,11 +426,9 @@ class PengajuanInvestasiController extends Controller
 
             DB::beginTransaction();
 
-            // Update nomor kontrak and status to completed (Step 6: Selesai)
+            // Update nomor kontrak first
             $pengajuan->update([
                 'nomor_kontrak' => $request->input('nomor_kontrak'),
-                'status' => 'Selesai',
-                'current_step' => 6,
                 'updated_by' => Auth::id(),
             ]);
 
@@ -432,6 +442,18 @@ class PengajuanInvestasiController extends Controller
                 'submit_step1_by' => Auth::id(),
             ]);
 
+            // Reload pengajuan dengan relasi untuk notifikasi kontrak dibuat
+            $pengajuan->load('investor');
+
+            // Kirim notifikasi untuk kontrak investasi dibuat
+            ListNotifSFinance::menuPengajuanInvestasi('Generate Kontrak', $pengajuan);
+
+            // Update status to completed (Step 6: Selesai)
+            $pengajuan->update([
+                'status' => 'Selesai',
+                'current_step' => 6,
+            ]);
+
             // Create history for "Selesai"
             HistoryStatusPengajuanInvestor::create([
                 'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
@@ -442,7 +464,14 @@ class PengajuanInvestasiController extends Controller
                 'submit_step1_by' => Auth::id(),
             ]);
 
+            // Reload pengajuan untuk memastikan nomor_kontrak ter-update
+            $pengajuan->refresh();
+            $pengajuan->load('investor');
+
             DB::commit();
+
+            // Kirim notifikasi untuk investasi berhasil ditransfer (status Selesai)
+            ListNotifSFinance::menuPengajuanInvestasi('Selesai', $pengajuan, $pengajuan->jumlah_investasi);
 
             return Response::success($pengajuan, 'Kontrak berhasil digenerate!');
         } catch (\Exception $e) {
@@ -458,7 +487,7 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $pengajuan = PengajuanInvestasi::with('investor')->findOrFail($id);
-            
+
             // Check if status is Selesai
             if ($pengajuan->status !== 'Selesai') {
                 return redirect()->back()->with('error', 'Sertifikat hanya tersedia untuk pengajuan yang sudah selesai');
@@ -470,12 +499,12 @@ class PengajuanInvestasiController extends Controller
                 ->where('status', 'Selesai')
                 ->where('id_pengajuan_investasi', '<=', $pengajuan->id_pengajuan_investasi)
                 ->count();
-            
+
             $nomorDeposito = 'DC' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
             // Get description based on deposito type
-            $deskripsi = $pengajuan->deposito === 'Khusus' 
-                ? 'INVESTASI DEPOSITO KHUSUS' 
+            $deskripsi = $pengajuan->deposito === 'Khusus'
+                ? 'INVESTASI DEPOSITO KHUSUS'
                 : 'INVESTASI DEPOSITO REGULER';
 
             // Calculate tanggal berakhir (tanggal_investasi + lama_investasi bulan)

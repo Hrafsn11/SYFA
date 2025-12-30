@@ -5,7 +5,9 @@ namespace App\Http\Controllers\SFinlog;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\PengajuanInvestasi;
+use App\Models\PengajuanInvestasiFinlog;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class KertasKerjaInvestorSFinlogController extends Controller
 {
@@ -15,84 +17,104 @@ class KertasKerjaInvestorSFinlogController extends Controller
     public function index(Request $request)
     {
         $year = $request->get('year', date('Y'));
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
         
         $data = $this->getKertasKerjaData($year);
         
-        return view('livewire.kertas-kerja-investor-sfinlog.index', compact('data', 'year'));
+        // Paginate the collection
+        $paginatedData = $this->paginateCollection($data, $perPage, $page, $request);
+        
+        return view('livewire.sfinlog.kertas-kerja-investor-sfinlog.index', [
+            'data' => $paginatedData,
+            'year' => $year,
+            'perPage' => $perPage
+        ]);
     }
     
     /**
-     * Get kertas kerja data for SFinlog module
-     * NOTE: Logika query bisa berbeda dari SFinance sesuai kebutuhan bisnis SFinlog
+     * Paginate a collection
+     */
+    private function paginateCollection($items, $perPage, $page, $request)
+    {
+        $total = $items->count();
+        $offset = ($page - 1) * $perPage;
+        $itemsForCurrentPage = $items->slice($offset, $perPage)->values();
+        
+        return new LengthAwarePaginator(
+            $itemsForCurrentPage,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+    }
+    
+    /**
+     * Get kertas kerja data with optimized queries (Separate Queries Strategy)
      */
     private function getKertasKerjaData($year)
     {
-        // TODO: Implementasi query khusus untuk SFinlog
-        // Saat ini menggunakan struktur yang sama, namun bisa dimodifikasi sesuai kebutuhan
-        // Misalnya filter berdasarkan kolom tertentu, agregasi berbeda, dll
-        
-        $investasi = PengajuanInvestasi::query()
+        $investasi = PengajuanInvestasiFinlog::query()
             ->select([
-                'id_pengajuan_investasi',
+                'id_pengajuan_investasi_finlog',
                 'tanggal_investasi',
-                'deposito',
                 'nama_investor',
-                'jumlah_investasi',
+                'nominal_investasi',
                 'lama_investasi',
-                'bagi_hasil_pertahun',
-                'nominal_bagi_hasil_yang_didapatkan',
-                'sisa_pokok',
-                'sisa_bagi_hasil',
+                'persentase_bagi_hasil',
+                'nominal_bagi_hasil_yang_didapat',
                 'status',
                 'nomor_kontrak'
             ])
             ->whereNotNull('nomor_kontrak')
             ->where('nomor_kontrak', '!=', '')
-            // TODO: Tambahkan filter khusus SFinlog di sini jika diperlukan
-            // Contoh: ->where('sumber_pendanaan', 'sfinlog')
             ->orderBy('tanggal_investasi', 'desc')
             ->get();
         
-        $pengembalianPerBulan = DB::table('pengembalian_investasi')
+        $pengembalianPerBulan = DB::table('pengembalian_investasi_finlog')
             ->select([
-                'id_pengajuan_investasi',
+                'id_pengajuan_investasi_finlog',
                 DB::raw('MONTH(tanggal_pengembalian) as bulan'),
                 DB::raw('SUM(dana_pokok_dibayar) as total_pokok'),
                 DB::raw('SUM(bagi_hasil_dibayar) as total_bagi_hasil')
             ])
             ->whereYear('tanggal_pengembalian', $year)
-            ->groupBy('id_pengajuan_investasi', DB::raw('MONTH(tanggal_pengembalian)'))
+            ->groupBy('id_pengajuan_investasi_finlog', DB::raw('MONTH(tanggal_pengembalian)'))
             ->get()
-            ->groupBy('id_pengajuan_investasi'); 
+            ->groupBy('id_pengajuan_investasi_finlog'); 
         
-        $totalPengembalian = DB::table('pengembalian_investasi')
+        $totalPengembalian = DB::table('pengembalian_investasi_finlog')
             ->select([
-                'id_pengajuan_investasi',
+                'id_pengajuan_investasi_finlog',
                 DB::raw('SUM(dana_pokok_dibayar) as total_pokok_all'),
                 DB::raw('SUM(bagi_hasil_dibayar) as total_bagi_hasil_all')
             ])
-            ->groupBy('id_pengajuan_investasi')
+            ->groupBy('id_pengajuan_investasi_finlog')
             ->get()
-            ->keyBy('id_pengajuan_investasi'); 
+            ->keyBy('id_pengajuan_investasi_finlog'); 
         
-        $tanggalPengembalianTerakhir = DB::table('pengembalian_investasi')
-            ->select([
-                'id_pengajuan_investasi',
-                DB::raw('MAX(tanggal_pengembalian) as tanggal_terakhir')
-            ])
-            ->groupBy('id_pengajuan_investasi')
-            ->get()
-            ->keyBy('id_pengajuan_investasi');
-        
-        $result = $investasi->map(function($inv) use ($pengembalianPerBulan, $totalPengembalian, $tanggalPengembalianTerakhir, $year) {
-            $id = $inv->id_pengajuan_investasi;
+        $result = $investasi->map(function($inv) use ($pengembalianPerBulan, $totalPengembalian, $year) {
+            $id = $inv->id_pengajuan_investasi_finlog;
             $pembayaranBulan = $pengembalianPerBulan->get($id, collect());
             $total = $totalPengembalian->get($id);
-            $tglTerakhir = $tanggalPengembalianTerakhir->get($id);
             
-            $bagiHasilPerBulan = $inv->bagi_hasil_pertahun / 12;
-            $cofBulan = ($inv->jumlah_investasi * $bagiHasilPerBulan) / 100;
+            // Bagi hasil (nominal/pa) = bagi hasil(%pa) × nominal deposito / 100
+            $bagiHasilNominalPa = ($inv->persentase_bagi_hasil * $inv->nominal_investasi) / 100;
             
+            // Bagi hasil (%bulan) = bagi hasil(%pa) / 12
+            $bagiHasilPerBulan = $inv->persentase_bagi_hasil / 12;
+            
+            // Bagi hasil (COF/bulan) = bagi hasil (nominal/pa) / 12
+            $cofBulan = $bagiHasilNominalPa / 12;
+            
+            // Bagi hasil per nominal = lama deposito(bulan) × bagi hasil(COF/bulan)
+            $bagiHasilPerNominal = $inv->lama_investasi * $cofBulan;
+            
+            // COF per akhir periode (31 Desember tahun yang dipilih)
             $tanggalMulai = \Carbon\Carbon::parse($inv->tanggal_investasi);
             $tanggalAkhirPeriode = \Carbon\Carbon::create($year, 12, 31);
             
@@ -102,34 +124,48 @@ class KertasKerjaInvestorSFinlogController extends Controller
                 $tanggalSekarang = \Carbon\Carbon::now();
                 $tanggalBatas = $tanggalAkhirPeriode->lt($tanggalSekarang) ? $tanggalAkhirPeriode : $tanggalSekarang;
                 
+                // Hitung bulan berjalan dari tanggal investasi sampai batas
                 $bulanBerjalan = max(0, $tanggalMulai->diffInMonths($tanggalBatas) + 1);
                 
+                // Total yang seharusnya dibayar
                 $totalSeharusnya = $cofBulan * $bulanBerjalan;
                 
-                $totalDibayar = DB::table('pengembalian_investasi')
-                    ->where('id_pengajuan_investasi', $id)
+                // Total yang sudah dibayar sampai batas
+                $totalDibayar = DB::table('pengembalian_investasi_finlog')
+                    ->where('id_pengajuan_investasi_finlog', $id)
                     ->where('tanggal_pengembalian', '<=', $tanggalBatas)
                     ->sum('bagi_hasil_dibayar');
                 
+                // COF akhir periode = total seharusnya - total dibayar
                 $cofAkhirPeriode = max(0, $totalSeharusnya - $totalDibayar);
             }
+            
+            // Hitung sisa pokok dan sisa bagi hasil
+            $totalPokokDikembalikan = $total->total_pokok_all ?? 0;
+            $totalBagiHasilDibayar = $total->total_bagi_hasil_all ?? 0;
+            
+            // Sisa pokok = nominal investasi - total pokok yang sudah dikembalikan
+            $sisaPokok = max(0, $inv->nominal_investasi - $totalPokokDikembalikan);
+            
+            // Sisa bagi hasil = bagi hasil per nominal - total bagi hasil yang sudah dibayar
+            $sisaBagiHasil = max(0, $bagiHasilPerNominal - $totalBagiHasilDibayar);
             
             return [
                 'id' => $id,
                 'nomor_kontrak' => $inv->nomor_kontrak,
                 'tanggal_uang_masuk' => $inv->tanggal_investasi,
-                'deposito' => $inv->deposito,
                 'deposan' => $inv->nama_investor,
-                'nominal_deposito' => $inv->jumlah_investasi,
+                'nominal_deposito' => $inv->nominal_investasi,
                 'lama_deposito' => $inv->lama_investasi,
-                'bagi_hasil_pa' => $inv->bagi_hasil_pertahun,
-                'bagi_hasil_nominal' => $inv->nominal_bagi_hasil_yang_didapatkan,
+                'bagi_hasil_pa' => $inv->persentase_bagi_hasil,
+                'bagi_hasil_nominal_pa' => $bagiHasilNominalPa,
+                'bagi_hasil_per_nominal' => $bagiHasilPerNominal,
                 'bagi_hasil_per_bulan' => $bagiHasilPerBulan,
                 'cof_bulan' => $cofBulan,
                 'cof_akhir_periode' => $cofAkhirPeriode,
                 'status' => $inv->status,
-                'tgl_pengembalian' => $tglTerakhir->tanggal_terakhir ?? null,
                 
+                // Data bulanan (Januari - Desember)
                 'jan' => $pembayaranBulan->where('bulan', 1)->first()->total_bagi_hasil ?? 0,
                 'feb' => $pembayaranBulan->where('bulan', 2)->first()->total_bagi_hasil ?? 0,
                 'mar' => $pembayaranBulan->where('bulan', 3)->first()->total_bagi_hasil ?? 0,
@@ -143,11 +179,12 @@ class KertasKerjaInvestorSFinlogController extends Controller
                 'nov' => $pembayaranBulan->where('bulan', 11)->first()->total_bagi_hasil ?? 0,
                 'des' => $pembayaranBulan->where('bulan', 12)->first()->total_bagi_hasil ?? 0,
                 
-                'pengembalian_pokok' => $total->total_pokok_all ?? 0,
-                'pengembalian_bagi_hasil' => $total->total_bagi_hasil_all ?? 0,
-                'sisa_pokok' => $inv->sisa_pokok,
-                'sisa_bagi_hasil' => $inv->sisa_bagi_hasil,
-                'total_belum_dikembalikan' => $inv->sisa_pokok + $inv->sisa_bagi_hasil,
+                // Data pengembalian
+                'pengembalian_pokok' => $totalPokokDikembalikan,
+                'pengembalian_bagi_hasil' => $totalBagiHasilDibayar,
+                'sisa_pokok' => $sisaPokok,
+                'sisa_bagi_hasil' => $sisaBagiHasil,
+                'total_belum_dikembalikan' => $sisaPokok + $sisaBagiHasil,
             ];
         });
         

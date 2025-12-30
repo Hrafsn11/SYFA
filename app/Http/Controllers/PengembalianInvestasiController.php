@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Response;
+use App\Helpers\ListNotifSFinance;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\PengembalianInvestasi;
@@ -11,6 +12,13 @@ use App\Http\Requests\PengembalianInvestasiRequest;
 
 class PengembalianInvestasiController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:pengembalian_investasi.add')->only(['store']);
+
+        $this->middleware('can:pengembalian_investasi.edit')->only(['edit', 'update']);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -37,26 +45,35 @@ class PengembalianInvestasiController extends Controller
 
             // Create pengembalian
             $pengembalian = PengembalianInvestasi::create($validated);
-            
-       
+
+
             $investasi = PengajuanInvestasi::findOrFail($validated['id_pengajuan_investasi']);
-            
+
             $sisaPokokBaru = $investasi->sisa_pokok - $validated['dana_pokok_dibayar'];
             $sisaBagiHasilBaru = $investasi->sisa_bagi_hasil - $validated['bagi_hasil_dibayar'];
-            
+
             $updateData = [
                 'sisa_pokok' => max(0, $sisaPokokBaru),
                 'sisa_bagi_hasil' => max(0, $sisaBagiHasilBaru),
             ];
-            
+
             // Auto-update status jika lunas
             if ($sisaPokokBaru <= 0 && $sisaBagiHasilBaru <= 0) {
                 $updateData['status'] = 'Lunas';
             }
-            
+
             $investasi->update($updateData);
 
+            // Reload pengembalian dengan relasi untuk notifikasi
+            $pengembalian->load('pengajuanInvestasi.investor');
+
             DB::commit();
+
+            // Kirim notifikasi saat SKI Finance melakukan transfer pengembalian investasi ke investor
+            // Hanya jika ada bukti transfer (berarti sudah ditransfer)
+            if ($pengembalian->bukti_transfer) {
+                ListNotifSFinance::transferPengembalianInvestasiKeInvestor($pengembalian);
+            }
 
             return Response::success(null, 'Data pengembalian investasi berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -107,22 +124,22 @@ class PengembalianInvestasiController extends Controller
                 if ($file && Storage::disk('public')->exists($pengembalian->bukti_transfer)) {
                     Storage::disk('public')->delete($pengembalian->bukti_transfer);
                 }
-                
+
                 $file = Storage::disk('public')->put('bukti_pengembalian_investasi', $request->bukti_transfer);
                 $validated['bukti_transfer'] = $file;
             }
 
             // Recalculate sisa (restore old then subtract new)
             $investasi = PengajuanInvestasi::findOrFail($pengembalian->id_pengajuan_investasi);
-            
+
             // Restore sisa from old pengembalian
             $sisaPokokRestored = $investasi->sisa_pokok + $pengembalian->dana_pokok_dibayar;
             $sisaBagiHasilRestored = $investasi->sisa_bagi_hasil + $pengembalian->bagi_hasil_dibayar;
-            
+
             // Subtract new pengembalian
             $sisaPokokBaru = $sisaPokokRestored - $validated['dana_pokok_dibayar'];
             $sisaBagiHasilBaru = $sisaBagiHasilRestored - $validated['bagi_hasil_dibayar'];
-            
+
             $investasi->update([
                 'sisa_pokok' => max(0, $sisaPokokBaru),
                 'sisa_bagi_hasil' => max(0, $sisaBagiHasilBaru),
@@ -147,21 +164,21 @@ class PengembalianInvestasiController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $pengembalian = PengembalianInvestasi::where('id_pengembalian_investasi', $id)->firstOrFail();
-            
+
             // Restore sisa to investasi
             $investasi = PengajuanInvestasi::findOrFail($pengembalian->id_pengajuan_investasi);
             $investasi->update([
                 'sisa_pokok' => $investasi->sisa_pokok + $pengembalian->dana_pokok_dibayar,
                 'sisa_bagi_hasil' => $investasi->sisa_bagi_hasil + $pengembalian->bagi_hasil_dibayar,
             ]);
-            
+
             // Delete file
             if ($pengembalian->bukti_transfer && Storage::disk('public')->exists($pengembalian->bukti_transfer)) {
                 Storage::disk('public')->delete($pengembalian->bukti_transfer);
             }
-            
+
             // Delete record
             $pengembalian->delete();
 
@@ -174,4 +191,3 @@ class PengembalianInvestasiController extends Controller
         }
     }
 }
-

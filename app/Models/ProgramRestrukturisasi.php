@@ -32,6 +32,7 @@ class ProgramRestrukturisasi extends Model
     ];
 
     protected $casts = [
+        'metode_perhitungan' => 'string',
         'plafon_pembiayaan' => 'decimal:2',
         'suku_bunga_per_tahun' => 'decimal:2',
         'total_pokok' => 'decimal:2',

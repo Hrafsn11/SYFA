@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\PeminjamanFinlog;
 use App\Models\HistoryPengajuanPinjamanFinlog;
+use App\Helpers\ListNotifSFinlog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -59,7 +60,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Menunggu Persetujuan'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 1,
                 'status' => 'Pengajuan Disubmit',
@@ -69,8 +70,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            $this->loadData();
-            $this->dispatch('refreshData');
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Pengajuan berhasil disubmit');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -101,7 +106,7 @@ class PeminjamanDetail extends Component
                 'total_pinjaman' => $total_pinjaman_baru
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 2,
                 'status' => 'Disetujui Investment Officer',
@@ -113,9 +118,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['bagi_hasil_disetujui']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Validasi IO berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -139,7 +148,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Draft'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 2,
                 'status' => 'Ditolak Investment Officer',
@@ -150,9 +159,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['catatan_penolakan']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Pengajuan kembali ke Draft');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -175,7 +188,7 @@ class PeminjamanDetail extends Component
                 'presentase_bagi_hasil' => $lastHistory->bagi_hasil_disetujui ?? 0
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 3,
                 'status' => 'Disetujui Debitur',
@@ -185,8 +198,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            $this->loadData();
-            $this->dispatch('refreshData');
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan debitur berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -209,7 +226,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Ditolak'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 3,
                 'status' => 'Ditolak Debitur',
@@ -220,9 +237,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['catatan_penolakan']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Pengajuan ditolak oleh Debitur');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -241,7 +262,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Menunggu Persetujuan'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 4,
                 'status' => 'Disetujui SKI Finance',
@@ -251,8 +272,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            $this->loadData();
-            $this->dispatch('refreshData');
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan SKI Finance berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -276,7 +301,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Menunggu Persetujuan'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 4,
                 'status' => 'Ditolak SKI Finance',
@@ -287,9 +312,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['catatan_penolakan']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Kembali ke Validasi IO');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -308,7 +337,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Disetujui'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 5,
                 'status' => 'Disetujui CEO Finlog',
@@ -318,8 +347,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            $this->loadData();
-            $this->dispatch('refreshData');
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan CEO berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -343,7 +376,7 @@ class PeminjamanDetail extends Component
                 'status' => 'Menunggu Persetujuan'
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 5,
                 'status' => 'Ditolak CEO Finlog',
@@ -354,9 +387,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['catatan_penolakan']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Kembali ke Persetujuan SKI Finance');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -384,7 +421,7 @@ class PeminjamanDetail extends Component
                 'jaminan' => $this->jaminan,
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 6,
                 'status' => 'Kontrak Digenerate',
@@ -394,9 +431,13 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['nomor_kontrak', 'biaya_administrasi', 'jaminan']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Kontrak berhasil digenerate');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -422,7 +463,7 @@ class PeminjamanDetail extends Component
                 'bukti_transfer' => $path
             ]);
 
-            HistoryPengajuanPinjamanFinlog::create([
+            $history = HistoryPengajuanPinjamanFinlog::create([
                 'id_peminjaman_finlog' => $this->peminjaman->id_peminjaman_finlog,
                 'current_step' => 7,
                 'status' => 'Bukti Transfer Diupload',
@@ -432,9 +473,19 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
+            
+            // Auto-update AR Perbulan saat status berubah ke "Selesai"
+            app(\App\Services\ArPerbulanFinlogService::class)->updateAROnSelesai(
+                $this->peminjaman->id_debitur,
+                now()
+            );
+            
+            // Reload peminjaman dengan relasi debitur untuk notifikasi
+            $this->peminjaman->refresh();
+            $this->peminjaman->load('debitur');
+            ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
+            
             $this->reset(['bukti_transfer']);
-            $this->loadData();
-            $this->dispatch('refreshData');
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {
             DB::rollBack();

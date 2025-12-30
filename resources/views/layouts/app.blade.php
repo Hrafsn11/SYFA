@@ -237,6 +237,56 @@
             updateNProgressPosition();
         });
     </script>
+
+<script>
+        $(document).on('click', '#markAllRead', function () {
+            $.ajax({
+                url: '{{ url("notif-read-all") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    // Optionally refresh just the notification UI
+                    $('.badge-notifications').remove(); // remove red dot
+                    $('.dropdown-notifications-read').remove(); // remove individual dots
+                    // Optional: reload or show a success toast
+                    $('#count_notif').text('0');
+                },
+                error: function (xhr) {
+                    console.error('Failed to mark all as read:', xhr.responseText);
+                }
+            });
+        });
+
+        $(document).on('click', '.dropdown-notifications-archive', function () {
+            const notifId = $(this).data('id');
+            const notifItem = $(this).closest('.dropdown-notifications-item');
+
+            $.ajax({
+                url: `{{ url('notif-hide') }}/${notifId}`,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    console.log(response);
+                    
+                    notifItem.fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                    $('#count_notif').text(response.notif_count);
+                    if(response.notif_count <= 0){
+                        $('.badge-notifications').remove();
+                    }
+                    console.log('Notification hidden successfully.');
+                },
+                error: function (xhr) {
+                    console.error('Failed to hide notification:', xhr.responseText);
+                }
+            });
+        });
+    </script>
     
     <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
     @endassets

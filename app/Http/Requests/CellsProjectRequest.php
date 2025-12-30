@@ -79,6 +79,13 @@ class CellsProjectRequest extends FormRequest
                 'string',
                 'max:255'
             ];
+            $validate['tanda_tangan_pic'] = [
+                'nullable', // Validation image dilakukan di Livewire sebelum convert ke path
+            ];
+        } else {
+            $validate['tanda_tangan_pic'] = [
+                'nullable',
+            ];
         }
 
         return $validate;
@@ -108,4 +115,3 @@ class CellsProjectRequest extends FormRequest
         ];
     }
 }
-

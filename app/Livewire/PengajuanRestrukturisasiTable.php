@@ -2,13 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengajuanRestrukturisasi;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use Rappasoft\LaravelLivewireTables\{DataTableComponent, Views\Column};
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class PengajuanRestrukturisasiTable extends DataTableComponent
 {
+    use HasDebiturAuthorization;
+
     protected $model = PengajuanRestrukturisasi::class;
 
     private const BADGE_COLORS_PEMBIAYAAN = [
@@ -43,12 +47,62 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
             ->setPerPage(10)
             ->setSearchStatus(true)
             ->setColumnSelectStatus(true)
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setEmptyMessage('Tidak ada data pengajuan restrukturisasi');
+    }
+
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Bulan')
+                ->options([
+                    '' => 'Semua Bulan',
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("MONTH(pengajuan_restrukturisasi.created_at) = ?", [$value]);
+                    }
+                }),
+
+            SelectFilter::make('Tahun')
+                ->options([
+                    '' => 'Semua Tahun',
+                    '2023' => '2023',
+                    '2024' => '2024',
+                    '2025' => '2025',
+                    '2026' => '2026',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("YEAR(pengajuan_restrukturisasi.created_at) = ?", [$value]);
+                    }
+                }),
+        ];
     }
 
     public function builder(): Builder
     {
-        return PengajuanRestrukturisasi::query()->select('pengajuan_restrukturisasi.*');
+        $query = PengajuanRestrukturisasi::query()
+            ->select([
+                'pengajuan_restrukturisasi.*',
+                'master_debitur_dan_investor.user_id',
+            ])
+            ->leftJoin('master_debitur_dan_investor', 'pengajuan_restrukturisasi.id_debitur', '=', 'master_debitur_dan_investor.id_debitur');
+
+        return $this->applyDebiturAuthorization($query);
     }
 
     public function columns(): array
@@ -152,20 +206,20 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
         }
 
         $jenisArray = is_array($value) ? $value : json_decode($value, true);
-        
+
         if (!$jenisArray || !is_array($jenisArray) || count($jenisArray) === 0) {
             return $this->html('<span class="text-muted">-</span>');
         }
 
         $badges = array_map(fn($jenis) => $this->badgeJenisRestrukturisasi($jenis), $jenisArray);
-        
+
         return $this->html('<div class="d-flex flex-wrap gap-1">' . implode('', $badges) . '</div>');
     }
 
     private function badgeJenisRestrukturisasi(string $jenis): string
     {
         $color = 'info';
-        
+
         foreach (self::BADGE_COLORS_JENIS as $keyword => $badgeColor) {
             if (stripos($jenis, $keyword) !== false) {
                 $color = $badgeColor;
@@ -187,15 +241,15 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
 
         return $this->html(
             '<div class="d-flex justify-content-center align-items-center gap-2">' .
-            $detailButton . $editButton .
-            '</div>'
+                $detailButton . $editButton .
+                '</div>'
         );
     }
 
     private function detailButton(string $id): string
     {
         $url = route('detail-restrukturisasi', ['id' => $id]);
-        
+
         return sprintf(
             '<a href="%s" class="btn btn-sm btn-icon btn-text-secondary rounded-pill" title="Detail">
                 <i class="ti ti-file"></i>
@@ -206,6 +260,10 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
 
     private function editButton(string $id, string $status): string
     {
+        if (!auth()->user()->can('pengajuan_restrukturisasi.edit')) {
+            return '';
+        }
+
         $isEditable = in_array($status, self::EDITABLE_STATUSES);
 
         if ($isEditable) {
