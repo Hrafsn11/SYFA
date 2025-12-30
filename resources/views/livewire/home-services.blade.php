@@ -86,7 +86,7 @@
                     <p class="text-muted mb-4 small flex-grow-1">
                         Modul utama pengelolaan pembiayaan dan investasi SYFA
                     </p>
-                    <a href="{{ route('sfinance.dashboard.pembiayaan') }}" class="btn btn-primary w-100 fw-semibold">
+                    <a href="{{ route('sfinance.index') }}" class="btn btn-primary w-100 fw-semibold">
                         Go to Application
                     </a>
                 </div>
@@ -107,7 +107,7 @@
                     <p class="text-muted mb-4 small flex-grow-1">
                         Monitoring dan pencatatan transaksi keuangan operasional
                     </p>
-                    <a href="{{ route('sfinlog.dashboard.pembiayaan') }}" class="btn btn-info w-100 fw-semibold">
+                    <a href="{{ route('sfinlog.index') }}" class="btn btn-info w-100 fw-semibold">
                         Go to Application
                     </a>
                 </div>
@@ -115,7 +115,7 @@
         </div>
 
         {{-- Master Data & Configuration Card --}}
-        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor']))
+        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor', 'IO (Investment Officer)', 'CEO S-Finlog', 'Direktur SKI', 'CEO SKI']))
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="card h-100 border service-card shadow-none">
                     <div class="card-body d-flex flex-column align-items-center text-center p-4">
@@ -140,7 +140,7 @@
 
 
         {{-- Portofolio Card --}}
-        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor']))
+        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor', 'IO (Investment Officer)', 'CEO S-Finlog', 'Direktur SKI', 'CEO SKI']))
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="card h-100 border service-card shadow-none">
                     <div class="card-body d-flex flex-column align-items-center text-center p-4">

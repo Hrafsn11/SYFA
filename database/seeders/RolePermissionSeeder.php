@@ -252,7 +252,7 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_restrukturisasi.edit',
             'pengajuan_restrukturisasi.ajukan_restrukturisasi',
             'program_restrukturisasi.view',
-            'program_restrukturisasi.add',
+            // 'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
 
             // Pengembalian Pinjaman (SFinance)
@@ -352,6 +352,10 @@ class RolePermissionSeeder extends Seeder
             'penyaluran_deposito.view',
             'penyaluran_deposito.add',
             'penyaluran_deposito.edit',
+
+            'program_restrukturisasi.view',
+            'program_restrukturisasi.add',
+            'program_restrukturisasi.edit',
 
             // Penyaluran Deposito Finlog (Finance SKI full access)
             'penyaluran_deposito_finlog.view',

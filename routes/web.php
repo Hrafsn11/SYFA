@@ -50,6 +50,15 @@ Route::middleware([
 
     require __DIR__ . '/livewire_route.php';
 
+    // Module Entry Points - Redirect to first accessible route based on user permissions
+    Route::get('sfinance', function () {
+        return \App\Helpers\ModuleRedirectHelper::redirectToFirstAccessible('sfinance');
+    })->name('sfinance.index');
+
+    Route::get('sfinlog', function () {
+        return \App\Helpers\ModuleRedirectHelper::redirectToFirstAccessible('sfinlog');
+    })->name('sfinlog.index');
+
     // Module Routes: SFinance
     Route::prefix('sfinance')->name('sfinance.')->group(function () {
         require __DIR__ . '/module_routes.php';
@@ -272,7 +281,6 @@ Route::middleware([
     Route::post('notif-read-all', [NotificationController::class, 'readall']);
     Route::get('/check-notifications', [NotificationController::class, 'checkNew']);
     Route::resource('notification', NotificationController::class);
-    
 });
 
 require __DIR__ . '/auth.php';
