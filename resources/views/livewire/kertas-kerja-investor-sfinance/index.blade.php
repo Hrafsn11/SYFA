@@ -14,44 +14,63 @@
             <div class="card">
                 <div class="card-datatable table-responsive">
                     <div class="dataTables_wrapper dt-bootstrap5 no-footer">
-                        <!-- Search and Filter -->
-                        <form method="GET" action="{{ route('kertas-kerja-investor-sfinance.index') }}" id="filterForm">
-                            <input type="hidden" name="year" value="{{ $year }}" id="yearInput">
-                            <input type="hidden" name="page" value="1" id="pageInput">
-
-                            <div class="row mx-2 mt-3 align-items-center mb-3">
-                                <div class="col-md-2">
-                                    <div class="d-flex align-items-center">
-                                        <span class="me-2">Show</span>
-                                        <select name="per_page" class="form-select" style="width: auto;" id="perPageSelect">
-                                            <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
-                                            <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
-                                            <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
-                                            <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
-                                        </select>
-                                        <span class="ms-2">Entries</span>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <!-- Year Filter -->
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" placeholder="Select Year"
-                                            id="flatpickr-year" value="{{ $year }}" />
-                                        <button type="button" class="btn btn-primary" id="filterYearBtn">
-                                            <i class="ti ti-filter"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-7">
-                                    <div class="d-flex justify-content-end">
-                                        <input type="search" name="search" class="form-control" placeholder="Cari..."
-                                            value="{{ $search }}" id="searchInput">
-                                    </div>
+                        {{-- Filter Controls --}}
+                        <div class="row mx-2 mt-3 align-items-center mb-3">
+                            {{-- Per Page --}}
+                            <div class="col-md-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">Show</span>
+                                    <select class="form-select" style="width: auto;" id="perPageSelect">
+                                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                        <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100</option>
+                                    </select>
+                                    <span class="ms-2">Entries</span>
                                 </div>
                             </div>
-                        </form>
+
+                            {{-- Year Filter --}}
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">Tahun</span>
+                                    <select class="form-select" id="yearSelect">
+                                        @for ($y = date('Y'); $y >= date('Y') - 10; $y--)
+                                            <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>
+                                                {{ $y }}</option>
+                                        @endfor
+                                    </select>
+                                    <button type="button" class="btn btn-primary" id="filterYearBtn">
+                                        <i class="ti ti-filter"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Search --}}
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="ti ti-search"></i></span>
+                                    <input type="search" class="form-control"
+                                        placeholder="Cari deposan, nomor kontrak, status..." value="{{ $search }}"
+                                        id="searchInput">
+                                    @if ($search)
+                                        <button type="button" class="btn btn-outline-secondary" id="clearSearchBtn">
+                                            <i class="ti ti-x"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Info Badge --}}
+                            <div class="col-md-3 text-end">
+                                @if ($search)
+                                    <span class="badge bg-info">
+                                        <i class="ti ti-search me-1"></i>
+                                        Hasil pencarian: "{{ $search }}"
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
 
                         <!-- Table -->
                         <div style="overflow-x: auto; white-space: nowrap;">
@@ -79,7 +98,8 @@
                                     <tbody>
                                         @forelse($paginatedData as $index => $row)
                                             <tr>
-                                                <td class="text-center">{{ $index + 1 }}</td>
+                                                <td class="text-center">
+                                                    {{ ($pagination['current_page'] - 1) * $perPage + $index + 1 }}</td>
                                                 <td class="text-center">
                                                     {{ \Carbon\Carbon::parse($row['tanggal_uang_masuk'])->format('d-m-Y') }}
                                                 </td>
@@ -110,7 +130,17 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="13" class="text-center">Tidak ada data</td>
+                                                <td colspan="13" class="text-center py-4">
+                                                    <div class="d-flex flex-column align-items-center">
+                                                        <i class="ti ti-database-off ti-xl text-muted mb-2"></i>
+                                                        @if ($search)
+                                                            <span class="text-muted">Tidak ada data yang cocok dengan
+                                                                pencarian "{{ $search }}"</span>
+                                                        @else
+                                                            <span class="text-muted">Tidak ada data</span>
+                                                        @endif
+                                                    </div>
+                                                </td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -219,36 +249,75 @@
                         <div class="row mx-2 mt-3 mb-3">
                             <div class="col-sm-12 col-md-6">
                                 <div class="dataTables_info">
-                                    Menampilkan {{ $pagination['from'] }} sampai {{ $pagination['to'] }} dari
-                                    {{ $pagination['total'] }} data
+                                    @if ($pagination['total'] > 0)
+                                        Menampilkan {{ $pagination['from'] }} sampai {{ $pagination['to'] }} dari
+                                        {{ $pagination['total'] }} data
+                                    @else
+                                        Tidak ada data untuk ditampilkan
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-sm-12 col-md-6">
-                                <div class="dataTables_paginate paging_simple_numbers">
-                                    <ul class="pagination">
-                                        <!-- Previous -->
-                                        <li
-                                            class="paginate_button page-item {{ $pagination['current_page'] == 1 ? 'disabled' : '' }}">
-                                            <a href="#" class="page-link"
-                                                onclick="goToPage({{ $pagination['current_page'] - 1 }}); return false;">Sebelumnya</a>
-                                        </li>
-
-                                        @for ($i = 1; $i <= $pagination['last_page']; $i++)
+                                @if ($pagination['last_page'] > 1)
+                                    <div class="dataTables_paginate paging_simple_numbers">
+                                        <ul class="pagination justify-content-end mb-0">
+                                            <!-- Previous -->
                                             <li
-                                                class="paginate_button page-item {{ $pagination['current_page'] == $i ? 'active' : '' }}">
-                                                <a href="#" class="page-link"
-                                                    onclick="goToPage({{ $i }}); return false;">{{ $i }}</a>
+                                                class="paginate_button page-item {{ $pagination['current_page'] == 1 ? 'disabled' : '' }}">
+                                                <a href="javascript:void(0)" class="page-link"
+                                                    onclick="goToPage({{ $pagination['current_page'] - 1 }})">
+                                                    <i class="ti ti-chevron-left ti-xs"></i>
+                                                </a>
                                             </li>
-                                        @endfor
 
-                                        <!-- Next -->
-                                        <li
-                                            class="paginate_button page-item {{ $pagination['current_page'] >= $pagination['last_page'] ? 'disabled' : '' }}">
-                                            <a href="#" class="page-link"
-                                                onclick="goToPage({{ $pagination['current_page'] + 1 }}); return false;">Selanjutnya</a>
-                                        </li>
-                                    </ul>
-                                </div>
+                                            @php
+                                                $start = max(1, $pagination['current_page'] - 2);
+                                                $end = min($pagination['last_page'], $pagination['current_page'] + 2);
+                                            @endphp
+
+                                            @if ($start > 1)
+                                                <li class="paginate_button page-item">
+                                                    <a href="javascript:void(0)" class="page-link"
+                                                        onclick="goToPage(1)">1</a>
+                                                </li>
+                                                @if ($start > 2)
+                                                    <li class="paginate_button page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                @endif
+                                            @endif
+
+                                            @for ($i = $start; $i <= $end; $i++)
+                                                <li
+                                                    class="paginate_button page-item {{ $pagination['current_page'] == $i ? 'active' : '' }}">
+                                                    <a href="javascript:void(0)" class="page-link"
+                                                        onclick="goToPage({{ $i }})">{{ $i }}</a>
+                                                </li>
+                                            @endfor
+
+                                            @if ($end < $pagination['last_page'])
+                                                @if ($end < $pagination['last_page'] - 1)
+                                                    <li class="paginate_button page-item disabled">
+                                                        <span class="page-link">...</span>
+                                                    </li>
+                                                @endif
+                                                <li class="paginate_button page-item">
+                                                    <a href="javascript:void(0)" class="page-link"
+                                                        onclick="goToPage({{ $pagination['last_page'] }})">{{ $pagination['last_page'] }}</a>
+                                                </li>
+                                            @endif
+
+                                            <!-- Next -->
+                                            <li
+                                                class="paginate_button page-item {{ $pagination['current_page'] >= $pagination['last_page'] ? 'disabled' : '' }}">
+                                                <a href="javascript:void(0)" class="page-link"
+                                                    onclick="goToPage({{ $pagination['current_page'] + 1 }})">
+                                                    <i class="ti ti-chevron-right ti-xs"></i>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -258,48 +327,83 @@
     </div>
 @endsection
 
-
-
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Flatpickr for year selection
-            flatpickr('#flatpickr-year', {
-                mode: "single",
-                dateFormat: "Y",
-                defaultDate: "{{ $year }}"
-            });
+            // Current filter state
+            var baseUrl = '{{ route('kertas-kerja-investor-sfinance.index') }}';
+            var currentYear = '{{ $year }}';
+            var currentPerPage = '{{ $perPage }}';
+            var currentSearch = '{{ $search }}';
+            var lastPage = {{ $pagination['last_page'] }};
+
+            // Get elements
+            var yearSelect = document.getElementById('yearSelect');
+            var perPageSelect = document.getElementById('perPageSelect');
+            var searchInput = document.getElementById('searchInput');
+            var filterYearBtn = document.getElementById('filterYearBtn');
+            var clearBtn = document.getElementById('clearSearchBtn');
+
+            // Navigate with params
+            function navigate(page) {
+                page = page || 1;
+                var url = baseUrl + '?year=' + currentYear + '&per_page=' + currentPerPage + '&page=' + page;
+                if (currentSearch && currentSearch.trim() !== '') {
+                    url += '&search=' + encodeURIComponent(currentSearch);
+                }
+                console.log('Navigating to:', url);
+                window.location.href = url;
+            }
+
+            // Year filter button click
+            if (filterYearBtn) {
+                filterYearBtn.onclick = function() {
+                    if (yearSelect) {
+                        currentYear = yearSelect.value;
+                        console.log('Selected year:', currentYear);
+                    }
+                    navigate(1);
+                };
+            }
 
             // Per page change
-            $('#perPageSelect').on('change', function() {
-                $('#pageInput').val(1); // Reset to page 1
-                $('#filterForm').submit();
-            });
+            if (perPageSelect) {
+                perPageSelect.onchange = function() {
+                    currentPerPage = this.value;
+                    navigate(1);
+                };
+            }
 
-            // Search with debounce
-            let searchTimeout;
-            $('#searchInput').on('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(function() {
-                    $('#pageInput').val(1); // Reset to page 1
-                    $('#filterForm').submit();
-                }, 500);
-            });
+            // Search input - Enter key
+            if (searchInput) {
+                searchInput.onkeydown = function(e) {
+                    if (e.key === 'Enter' || e.keyCode === 13) {
+                        e.preventDefault();
+                        currentSearch = this.value;
+                        console.log('Search:', currentSearch);
+                        navigate(1);
+                    }
+                };
+            }
 
-            // Year filter button
-            $('#filterYearBtn').on('click', function() {
-                const selectedYear = $('#flatpickr-year').val();
-                $('#yearInput').val(selectedYear);
-                $('#pageInput').val(1); // Reset to page 1
-                $('#filterForm').submit();
-            });
+            // Clear search button
+            if (clearBtn) {
+                clearBtn.onclick = function() {
+                    if (searchInput) {
+                        searchInput.value = '';
+                    }
+                    currentSearch = '';
+                    navigate(1);
+                };
+            }
+
+            // Pagination function - make it global
+            window.goToPage = function(page) {
+                if (page < 1 || page > lastPage) return;
+                navigate(page);
+            };
+
+            console.log('Kertas Kerja Investor JS loaded. Year:', currentYear, 'PerPage:', currentPerPage);
         });
-
-        // Pagination function
-        function goToPage(page) {
-            if (page < 1 || page > {{ $pagination['last_page'] }}) return;
-            $('#pageInput').val(page);
-            $('#filterForm').submit();
-        }
     </script>
 @endpush

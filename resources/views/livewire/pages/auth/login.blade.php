@@ -19,7 +19,7 @@ new #[Layout('layouts.guest')] class extends Component {
 
         // Cek apakah input adalah email atau username
         $fieldType = filter_var($this->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
-        
+
         if (Auth::attempt([$fieldType => $this->email, 'password' => $this->password], $this->remember)) {
             request()->session()->regenerate();
             $this->redirect(RouteServiceProvider::HOME);
@@ -50,31 +50,23 @@ new #[Layout('layouts.guest')] class extends Component {
 
                         <form class="mb-4" wire:submit.prevent="login">
                             <div class="mb-6">
-                                <input 
-                                    wire:model="email" 
-                                    type="text"
-                                    class="form-control @error('email') is-invalid @enderror" 
-                                    id="email" 
-                                    placeholder="Email or Username" 
-                                    autocomplete="username"
-                                    autofocus 
-                                />
+                                <input wire:model="email" type="text"
+                                    class="form-control @error('email') is-invalid @enderror" id="email"
+                                    placeholder="Email or Username" autocomplete="username" autofocus />
                                 @error('email')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="mb-6 form-password-toggle">
                                 <div class="input-group input-group-merge">
-                                    <input 
-                                        wire:model="password" 
-                                        type="password" 
-                                        id="password"
-                                        class="form-control @error('password') is-invalid @enderror" 
-                                        placeholder="Password" 
-                                        autocomplete="current-password"
-                                        aria-describedby="password" 
-                                    />
-                                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                                    <input wire:model="password" type="password" id="password"
+                                        class="form-control @error('password') is-invalid @enderror"
+                                        placeholder="Password" autocomplete="current-password"
+                                        aria-describedby="password" />
+                                    <span class="input-group-text cursor-pointer" id="togglePassword"
+                                        onclick="togglePasswordVisibility()">
+                                        <i class="ti ti-eye-off" id="togglePasswordIcon"></i>
+                                    </span>
                                 </div>
                                 @error('password')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -83,12 +75,8 @@ new #[Layout('layouts.guest')] class extends Component {
                             <div class="my-8">
                                 <div class="d-flex justify-content-between">
                                     <div class="form-check mb-0 ms-2">
-                                        <input 
-                                            wire:model="remember" 
-                                            class="form-check-input" 
-                                            type="checkbox"
-                                            id="remember-me" 
-                                        />
+                                        <input wire:model="remember" class="form-check-input" type="checkbox"
+                                            id="remember-me" />
                                         <label class="form-check-label" for="remember-me"> Remember Me </label>
                                     </div>
                                     @if (Route::has('password.request'))
@@ -98,10 +86,12 @@ new #[Layout('layouts.guest')] class extends Component {
                                 </div>
                             </div>
                             <div class="mb-6">
-                                <button class="btn btn-primary d-grid w-100" type="submit" wire:loading.attr="disabled">
+                                <button class="btn btn-primary d-grid w-100" type="submit"
+                                    wire:loading.attr="disabled">
                                     <span wire:loading.remove wire:target="login">Login</span>
                                     <span wire:loading wire:target="login">
-                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"
+                                            aria-hidden="true"></span>
                                         Loading...
                                     </span>
                                 </button>
@@ -112,4 +102,21 @@ new #[Layout('layouts.guest')] class extends Component {
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('ti-eye-off');
+                toggleIcon.classList.add('ti-eye');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('ti-eye');
+                toggleIcon.classList.add('ti-eye-off');
+            }
+        }
+    </script>
 </div>
