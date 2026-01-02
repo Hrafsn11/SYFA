@@ -50,6 +50,8 @@ class ListNotifSFinance
                 'notif_variable' => $notif_variable,
                 'link' => $link,
                 'notif' => $notif,
+                'id_debitur' => $peminjaman->id_debitur,
+                'id_investor' => null,
             ];
             sendNotification($data);
         }
@@ -84,6 +86,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $pengembalian->pengajuanPeminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -117,6 +121,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $pengajuan->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -150,6 +156,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $pengajuan->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -230,6 +238,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $pengajuan->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -265,6 +275,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -300,6 +312,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -335,6 +349,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -401,6 +417,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => null,
+            'id_investor' => $pengajuan->id_debitur_dan_investor,
         ];
 
         sendNotification($data);
@@ -434,6 +452,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $penyaluran->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -467,6 +487,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $penyaluran->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -500,6 +522,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $penyaluran->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -533,6 +557,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => null,
+            'id_investor' => $pengajuan->id_debitur_dan_investor,
         ];
 
         sendNotification($data);
@@ -563,6 +589,8 @@ class ListNotifSFinance
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => null,
+            'id_investor' => $pengembalian->pengajuanInvestasi->id_debitur_dan_investor ?? null,
         ];
 
         sendNotification($data);

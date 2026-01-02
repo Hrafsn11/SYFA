@@ -229,8 +229,8 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 ->format(function ($value) {
                     if ($value) {
                         return '<div class="text-center">
-                            <a href="/storage/' . $value . '" target="_blank" class="text-primary text-decoration-none">
-                                <i class="ti ti-file-text me-1"></i> Lihat Dokumen
+                            <a href="/storage/' . $value . '" target="_blank" class="btn btn-outline-primary">
+                                <i class="ti ti-file"></i>
                             </a>
                         </div>';
                     } else {

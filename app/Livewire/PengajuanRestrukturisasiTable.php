@@ -251,7 +251,7 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
         $url = route('detail-restrukturisasi', ['id' => $id]);
 
         return sprintf(
-            '<a href="%s" class="btn btn-sm btn-icon btn-text-secondary rounded-pill" title="Detail">
+            '<a href="%s" class="btn btn-sm btn-outline-primary" title="Detail">
                 <i class="ti ti-file"></i>
             </a>',
             e($url)
@@ -269,7 +269,7 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
         if ($isEditable) {
             return sprintf(
                 '<a href="javascript:void(0);" onclick="editPengajuan(\'%s\')" 
-                   class="btn btn-sm btn-icon btn-text-secondary rounded-pill" title="Edit">
+                   class="btn btn-sm btn-outline-warning" title="Edit">
                     <i class="ti ti-edit"></i>
                 </a>',
                 e($id)

@@ -193,7 +193,7 @@ class PenyaluranDepositoTable extends DataTableComponent
 
                         return '<div class="text-center">
                             <button type="button" class="btn btn-sm btn-success" onclick="previewBukti(\'' . $row->id_penyaluran_deposito . '\', \'' . $value . '\', ' . ($isImage ? 'true' : 'false') . ')">
-                                <i class="ti ti-eye me-1"></i>Preview
+                                <i class="ti ti-file me-1"></i>Preview
                             </button>
                         </div>';
                     } else {
@@ -228,7 +228,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                     $jsonData = htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8');
 
                     return '<div class="text-center">
-                        <button type="button" class="btn btn-sm btn-warning" onclick="editDataDirect(this)" data-item=\'' . $jsonData . '\'>
+                        <button type="button" class="btn btn-sm btn-outline-warning" onclick="editDataDirect(this)" data-item=\'' . $jsonData . '\'>
                             <i class="ti ti-edit"></i>
                         </button>
                     </div>';
