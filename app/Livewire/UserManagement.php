@@ -99,12 +99,13 @@ class UserManagement extends Component
 
         // Don't allow deletion of super admin user
         if ($user->hasRole('super-admin')) {
-            session()->flash('error', 'Cannot delete super admin user!');
+            session()->flash('error', 'Tidak dapat menghapus user super admin!');
             return;
         }
 
+        $userName = $user->name;
         $user->delete();
-        session()->flash('message', 'User deleted successfully!');
+        session()->flash('message', 'User ' . $userName . ' berhasil dihapus!');
     }
 
     public function closeModal()
