@@ -72,10 +72,10 @@
                                         @can('users.delete')
                                             @if (!$user->hasRole('super-admin'))
                                                 <button
-                                                    wire:click="delete('{{ $user->id }}') 
-                                                onclick="return
-                                                    confirm('Are you sure you want to delete this user?')"
-                                                    class="btn btn-sm btn-icon btn-danger" title="Delete">
+                                                    class="btn btn-sm btn-icon btn-danger user-delete-btn"
+                                                    type="button"
+                                                    data-id="{{ $user->id }}"
+                                                    title="Delete">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
                                             @endif
@@ -182,3 +182,22 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+    $(document).on('click', '.user-delete-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+
+        sweetAlertConfirm({
+            title: 'Konfirmasi Hapus',
+            text: 'Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+        }, () => {
+            @this.delete(id);
+        });
+    });
+</script>
+@endpush
