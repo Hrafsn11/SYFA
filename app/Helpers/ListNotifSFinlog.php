@@ -60,6 +60,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -88,6 +90,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -120,6 +124,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -148,6 +154,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -199,6 +207,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => null,
+            'id_investor' => $pengajuan->id_debitur_dan_investor,
         ];
 
         sendNotification($data);
@@ -247,6 +257,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -295,6 +307,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -347,6 +361,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
         ];
 
         sendNotification($data);
@@ -380,6 +396,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => null,
+            'id_investor' => $pengajuan->id_debitur_dan_investor,
         ];
 
         sendNotification($data);
@@ -409,6 +427,8 @@ class ListNotifSFinlog
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
+            'id_debitur' => null,
+            'id_investor' => $pengembalian->pengajuan->id_debitur_dan_investor,
         ];
 
         sendNotification($data);
