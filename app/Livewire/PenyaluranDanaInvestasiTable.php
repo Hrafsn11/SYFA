@@ -93,6 +93,8 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
+        $user = auth()->user();
+
         $query = PenyaluranDeposito::query()
             ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
             ->leftJoin('master_debitur_dan_investor', 'pi.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
@@ -122,9 +124,28 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 'pi.nama_investor as pi_nama_investor',
                 'pi.jumlah_investasi as pi_jumlah_investasi',
                 'pi.lama_investasi as pi_lama_investasi',
+                'pi.id_debitur_dan_investor as pi_id_investor',
                 \DB::raw('COALESCE(pd_sum.total_disalurkan_sum, 0) as total_disalurkan'),
                 \DB::raw('(pi.jumlah_investasi - COALESCE(pd_sum.total_disalurkan_sum, 0)) as sisa_dana')
             ]);
+
+        // Restricted data access based on user role
+        $isUnrestricted = $user->hasRole('super-admin') ||
+            $user->roles()->where('restriction', 1)->exists();
+
+        if (!$isUnrestricted) {
+            // Get id_debitur (investor) from user's debitur relation
+            $debiturInvestor = $user->debitur;
+            $idInvestor = $debiturInvestor ? $debiturInvestor->id_debitur : null;
+
+            // Investor: only see penyaluran from their own pengajuan investasi
+            if ($idInvestor) {
+                $query->where('pi.id_debitur_dan_investor', $idInvestor);
+            } else {
+                // User is not Investor and not unrestricted - show nothing
+                $query->whereRaw('1 = 0');
+            }
+        }
 
         // Custom search for joined tables
         if ($search = $this->getSearch()) {

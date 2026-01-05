@@ -111,9 +111,13 @@ class PenyaluranDepositoTable extends DataTableComponent
             $user->roles()->where('restriction', 1)->exists();
 
         if (!$isUnrestricted) {
-            // Debitur: only see their own data
-            if ($user->id_debitur) {
-                $query->where('penyaluran_deposito.id_debitur', $user->id_debitur);
+            // Get id_debitur from user's debitur relation
+            $debitur = $user->debitur;
+            $idDebitur = $debitur ? $debitur->id_debitur : null;
+
+            // Debitur: only see their own data (penyaluran yang ditujukan kepada mereka)
+            if ($idDebitur) {
+                $query->where('penyaluran_deposito.id_debitur', $idDebitur);
             } else {
                 // User is not Debitur and not unrestricted - show nothing
                 $query->whereRaw('1 = 0');
