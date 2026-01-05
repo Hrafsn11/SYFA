@@ -527,6 +527,15 @@ class DashboardInvestasiDeposito extends Component
         $persentase = 0;
         if ($totalBulanSebelumnya > 0) {
             $persentase = (($totalBulanIni - $totalBulanSebelumnya) / $totalBulanSebelumnya) * 100;
+        } elseif ($totalBulanSebelumnya == 0 && $totalBulanIni > 0) {
+            // Jika bulan sebelumnya 0 dan bulan ini ada nilai, maka ini adalah kenaikan
+            $persentase = 100;
+        } elseif ($totalBulanSebelumnya == 0 && $totalBulanIni == 0) {
+            // Jika kedua-duanya 0, maka tidak ada perubahan
+            $persentase = 0;
+        } elseif ($totalBulanSebelumnya > 0 && $totalBulanIni == 0) {
+            // Jika bulan sebelumnya ada nilai tapi bulan ini 0, maka turun 100%
+            $persentase = -100;
         }
         
         // Format nama bulan untuk period
