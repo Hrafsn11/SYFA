@@ -151,11 +151,15 @@
                 $.ajax({
                     url,
                     method: 'POST',
-                    data: { _token: CSRF, ...data },
+                    data: {
+                        _token: CSRF,
+                        ...data
+                    },
                     beforeSend: () => $btn.prop('disabled', true).html(loadingText),
-                    success: (res) => res.error ? 
+                    success: (res) => res.error ?
                         Swal.fire('Error!', res.message, 'error') : onSuccess(res),
-                    error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error'),
+                    error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message ||
+                        'Terjadi kesalahan', 'error'),
                     complete: () => $btn.prop('disabled', false).html(originalHtml)
                 });
             };
@@ -180,12 +184,20 @@
                 pendingRejectStep = step;
 
                 const stepTexts = {
-                    2: ['Setujui Evaluasi Restrukturisasi?', 'Pastikan evaluasi kelengkapan dokumen dan kelayakan debitur sudah sesuai. Setelah disetujui, pengajuan akan diteruskan ke CEO SKI untuk persetujuan.'],
-                    3: ['Setujui Persetujuan CEO SKI?', 'Pastikan hasil evaluasi sudah sesuai. Setelah disetujui oleh CEO SKI, pengajuan akan diteruskan ke Direktur untuk persetujuan final.'],
-                    4: ['Setujui Persetujuan Direktur?', 'Ini adalah persetujuan final. Setelah disetujui oleh Direktur, proses restrukturisasi akan selesai dan status menjadi "Selesai".']
+                    2: ['Setujui Evaluasi Restrukturisasi?',
+                        'Pastikan evaluasi kelengkapan dokumen dan kelayakan debitur sudah sesuai. Setelah disetujui, pengajuan akan diteruskan ke CEO SKI untuk persetujuan.'
+                    ],
+                    3: ['Setujui Persetujuan CEO SKI?',
+                        'Pastikan hasil evaluasi sudah sesuai. Setelah disetujui oleh CEO SKI, pengajuan akan diteruskan ke Direktur untuk persetujuan final.'
+                    ],
+                    4: ['Setujui Persetujuan Direktur?',
+                        'Ini adalah persetujuan final. Setelah disetujui oleh Direktur, proses restrukturisasi akan selesai dan status menjadi "Selesai".'
+                    ]
                 };
 
-                const [title, description] = stepTexts[step] || ['Apakah Anda yakin menyetujui pengajuan ini?', 'Pastikan semua data dan dokumen sudah sesuai sebelum melanjutkan.'];
+                const [title, description] = stepTexts[step] || ['Apakah Anda yakin menyetujui pengajuan ini?',
+                    'Pastikan semua data dan dokumen sudah sesuai sebelum melanjutkan.'
+                ];
 
                 $('#approvalTitle').text(title);
                 $('#approvalDescription').text(description);
@@ -196,8 +208,10 @@
             $('#btnKonfirmasiSetuju').click(function() {
                 bootstrap.Modal.getInstance($('#modalApproval')[0]).hide();
                 ajaxPost(
-                    `/pengajuan-restrukturisasi/${ID}/decision`,
-                    { action: 'approve', step: pendingRejectStep },
+                    `/pengajuan-restrukturisasi/${ID}/decision`, {
+                        action: 'approve',
+                        step: pendingRejectStep
+                    },
                     () => showSuccessReload('Pengajuan berhasil disetujui!'),
                     '#btnKonfirmasiSetuju',
                     '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...'
@@ -209,12 +223,20 @@
                 bootstrap.Modal.getInstance($('#modalApproval')[0]).hide();
 
                 const rejectWarnings = {
-                    2: ['Penolakan di Tahap Evaluasi', 'Jika Anda menolak di tahap ini, pengajuan akan dikembalikan ke pemohon untuk diperbaiki. Status akan berubah menjadi "Perbaikan Dokumen" dan pemohon dapat mengedit ulang pengajuan.'],
-                    3: ['Penolakan oleh CEO SKI', 'Jika ditolak di tahap ini, pengajuan akan dikembalikan ke tahap evaluasi (Step 2) untuk dievaluasi ulang. Status akan berubah menjadi "Perlu Evaluasi Ulang".'],
-                    4: ['Penolakan oleh Direktur', 'Jika ditolak di tahap ini, pengajuan akan dikembalikan ke tahap persetujuan CEO SKI (Step 3) untuk evaluasi ulang. Status akan berubah menjadi "Perlu Evaluasi Ulang".']
+                    2: ['Penolakan di Tahap Evaluasi',
+                        'Jika Anda menolak di tahap ini, pengajuan akan dikembalikan ke pemohon untuk diperbaiki. Status akan berubah menjadi "Perbaikan Dokumen" dan pemohon dapat mengedit ulang pengajuan.'
+                    ],
+                    3: ['Penolakan oleh CEO SKI',
+                        'Jika ditolak di tahap ini, pengajuan akan dikembalikan ke tahap evaluasi (Step 2) untuk dievaluasi ulang. Status akan berubah menjadi "Perlu Evaluasi Ulang".'
+                    ],
+                    4: ['Penolakan oleh Direktur',
+                        'Jika ditolak di tahap ini, pengajuan akan dikembalikan ke tahap persetujuan CEO SKI (Step 3) untuk evaluasi ulang. Status akan berubah menjadi "Perlu Evaluasi Ulang".'
+                    ]
                 };
 
-                const [title, text] = rejectWarnings[pendingRejectStep] || ['Perhatian!', 'Penolakan pengajuan akan dicatat dalam sistem.'];
+                const [title, text] = rejectWarnings[pendingRejectStep] || ['Perhatian!',
+                    'Penolakan pengajuan akan dicatat dalam sistem.'
+                ];
 
                 $('#rejectWarningTitle').text(title);
                 $('#rejectWarningText').text(text);
@@ -243,12 +265,19 @@
                 $.ajax({
                     url: `/pengajuan-restrukturisasi/${ID}/decision`,
                     method: 'POST',
-                    data: { _token: CSRF, action: 'reject', step: pendingRejectStep, note: $('#rejectNote').val() },
-                    success: (res) => res.error ? 
-                        Swal.fire('Error!', res.message, 'error') :
-                        (bootstrap.Modal.getInstance($('#modalReject')[0]).hide(), 
-                         Swal.fire('Pengajuan Ditolak', 'Pengajuan telah ditolak', 'info').then(() => location.reload())),
-                    error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error'),
+                    data: {
+                        _token: CSRF,
+                        action: 'reject',
+                        step: pendingRejectStep,
+                        note: $('#rejectNote').val()
+                    },
+                    success: (res) => res.error ?
+                        Swal.fire('Error!', res.message, 'error') : (bootstrap.Modal.getInstance($(
+                                '#modalReject')[0]).hide(),
+                            Swal.fire('Pengajuan Ditolak', 'Pengajuan telah ditolak', 'info').then(
+                                () => location.reload())),
+                    error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message ||
+                        'Terjadi kesalahan', 'error'),
                     complete: () => {
                         $btn.prop('disabled', false).html(originalHtml);
                         $spinner.addClass('d-none');
@@ -258,37 +287,87 @@
 
             updateUI();
 
-            @if (isset($pengajuan) && $pengajuan->current_step == 2)
+            @php
+                // Check if form is editable
+                $jsCurrentStatus = $pengajuan->status ?? '';
+                $jsIsPerluEvaluasiUlang = $jsCurrentStatus === 'Perlu Evaluasi Ulang';
+                $jsIsEditModeRequested = request()->query('edit') === 'true';
+
+                // Get evaluasi data
+                $evaluasi = \App\Models\EvaluasiPengajuanRestrukturisasi::where('id_pengajuan_restrukturisasi', $pengajuan->id_pengajuan_restrukturisasi)->first();
+                $jsEvaluasiExists = !is_null($evaluasi);
+
+                // Editable if: Step 2 AND (evaluasi not exists OR (Perlu Evaluasi Ulang AND edit mode requested))
+                $jsIsEditable = isset($pengajuan) && ($pengajuan->current_step ?? 1) == 2 && (!$jsEvaluasiExists || ($jsIsPerluEvaluasiUlang && $jsIsEditModeRequested));
+            @endphp
+
+            @if ($jsIsEditable)
                 let committeeIndex = 0;
+
+                // Initialize Select2 for rekomendasi
+                function initSelect2Rekomendasi() {
+                    if ($('.select2-rekomendasi').length && !$('.select2-rekomendasi').hasClass(
+                            'select2-hidden-accessible')) {
+                        $('.select2-rekomendasi').select2({
+                            placeholder: '-- Pilih Rekomendasi --',
+                            allowClear: true,
+                            width: '100%'
+                        });
+                    }
+                }
+
+                // Initialize Flatpickr for date inputs
+                function initDatepicker(element) {
+                    if (element && typeof flatpickr !== 'undefined') {
+                        flatpickr(element, {
+                            dateFormat: 'Y-m-d',
+                            altInput: true,
+                            altFormat: 'd M Y',
+                            allowInput: true
+                        });
+                    }
+                }
 
                 // Add committee row function
                 window.addCommitteeRow = function() {
                     const html = `
-            <div class="approval-row row g-3 p-3 mb-3 border rounded" data-index="${committeeIndex}">
+            <div class="approval-row row g-3 p-3 mb-6 border rounded" data-index="${committeeIndex}">
                 <div class="col-md-3">
-                    <label class="form-label small">Nama Anggota</label>
+                    <label class="form-label small">Nama Anggota <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="committee[${committeeIndex}][nama_anggota]" 
                         placeholder="Nama Lengkap" required>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small">Jabatan</label>
+                    <label class="form-label small">Jabatan <span class="text-danger">*</span></label>
                     <input type="text" class="form-control" name="committee[${committeeIndex}][jabatan]" 
                         placeholder="Jabatan" required>
                 </div>
                 <div class="col-md-2">
-                    <label class="form-label small">Tanggal</label>
-                    <input type="date" class="form-control" name="committee[${committeeIndex}][tanggal_persetujuan]" required>
+                    <label class="form-label small">Tanggal <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control datepicker-komite" name="committee[${committeeIndex}][tanggal_persetujuan]" 
+                        placeholder="Pilih tanggal" required>
+                        <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                    </div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small">Upload TTD</label>
                     <input type="file" class="form-control" name="committee[${committeeIndex}][ttd_digital]" accept=".png,.jpg,.jpeg">
                 </div>
                 <div class="col-md-1 d-flex align-items-end justify-content-center">
-                    ${committeeIndex > 0 ? `<button type="button" class="btn btn-icon btn-outline-danger btn-sm" onclick="removeCommitteeRow(${committeeIndex})"><i class="ti ti-trash"></i></button>` : ''}
+                    ${committeeIndex > 0 ? `<button type="button" class="btn btn-outline-danger" onclick="removeCommitteeRow(${committeeIndex})">
+                                    <i class="ti ti-trash"></i>
+                                </button>` : ''}
                 </div>
             </div>
         `;
                     $('#committee-container').append(html);
+
+                    // Initialize datepicker for newly added row
+                    const newRow = $(`.approval-row[data-index="${committeeIndex}"]`);
+                    const dateInput = newRow.find('.datepicker-komite')[0];
+                    initDatepicker(dateInput);
+
                     committeeIndex++;
                 };
 
@@ -297,22 +376,87 @@
                     $(`.approval-row[data-index="${index}"]`).remove();
                 };
 
-                // Initialize first committee row
-                addCommitteeRow();
+                // Initialize plugins on page load
+                $(document).ready(function() {
+                    initSelect2Rekomendasi();
+                });
+
+                // Pre-load existing committee data if in edit mode
+                @php
+                    $existingKomite = $evaluasi ? $evaluasi->persetujuanKomite()->get() : collect();
+                @endphp
+
+                @if ($existingKomite->count() > 0)
+                    // Load existing committee members
+                    @foreach ($existingKomite as $komiteData)
+                        (function() {
+                            const idx = committeeIndex;
+                            const html = `
+                <div class="approval-row row g-3 p-3 mb-6 border rounded" data-index="${idx}">
+                    <div class="col-md-3">
+                        <label class="form-label small">Nama Anggota <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="committee[${idx}][nama_anggota]" 
+                            value="{{ $komiteData->nama_anggota }}" placeholder="Nama Lengkap" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Jabatan <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="committee[${idx}][jabatan]" 
+                            value="{{ $komiteData->jabatan }}" placeholder="Jabatan" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small">Tanggal <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control datepicker-komite" name="committee[${idx}][tanggal_persetujuan]" 
+                                value="{{ $komiteData->tanggal_persetujuan ? \Carbon\Carbon::parse($komiteData->tanggal_persetujuan)->format('Y-m-d') : '' }}"
+                                placeholder="Pilih tanggal" required>
+                            <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small">Upload TTD</label>
+                        <input type="file" class="form-control" name="committee[${idx}][ttd_digital]" accept=".png,.jpg,.jpeg">
+                        @if ($komiteData->ttd_digital)
+                            <small class="text-muted">TTD sudah ada. Upload baru untuk mengganti.</small>
+                        @endif
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end justify-content-center">
+                        ${idx > 0 ? `<button type="button" class="btn btn-outline-danger" onclick="removeCommitteeRow(${idx})">
+                                    <i class="ti ti-trash"></i>
+                                </button>` : ''}
+                    </div>
+                </div>
+            `;
+                            $('#committee-container').append(html);
+
+                            // Initialize datepicker for this row
+                            const newRow = $(`.approval-row[data-index="${idx}"]`);
+                            const dateInput = newRow.find('.datepicker-komite')[0];
+                            initDatepicker(dateInput);
+
+                            committeeIndex++;
+                        })();
+                    @endforeach
+                @else
+                    // Initialize first empty committee row if no existing data
+                    addCommitteeRow();
+                @endif
 
                 // Collect data functions
-                const collectData = (selector, mapper) => Array.from(document.querySelectorAll(selector)).map(mapper);
-                
+                const collectData = (selector, mapper) => Array.from(document.querySelectorAll(selector)).map(
+                    mapper);
+
                 const collectKelengkapan = () => collectData('#table-kelengkapan-body tr', tr => ({
                     nama_dokumen: tr.children[1]?.textContent.trim() || '',
                     status: tr.querySelector('input[type="radio"]:checked')?.value || null,
-                    catatan: tr.querySelector('textarea[name^="catatan_kelengkapan"]')?.value?.trim() || ''
+                    catatan: tr.querySelector('textarea[name^="catatan_kelengkapan"]')?.value?.trim() ||
+                        ''
                 }));
 
                 const collectKelayakan = () => collectData('#table-kelayakan-body tr', tr => ({
                     kriteria: tr.children[1]?.textContent.trim() || '',
                     status: tr.querySelector('input[type="radio"]:checked')?.value || null,
-                    catatan: tr.querySelector('textarea[name^="catatan_kelayakan"]')?.value?.trim() || ''
+                    catatan: tr.querySelector('textarea[name^="catatan_kelayakan"]')?.value?.trim() ||
+                        ''
                 }));
 
                 const collectAnalisa = () => collectData('#table-analisa-body tr', tr => ({
@@ -324,15 +468,19 @@
                 const collectCommittee = () => collectData('#committee-container .approval-row', row => ({
                     nama_anggota: row.querySelector('input[name$="[nama_anggota]"]')?.value || '',
                     jabatan: row.querySelector('input[name$="[jabatan]"]')?.value || '',
-                    tanggal_persetujuan: row.querySelector('input[name$="[tanggal_persetujuan]"]')?.value || '',
+                    tanggal_persetujuan: row.querySelector('input[name$="[tanggal_persetujuan]"]')
+                        ?.value || '',
                     ttd_digital: row.querySelector('input[name$="[ttd_digital]"]')?.files[0] || null
                 }));
 
                 // Validate
                 const validateEvaluasi = (kelengkapan, kelayakan, analisa) => [
-                    ...kelengkapan.map((row, idx) => !row.status ? `Kelengkapan dokumen baris ${idx + 1}: Status belum dipilih` : null),
-                    ...kelayakan.map((row, idx) => !row.status ? `Kelayakan kriteria ${idx + 1}: Status belum dipilih` : null),
-                    ...analisa.map((row, idx) => !row.evaluasi ? `Analisa aspek ${idx + 1}: Evaluasi belum dipilih` : null)
+                    ...kelengkapan.map((row, idx) => !row.status ?
+                        `Kelengkapan dokumen baris ${idx + 1}: Status belum dipilih` : null),
+                    ...kelayakan.map((row, idx) => !row.status ?
+                        `Kelayakan kriteria ${idx + 1}: Status belum dipilih` : null),
+                    ...analisa.map((row, idx) => !row.evaluasi ?
+                        `Analisa aspek ${idx + 1}: Evaluasi belum dipilih` : null)
                 ].filter(Boolean);
 
                 // Save evaluasi
@@ -346,25 +494,47 @@
 
                     // Validate
                     const errors = validateEvaluasi(kelengkapan, kelayakan, analisa);
-                    if (errors.length) return Swal.fire({ icon: 'warning', title: 'Data Belum Lengkap', html: '<ul class="text-start">' + errors.map(e => `<li>${e}</li>`).join('') + '</ul>' });
-                    if (!rekomendasi) return Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Rekomendasi harus dipilih' });
-                    if (!committee.length || !committee[0].nama_anggota) return Swal.fire({ icon: 'warning', title: 'Perhatian', text: 'Minimal 1 anggota komite harus diisi' });
+                    if (errors.length) return Swal.fire({
+                        icon: 'warning',
+                        title: 'Data Belum Lengkap',
+                        html: '<ul class="text-start">' + errors.map(e => `<li>${e}</li>`).join(
+                            '') + '</ul>'
+                    });
+                    if (!rekomendasi) return Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian',
+                        text: 'Rekomendasi harus dipilih'
+                    });
+                    if (!committee.length || !committee[0].nama_anggota) return Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian',
+                        text: 'Minimal 1 anggota komite harus diisi'
+                    });
 
                     // Prepare FormData
                     const formData = new FormData();
-                    Object.entries({ _token: CSRF, kelengkapan: JSON.stringify(kelengkapan), kelayakan: JSON.stringify(kelayakan), analisa: JSON.stringify(analisa), rekomendasi, justifikasi_rekomendasi: justifikasi })
+                    Object.entries({
+                            _token: CSRF,
+                            kelengkapan: JSON.stringify(kelengkapan),
+                            kelayakan: JSON.stringify(kelayakan),
+                            analisa: JSON.stringify(analisa),
+                            rekomendasi,
+                            justifikasi_rekomendasi: justifikasi
+                        })
                         .forEach(([key, val]) => formData.append(key, val));
 
                     committee.forEach((c, idx) => {
-                        ['nama_anggota', 'jabatan', 'tanggal_persetujuan'].forEach(field => 
+                        ['nama_anggota', 'jabatan', 'tanggal_persetujuan'].forEach(field =>
                             formData.append(`persetujuan_komite[${idx}][${field}]`, c[field]));
-                        if (c.ttd_digital) formData.append(`persetujuan_komite[${idx}][ttd_digital]`, c.ttd_digital);
+                        if (c.ttd_digital) formData.append(
+                            `persetujuan_komite[${idx}][ttd_digital]`, c.ttd_digital);
                     });
 
                     const $btn = $(this);
                     const originalHtml = $btn.html();
 
-                    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...');
+                    $btn.prop('disabled', true).html(
+                        '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...');
 
                     $.ajax({
                         url: `/pengajuan-restrukturisasi/${ID}/evaluasi`,
@@ -372,10 +542,12 @@
                         data: formData,
                         processData: false,
                         contentType: false,
-                        success: (res) => res.error ? 
-                            Swal.fire('Error!', res.message, 'error') : 
-                            Swal.fire('Berhasil!', res.message || 'Evaluasi berhasil disimpan!', 'success').then(() => location.reload()),
-                        error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error'),
+                        success: (res) => res.error ?
+                            Swal.fire('Error!', res.message, 'error') : Swal.fire('Berhasil!', res
+                                .message || 'Evaluasi berhasil disimpan!', 'success').then(() =>
+                                location.reload()),
+                        error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message ||
+                            'Terjadi kesalahan', 'error'),
                         complete: () => $btn.prop('disabled', false).html(originalHtml)
                     });
                 });

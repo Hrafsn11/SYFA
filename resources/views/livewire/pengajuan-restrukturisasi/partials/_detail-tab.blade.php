@@ -1,39 +1,84 @@
+@php
+    $currentStep = $pengajuan->current_step ?? 1;
+    $currentStatus = $pengajuan->status ?? 'Draft';
+
+    $evaluasi = \App\Models\EvaluasiPengajuanRestrukturisasi::where(
+        'id_pengajuan_restrukturisasi',
+        $pengajuan->id_pengajuan_restrukturisasi,
+    )->first();
+
+    $hasEvaluasi = !is_null($evaluasi);
+
+    // Status checks
+    $isDraft = $currentStatus === 'Draft';
+    $isPerbaikanDokumen = $currentStatus === 'Perbaikan Dokumen';
+    $isPerluEvaluasiUlang = $currentStatus === 'Perlu Evaluasi Ulang';
+    $isRejectedStatus = in_array($currentStatus, ['Draft', 'Ditolak']);
+
+    $isEditModeRequested = request()->query('edit') === 'true';
+
+    $canSubmitPengajuan = $isDraft || ($isPerbaikanDokumen && $currentStep == 1);
+    $canApproveStep2 = $currentStep == 2 && !$isRejectedStatus && $hasEvaluasi && !$isPerluEvaluasiUlang;
+    $showEditButtonStep2 = $currentStep == 2 && $isPerluEvaluasiUlang && !$isEditModeRequested && $hasEvaluasi;
+    $showEditModeStep2 = $currentStep == 2 && $isPerluEvaluasiUlang && $isEditModeRequested;
+
+    $canApproveStep3 = $currentStep == 3 && !$isRejectedStatus;
+    $canApproveStep4 = $currentStep == 4 && !$isRejectedStatus;
+@endphp
+
 <div class="tab-pane fade show active" id="detail-restrukturisasi" role="tabpanel">
+    {{-- Action Buttons --}}
     <div class="d-flex justify-content-between items-center mt-4 mb-3 mb-md-4 flex-wrap gap-2">
         <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            {{-- Step 1: Submit Pengajuan --}}
             @can('pengajuan_restrukturisasi.ajukan_restrukturisasi')
-                @php
-                    $isDraft = ($pengajuan->status ?? '') === 'Draft';
-                    $isPerbaikanDokumen = ($pengajuan->status ?? '') === 'Perbaikan Dokumen';
-                    $currentStep = $pengajuan->current_step ?? 1;
-                @endphp
-                @if($isDraft || ($isPerbaikanDokumen && $currentStep == 1))
-                    <button type="button" class="btn btn-success" onclick="submitPengajuan()">
+                @if ($canSubmitPengajuan)
+                    <button type="button" class="btn btn-success" onclick="submitPengajuan()" id="btnSubmitPengajuan">
                         <i class="fas fa-paper-plane me-2"></i>
                         {{ $isPerbaikanDokumen ? 'Submit Ulang Pengajuan' : 'Submit Pengajuan' }}
                     </button>
                 @endif
             @endcan
+
+            {{-- Step 2: Approval --}}
             @can('pengajuan_restrukturisasi.validasi_dokumen')
-                @if(isset($pengajuan) && ($pengajuan->current_step ?? 1) == 2 && !in_array($pengajuan->status ?? '', ['Draft','Ditolak']))
-                    <button type="button" class="btn btn-primary btn-approve" id="btnSetujuiPeminjaman" onclick="handleApprove(2)">
+                @if ($canApproveStep2)
+                    <button type="button" class="btn btn-primary btn-approve" id="btnSetujuiPeminjaman"
+                        onclick="handleApprove(2)">
                         <i class="fas fa-check me-2"></i>
                         Setujui Restrukturisasi
                     </button>
+                @elseif($showEditButtonStep2)
+                    {{-- Show "Edit Evaluasi" button when Perlu Evaluasi Ulang --}}
+                    <a href="{{ request()->fullUrlWithQuery(['edit' => 'true']) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Evaluasi
+                    </a>
+                @elseif($currentStep == 2 && !$isRejectedStatus && !$hasEvaluasi)
+                    {{-- Show info badge if at Step 2 but evaluation not saved yet --}}
+                    <span class="badge bg-warning text-dark d-flex align-items-center px-3 py-2">
+                        Simpan Evaluasi terlebih dahulu
+                    </span>
                 @endif
             @endcan
+
+            {{-- Step 3: CEO Approval --}}
             @can('pengajuan_restrukturisasi.persetujuan_ceo_ski')
-                @if(isset($pengajuan) && ($pengajuan->current_step ?? 1) == 3 && !in_array($pengajuan->status ?? '', ['Draft','Ditolak']))
-                    <button type="button" class="btn btn-warning btn-approve" id="btnPersetujuanCEO" onclick="handleApprove(3)">
+                @if ($canApproveStep3)
+                    <button type="button" class="btn btn-warning btn-approve" id="btnPersetujuanCEO"
+                        onclick="handleApprove(3)">
                         <i class="fas fa-crown me-2"></i>
                         Setujui Restrukturisasi
                     </button>
                 @endif
             @endcan
+
+            {{-- Step 4: Direktur Approval --}}
             @can('pengajuan_restrukturisasi.persetujuan_direktur')
-                @if(isset($pengajuan) && ($pengajuan->current_step ?? 1) == 4 && !in_array($pengajuan->status ?? '', ['Draft','Ditolak']))
-                    <button type="button" class="btn btn-info btn-approve" id="btnPersetujuanDirektur" onclick="handleApprove(4)">
+                @if ($canApproveStep4)
+                    <button type="button" class="btn btn-info btn-approve" id="btnPersetujuanDirektur"
+                        onclick="handleApprove(4)">
                         <i class="fas fa-briefcase me-2"></i>
                         Setujui Restrukturisasi
                     </button>
@@ -44,7 +89,9 @@
 
     <hr class="my-3 my-md-4">
 
+    {{-- Detail Information --}}
     <div class="row">
+        {{-- Left Column --}}
         <div class="col-md-6">
             <table class="table table-borderless table-sm">
                 <tbody>
@@ -81,6 +128,8 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Right Column --}}
         <div class="col-md-6">
             <table class="table table-borderless table-sm">
                 <tbody>
@@ -109,11 +158,18 @@
                     <tr>
                         <td class="text-nowrap"><strong>Status Saat Ini (DPD):</strong></td>
                         <td>
-                            @if($pengajuan->status_dpd !== null)
-                                @if($pengajuan->status_dpd > 0)
-                                    <span class="badge bg-label-{{ $pengajuan->status_dpd > 90 ? 'danger' : ($pengajuan->status_dpd > 30 ? 'warning' : 'info') }}">
-                                        {{ $pengajuan->status_dpd }} Hari
-                                    </span>
+                            @if ($pengajuan->status_dpd !== null)
+                                @php
+                                    $dpdClass =
+                                        $pengajuan->status_dpd > 90
+                                            ? 'danger'
+                                            : ($pengajuan->status_dpd > 30
+                                                ? 'warning'
+                                                : 'info');
+                                @endphp
+                                @if ($pengajuan->status_dpd > 0)
+                                    <span class="badge bg-label-{{ $dpdClass }}">{{ $pengajuan->status_dpd }}
+                                        Hari</span>
                                 @else
                                     <span class="badge bg-label-success">0 Hari (Lancar)</span>
                                 @endif
@@ -129,6 +185,8 @@
                 </tbody>
             </table>
         </div>
+
+        {{-- Additional Info --}}
         <div class="col-12 mt-3">
             <div class="alert alert-secondary py-2" role="alert">
                 <p class="mb-1"><strong>Alasan Restrukturisasi:</strong></p>
@@ -144,16 +202,13 @@
                     <div class="d-flex flex-wrap gap-2">
                         @foreach ($pengajuan->jenis_restrukturisasi as $jenis)
                             @php
-                                $badgeColor = 'primary';
-                                if (stripos($jenis, 'penurunan') !== false) {
-                                    $badgeColor = 'success';
-                                } elseif (stripos($jenis, 'perpanjangan') !== false) {
-                                    $badgeColor = 'info';
-                                } elseif (stripos($jenis, 'pengurangan') !== false) {
-                                    $badgeColor = 'warning';
-                                } elseif (stripos($jenis, 'lainnya') !== false) {
-                                    $badgeColor = 'secondary';
-                                }
+                                $badgeColor = match (true) {
+                                    stripos($jenis, 'penurunan') !== false => 'success',
+                                    stripos($jenis, 'perpanjangan') !== false => 'info',
+                                    stripos($jenis, 'pengurangan') !== false => 'warning',
+                                    stripos($jenis, 'lainnya') !== false => 'secondary',
+                                    default => 'primary',
+                                };
                             @endphp
                             <span class="badge bg-label-{{ $badgeColor }}">{{ $jenis }}</span>
                         @endforeach
@@ -165,7 +220,8 @@
         </div>
     </div>
 
-    @if(isset($pengajuan) && $pengajuan->current_step >= 2)
-        @include('livewire.pengajuan-restrukturisasi.partials._evaluasi-forms')
+    {{-- Evaluasi Forms (shown from Step 2 onwards) --}}
+    @if ($currentStep >= 2)
+        @include('livewire.pengajuan-restrukturisasi.partials._evaluasi-forms', ['evaluasi' => $evaluasi])
     @endif
 </div>
