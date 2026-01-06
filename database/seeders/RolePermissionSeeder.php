@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Permission;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -161,6 +160,8 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.view',
             'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
+            'program_restrukturisasi.edit_parameter',
+            'program_restrukturisasi.upload',
             // Pengembalian Investasi
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
@@ -254,6 +255,7 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.view',
             // 'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
+            'program_restrukturisasi.upload',
 
             // Pengembalian Pinjaman (SFinance)
             'pengembalian_pinjaman.view',
@@ -356,6 +358,7 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.view',
             'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
+            'program_restrukturisasi.edit_parameter',
 
             // Penyaluran Deposito Finlog (Finance SKI full access)
             'penyaluran_deposito_finlog.view',
@@ -471,7 +474,6 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_finlog.view',
             'peminjaman_finlog.validasi_io',  // Step 2 validation
         ]);
-
 
         // Create a super admin user (idempotent)
         $superAdmin = User::firstOrCreate([

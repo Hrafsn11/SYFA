@@ -60,85 +60,87 @@
                 <hr class="my-4">
 
                 {{-- PARAMETER --}}
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h5 class="mb-3">Parameter Perhitungan</h5>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
-                                class="text-danger">*</span></label>
-                        {{-- In edit mode, just show a disabled select --}}
-                        <select class="form-select" disabled style="background-color: #f5f5f9;">
-                            <option value="{{ $metode_perhitungan }}" selected>
-                                Metode {{ $metode_perhitungan }}
-                            </option>
-                        </select>
-                        <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program
-                            dibuat</small>
-                        @error('metode_perhitungan')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Suku Bunga Per Tahun (%) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('suku_bunga_per_tahun') is-invalid @enderror"
-                            wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100">
-                        @error('suku_bunga_per_tahun')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
-                            wire:model.live="jangka_waktu_total" min="1">
-                        @error('jangka_waktu_total')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Masa Tenggang (Bulan) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('masa_tenggang') is-invalid @enderror"
-                            wire:model.live="masa_tenggang" min="0">
-                        <small class="text-muted">Hanya bayar margin selama masa tenggang</small>
-                        @error('masa_tenggang')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Tanggal Mulai Cicilan <span class="text-danger">*</span></label>
-                        <div wire:ignore>
-                            <div class="input-group">
-                                <input type="text"
-                                    class="form-control @error('tanggal_mulai_cicilan') is-invalid @enderror"
-                                    id="tgl_mulai_cicilan" placeholder="yyyy-mm-dd" autocomplete="off"
-                                    value="{{ $tanggal_mulai_cicilan }}">
-                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
-                            </div>
+                @can('program_restrukturisasi.edit_parameter')
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Parameter Perhitungan</h5>
                         </div>
-                        @error('tanggal_mulai_cicilan')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
 
-                    <div class="col-12 mb-3">
-                        <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
-                            wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
-                            <span wire:loading.remove wire:target="hitungJadwalAngsuran"
-                                class="d-flex align-items-center">
-                                <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
-                            </span>
-                            <span wire:loading wire:target="hitungJadwalAngsuran">
-                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                Menghitung...
-                            </span>
-                        </button>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
+                                    class="text-danger">*</span></label>
+                            {{-- In edit mode, just show a disabled select --}}
+                            <select class="form-select" disabled style="background-color: #f5f5f9;">
+                                <option value="{{ $metode_perhitungan }}" selected>
+                                    Metode {{ $metode_perhitungan }}
+                                </option>
+                            </select>
+                            <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program
+                                dibuat</small>
+                            @error('metode_perhitungan')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Suku Bunga Per Tahun (%) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('suku_bunga_per_tahun') is-invalid @enderror"
+                                wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100">
+                            @error('suku_bunga_per_tahun')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
+                                wire:model.live="jangka_waktu_total" min="1">
+                            @error('jangka_waktu_total')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Masa Tenggang (Bulan) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('masa_tenggang') is-invalid @enderror"
+                                wire:model.live="masa_tenggang" min="0">
+                            <small class="text-muted">Hanya bayar margin selama masa tenggang</small>
+                            @error('masa_tenggang')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Tanggal Mulai Cicilan <span class="text-danger">*</span></label>
+                            <div wire:ignore>
+                                <div class="input-group">
+                                    <input type="text"
+                                        class="form-control @error('tanggal_mulai_cicilan') is-invalid @enderror"
+                                        id="tgl_mulai_cicilan" placeholder="yyyy-mm-dd" autocomplete="off"
+                                        value="{{ $tanggal_mulai_cicilan }}">
+                                    <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                </div>
+                            </div>
+                            @error('tanggal_mulai_cicilan')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
+                                wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                                <span wire:loading.remove wire:target="hitungJadwalAngsuran"
+                                    class="d-flex align-items-center">
+                                    <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
+                                </span>
+                                <span wire:loading wire:target="hitungJadwalAngsuran">
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    Menghitung...
+                                </span>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                @endcan
 
                 {{-- TABEL JADWAL --}}
                 @if ($show_jadwal && count($jadwal_angsuran) > 0)
@@ -302,23 +304,25 @@
                 @endif
 
                 {{-- TOMBOL SIMPAN --}}
-                <div class="row mt-4">
-                    <div class="col-12">
-                        @if ($show_jadwal && count($jadwal_angsuran) > 0)
-                            <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
-                                <span wire:loading.remove wire:target="simpan" class="d-flex align-items-center">
-                                    <i class="ti ti-device-floppy me-1">
-                                    </i>
-                                    {{ $submitLabel ?? 'Simpan Restrukturisasi' }}
-                                </span>
-                                <span wire:loading wire:target="simpan">
-                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                    Menyimpan...
-                                </span>
-                            </button>
-                        @endif
+                @can('program_restrukturisasi.edit_parameter')
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            @if ($show_jadwal && count($jadwal_angsuran) > 0)
+                                <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="simpan" class="d-flex align-items-center">
+                                        <i class="ti ti-device-floppy me-1">
+                                        </i>
+                                        {{ $submitLabel ?? 'Simpan Restrukturisasi' }}
+                                    </span>
+                                    <span wire:loading wire:target="simpan">
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        Menyimpan...
+                                    </span>
+                                </button>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endcan
             </form>
         </div>
     </div>
