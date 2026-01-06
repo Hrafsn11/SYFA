@@ -339,9 +339,11 @@ class DashboardPembiayaanSfinanceService
         $startOfMonth = Carbon::create($tahun, $bulanInt, 1);
         $endOfMonth = $startOfMonth->copy()->endOfMonth();
         
+        // Filter: hanya investasi yang dibuat pada bulan/tahun yang dipilih
         $results = DB::table('pengajuan_investasi as pi')
             ->whereNotNull('pi.nomor_kontrak')
             ->where('pi.nomor_kontrak', '!=', '')
+            ->whereDate('pi.tanggal_investasi', '>=', $startOfMonth->format('Y-m-d'))
             ->whereDate('pi.tanggal_investasi', '<=', $endOfMonth->format('Y-m-d'))
             ->select(DB::raw('pi.jumlah_investasi - COALESCE(pi.total_kembali_dari_penyaluran, 0) as sisa'))
             ->get();
@@ -355,6 +357,8 @@ class DashboardPembiayaanSfinanceService
         $tahun = $tahun ?? date('Y');
         $bulanInt = is_numeric($bulan) ? (int)$bulan : (int)date('m');
         
+        // Ambil debitur yang memiliki pembayaran di bulan/tahun yang dipilih
+        // (sama seperti logika AR Performance)
         $debiturs = DB::table('report_pengembalian as rp')
             ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
             ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
@@ -368,6 +372,8 @@ class DashboardPembiayaanSfinanceService
 
         $result = [];
         foreach ($debiturs as $debitur) {
+            // Untuk setiap debitur, cari report pembayaran di bulan/tahun yang dipilih
+            // Include due_date dan created_at untuk perhitungan aging category yang akurat
             $reports = DB::table('report_pengembalian as rp')
                 ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
                 ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
@@ -375,22 +381,40 @@ class DashboardPembiayaanSfinanceService
                 ->where('pm.status', 'Dana Sudah Dicairkan')
                 ->whereMonth('rp.created_at', $bulanInt)
                 ->whereYear('rp.created_at', $tahun)
-                ->select('rp.hari_keterlambatan', 'rp.nilai_total_pengembalian')
+                ->select('rp.due_date', 'rp.created_at as tanggal_pembayaran', 'rp.nilai_total_pengembalian')
                 ->get();
 
             $del_1_30 = 0; $del_31_60 = 0; $del_61_90 = 0; $npl_91_179 = 0; $write_off = 0;
 
             foreach ($reports as $report) {
-                preg_match('/(\d+)/', $report->hari_keterlambatan, $matches);
-                $daysLate = isset($matches[1]) ? (int)$matches[1] : 0;
+                // Gunakan logika yang sama dengan AR Performance
+                $tanggalPembayaran = Carbon::parse($report->tanggal_pembayaran);
+                $dueDate = Carbon::parse($report->due_date);
                 $nilai = (float)($report->nilai_total_pengembalian ?? 0);
-                if ($daysLate <= 30) $del_1_30 += $nilai;
-                elseif ($daysLate <= 60) $del_31_60 += $nilai;
-                elseif ($daysLate <= 90) $del_61_90 += $nilai;
-                elseif ($daysLate <= 179) $npl_91_179 += $nilai;
-                else $write_off += $nilai;
+                
+                // Hitung days late dengan membandingkan tanggal sebenarnya
+                $daysLate = $tanggalPembayaran->lte($dueDate) 
+                    ? 0 
+                    : $tanggalPembayaran->diffInDays($dueDate);
+                
+                // Kategorisasi berdasarkan days late (sama seperti AR Performance)
+                if ($daysLate == 0) {
+                    // Belum jatuh tempo tidak ditampilkan di dashboard
+                    continue;
+                } elseif ($daysLate <= 30) {
+                    $del_1_30 += $nilai;
+                } elseif ($daysLate <= 60) {
+                    $del_31_60 += $nilai;
+                } elseif ($daysLate <= 90) {
+                    $del_61_90 += $nilai;
+                } elseif ($daysLate <= 179) {
+                    $npl_91_179 += $nilai;
+                } else {
+                    $write_off += $nilai;
+                }
             }
-
+            
+            // Hanya tampilkan debitur yang memiliki pembayaran di bulan/tahun yang dipilih
             $result[] = [
                 'debitur' => $debitur->nama_debitur,
                 'del_1_30' => $del_1_30,
