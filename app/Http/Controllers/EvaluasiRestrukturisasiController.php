@@ -24,10 +24,10 @@ class EvaluasiRestrukturisasiController extends Controller
     private const STATUS_PERBAIKAN_DOKUMEN = 'Perbaikan Dokumen';
     private const STATUS_PERLU_EVALUASI = 'Perlu Evaluasi Ulang';
     private const STATUS_DITOLAK = 'Ditolak';
-    
+
     private const VALIDASI_DISETUJUI = 'disetujui';
     private const VALIDASI_DITOLAK = 'ditolak';
-    
+
     private const STEP_FINAL = 5;
     private const STEP_APPROVAL_THRESHOLD = 4;
 
@@ -40,18 +40,24 @@ class EvaluasiRestrukturisasiController extends Controller
             ]);
 
             $sections = $this->parseSections($request);
-            
+
             DB::beginTransaction();
 
             $pengajuan = PengajuanRestrukturisasi::findOrFail($id);
             $evaluasi = $this->createOrUpdateEvaluasi($id, $validated);
-            
+
             $this->syncSections($evaluasi, $sections, $request);
+
+            // Jika status sebelumnya "Perlu Evaluasi Ulang", ubah menjadi "Dalam Proses"
+            // Ini memastikan form menjadi read-only setelah evaluasi ulang disimpan
+            if ($pengajuan->status === self::STATUS_PERLU_EVALUASI) {
+                $pengajuan->status = self::STATUS_DALAM_PROSES;
+                $pengajuan->save();
+            }
 
             DB::commit();
 
             return $this->successResponse($evaluasi, 'Evaluasi berhasil disimpan');
-            
         } catch (ValidationException $e) {
             return $this->errorResponse('Validasi gagal', 422, $e->errors());
         } catch (\Exception $e) {
@@ -73,15 +79,15 @@ class EvaluasiRestrukturisasiController extends Controller
             DB::beginTransaction();
 
             $pengajuan = PengajuanRestrukturisasi::findOrFail($id);
-            
+
             $history = $this->buildHistoryData($pengajuan, $validated);
-            
+
             // Handle submit pengajuan (step 1 -> step 2)
             if ($validated['action'] === 'approve' && $validated['step'] == 1) {
                 $pengajuan->status = 'Submit Dokumen';
                 $pengajuan->current_step = 2;
                 $pengajuan->save();
-                
+
                 $history['status'] = $pengajuan->status;
                 $history['current_step'] = $pengajuan->current_step;
                 $history['submit_by'] = auth()->id();
@@ -102,7 +108,6 @@ class EvaluasiRestrukturisasiController extends Controller
             ListNotifSFinance::menuRestrukturisasi($pengajuan->status, $pengajuan, $validated['step']);
 
             return $this->successResponse($pengajuan, 'Keputusan berhasil disimpan');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error save decision', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -213,14 +218,14 @@ class EvaluasiRestrukturisasiController extends Controller
     private function handleTtdUpload(Request $request, int $index): ?string
     {
         $fileKey = "persetujuan_komite.{$index}.ttd_digital";
-        
+
         if (!$request->hasFile($fileKey)) {
             return null;
         }
 
         $file = $request->file($fileKey);
         $filename = time() . '_persetujuan_' . $index . '_' . preg_replace('/[^A-Za-z0-9._-]/', '', $file->getClientOriginalName());
-        
+
         return $file->storeAs('restrukturisasi/ttd', $filename, 'public');
     }
 
@@ -240,8 +245,8 @@ class EvaluasiRestrukturisasiController extends Controller
     private function handleApproval(PengajuanRestrukturisasi $pengajuan, int $step, array &$history): void
     {
         $pengajuan->current_step = $step + 1;
-        $pengajuan->status = $step >= self::STEP_APPROVAL_THRESHOLD 
-            ? self::STATUS_SELESAI 
+        $pengajuan->status = $step >= self::STEP_APPROVAL_THRESHOLD
+            ? self::STATUS_SELESAI
             : self::STATUS_DALAM_PROSES;
         $pengajuan->save();
 
