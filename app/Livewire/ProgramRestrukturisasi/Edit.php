@@ -24,7 +24,7 @@ class Edit extends Create
     public $selectedAngsuranNo = null;
     public $uploadFile = null;
 
-    public string $pageTitle = 'Edit Program Restrukturisasi';
+    public string $pageTitle = 'Aksi Program Restrukturisasi';
     public string $pageSubtitle = 'Perbarui parameter program restrukturisasi';
     public string $submitLabel = 'Perbarui Restrukturisasi';
 
