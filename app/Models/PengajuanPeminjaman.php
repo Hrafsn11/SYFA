@@ -25,6 +25,7 @@ class PengajuanPeminjaman extends Model
         'tujuan_pembiayaan',
         'jenis_pembiayaan',
         'total_pinjaman',
+        'nominal_pengajuan_awal',
         'harapan_tanggal_pencairan',
         'total_bagi_hasil',
         'rencana_tgl_pembayaran',

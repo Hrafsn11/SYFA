@@ -64,7 +64,7 @@ class PeminjamanController extends Controller
             'nama_rekening' => $header->nama_rekening,
             'lampiran_sid' => $header->lampiran_sid,
             'nilai_kol' => $header->nilai_kol,
-            'nominal_pinjaman' => $header->total_pinjaman,
+            'nominal_pinjaman' => $header->nominal_pengajuan_awal ?? $header->total_pinjaman,
             'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
             'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
             'total_bagi_hasil' => $header->total_bagi_hasil,
@@ -1075,6 +1075,9 @@ class PeminjamanController extends Controller
             }
             $dataPengajuanPeminjaman['created_by'] = auth()->user()->id;
             $dataPengajuanPeminjaman['updated_by'] = auth()->user()->id;
+
+            // Simpan nominal pengajuan awal (tidak akan berubah meskipun nominal disetujui berbeda)
+            $dataPengajuanPeminjaman['nominal_pengajuan_awal'] = $dataPengajuanPeminjaman['total_pinjaman'];
 
             $peminjaman = PengajuanPeminjaman::create($dataPengajuanPeminjaman);
 

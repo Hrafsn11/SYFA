@@ -7,6 +7,7 @@ use App\Models\PengajuanPeminjaman;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PengajuanPinjamanTable extends DataTableComponent
 {
@@ -28,8 +29,7 @@ class PengajuanPinjamanTable extends DataTableComponent
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
 
-            // Default Sort
-            ->setDefaultSort('id_pengajuan_peminjaman', 'desc')
+            ->setDefaultSort('pengajuan_peminjaman.created_at', 'desc')
 
             // Table Styling
             ->setTableAttributes([
@@ -53,12 +53,13 @@ class PengajuanPinjamanTable extends DataTableComponent
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         $query = PengajuanPeminjaman::query()
-            ->with(['debitur', 'instansi'])
+            ->with(['debitur', 'instansi', 'historyStatus'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
             ->select(
                 'pengajuan_peminjaman.*',
                 DB::raw('master_debitur_dan_investor.nama as nama_perusahaan')
-            );
+            )
+            ->orderBy('pengajuan_peminjaman.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }
@@ -139,8 +140,17 @@ class PengajuanPinjamanTable extends DataTableComponent
             Column::make('Status', 'status')
                 ->sortable()
                 ->searchable()
-                ->format(function ($value) {
-                    $badgeClass = match ($value) {
+                ->label(function ($row) {
+                    $status = $row->status;
+                    
+                    $latestHistory = $row->historyStatus->sortByDesc('created_at')->first();
+                    $currentStep = $latestHistory?->current_step ?? 1;
+                    
+                    if ($status === 'Disetujui oleh CEO SKI' && $currentStep == 5) {
+                        return '<div class="text-center"><span class="badge bg-info">Menunggu Validasi Direktur</span></div>';
+                    }
+                    
+                    $badgeClass = match ($status) {
                         'Draft' => 'bg-warning text-dark',
                         'Submitted' => 'bg-success',
                         'rejected' => 'bg-danger',
@@ -149,10 +159,32 @@ class PengajuanPinjamanTable extends DataTableComponent
                         'Dana Sudah Dicairkan' => 'bg-success',
                         'Proses Restrukturisasi' => 'bg-info',
                         'Peminjaman Direstrukturisasi' => 'bg-primary',
+                        'Disetujui oleh CEO SKI' => 'bg-success',
+                        'Disetujui oleh Direktur SKI' => 'bg-success',
                         'Lunas' => 'bg-primary',
                         default => 'bg-secondary'
                     };
-                    return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ucfirst($value ?: 'Draft') . '</span></div>';
+                    return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ucfirst($status ?: 'Draft') . '</span></div>';
+                })
+                ->html(),
+
+            Column::make('Tanggal Dicairkan')
+                ->label(function ($row) {
+                    if ($row->status !== 'Dana Sudah Dicairkan') {
+                        return '<div class="text-center"><span class="text-muted">-</span></div>';
+                    }
+                    
+                    $historyWithTanggalPencairan = $row->historyStatus
+                        ->whereNotNull('tanggal_pencairan')
+                        ->sortByDesc('created_at')
+                        ->first();
+                    
+                    if ($historyWithTanggalPencairan && $historyWithTanggalPencairan->tanggal_pencairan) {
+                        $tanggal = Carbon::parse($historyWithTanggalPencairan->tanggal_pencairan)->format('d M Y');
+                        return '<div class="text-center">' . $tanggal . '</div>';
+                    }
+                    
+                    return '<div class="text-center"><span class="text-muted">-</span></div>';
                 })
                 ->html(),
 
