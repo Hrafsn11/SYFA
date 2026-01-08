@@ -57,6 +57,8 @@
 @push('scripts')
 <script>
     var currentTabType = 'debitur';
+    var isEditMode = false;
+    
     function afterAction(payload) {
         Livewire.dispatch('refreshDebiturTable');
         Livewire.dispatch('refreshInvestorTable');
@@ -97,6 +99,7 @@
 
     function editData(payload) {
         const data = payload.data;
+        isEditMode = true;
         
         const modal = $('#modalTambahDebitur');
         const form = modal.find('form');
@@ -106,8 +109,13 @@
         // ubah title modal
         modal.find('.modal-title').html('Edit ' + (data.flagging == 'ya' ? 'Investor' : 'Debitur'));
 
-        // tampilkan modal
-        modal.find('.password-section').addClass('d-none');
+        // tampilkan password section dengan label edit mode
+        modal.find('.password-section').removeClass('d-none');
+        modal.find('#password-label').html('Password Baru <small class="text-muted">(kosongkan jika tidak ingin mengubah)</small>');
+        modal.find('#password-confirm-label').html('Konfirmasi Password Baru');
+        modal.find('#password-required').addClass('d-none');
+        modal.find('#password-confirm-required').addClass('d-none');
+        
         modal.modal('show');
 
         Object.entries(data).forEach(([key, value]) => {
@@ -117,12 +125,23 @@
                 @this.set(key, value);
             }
         });
+        
+        // Clear password fields for edit mode
+        @this.set('password', '');
+        @this.set('password_confirmation', '');
     }
 
     $('.modal').on('hide.bs.modal', function() {
+        isEditMode = false;
         $(this).find('form').attr('wire:submit', `{!! $urlAction["store_master_debitur_dan_investor"] !!}`);
         $(this).find('.modal-title').text(currentTabType == 'debitur' ? 'Tambah Debitur' : 'Tambah Investor');
         $(this).find('.password-section').removeClass('d-none');
+        
+        // Reset password labels for create mode
+        $(this).find('#password-label').html('Password <span class="text-danger" id="password-required">*</span>');
+        $(this).find('#password-confirm-label').html('Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span>');
+        $(this).find('#password-required').removeClass('d-none');
+        $(this).find('#password-confirm-required').removeClass('d-none');
 
         if (currentTabType === 'investor') {
             $(this).find('.modal-title').text('Tambah Investor');
@@ -144,6 +163,22 @@
             cancelButtonText: 'Batal',
         }, () => {
             @this.saveData("master-data.debitur-investor.toggle-status", {"id" : id, "callback" : "afterAction"});
+        });
+    });
+
+    // Handler untuk unlock button
+    $(document).on('click', '.debitur-unlock-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+
+        sweetAlertConfirm({
+            title: 'Unlock Akun',
+            text: 'Apakah Anda yakin ingin membuka kunci akun ini? Pengguna akan dapat login kembali.',
+            icon: 'question',
+            confirmButtonText: 'Ya, Unlock',
+            cancelButtonText: 'Batal',
+        }, () => {
+            @this.saveData("master-data.debitur-investor.unlock", {"id" : id, "callback" : "afterAction"});
         });
     });
 </script>

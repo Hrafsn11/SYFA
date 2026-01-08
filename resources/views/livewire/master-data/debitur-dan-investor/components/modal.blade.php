@@ -136,7 +136,7 @@
 
                         <!-- Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password" class="form-label">Password <span class="text-danger"
+                            <label for="password" class="form-label" id="password-label">Password <span class="text-danger"
                                     id="password-required">*</span></label>
                             <input type="password" class="form-control" id="password"
                                 placeholder="Masukkan password" wire:model.blur="password"
@@ -149,7 +149,7 @@
 
                         <!-- Confirm Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password <span
+                            <label for="password_confirmation" class="form-label" id="password-confirm-label">Konfirmasi Password <span
                                     class="text-danger" id="password-confirm-required">*</span></label>
                             <input type="password" class="form-control" id="password_confirmation"
                                 wire:model.blur="password_confirmation" placeholder="Konfirmasi password"

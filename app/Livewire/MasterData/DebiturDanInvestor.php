@@ -35,6 +35,7 @@ class DebiturDanInvestor extends Component
         $this->setUrlSaveData('store_master_debitur_dan_investor', 'master-data.debitur-investor.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_master_debitur_dan_investor', 'master-data.debitur-investor.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
         $this->setUrlSaveData('status_master_debitur_dan_investor', 'master-data.debitur-investor.toggle-status', ["id" => "id_placeholder", "callback" => "afterAction"]);
+        $this->setUrlSaveData('unlock_master_debitur_dan_investor', 'master-data.debitur-investor.unlock', ["id" => "id_placeholder", "callback" => "afterAction"]);
 
         $this->kol = MasterKol::orderBy('id_kol', 'asc')->get();
         $this->banks = BanksEnum::getConstants();

@@ -250,4 +250,40 @@ class DebiturDanInvestorController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Unlock a locked account
+     */
+    public function unlock($id)
+    {
+        try {
+            $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
+
+            if ($debitur->status !== 'locked') {
+                return Response::error('Akun tidak dalam status terkunci');
+            }
+
+            DB::beginTransaction();
+
+            // Update debitur status
+            $debitur->update(['status' => 'active']);
+
+            // Reset user login attempts if user exists
+            if ($debitur->user_id) {
+                $user = User::find($debitur->user_id);
+                if ($user) {
+                    $user->resetLoginAttempts();
+                }
+            }
+
+            DB::commit();
+
+            return Response::success([
+                'status' => 'active'
+            ], 'Akun berhasil dibuka kuncinya');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorCatch($e);
+        }
+    }
 }

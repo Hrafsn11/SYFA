@@ -234,6 +234,7 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'destroy'])->name('destroy');
 
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('{id}/unlock', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'unlock'])->name('unlock');
         Route::delete('{id}/delete-signature', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'deleteSignature'])->name('delete-signature');
         Route::get('{id}/history-kol', \App\Livewire\KolHistoryIndex::class)->name('history-kol');
     });

@@ -43,6 +43,7 @@ class DebiturTable extends DataTableComponent
                     '' => 'Semua Status',
                     'active' => 'Active',
                     'non active' => 'Non Active',
+                    'locked' => 'Locked',
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
@@ -139,6 +140,8 @@ class DebiturTable extends DataTableComponent
                 ->format(function ($value) {
                     if ($value === 'active') {
                         return '<div class="text-center"><span class="badge bg-success">Active</span></div>';
+                    } elseif ($value === 'locked') {
+                        return '<div class="text-center"><span class="badge bg-danger"><i class="ti ti-lock me-1"></i>Locked</span></div>';
                     } else {
                         return '<div class="text-center"><span class="badge bg-secondary">Non Active</span></div>';
                     }
