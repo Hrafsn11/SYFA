@@ -8,6 +8,7 @@ use App\Models\{
     EvaluasiKelengkapanDokumen,
     EvaluasiPengajuanRestrukturisasi,
     HistoryStatusPengajuanRestrukturisasi,
+    PengajuanPeminjaman,
     PengajuanRestrukturisasi,
     PersetujuanKomiteRestrukturisasi
 };
@@ -48,8 +49,6 @@ class EvaluasiRestrukturisasiController extends Controller
 
             $this->syncSections($evaluasi, $sections, $request);
 
-            // Jika status sebelumnya "Perlu Evaluasi Ulang", ubah menjadi "Dalam Proses"
-            // Ini memastikan form menjadi read-only setelah evaluasi ulang disimpan
             if ($pengajuan->status === self::STATUS_PERLU_EVALUASI) {
                 $pengajuan->status = self::STATUS_DALAM_PROSES;
                 $pengajuan->save();
@@ -245,10 +244,17 @@ class EvaluasiRestrukturisasiController extends Controller
     private function handleApproval(PengajuanRestrukturisasi $pengajuan, int $step, array &$history): void
     {
         $pengajuan->current_step = $step + 1;
-        $pengajuan->status = $step >= self::STEP_APPROVAL_THRESHOLD
+        $isCompleted = $step >= self::STEP_APPROVAL_THRESHOLD;
+        $pengajuan->status = $isCompleted
             ? self::STATUS_SELESAI
             : self::STATUS_DALAM_PROSES;
         $pengajuan->save();
+
+        // Jika restrukturisasi selesai, update status peminjaman menjadi "Peminjaman Direstrukturisasi"
+        if ($isCompleted && $pengajuan->id_pengajuan_peminjaman) {
+            PengajuanPeminjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
+                ->update(['status' => 'Peminjaman Direstrukturisasi']);
+        }
 
         $history['status'] = $pengajuan->status;
         $history['current_step'] = $pengajuan->current_step;
@@ -303,6 +309,12 @@ class EvaluasiRestrukturisasiController extends Controller
         $pengajuan->status = self::STATUS_DITOLAK;
         $pengajuan->current_step = $step;
         $pengajuan->save();
+
+        // Kembalikan status peminjaman ke "Dana Sudah Dicairkan" karena restrukturisasi ditolak
+        if ($pengajuan->id_pengajuan_peminjaman) {
+            PengajuanPeminjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
+                ->update(['status' => 'Dana Sudah Dicairkan']);
+        }
     }
 
     private function successResponse($data, string $message): JsonResponse
