@@ -95,6 +95,12 @@ class PengajuanRestrukturisasiController extends Controller
 
             $pengajuan = PengajuanRestrukturisasi::create($validated);
 
+            // Update status Pengajuan Peminjaman menjadi "Proses Restrukturisasi"
+            if (isset($validated['id_pengajuan_peminjaman'])) {
+                PengajuanPeminjaman::where('id_pengajuan_peminjaman', $validated['id_pengajuan_peminjaman'])
+                    ->update(['status' => 'Proses Restrukturisasi']);
+            }
+
             DB::commit();
 
             return Response::success($pengajuan, 'Pengajuan restrukturisasi berhasil dibuat!');
