@@ -5,8 +5,10 @@ namespace App\Livewire;
 use App\Livewire\MasterData\DebiturDanInvestor;
 use App\Models\MasterDebiturDanInvestor;
 use App\Livewire\Traits\HasUniversalFormAction;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class InvestorTable extends DataTableComponent
 {
@@ -25,15 +27,33 @@ class InvestorTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_debitur', 'asc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setBulkActionsDisabled();
     }
 
-    public function builder(): \Illuminate\Database\Eloquent\Builder
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Status')
+                ->options([
+                    '' => 'Semua Status',
+                    'active' => 'Active',
+                    'non active' => 'Non Active',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->where('status', $value);
+                    }
+                }),
+        ];
+    }
+
+    public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
             ->with('kol')
