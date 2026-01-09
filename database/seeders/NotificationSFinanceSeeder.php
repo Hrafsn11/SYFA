@@ -93,15 +93,31 @@ class NotificationSFinanceSeeder extends Seeder
             'message' => 'Pengajuan pinjaman baru telah diterima dari debitur [[nama.debitur]]. Silakan lakukan proses verifikasi.',
         ]);
 
+        // Notifikasi untuk Debitur
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_ditolak_finance_ski->id_notification_feature,
             'role_assigned' => json_encode([$debitur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
         ]);
 
+        // Notifikasi untuk Direktur SKI
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_ditolak_finance_ski->id_notification_feature,
+            'role_assigned' => json_encode([$direktur->id]),
+            'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
+        ]);
+
+        // Notifikasi untuk Debitur
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_disetujui_finance_ski->id_notification_feature,
             'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
+        ]);
+
+        // Notifikasi untuk Direktur SKI
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_disetujui_finance_ski->id_notification_feature,
+            'role_assigned' => json_encode([$direktur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
         ]);
 
