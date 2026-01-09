@@ -126,7 +126,14 @@
         <div class="col-12 col-sm-6 col-md-4 col-lg-3">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">NIB Perusahaan</small>
-                <p class="fw-bold mb-0">{{ $peminjaman->nib_perusahaan ?? '-' }}</p>
+                @if ($peminjaman->nib_perusahaan)
+                    <a href="{{ asset('storage/' . $peminjaman->nib_perusahaan) }}" target="_blank"
+                        class="btn btn-sm btn-outline-primary">
+                        <i class="ti ti-eye me-1"></i> Lihat
+                    </a>
+                @else
+                    <p class="text-muted mb-0">-</p>
+                @endif
             </div>
         </div>
     </div>
