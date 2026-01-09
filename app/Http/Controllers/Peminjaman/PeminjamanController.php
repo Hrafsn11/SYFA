@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Models\MasterDebiturDanInvestor;
 use App\Services\PeminjamanNumberService;
+use App\Services\ContractNumberService;
 use App\Enums\PengajuanPeminjamanStatusEnum;
 use App\Helpers\ListNotifSFinance;
 use App\Models\HistoryStatusPengajuanPinjaman;
@@ -55,6 +56,7 @@ class PeminjamanController extends Controller
         $peminjaman = [
             'id' => $header->id_pengajuan_peminjaman,
             'nomor_peminjaman' => $header->nomor_peminjaman,
+            'no_kontrak' => $header->no_kontrak,
             'nama_perusahaan' => $header->debitur->nama ?? '',
             'nama_ceo' => $header->debitur->nama_ceo ?? '',
             'alamat' => $header->debitur->alamat ?? '',
@@ -120,6 +122,19 @@ class PeminjamanController extends Controller
         }
 
         $peminjaman['current_step'] = $currentStep;
+
+        // Generate preview nomor kontrak jika belum ada dan sudah di step 6 atau lebih
+        $previewNomorKontrak = null;
+        if (empty($header->no_kontrak) && $currentStep >= 6) {
+            // Generate preview tanpa save ke database
+            if ($header->debitur && !empty($header->debitur->kode_perusahaan)) {
+                $previewNomorKontrak = ContractNumberService::generate(
+                    $header->debitur->kode_perusahaan,
+                    $header->jenis_pembiayaan
+                );
+            }
+        }
+        $peminjaman['preview_no_kontrak'] = $previewNomorKontrak;
 
         // Add latest history data (nominal disetujui and tanggal pencairan from latest update)
         if ($latestHistory) {
@@ -1064,8 +1079,11 @@ class PeminjamanController extends Controller
             }
 
             $userEmail = auth()->user()->email;
-            $id_debitur = MasterDebiturDanInvestor::select('id_debitur')->where('email', $userEmail)->first()->id_debitur;
-            $dataPengajuanPeminjaman['id_debitur'] = $id_debitur;
+            $debitur = MasterDebiturDanInvestor::select('id_debitur', 'kode_perusahaan')
+                ->where('email', $userEmail)
+                ->first();
+            
+            $dataPengajuanPeminjaman['id_debitur'] = $debitur->id_debitur;
 
             if (isset($dataPengajuanPeminjaman['lampiran_sid']) && $dataPengajuanPeminjaman['lampiran_sid'] instanceof UploadedFile) {
                 $dataPengajuanPeminjaman['lampiran_sid'] = Storage::disk('public')->put('lampiran_sid', $dataPengajuanPeminjaman['lampiran_sid']);
@@ -1973,5 +1991,67 @@ class PeminjamanController extends Controller
 </html>';
 
         return $html;
+    }
+
+    /**
+     * Generate nomor kontrak untuk pengajuan peminjaman
+     * Dipanggil saat user klik "Simpan" di step 6 (Generate Kontrak)
+     */
+    public function generateKontrak(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Get pengajuan peminjaman
+            $peminjaman = PengajuanPeminjaman::with('debitur')->findOrFail($id);
+
+            // Validasi: Pastikan pengajuan sudah disetujui lengkap
+            $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if (!$latestHistory || $latestHistory->status !== 'Disetujui oleh Direktur SKI') {
+                return Response::error('Pengajuan belum disetujui lengkap. Tidak bisa generate kontrak.', 400);
+            }
+
+            // Validasi: Nomor kontrak belum pernah di-generate
+            if (!empty($peminjaman->no_kontrak)) {
+                return Response::error('Nomor kontrak sudah pernah di-generate: ' . $peminjaman->no_kontrak, 400);
+            }
+
+            // Validasi: Debitur harus punya kode perusahaan
+            if (empty($peminjaman->debitur->kode_perusahaan)) {
+                return Response::error('Kode perusahaan debitur belum diisi. Hubungi administrator.', 400);
+            }
+
+            // Generate nomor kontrak
+            $nomorKontrak = ContractNumberService::generate(
+                $peminjaman->debitur->kode_perusahaan,
+                $peminjaman->jenis_pembiayaan
+            );
+
+            // Update pengajuan peminjaman dengan nomor kontrak
+            $peminjaman->no_kontrak = $nomorKontrak;
+            
+            // Update biaya administrasi jika ada
+            if ($request->has('biaya_administrasi')) {
+                $biayaAdmin = str_replace(['Rp', '.', ' '], '', $request->biaya_administrasi);
+                $peminjaman->biaya_administrasi = (float) $biayaAdmin;
+            }
+
+            $peminjaman->save();
+
+            DB::commit();
+
+            return Response::success([
+                'no_kontrak' => $nomorKontrak,
+                'id_pengajuan' => $peminjaman->id_pengajuan_peminjaman
+            ], 'Nomor kontrak berhasil di-generate: ' . $nomorKontrak);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error generate kontrak: ' . $e->getMessage());
+            return Response::errorCatch($e);
+        }
     }
 }

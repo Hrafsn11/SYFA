@@ -24,7 +24,7 @@ class DebiturDanInvestor extends Component
     public $id; // untuk edit data
     
     #[FieldInput]
-    public $nama, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging;
+    public $nama, $kode_perusahaan, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging;
 
     #[FieldInput]
     #[Renderless]

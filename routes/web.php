@@ -82,6 +82,7 @@ Route::middleware([
         Route::post('/{id}', 'update')->name('update');
 
         Route::get('/{id}/preview-kontrak', 'previewKontrak')->name('preview-kontrak');
+        Route::post('/{id}/generate-kontrak', 'generateKontrak')->name('generate-kontrak');
         Route::post('/{id}/approval', 'approval')->name('approval');
         Route::get('/history/{historyId}', 'getHistoryDetail')->name('history.detail');
         Route::patch('/{id}/toggle-active', 'toggleActive')->name('toggle-active');

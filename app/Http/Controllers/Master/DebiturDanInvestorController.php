@@ -39,6 +39,10 @@ class DebiturDanInvestorController extends Controller
             }
             $validated['tanda_tangan'] = $file;
 
+            if (isset($validated['kode_perusahaan'])) {
+                $validated['kode_perusahaan'] = strtoupper($validated['kode_perusahaan']);
+            }
+
             $user = User::create([
                 'name' => $validated['nama'],
                 'email' => $validated['email'],
@@ -98,6 +102,7 @@ class DebiturDanInvestorController extends Controller
         } else {
             $result = [
                 'nama' => $debitur->nama,
+                'kode_perusahaan' => $debitur->kode_perusahaan,
                 'nama_ceo' => $debitur->nama_ceo,
                 'alamat' => $debitur->alamat,
                 'email' => $debitur->email,
@@ -134,6 +139,10 @@ class DebiturDanInvestorController extends Controller
 
                 $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
                 $validated['tanda_tangan'] = $file;
+            }
+
+            if (isset($validated['kode_perusahaan'])) {
+                $validated['kode_perusahaan'] = strtoupper($validated['kode_perusahaan']);
             }
 
             // Update user if exists

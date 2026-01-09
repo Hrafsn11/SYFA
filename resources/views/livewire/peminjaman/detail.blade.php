@@ -701,7 +701,18 @@
                                             <div class="col-lg mb-3">
                                                 <label for="no_kontrak" class="form-label">No Kontrak</label>
                                                 <input type="text" class="form-control" id="no_kontrak"
-                                                    name="no_kontrak" value="{{ $header->no_kontrak ?? '' }}" placeholder="No Kontrak">
+                                                    name="no_kontrak" 
+                                                    value="{{ $peminjaman['no_kontrak'] ?? $peminjaman['preview_no_kontrak'] ?? '' }}" 
+                                                    placeholder="No Kontrak akan di-generate otomatis" 
+                                                    readonly>
+                                                <small class="text-muted">
+                                                    <i class="ti ti-info-circle"></i> 
+                                                    @if(empty($peminjaman['no_kontrak']) && !empty($peminjaman['preview_no_kontrak']))
+                                                        Preview nomor kontrak. Akan disimpan saat Anda klik "Simpan"
+                                                    @else
+                                                        Nomor kontrak otomatis dari sistem
+                                                    @endif
+                                                </small>
                                             </div>
                                             <div class="col-lg mb-3">
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
@@ -782,10 +793,7 @@
                                             <div class="col-lg mb-3">
                                                 <label for="nisbah" class="form-label">Bagi Hasil (Nisbah)</label>
                                                 <input type="text" class="form-control" id="nisbah" name="nisbah"
-                                                    value="{{ $header->persentase_bagi_hasil ?? 2 }}% flat / bulan" required disabled>
-                                            </div>
-
-                                            <div class="col-lg mb-3">
+                                    value="{{ $peminjaman['persentase_bagi_hasil'] ?? 2 }}% flat / bulan" required disabled>
                                                 <label for="denda_keterlambatan" class="form-label">
                                                     Denda Keterlambatan
                                                 </label>
@@ -1434,7 +1442,7 @@
                 switchToActivityTab();
             };
 
-            const handleGenerateKontrakSubmit = (e) => {
+            const handleGenerateKontrakSubmit = async (e) => {
                 e.preventDefault();
 
                 const form = e.target;
@@ -1446,24 +1454,56 @@
 
                 const btnSimpan = document.getElementById('btnSimpanKontrak');
                 const spinner = document.getElementById('btnSimpanKontrakSpinner');
-                const originalText = btnSimpan.innerHTML;
+                const peminjamanId = @json($peminjaman['id'] ?? null);
 
-                // Show loading
+                if (!peminjamanId) {
+                    Swal.fire('Error', 'ID Pengajuan tidak ditemukan', 'error');
+                    return;
+                }
+
                 btnSimpan.disabled = true;
                 spinner.classList.remove('d-none');
 
-                // Simulasi proses generate kontrak (ganti dengan AJAX call sebenarnya)
-                setTimeout(() => {
+                try {
+                    // Get form data
+                    const formData = new FormData(form);
+                    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
+                    const response = await fetch(`/peminjaman/${peminjamanId}/generate-kontrak`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status) {
+                        // Success
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message || 'Nomor kontrak berhasil di-generate',
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Reload page untuk refresh data kontrak
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(result.message || 'Gagal generate kontrak');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: error.message || 'Terjadi kesalahan saat generate kontrak'
+                    });
+                } finally {
                     btnSimpan.disabled = false;
                     spinner.classList.add('d-none');
-
-                    // Reset form
-                    form.classList.remove('was-validated');
-
-                    // Success - pindah ke step 8
-                    goToStep(8);
-                    switchToActivityTab();
-                }, 2000);
+                }
             };
 
             const handleBatalKontrak = () => {

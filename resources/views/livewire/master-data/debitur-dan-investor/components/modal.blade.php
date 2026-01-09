@@ -20,6 +20,18 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
+                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                            <label for="kode_perusahaan" class="form-label">
+                                Kode Perusahaan <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="kode_perusahaan"
+                                placeholder="Masukan Kode Perusahaan" wire:model.blur="kode_perusahaan" minlength="2" maxlength="4" style="text-transform: uppercase;">
+                            <small class="text-muted">
+                               Minimal 2 karakter, maksimal 4 karakter (huruf dan angka, contoh: TECH)
+                            </small>
+                            <div class="invalid-feedback"></div>
+                        </div>
+
                         <!-- Deposito (Khusus Investor) -->
                         <div class="col-12 mb-3 form-group investor-section d-none">
                             <label class="form-label">Deposito</label>
