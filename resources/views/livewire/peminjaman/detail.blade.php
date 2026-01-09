@@ -249,7 +249,7 @@
                                                         @if (($peminjaman['jenis_pembiayaan'] ?? '') === 'Factoring')
                                                             {{ number_format($peminjaman['total_nominal_yang_dialihkan'] ?? 0, 0, ',', '.') }}
                                                         @else
-                                                            {{ number_format($peminjaman['nominal_pinjaman'] ?? ($peminjaman['total_pinjaman'] ?? 0), 0, ',', '.') }}
+                                                            {{ number_format($latestHistory->nominal_yang_disetujui ?? $peminjaman['nominal_pinjaman'] ?? 0, 0, ',', '.') }}
                                                         @endif
                                                     </p>
                                                 </div>
@@ -316,15 +316,7 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                    <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Sumber
-                                                            Pembiayaan</small>
-                                                        <p class="fw-bold mb-0">
-                                                            {{ $peminjaman['sumber_pembiayaan'] ?? '-' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
+
                                             @else
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
@@ -364,23 +356,7 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                    <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Sumber
-                                                            Pembiayaan</small>
-                                                        <p class="fw-bold mb-0">
-                                                            {{ ucFirst($peminjaman['sumber_pembiayaan'] ?? '-') }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                    <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Instansi</small>
-                                                        <p class="fw-bold mb-0">
-                                                            {{ $peminjaman['instansi'] ?? '-' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
+
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
@@ -731,7 +707,7 @@
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
-                                                    name="jenis_pembiayaan" value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required
+                                                    name="jenis_pembiayaan" value="{{ $header->jenis_pembiayaan ?? $peminjaman['jenis_pembiayaan'] ?? '' }}" required
                                                     disabled>
                                             </div>
 
@@ -824,7 +800,7 @@
                                                     Jaminan
                                                 </label>
                                                 <input type="text" class="form-control" id="jaminan" name="jaminan"
-                                                    value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required disabled>
+                                                    value="{{ $header->jaminan ?? $header->jenis_pembiayaan ?? $peminjaman['jenis_pembiayaan'] ?? '' }}" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
@@ -1188,6 +1164,8 @@
                     deviasi: deviasi,
                     nominal_yang_disetujui: nominalDisetujui.replace(/\D/g, ''), // Remove non-numeric characters
                     tanggal_pencairan: tanggalPencairan,
+                    persentase_bagi_hasil: document.getElementById('persentaseBagiHasil')?.value || 2,
+                    total_bagi_hasil: document.getElementById('totalBagiHasilValue')?.value || 0,
                     catatan_validasi_dokumen_disetujui: catatan,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0], // Current date in Y-m-d format
@@ -2131,6 +2109,65 @@
             }
         }
 
+        function initBagiHasilCalculation() {
+            const nominalInput = document.getElementById('nominalDisetujui');
+            const persentaseInput = document.getElementById('persentaseBagiHasil');
+            const totalBagiHasilDisplay = document.getElementById('totalBagiHasil');
+            const totalBagiHasilValue = document.getElementById('totalBagiHasilValue');
+
+            if (!nominalInput || !persentaseInput) return;
+
+            function formatRupiah(angka) {
+                return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka);
+            }
+            
+            
+            function recalculate() {
+                // Get nominal (remove Rp and dots)
+                let nominalText = nominalInput.value.replace(/[^0-9]/g, '');
+                const nominal = parseFloat(nominalText) || 0;
+                
+                // Get persentase
+                const persentase = parseFloat(persentaseInput.value) || 0;
+                
+                // Calculate
+                const totalBagiHasil = nominal * (persentase / 100);
+                
+                // Update display
+                if (totalBagiHasilDisplay) totalBagiHasilDisplay.value = formatRupiah(totalBagiHasil);
+                if (totalBagiHasilValue) totalBagiHasilValue.value = Math.round(totalBagiHasil);
+
+                // Update keterangan
+                const keteranganEl = document.getElementById('keteranganBagiHasil');
+                if (keteranganEl) {
+                    const defaultPercent = {{ $peminjaman['jenis_pembiayaan'] === 'Installment' ? 10 : 2 }};
+                    if (persentase > defaultPercent) {
+                        keteranganEl.textContent = 'Eksternal';
+                        keteranganEl.className = 'text-warning fw-bold';
+                    } else {
+                        keteranganEl.textContent = '-';
+                        keteranganEl.className = 'text-muted';
+                    }
+                }
+            }
+
+            // Event listeners
+            nominalInput.addEventListener('input', recalculate);
+            nominalInput.addEventListener('change', recalculate);
+            persentaseInput.addEventListener('input', recalculate);
+            persentaseInput.addEventListener('change', recalculate);
+
+            // Initial calculation
+            recalculate();
+        }
+
+        // Initialize when modal is shown
+        const modalPencairan = document.getElementById('modalPencairanDana');
+        if (modalPencairan) {
+            modalPencairan.addEventListener('shown.bs.modal', function () {
+                initBagiHasilCalculation();
+            });
+        }
         // Call the step 8 update function on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateButtonsForStep8();

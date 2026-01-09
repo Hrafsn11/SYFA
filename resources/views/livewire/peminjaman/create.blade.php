@@ -28,61 +28,6 @@
                                 required readonly tabindex="-1">
                         </div>
                     </div>
-                    <div class="card border-1 mb-3 shadow-none" id="cardSumberPembiayaan">
-                        <div class="card-body">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label mb-2">Sumber Pembiayaan</label>
-                                <div class="d-flex">
-                                    <div class="form-check me-3">
-                                        <input name="sumber_pembiayaan" class="form-check-input sumber-pembiayaan-radio"
-                                            type="radio" value="Eksternal" id="sumber_eksternal" 
-                                            {{ (isset($pengajuan) && strtolower($pengajuan->sumber_pembiayaan ?? '') == 'eksternal') || !isset($pengajuan) ? 'checked' : '' }} required>
-                                        <label class="form-check-label" for="sumber_eksternal">
-                                            Eksternal
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input name="sumber_pembiayaan" class="form-check-input sumber-pembiayaan-radio"
-                                            type="radio" value="Internal" id="sumber_internal" 
-                                            {{ isset($pengajuan) && strtolower($pengajuan->sumber_pembiayaan ?? '') == 'internal' ? 'checked' : '' }} required>
-                                        <label class="form-check-label" for="sumber_internal">
-                                            Internal
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="mt-2" id="divSumberEksternal" 
-                                     style="display: {{ (isset($pengajuan) && strtolower($pengajuan->sumber_pembiayaan ?? '') == 'internal') ? 'none' : 'block' }};">
-                                    <select id="select2Basic" name="sumber_eksternal_id" class="form-select"
-                                        data-placeholder="Pilih Sumber Pembiayaan Eksternal">
-                                        <option value="">Pilih Sumber Pembiayaan</option>
-                                        @foreach ($sumber_eksternal as $sumber)
-                                            @php
-                                                // support both array and object representations
-                                                if (is_array($sumber)) {
-                                                    $percent =
-                                                        $sumber['persentase'] ??
-                                                        ($sumber['bagi_hasil'] ??
-                                                            ($sumber['persentase_bagi_hasil'] ?? 2));
-                                                    $label = $sumber['nama'] ?? ($sumber['nama_instansi'] ?? '');
-                                                    $val = $sumber['id'] ?? '';
-                                                } else {
-                                                    $percent =
-                                                        $sumber->persentase ??
-                                                        ($sumber->bagi_hasil ?? ($sumber->persentase_bagi_hasil ?? 2));
-                                                    $label = $sumber->nama ?? ($sumber->nama_instansi ?? '');
-                                                    $val = $sumber->id ?? ($sumber->id_instansi ?? '');
-                                                }
-                                            @endphp
-                                            <option value="{{ $val }}" data-percent="{{ $percent }}" 
-                                                {{ isset($pengajuan) && $pengajuan->id_instansi == $val ? 'selected' : '' }}>
-                                                {{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="card border-1 mb-3 shadow-none">
                         <div class="card-body">
                             <div class="row mb-3">
@@ -613,66 +558,11 @@
                 }
             }, 200);
 
-            // Handle Sumber Pembiayaan Radio
-            $('.sumber-pembiayaan-radio').on('change', function() {
-                if ($(this).val() === 'Eksternal') {
-                    $('#divSumberEksternal').slideDown();
-                } else {
-                    $('#divSumberEksternal').slideUp();
-                }
-                // No need to recalc - totals are calculated from modal data
-            });
-
-            // When external sumber selection changes, update getBagiPercent for modal calculations
-            $('#select2Basic').on('change', function() {
-                // The getBagiPercent() function will return updated percentage
-                // This affects modal calculations, not main form totals
-                try {} catch (e) {
-                    // suppressed
-                }
-                try {} catch (e) {}
-            });
 
 
 
 
-            // Helper: get current bagi hasil percent based on sumber selection
             window.getBagiPercent = function() {
-                try {
-                    const sumberType = $('input[name="sumber_pembiayaan"]:checked').val();
-                    if (sumberType === 'Internal') return 2; // internal fixed 2%
-                    // external: read data-percent from selected option
-                    // When select2 is used, option:selected should still be queryable but also check underlying select value
-                    let p = NaN;
-                    const $sel = $('#select2Basic');
-                    if ($sel && $sel.length) {
-                        // try data on selected option
-                        const opt = $sel.find('option:selected');
-                        if (opt && opt.length) {
-                            p = parseFloat(opt.data('percent'));
-                            if (!isNaN(p)) return p;
-                        }
-                        // try data attribute on select element itself
-                        const sp = parseFloat($sel.data('percent'));
-                        if (!isNaN(sp)) return sp;
-                        // try parsing percent from the option text (e.g., "Name (50%)") as a last resort
-                        const val = $sel.val();
-                        if (val) {
-                            const optByVal = $sel.find('option[value="' + val + '"]');
-                            if (optByVal && optByVal.length) {
-                                const text = optByVal.text() || '';
-                                const m = text.match(/(\d+(?:\.\d+)?)\s*%/);
-                                if (m && m[1]) {
-                                    const parsed = parseFloat(m[1]);
-                                    if (!isNaN(parsed)) return parsed;
-                                }
-                            }
-                        }
-                    }
-                    // suppressed
-                } catch (e) {
-                    // fallback
-                }
                 return 2;
             };
 
