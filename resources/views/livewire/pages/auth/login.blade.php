@@ -4,6 +4,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use App\Models\User;
 
 new #[Layout('layouts.guest')] class extends Component {
     public string $email = '';
@@ -20,15 +21,59 @@ new #[Layout('layouts.guest')] class extends Component {
         // Cek apakah input adalah email atau username
         $fieldType = filter_var($this->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
 
+        // Cari user terlebih dahulu
+        $user = User::where($fieldType, $this->email)->first();
+
+        if (!$user) {
+            $this->addError('email', 'Email atau username tidak ditemukan.');
+            return;
+        }
+
+        // Cek apakah user adalah admin/super-admin (tidak bisa dikunci)
+        if (!$user->isLockable()) {
+            // Admin/Super-admin langsung login tanpa pengecekan lock
+            if (Auth::attempt([$fieldType => $this->email, 'password' => $this->password], $this->remember)) {
+                request()->session()->regenerate();
+                $this->redirect(RouteServiceProvider::HOME);
+            } else {
+                $this->addError('email', 'Password yang Anda masukkan salah.');
+            }
+            return;
+        }
+
+        // Untuk user biasa (debitur/investor), cek status akun
+        if ($user->isAccountLocked()) {
+            $this->addError('email', 'Akun Anda telah dikunci karena terlalu banyak percobaan login gagal. Silahkan hubungi admin untuk membuka kembali akun Anda.');
+            return;
+        }
+
+        if ($user->isAccountNonActive()) {
+            $this->addError('email', 'Akun Anda tidak aktif. Silahkan hubungi admin untuk informasi lebih lanjut.');
+            return;
+        }
+
+        // Coba login
         if (Auth::attempt([$fieldType => $this->email, 'password' => $this->password], $this->remember)) {
+            // Login sukses - reset login attempts
+            $user->resetLoginAttempts();
             request()->session()->regenerate();
             $this->redirect(RouteServiceProvider::HOME);
         } else {
-            $this->addError('email', 'The provided credentials do not match our records.');
+            // Login gagal - increment attempts
+            $attempts = $user->incrementLoginAttempts();
+            $remainingAttempts = User::MAX_LOGIN_ATTEMPTS - $attempts;
+
+            if ($attempts >= User::MAX_LOGIN_ATTEMPTS) {
+                // Lock the account
+                $user->lockAccount();
+                $this->addError('email', 'Akun Anda telah dikunci karena 3 kali percobaan login gagal. Silahkan hubungi admin untuk membuka kembali akun Anda.');
+            } else {
+                $this->addError('email', "Password salah. Sisa percobaan: {$remainingAttempts}");
+            }
         }
     }
-}; ?>
-
+};
+?>
 <div>
     <div class="container-xxl">
         <div class="authentication-wrapper authentication-basic container-p-y">

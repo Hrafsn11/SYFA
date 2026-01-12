@@ -249,7 +249,7 @@
                                                         @if (($peminjaman['jenis_pembiayaan'] ?? '') === 'Factoring')
                                                             {{ number_format($peminjaman['total_nominal_yang_dialihkan'] ?? 0, 0, ',', '.') }}
                                                         @else
-                                                            {{ number_format($peminjaman['nominal_pinjaman'] ?? ($peminjaman['total_pinjaman'] ?? 0), 0, ',', '.') }}
+                                                            {{ number_format($latestHistory->nominal_yang_disetujui ?? $peminjaman['nominal_pinjaman'] ?? 0, 0, ',', '.') }}
                                                         @endif
                                                     </p>
                                                 </div>
@@ -316,15 +316,7 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                    <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Sumber
-                                                            Pembiayaan</small>
-                                                        <p class="fw-bold mb-0">
-                                                            {{ $peminjaman['sumber_pembiayaan'] ?? '-' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
+
                                             @else
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
@@ -364,23 +356,7 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                    <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Sumber
-                                                            Pembiayaan</small>
-                                                        <p class="fw-bold mb-0">
-                                                            {{ ucFirst($peminjaman['sumber_pembiayaan'] ?? '-') }}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
-                                                    <div class="mb-0">
-                                                        <small class="text-light fw-semibold d-block mb-1">Instansi</small>
-                                                        <p class="fw-bold mb-0">
-                                                            {{ $peminjaman['instansi'] ?? '-' }}
-                                                        </p>
-                                                    </div>
-                                                </div>
+
                                                 <div class="col-12 col-sm-6 col-md-4 col-lg-4">
                                                     <div class="mb-0">
                                                         <small class="text-light fw-semibold d-block mb-1">Rencana Tanggal
@@ -725,13 +701,24 @@
                                             <div class="col-lg mb-3">
                                                 <label for="no_kontrak" class="form-label">No Kontrak</label>
                                                 <input type="text" class="form-control" id="no_kontrak"
-                                                    name="no_kontrak" value="{{ $header->no_kontrak ?? '' }}" placeholder="No Kontrak">
+                                                    name="no_kontrak" 
+                                                    value="{{ $peminjaman['no_kontrak'] ?? $peminjaman['preview_no_kontrak'] ?? '' }}" 
+                                                    placeholder="No Kontrak akan di-generate otomatis" 
+                                                    readonly>
+                                                <small class="text-muted">
+                                                    <i class="ti ti-info-circle"></i> 
+                                                    @if(empty($peminjaman['no_kontrak']) && !empty($peminjaman['preview_no_kontrak']))
+                                                        Preview nomor kontrak. Akan disimpan saat Anda klik "Simpan"
+                                                    @else
+                                                        Nomor kontrak otomatis dari sistem
+                                                    @endif
+                                                </small>
                                             </div>
                                             <div class="col-lg mb-3">
                                                 <label for="jenis_pembiayaan" class="form-label">Jenis
                                                     Pembiayaan</label>
                                                 <input type="text" class="form-control" id="jenis_pembiayaan"
-                                                    name="jenis_pembiayaan" value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required
+                                                    name="jenis_pembiayaan" value="{{ $header->jenis_pembiayaan ?? $peminjaman['jenis_pembiayaan'] ?? '' }}" required
                                                     disabled>
                                             </div>
 
@@ -806,10 +793,7 @@
                                             <div class="col-lg mb-3">
                                                 <label for="nisbah" class="form-label">Bagi Hasil (Nisbah)</label>
                                                 <input type="text" class="form-control" id="nisbah" name="nisbah"
-                                                    value="{{ $header->persentase_bagi_hasil ?? 2 }}% flat / bulan" required disabled>
-                                            </div>
-
-                                            <div class="col-lg mb-3">
+                                    value="{{ $peminjaman['persentase_bagi_hasil'] ?? 2 }}% flat / bulan" required disabled>
                                                 <label for="denda_keterlambatan" class="form-label">
                                                     Denda Keterlambatan
                                                 </label>
@@ -824,7 +808,7 @@
                                                     Jaminan
                                                 </label>
                                                 <input type="text" class="form-control" id="jaminan" name="jaminan"
-                                                    value="{{ $header->jenis_pembiayaan ?? 'Invoice & Project Financing' }}" required disabled>
+                                                    value="{{ $header->jaminan ?? $header->jenis_pembiayaan ?? $peminjaman['jenis_pembiayaan'] ?? '' }}" required disabled>
                                             </div>
 
                                             <div class="col-lg mb-3">
@@ -1188,6 +1172,8 @@
                     deviasi: deviasi,
                     nominal_yang_disetujui: nominalDisetujui.replace(/\D/g, ''), // Remove non-numeric characters
                     tanggal_pencairan: tanggalPencairan,
+                    persentase_bagi_hasil: document.getElementById('persentaseBagiHasil')?.value || 2,
+                    total_bagi_hasil: document.getElementById('totalBagiHasilValue')?.value || 0,
                     catatan_validasi_dokumen_disetujui: catatan,
                     approve_by: @json(auth()->id()),
                     date: new Date().toISOString().split('T')[0], // Current date in Y-m-d format
@@ -1456,7 +1442,7 @@
                 switchToActivityTab();
             };
 
-            const handleGenerateKontrakSubmit = (e) => {
+            const handleGenerateKontrakSubmit = async (e) => {
                 e.preventDefault();
 
                 const form = e.target;
@@ -1468,24 +1454,56 @@
 
                 const btnSimpan = document.getElementById('btnSimpanKontrak');
                 const spinner = document.getElementById('btnSimpanKontrakSpinner');
-                const originalText = btnSimpan.innerHTML;
+                const peminjamanId = @json($peminjaman['id'] ?? null);
 
-                // Show loading
+                if (!peminjamanId) {
+                    Swal.fire('Error', 'ID Pengajuan tidak ditemukan', 'error');
+                    return;
+                }
+
                 btnSimpan.disabled = true;
                 spinner.classList.remove('d-none');
 
-                // Simulasi proses generate kontrak (ganti dengan AJAX call sebenarnya)
-                setTimeout(() => {
+                try {
+                    // Get form data
+                    const formData = new FormData(form);
+                    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
+                    const response = await fetch(`/peminjaman/${peminjamanId}/generate-kontrak`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status) {
+                        // Success
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message || 'Nomor kontrak berhasil di-generate',
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Reload page untuk refresh data kontrak
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(result.message || 'Gagal generate kontrak');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: error.message || 'Terjadi kesalahan saat generate kontrak'
+                    });
+                } finally {
                     btnSimpan.disabled = false;
                     spinner.classList.add('d-none');
-
-                    // Reset form
-                    form.classList.remove('was-validated');
-
-                    // Success - pindah ke step 8
-                    goToStep(8);
-                    switchToActivityTab();
-                }, 2000);
+                }
             };
 
             const handleBatalKontrak = () => {
@@ -2131,6 +2149,65 @@
             }
         }
 
+        function initBagiHasilCalculation() {
+            const nominalInput = document.getElementById('nominalDisetujui');
+            const persentaseInput = document.getElementById('persentaseBagiHasil');
+            const totalBagiHasilDisplay = document.getElementById('totalBagiHasil');
+            const totalBagiHasilValue = document.getElementById('totalBagiHasilValue');
+
+            if (!nominalInput || !persentaseInput) return;
+
+            function formatRupiah(angka) {
+                return 'Rp ' + new Intl.NumberFormat('id-ID').format(angka);
+            }
+            
+            
+            function recalculate() {
+                // Get nominal (remove Rp and dots)
+                let nominalText = nominalInput.value.replace(/[^0-9]/g, '');
+                const nominal = parseFloat(nominalText) || 0;
+                
+                // Get persentase
+                const persentase = parseFloat(persentaseInput.value) || 0;
+                
+                // Calculate
+                const totalBagiHasil = nominal * (persentase / 100);
+                
+                // Update display
+                if (totalBagiHasilDisplay) totalBagiHasilDisplay.value = formatRupiah(totalBagiHasil);
+                if (totalBagiHasilValue) totalBagiHasilValue.value = Math.round(totalBagiHasil);
+
+                // Update keterangan
+                const keteranganEl = document.getElementById('keteranganBagiHasil');
+                if (keteranganEl) {
+                    const defaultPercent = {{ $peminjaman['jenis_pembiayaan'] === 'Installment' ? 10 : 2 }};
+                    if (persentase > defaultPercent) {
+                        keteranganEl.textContent = 'Eksternal';
+                        keteranganEl.className = 'text-warning fw-bold';
+                    } else {
+                        keteranganEl.textContent = '-';
+                        keteranganEl.className = 'text-muted';
+                    }
+                }
+            }
+
+            // Event listeners
+            nominalInput.addEventListener('input', recalculate);
+            nominalInput.addEventListener('change', recalculate);
+            persentaseInput.addEventListener('input', recalculate);
+            persentaseInput.addEventListener('change', recalculate);
+
+            // Initial calculation
+            recalculate();
+        }
+
+        // Initialize when modal is shown
+        const modalPencairan = document.getElementById('modalPencairanDana');
+        if (modalPencairan) {
+            modalPencairan.addEventListener('shown.bs.modal', function () {
+                initBagiHasilCalculation();
+            });
+        }
         // Call the step 8 update function on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateButtonsForStep8();

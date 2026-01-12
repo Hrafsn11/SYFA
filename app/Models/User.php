@@ -32,7 +32,111 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'login_attempts',
+        'locked_at',
     ];
+
+    /**
+     * Max login attempts before account gets locked.
+     */
+    public const MAX_LOGIN_ATTEMPTS = 3;
+
+    /**
+     * Roles that cannot be locked.
+     */
+    protected static $unlockableRoles = ['super-admin', 'admin'];
+
+    /**
+     * Check if user account can be locked (not admin/super-admin).
+     */
+    public function isLockable(): bool
+    {
+        foreach (self::$unlockableRoles as $role) {
+            if ($this->hasRole($role)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if the user's associated debitur/investor account is locked.
+     */
+    public function isAccountLocked(): bool
+    {
+        $debitur = $this->debitur;
+        if ($debitur) {
+            return $debitur->status === 'locked';
+        }
+        return false;
+    }
+
+    /**
+     * Check if the user's associated debitur/investor account is non-active.
+     */
+    public function isAccountNonActive(): bool
+    {
+        $debitur = $this->debitur;
+        if ($debitur) {
+            return $debitur->status === 'non active';
+        }
+        return false;
+    }
+
+    /**
+     * Increment login attempts.
+     */
+    public function incrementLoginAttempts(): int
+    {
+        $this->login_attempts++;
+        $this->save();
+        return $this->login_attempts;
+    }
+
+    /**
+     * Reset login attempts to zero.
+     */
+    public function resetLoginAttempts(): void
+    {
+        $this->login_attempts = 0;
+        $this->locked_at = null;
+        $this->save();
+    }
+
+    /**
+     * Lock the account by updating debitur/investor status.
+     */
+    public function lockAccount(): bool
+    {
+        $debitur = $this->debitur;
+        if ($debitur) {
+            $debitur->status = 'locked';
+            $debitur->save();
+            
+            $this->locked_at = now();
+            $this->save();
+            
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Unlock the account by resetting status and login attempts.
+     */
+    public function unlockAccount(): bool
+    {
+        $debitur = $this->debitur;
+        if ($debitur && $debitur->status === 'locked') {
+            $debitur->status = 'active';
+            $debitur->save();
+            
+            $this->resetLoginAttempts();
+            
+            return true;
+        }
+        return false;
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -53,6 +157,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'locked_at' => 'datetime',
     ];
 
     /**

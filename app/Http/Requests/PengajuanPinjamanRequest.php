@@ -17,18 +17,9 @@ class PengajuanPinjamanRequest extends FormRequest
 
     /**
      * Prepare the data for validation.
-     * Normalize sumber_pembiayaan to proper case for consistency.
      */
     protected function prepareForValidation()
     {
-        if ($this->has('sumber_pembiayaan')) {
-            $sumber = $this->input('sumber_pembiayaan');
-            if (strtolower($sumber) === 'eksternal') {
-                $this->merge(['sumber_pembiayaan' => 'Eksternal']);
-            } elseif (strtolower($sumber) === 'internal') {
-                $this->merge(['sumber_pembiayaan' => 'Internal']);
-            }
-        }
     }
 
     /**
@@ -47,9 +38,8 @@ class PengajuanPinjamanRequest extends FormRequest
             'jenis_pembiayaan' => 'required|in:' . implode(',', JenisPembiayaanEnum::getConstants()),
             'catatan_lainnya' => 'nullable',
             
-            // Only for Invoice Financing & PO Financing
-            'sumber_pembiayaan' => 'nullable|required_if:jenis_pembiayaan,Invoice Financing,PO Financing|in:Eksternal,Internal,eksternal,internal',
-            'id_instansi' => 'nullable|required_if:sumber_pembiayaan,Eksternal,eksternal|exists:master_sumber_pendanaan_eksternal,id_instansi',
+            'sumber_pembiayaan' => 'nullable',
+            'id_instansi' => 'nullable|exists:master_sumber_pendanaan_eksternal,id_instansi',
             'lampiran_sid' => [
                 'nullable',
                 function ($attribute, $value, $fail) {
@@ -123,10 +113,6 @@ class PengajuanPinjamanRequest extends FormRequest
             'jenis_pembiayaan.required' => 'Jenis pembiayaan harus dipilih.',
             'jenis_pembiayaan.in' => 'Jenis pembiayaan tidak valid.',
             
-            // Invoice & PO Financing specific
-            'sumber_pembiayaan.required_if' => 'Sumber pembiayaan harus dipilih untuk Invoice Financing atau PO Financing.',
-            'sumber_pembiayaan.in' => 'Sumber pembiayaan tidak valid.',
-            'id_instansi.required_if' => 'Instansi harus dipilih ketika sumber pembiayaan Eksternal.',
             'id_instansi.exists' => 'Instansi tidak valid.',
             'lampiran_sid.required_if' => 'Lampiran SID harus diupload untuk Invoice Financing atau PO Financing.',
             'lampiran_sid.image' => 'Lampiran SID harus berupa gambar.',

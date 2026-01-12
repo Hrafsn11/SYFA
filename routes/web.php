@@ -82,6 +82,7 @@ Route::middleware([
         Route::post('/{id}', 'update')->name('update');
 
         Route::get('/{id}/preview-kontrak', 'previewKontrak')->name('preview-kontrak');
+        Route::post('/{id}/generate-kontrak', 'generateKontrak')->name('generate-kontrak');
         Route::post('/{id}/approval', 'approval')->name('approval');
         Route::get('/history/{historyId}', 'getHistoryDetail')->name('history.detail');
         Route::patch('/{id}/toggle-active', 'toggleActive')->name('toggle-active');
@@ -234,6 +235,7 @@ Route::middleware([
         Route::delete('{id}', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'destroy'])->name('destroy');
 
         Route::patch('{id}/toggle-status', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'toggleStatus'])->name('toggle-status');
+        Route::patch('{id}/unlock', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'unlock'])->name('unlock');
         Route::delete('{id}/delete-signature', [\App\Http\Controllers\Master\DebiturDanInvestorController::class, 'deleteSignature'])->name('delete-signature');
         Route::get('{id}/history-kol', \App\Livewire\KolHistoryIndex::class)->name('history-kol');
     });

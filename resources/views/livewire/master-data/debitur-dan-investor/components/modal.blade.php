@@ -1,13 +1,13 @@
 {{-- Modal Tambah/Edit Debitur/Investor --}}
-<div class="modal fade" id="modalTambahDebitur" wire:ignore>
+<div class="modal fade" id="modalTambahDebitur">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTambahDebiturLabel">Tambah Debitur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formTambahDebitur" wire:submit="{{ $urlAction['store_master_debitur_dan_investor'] }}">
-                <input type="hidden" id="hiddenFlagging" wire:model.blur="flagging">
+            <form id="formTambahDebitur" wire:submit.prevent="submit">
+                <input type="hidden" id="hiddenFlagging" wire:model="flagging">
                 <div class="modal-body">
                     <div class="row">
                         <!-- Nama Perusahaan / Nama Investor -->
@@ -17,6 +17,18 @@
                             </label>
                             <input type="text" class="form-control" id="nama"
                                 placeholder="Masukkan Nama Perusahaan" wire:model.blur="nama">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                            <label for="kode_perusahaan" class="form-label">
+                                Kode Perusahaan <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="kode_perusahaan"
+                                placeholder="Masukan Kode Perusahaan" wire:model.blur="kode_perusahaan" minlength="2" maxlength="4" style="text-transform: uppercase;">
+                            <small class="text-muted">
+                               Minimal 2 karakter, maksimal 4 karakter (huruf dan angka, contoh: TECH)
+                            </small>
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -167,7 +179,7 @@
 
                         <!-- Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password" class="form-label">Password <span class="text-danger"
+                            <label for="password" class="form-label" id="password-label">Password <span class="text-danger"
                                     id="password-required">*</span></label>
                             <input type="password" class="form-control" id="password"
                                 placeholder="Masukkan password" wire:model.blur="password"
@@ -180,7 +192,7 @@
 
                         <!-- Confirm Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password <span
+                            <label for="password_confirmation" class="form-label" id="password-confirm-label">Konfirmasi Password <span
                                     class="text-danger" id="password-confirm-required">*</span></label>
                             <input type="password" class="form-control" id="password_confirmation"
                                 wire:model.blur="password_confirmation" placeholder="Konfirmasi password"
@@ -193,9 +205,8 @@
                     <button type="button" class="btn btn-danger" id="btnHapusDataModal" style="display: none;">
                         <i class="ti ti-trash me-1"></i> Hapus Data
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="spinner-border spinner-border-sm me-2" wire:loading
-                            wire:target="saveData"></span>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submit">
+                        <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="submit"></span>
                         Simpan
                     </button>
                 </div>
