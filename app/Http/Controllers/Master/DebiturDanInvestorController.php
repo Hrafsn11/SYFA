@@ -93,6 +93,7 @@ class DebiturDanInvestorController extends Controller
             $result = [
                 'nama' => $debitur->nama,
                 'deposito' => $debitur->deposito,
+                'flagging_investor' => $debitur->flagging_investor,
                 'alamat' => $debitur->alamat,
                 'email' => $debitur->email,
                 'no_telepon' => $debitur->no_telepon,
@@ -130,15 +131,17 @@ class DebiturDanInvestorController extends Controller
             DB::beginTransaction();
 
             // Handle file upload for both debitur and investor
-            $file = $debitur->tanda_tangan;
             if ($request->tanda_tangan) {
                 // Delete old file if exists
-                if ($file && Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                if ($debitur->tanda_tangan && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                     Storage::disk('public')->delete($debitur->tanda_tangan);
                 }
 
                 $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
                 $validated['tanda_tangan'] = $file;
+            } else {
+                // If no new file, keep the old one
+                $validated['tanda_tangan'] = $debitur->tanda_tangan;
             }
 
             if (isset($validated['kode_perusahaan'])) {

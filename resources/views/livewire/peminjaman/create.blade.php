@@ -2190,12 +2190,12 @@
                     if ($this.data('datepicker')) {
                         $this.datepicker('destroy');
                     }
-                    // Initialize with config
+                    
+                    // Initialize with config - no date restrictions
                     $this.datepicker({
                         format: 'dd/mm/yyyy',
                         autoclose: true,
                         todayHighlight: true,
-                        startDate: new Date(),
                         orientation: 'bottom auto'
                     });
                 });

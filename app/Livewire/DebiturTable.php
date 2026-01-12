@@ -58,7 +58,7 @@ class DebiturTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan');
+            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan','flagging_investor');
     }
 
     public function columns(): array

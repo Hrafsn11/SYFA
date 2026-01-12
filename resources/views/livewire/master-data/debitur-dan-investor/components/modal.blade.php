@@ -1,5 +1,5 @@
 {{-- Modal Tambah/Edit Debitur/Investor --}}
-<div class="modal fade" id="modalTambahDebitur">
+<div class="modal fade" id="modalTambahDebitur" wire:ignore>
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -52,6 +52,37 @@
                                 </div>
                             </div>
                             <div class="invalid-feedback"></div>
+                        </div>
+
+                        <!-- Flagging Investor (Khusus Investor) -->
+                        <div class="col-12 mb-3 form-group investor-section d-none">
+                            <label class="form-label">Tipe Investor <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_sfinance" value="sfinance"
+                                        wire:model.blur="flagging_investor" name="flagging_investor">
+                                    <label class="form-check-label" for="flagging_investor_sfinance">
+                                        SFinance
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_sfinlog" value="sfinlog"
+                                        wire:model.blur="flagging_investor" name="flagging_investor">
+                                    <label class="form-check-label" for="flagging_investor_sfinlog">
+                                        SFinlog
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_both" value="sfinance,sfinlog"
+                                        wire:model.blur="flagging_investor" name="flagging_investor">
+                                    <label class="form-check-label" for="flagging_investor_both">
+                                        Keduanya
+                                    </label>
+                                </div>
+                            </div>
+                            @error('flagging_investor')
+                                <div class="text-danger small mt-2">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Nama CEO (Hanya untuk Debitur) -->
@@ -137,7 +168,7 @@
                         <!-- Upload Tanda Tangan (Untuk Debitur dan Investor) -->
                         <div class="col-12 mb-3 form-group">
                             <label class="form-label">
-                                <span id="label-ttd">Upload Tanda Tangan</span> <span class="text-danger">*</span>
+                                <span id="label-ttd">Upload Tanda Tangan</span> <span class="text-danger" id="ttd-required">*</span>
                             </label>
                             <input type="file" class="form-control" id="tanda_tangan"
                                 wire:model.blur="tanda_tangan" accept="image/jpeg,image/png,image/jpg">

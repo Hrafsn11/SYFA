@@ -28,7 +28,19 @@ class PeminjamanRequest extends FormRequest
             'nama_project' => ['required', 'string', 'max:255'],
             'durasi_project' => ['required', 'integer', 'min:0'],
             'durasi_project_hari' => ['required', 'integer', 'min:0'],
-            'nib_perusahaan' => ['nullable', 'string', 'max:255'],
+            'nib_perusahaan' => ['required', function ($attribute, $value, $fail) {
+                if (is_string($value)) return; // Already a stored path from Livewire
+                if (!$value instanceof \Illuminate\Http\UploadedFile) {
+                    $fail('NIB perusahaan harus diupload sebagai file.');
+                    return;
+                }
+                if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    $fail('NIB perusahaan harus berformat PDF, JPG, JPEG, atau PNG.');
+                }
+                if ($value->getSize() > 2048 * 1024) {
+                    $fail('Ukuran NIB perusahaan maksimal 2MB.');
+                }
+            }],
             
             'nilai_pinjaman' => ['required', 'numeric', 'min:0'],
             'presentase_bagi_hasil' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -171,8 +183,7 @@ class PeminjamanRequest extends FormRequest
             'durasi_project_hari.integer' => 'Durasi project (hari) harus berupa angka bulat.',
             'durasi_project_hari.min' => 'Durasi project (hari) minimal 0 hari.',
             
-            'nib_perusahaan.string' => 'NIB perusahaan harus berupa teks.',
-            'nib_perusahaan.max' => 'NIB perusahaan maksimal 255 karakter.',
+            'nib_perusahaan.required' => 'NIB perusahaan harus diupload.',
             
             'nilai_pinjaman.required' => 'Nilai pinjaman harus diisi.',
             'nilai_pinjaman.numeric' => 'Nilai pinjaman harus berupa angka.',

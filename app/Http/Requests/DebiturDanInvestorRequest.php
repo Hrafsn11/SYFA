@@ -43,6 +43,11 @@ class DebiturDanInvestorRequest extends FormRequest
             'no_rek' => 'required|max:100',
             'npwp' => 'nullable|numeric|unique:master_debitur_dan_investor,npwp',
             'flagging' => 'required|in:ya,tidak',
+            'flagging_investor' => [
+                'required_if:flagging,ya',
+                'nullable',
+                'regex:/^(sfinance|sfinlog)(,(sfinance|sfinlog))?$/'
+            ],
             'tanda_tangan' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ];
 
@@ -56,9 +61,7 @@ class DebiturDanInvestorRequest extends FormRequest
                 if ($user) $fail('Email sudah digunakan.');
             }];
 
-            if ($this->flagging == 'tidak') {
-                $validate['tanda_tangan'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
-            }
+            $validate['tanda_tangan'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
             $validate['npwp'] = 'nullable|numeric|unique:master_debitur_dan_investor,npwp,' . $this->id . ',id_debitur';
         }
 
@@ -99,6 +102,8 @@ class DebiturDanInvestorRequest extends FormRequest
             'npwp.unique' => 'NPWP sudah terdaftar.',
             'flagging.required' => 'Flagging harus diisi.',
             'flagging.in' => 'Flagging tidak valid.',
+            'flagging_investor.required_if' => 'Tipe investor harus diisi.',
+            'flagging_investor.regex' => 'Tipe investor tidak valid. Pilih: SFinance, SFinlog, atau Keduanya.',
             'tanda_tangan.required' => 'Tanda tangan harus diisi.',
             'tanda_tangan.image' => 'Tanda tangan harus berupa gambar.',
             'tanda_tangan.mimes' => 'Tanda tangan harus berupa gambar JPEG, PNG, atau JPG.',

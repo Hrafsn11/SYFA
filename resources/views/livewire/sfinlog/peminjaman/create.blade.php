@@ -83,8 +83,9 @@
                     <div class="col-md-6 mb-3">
                         <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
                                 class="text-danger">*</span></label>
-                        <input type="text" id="nib_perusahaan" class="form-control" placeholder="NIB Perusahaan"
-                            wire:model="nib_perusahaan" required>
+                        <input type="file" id="nib_perusahaan" class="form-control" 
+                            wire:model.blur="nib_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
                         @error('nib_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror

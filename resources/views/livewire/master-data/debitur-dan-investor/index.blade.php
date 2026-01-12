@@ -85,6 +85,8 @@
             $('#label-alamat').text('Alamat Investor');
             $('#alamat').attr('placeholder', 'Masukkan alamat investor');
             $('#label-ttd').text('Upload Tanda Tangan Investor');
+            $('#ttd-required').show();
+            $('.modal-title').text('Tambah Investor');
             @this.set('flagging', 'ya');
         } else {
             $('.debitur-section').removeClass('d-none');
@@ -93,6 +95,8 @@
             $('#label-alamat').text('Alamat Perusahaan');
             $('#alamat').attr('placeholder', 'Masukkan alamat perusahaan');
             $('#label-ttd').text('Upload Tanda Tangan Debitur');
+            $('#ttd-required').show();
+            $('.modal-title').text('Tambah Debitur');
             @this.set('flagging', 'tidak');
         }
     });
@@ -116,10 +120,26 @@
         modal.find('#password-required').addClass('d-none');
         modal.find('#password-confirm-required').addClass('d-none');
         
+        // tampilkan modal
+        modal.find('.password-section').addClass('d-none');
+        // Sembunyikan required asterisk untuk tanda tangan saat edit
+        modal.find('#ttd-required').hide();
         modal.modal('show');
 
+        // Set flagging_investor first dan sync dengan Livewire
+        if (data.flagging_investor) {
+            @this.set('flagging_investor', data.flagging_investor);
+            // Juga set radio button manually
+            $('input[name="flagging_investor"][value="' + data.flagging_investor + '"]').prop('checked', true);
+        }
+
+        // Set fields lainnya
         Object.entries(data).forEach(([key, value]) => {
-            if (['nama_bank', 'id_kol'].includes(key)) {
+            if (key === 'flagging_investor') {
+                // Already handled above
+                return;
+            } else if (['nama_bank', 'id_kol'].includes(key)) {
+                // Select dropdown handling
                 $('#' + key).val(value).trigger('change');
             } else {
                 @this.set(key, value);
@@ -142,12 +162,21 @@
         $(this).find('#password-confirm-label').html('Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span>');
         $(this).find('#password-required').removeClass('d-none');
         $(this).find('#password-confirm-required').removeClass('d-none');
+        // Tampilkan kembali required asterisk untuk tanda tangan
+        $(this).find('#ttd-required').show();
 
         if (currentTabType === 'investor') {
             $(this).find('.modal-title').text('Tambah Investor');
         } else {
             $(this).find('.modal-title').text('Tambah Debitur');
         }
+
+        // Reset all form fields
+        @this.call('resetFormData');
+        $(this).find('form')[0].reset();
+        // Reset select2 and other inputs
+        $(this).find('select').val('').trigger('change');
+        $(this).find('input[type="radio"]').prop('checked', false);
     });
 
     $(document).on('click', '.debitur-toggle-status-btn', function(e) {

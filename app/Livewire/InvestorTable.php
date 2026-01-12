@@ -59,7 +59,7 @@ class InvestorTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor');
     }
 
     public function columns(): array
@@ -138,6 +138,30 @@ class InvestorTable extends DataTableComponent
                     } else {
                         return '<div class="text-center"><span class="badge bg-secondary">Non Active</span></div>';
                     }
+                })
+                ->html(),
+
+            Column::make('Tipe Investor', 'flagging_investor')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value) {
+                    if (!$value) {
+                        return '<div class="text-center">-</div>';
+                    }
+                    
+                    $types = explode(',', $value);
+                    $badges = [];
+                    
+                    foreach ($types as $type) {
+                        $type = trim($type);
+                        if ($type === 'sfinance') {
+                            $badges[] = '<span class="badge bg-primary">SFinance</span>';
+                        } elseif ($type === 'sfinlog') {
+                            $badges[] = '<span class="badge bg-info">SFinlog</span>';
+                        }
+                    }
+                    
+                    return '<div class="text-center">'.implode(' ', $badges).'</div>';
                 })
                 ->html(),
 
