@@ -2,12 +2,12 @@
     <div class="row">
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">Cells Project</h4>
+                <h4 class="fw-bold">List Cells Project SFinlog</h4>
                 @can('master_data.add')
                     <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
                         data-bs-toggle="modal" data-bs-target="#modalTambahCellsProject" id="btnTambahCellsProject">
                         <i class="fa-solid fa-plus"></i>
-                        Cells Project
+                        Tambah List Cells Project SFinlog
                     </button>
                 @endcan
             </div>
@@ -29,7 +29,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTambahCellsProjectLabel">Tambah Cells Project</h5>
+                    <h5 class="modal-title" id="modalTambahCellsProjectLabel">Tambah List Cells Project SFinlog</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form wire:submit='{{ $urlAction['store_cells_project'] }}'>
@@ -195,7 +195,7 @@
             form.attr('wire:submit', `{!! $urlAction['update_cells_project'] !!}`.replace('id_placeholder', data.id_cells_project));
 
             // ubah title modal
-            modal.find('.modal-title').text('Edit Cells Project');
+            modal.find('.modal-title').text('Edit List Cells Project SFinlog');
 
             // Set cells project data
             @this.set('id_cells_project', data.id_cells_project);
@@ -221,7 +221,7 @@
 
         $('.modal').on('hide.bs.modal', function() {
             $(this).find('form').attr('wire:submit', `{!! $urlAction['store_cells_project'] !!}`);
-            $(this).find('.modal-title').text('Tambah Cells Project');
+            $(this).find('.modal-title').text('Tambah List Cells Project SFinlog');
             @this.set('id_cells_project', null);
             @this.set('nama_cells_bisnis', '');
             @this.set('nama_pic', '');

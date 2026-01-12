@@ -121,7 +121,16 @@ class PeminjamanFinlogTable extends DataTableComponent
 
             Column::make('Nib perusahaan', 'nib_perusahaan')
                 ->sortable()
-                ->searchable(), 
+                ->searchable()
+                ->html()
+                ->format(function ($value) {
+                    if ($value) {
+                        return '<a href="' . asset('storage/' . $value) . '" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="ti ti-eye me-1"></i> Lihat
+                                </a>';
+                    }
+                    return '<span class="text-muted">-</span>';
+                }), 
 
             Column::make('Nilai pinjaman', 'nilai_pinjaman')
                 ->sortable()
