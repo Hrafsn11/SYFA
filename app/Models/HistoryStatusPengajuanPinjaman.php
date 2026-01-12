@@ -15,7 +15,7 @@ class HistoryStatusPengajuanPinjaman extends Model
      * The table associated with the model.
      */
     protected $table = 'history_status_pengajuan_pinjaman';
-    
+
     protected $primaryKey = 'id_history_status_pengajuan_pinjaman';
 
     protected $fillable = [

@@ -22,6 +22,7 @@ class MasterDebiturDanInvestor extends Model
         'user_id',
         'id_kol',
         'nama',
+        'kode_perusahaan',
         'alamat',
         'email',
         'npa',

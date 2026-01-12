@@ -5,8 +5,10 @@ namespace App\Livewire;
 use App\Livewire\MasterData\DebiturDanInvestor;
 use App\Models\MasterDebiturDanInvestor;
 use App\Livewire\Traits\HasUniversalFormAction;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class InvestorTable extends DataTableComponent
 {
@@ -25,15 +27,34 @@ class InvestorTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_debitur', 'asc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setBulkActionsDisabled();
     }
 
-    public function builder(): \Illuminate\Database\Eloquent\Builder
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Status')
+                ->options([
+                    '' => 'Semua Status',
+                    'active' => 'Active',
+                    'non active' => 'Non Active',
+                    'locked' => 'Locked',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->where('status', $value);
+                    }
+                }),
+        ];
+    }
+
+    public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
             ->with('kol')
@@ -112,6 +133,8 @@ class InvestorTable extends DataTableComponent
                 ->format(function ($value) {
                     if ($value === 'active') {
                         return '<div class="text-center"><span class="badge bg-success">Active</span></div>';
+                    } elseif ($value === 'locked') {
+                        return '<div class="text-center"><span class="badge bg-danger"><i class="ti ti-lock me-1"></i>Locked</span></div>';
                     } else {
                         return '<div class="text-center"><span class="badge bg-secondary">Non Active</span></div>';
                     }

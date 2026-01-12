@@ -16,6 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Models\MasterDebiturDanInvestor;
 use App\Services\PeminjamanNumberService;
+use App\Services\ContractNumberService;
 use App\Enums\PengajuanPeminjamanStatusEnum;
 use App\Helpers\ListNotifSFinance;
 use App\Models\HistoryStatusPengajuanPinjaman;
@@ -44,7 +45,8 @@ class PeminjamanController extends Controller
     {
         // Use unified PengajuanPeminjaman model
         $header = PengajuanPeminjaman::with(['debitur.kol', 'instansi', 'buktiPeminjaman'])->find($id);
-        if (!$header) abort(404);
+        if (!$header)
+            abort(404);
 
         $headerType = strtolower(str_replace(' ', '_', $header->jenis_pembiayaan ?? 'invoice_financing'));
 
@@ -54,6 +56,7 @@ class PeminjamanController extends Controller
         $peminjaman = [
             'id' => $header->id_pengajuan_peminjaman,
             'nomor_peminjaman' => $header->nomor_peminjaman,
+            'no_kontrak' => $header->no_kontrak,
             'nama_perusahaan' => $header->debitur->nama ?? '',
             'nama_ceo' => $header->debitur->nama_ceo ?? '',
             'alamat' => $header->debitur->alamat ?? '',
@@ -64,7 +67,7 @@ class PeminjamanController extends Controller
             'nama_rekening' => $header->nama_rekening,
             'lampiran_sid' => $header->lampiran_sid,
             'nilai_kol' => $header->nilai_kol,
-            'nominal_pinjaman' => $header->total_pinjaman,
+            'nominal_pinjaman' => $header->nominal_pengajuan_awal ?? $header->total_pinjaman,
             'harapan_tanggal_pencairan' => $header->harapan_tanggal_pencairan,
             'rencana_tgl_pembayaran' => $header->rencana_tgl_pembayaran,
             'total_bagi_hasil' => $header->total_bagi_hasil,
@@ -119,6 +122,19 @@ class PeminjamanController extends Controller
         }
 
         $peminjaman['current_step'] = $currentStep;
+
+        // Generate preview nomor kontrak jika belum ada dan sudah di step 6 atau lebih
+        $previewNomorKontrak = null;
+        if (empty($header->no_kontrak) && $currentStep >= 6) {
+            // Generate preview tanpa save ke database
+            if ($header->debitur && !empty($header->debitur->kode_perusahaan)) {
+                $previewNomorKontrak = ContractNumberService::generate(
+                    $header->debitur->kode_perusahaan,
+                    $header->jenis_pembiayaan
+                );
+            }
+        }
+        $peminjaman['preview_no_kontrak'] = $previewNomorKontrak;
 
         // Add latest history data (nominal disetujui and tanggal pencairan from latest update)
         if ($latestHistory) {
@@ -271,14 +287,14 @@ class PeminjamanController extends Controller
             'nama_pimpinan' => $pengajuan->debitur->nama_ceo ?? 'N/A',
             'alamat' => $pengajuan->debitur->alamat ?? 'N/A',
             'tujuan_pembiayaan' => $pengajuan->tujuan_pembiayaan ?? 'N/A',
-            'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
+            'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
             'nilai_pembiayaan' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
             'hutang_pokok' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
             'tenor' => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
             'biaya_admin' => 'Rp. 0',
             'nisbah' => ($pengajuan->persentase_bagi_hasil ?? 2) . '% flat / bulan',
             'denda_keterlambatan' => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
-            'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
+            'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
             'no_kontrak2' => $no_kontrak_2,
             'tanda_tangan' => $pengajuan->debitur->tanda_tangan ?? null,
         ];
@@ -522,12 +538,9 @@ class PeminjamanController extends Controller
             $rules['details'] = 'required|array|min:1';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
-            if ($request->sumber_pembiayaan === 'eksternal') {
-                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
-            } else {
-                $rules['id_instansi'] = 'nullable';
-            }
-            $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
+            // Sumber pembiayaan removed - using fixed 2% bagi hasil
+            $rules['id_instansi'] = 'nullable';
+            $rules['sumber_pembiayaan'] = 'nullable';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
             $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
@@ -545,15 +558,12 @@ class PeminjamanController extends Controller
             $rules['yang_harus_dibayarkan'] = 'nullable|numeric';
         } elseif ($jenisPembiayaan === 'PO Financing') {
             $rules['details'] = 'required|array|min:1';
-            if ($request->sumber_pembiayaan === 'eksternal') {
-                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
-            } else {
-                $rules['id_instansi'] = 'nullable';
-            }
+            // Sumber pembiayaan removed - using fixed 2% bagi hasil
+            $rules['id_instansi'] = 'nullable';
             $rules['no_kontrak'] = 'nullable|string';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
-            $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
+            $rules['sumber_pembiayaan'] = 'nullable';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
             $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
@@ -564,12 +574,9 @@ class PeminjamanController extends Controller
             $rules['details'] = 'required|array|min:1';
             $rules['lampiran_sid'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $rules['nilai_kol'] = 'nullable|string';
-            if ($request->sumber_pembiayaan === 'eksternal') {
-                $rules['id_instansi'] = 'required|string|size:26'; // ULID format
-            } else {
-                $rules['id_instansi'] = 'nullable';
-            }
-            $rules['sumber_pembiayaan'] = 'required|in:eksternal,internal';
+            // Sumber pembiayaan removed - using fixed 2% bagi hasil
+            $rules['id_instansi'] = 'nullable';
+            $rules['sumber_pembiayaan'] = 'nullable';
             $rules['tujuan_pembiayaan'] = 'nullable|string';
             $rules['total_pinjaman'] = 'nullable';
             $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
@@ -599,13 +606,17 @@ class PeminjamanController extends Controller
 
         if ($jenisPembiayaan === 'Installment') {
             $validated['id_instansi'] = null;
-            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['sumber_pembiayaan'] = 'Internal';
             $validated['persentase_bagi_hasil'] = 10;
-        }
-
-        if ($jenisPembiayaan === 'Factoring') {
+        } elseif ($jenisPembiayaan === 'Invoice Financing' || $jenisPembiayaan === 'PO Financing') {
+            // Fixed 2% bagi hasil untuk Invoice & PO Financing
             $validated['id_instansi'] = null;
-            $validated['sumber_pembiayaan'] = 'internal';
+            $validated['sumber_pembiayaan'] = 'Internal';
+            $validated['persentase_bagi_hasil'] = 2;
+        } elseif ($jenisPembiayaan === 'Factoring') {
+            // Fixed 2% bagi hasil untuk Factoring
+            $validated['id_instansi'] = null;
+            $validated['sumber_pembiayaan'] = 'Internal';
             $validated['persentase_bagi_hasil'] = 2;
         }
 
@@ -993,15 +1004,12 @@ class PeminjamanController extends Controller
                 now()->format('Ym')
             );
 
-            if ($dataPengajuanPeminjaman['sumber_pembiayaan'] === 'Eksternal') {
-                $instansi = MasterSumberPendanaanEksternal::find($dataPengajuanPeminjaman['id_instansi']);
-                if ($instansi && $instansi->persentase_bagi_hasil) {
-                    $this->persentase_bagi_hasil = (float) $instansi->persentase_bagi_hasil / 100;
-                }
-            }
-
+            
             if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
                 $this->persentase_bagi_hasil = (float) 10 / 100;
+            } else {
+                // Invoice Financing, PO Financing, Factoring = 2%
+                $this->persentase_bagi_hasil = (float) 2 / 100;
             }
 
             $masterDebiturDanInvestor = MasterDebiturDanInvestor::where('email', auth()->user()->email)
@@ -1039,6 +1047,9 @@ class PeminjamanController extends Controller
                 $dataPengajuanPeminjaman['persentase_bagi_hasil'] = $this->persentase_bagi_hasil * 100; // Store as percentage (5%, 2%, etc)
             }
 
+            $dataPengajuanPeminjaman['sumber_pembiayaan'] = 'Internal';
+            $dataPengajuanPeminjaman['id_instansi'] = null;
+
             // Calculate total_bagi_hasil and pembayaran_total if not provided
             if (!isset($dataPengajuanPeminjaman['total_bagi_hasil']) || empty($dataPengajuanPeminjaman['total_bagi_hasil'])) {
                 $dataPengajuanPeminjaman['total_bagi_hasil'] = $dataPengajuanPeminjaman['total_pinjaman'] * $persentaseForCalculation;
@@ -1051,7 +1062,8 @@ class PeminjamanController extends Controller
             if ($dataPengajuanPeminjaman['jenis_pembiayaan'] == 'Installment') {
                 // PPS = 40% of bagi hasil, S Finance = 60% of bagi hasil
                 $dataPengajuanPeminjaman['pps'] = (float) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.40;
-                $dataPengajuanPeminjaman['s_finance'] = (float) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.60;;
+                $dataPengajuanPeminjaman['s_finance'] = (float) $dataPengajuanPeminjaman['total_bagi_hasil'] * 0.60;
+                ;
                 $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = (float) ((float) $dataPengajuanPeminjaman['pembayaran_total'] / (float) $dataPengajuanPeminjaman['tenor_pembayaran']);
                 // Set fields that don't exist for Installment to NULL
                 $dataPengajuanPeminjaman['harapan_tanggal_pencairan'] = null;
@@ -1067,14 +1079,20 @@ class PeminjamanController extends Controller
             }
 
             $userEmail = auth()->user()->email;
-            $id_debitur = MasterDebiturDanInvestor::select('id_debitur')->where('email', $userEmail)->first()->id_debitur;
-            $dataPengajuanPeminjaman['id_debitur'] = $id_debitur;
+            $debitur = MasterDebiturDanInvestor::select('id_debitur', 'kode_perusahaan')
+                ->where('email', $userEmail)
+                ->first();
+            
+            $dataPengajuanPeminjaman['id_debitur'] = $debitur->id_debitur;
 
             if (isset($dataPengajuanPeminjaman['lampiran_sid']) && $dataPengajuanPeminjaman['lampiran_sid'] instanceof UploadedFile) {
                 $dataPengajuanPeminjaman['lampiran_sid'] = Storage::disk('public')->put('lampiran_sid', $dataPengajuanPeminjaman['lampiran_sid']);
             }
             $dataPengajuanPeminjaman['created_by'] = auth()->user()->id;
             $dataPengajuanPeminjaman['updated_by'] = auth()->user()->id;
+
+            // Simpan nominal pengajuan awal (tidak akan berubah meskipun nominal disetujui berbeda)
+            $dataPengajuanPeminjaman['nominal_pengajuan_awal'] = $dataPengajuanPeminjaman['total_pinjaman'];
 
             $peminjaman = PengajuanPeminjaman::create($dataPengajuanPeminjaman);
 
@@ -1215,16 +1233,39 @@ class PeminjamanController extends Controller
                 $historyData['catatan_validasi_dokumen_disetujui'] = $request->input('catatan_validasi_dokumen_disetujui');
                 $historyData['current_step'] = 3;
 
+                $persentaseBagiHasilBaru = $request->input('persentase_bagi_hasil');
+                $totalBagiHasilBaru = $request->input('total_bagi_hasil');
+
+                if ($persentaseBagiHasilBaru !== null) {
+                    $persentaseBagiHasilBaru = floatval($persentaseBagiHasilBaru);
+                } else {
+                    $persentaseBagiHasilBaru = $peminjaman->persentase_bagi_hasil ?? 2;
+                }
+
+                if ($totalBagiHasilBaru !== null) {
+                    $totalBagiHasilBaru = floatval(preg_replace('/[^0-9.]/', '', $totalBagiHasilBaru));
+                } else {
+                    $totalBagiHasilBaru = $historyData['nominal_yang_disetujui'] * ($persentaseBagiHasilBaru / 100);
+                }
+
                 $nominalPengajuan = $peminjaman->total_pinjaman;
+
+                $updateData = [
+                    'total_pinjaman' => $historyData['nominal_yang_disetujui'],
+                    'persentase_bagi_hasil' => $persentaseBagiHasilBaru,
+                    'total_bagi_hasil' => $totalBagiHasilBaru,
+                    'pembayaran_total' => $historyData['nominal_yang_disetujui'] + $totalBagiHasilBaru,
+                ];
+
                 if ($historyData['nominal_yang_disetujui'] != $nominalPengajuan) {
                     $ratio = $historyData['nominal_yang_disetujui'] / $nominalPengajuan;
 
                     $buktiPeminjaman = BuktiPeminjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)->get();
 
-                    $persentaseBagiHasil = ($peminjaman->persentase_bagi_hasil ?? 2) / 100;
+                    $persentaseBagiHasil = $persentaseBagiHasilBaru / 100;
 
                     $totalPinjamanBaru = 0;
-                    $totalBagiHasilBaru = 0;
+                    $totalBagiHasilCalc = 0;
 
                     if ($peminjaman->jenis_pembiayaan === 'Installment') {
                         foreach ($buktiPeminjaman as $bukti) {
@@ -1237,7 +1278,7 @@ class PeminjamanController extends Controller
 
                             $totalPinjamanBaru += $nilaiInvoiceBaru;
                         }
-                        $totalBagiHasilBaru = $historyData['nominal_yang_disetujui'] * $persentaseBagiHasil;
+                        $totalBagiHasilCalc = $historyData['nominal_yang_disetujui'] * $persentaseBagiHasil;
                     } else {
                         foreach ($buktiPeminjaman as $bukti) {
                             $nilaiPinjamanLama = $bukti->nilai_pinjaman ?? 0;
@@ -1251,24 +1292,24 @@ class PeminjamanController extends Controller
                             ]);
 
                             $totalPinjamanBaru += $nilaiPinjamanBaru;
-                            $totalBagiHasilBaru += $nilaiBagiHasilBaru;
+                            $totalBagiHasilCalc += $nilaiBagiHasilBaru;
                         }
                     }
 
-                    $updateData = [
-                        'total_pinjaman' => $historyData['nominal_yang_disetujui'],
-                        'total_bagi_hasil' => $totalBagiHasilBaru,
-                        'pembayaran_total' => $historyData['nominal_yang_disetujui'] + $totalBagiHasilBaru,
-                    ];
-
-                    if ($peminjaman->jenis_pembiayaan === 'Installment') {
-                        $updateData['pps'] = $totalBagiHasilBaru * 0.40;
-                        $updateData['s_finance'] = $totalBagiHasilBaru * 0.60;
-                        $updateData['yang_harus_dibayarkan'] = ($historyData['nominal_yang_disetujui'] + $totalBagiHasilBaru) / ($peminjaman->tenor_pembayaran ?? 1);
+                    if ($totalBagiHasilCalc > 0) {
+                        $updateData['total_bagi_hasil'] = $totalBagiHasilCalc;
+                        $updateData['pembayaran_total'] = $historyData['nominal_yang_disetujui'] + $totalBagiHasilCalc;
+                        $historyData['total_bagi_hasil'] = $totalBagiHasilCalc;
                     }
 
-                    $peminjaman->update($updateData);
+                    if ($peminjaman->jenis_pembiayaan === 'Installment') {
+                        $updateData['pps'] = $updateData['total_bagi_hasil'] * 0.40;
+                        $updateData['s_finance'] = $updateData['total_bagi_hasil'] * 0.60;
+                        $updateData['yang_harus_dibayarkan'] = ($historyData['nominal_yang_disetujui'] + $updateData['total_bagi_hasil']) / ($peminjaman->tenor_pembayaran ?? 1);
+                    }
                 }
+
+                $peminjaman->update($updateData);
             } elseif ($status === 'Validasi Ditolak') {
                 $historyData['validasi_dokumen'] = 'ditolak';
                 $historyData['reject_by'] = auth()->id();
@@ -1612,7 +1653,7 @@ class PeminjamanController extends Controller
                 'nama_pimpinan' => $pengajuan->debitur->nama_ceo ?? 'N/A',
                 'alamat' => $pengajuan->debitur->alamat ?? 'N/A',
                 'tujuan_pembiayaan' => $pengajuan->tujuan_pembiayaan ?? 'N/A',
-                'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
+                'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
                 'nilai_pembiayaan' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
                 'hutang_pokok' => 'Rp. ' . number_format($latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0, 0, ',', '.'),
                 'tenor' => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
@@ -1620,7 +1661,7 @@ class PeminjamanController extends Controller
                 'biaya_admin_raw' => $biaya_admin_input,
                 'nisbah' => ($pengajuan->persentase_bagi_hasil ?? 2) . '% flat / bulan',
                 'denda_keterlambatan' => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
-                'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice & Project Financing',
+                'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
                 'tanda_tangan' => $pengajuan->debitur->tanda_tangan ?? null,
             ];
 
@@ -1950,5 +1991,67 @@ class PeminjamanController extends Controller
 </html>';
 
         return $html;
+    }
+
+    /**
+     * Generate nomor kontrak untuk pengajuan peminjaman
+     * Dipanggil saat user klik "Simpan" di step 6 (Generate Kontrak)
+     */
+    public function generateKontrak(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Get pengajuan peminjaman
+            $peminjaman = PengajuanPeminjaman::with('debitur')->findOrFail($id);
+
+            // Validasi: Pastikan pengajuan sudah disetujui lengkap
+            $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if (!$latestHistory || $latestHistory->status !== 'Disetujui oleh Direktur SKI') {
+                return Response::error('Pengajuan belum disetujui lengkap. Tidak bisa generate kontrak.', 400);
+            }
+
+            // Validasi: Nomor kontrak belum pernah di-generate
+            if (!empty($peminjaman->no_kontrak)) {
+                return Response::error('Nomor kontrak sudah pernah di-generate: ' . $peminjaman->no_kontrak, 400);
+            }
+
+            // Validasi: Debitur harus punya kode perusahaan
+            if (empty($peminjaman->debitur->kode_perusahaan)) {
+                return Response::error('Kode perusahaan debitur belum diisi. Hubungi administrator.', 400);
+            }
+
+            // Generate nomor kontrak
+            $nomorKontrak = ContractNumberService::generate(
+                $peminjaman->debitur->kode_perusahaan,
+                $peminjaman->jenis_pembiayaan
+            );
+
+            // Update pengajuan peminjaman dengan nomor kontrak
+            $peminjaman->no_kontrak = $nomorKontrak;
+            
+            // Update biaya administrasi jika ada
+            if ($request->has('biaya_administrasi')) {
+                $biayaAdmin = str_replace(['Rp', '.', ' '], '', $request->biaya_administrasi);
+                $peminjaman->biaya_administrasi = (float) $biayaAdmin;
+            }
+
+            $peminjaman->save();
+
+            DB::commit();
+
+            return Response::success([
+                'no_kontrak' => $nomorKontrak,
+                'id_pengajuan' => $peminjaman->id_pengajuan_peminjaman
+            ], 'Nomor kontrak berhasil di-generate: ' . $nomorKontrak);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error generate kontrak: ' . $e->getMessage());
+            return Response::errorCatch($e);
+        }
     }
 }

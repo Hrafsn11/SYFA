@@ -19,15 +19,8 @@ class ProgramRestrukturisasiController extends Controller
      */
     public function create()
     {
-        // Get approved restrukturisasi (status = 'Selesai' atau status yang mengandung 'Disetujui')
         $approvedRestrukturisasi = PengajuanRestrukturisasi::with('debitur')
-            ->where(function ($query) {
-                $query->where('status', 'Selesai')
-                    ->orWhere('status', 'Disetujui CEO SKI')
-                    ->orWhere('status', 'Disetujui Direktur SKI');
-            })
-            ->whereNotNull('sisa_pokok_belum_dibayar')
-            ->where('sisa_pokok_belum_dibayar', '>', 0)
+            ->where('status', 'Selesai')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -41,13 +34,7 @@ class ProgramRestrukturisasiController extends Controller
     {
         try {
             $data = PengajuanRestrukturisasi::with('debitur')
-                ->where(function ($query) {
-                    $query->where('status', 'Selesai')
-                        ->orWhere('status', 'Disetujui CEO SKI')
-                        ->orWhere('status', 'Disetujui Direktur SKI');
-                })
-                ->whereNotNull('sisa_pokok_belum_dibayar')
-                ->where('sisa_pokok_belum_dibayar', '>', 0)
+                ->where('status', 'Selesai')
                 ->select([
                     'id_pengajuan_restrukturisasi',
                     'id_debitur',
@@ -58,7 +45,6 @@ class ProgramRestrukturisasiController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($item) {
-                    // Get nama debitur from relationship if available
                     $namaDebitur = $item->debitur ? $item->debitur->nama : $item->nama_debitur;
 
                     return [
@@ -83,11 +69,7 @@ class ProgramRestrukturisasiController extends Controller
         try {
             $restrukturisasi = PengajuanRestrukturisasi::with('debitur')
                 ->where('id_pengajuan_restrukturisasi', $id)
-                ->where(function ($query) {
-                    $query->where('status', 'Selesai')
-                        ->orWhere('status', 'Disetujui CEO SKI')
-                        ->orWhere('status', 'Disetujui Direktur SKI');
-                })
+                ->where('status', 'Selesai')
                 ->firstOrFail();
 
             $namaDebitur = $restrukturisasi->debitur ? $restrukturisasi->debitur->nama : $restrukturisasi->nama_perusahaan;
