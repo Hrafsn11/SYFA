@@ -106,9 +106,6 @@
         isEditMode = true;
         
         const modal = $('#modalTambahDebitur');
-        const form = modal.find('form');
-
-        form.attr('wire:submit', `{!! $urlAction["update_master_debitur_dan_investor"] !!}`.replace('id_placeholder', data.id));
         
         // ubah title modal
         modal.find('.modal-title').html('Edit ' + (data.flagging == 'ya' ? 'Investor' : 'Debitur'));
@@ -153,7 +150,6 @@
 
     $('.modal').on('hide.bs.modal', function() {
         isEditMode = false;
-        $(this).find('form').attr('wire:submit', `{!! $urlAction["store_master_debitur_dan_investor"] !!}`);
         $(this).find('.modal-title').text(currentTabType == 'debitur' ? 'Tambah Debitur' : 'Tambah Investor');
         $(this).find('.password-section').removeClass('d-none');
         

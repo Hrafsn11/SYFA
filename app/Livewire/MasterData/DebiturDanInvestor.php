@@ -63,13 +63,29 @@ class DebiturDanInvestor extends Component
         // For investor: exclude debitur-specific fields
         else {
             $listInput = array_filter($listInput, function ($value) {
-                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp']);
+                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp', 'kode_perusahaan']);
             });
         }
 
         foreach (array_values($listInput) as $key => $value) {
             $this->form_data[$value] = $this->{$value};
         }
+    }
+
+    /**
+     * Handle form submission
+     */
+    public function submit()
+    {
+        $routeName = $this->id 
+            ? 'master-data.debitur-investor.update' 
+            : 'master-data.debitur-investor.store';
+        
+        $params = $this->id 
+            ? ['id' => $this->id, 'callback' => 'afterAction'] 
+            : ['callback' => 'afterAction'];
+        
+        $this->saveData($routeName, $params);
     }
 
     /**

@@ -1,13 +1,13 @@
 {{-- Modal Tambah/Edit Debitur/Investor --}}
-<div class="modal fade" id="modalTambahDebitur" wire:ignore>
+<div class="modal fade" id="modalTambahDebitur">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTambahDebiturLabel">Tambah Debitur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formTambahDebitur" wire:submit="{{ $urlAction['store_master_debitur_dan_investor'] }}">
-                <input type="hidden" id="hiddenFlagging" wire:model.blur="flagging">
+            <form id="formTambahDebitur" wire:submit.prevent="submit">
+                <input type="hidden" id="hiddenFlagging" wire:model="flagging">
                 <div class="modal-body">
                     <div class="row">
                         <!-- Nama Perusahaan / Nama Investor -->
@@ -205,9 +205,8 @@
                     <button type="button" class="btn btn-danger" id="btnHapusDataModal" style="display: none;">
                         <i class="ti ti-trash me-1"></i> Hapus Data
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="spinner-border spinner-border-sm me-2" wire:loading
-                            wire:target="saveData"></span>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submit">
+                        <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="submit"></span>
                         Simpan
                     </button>
                 </div>
