@@ -58,7 +58,7 @@ class MasterCellsProject extends Component
     {
         return view('livewire.master-data.master-cells-project')
             ->layout('layouts.app', [
-                'title' => 'Master Cells Project'
+                'title' => 'List Cells Project SFinlog'
             ]);
     }
 }
