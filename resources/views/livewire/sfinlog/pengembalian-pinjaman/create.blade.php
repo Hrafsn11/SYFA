@@ -38,8 +38,8 @@
 
                 </div>
 
-                {{-- Peminjaman Details Card --}}
-                <div class="card border shadow-none mb-4" wire:key="peminjaman-detail-{{ $id_pinjaman_finlog }}">
+                {{-- Peminjaman Details Card - Use static key to prevent recreation --}}
+                <div class="card border shadow-none mb-4" wire:key="peminjaman-detail-card">
                     <div class="card-body">
                         {{-- Row 1: Cells Bisnis & Nama Project --}}
                         <div class="row mb-3">

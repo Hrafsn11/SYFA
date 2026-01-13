@@ -23,25 +23,28 @@ class PengembalianPinjamanFinlogCreate extends Component
 
     public $validateClass = PengembalianPinjamanFinlogRequest::class;
 
-    // Form fields
+    // Form fields - Only fields that are actual INPUTS should have #[FieldInput]
     #[FieldInput]
     public string $id_pinjaman_finlog = '';
 
     #[Locked]
     public string $nama_perusahaan = '';
 
-    #[FieldInput] public string $cells_bisnis = '';
-    #[FieldInput] public string $nama_project = '';
-    #[FieldInput] public string $tanggal_pencairan = '';
-    #[FieldInput] public string $top = '';
-    #[FieldInput] public string $jatuh_tempo = '';
-    #[FieldInput] public int $jumlah_minggu_keterlambatan = 0;
-    #[FieldInput] public float $nilai_pinjaman = 0;
-    #[FieldInput] public float $nilai_bagi_hasil = 0;
-    #[FieldInput] public float $nilai_bagi_hasil_saat_ini = 0;
-    #[FieldInput] public float $total_pinjaman = 0;
-    #[FieldInput] public float $sisa_utang = 0;
-    #[FieldInput] public float $sisa_bagi_hasil = 0;
+    // Display-only fields (NO #[FieldInput] - these should never be reset by modal/form)
+    public string $cells_bisnis = '';
+    public string $nama_project = '';
+    public string $tanggal_pencairan = '';
+    public string $top = '';
+    public string $jatuh_tempo = '';
+    public int $jumlah_minggu_keterlambatan = 0;
+    public float $nilai_pinjaman = 0;
+    public float $nilai_bagi_hasil = 0;
+    public float $nilai_bagi_hasil_saat_ini = 0;
+    public float $total_pinjaman = 0;
+    public float $sisa_utang = 0;
+    public float $sisa_bagi_hasil = 0;
+
+    // This IS an input field - keep FieldInput
     #[FieldInput] public string $catatan = '';
 
     public array $pengembalian_list = [];
@@ -56,7 +59,6 @@ class PengembalianPinjamanFinlogCreate extends Component
 
     // State
     public string $value = '';
-    public ?PeminjamanFinlog $selectedPeminjaman = null;
     public string $id_cells_project = '';
     public string $id_project = '';
 
@@ -171,8 +173,11 @@ class PengembalianPinjamanFinlogCreate extends Component
         if (empty($this->id_pinjaman_finlog)) {
             if (!empty($this->value)) {
                 $this->id_pinjaman_finlog = $this->value;
-            } elseif ($this->selectedPeminjaman) {
-                $this->id_pinjaman_finlog = $this->selectedPeminjaman->id_peminjaman_finlog;
+            } else {
+                $peminjaman = $this->getSelectedPeminjaman();
+                if ($peminjaman) {
+                    $this->id_pinjaman_finlog = $peminjaman->id_peminjaman_finlog;
+                }
             }
         }
 
@@ -189,7 +194,6 @@ class PengembalianPinjamanFinlogCreate extends Component
                 if ($this->nilai_bagi_hasil_saat_ini <= 0) {
                     $this->nilai_bagi_hasil_saat_ini = $this->nilai_bagi_hasil;
                 }
-                $this->selectedPeminjaman = $peminjaman;
             }
         }
 
@@ -223,7 +227,7 @@ class PengembalianPinjamanFinlogCreate extends Component
                 'sisa_pinjaman' => $sisaUtang,
                 'sisa_bagi_hasil' => $sisaBagiHasil,
                 'total_sisa_pinjaman' => $totalSisa,
-                'jatuh_tempo' => $this->selectedPeminjaman->rencana_tgl_pengembalian,
+                'jatuh_tempo' => $this->getSelectedPeminjaman()?->rencana_tgl_pengembalian,
                 'catatan' => $this->catatan,
                 'status' => $status,
             ];
@@ -273,9 +277,23 @@ class PengembalianPinjamanFinlogCreate extends Component
             return;
         }
 
-        $this->selectedPeminjaman = $peminjaman;
         $this->populateFormFields($peminjaman);
         $this->calculateRemainingBalance();
+    }
+
+    /**
+     * Get selected peminjaman model on-demand
+     * This prevents Livewire serialization issues
+     */
+    private function getSelectedPeminjaman(): ?PeminjamanFinlog
+    {
+        if (empty($this->id_pinjaman_finlog)) {
+            return null;
+        }
+
+        return PeminjamanFinlog::with(['debitur', 'cellsProject'])
+            ->where('id_peminjaman_finlog', $this->id_pinjaman_finlog)
+            ->first();
     }
 
     private function populateFormFields(PeminjamanFinlog $peminjaman)
@@ -382,7 +400,8 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         if ($totalSisa <= 0) return self::STATUS_LUNAS;
 
-        $jatuhTempo = $this->selectedPeminjaman->rencana_tgl_pengembalian;
+        $peminjaman = $this->getSelectedPeminjaman();
+        $jatuhTempo = $peminjaman?->rencana_tgl_pengembalian;
         if ($jatuhTempo && now()->gt($jatuhTempo)) return self::STATUS_TERLAMBAT;
 
         return self::STATUS_BELUM_LUNAS;
@@ -391,7 +410,6 @@ class PengembalianPinjamanFinlogCreate extends Component
     private function resetPeminjamanData()
     {
         $this->reset([
-            'selectedPeminjaman',
             'cells_bisnis',
             'nama_project',
             'tanggal_pencairan',
