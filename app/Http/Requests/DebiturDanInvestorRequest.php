@@ -27,7 +27,7 @@ class DebiturDanInvestorRequest extends FormRequest
         $validate = [
             'id_kol' => 'required_if:flagging,tidak|exists:master_kol,id_kol',
             'nama' => 'required|max:255',
-            'kode_perusahaan' => 'required_if:flagging,tidak|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan',
+            'kode_perusahaan' => 'required|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan',
             'alamat' => 'required|max:500',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => [
@@ -53,7 +53,7 @@ class DebiturDanInvestorRequest extends FormRequest
 
         if ($this->id) {
             $validate['id_kol'] = 'nullable|exists:master_kol,id_kol';
-            $validate['kode_perusahaan'] = 'required_if:flagging,tidak|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan,' . $this->id . ',id_debitur';
+            $validate['kode_perusahaan'] = 'required|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan,' . $this->id . ',id_debitur';
             
             $validate['password'] = [
                 'nullable',
@@ -81,7 +81,7 @@ class DebiturDanInvestorRequest extends FormRequest
             'id_kol.required_if' => 'Kol harus diisi.',
             'id_kol.exists' => 'Kol tidak valid.',
             'nama.required' => 'Nama harus diisi.',
-            'kode_perusahaan.required_if' => 'Kode perusahaan harus diisi untuk debitur.',
+            'kode_perusahaan.required' => 'Kode perusahaan harus diisi.',
             'kode_perusahaan.min' => 'Kode perusahaan minimal 2 karakter.',
             'kode_perusahaan.max' => 'Kode perusahaan tidak boleh lebih dari 4 karakter.',
             'kode_perusahaan.regex' => 'Kode perusahaan hanya boleh mengandung huruf dan angka.',

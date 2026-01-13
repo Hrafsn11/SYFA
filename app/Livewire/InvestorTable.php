@@ -59,7 +59,7 @@ class InvestorTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor');
+            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor');
     }
 
     public function columns(): array
@@ -78,6 +78,12 @@ class InvestorTable extends DataTableComponent
                 ->excludeFromColumnSelect(),
 
             Column::make('Nama Perusahaan', 'nama')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
+            Column::make('Kode Perusahaan', 'kode_perusahaan')
                 ->sortable()
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
