@@ -97,6 +97,12 @@ class PengembalianPinjamanFinlogCreate extends Component
         }
     }
 
+    #[On('reset-modal-fields')]
+    public function resetModalFieldsFromJs()
+    {
+        $this->resetModalFields();
+    }
+
     public function updatedIdPinjamanFinlog($value)
     {
         $this->value = $value;
@@ -107,7 +113,6 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         try {
             $this->nominal_yang_dibayarkan = $this->sanitizeCurrency($this->nominal_yang_dibayarkan);
-
 
             $this->validate([
                 'nominal_yang_dibayarkan' => 'required|numeric|min:1',
@@ -127,7 +132,24 @@ class PengembalianPinjamanFinlogCreate extends Component
             $this->calculateRemainingBalance();
             $this->resetModalFields();
 
-            $this->dispatch('close-pengembalian-modal');
+            // Close modal using direct JS call (more reliable than dispatch)
+            $this->js("
+                const modalEl = document.getElementById('modal-pengembalian-invoice');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                        modal.hide();
+                    } else {
+                        modalEl.classList.remove('show');
+                        modalEl.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                    }
+                }
+                document.getElementById('file-upload-bukti').value = '';
+            ");
+
             $this->showToast('success', 'Pengembalian invoice berhasil ditambahkan!');
         } catch (ValidationException $e) {
             throw $e;
@@ -311,10 +333,17 @@ class PengembalianPinjamanFinlogCreate extends Component
     {
         if (!$this->currentDebitur) return [];
 
+        // Get IDs of peminjaman that already have 'Lunas' status in pengembalian
+        $lunasPeminjamanIds = PengembalianPinjamanFinlog::where('status', 'Lunas')
+            ->pluck('id_pinjaman_finlog')
+            ->unique()
+            ->toArray();
+
         return PeminjamanFinlog::query()
             ->with(['debitur', 'cellsProject'])
             ->where('id_debitur', $this->currentDebitur->id_debitur)
             ->where('status', 'Selesai')
+            ->whereNotIn('id_peminjaman_finlog', $lunasPeminjamanIds) // Exclude lunas
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn($item) => (object)[

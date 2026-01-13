@@ -188,30 +188,100 @@ class PeminjamanController extends Controller
         }
     }
 
+    /**
+     * Show Contract Preview (HTML)
+     * 
+     * @param string $id - ID peminjaman finlog
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     */
     public function showKontrak($id)
     {
-        $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->findOrFail($id);
-        $data = $this->prepareContractData($peminjaman);
+        try {
+            $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->findOrFail($id);
 
-        return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
+            // Validasi: Kontrak hanya bisa dilihat jika sudah ada nomor kontrak
+            if (empty($peminjaman->nomor_kontrak)) {
+                return redirect()->back()->with('error', 'Kontrak belum tersedia. Silakan generate kontrak terlebih dahulu.');
+            }
+
+            $data = $this->prepareContractData($peminjaman);
+
+            return view('livewire.sfinlog.peminjaman.partials.show-kontrak', compact('peminjaman', 'data'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Data peminjaman tidak ditemukan.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal menampilkan kontrak: ' . $e->getMessage());
+        }
     }
 
-    public function downloadKontrakPdf($id)
+    /**
+     * Download Contract as PDF
+     * 
+     * @param string $id - ID peminjaman finlog
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     */
+    public function downloadKontrakPdf($id, \Illuminate\Http\Request $request)
     {
-        $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->findOrFail($id);
-        $data = $this->prepareContractData($peminjaman);
+        try {
+            $peminjaman = PeminjamanFinlog::with(['debitur', 'cellsProject'])->findOrFail($id);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('livewire.sfinlog.peminjaman.partials.show-kontrak-pdf', compact('peminjaman', 'data'));
-        $pdf->setPaper('A4', 'portrait');
+            // Validasi: Kontrak hanya bisa didownload jika sudah ada nomor kontrak
+            if (empty($peminjaman->nomor_kontrak)) {
+                return redirect()->back()->with('error', 'Kontrak belum tersedia. Silakan generate kontrak terlebih dahulu.');
+            }
 
-        return $pdf->stream('Kontrak-Pembiayaan-' . $peminjaman->nomor_kontrak . '.pdf');
+            $data = $this->prepareContractData($peminjaman);
+
+            // Generate PDF menggunakan DomPDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+                'livewire.sfinlog.peminjaman.partials.show-kontrak-pdf',
+                compact('peminjaman', 'data')
+            );
+
+            // Set paper size dan orientation
+            $pdf->setPaper('A4', 'portrait');
+
+            // Set options untuk better rendering
+            $pdf->setOption('isRemoteEnabled', true);
+            $pdf->setOption('isHtml5ParserEnabled', true);
+
+            // Generate filename
+            $filename = 'Kontrak-Pembiayaan-' . str_replace('/', '-', $peminjaman->nomor_kontrak) . '.pdf';
+
+            // Check if download or stream (preview)
+            // ?download=1 untuk download langsung, tanpa parameter untuk preview
+            if ($request->has('download') && $request->download == '1') {
+                return $pdf->download($filename);
+            }
+
+            // Default: stream (preview in browser)
+            return $pdf->stream($filename);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return redirect()->back()->with('error', 'Data peminjaman tidak ditemukan.');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('PDF Generation Error', [
+                'id' => $id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Gagal generate PDF kontrak. Silakan coba lagi.');
+        }
     }
 
+    /**
+     * Prepare Contract Data
+     * 
+     * Method untuk menyiapkan data yang akan ditampilkan di kontrak
+     * 
+     * @param PeminjamanFinlog $peminjaman
+     * @return array
+     */
     private function prepareContractData($peminjaman)
     {
         return [
-            'nomor_kontrak' => $peminjaman->nomor_kontrak,
-            'tanggal_kontrak' => now()->toDateString(),
+            'nomor_kontrak' => $peminjaman->nomor_kontrak ?? '-',
+            'tanggal_kontrak' => $peminjaman->tanggal_kontrak ?? now()->toDateString(),
 
             // Principal / Cells
             'nama_principal' => $peminjaman->cellsProject->nama_cells_bisnis ?? '-',

@@ -77,12 +77,12 @@
                                 <input type="text" class="form-control"
                                     value="Rp {{ number_format($nilai_pinjaman, 0, ',', '.') }}" readonly>
                             </div>
-                             {{-- Bagi Hasil (termasuk keterlambatan jika ada) --}}
+                            {{-- Bagi Hasil (termasuk keterlambatan jika ada) --}}
                             <div class="col-md-4">
                                 <label class="form-label">Bagi Hasil</label>
                                 <input type="text" class="form-control"
-                                     value="Rp {{ number_format($nilai_bagi_hasil_saat_ini ?? $nilai_bagi_hasil, 0, ',', '.') }}"
-                                     readonly>
+                                    value="Rp {{ number_format($nilai_bagi_hasil_saat_ini ?? $nilai_bagi_hasil, 0, ',', '.') }}"
+                                    readonly>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Jumlah Minggu Keterlambatan</label>
@@ -203,10 +203,29 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('livewire:initialized', () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize modal reference
+            const modalEl = document.getElementById('modal-pengembalian-invoice');
+            let bsModal = null;
+
+            if (modalEl) {
+                bsModal = new bootstrap.Modal(modalEl);
+
+                // Reset form fields when modal is closed
+                modalEl.addEventListener('hidden.bs.modal', () => {
+                    const fileInput = document.getElementById('file-upload-bukti');
+                    if (fileInput) fileInput.value = '';
+
+                    // Reset Livewire properties
+                    if (typeof Livewire !== 'undefined') {
+                        Livewire.dispatch('reset-modal-fields');
+                    }
+                });
+            }
+
             // Listen: Alert Events
             Livewire.on('alert', (data) => {
-                const eventData = data[0] || data;
+                const eventData = Array.isArray(data) ? data[0] : data;
                 Swal.fire({
                     icon: eventData.icon,
                     title: eventData.icon === 'error' ? 'Error!' : (eventData.icon === 'success' ?
@@ -219,10 +238,26 @@
 
             // Listen: Close Modal Event
             Livewire.on('close-pengembalian-modal', () => {
-                const modalEl = document.getElementById('modal-pengembalian-invoice');
+                console.log('Closing modal...');
                 if (modalEl) {
-                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                    modal.hide();
+                    // Try using Bootstrap's modal instance
+                    const existingModal = bootstrap.Modal.getInstance(modalEl);
+                    if (existingModal) {
+                        existingModal.hide();
+                    } else if (bsModal) {
+                        bsModal.hide();
+                    } else {
+                        // Fallback: force close using jQuery or vanilla JS
+                        modalEl.classList.remove('show');
+                        modalEl.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                    }
+
+                    // Reset file input
+                    const fileInput = document.getElementById('file-upload-bukti');
+                    if (fileInput) fileInput.value = '';
                 }
             });
         });
