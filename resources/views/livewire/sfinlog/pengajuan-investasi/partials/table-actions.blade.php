@@ -7,7 +7,7 @@
     @endcan
 
     @can('pengajuan_investasi_finlog.edit')
-        @if ($status === 'Menunggu Validasi Finance SKI' || ($status === 'Ditolak Finance SKI' && $current_step == 2))
+        @if ($status === 'Draft' || $status === 'Menunggu Validasi Finance SKI' || ($status === 'Ditolak Finance SKI' && $current_step == 2))
             <button class="btn btn-sm btn-icon btn-text-warning rounded-pill waves-effect investor-edit-btn" type="button"
                 data-id="{{ $id }}" title="Edit">
                 <i class="ti ti-edit"></i>

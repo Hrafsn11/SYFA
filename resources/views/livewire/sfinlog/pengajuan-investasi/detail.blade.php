@@ -487,6 +487,18 @@
                         initDatepicker(
                             '.bs-datepicker'));
 
+                    $('#btnSubmitPengajuan').click(() => {
+                        sweetAlertConfirm({
+                            title: 'Konfirmasi Submit',
+                            text: 'Apakah Anda yakin ingin submit pengajuan ini? Setelah submit, data akan divalidasi oleh Finance SKI.',
+                            icon: 'question',
+                            confirmButtonText: 'Ya, Submit',
+                            cancelButtonText: 'Batal',
+                        }, () => {
+                            approval.approve('Submit Pengajuan', 'submit_step1');
+                        });
+                    });
+
                     // Finance SKI
                     $('#btnValidasiFinanceSKI').click(() => modal('modalValidasiFinanceSKI'));
                     $('#btnKonfirmasiSetujuFinanceSKI').click(() => {

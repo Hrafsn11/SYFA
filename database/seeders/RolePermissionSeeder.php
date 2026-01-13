@@ -302,6 +302,7 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_investasi_finlog.add',
             'pengajuan_investasi_finlog.edit',
             'pengajuan_investasi_finlog.delete',
+            'pengajuan_investasi_finlog.upload_bukti',  // Investor can upload bukti transfer
         ]);
 
         $financeRole = Role::updateOrCreate(

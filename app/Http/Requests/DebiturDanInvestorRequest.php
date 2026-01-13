@@ -54,7 +54,14 @@ class DebiturDanInvestorRequest extends FormRequest
         if ($this->id) {
             $validate['id_kol'] = 'nullable|exists:master_kol,id_kol';
             $validate['kode_perusahaan'] = 'required_if:flagging,tidak|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan,' . $this->id . ',id_debitur';
-            unset($validate['password'], $validate['password_confirmation']);
+            
+            $validate['password'] = [
+                'nullable',
+                'min:8',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/'
+            ];
+            $validate['password_confirmation'] = 'required_with:password|min:8|same:password';
+            
             $validate['email'] = ['required', 'email', 'max:255', function ($attribute, $value, $fail) {
                 $master = MasterDebiturDanInvestor::where('id_debitur', $this->id)->first();
                 $user = User::where('email', $value)->where('id', '!=', $master->user_id)->exists();

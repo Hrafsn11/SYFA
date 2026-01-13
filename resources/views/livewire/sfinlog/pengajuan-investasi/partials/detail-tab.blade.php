@@ -7,14 +7,17 @@
     <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2 mt-3">
         <h5 class="mb-3 mb-md-4">Detail Investasi</h5>
         <div class="d-flex gap-2">
-            @can('pengajuan_investasi_finlog.submit')
-                @if ($currentStep == 1 && $status == 'Draft')
+            @if ($currentStep == 1 && $status == 'Draft')
+                @php
+                    $isOwner = Auth::id() == $pengajuan->investor->user_id ?? false;
+                @endphp
+                @if ($isOwner)
                     <button type="button" class="btn btn-success" id="btnSubmitPengajuan">
                         <i class="fas fa-paper-plane me-2"></i>
                         Submit Pengajuan
                     </button>
                 @endif
-            @endcan
+            @endif
 
             @can('pengajuan_investasi_finlog.validasi_finance_ski')
                 @if ($currentStep == 2 && str_contains($status, 'Menunggu Validasi Finance SKI'))
