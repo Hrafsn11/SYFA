@@ -218,6 +218,10 @@ class PengajuanInvestasiController extends Controller
                 if (!isset($historyData['validasi_bagi_hasil'])) {
                     $historyData['validasi_bagi_hasil'] = 'disetujui';
                 }
+                // Add catatan if provided
+                if ($request->has('catatan') && !empty($request->input('catatan'))) {
+                    $historyData['catatan'] = $request->input('catatan');
+                }
             } elseif ($status === 'Ditolak' || str_contains($status, 'Ditolak')) {
                 $historyData['reject_by'] = Auth::id();
                 if (!isset($historyData['validasi_bagi_hasil'])) {

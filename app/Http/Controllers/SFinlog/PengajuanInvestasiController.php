@@ -249,6 +249,10 @@ class PengajuanInvestasiController extends Controller
                 $historyData['catatan_penolakan'] = $request->input('catatan_penolakan', $request->input('catatan', ''));
             } else {
                 $historyData['approve_by'] = Auth::id();
+                // Simpan catatan validasi jika ada (untuk approval)
+                if ($request->filled('catatan')) {
+                    $historyData['catatan'] = $request->input('catatan');
+                }
             }
 
             $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, $historyData);

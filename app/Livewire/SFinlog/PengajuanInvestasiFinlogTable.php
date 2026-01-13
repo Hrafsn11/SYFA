@@ -6,6 +6,8 @@ use App\Livewire\Traits\HasDebiturAuthorization;
 use App\Models\PengajuanInvestasiFinlog;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class PengajuanInvestasiFinlogTable extends DataTableComponent
 {
@@ -45,8 +47,54 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                 'class' => 'form-select',
             ])
 
+            // Enable Filters
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
+
             // Disable Bulk Actions
             ->setBulkActionsDisabled();
+    }
+
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Bulan')
+                ->options([
+                    '' => 'Semua Bulan',
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("MONTH(pengajuan_investasi_finlog.tanggal_investasi) = ?", [$value]);
+                    }
+                }),
+
+            SelectFilter::make('Tahun')
+                ->options([
+                    '' => 'Semua Tahun',
+                    '2023' => '2023',
+                    '2024' => '2024',
+                    '2025' => '2025',
+                    '2026' => '2026',
+                    '2027' => '2027',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("YEAR(pengajuan_investasi_finlog.tanggal_investasi) = ?", [$value]);
+                    }
+                }),
+        ];
     }
 
     public function builder(): \Illuminate\Database\Eloquent\Builder

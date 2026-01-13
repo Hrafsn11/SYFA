@@ -156,6 +156,11 @@
                                 semula</small>
                         </div>
 
+                        <div class="mb-3">
+                            <label for="catatan_validasi_finance" class="form-label">Catatan Validasi <small class="text-muted">(Opsional)</small></label>
+                            <textarea class="form-control" id="catatan_validasi_finance" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                        </div>
+
                         <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button
                             merah untuk menolak.</p>
                     </div>
@@ -213,8 +218,15 @@
                 </div>
                 <hr class="my-2">
                 <div class="modal-body">
-                    <h5 class="mb-2">Apakah anda yakin menyetujui pengajuan investasi ini?</h5>
-                    <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
+                    <h5 class="mb-3">Apakah anda yakin menyetujui pengajuan investasi ini?</h5>
+                    
+                    <div class="mb-3">
+                        <label for="catatan_validasi_ceo" class="form-label">Catatan Persetujuan <small class="text-muted">(Opsional)</small></label>
+                        <textarea class="form-control" id="catatan_validasi_ceo" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                        <small class="text-muted">Catatan ini akan ditampilkan di activity log</small>
+                    </div>
+                    
+                    <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
                         menolak.</p>
                 </div>
                 <div class="modal-footer">
@@ -503,9 +515,11 @@
                     $('#btnValidasiFinanceSKI').click(() => modal('modalValidasiFinanceSKI'));
                     $('#btnKonfirmasiSetujuFinanceSKI').click(() => {
                         const tanggalInvestasi = $('#tanggal_investasi_validasi').val();
+                        const catatan = $('#catatan_validasi_finance').val();
                         approval.approve('Dokumen Tervalidasi', 'validasi_pengajuan',
                             'modalValidasiFinanceSKI', {
-                                tanggal_investasi: tanggalInvestasi
+                                tanggal_investasi: tanggalInvestasi,
+                                catatan: catatan
                             });
                     });
                     $('#btnTolakFinanceSKI').click(() => (modal('modalValidasiFinanceSKI', true), modal(
@@ -520,8 +534,11 @@
                     // CEO
                     $('#btnValidasiCEO').click(() => modal('modalValidasiCEO'));
                     $('#btnKonfirmasiCEO').click(() => {
+                        const catatan = $('#catatan_validasi_ceo').val();
                         approval.approve('Disetujui CEO Finlog', 'persetujuan_ceo_finlog',
-                            'modalValidasiCEO');
+                            'modalValidasiCEO', {
+                                catatan: catatan
+                            });
                     });
                     $('#btnTolakCEO').click(() => (modal('modalValidasiCEO', true), modal(
                         'modalAlasanPenolakanCEO',

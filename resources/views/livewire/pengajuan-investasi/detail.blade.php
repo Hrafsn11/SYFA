@@ -333,7 +333,7 @@
                                     @else
                                         <!-- Timeline dari database -->
                                         <div class="timeline">
-                                            @foreach ($histories->reverse() as $history)
+                                            @foreach ($histories as $history)
                                                 <div class="activity-item mb-4">
                                                     <div class="row align-items-start">
                                                         <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -441,6 +441,13 @@
                                                                         @endphp
                                                                         {!! $statusDescriptions[$history->status] ?? $history->status !!}
                                                                     </p>
+                                                                    
+                                                                    @if($history->catatan && !str_contains($history->status, 'Ditolak'))
+                                                                        <div class="alert alert-info alert-sm mt-2 mb-0" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
+                                                                            <strong><i class="ti ti-note me-1"></i>Catatan:</strong> {{ $history->catatan }}
+                                                                        </div>
+                                                                    @endif
+                                                                    
                                                                     @if ($history->submittedBy)
                                                                         <small class="text-muted">
                                                                         </small>
@@ -504,8 +511,14 @@
                     </div>
                     <hr class="my-2">
                     <div class="modal-body">
-                        <h5 class="mb-2">Apakah anda yakin menyetujui Bagi Hasil Investasi ini?</h5>
-                        <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
+                        <h5 class="mb-3">Apakah anda yakin menyetujui Bagi Hasil Investasi ini?</h5>
+                        
+                        <div class="mb-3">
+                            <label for="catatan_validasi_finance" class="form-label">Catatan Validasi <small class="text-muted">(Opsional)</small></label>
+                            <textarea class="form-control" id="catatan_validasi_finance" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                        </div>
+                        
+                        <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
                             menolak.</p>
                     </div>
                     <div class="modal-footer">
@@ -613,6 +626,12 @@
                     <div class="modal-body">
                         <h5 class="mb-2">Apakah Anda yakin menyetujui pengajuan investasi ini?</h5>
                         <p class="mb-0">Dengan menyetujui, pengajuan akan dilanjutkan ke proses upload bukti transfer.</p>
+                        
+                        <div class="mt-3">
+                            <label for="catatan_validasi_ceo" class="form-label">Catatan Validasi (Opsional)</label>
+                            <textarea class="form-control" id="catatan_validasi_ceo" rows="3" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+                            <div class="form-text">Catatan ini akan ditampilkan di riwayat aktivitas</div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" id="btnKonfirmasiCEO">
@@ -755,7 +774,8 @@
             $('#btnKonfirmasiSetuju').click(() => ajaxPost(
                 `/pengajuan-investasi/${ID}/approval`, {
                     status: 'Dokumen Tervalidasi',
-                    validasi_bagi_hasil: 'disetujui'
+                    validasi_bagi_hasil: 'disetujui',
+                    catatan: $('#catatan_validasi_finance').val()
                 },
                 () => (hideModal('modalPersetujuanInvestasi'), showSuccessReload(
                     'Pengajuan berhasil disetujui')),
@@ -789,7 +809,8 @@
 
             $('#btnKonfirmasiCEO').click(() => ajaxPost(
                 `/pengajuan-investasi/${ID}/approval`, {
-                    status: 'Disetujui oleh CEO SKI'
+                    status: 'Disetujui oleh CEO SKI',
+                    catatan: $('#catatan_validasi_ceo').val()
                 },
                 () => (hideModal('modalValidasiCEO'), showSuccessReload('Pengajuan disetujui CEO')),
                 '#btnKonfirmasiCEO',
