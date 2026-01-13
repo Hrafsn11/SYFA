@@ -185,3 +185,4 @@ config/local.php
 /docker/
 /supervisord.log
 /supervisord.pid
+.composer/
