@@ -203,10 +203,8 @@
                                                 <div class="card-body">
                                                     <form id="formGenerateKontrak">
                                                         <div class="row g-3">
-                                                            @php
+                                                        @php
                                                                 $kontrakFields = [
-                                                                    'Nama Investor' =>
-                                                                        $investasi['nama_investor'] ?? '-',
                                                                     'Nama Perusahaan' =>
                                                                         $investasi['nama_investor'] ?? '-',
                                                                     'Jenis Deposito' => ucfirst(
@@ -256,6 +254,22 @@
                                                                         : '-',
                                                                 ];
                                                             @endphp
+                                                            
+                                                            {{-- Input Nama PIC (Editable) --}}
+                                                            <div class="col-md-6">
+                                                                <label for="namaPicKontrak" class="form-label">
+                                                                    Nama PIC/CEO Investor <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control" id="namaPicKontrak" 
+                                                                    name="nama_pic_kontrak"
+                                                                    value="{{ $investasi['nama_pic_kontrak'] ?? '' }}"
+                                                                    placeholder="Masukkan nama PIC/CEO investor"
+                                                                    {{ !empty($investasi['nomor_kontrak']) ? 'readonly' : 'required' }}>
+                                                                <div class="invalid-feedback">
+                                                                    Nama PIC/CEO harus diisi
+                                                                </div>
+                                                            </div>
+                                                            
                                                             @foreach ($kontrakFields as $label => $value)
                                                                 <div class="col-md-6">
                                                                     <label
@@ -899,13 +913,28 @@
             $('#formGenerateKontrak').submit(async function(e) {
                 e.preventDefault();
                 
+                // Validasi form
+                if (!this.checkValidity()) {
+                    e.stopPropagation();
+                    $(this).addClass('was-validated');
+                    
+                    // Focus ke field yang error
+                    const namaPicInput = $('#namaPicKontrak');
+                    if (!namaPicInput.val()) {
+                        namaPicInput.focus();
+                        namaPicInput.addClass('is-invalid');
+                    }
+                    return;
+                }
+                
                 const btnGenerate = $('#btnGenerateKontrak');
                 const spinner = $('#btnGenerateKontrakSpinner');
+                const namaPicKontrak = $('#namaPicKontrak').val();
                 
                 try {
                     const result = await Swal.fire({
                         title: 'Konfirmasi',
-                        text: 'Generate nomor kontrak untuk investasi ini?',
+                        html: `Generate nomor kontrak untuk investasi ini?<br><br><small><strong>Nama PIC/CEO:</strong> ${namaPicKontrak}</small>`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Ya, Generate',
@@ -923,7 +952,10 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': CSRF,
                             'Accept': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({
+                            nama_pic_kontrak: namaPicKontrak
+                        })
                     });
 
                     const data = await response.json();

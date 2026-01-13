@@ -17,7 +17,7 @@ class PengajuanInvestasi extends Model
      * The table associated with the model.
      */
     protected $table = 'pengajuan_investasi';
-    
+
     /**
      * The primary key associated with the table.
      */
@@ -29,6 +29,7 @@ class PengajuanInvestasi extends Model
     protected $fillable = [
         'id_debitur_dan_investor',
         'nama_investor',
+        'nama_pic_kontrak',
         'deposito',
         'tanggal_investasi',
         'lama_investasi',
@@ -63,7 +64,7 @@ class PengajuanInvestasi extends Model
         'total_kembali_dari_penyaluran' => 'decimal:2',
     ];
 
-       protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
@@ -71,7 +72,7 @@ class PengajuanInvestasi extends Model
             if (!$investasi->sisa_pokok || $investasi->sisa_pokok == 0) {
                 $investasi->sisa_pokok = $investasi->jumlah_investasi ?? 0;
             }
-            
+
             if (!$investasi->sisa_bagi_hasil || $investasi->sisa_bagi_hasil == 0) {
                 $investasi->sisa_bagi_hasil = $investasi->nominal_bagi_hasil_yang_didapatkan ?? 0;
             }
@@ -116,8 +117,8 @@ class PengajuanInvestasi extends Model
     public function latestHistory()
     {
         return $this->hasOne(HistoryStatusPengajuanInvestor::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi')
-                    ->orderBy('id_history_status_pengajuan_investor', 'desc')
-                    ->limit(1);
+            ->orderBy('id_history_status_pengajuan_investor', 'desc')
+            ->limit(1);
     }
 
     /**
@@ -160,7 +161,7 @@ class PengajuanInvestasi extends Model
         return $query->where('status', 'Rejected');
     }
 
-   
+
     public function penyaluranDeposito(): HasMany
     {
         return $this->hasMany(PenyaluranDeposito::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
@@ -174,13 +175,13 @@ class PengajuanInvestasi extends Model
         return $this->hasMany(PengembalianInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
     }
 
-   
+
     public function scopeWithSisaDana($query)
     {
         if (!str_contains($query->toSql(), 'pengajuan_investasi')) {
             $query->from('pengajuan_investasi');
         }
-        
+
         return $query
             ->leftJoin(
                 DB::raw('(
@@ -190,8 +191,8 @@ class PengajuanInvestasi extends Model
                     FROM penyaluran_deposito 
                     GROUP BY id_pengajuan_investasi
                 ) as pd_aggregated'),
-                'pengajuan_investasi.id_pengajuan_investasi', 
-                '=', 
+                'pengajuan_investasi.id_pengajuan_investasi',
+                '=',
                 'pd_aggregated.pd_id_pengajuan_investasi'
             )
             ->select([
@@ -201,18 +202,18 @@ class PengajuanInvestasi extends Model
             ]);
     }
 
-    
+
     public function scopeHasSisaDana($query, $minimum = 0)
     {
         return $query->havingRaw('sisa_dana > ?', [$minimum]);
     }
 
-   
+
     public function getSisaDana(): float
     {
         $totalDisalurkan = $this->penyaluranDeposito()
             ->sum('nominal_yang_disalurkan');
-        
+
         return floatval($this->jumlah_investasi) - floatval($totalDisalurkan);
     }
 

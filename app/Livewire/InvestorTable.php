@@ -72,7 +72,7 @@ class InvestorTable extends DataTableComponent
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
 
-                    return '<div class="text-center">'.$number.'</div>';
+                    return '<div class="text-center">' . $number . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
@@ -80,13 +80,13 @@ class InvestorTable extends DataTableComponent
             Column::make('Nama Perusahaan', 'nama')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('Kode Perusahaan', 'kode_perusahaan')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('Deposito', 'deposito')
@@ -106,31 +106,31 @@ class InvestorTable extends DataTableComponent
             Column::make('Email', 'email')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('No. Telepon', 'no_telepon')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('Alamat', 'alamat')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('Nama Bank', 'nama_bank')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('No Rekening', 'no_rek')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
                 ->html(),
 
             Column::make('Status', 'status')
@@ -154,10 +154,10 @@ class InvestorTable extends DataTableComponent
                     if (!$value) {
                         return '<div class="text-center">-</div>';
                     }
-                    
+
                     $types = explode(',', $value);
                     $badges = [];
-                    
+
                     foreach ($types as $type) {
                         $type = trim($type);
                         if ($type === 'sfinance') {
@@ -166,8 +166,8 @@ class InvestorTable extends DataTableComponent
                             $badges[] = '<span class="badge bg-info">SFinlog</span>';
                         }
                     }
-                    
-                    return '<div class="text-center">'.implode(' ', $badges).'</div>';
+
+                    return '<div class="text-center">' . implode(' ', $badges) . '</div>';
                 })
                 ->html(),
 

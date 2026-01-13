@@ -550,6 +550,14 @@ class PengajuanInvestasiController extends Controller
         try {
             DB::beginTransaction();
 
+            $request->validate([
+                'nama_pic_kontrak' => 'required|string|max:255',
+            ], [
+                'nama_pic_kontrak.required' => 'Nama PIC/CEO harus diisi',
+                'nama_pic_kontrak.string' => 'Nama PIC/CEO harus berupa teks',
+                'nama_pic_kontrak.max' => 'Nama PIC/CEO maksimal 255 karakter',
+            ]);
+
             // Get pengajuan investasi
             $investasi = PengajuanInvestasi::with('investor')->findOrFail($id);
 
@@ -575,9 +583,10 @@ class PengajuanInvestasiController extends Controller
                 $investasi->tanggal_investasi
             );
 
-            // Update pengajuan investasi dengan nomor kontrak
+            // Update pengajuan investasi dengan nomor kontrak DAN nama_pic_kontrak
             $investasi->update([
                 'nomor_kontrak' => $nomorKontrak,
+                'nama_pic_kontrak' => $request->nama_pic_kontrak,
                 'updated_by' => Auth::id(),
             ]);
 
@@ -909,7 +918,7 @@ class PengajuanInvestasiController extends Controller
             return $html;
         } catch (\Exception $e) {
             Log::error('Error building kontrak HTML: ' . $e->getMessage());
-            throw $e; 
+            throw $e;
         }
     }
 }
