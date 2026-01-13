@@ -154,7 +154,7 @@
                         <p class="text-muted mb-4 small flex-grow-1">
                             Ringkasan kinerja portofolio pembiayaan dan investasi
                         </p>
-                        <a href="#" class="btn btn-success w-100 fw-semibold">
+                        <a href="{{ route('portofolio.index') }}" class="btn btn-success w-100 fw-semibold">
                             Go to Application
                         </a>
                     </div>

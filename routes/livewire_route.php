@@ -69,3 +69,6 @@ Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembali
 
 // SFinlog - Debitur Piutang
 Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');
+
+// Portofolio
+Route::get('portofolio', \App\Livewire\Portofolio\Index::class)->name('portofolio.index');
