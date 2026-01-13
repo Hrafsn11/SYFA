@@ -7,6 +7,7 @@ use App\Models\PengajuanPeminjaman;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PengajuanPinjamanTable extends DataTableComponent
 {
@@ -28,8 +29,7 @@ class PengajuanPinjamanTable extends DataTableComponent
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
 
-            // Default Sort
-            ->setDefaultSort('id_pengajuan_peminjaman', 'desc')
+            ->setDefaultSort('pengajuan_peminjaman.created_at', 'desc')
 
             // Table Styling
             ->setTableAttributes([
@@ -53,10 +53,13 @@ class PengajuanPinjamanTable extends DataTableComponent
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         $query = PengajuanPeminjaman::query()
-            ->with(['debitur', 'instansi'])
+            ->with(['debitur', 'instansi', 'historyStatus'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
-            ->select('pengajuan_peminjaman.*', 
-                    DB::raw('master_debitur_dan_investor.nama as nama_perusahaan'));
+            ->select(
+                'pengajuan_peminjaman.*',
+                DB::raw('master_debitur_dan_investor.nama as nama_perusahaan')
+            )
+            ->orderBy('pengajuan_peminjaman.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }
@@ -69,89 +72,124 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->label(function ($row) use (&$rowNumber) {
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
-                    return '<div class="text-center">'.$number.'</div>';
+                    return '<div class="text-center">' . $number . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
-                
+
             Column::make('Nomor Peminjaman', 'nomor_peminjaman')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-center"><strong>'.($value ?: '-').'</strong></div>')
+                ->format(fn($value) => '<div class="text-center"><strong>' . ($value ?: '-') . '</strong></div>')
                 ->html(),
-                
+
             Column::make('Nama Perusahaan')
                 ->label(function ($row) {
                     $namaDebitur = $row->nama_perusahaan ?: ($row->debitur->nama ?? '-');
-                    return '<div class="text-start">'.$namaDebitur.'</div>';
+                    return '<div class="text-start">' . $namaDebitur . '</div>';
                 })
                 ->sortable(function ($builder, $direction) {
                     return $builder->orderBy('master_debitur_dan_investor.nama', $direction);
                 })
                 ->searchable(function ($builder, $term) {
-                    return $builder->orWhere('master_debitur_dan_investor.nama', 'like', '%'.$term.'%');
+                    return $builder->orWhere('master_debitur_dan_investor.nama', 'like', '%' . $term . '%');
                 })
                 ->html(),
-                
+
             Column::make('Jenis Pembiayaan', 'jenis_pembiayaan')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    $badgeClass = match($value) {
+                    $badgeClass = match ($value) {
                         'Invoice Financing' => 'bg-primary',
                         'PO Financing' => 'bg-success',
                         'Installment' => 'bg-warning',
                         'Factoring' => 'bg-info',
                         default => 'bg-secondary'
                     };
-                    return '<div class="text-center"><span class="badge '.$badgeClass.'">'.($value ?: '-').'</span></div>';
+                    return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ($value ?: '-') . '</span></div>';
                 })
                 ->html(),
-                
+
             Column::make('Lampiran SID', 'lampiran_sid')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value, $row) {
                     if ($value) {
-                        return '<div class="text-center"><a href="'.asset('storage/'.$value).'" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-file-alt"></i></a></div>';
+                        return '<div class="text-center"><a href="' . asset('storage/' . $value) . '" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-file-alt"></i></a></div>';
                     }
                     return '<div class="text-center"><span class="text-muted">-</span></div>';
                 })
                 ->html(),
-                
+
             Column::make('Nilai Kol', 'nilai_kol')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value, $row) {
                     $kol = $row->debitur->kol->kol ?? null;
                     $displayValue = isset($kol) ? $kol : '-';
-                    
+
                     if ($displayValue === '-') {
                         return '<div class="text-center"><span class="text-muted">-</span></div>';
                     }
-                    
-                    return '<div class="text-center"><span class="badge bg-danger">'.$displayValue.'</span></div>';
+
+                    return '<div class="text-center"><span class="badge bg-danger">' . $displayValue . '</span></div>';
                 })
                 ->html(),
-                
+
             Column::make('Status', 'status')
                 ->sortable()
                 ->searchable()
-                ->format(function ($value) {
-                    $badgeClass = match($value) {
+                ->label(function ($row) {
+                    $status = $row->status;
+                    
+                    $latestHistory = $row->historyStatus->sortByDesc('created_at')->first();
+                    $currentStep = $latestHistory?->current_step ?? 1;
+                    
+                    if ($status === 'Disetujui oleh CEO SKI' && $currentStep == 5) {
+                        return '<div class="text-center"><span class="badge bg-info">Menunggu Validasi Direktur</span></div>';
+                    }
+                    
+                    $badgeClass = match ($status) {
                         'Draft' => 'bg-warning text-dark',
                         'Submitted' => 'bg-success',
                         'rejected' => 'bg-danger',
                         'pending' => 'bg-warning text-dark',
                         'disbursed' => 'bg-info',
+                        'Dana Sudah Dicairkan' => 'bg-success',
+                        'Proses Restrukturisasi' => 'bg-info',
+                        'Peminjaman Direstrukturisasi' => 'bg-primary',
+                        'Disetujui oleh CEO SKI' => 'bg-success',
+                        'Disetujui oleh Direktur SKI' => 'bg-success',
+                        'Lunas' => 'bg-primary',
                         default => 'bg-secondary'
                     };
-                    return '<div class="text-center"><span class="badge '.$badgeClass.'">'.ucfirst($value ?: 'Draft').'</span></div>';
+                    return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ucfirst($status ?: 'Draft') . '</span></div>';
                 })
                 ->html(),
-                
+
+            Column::make('Tanggal Dicairkan')
+                ->label(function ($row) {
+                    if ($row->status !== 'Dana Sudah Dicairkan') {
+                        return '<div class="text-center"><span class="text-muted">-</span></div>';
+                    }
+                    
+                    $historyWithTanggalPencairan = $row->historyStatus
+                        ->whereNotNull('tanggal_pencairan')
+                        ->sortByDesc('created_at')
+                        ->first();
+                    
+                    if ($historyWithTanggalPencairan && $historyWithTanggalPencairan->tanggal_pencairan) {
+                        $tanggal = Carbon::parse($historyWithTanggalPencairan->tanggal_pencairan)->format('d M Y');
+                        return '<div class="text-center">' . $tanggal . '</div>';
+                    }
+                    
+                    return '<div class="text-center"><span class="text-muted">-</span></div>';
+                })
+                ->html(),
+
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.peminjaman.partials.table-actions', [
+                ->label(fn($row) => view('livewire.peminjaman.partials.table-actions', [
                     'id' => $row->id_pengajuan_peminjaman,
                     'status' => $row->status,
                     'is_active' => $row->is_active

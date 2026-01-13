@@ -105,11 +105,11 @@ class PeminjamanFinlogTable extends DataTableComponent
 
             Column::make('Nomor peminjaman', 'nomor_peminjaman')
                 ->sortable()
-                ->searchable(), 
+                ->searchable(),
 
             Column::make('Nama project', 'nama_project')
                 ->sortable()
-                ->searchable(), 
+                ->searchable(),
 
             Column::make('Durasi project', 'durasi_project')
                 ->sortable()
@@ -121,7 +121,16 @@ class PeminjamanFinlogTable extends DataTableComponent
 
             Column::make('Nib perusahaan', 'nib_perusahaan')
                 ->sortable()
-                ->searchable(), 
+                ->searchable()
+                ->html()
+                ->format(function ($value) {
+                    if ($value) {
+                        return '<a href="' . asset('storage/' . $value) . '" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="ti ti-eye me-1"></i> Lihat
+                                </a>';
+                    }
+                    return '<span class="text-muted">-</span>';
+                }),
 
             Column::make('Nilai pinjaman', 'nilai_pinjaman')
                 ->sortable()
@@ -167,7 +176,7 @@ class PeminjamanFinlogTable extends DataTableComponent
 
             Column::make('Status', 'status')
                 ->sortable()
-                ->searchable() 
+                ->searchable()
                 ->format(function ($value) {
                     $badges = [
                         'Draft' => 'secondary',
@@ -185,8 +194,21 @@ class PeminjamanFinlogTable extends DataTableComponent
             Column::make('Aksi')
                 ->label(function ($row) {
                     $detailUrl = route('sfinlog.peminjaman.detail', ['id' => $row->id_peminjaman_finlog]);
-                    $btn = '<div class="btn-group" role="group">';
-                    $btn .= '<a href="'.$detailUrl.'" class="btn btn-sm btn-info"><i class="ti ti-eye"></i></a>';
+                    $editUrl = route('sfinlog.peminjaman.edit', ['id' => $row->id_peminjaman_finlog]);
+                    $canEdit = $row->status === 'Draft';
+
+                    $btn = '<div class="d-flex justify-content-center gap-1" role="group">';
+
+                    // Tombol Detail
+                    $btn .= '<a href="' . $detailUrl . '" class="btn btn-sm btn-outline-primary action-btn" title="Detail"><i class="ti ti-file-text"></i></a>';
+
+                    // Tombol Edit - Disabled jika status bukan Draft
+                    if ($canEdit) {
+                        $btn .= '<a href="' . $editUrl . '" class="btn btn-sm btn-outline-warning action-btn edit-btn" title="Edit"><i class="ti ti-edit"></i></a>';
+                    } else {
+                        $btn .= '<button type="button" class="btn btn-sm btn-secondary" disabled title="Tidak dapat diedit"><i class="ti ti-edit"></i></button>';
+                    }
+
                     $btn .= '</div>';
                     return $btn;
                 })

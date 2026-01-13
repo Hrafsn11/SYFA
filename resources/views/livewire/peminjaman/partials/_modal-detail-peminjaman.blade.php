@@ -74,7 +74,43 @@
                                     </div>
                                 </div>
 
+                                <!-- Total Bagi Hasil Disetujui & Persentase -->
                                 <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="persentaseBagiHasil" class="form-label">
+                                            Persentase Bagi Hasil (%) <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" name="persentase_bagi_hasil" class="form-control" id="persentaseBagiHasil"
+                                            placeholder="2" min="0" max="100" step="0.01" value="{{ $peminjaman['persentase_bagi_hasil'] ?? 2 }}" required>
+                                        <div class="form-text">
+                                            Default: {{ $peminjaman['jenis_pembiayaan'] === 'Installment' ? '10%' : '2%' }}
+                                        </div>
+                                        <div class="form-text mt-1">
+                                            <strong>Keterangan:</strong> <span id="keteranganBagiHasil" class="text-muted">-</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="totalBagiHasil" class="form-label">Total Bagi Hasil Disetujui (Auto)</label>
+                                        <input type="text" class="form-control" id="totalBagiHasil" value="Rp 0" disabled>
+                                        <input type="hidden" name="total_bagi_hasil" id="totalBagiHasilValue">
+                                    </div>
+                                    
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="flatpickr-tanggal-harapan" class="form-label">Tanggal Pencairan yang
+                                            Diharapkan</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control rounded-start"
+                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-harapan"
+                                                value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
+                                            <span class="input-group-text">
+                                                <i class="ti ti-calendar"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-6 mb-3 mb-md-0">
                                         <label for="flatpickr-tanggal-pencairan" class="form-label">Tanggal
                                             Pencairan</label>
@@ -91,18 +127,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
-                                        <label for="flatpickr-tanggal-harapan" class="form-label">Tanggal Pencairan yang
-                                            Diharapkan</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control rounded-start"
-                                                placeholder="DD/MM/YYYY" id="flatpickr-tanggal-harapan"
-                                                value="{{ $peminjaman['harapan_tanggal_pencairan'] ? \Carbon\Carbon::parse($peminjaman['harapan_tanggal_pencairan'])->format('d/m/Y') : '' }}" disabled>
-                                            <span class="input-group-text">
-                                                <i class="ti ti-calendar"></i>
-                                            </span>
-                                        </div>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -206,6 +231,34 @@
                                         <label for="editNominalDisetujui" class="form-label">Nominal Disetujui</label>
                                         <input type="text" class="form-control input-rupiah"
                                             id="editNominalDisetujui" value="@if($peminjaman['nominal_yang_disetujui'])Rp {{ number_format(intval($peminjaman['nominal_yang_disetujui']), 0, ',', '.') }}@endif" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editPersentaseBagiHasilDisetujui" class="form-label">Persentase Bagi Hasil yang Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="editPersentaseBagiHasilDisetujui" value="{{ isset($peminjaman['persentase_bagi_hasil']) ? $peminjaman['persentase_bagi_hasil'] : 2 }}%" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="editTotalBagiHasilDisetujui" class="form-label">Total Bagi Hasil Disetujui</label>
+                                        @php
+                                            $totalBagiHasilEdit = 0;
+                                            
+                                            if (isset($peminjaman['total_bagi_hasil']) && $peminjaman['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilEdit = intval($peminjaman['total_bagi_hasil']);
+                                            } 
+                                            elseif (isset($peminjaman['nominal_yang_disetujui']) && isset($peminjaman['persentase_bagi_hasil'])) {
+                                                $nominal = intval($peminjaman['nominal_yang_disetujui']);
+                                                $persentase = floatval($peminjaman['persentase_bagi_hasil']);
+                                                if ($nominal > 0 && $persentase > 0) {
+                                                    $totalBagiHasilEdit = $nominal * ($persentase / 100);
+                                                }
+                                            }
+                                        @endphp
+                                        <input type="text" class="form-control"
+                                            id="editTotalBagiHasilDisetujui" value="Rp {{ number_format($totalBagiHasilEdit, 0, ',', '.') }}" disabled>
                                     </div>
                                 </div>
 
@@ -334,6 +387,37 @@
                                 </div>
 
                                 <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="debiturPersentaseBagiHasilDisetujui" class="form-label">Persentase Bagi Hasil yang Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="debiturPersentaseBagiHasilDisetujui" value="{{ isset($latestHistory) && $latestHistory['persentase_bagi_hasil'] ? $latestHistory['persentase_bagi_hasil'] : ($peminjaman['persentase_bagi_hasil'] ?? 2) }}%" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="debiturTotalBagiHasilDisetujui" class="form-label">Total Bagi Hasil Disetujui</label>
+                                        @php
+                                            $totalBagiHasilDisetujui = 0;
+                                            
+                                            if (isset($latestHistory) && isset($latestHistory['total_bagi_hasil']) && $latestHistory['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilDisetujui = intval($latestHistory['total_bagi_hasil']);
+                                            } 
+                                            elseif (isset($latestHistory) && isset($latestHistory['nominal_yang_disetujui']) && isset($latestHistory['persentase_bagi_hasil'])) {
+                                                $nominal = intval($latestHistory['nominal_yang_disetujui']);
+                                                $persentase = floatval($latestHistory['persentase_bagi_hasil']);
+                                                if ($nominal > 0 && $persentase > 0) {
+                                                    $totalBagiHasilDisetujui = $nominal * ($persentase / 100);
+                                                }
+                                            }
+                                            elseif (isset($peminjaman['total_bagi_hasil']) && $peminjaman['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilDisetujui = intval($peminjaman['total_bagi_hasil']);
+                                            }
+                                        @endphp
+                                        <input type="text" class="form-control"
+                                            id="debiturTotalBagiHasilDisetujui" value="Rp {{ number_format($totalBagiHasilDisetujui, 0, ',', '.') }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
                                     <div class="col-md-6 mb-3 mb-md-0">
                                         <label for="debiturTanggalPencairan" class="form-label">Tanggal Pencairan</label>
                                         <div class="input-group">
@@ -442,6 +526,37 @@
                                 </div>
 
                                 <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ceoPersentaseBagiHasilDisetujui" class="form-label">Persentase Bagi Hasil yang Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="ceoPersentaseBagiHasilDisetujui" value="{{ isset($latestHistory) && $latestHistory['persentase_bagi_hasil'] ? $latestHistory['persentase_bagi_hasil'] : ($peminjaman['persentase_bagi_hasil'] ?? 2) }}%" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ceoTotalBagiHasilDisetujui" class="form-label">Total Bagi Hasil Disetujui</label>
+                                        @php
+                                            $totalBagiHasilCEO = 0;
+                                            
+                                            if (isset($latestHistory) && isset($latestHistory['total_bagi_hasil']) && $latestHistory['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilCEO = intval($latestHistory['total_bagi_hasil']);
+                                            } 
+                                            elseif (isset($latestHistory) && isset($latestHistory['nominal_yang_disetujui']) && isset($latestHistory['persentase_bagi_hasil'])) {
+                                                $nominal = intval($latestHistory['nominal_yang_disetujui']);
+                                                $persentase = floatval($latestHistory['persentase_bagi_hasil']);
+                                                if ($nominal > 0 && $persentase > 0) {
+                                                    $totalBagiHasilCEO = $nominal * ($persentase / 100);
+                                                }
+                                            }
+                                            elseif (isset($peminjaman['total_bagi_hasil']) && $peminjaman['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilCEO = intval($peminjaman['total_bagi_hasil']);
+                                            }
+                                        @endphp
+                                        <input type="text" class="form-control"
+                                            id="ceoTotalBagiHasilDisetujui" value="Rp {{ number_format($totalBagiHasilCEO, 0, ',', '.') }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
                                     <div class="col-md-6 mb-3 mb-md-0">
                                         <label for="ceoTanggalPencairan" class="form-label">Tanggal Pencairan</label>
                                         <div class="input-group">
@@ -546,6 +661,37 @@
                                         <label for="direkturNominalDisetujui" class="form-label">Nominal Disetujui</label>
                                         <input type="text" class="form-control"
                                             id="direkturNominalDisetujui" value="{{ isset($latestHistory) && $latestHistory['nominal_yang_disetujui'] ? 'Rp ' . number_format(intval($latestHistory['nominal_yang_disetujui']), 0, ',', '.') : 'Rp 0' }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="direkturPersentaseBagiHasilDisetujui" class="form-label">Persentase Bagi Hasil yang Disetujui</label>
+                                        <input type="text" class="form-control"
+                                            id="direkturPersentaseBagiHasilDisetujui" value="{{ isset($latestHistory) && $latestHistory['persentase_bagi_hasil'] ? $latestHistory['persentase_bagi_hasil'] : ($peminjaman['persentase_bagi_hasil'] ?? 2) }}%" disabled>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="direkturTotalBagiHasilDisetujui" class="form-label">Total Bagi Hasil Disetujui</label>
+                                        @php
+                                            $totalBagiHasilDirektur = 0;
+                                            
+                                            if (isset($latestHistory) && isset($latestHistory['total_bagi_hasil']) && $latestHistory['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilDirektur = intval($latestHistory['total_bagi_hasil']);
+                                            } 
+                                            elseif (isset($latestHistory) && isset($latestHistory['nominal_yang_disetujui']) && isset($latestHistory['persentase_bagi_hasil'])) {
+                                                $nominal = intval($latestHistory['nominal_yang_disetujui']);
+                                                $persentase = floatval($latestHistory['persentase_bagi_hasil']);
+                                                if ($nominal > 0 && $persentase > 0) {
+                                                    $totalBagiHasilDirektur = $nominal * ($persentase / 100);
+                                                }
+                                            }
+                                            elseif (isset($peminjaman['total_bagi_hasil']) && $peminjaman['total_bagi_hasil'] > 0) {
+                                                $totalBagiHasilDirektur = intval($peminjaman['total_bagi_hasil']);
+                                            }
+                                        @endphp
+                                        <input type="text" class="form-control"
+                                            id="direkturTotalBagiHasilDisetujui" value="Rp {{ number_format($totalBagiHasilDirektur, 0, ',', '.') }}" disabled>
                                     </div>
                                 </div>
 

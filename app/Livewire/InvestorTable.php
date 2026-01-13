@@ -5,8 +5,10 @@ namespace App\Livewire;
 use App\Livewire\MasterData\DebiturDanInvestor;
 use App\Models\MasterDebiturDanInvestor;
 use App\Livewire\Traits\HasUniversalFormAction;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class InvestorTable extends DataTableComponent
 {
@@ -25,20 +27,39 @@ class InvestorTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_debitur', 'asc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setBulkActionsDisabled();
     }
 
-    public function builder(): \Illuminate\Database\Eloquent\Builder
+    public function filters(): array
+    {
+        return [
+            SelectFilter::make('Status')
+                ->options([
+                    '' => 'Semua Status',
+                    'active' => 'Active',
+                    'non active' => 'Non Active',
+                    'locked' => 'Locked',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->where('status', $value);
+                    }
+                }),
+        ];
+    }
+
+    public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging');
+            ->select('id_debitur', 'id_kol', 'nama', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor');
     }
 
     public function columns(): array
@@ -112,9 +133,35 @@ class InvestorTable extends DataTableComponent
                 ->format(function ($value) {
                     if ($value === 'active') {
                         return '<div class="text-center"><span class="badge bg-success">Active</span></div>';
+                    } elseif ($value === 'locked') {
+                        return '<div class="text-center"><span class="badge bg-danger"><i class="ti ti-lock me-1"></i>Locked</span></div>';
                     } else {
                         return '<div class="text-center"><span class="badge bg-secondary">Non Active</span></div>';
                     }
+                })
+                ->html(),
+
+            Column::make('Tipe Investor', 'flagging_investor')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value) {
+                    if (!$value) {
+                        return '<div class="text-center">-</div>';
+                    }
+                    
+                    $types = explode(',', $value);
+                    $badges = [];
+                    
+                    foreach ($types as $type) {
+                        $type = trim($type);
+                        if ($type === 'sfinance') {
+                            $badges[] = '<span class="badge bg-primary">SFinance</span>';
+                        } elseif ($type === 'sfinlog') {
+                            $badges[] = '<span class="badge bg-info">SFinlog</span>';
+                        }
+                    }
+                    
+                    return '<div class="text-center">'.implode(' ', $badges).'</div>';
                 })
                 ->html(),
 

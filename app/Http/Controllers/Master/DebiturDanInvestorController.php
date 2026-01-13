@@ -39,6 +39,10 @@ class DebiturDanInvestorController extends Controller
             }
             $validated['tanda_tangan'] = $file;
 
+            if (isset($validated['kode_perusahaan'])) {
+                $validated['kode_perusahaan'] = strtoupper($validated['kode_perusahaan']);
+            }
+
             $user = User::create([
                 'name' => $validated['nama'],
                 'email' => $validated['email'],
@@ -89,6 +93,7 @@ class DebiturDanInvestorController extends Controller
             $result = [
                 'nama' => $debitur->nama,
                 'deposito' => $debitur->deposito,
+                'flagging_investor' => $debitur->flagging_investor,
                 'alamat' => $debitur->alamat,
                 'email' => $debitur->email,
                 'no_telepon' => $debitur->no_telepon,
@@ -98,6 +103,7 @@ class DebiturDanInvestorController extends Controller
         } else {
             $result = [
                 'nama' => $debitur->nama,
+                'kode_perusahaan' => $debitur->kode_perusahaan,
                 'nama_ceo' => $debitur->nama_ceo,
                 'alamat' => $debitur->alamat,
                 'email' => $debitur->email,
@@ -125,15 +131,21 @@ class DebiturDanInvestorController extends Controller
             DB::beginTransaction();
 
             // Handle file upload for both debitur and investor
-            $file = $debitur->tanda_tangan;
             if ($request->tanda_tangan) {
                 // Delete old file if exists
-                if ($file && Storage::disk('public')->exists($debitur->tanda_tangan)) {
+                if ($debitur->tanda_tangan && Storage::disk('public')->exists($debitur->tanda_tangan)) {
                     Storage::disk('public')->delete($debitur->tanda_tangan);
                 }
 
                 $file = Storage::disk('public')->put('tanda_tangan', $request->tanda_tangan);
                 $validated['tanda_tangan'] = $file;
+            } else {
+                // If no new file, keep the old one
+                $validated['tanda_tangan'] = $debitur->tanda_tangan;
+            }
+
+            if (isset($validated['kode_perusahaan'])) {
+                $validated['kode_perusahaan'] = strtoupper($validated['kode_perusahaan']);
             }
 
             // Update user if exists
@@ -248,6 +260,42 @@ class DebiturDanInvestorController extends Controller
                 'success' => false,
                 'message' => 'Gagal menghapus tanda tangan: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Unlock a locked account
+     */
+    public function unlock($id)
+    {
+        try {
+            $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
+
+            if ($debitur->status !== 'locked') {
+                return Response::error('Akun tidak dalam status terkunci');
+            }
+
+            DB::beginTransaction();
+
+            // Update debitur status
+            $debitur->update(['status' => 'active']);
+
+            // Reset user login attempts if user exists
+            if ($debitur->user_id) {
+                $user = User::find($debitur->user_id);
+                if ($user) {
+                    $user->resetLoginAttempts();
+                }
+            }
+
+            DB::commit();
+
+            return Response::success([
+                'status' => 'active'
+            ], 'Akun berhasil dibuka kuncinya');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorCatch($e);
         }
     }
 }

@@ -20,7 +20,7 @@ class PeminjamanCreate extends Component
     private string $validateClass = PeminjamanRequest::class;
     
     #[FieldInput]
-    public $id_debitur, $id_cells_project, $nama_project, $durasi_project, $durasi_project_hari, $nib_perusahaan;
+    public $id_debitur, $id_cells_project, $nama_project, $durasi_project, $durasi_project_hari;
     
     #[FieldInput]
     public $nilai_pinjaman, $presentase_bagi_hasil, $nilai_bagi_hasil, $total_pinjaman;
@@ -32,7 +32,7 @@ class PeminjamanCreate extends Component
     public $dokumen_mitra, $form_new_customer, $dokumen_kerja_sama, $dokumen_npa;
     
     #[FieldInput]
-    public $akta_perusahaan, $ktp_owner, $ktp_pic, $surat_izin_usaha;
+    public $akta_perusahaan, $ktp_owner, $ktp_pic, $surat_izin_usaha, $nib_perusahaan;
     
     #[FieldInput]
     public $catatan;
@@ -84,7 +84,7 @@ class PeminjamanCreate extends Component
     public function setterFormData()
     {
         $fileFields = ['dokumen_mitra', 'form_new_customer', 'dokumen_kerja_sama', 'dokumen_npa', 
-                      'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha'];
+                      'akta_perusahaan', 'ktp_owner', 'ktp_pic', 'surat_izin_usaha', 'nib_perusahaan'];
         
         foreach ($this->getUniversalFieldInputs() as $field) {
             $value = $this->{$field};

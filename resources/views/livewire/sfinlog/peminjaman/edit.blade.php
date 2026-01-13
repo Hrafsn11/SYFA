@@ -2,8 +2,11 @@
     <div class="row">
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">Pengajuan Pinjaman</h4>
-                <a href="{{ route('sfinlog.peminjaman.index') }}" class="btn btn-outline-primary">
+                <div>
+                    <h4 class="fw-bold mb-1">Edit Peminjaman Dana - <span class="">{{ $peminjaman->nomor_peminjaman }}</span></h4>
+                </div>
+                <a href="{{ route('sfinlog.peminjaman.detail', ['id' => $id_peminjaman]) }}"
+                    class="btn btn-outline-primary">
                     <i class="ti ti-arrow-left me-1"></i>
                     Kembali
                 </a>
@@ -13,7 +16,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form id="formPeminjamanDana" novalidate>
+            <form id="formEditPeminjamanDana" novalidate>
                 <h5 class="mb-3">Informasi Perusahaan & Project</h5>
                 <div class="row">
                     <div class="col-lg-12 mb-3">
@@ -34,7 +37,9 @@
                                 data-placeholder="Pilih Project" required>
                                 <option value=""></option>
                                 @foreach ($projects as $project)
-                                    <option value="{{ $project->id_cells_project }}">{{ $project->nama_cells_bisnis }}
+                                    <option value="{{ $project->id_cells_project }}"
+                                        {{ $id_cells_project == $project->id_cells_project ? 'selected' : '' }}>
+                                        {{ $project->nama_cells_bisnis }}
                                     </option>
                                 @endforeach
                             </select>
@@ -52,7 +57,9 @@
                                 data-placeholder="Pilih Project" required>
                                 <option value=""></option>
                                 @foreach ($availableProjects as $project)
-                                    <option value="{{ $project['nama_project'] }}">{{ $project['nama_project'] }}
+                                    <option value="{{ $project['nama_project'] }}"
+                                        {{ $nama_project == $project['nama_project'] ? 'selected' : '' }}>
+                                        {{ $project['nama_project'] }}
                                     </option>
                                 @endforeach
                             </select>
@@ -62,11 +69,11 @@
                         @enderror
                     </div>
 
-                                        <div class="col-md-3 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="durasi_project" class="form-label">Durasi Project (Bulan) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project" class="form-control"
-                            placeholder="Masukkan durasi bulan" wire:model="durasi_project" value="0" min="0" required>
+                            placeholder="Masukkan durasi bulan" wire:model="durasi_project" min="0" required>
                         @error('durasi_project')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -75,7 +82,7 @@
                         <label for="durasi_project_hari" class="form-label">Durasi Project (Hari) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project_hari" class="form-control"
-                            placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" value="0" min="0" required>
+                            placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" min="0" required>
                         @error('durasi_project_hari')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -83,9 +90,17 @@
                     <div class="col-md-6 mb-3">
                         <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
                                 class="text-danger">*</span></label>
-                        <input type="file" id="nib_perusahaan" class="form-control" 
-                            wire:model.blur="nib_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <input type="file" id="nib_perusahaan" class="form-control" wire:model.blur="nib_perusahaan"
+                            accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
+                        @if ($existing_nib_perusahaan)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_nib_perusahaan) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('nib_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -102,7 +117,7 @@
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
                             <input type="text" id="nilai_pinjaman" class="form-control input-rupiah"
-                                placeholder="Rp 0" required>
+                                placeholder="Rp 0" required data-initial="{{ $nilai_pinjaman }}">
                         </div>
                         @error('nilai_pinjaman')
                             <span class="text-danger">{{ $message }}</span>
@@ -113,8 +128,9 @@
                         <label for="presentase_bagi_hasil" class="form-label">Persentase Bagi Hasil <span
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
-                            <select id="presentase_bagi_hasil" name="presentase_bagi_hasil" class="form-select select2"
-                                data-placeholder="Pilih Persentase Bagi Hasil" required>
+                            <select id="presentase_bagi_hasil" name="presentase_bagi_hasil"
+                                class="form-select select2" data-placeholder="Pilih Persentase Bagi Hasil"
+                                data-initial="{{ $presentase_bagi_hasil }}" required>
                                 <option value=""></option>
                             </select>
                         </div>
@@ -128,7 +144,7 @@
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
                             <input type="text" id="nilai_bagi_hasil" class="form-control input-rupiah"
-                                placeholder="Rp 0" readonly disabled>
+                                placeholder="Rp 0" readonly disabled data-initial="{{ $nilai_bagi_hasil }}">
                         </div>
                         @error('nilai_bagi_hasil')
                             <span class="text-danger">{{ $message }}</span>
@@ -140,7 +156,7 @@
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
                             <input type="text" id="total_pinjaman" class="form-control input-rupiah"
-                                placeholder="Rp 0" readonly disabled>
+                                placeholder="Rp 0" readonly disabled data-initial="{{ $total_pinjaman }}">
                         </div>
                         @error('total_pinjaman')
                             <span class="text-danger">{{ $message }}</span>
@@ -158,7 +174,8 @@
                                 class="text-danger">*</span></label>
                         <div class="input-group" wire:ignore>
                             <input type="text" class="form-control bs-datepicker" placeholder="yyyy-mm-dd"
-                                id="harapan_tanggal_pencairan" name="harapan_tanggal_pencairan" required />
+                                id="harapan_tanggal_pencairan" name="harapan_tanggal_pencairan"
+                                value="{{ $harapan_tanggal_pencairan }}" required />
                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                         </div>
                         @error('harapan_tanggal_pencairan')
@@ -182,7 +199,8 @@
                         <div class="input-group" wire:ignore>
                             <input type="text" class="form-control bs-datepicker" placeholder="yyyy-mm-dd"
                                 id="rencana_tanggal_pengembalian" name="rencana_tanggal_pengembalian" disabled
-                                required wire:model.blur="rencana_tgl_pengembalian" />
+                                value="{{ $rencana_tgl_pengembalian }}" required
+                                wire:model.blur="rencana_tgl_pengembalian" />
                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                         </div>
                         @error('rencana_tgl_pengembalian')
@@ -195,12 +213,25 @@
 
                 <!-- Dokumen Persyaratan -->
                 <h5 class="mb-3">Dokumen Persyaratan</h5>
+                <div class="alert alert-info mb-3">
+                    <i class="ti ti-info-circle me-2"></i>
+                    Upload file baru hanya jika ingin mengganti dokumen yang sudah ada.
+                </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan (Kontrak/PO/Invoice/PKS)</label>
+                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan
+                            (Kontrak/PO/Invoice/PKS)</label>
                         <input type="file" id="dokumen_mitra" class="form-control"
                             wire:model.blur="dokumen_mitra" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
+                        @if ($existing_dokumen_mitra)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_dokumen_mitra) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('dokumen_mitra')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -210,8 +241,16 @@
                         <label for="form_new_customer" class="form-label">Form New Customer <span
                                 class="text-danger">*</span></label>
                         <input type="file" id="form_new_customer" class="form-control"
-                            wire:model.blur="form_new_customer" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                            wire:model.blur="form_new_customer" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
+                        @if ($existing_form_new_customer)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_form_new_customer) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('form_new_customer')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -221,8 +260,16 @@
                         <label for="dokumen_kerja_sama" class="form-label">Dokumen Kerja Sama <span
                                 class="text-danger">*</span></label>
                         <input type="file" id="dokumen_kerja_sama" class="form-control"
-                            wire:model.blur="dokumen_kerja_sama" accept=".pdf,.doc,.docx" required>
+                            wire:model.blur="dokumen_kerja_sama" accept=".pdf,.doc,.docx">
                         <small class="text-muted">Format: PDF, DOC, DOCX (Max: 2MB)</small>
+                        @if ($existing_dokumen_kerja_sama)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_dokumen_kerja_sama) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('dokumen_kerja_sama')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -232,8 +279,16 @@
                         <label for="dokumen_npa" class="form-label">Dokumen NPA <span
                                 class="text-danger">*</span></label>
                         <input type="file" id="dokumen_npa" class="form-control" wire:model.blur="dokumen_npa"
-                            accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+                            accept=".pdf,.doc,.docx,.xls,.xlsx">
                         <small class="text-muted">Format: PDF, DOC, DOCX, XLS, XLSX (Max: 2MB)</small>
+                        @if ($existing_dokumen_npa)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_dokumen_npa) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('dokumen_npa')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -244,6 +299,14 @@
                         <input type="file" id="akta_perusahaan" class="form-control"
                             wire:model.blur="akta_perusahaan" accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
+                        @if ($existing_akta_perusahaan)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_akta_perusahaan) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('akta_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -254,6 +317,14 @@
                         <input type="file" id="ktp_owner" class="form-control" wire:model.blur="ktp_owner"
                             accept=".jpg,.jpeg,.png,.pdf">
                         <small class="text-muted">Format: JPG, PNG, PDF (Max: 2MB)</small>
+                        @if ($existing_ktp_owner)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_ktp_owner) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('ktp_owner')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -262,8 +333,16 @@
                     <div class="col-md-6 mb-3">
                         <label for="ktp_pic" class="form-label">KTP PIC <span class="text-danger">*</span></label>
                         <input type="file" id="ktp_pic" class="form-control" wire:model.blur="ktp_pic"
-                            accept=".jpg,.jpeg,.png,.pdf" required>
+                            accept=".jpg,.jpeg,.png,.pdf">
                         <small class="text-muted">Format: JPG, PNG, PDF (Max: 2MB)</small>
+                        @if ($existing_ktp_pic)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_ktp_pic) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('ktp_pic')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -274,6 +353,14 @@
                         <input type="file" id="surat_izin_usaha" class="form-control"
                             wire:model.blur="surat_izin_usaha" accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
+                        @if ($existing_surat_izin_usaha)
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $existing_surat_izin_usaha) }}" target="_blank"
+                                    class="btn btn-sm btn-outline-info">
+                                    <i class="ti ti-eye me-1"></i> Lihat File Saat Ini
+                                </a>
+                            </div>
+                        @endif
                         @error('surat_izin_usaha')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -288,7 +375,7 @@
                     <div class="col-12 mb-3">
                         <label for="catatan" class="form-label">Catatan Lainnya</label>
                         <textarea class="form-control" id="catatan" name="catatan" rows="4"
-                            placeholder="Masukkan catatan tambahan (opsional)" wire:model.blur="catatan"></textarea>
+                            placeholder="Masukkan catatan tambahan (opsional)" wire:model.blur="catatan">{{ $catatan }}</textarea>
                         @error('catatan')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -299,10 +386,15 @@
 
                 <div class="row">
                     <div class="col-12 d-flex justify-content-end gap-2">
+                        <a href="{{ route('sfinlog.peminjaman.detail', ['id' => $id_peminjaman]) }}"
+                            class="btn btn-outline-secondary">
+                            <i class="ti ti-x me-1"></i>
+                            Batal
+                        </a>
                         <button type="submit" class="btn btn-primary">
                             <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSimpanSpinner"></span>
                             <i class="ti ti-device-floppy me-1"></i>
-                            Simpan Pengajuan
+                            Simpan Perubahan
                         </button>
                     </div>
                 </div>
@@ -328,6 +420,12 @@
             const initCleave = () => ['nilai_pinjaman', 'nilai_bagi_hasil', 'total_pinjaman'].forEach(id => {
                 if (cleaveInstances[id]) cleaveInstances[id].destroy();
                 cleaveInstances[id] = new Cleave(`#${id}`, cleaveConfig);
+
+                // Set initial value if exists
+                const initialValue = $(`#${id}`).data('initial');
+                if (initialValue) {
+                    cleaveInstances[id].setRawValue(initialValue);
+                }
             });
             const getCleave = (id) => parseInt(cleaveInstances[id]?.getRawValue()) || 0;
             const setCleave = (id, val) => cleaveInstances[id]?.setRawValue(val);
@@ -380,6 +478,8 @@
                 @this.set('nama_project', $(this).val());
             });
 
+            // Initialize presentase_bagi_hasil with options and set initial value
+            const initialPresentase = $('#presentase_bagi_hasil').data('initial');
             $('#presentase_bagi_hasil').select2({
                 placeholder: 'Pilih Persentase Bagi Hasil',
                 allowClear: true,
@@ -396,6 +496,10 @@
             }).on('change', function() {
                 @this.set('presentase_bagi_hasil', $(this).val());
             });
+
+            if (initialPresentase) {
+                $('#presentase_bagi_hasil').val(initialPresentase).trigger('change');
+            }
 
             // Event handlers
             $('#harapan_tanggal_pencairan').on('changeDate', function() {
@@ -448,7 +552,7 @@
             $('#top').on('input', hitungTanggalPengembalian);
 
             // Form submit
-            $('#formPeminjamanDana').on('submit', function(e) {
+            $('#formEditPeminjamanDana').on('submit', function(e) {
                 e.preventDefault();
 
                 // Sync all Cleave values before submit
@@ -458,16 +562,17 @@
 
                 // Show confirmation
                 Swal.fire({
-                    title: 'Konfirmasi Pengajuan',
-                    text: 'Apakah Anda yakin ingin mengajukan peminjaman dana ini?',
+                    title: 'Konfirmasi Perubahan',
+                    text: 'Apakah Anda yakin ingin menyimpan perubahan peminjaman dana ini?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Ya, Ajukan',
+                    confirmButtonText: 'Ya, Simpan',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        @this.call('saveData', 'sfinlog.peminjaman.store', {
-                            callback: 'afterAction'
+                        @this.call('saveData', 'sfinlog.peminjaman.update', {
+                            callback: 'afterAction',
+                            id: '{{ $id_peminjaman }}'
                         });
                     }
                 });
@@ -479,11 +584,11 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: payload.message || 'Pengajuan peminjaman dana berhasil disimpan.',
+                    text: payload.message || 'Perubahan peminjaman dana berhasil disimpan.',
                     showConfirmButton: false,
                     timer: 1500
                 }).then(() => {
-                    window.location.href = "{{ route('sfinlog.peminjaman.index') }}";
+                    window.location.href = "{{ route('sfinlog.peminjaman.detail', ['id' => $id_peminjaman]) }}";
                 });
             } else {
                 Swal.fire({

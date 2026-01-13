@@ -22,6 +22,7 @@ class MasterDebiturDanInvestor extends Model
         'user_id',
         'id_kol',
         'nama',
+        'kode_perusahaan',
         'alamat',
         'email',
         'npa',
@@ -33,11 +34,13 @@ class MasterDebiturDanInvestor extends Model
         'no_rek',
         'npwp',
         'flagging',
+        'flagging_investor',
         'tanda_tangan',
     ];
 
     protected $casts = [
         'flagging' => 'string',
+        'flagging_investor' => 'string',
         'status' => 'string',
         'deposito' => 'string',
     ];
@@ -65,5 +68,35 @@ class MasterDebiturDanInvestor extends Model
     public function Investor($query)
     {
         return $query->where('flagging', 'ya');
+    }
+
+    /**
+     * Check if investor is registered in a specific platform type
+     * 
+     * @param string $type sfinance, sfinlog, or both
+     * @return bool
+     */
+    public function isInvestorType(string $type): bool
+    {
+        if (!$this->flagging_investor) {
+            return false;
+        }
+
+        $types = array_map('trim', explode(',', $this->flagging_investor));
+        return in_array($type, $types);
+    }
+
+    /**
+     * Get investor types as array
+     * 
+     * @return array
+     */
+    public function getInvestorTypes(): array
+    {
+        if (!$this->flagging_investor) {
+            return [];
+        }
+
+        return array_map('trim', explode(',', $this->flagging_investor));
     }
 }

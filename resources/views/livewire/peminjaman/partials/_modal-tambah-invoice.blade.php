@@ -46,9 +46,10 @@
                             <label class="form-label">Invoice Date</label>
                             <div class="input-group">
                                 <input type="text" class="form-control bs-datepicker-modal" id="modal_invoice_date"
-                                    placeholder="DD/MM/YYYY">
+                                    placeholder="DD/MM/YYYY" data-allow-past="true">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
+                            <small class="text-muted">Tanggal invoice boleh di masa lalu (backdate diizinkan)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Due Date</label>
@@ -191,9 +192,10 @@
                             <label class="form-label">Invoice Date</label>
                             <div class="input-group">
                                 <input type="text" class="form-control bs-datepicker-modal"
-                                    id="modal_invoice_date_inst" placeholder="DD/MM/YYYY">
+                                    id="modal_invoice_date_inst" placeholder="DD/MM/YYYY" data-allow-past="true">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
+                            <small class="text-muted">Tanggal invoice boleh di masa lalu (backdate diizinkan)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nama Barang <span class="text-danger">*</span></label>

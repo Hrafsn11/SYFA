@@ -59,7 +59,10 @@ class DebiturPiutangFinlogTable extends DataTableComponent
                 ->format(fn($val) => 'Rp ' . number_format($val, 0, ',', '.')),
 
             Column::make('Bagi Hasil / Minggu', 'nilai_bagi_hasil')
-                ->format(fn($val) => 'Rp ' . number_format($val / 4, 0, ',', '.')),
+                ->label(function ($row) {
+                    $pembagi = $this->getPembagiBerdasarkanTOP($row->top ?? 0);
+                    return 'Rp ' . number_format($row->nilai_bagi_hasil / $pembagi, 0, ',', '.');
+                }),
 
             Column::make('Bagi Hasil per Minggu (Keterlambatan)')
                 ->label(function ($row) {
@@ -77,8 +80,11 @@ class DebiturPiutangFinlogTable extends DataTableComponent
                         now()->diffInWeeks($row->rencana_tgl_pengembalian)
                     );
 
+                    // Pembagi berdasarkan TOP
+                    $pembagi = $this->getPembagiBerdasarkanTOP($row->top ?? 0);
+
                     // Bagi hasil per minggu
-                    $bagiHasilPerMinggu = $row->nilai_bagi_hasil / 4;
+                    $bagiHasilPerMinggu = $row->nilai_bagi_hasil / $pembagi;
 
                     // Bagi hasil TOP (awal)
                     $bagiHasilTOP = $row->nilai_bagi_hasil;
@@ -190,5 +196,25 @@ class DebiturPiutangFinlogTable extends DataTableComponent
     private function getBayarBagiHasil($row)
     {
         return $row->nilai_bagi_hasil - $this->getSisaBagiHasil($row);
+    }
+
+    /**
+     * Menghitung pembagi bagi hasil berdasarkan TOP (hari)
+     * 
+     * @param int $top TOP dalam hari
+     * @return int Pembagi untuk perhitungan bagi hasil per minggu
+     */
+    private function getPembagiBerdasarkanTOP(int $top): int
+    {
+        if ($top >= 1 && $top <= 7) {
+            return 1;
+        } elseif ($top >= 8 && $top <= 14) {
+            return 2;
+        } elseif ($top >= 15 && $top <= 21) {
+            return 3;
+        } else {
+            // TOP 22 dan seterusnya
+            return 4;
+        }
     }
 }

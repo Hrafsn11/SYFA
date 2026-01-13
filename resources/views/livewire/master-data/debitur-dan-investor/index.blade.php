@@ -57,6 +57,8 @@
 @push('scripts')
 <script>
     var currentTabType = 'debitur';
+    var isEditMode = false;
+    
     function afterAction(payload) {
         Livewire.dispatch('refreshDebiturTable');
         Livewire.dispatch('refreshInvestorTable');
@@ -83,6 +85,8 @@
             $('#label-alamat').text('Alamat Investor');
             $('#alamat').attr('placeholder', 'Masukkan alamat investor');
             $('#label-ttd').text('Upload Tanda Tangan Investor');
+            $('#ttd-required').show();
+            $('.modal-title').text('Tambah Investor');
             @this.set('flagging', 'ya');
         } else {
             $('.debitur-section').removeClass('d-none');
@@ -91,44 +95,84 @@
             $('#label-alamat').text('Alamat Perusahaan');
             $('#alamat').attr('placeholder', 'Masukkan alamat perusahaan');
             $('#label-ttd').text('Upload Tanda Tangan Debitur');
+            $('#ttd-required').show();
+            $('.modal-title').text('Tambah Debitur');
             @this.set('flagging', 'tidak');
         }
     });
 
     function editData(payload) {
         const data = payload.data;
+        isEditMode = true;
         
         const modal = $('#modalTambahDebitur');
-        const form = modal.find('form');
-
-        form.attr('wire:submit', `{!! $urlAction["update_master_debitur_dan_investor"] !!}`.replace('id_placeholder', data.id));
         
         // ubah title modal
         modal.find('.modal-title').html('Edit ' + (data.flagging == 'ya' ? 'Investor' : 'Debitur'));
 
+        // tampilkan password section dengan label edit mode
+        modal.find('.password-section').removeClass('d-none');
+        modal.find('#password-label').html('Password Baru <small class="text-muted">(kosongkan jika tidak ingin mengubah)</small>');
+        modal.find('#password-confirm-label').html('Konfirmasi Password Baru');
+        modal.find('#password-required').addClass('d-none');
+        modal.find('#password-confirm-required').addClass('d-none');
+        
         // tampilkan modal
         modal.find('.password-section').addClass('d-none');
+        // Sembunyikan required asterisk untuk tanda tangan saat edit
+        modal.find('#ttd-required').hide();
         modal.modal('show');
 
+        // Set flagging_investor first dan sync dengan Livewire
+        if (data.flagging_investor) {
+            @this.set('flagging_investor', data.flagging_investor);
+            // Juga set radio button manually
+            $('input[name="flagging_investor"][value="' + data.flagging_investor + '"]').prop('checked', true);
+        }
+
+        // Set fields lainnya
         Object.entries(data).forEach(([key, value]) => {
-            if (['nama_bank', 'id_kol'].includes(key)) {
+            if (key === 'flagging_investor') {
+                // Already handled above
+                return;
+            } else if (['nama_bank', 'id_kol'].includes(key)) {
+                // Select dropdown handling
                 $('#' + key).val(value).trigger('change');
             } else {
                 @this.set(key, value);
             }
         });
+        
+        // Clear password fields for edit mode
+        @this.set('password', '');
+        @this.set('password_confirmation', '');
     }
 
     $('.modal').on('hide.bs.modal', function() {
-        $(this).find('form').attr('wire:submit', `{!! $urlAction["store_master_debitur_dan_investor"] !!}`);
+        isEditMode = false;
         $(this).find('.modal-title').text(currentTabType == 'debitur' ? 'Tambah Debitur' : 'Tambah Investor');
         $(this).find('.password-section').removeClass('d-none');
+        
+        // Reset password labels for create mode
+        $(this).find('#password-label').html('Password <span class="text-danger" id="password-required">*</span>');
+        $(this).find('#password-confirm-label').html('Konfirmasi Password <span class="text-danger" id="password-confirm-required">*</span>');
+        $(this).find('#password-required').removeClass('d-none');
+        $(this).find('#password-confirm-required').removeClass('d-none');
+        // Tampilkan kembali required asterisk untuk tanda tangan
+        $(this).find('#ttd-required').show();
 
         if (currentTabType === 'investor') {
             $(this).find('.modal-title').text('Tambah Investor');
         } else {
             $(this).find('.modal-title').text('Tambah Debitur');
         }
+
+        // Reset all form fields
+        @this.call('resetFormData');
+        $(this).find('form')[0].reset();
+        // Reset select2 and other inputs
+        $(this).find('select').val('').trigger('change');
+        $(this).find('input[type="radio"]').prop('checked', false);
     });
 
     $(document).on('click', '.debitur-toggle-status-btn', function(e) {
@@ -144,6 +188,22 @@
             cancelButtonText: 'Batal',
         }, () => {
             @this.saveData("master-data.debitur-investor.toggle-status", {"id" : id, "callback" : "afterAction"});
+        });
+    });
+
+    // Handler untuk unlock button
+    $(document).on('click', '.debitur-unlock-btn', function(e) {
+        e.preventDefault();
+        const id = $(this).data('id');
+
+        sweetAlertConfirm({
+            title: 'Unlock Akun',
+            text: 'Apakah Anda yakin ingin membuka kunci akun ini? Pengguna akan dapat login kembali.',
+            icon: 'question',
+            confirmButtonText: 'Ya, Unlock',
+            cancelButtonText: 'Batal',
+        }, () => {
+            @this.saveData("master-data.debitur-investor.unlock", {"id" : id, "callback" : "afterAction"});
         });
     });
 </script>

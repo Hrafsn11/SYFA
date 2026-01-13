@@ -93,15 +93,31 @@ class NotificationSFinanceSeeder extends Seeder
             'message' => 'Pengajuan pinjaman baru telah diterima dari debitur [[nama.debitur]]. Silakan lakukan proses verifikasi.',
         ]);
 
+        // Notifikasi untuk Debitur
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_ditolak_finance_ski->id_notification_feature,
             'role_assigned' => json_encode([$debitur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
         ]);
 
+        // Notifikasi untuk Direktur SKI
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_ditolak_finance_ski->id_notification_feature,
+            'role_assigned' => json_encode([$direktur->id]),
+            'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
+        ]);
+
+        // Notifikasi untuk Debitur
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_disetujui_finance_ski->id_notification_feature,
             'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
+        ]);
+
+        // Notifikasi untuk Direktur SKI
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_disetujui_finance_ski->id_notification_feature,
+            'role_assigned' => json_encode([$direktur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
         ]);
 
@@ -371,51 +387,83 @@ class NotificationSFinanceSeeder extends Seeder
             'message' => 'Pengajuan investasi baru telah diterima dari investor [[nama.investor]].',
         ]);
 
-        // 2. Pengajuan Investasi Disetujui oleh SKI Finance - Investor
+        // 2. Pengajuan Investasi Disetujui oleh SKI Finance - Investor dan CEO SKI
         $pengajuan_investasi_disetujui_finance = NotificationFeature::firstOrCreate([
             'name' => 'pengajuan_investasi_disetujui_finance_ski',
             'module' => 's_finance',
         ]);
 
+        // Notifikasi untuk Investor
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_investasi_disetujui_finance->id_notification_feature,
             'role_assigned' => json_encode([$investor->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh SKI Finance.',
         ]);
 
-        // 3. Pengajuan Investasi Ditolak oleh SKI Finance - Investor
+        // Notifikasi untuk CEO SKI
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_disetujui_finance->id_notification_feature,
+            'role_assigned' => json_encode([$ceo->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh SKI Finance.',
+        ]);
+
+        // 3. Pengajuan Investasi Ditolak oleh SKI Finance - Investor dan CEO SKI
         $pengajuan_investasi_ditolak_finance = NotificationFeature::firstOrCreate([
             'name' => 'pengajuan_investasi_ditolak_finance_ski',
             'module' => 's_finance',
         ]);
 
+        // Notifikasi untuk Investor
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_investasi_ditolak_finance->id_notification_feature,
             'role_assigned' => json_encode([$investor->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh SKI Finance.',
         ]);
 
-        // 4. Pengajuan Investasi Disetujui oleh CEO SKI - SKI Finance
+        // Notifikasi untuk CEO SKI
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_ditolak_finance->id_notification_feature,
+            'role_assigned' => json_encode([$ceo->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh SKI Finance.',
+        ]);
+
+        // 4. Pengajuan Investasi Disetujui oleh CEO SKI - SKI Finance dan Investor
         $pengajuan_investasi_disetujui_ceo = NotificationFeature::firstOrCreate([
             'name' => 'pengajuan_investasi_disetujui_ceo_ski',
             'module' => 's_finance',
         ]);
 
+        // Notifikasi untuk SKI Finance
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_investasi_disetujui_ceo->id_notification_feature,
             'role_assigned' => json_encode([$finance->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh CEO SKI.',
         ]);
 
-        // 5. Pengajuan Investasi Ditolak oleh CEO SKI - SKI Finance
+        // Notifikasi untuk Investor
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_disetujui_ceo->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh CEO SKI.',
+        ]);
+
+        // 5. Pengajuan Investasi Ditolak oleh CEO SKI - SKI Finance dan Investor
         $pengajuan_investasi_ditolak_ceo = NotificationFeature::firstOrCreate([
             'name' => 'pengajuan_investasi_ditolak_ceo_ski',
             'module' => 's_finance',
         ]);
 
+        // Notifikasi untuk SKI Finance
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_investasi_ditolak_ceo->id_notification_feature,
             'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh CEO SKI.',
+        ]);
+
+        // Notifikasi untuk Investor
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $pengajuan_investasi_ditolak_ceo->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh CEO SKI.',
         ]);
 

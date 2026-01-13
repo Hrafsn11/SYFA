@@ -6,8 +6,8 @@
                 <h5 class="modal-title" id="modalTambahDebiturLabel">Tambah Debitur</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="formTambahDebitur" wire:submit="{{ $urlAction['store_master_debitur_dan_investor'] }}">
-                <input type="hidden" id="hiddenFlagging" wire:model.blur="flagging">
+            <form id="formTambahDebitur" wire:submit.prevent="submit">
+                <input type="hidden" id="hiddenFlagging" wire:model="flagging">
                 <div class="modal-body">
                     <div class="row">
                         <!-- Nama Perusahaan / Nama Investor -->
@@ -17,6 +17,18 @@
                             </label>
                             <input type="text" class="form-control" id="nama"
                                 placeholder="Masukkan Nama Perusahaan" wire:model.blur="nama">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                            <label for="kode_perusahaan" class="form-label">
+                                Kode Perusahaan <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="kode_perusahaan"
+                                placeholder="Masukan Kode Perusahaan" wire:model.blur="kode_perusahaan" minlength="2" maxlength="4" style="text-transform: uppercase;">
+                            <small class="text-muted">
+                               Minimal 2 karakter, maksimal 4 karakter (huruf dan angka, contoh: TECH)
+                            </small>
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -40,6 +52,37 @@
                                 </div>
                             </div>
                             <div class="invalid-feedback"></div>
+                        </div>
+
+                        <!-- Flagging Investor (Khusus Investor) -->
+                        <div class="col-12 mb-3 form-group investor-section d-none">
+                            <label class="form-label">Tipe Investor <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_sfinance" value="sfinance"
+                                        wire:model.blur="flagging_investor" name="flagging_investor">
+                                    <label class="form-check-label" for="flagging_investor_sfinance">
+                                        SFinance
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_sfinlog" value="sfinlog"
+                                        wire:model.blur="flagging_investor" name="flagging_investor">
+                                    <label class="form-check-label" for="flagging_investor_sfinlog">
+                                        SFinlog
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_both" value="sfinance,sfinlog"
+                                        wire:model.blur="flagging_investor" name="flagging_investor">
+                                    <label class="form-check-label" for="flagging_investor_both">
+                                        Keduanya
+                                    </label>
+                                </div>
+                            </div>
+                            @error('flagging_investor')
+                                <div class="text-danger small mt-2">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Nama CEO (Hanya untuk Debitur) -->
@@ -125,7 +168,7 @@
                         <!-- Upload Tanda Tangan (Untuk Debitur dan Investor) -->
                         <div class="col-12 mb-3 form-group">
                             <label class="form-label">
-                                <span id="label-ttd">Upload Tanda Tangan</span> <span class="text-danger">*</span>
+                                <span id="label-ttd">Upload Tanda Tangan</span> <span class="text-danger" id="ttd-required">*</span>
                             </label>
                             <input type="file" class="form-control" id="tanda_tangan"
                                 wire:model.blur="tanda_tangan" accept="image/jpeg,image/png,image/jpg">
@@ -136,7 +179,7 @@
 
                         <!-- Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password" class="form-label">Password <span class="text-danger"
+                            <label for="password" class="form-label" id="password-label">Password <span class="text-danger"
                                     id="password-required">*</span></label>
                             <input type="password" class="form-control" id="password"
                                 placeholder="Masukkan password" wire:model.blur="password"
@@ -149,7 +192,7 @@
 
                         <!-- Confirm Password -->
                         <div class="col-md-6 mb-3 form-group password-section">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password <span
+                            <label for="password_confirmation" class="form-label" id="password-confirm-label">Konfirmasi Password <span
                                     class="text-danger" id="password-confirm-required">*</span></label>
                             <input type="password" class="form-control" id="password_confirmation"
                                 wire:model.blur="password_confirmation" placeholder="Konfirmasi password"
@@ -162,9 +205,8 @@
                     <button type="button" class="btn btn-danger" id="btnHapusDataModal" style="display: none;">
                         <i class="ti ti-trash me-1"></i> Hapus Data
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <span class="spinner-border spinner-border-sm me-2" wire:loading
-                            wire:target="saveData"></span>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="submit">
+                        <span class="spinner-border spinner-border-sm me-2" wire:loading wire:target="submit"></span>
                         Simpan
                     </button>
                 </div>

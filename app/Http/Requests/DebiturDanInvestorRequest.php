@@ -27,6 +27,7 @@ class DebiturDanInvestorRequest extends FormRequest
         $validate = [
             'id_kol' => 'required_if:flagging,tidak|exists:master_kol,id_kol',
             'nama' => 'required|max:255',
+            'kode_perusahaan' => 'required_if:flagging,tidak|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan',
             'alamat' => 'required|max:500',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => [
@@ -42,11 +43,17 @@ class DebiturDanInvestorRequest extends FormRequest
             'no_rek' => 'required|max:100',
             'npwp' => 'nullable|numeric|unique:master_debitur_dan_investor,npwp',
             'flagging' => 'required|in:ya,tidak',
+            'flagging_investor' => [
+                'required_if:flagging,ya',
+                'nullable',
+                'regex:/^(sfinance|sfinlog)(,(sfinance|sfinlog))?$/'
+            ],
             'tanda_tangan' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ];
 
         if ($this->id) {
             $validate['id_kol'] = 'nullable|exists:master_kol,id_kol';
+            $validate['kode_perusahaan'] = 'required_if:flagging,tidak|min:2|max:4|regex:/^[A-Za-z0-9]+$/|unique:master_debitur_dan_investor,kode_perusahaan,' . $this->id . ',id_debitur';
             unset($validate['password'], $validate['password_confirmation']);
             $validate['email'] = ['required', 'email', 'max:255', function ($attribute, $value, $fail) {
                 $master = MasterDebiturDanInvestor::where('id_debitur', $this->id)->first();
@@ -54,9 +61,7 @@ class DebiturDanInvestorRequest extends FormRequest
                 if ($user) $fail('Email sudah digunakan.');
             }];
 
-            if ($this->flagging == 'tidak') {
-                $validate['tanda_tangan'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
-            }
+            $validate['tanda_tangan'] = 'nullable|image|mimes:jpeg,png,jpg|max:2048';
             $validate['npwp'] = 'nullable|numeric|unique:master_debitur_dan_investor,npwp,' . $this->id . ',id_debitur';
         }
 
@@ -69,6 +74,11 @@ class DebiturDanInvestorRequest extends FormRequest
             'id_kol.required_if' => 'Kol harus diisi.',
             'id_kol.exists' => 'Kol tidak valid.',
             'nama.required' => 'Nama harus diisi.',
+            'kode_perusahaan.required_if' => 'Kode perusahaan harus diisi untuk debitur.',
+            'kode_perusahaan.min' => 'Kode perusahaan minimal 2 karakter.',
+            'kode_perusahaan.max' => 'Kode perusahaan tidak boleh lebih dari 4 karakter.',
+            'kode_perusahaan.regex' => 'Kode perusahaan hanya boleh mengandung huruf dan angka.',
+            'kode_perusahaan.unique' => 'Kode perusahaan sudah digunakan.',
             'alamat.required' => 'Alamat harus diisi.',
             'email.required' => 'Email harus diisi.',
             'email.email' => 'Email tidak valid.',
@@ -92,6 +102,8 @@ class DebiturDanInvestorRequest extends FormRequest
             'npwp.unique' => 'NPWP sudah terdaftar.',
             'flagging.required' => 'Flagging harus diisi.',
             'flagging.in' => 'Flagging tidak valid.',
+            'flagging_investor.required_if' => 'Tipe investor harus diisi.',
+            'flagging_investor.regex' => 'Tipe investor tidak valid. Pilih: SFinance, SFinlog, atau Keduanya.',
             'tanda_tangan.required' => 'Tanda tangan harus diisi.',
             'tanda_tangan.image' => 'Tanda tangan harus berupa gambar.',
             'tanda_tangan.mimes' => 'Tanda tangan harus berupa gambar JPEG, PNG, atau JPG.',

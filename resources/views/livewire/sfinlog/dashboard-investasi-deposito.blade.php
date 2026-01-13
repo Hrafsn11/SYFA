@@ -10,12 +10,16 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
+                        @php
+                            $totalDepositoPokokPercentVal = (float) ($summaryData['total_deposito_pokok_percent'] ?? 0);
+                            $totalDepositoPokokIsUp = $totalDepositoPokokPercentVal >= 0;
+                        @endphp
                         <div class="flex-grow-1">
                             <h6 class="card-title mb-1 text-muted">Total Deposito Pokok Masuk Bulan Ini</h6>
                             <h4 class="mb-2 fw-bold">Rp {{ number_format($summaryData['total_deposito_pokok'], 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center mb-1">
-                                <i class="ti ti-arrow-up text-success me-1"></i>
-                                <span class="text-success fw-semibold">{{ $summaryData['total_deposito_pokok_percent'] }}% dari bulan lalu</span>
+                                <i class="ti {{ $totalDepositoPokokIsUp ? 'ti-arrow-up text-success' : 'ti-arrow-down text-warning' }} me-1"></i>
+                                <span class="{{ $totalDepositoPokokIsUp ? 'text-success' : 'text-warning' }} fw-semibold">{{ $summaryData['total_deposito_pokok_percent'] }}% dari bulan lalu</span>
                             </div>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
@@ -32,12 +36,16 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
+                        @php
+                            $totalCofPercentVal = (float) ($summaryData['total_cof_percent'] ?? 0);
+                            $totalCofIsUp = $totalCofPercentVal >= 0;
+                        @endphp
                         <div class="flex-grow-1">
                             <h6 class="card-title mb-1 text-muted">Total CoF (Cost of Fund) Bulan Ini</h6>
                             <h4 class="mb-2 fw-bold">Rp {{ number_format($summaryData['total_cof'], 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center mb-1">
-                                <i class="ti ti-arrow-up text-success me-1"></i>
-                                <span class="text-success fw-semibold">{{ $summaryData['total_cof_percent'] }}% lebih lancar</span>
+                                <i class="ti {{ $totalCofIsUp ? 'ti-arrow-up text-success' : 'ti-arrow-down text-warning' }} me-1"></i>
+                                <span class="{{ $totalCofIsUp ? 'text-success' : 'text-warning' }} fw-semibold">{{ $summaryData['total_cof_percent'] }}% lebih lancar</span>
                             </div>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
@@ -54,12 +62,16 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
+                        @php
+                            $totalPengembalianPercentVal = (float) ($summaryData['total_pengembalian_percent'] ?? 0);
+                            $totalPengembalianIsUp = $totalPengembalianPercentVal >= 0;
+                        @endphp
                         <div class="flex-grow-1">
                             <h6 class="card-title mb-1 text-muted">Total Pengembalian Bulan Ini</h6>
                             <h4 class="mb-2 fw-bold">Rp {{ number_format($summaryData['total_pengembalian'], 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center mb-1">
-                                <i class="ti ti-arrow-up text-success me-1"></i>
-                                <span class="text-success fw-semibold">{{ $summaryData['total_pengembalian_percent'] }}%</span>
+                                <i class="ti {{ $totalPengembalianIsUp ? 'ti-arrow-up text-success' : 'ti-arrow-down text-warning' }} me-1"></i>
+                                <span class="{{ $totalPengembalianIsUp ? 'text-success' : 'text-warning' }} fw-semibold">{{ $summaryData['total_pengembalian_percent'] }}%</span>
                             </div>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">
@@ -76,12 +88,16 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
+                        @php
+                            $totalOutstandingPercentVal = (float) ($summaryData['total_outstanding_percent'] ?? 0);
+                            $totalOutstandingIsUp = $totalOutstandingPercentVal >= 0;
+                        @endphp
                         <div class="flex-grow-1">
                             <h6 class="card-title mb-1 text-muted">Total Outstanding Deposito</h6>
                             <h4 class="mb-2 fw-bold">Rp {{ number_format($summaryData['total_outstanding'], 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center mb-1">
-                                <i class="ti ti-arrow-down text-warning me-1"></i>
-                                <span class="text-warning fw-semibold">{{ $summaryData['total_outstanding_percent'] }}% dari bulan lalu</span>
+                                <i class="ti {{ $totalOutstandingIsUp ? 'ti-arrow-up text-success' : 'ti-arrow-down text-warning' }} me-1"></i>
+                                <span class="{{ $totalOutstandingIsUp ? 'text-success' : 'text-warning' }} fw-semibold">{{ $summaryData['total_outstanding_percent'] }}% dari bulan lalu</span>
                             </div>
                         </div>
                         <div class="avatar flex-shrink-0 ms-3">

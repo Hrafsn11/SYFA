@@ -16,8 +16,7 @@
         <i class="ti ti-history"></i>
     </a>
 
-    {{-- Button Toggle Status --}}
-
+    {{-- Button Toggle Status / Unlock --}}
     @can('master_data.delete')
         @if($status === 'active')
             <button class="btn btn-sm btn-icon btn-text-danger rounded-pill waves-effect debitur-toggle-status-btn" 
@@ -26,6 +25,13 @@
                     data-status="{{ $status }}"
                     title="Nonaktifkan">
                 <i class="ti ti-circle-x"></i>
+            </button>
+        @elseif($status === 'locked')
+            <button class="btn btn-sm btn-icon btn-text-warning rounded-pill waves-effect debitur-unlock-btn" 
+                    type="button"
+                    data-id="{{ $id }}"
+                    title="Unlock Akun">
+                <i class="ti ti-lock-open"></i>
             </button>
         @else
             <button class="btn btn-sm btn-icon btn-text-success rounded-pill waves-effect debitur-toggle-status-btn" 

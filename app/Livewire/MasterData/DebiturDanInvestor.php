@@ -24,7 +24,7 @@ class DebiturDanInvestor extends Component
     public $id; // untuk edit data
     
     #[FieldInput]
-    public $nama, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging;
+    public $nama, $kode_perusahaan, $email, $nama_bank, $deposito, $nama_ceo, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging,$flagging_investor;
 
     #[FieldInput]
     #[Renderless]
@@ -35,6 +35,7 @@ class DebiturDanInvestor extends Component
         $this->setUrlSaveData('store_master_debitur_dan_investor', 'master-data.debitur-investor.store', ["callback" => "afterAction"]);
         $this->setUrlSaveData('update_master_debitur_dan_investor', 'master-data.debitur-investor.update', ["id" => "id_placeholder", "callback" => "afterAction"]);
         $this->setUrlSaveData('status_master_debitur_dan_investor', 'master-data.debitur-investor.toggle-status', ["id" => "id_placeholder", "callback" => "afterAction"]);
+        $this->setUrlSaveData('unlock_master_debitur_dan_investor', 'master-data.debitur-investor.unlock', ["id" => "id_placeholder", "callback" => "afterAction"]);
 
         $this->kol = MasterKol::orderBy('id_kol', 'asc')->get();
         $this->banks = BanksEnum::getConstants();
@@ -52,18 +53,62 @@ class DebiturDanInvestor extends Component
     public function setterFormData()
     {
         $listInput = $this->getUniversalFieldInputs();
+        
+        // For debitur: exclude investor-specific fields
         if ($this->flagging == 'tidak') {
             $listInput = array_filter($listInput, function ($value) {
-                return $value !== 'deposito';
+                return !in_array($value, ['deposito', 'flagging_investor']);
             });
-        } else {
+        } 
+        // For investor: exclude debitur-specific fields
+        else {
             $listInput = array_filter($listInput, function ($value) {
-                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp']);
+                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp', 'kode_perusahaan']);
             });
         }
 
         foreach (array_values($listInput) as $key => $value) {
             $this->form_data[$value] = $this->{$value};
         }
+    }
+
+    /**
+     * Handle form submission
+     */
+    public function submit()
+    {
+        $routeName = $this->id 
+            ? 'master-data.debitur-investor.update' 
+            : 'master-data.debitur-investor.store';
+        
+        $params = $this->id 
+            ? ['id' => $this->id, 'callback' => 'afterAction'] 
+            : ['callback' => 'afterAction'];
+        
+        $this->saveData($routeName, $params);
+    }
+
+    /**
+     * Reset form data when modal is closed
+     */
+    public function resetFormData()
+    {
+        $this->nama = null;
+        $this->email = null;
+        $this->nama_bank = null;
+        $this->deposito = null;
+        $this->nama_ceo = null;
+        $this->alamat = null;
+        $this->no_telepon = null;
+        $this->no_rek = null;
+        $this->npwp = null;
+        $this->id_kol = null;
+        $this->password = null;
+        $this->password_confirmation = null;
+        $this->flagging = 'tidak';
+        $this->flagging_investor = null;
+        $this->tanda_tangan = null;
+        $this->id = null;
+        $this->form_data = [];
     }
 }
