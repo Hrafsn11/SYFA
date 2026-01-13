@@ -122,8 +122,10 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
 
-            if ($pengajuan->status !== 'Draft') {
-                return Response::error('Pengajuan tidak dapat diubah setelah disubmit');
+            // Only allow edit if status is "Menunggu Validasi Finance SKI" or "Ditolak Finance SKI" at step 2
+            if ($pengajuan->status !== 'Menunggu Validasi Finance SKI' && 
+                !($pengajuan->status === 'Ditolak Finance SKI' && $pengajuan->current_step == 2)) {
+                return Response::error('Pengajuan tidak dapat diubah pada status: ' . $pengajuan->status);
             }
 
             $validated = $request->validated();
