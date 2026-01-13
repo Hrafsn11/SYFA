@@ -72,26 +72,28 @@
     </div>
     {{-- Services Grid --}}
     <div class="row g-4 justify-content-center mt-5">
-        {{-- SFinance Card --}}
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card h-100 border service-card shadow-none">
-                <div class="card-body d-flex flex-column align-items-center text-center p-4">
-                    <span class="badge bg-label-primary text-uppercase mb-3 px-3 py-2 fw-semibold">Core</span>
-                    <div class="mb-3">
-                        <div class="icon-wrapper bg-light-primary rounded-circle p-3 mb-2">
-                            <i class="ti ti-building-bank text-primary" style="font-size: 3rem;"></i>
+        {{-- SFinance Card - Hidden for CEO S-Finlog and IO (Investment Officer) --}}
+        @if (!auth()->user()->hasAnyRole(['CEO S-Finlog', 'IO (Investment Officer)']))
+            <div class="col-12 col-md-6 col-xl-3">
+                <div class="card h-100 border service-card shadow-none">
+                    <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                        <span class="badge bg-label-primary text-uppercase mb-3 px-3 py-2 fw-semibold">Core</span>
+                        <div class="mb-3">
+                            <div class="icon-wrapper bg-light-primary rounded-circle p-3 mb-2">
+                                <i class="ti ti-building-bank text-primary" style="font-size: 3rem;"></i>
+                            </div>
                         </div>
+                        <h5 class="mb-2 fw-bold">SFinance</h5>
+                        <p class="text-muted mb-4 small flex-grow-1">
+                            Modul utama pengelolaan pembiayaan dan investasi SYFA
+                        </p>
+                        <a href="{{ route('sfinance.index') }}" class="btn btn-primary w-100 fw-semibold">
+                            Go to Application
+                        </a>
                     </div>
-                    <h5 class="mb-2 fw-bold">SFinance</h5>
-                    <p class="text-muted mb-4 small flex-grow-1">
-                        Modul utama pengelolaan pembiayaan dan investasi SYFA
-                    </p>
-                    <a href="{{ route('sfinance.index') }}" class="btn btn-primary w-100 fw-semibold">
-                        Go to Application
-                    </a>
                 </div>
             </div>
-        </div>
+        @endif
 
         {{-- SFinlog Card --}}
         <div class="col-12 col-md-6 col-xl-3">

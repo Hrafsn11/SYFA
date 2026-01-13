@@ -195,18 +195,20 @@ class PeminjamanFinlogTable extends DataTableComponent
                 ->label(function ($row) {
                     $detailUrl = route('sfinlog.peminjaman.detail', ['id' => $row->id_peminjaman_finlog]);
                     $editUrl = route('sfinlog.peminjaman.edit', ['id' => $row->id_peminjaman_finlog]);
-                    $canEdit = $row->status === 'Draft';
+                    $canEdit = $row->status === 'Draft' && auth()->user()->can('peminjaman_finlog.edit');
 
                     $btn = '<div class="d-flex justify-content-center gap-1" role="group">';
 
                     // Tombol Detail
                     $btn .= '<a href="' . $detailUrl . '" class="btn btn-sm btn-outline-primary action-btn" title="Detail"><i class="ti ti-file-text"></i></a>';
 
-                    // Tombol Edit - Disabled jika status bukan Draft
-                    if ($canEdit) {
-                        $btn .= '<a href="' . $editUrl . '" class="btn btn-sm btn-outline-warning action-btn edit-btn" title="Edit"><i class="ti ti-edit"></i></a>';
-                    } else {
-                        $btn .= '<button type="button" class="btn btn-sm btn-secondary" disabled title="Tidak dapat diedit"><i class="ti ti-edit"></i></button>';
+                    // Tombol Edit - Hanya tampil jika punya permission dan status Draft
+                    if (auth()->user()->can('peminjaman_finlog.edit')) {
+                        if ($canEdit) {
+                            $btn .= '<a href="' . $editUrl . '" class="btn btn-sm btn-outline-warning action-btn edit-btn" title="Edit"><i class="ti ti-edit"></i></a>';
+                        } else {
+                            $btn .= '<button type="button" class="btn btn-sm btn-secondary" disabled title="Tidak dapat diedit"><i class="ti ti-edit"></i></button>';
+                        }
                     }
 
                     $btn .= '</div>';
