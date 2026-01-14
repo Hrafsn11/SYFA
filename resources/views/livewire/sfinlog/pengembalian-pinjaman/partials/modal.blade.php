@@ -56,7 +56,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
                 <button type="button" class="btn btn-primary" wire:click="addPengembalian" wire:loading.attr="disabled"
-                    wire:target="addPengembalian" @if (!$bukti_pembayaran_invoice) disabled @endif>
+                    wire:target="addPengembalian, bukti_pembayaran_invoice" id="btnSimpanPengembalian">
                     <span wire:loading.remove wire:target="addPengembalian">
                         Simpan <i class="ti ti-check ms-1"></i>
                     </span>
@@ -69,24 +69,3 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-    @push('scripts')
-        <script>
-            document.addEventListener('livewire:initialized', () => {
-                const modalElement = document.getElementById('modal-pengembalian-invoice');
-
-                if (modalElement) {
-                    // Reset fields when modal is closed
-                    modalElement.addEventListener('hidden.bs.modal', () => {
-                        @this.set('nominal_yang_dibayarkan', 0, false);
-                        @this.set('bukti_pembayaran_invoice', null, false);
-
-                        const fileInput = document.getElementById('file-upload-bukti');
-                        if (fileInput) fileInput.value = '';
-                    });
-                }
-            });
-        </script>
-    @endpush
-@endpush

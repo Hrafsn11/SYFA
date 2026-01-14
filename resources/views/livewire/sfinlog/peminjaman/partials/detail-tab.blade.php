@@ -4,7 +4,7 @@
         <div class="d-flex gap-2">
             {{-- Step 1: Draft - Button Submit Pengajuan --}}
             @can('peminjaman_finlog.submit')
-                @if ($currentStep == 1)
+                @if ($currentStep == 1 && $status == 'Draft')
                     <button type="button" class="btn btn-success" id="btnSubmitPengajuan">
                         <i class="ti ti-send me-2"></i>
                         Submit Pengajuan
