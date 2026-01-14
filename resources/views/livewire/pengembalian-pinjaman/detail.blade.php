@@ -101,12 +101,54 @@
                             <span class="fw-bold text-end">Rp
                                 {{ number_format($pengembalian->nominal_invoice ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        <div
-                            class="info-item d-flex justify-content-between py-3 border-bottom bg-opacity-10 rounded px-2 -mx-2">
-                            <span class="fw-semibold">Total Dibayarkan</span>
-                            <span class="fw-bold text-success text-end">Rp
-                                {{ number_format($totalDibayarkan, 0, ',', '.') }}</span>
+
+                        {{-- Total Dibayarkan dengan Breakdown --}}
+                        <div class="py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-semibold">Total Dibayarkan</span>
+                                <span class="fw-bold text-success fs-5">Rp
+                                    {{ number_format($totalDibayarkan, 0, ',', '.') }}</span>
+                            </div>
+
+                            {{-- Breakdown Section --}}
+                            @if ($totalDibayarkan > 0)
+                                <div class="mt-3 pt-3 border-top">
+                                    <small class="text-muted d-block mb-2">
+                                        <i class="ti ti-chart-pie me-1"></i> Alokasi Pembayaran:
+                                    </small>
+                                    <div class="d-flex flex-column gap-2">
+                                        {{-- Dibayarkan ke Bagi Hasil --}}
+                                        <div class="d-flex justify-content-between align-items-center px-3 py-2 rounded"
+                                            style="background-color: rgba(113, 221, 55, 0.1);">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge bg-success rounded-circle p-1">
+                                                    <i class="ti ti-percentage ti-xs"></i>
+                                                </span>
+                                                <span class="text-muted">Bayar Bagi Hasil</span>
+                                            </div>
+                                            <span class="fw-semibold text-success">
+                                                Rp {{ number_format($dibayarkanKeBagiHasil, 0, ',', '.') }}
+                                            </span>
+                                        </div>
+
+                                        {{-- Dibayarkan ke Pokok --}}
+                                        <div class="d-flex justify-content-between align-items-center px-3 py-2 rounded"
+                                            style="background-color: rgba(105, 108, 255, 0.1);">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge bg-primary rounded-circle p-1">
+                                                    <i class="ti ti-wallet ti-xs"></i>
+                                                </span>
+                                                <span class="text-muted">Bayar Pokok Pinjaman</span>
+                                            </div>
+                                            <span class="fw-semibold text-primary">
+                                                Rp {{ number_format($dibayarkanKePokok, 0, ',', '.') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
+
                         <div class="info-item d-flex justify-content-between py-3 border-bottom">
                             <span class="text-muted">Sisa Bayar Pokok</span>
                             <span class="text-end">
@@ -171,7 +213,7 @@
                                 <td>
                                     @if ($invoice->bukti_pembayaran)
                                         <a href="{{ Storage::disk('public')->url($invoice->bukti_pembayaran) }}"
-                                           class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
+                                            class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">
                                             Lihat Bukti
                                         </a>
                                     @else

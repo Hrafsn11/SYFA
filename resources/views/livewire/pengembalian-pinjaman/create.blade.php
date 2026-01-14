@@ -41,8 +41,14 @@
                                     readonly>
                             </div>
                             <div class="col-md-6">
-                                <label for="total_bagi_hasil">Total Bagi Hasil</label>
-                                <input type="text" class="form-control" id="total_bagi_hasil"
+                                <label for="total_bagi_hasil">
+                                    Total Bagi Hasil
+                                    @if ($isLate && $bagiHasilTambahan > 0)
+                                        <span class="badge bg-warning ms-1">Disesuaikan</span>
+                                    @endif
+                                </label>
+                                <input type="text" class="form-control {{ $isLate ? 'border-warning' : '' }}"
+                                    id="total_bagi_hasil"
                                     value="{{ $total_bagi_hasil ? 'Rp ' . number_format($total_bagi_hasil, 0, ',', '.') : '' }}"
                                     readonly>
                             </div>
@@ -184,44 +190,114 @@
                         @error('pengembalian_invoices')
                             <span class="text-danger small d-block mb-3">{{ $message }}</span>
                         @enderror
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="sisa_utang" class="form-label">Sisa Bayar Pokok</label>
-                        <input type="text" class="form-control" id="sisa_utang_display" readonly>
-                        <input type="hidden" wire:model="sisa_utang">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
-                        <input type="text" class="form-control" id="sisa_bagi_hasil_display" readonly>
-                        <input type="hidden" wire:model="sisa_bagi_hasil">
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-lg">
-                        <label for="catatan">Catatan Lainnya</label>
-                        <textarea wire:model="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan" rows="3"></textarea>
-                    </div>
-                </div>
 
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
-                        <span wire:loading.remove>
-                            <i class="ti ti-device-floppy me-1"></i> Simpan Data
-                        </span>
-                        <span wire:loading>
-                            <span class="spinner-border spinner-border-sm me-1" role="status"
-                                aria-hidden="true"></span>
-                            Menyimpan...
-                        </span>
-                    </button>
+                        {{-- Sisa Bayar Section --}}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="sisa_utang" class="form-label">Sisa Bayar Pokok</label>
+                                <input type="text" class="form-control"
+                                    value="{{ $sisa_utang ? 'Rp ' . number_format($sisa_utang, 0, ',', '.') : 'Rp 0' }}"
+                                    readonly>
+                                <input type="hidden" wire:model="sisa_utang">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="sisa_bagi_hasil" class="form-label">
+                                    Sisa Bagi Hasil
+                                    @if ($isLate && $bagiHasilTambahan > 0)
+                                        <span class="badge bg-warning ms-1">Disesuaikan</span>
+                                    @endif
+                                </label>
+                                <input type="text" class="form-control {{ $isLate ? 'border-warning' : '' }}"
+                                    value="{{ $sisa_bagi_hasil ? 'Rp ' . number_format($sisa_bagi_hasil, 0, ',', '.') : 'Rp 0' }}"
+                                    readonly>
+                                <input type="hidden" wire:model="sisa_bagi_hasil">
+                            </div>
+                        </div>
+
+                        {{-- Late Payment Alert - Show near Sisa fields if payment is late --}}
+                        @if ($isLate && $bulanKeterlambatan > 0)
+                            <div class="alert alert-warning border-warning mb-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="flex-grow-1">
+                                        <h6 class="alert-heading mb-2">
+                                            <i class="ti ti-clock-exclamation me-1"></i>
+                                            Pembayaran Terlambat {{ $bulanKeterlambatan }} Bulan
+                                        </h6>
+                                        <p class="mb-2 small">
+                                            Karena pembayaran melewati jatuh tempo
+                                            <strong>({{ $selectedDueDate ? \Carbon\Carbon::parse($selectedDueDate)->format('d M Y') : '-' }})</strong>,
+                                            bagi hasil disesuaikan berdasarkan sisa pokok.
+                                        </p>
+                                        <hr class="my-2">
+                                        <div class="row small">
+                                            <div class="col-md-6">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted">Bagi Hasil Awal:</span>
+                                                    <span>Rp {{ number_format($bagiHasilAwal, 0, ',', '.') }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted">Persentase Bagi Hasil:</span>
+                                                    <span>{{ number_format($persentaseBagiHasil, 2) }}%</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted">Sisa Pokok:</span>
+                                                    <span>Rp {{ number_format($total_pinjaman, 0, ',', '.') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted">Keterlambatan:</span>
+                                                    <span class="text-warning fw-semibold">{{ $bulanKeterlambatan }}
+                                                        Bulan</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-1">
+                                                    <span class="text-muted">Bagi Hasil Tambahan:</span>
+                                                    <span class="text-danger fw-semibold">+ Rp
+                                                        {{ number_format($bagiHasilTambahan, 0, ',', '.') }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="fw-semibold">Total Bagi Hasil:</span>
+                                                    <span class="fw-bold text-warning">Rp
+                                                        {{ number_format($totalBagiHasilDisesuaikan, 0, ',', '.') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 p-2 bg-light rounded small">
+                                            <strong>Rumus:</strong> Sisa Pokok ×
+                                            {{ number_format($persentaseBagiHasil, 2) }}% × {{ $bulanKeterlambatan }}
+                                            bulan =
+                                            <span class="text-danger">Rp
+                                                {{ number_format($bagiHasilTambahan, 0, ',', '.') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                        <div class="row mb-3">
+                            <div class="col-lg">
+                                <label for="catatan">Catatan Lainnya</label>
+                                <textarea wire:model="catatan" id="catatan" class="form-control" placeholder="Masukkan Catatan" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+                                <span wire:loading.remove>
+                                    <i class="ti ti-device-floppy me-1"></i> Simpan Data
+                                </span>
+                                <span wire:loading>
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"
+                                        aria-hidden="true"></span>
+                                    Menyimpan...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Include Bootstrap Modal Partial -->
     @include('livewire.pengembalian-pinjaman.partials._modal-tambah-pengembalian-invoice')
 
     @push('scripts')
@@ -234,18 +310,11 @@
                     fileInput: document.getElementById('bukti_pembayaran_invoice'),
                     saveButton: document.getElementById('btnSavePengembalian'),
                     fileInfoDiv: document.getElementById('currentFileInfo'),
-                    fileNameSpan: document.getElementById('currentFileName'),
-                    sisaUtangDisplay: document.getElementById('sisa_utang_display'),
-                    sisaBagiHasilDisplay: document.getElementById('sisa_bagi_hasil_display')
+                    fileNameSpan: document.getElementById('currentFileName')
                 };
                 let editingIndex = null;
 
                 const formatCurrency = (value) => 'Rp ' + (parseInt(value) || 0).toLocaleString('id-ID');
-
-                const updateSisaDisplay = () => {
-                    elements.sisaUtangDisplay.value = formatCurrency(@this.get('sisa_utang'));
-                    elements.sisaBagiHasilDisplay.value = formatCurrency(@this.get('sisa_bagi_hasil'));
-                };
 
                 const resetButton = () => {
                     elements.saveButton.disabled = false;
@@ -295,7 +364,6 @@
 
                 @this.on('closeInvoiceModal', () => {
                     modal.hide();
-                    updateSisaDisplay(); // Update tampilan sisa
                     if (elements.nominalInput._cleaveInstance) {
                         elements.nominalInput._cleaveInstance.setRawValue('');
                     }

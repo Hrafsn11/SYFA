@@ -71,6 +71,15 @@ class Create extends Component
     public $yangHarusDibayarkanPerBulan;
     public $tanggalPencairanReal;
 
+    // Late payment adjustment fields
+    public $persentaseBagiHasil = 0;      // Persentase bagi hasil (e.g., 5 for 5%)
+    public $bulanKeterlambatan = 0;        // Jumlah bulan keterlambatan
+    public $bagiHasilTambahan = 0;         // Bagi hasil tambahan karena keterlambatan
+    public $bagiHasilAwal = 0;             // Bagi hasil awal sebelum penyesuaian
+    public $totalBagiHasilDisesuaikan = 0; // Total bagi hasil setelah penyesuaian
+    public $selectedDueDate = null;        // Due Date tannggal keterlambaran
+    public $isLate = false;                // Flag apakah terlambat
+
     protected $listeners = ['refreshData' => '$refresh'];
 
     public function mount()
@@ -105,7 +114,6 @@ class Create extends Component
         }
 
         // 2. Process File Uploads dalam Array Invoice
-        // Mengubah TemporaryUploadedFile menjadi string Path agar bisa dikirim ke Controller
         $processedInvoices = [];
         foreach ($this->pengembalian_invoices as $item) {
             if (isset($item['file']) && $item['file'] instanceof TemporaryUploadedFile) {
@@ -142,10 +150,15 @@ class Create extends Component
             ->first();
 
         $this->total_pinjaman = $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bayar_pokok : $pengajuan->total_pinjaman;
-        $this->total_bagi_hasil = $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bagi_hasil : $pengajuan->total_bagi_hasil;
+        $this->bagiHasilAwal = $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bagi_hasil : $pengajuan->total_bagi_hasil;
+        $this->total_bagi_hasil = $this->bagiHasilAwal; // Will be adjusted if late
+        $this->persentaseBagiHasil = $pengajuan->persentase_bagi_hasil ?? 0;
         $this->jenisPembiayaan = $pengajuan->jenis_pembiayaan;
         $this->tenorPembayaran = $pengajuan->tenor_pembayaran;
         $this->yangHarusDibayarkanPerBulan = $pengajuan->yang_harus_dibayarkan;
+
+        // Reset late payment fields
+        $this->resetLatePaymentFields();
 
         if ($pengajuan->jenis_pembiayaan === 'Installment') {
             $historyPencairan = $pengajuan->historyStatus()->where('status', 'Dana Sudah Dicairkan')->orderBy('created_at', 'desc')->first();
@@ -190,6 +203,65 @@ class Create extends Component
     {
         $invoice = collect($this->availableInvoices)->firstWhere('label', $value);
         $this->nominal_invoice = $invoice ? $invoice['nilai'] : null;
+        $this->selectedDueDate = $invoice['due_date'] ?? null;
+
+        $this->calculateLatePaymentAdjustment();
+    }
+    
+    private function calculateLatePaymentAdjustment(): void
+    {
+        $this->resetLatePaymentFields();
+
+        if (!$this->selectedDueDate || !$this->total_pinjaman || $this->persentaseBagiHasil <= 0) {
+            return;
+        }
+
+        $dueDate = Carbon::parse($this->selectedDueDate);
+        $today = Carbon::now();
+
+        if ($today->gt($dueDate)) {
+            $bulanKeterlambatanSekarang = (int) ceil($dueDate->diffInDays($today) / 30);
+
+            $pengembalianTerakhirSetelahDueDate = PengembalianPinjaman::where('id_pengajuan_peminjaman', $this->kode_peminjaman)
+                ->where('created_at', '>', $dueDate)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            $bulanKeterlambatanSebelumnya = 0;
+
+            if ($pengembalianTerakhirSetelahDueDate) {
+                $bulanKeterlambatanSebelumnya = (int) ceil($dueDate->diffInDays($pengembalianTerakhirSetelahDueDate->created_at) / 30);
+            }
+
+            $selisihBulan = max(0, $bulanKeterlambatanSekarang - $bulanKeterlambatanSebelumnya);
+
+            if ($selisihBulan > 0) {
+                $this->isLate = true;
+                $this->bulanKeterlambatan = $selisihBulan;
+
+                // sisa_pokok × (persentase / 100) × selisih_bulan
+                $sisaPokok = (float) $this->total_pinjaman;
+                $persentase = (float) $this->persentaseBagiHasil / 100;
+
+                $this->bagiHasilTambahan = round($sisaPokok * $persentase * $selisihBulan);
+
+                // Adjust total profit sharing
+                $this->totalBagiHasilDisesuaikan = $this->bagiHasilAwal + $this->bagiHasilTambahan;
+                $this->total_bagi_hasil = $this->totalBagiHasilDisesuaikan;
+            }
+        }
+
+        // Recalculate sisa
+        $this->calculateSisa();
+    }
+
+    private function resetLatePaymentFields(): void
+    {
+        $this->isLate = false;
+        $this->bulanKeterlambatan = 0;
+        $this->bagiHasilTambahan = 0;
+        $this->totalBagiHasilDisesuaikan = $this->bagiHasilAwal;
+        $this->total_bagi_hasil = $this->bagiHasilAwal;
     }
 
     public function updatedBulanPembayaran($value)
@@ -342,5 +414,14 @@ class Create extends Component
         $this->pengembalian_invoices = [];
         $this->availableInvoices = [];
         $this->availableBulanPembayaran = [];
+
+        // Reset late payment fields
+        $this->persentaseBagiHasil = 0;
+        $this->bulanKeterlambatan = 0;
+        $this->bagiHasilTambahan = 0;
+        $this->bagiHasilAwal = 0;
+        $this->totalBagiHasilDisesuaikan = 0;
+        $this->selectedDueDate = null;
+        $this->isLate = false;
     }
 }
