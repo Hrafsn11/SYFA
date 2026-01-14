@@ -157,8 +157,8 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50%">Nominal Dibayarkan</th>
-                            <th style="width: 50%">Bukti Pembayaran</th>
+                            <th>Nominal Dibayarkan</th>
+                            <th>Bukti Pembayaran</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -178,17 +178,17 @@
                                         <span class="text-muted">-</span>
                                     @endif
                                 </td>
-                                <td class="text-center">
+                                {{-- <td class="text-center">
                                     @if ($invoice->bukti_pembayaran)
                                         <a href="{{ Storage::disk('public')->url($invoice->bukti_pembayaran) }}"
                                            class="btn btn-sm btn-icon btn-text-primary rounded-pill"
                                            target="_blank" rel="noopener" title="Lihat Bukti">
-                                            <i class="fa-solid fa-eye"></i>
+                                            <i class="ti ti-file-text"></i>
                                         </a>
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
-                                </td>
+                                </td> --}}
                             </tr>
                         @empty
                             <tr>
