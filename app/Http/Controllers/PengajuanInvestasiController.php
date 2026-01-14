@@ -327,9 +327,25 @@ class PengajuanInvestasiController extends Controller
             // Build custom HTML for PDF
             $html = $this->buildKontrakHTML($kontrak);
 
-            // Generate PDF using DomPDF
+            // Generate PDF using DomPDF with config
             $pdf = Pdf::loadHTML($html);
             $pdf->setPaper('A4', 'portrait');
+            
+            // Set DomPDF options
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'sans-serif',
+                'isFontSubsettingEnabled' => true,
+                'debugPng' => false,
+                'debugKeepTemp' => false,
+                'debugCss' => false,
+                'debugLayout' => false,
+                'debugLayoutLines' => false,
+                'debugLayoutBlocks' => false,
+                'debugLayoutInline' => false,
+                'debugLayoutPaddingBox' => false,
+            ]);
 
             $filename = 'Kontrak_Investasi_' . str_replace('/', '_', $pengajuan->nomor_kontrak) . '_' . date('Ymd') . '.pdf';
 
@@ -649,12 +665,16 @@ class PengajuanInvestasiController extends Controller
     private function buildKontrakHTML($kontrak)
     {
         try {
-            // Load logo as base64
+            // Load logo as base64 - resize if needed
             $logoPath = public_path('assets/img/branding/Logo.jpg');
             $logoBase64 = '';
             if (file_exists($logoPath)) {
-                $logoBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath));
-                Log::info('Logo loaded successfully');
+                try {
+                    $logoBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath));
+                    Log::info('Logo loaded successfully');
+                } catch (\Exception $e) {
+                    Log::warning('Error loading logo: ' . $e->getMessage());
+                }
             } else {
                 Log::warning('Logo file not found: ' . $logoPath);
             }
@@ -663,8 +683,12 @@ class PengajuanInvestasiController extends Controller
             $ttdPerusahaanPath = public_path('assets/img/ttd.png');
             $ttdPerusahaan = '';
             if (file_exists($ttdPerusahaanPath)) {
-                $ttdPerusahaan = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdPerusahaanPath));
-                Log::info('TTD Perusahaan loaded successfully');
+                try {
+                    $ttdPerusahaan = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdPerusahaanPath));
+                    Log::info('TTD Perusahaan loaded successfully');
+                } catch (\Exception $e) {
+                    Log::warning('Error loading TTD Perusahaan: ' . $e->getMessage());
+                }
             } else {
                 Log::warning('TTD Perusahaan file not found: ' . $ttdPerusahaanPath);
             }
@@ -674,8 +698,12 @@ class PengajuanInvestasiController extends Controller
             if (!empty($kontrak['tanda_tangan_investor'])) {
                 $ttdInvestorPath = storage_path('app/public/' . $kontrak['tanda_tangan_investor']);
                 if (file_exists($ttdInvestorPath)) {
-                    $ttdInvestor = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdInvestorPath));
-                    Log::info('TTD Investor loaded successfully');
+                    try {
+                        $ttdInvestor = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdInvestorPath));
+                        Log::info('TTD Investor loaded successfully');
+                    } catch (\Exception $e) {
+                        Log::warning('Error loading TTD Investor: ' . $e->getMessage());
+                    }
                 } else {
                     Log::warning('TTD Investor file not found: ' . $ttdInvestorPath);
                 }
@@ -686,22 +714,26 @@ class PengajuanInvestasiController extends Controller
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Kontrak Investasi - ' . $kontrak['nomor_kontrak'] . '</title>
+    <title>Kontrak Investasi - ' . htmlspecialchars($kontrak['nomor_kontrak']) . '</title>
     <style>
+        @page {
+            margin: 20mm 15mm;
+        }
         body {
-            font-family: "DejaVu Sans", sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 11pt;
             line-height: 1.6;
             color: #000;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
         .header-logo {
             text-align: right;
             margin-bottom: 20px;
         }
         .header-logo img {
-            height: 50px;
+            max-height: 50px;
+            max-width: 200px;
         }
         .title {
             text-align: center;

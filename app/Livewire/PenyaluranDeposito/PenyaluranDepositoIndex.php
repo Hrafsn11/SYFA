@@ -16,12 +16,12 @@ use App\Http\Requests\PenyaluranDepositoRequest;
 class PenyaluranDepositoIndex extends Component
 {
     use HasUniversalFormAction, HasValidate, WithFileUploads;
-    
+
     private string $validateClass = PenyaluranDepositoRequest::class;
 
     #[ParameterIDRoute]
     public $id;
-    
+
     #[FieldInput]
     public $id_pengajuan_investasi, $id_debitur, $nominal_yang_disalurkan, $tanggal_pengiriman_dana, $tanggal_pengembalian, $bukti_pengembalian;
 
@@ -36,7 +36,7 @@ class PenyaluranDepositoIndex extends Component
     public function getPengajuanInvestasiProperty()
     {
         return PengajuanInvestasi::query()
-            ->withSisaDana()  
+            ->withSisaDana()
             ->whereNotNull('pengajuan_investasi.nomor_kontrak')
             ->where('pengajuan_investasi.nomor_kontrak', '!=', '')
             ->orderBy('pengajuan_investasi.created_at', 'desc')
@@ -60,8 +60,44 @@ class PenyaluranDepositoIndex extends Component
             'pengajuanInvestasi' => $this->pengajuanInvestasi,
             'debitur' => $this->debitur,
         ])
-        ->layout('layouts.app', [
-            'title' => 'Penyaluran Deposito'
-        ]);
+            ->layout('layouts.app', [
+                'title' => 'Aset Investasi'
+            ]);
+    }
+
+    /**
+     * Update nominal yang dikembalikan
+     */
+    public function updateNominalPengembalian($id, $nominal)
+    {
+        try {
+            $penyaluran = \App\Models\PenyaluranDeposito::findOrFail($id);
+
+            if ($nominal > $penyaluran->nominal_yang_disalurkan) {
+                $this->dispatch('showAlert', type: 'error', message: 'Nominal yang dikembalikan tidak boleh lebih besar dari nominal yang disalurkan!');
+                return;
+            }
+
+            // Validasi: nominal tidak boleh negatif
+            if ($nominal < 0) {
+                $this->dispatch('showAlert', type: 'error', message: 'Nominal yang dikembalikan tidak boleh negatif!');
+                return;
+            }
+
+            // Update nominal
+            $penyaluran->update([
+                'nominal_yang_dikembalikan' => $nominal
+            ]);
+
+            // Refresh table
+            $this->dispatch('refreshPenyaluranDepositoTable');
+            
+            // Dispatch success
+            $this->dispatch('pengembalian-success', message: 'Nominal pengembalian berhasil disimpan!');
+
+        } catch (\Exception $e) {
+            \Log::error('Error updating nominal pengembalian: ' . $e->getMessage());
+            $this->dispatch('showAlert', type: 'error', message: 'Terjadi kesalahan saat menyimpan data!');
+        }
     }
 }

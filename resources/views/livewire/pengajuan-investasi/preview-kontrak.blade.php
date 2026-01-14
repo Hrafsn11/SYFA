@@ -370,81 +370,29 @@
             $('#btnGeneratePDF').on('click', function () {
                 const $btn = $(this);
                 const originalText = $btn.html();
+                const investasiId = '{{ $kontrak['id_investasi'] }}';
 
                 // Show loading state
                 $btn.prop('disabled', true);
                 $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Generating PDF...');
 
-                // Get CSRF token
-                const csrfToken = $('meta[name="csrf-token"]').attr('content');
-                const investasiId = '{{ $kontrak['id_investasi'] }}';
+                // Direct download via GET request (simple redirect)
+                const downloadUrl = `/pengajuan-investasi/${investasiId}/download-kontrak`;
+                window.location.href = downloadUrl;
 
-                // Make AJAX request to generate PDF
-                $.ajax({
-                    url: `/pengajuan-investasi/${investasiId}/download-kontrak`,
-                    type: 'POST',
-                    data: {
-                        _token: csrfToken
-                    },
-                    xhrFields: {
-                        responseType: 'blob' // Important for PDF download
-                    },
-                    success: function (response, status, xhr) {
-                        // Reset button
-                        $btn.prop('disabled', false);
-                        $btn.html(originalText);
-
-                        // Get filename from Content-Disposition header
-                        const disposition = xhr.getResponseHeader('Content-Disposition');
-                        let filename = 'Kontrak_Investasi.pdf';
-                        if (disposition && disposition.indexOf('filename=') !== -1) {
-                            const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                            const matches = filenameRegex.exec(disposition);
-                            if (matches != null && matches[1]) {
-                                filename = matches[1].replace(/['"]/g, '');
-                            }
-                        }
-
-                        // Create blob link to download
-                        const blob = new Blob([response], { type: 'application/pdf' });
-                        const link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = filename;
-
-                        // Trigger download
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-
-                        // Clean up
-                        window.URL.revokeObjectURL(link.href);
-
-                        // Show success message
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: 'PDF kontrak berhasil di-generate dan diunduh.',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                    },
-                    error: function (xhr, status, error) {
-                        // Reset button
-                        $btn.prop('disabled', false);
-                        $btn.html(originalText);
-
-                        console.error('Error generating PDF:', error);
-
-                        // Show error message
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Terjadi kesalahan saat membuat PDF. Silakan coba lagi.',
-                            icon: 'error',
-                            confirmButtonColor: '#dc3545',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                });
+                // Reset button after delay
+                setTimeout(function() {
+                    $btn.prop('disabled', false);
+                    $btn.html(originalText);
+                    
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'PDF kontrak berhasil diunduh.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }, 2000);
             });
         });
     </script>
