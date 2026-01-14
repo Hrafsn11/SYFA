@@ -66,7 +66,7 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                     '2023' => '2023',
                     '2024' => '2024',
                     '2025' => '2025',
-                    '2026' =>  '2026',
+                    '2026' => '2026',
                     '2027' => '2027',
                 ])
                 ->filter(function (Builder $builder, string $value) {
@@ -91,6 +91,44 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
         ];
     }
 
+    public function showKontrakDetail($nomorKontrak)
+    {
+        // Load all penyaluran deposito for this contract number
+        $details = PenyaluranDeposito::query()
+            ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->where('pi.nomor_kontrak', $nomorKontrak)
+            ->select([
+                'penyaluran_deposito.*',
+                'pi.nomor_kontrak',
+                'pi.nama_investor',
+                'pi.jumlah_investasi',
+                'pi.lama_investasi'
+            ])
+            ->orderBy('penyaluran_deposito.created_at', 'desc')
+            ->get();
+
+        if ($details->isNotEmpty()) {
+            $firstDetail = $details->first();
+
+            $kontrakData = [
+                'nomor_kontrak' => $firstDetail->nomor_kontrak,
+                'nama_investor' => $firstDetail->nama_investor,
+                'jumlah_investasi' => $firstDetail->jumlah_investasi,
+                'lama_investasi' => $firstDetail->lama_investasi,
+                'details' => $details->map(function ($item) {
+                    return [
+                        'nominal_yang_disalurkan' => $item->nominal_yang_disalurkan,
+                        'tanggal_pengiriman_dana' => $item->tanggal_pengiriman_dana,
+                        'tanggal_pengembalian' => $item->tanggal_pengembalian,
+                        'bukti_pengembalian' => $item->bukti_pengembalian,
+                    ];
+                })->toArray()
+            ];
+
+            $this->dispatch('kontrakDetailLoaded', $kontrakData);
+        }
+    }
+
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         $user = auth()->user();
@@ -111,23 +149,20 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 'pd_sum.id_pengajuan_investasi'
             )
             ->select([
-                'penyaluran_deposito.id_penyaluran_deposito',
-                'penyaluran_deposito.id_pengajuan_investasi',
-                'penyaluran_deposito.id_debitur',
-                'penyaluran_deposito.nominal_yang_disalurkan',
-                'penyaluran_deposito.tanggal_pengiriman_dana',
-                'penyaluran_deposito.tanggal_pengembalian',
-                'penyaluran_deposito.bukti_pengembalian',
-                'penyaluran_deposito.created_at',
-                'penyaluran_deposito.updated_at',
+                \DB::raw('MIN(penyaluran_deposito.id_penyaluran_deposito) as id_penyaluran_deposito'),
+                \DB::raw('MIN(penyaluran_deposito.id_pengajuan_investasi) as id_pengajuan_investasi'),
+                \DB::raw('MIN(penyaluran_deposito.created_at) as created_at'),
                 'pi.nomor_kontrak as pi_nomor_kontrak',
                 'pi.nama_investor as pi_nama_investor',
                 'pi.jumlah_investasi as pi_jumlah_investasi',
                 'pi.lama_investasi as pi_lama_investasi',
                 'pi.id_debitur_dan_investor as pi_id_investor',
                 \DB::raw('COALESCE(pd_sum.total_disalurkan_sum, 0) as total_disalurkan'),
-                \DB::raw('(pi.jumlah_investasi - COALESCE(pd_sum.total_disalurkan_sum, 0)) as sisa_dana')
-            ]);
+                \DB::raw('(pi.jumlah_investasi - COALESCE(pd_sum.total_disalurkan_sum, 0)) as sisa_dana'),
+                \DB::raw('COUNT(penyaluran_deposito.id_penyaluran_deposito) as jumlah_penyaluran'),
+                \DB::raw('SUM(CASE WHEN penyaluran_deposito.bukti_pengembalian IS NOT NULL THEN 1 ELSE 0 END) as jumlah_lunas')
+            ])
+            ->groupBy('pi.nomor_kontrak', 'pi.nama_investor', 'pi.jumlah_investasi', 'pi.lama_investasi', 'pi.id_debitur_dan_investor', 'pd_sum.total_disalurkan_sum');
 
         // Restricted data access based on user role
         $isUnrestricted = $user->hasRole('super-admin') ||
@@ -149,13 +184,8 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
 
         // Custom search for joined tables
         if ($search = $this->getSearch()) {
-            $query->where(function ($q) use ($search) {
-                $q->where('pi.nomor_kontrak', 'LIKE', '%' . $search . '%')
-                    ->orWhere('pi.nama_investor', 'LIKE', '%' . $search . '%')
-                    ->orWhere('penyaluran_deposito.nominal_yang_disalurkan', 'LIKE', '%' . $search . '%')
-                    ->orWhereRaw("DATE_FORMAT(penyaluran_deposito.tanggal_pengiriman_dana, '%d/%m/%Y') LIKE ?", ['%' . $search . '%'])
-                    ->orWhereRaw("DATE_FORMAT(penyaluran_deposito.tanggal_pengembalian, '%d/%m/%Y') LIKE ?", ['%' . $search . '%']);
-            });
+            $query->havingRaw("pi.nomor_kontrak LIKE ?", ['%' . $search . '%'])
+                ->orHavingRaw("pi.nama_investor LIKE ?", ['%' . $search . '%']);
         }
 
         return $query;
@@ -202,10 +232,11 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Penyaluran Dana', 'nominal_yang_disalurkan')
+            Column::make('Penyaluran Dana', 'total_disalurkan')
                 ->sortable()
-                ->format(function ($value) {
-                    return '<div class="text-end">' . ($value ? 'Rp ' . number_format($value, 0, ',', '.') : '-') . '</div>';
+                ->label(function ($row) {
+                    $total = $row->total_disalurkan ?? 0;
+                    return '<div class="text-end">Rp ' . number_format($total, 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
@@ -221,42 +252,30 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Tanggal Disalurkan', 'tanggal_pengiriman_dana')
-                ->sortable()
-                ->format(function ($value) {
-                    return '<div class="text-center">' . ($value ? \Carbon\Carbon::parse($value)->format('d/m/Y') : '-') . '</div>';
-                })
-                ->html(),
+            Column::make('Status Pembayaran')
+                ->label(function ($row) {
+                    $jumlahLunas = $row->jumlah_lunas ?? 0;
+                    $jumlahTotal = $row->jumlah_penyaluran ?? 0;
 
-            Column::make('Rencana Tanggal Penagihan', 'tanggal_pengembalian')
-                ->sortable()
-                ->format(function ($value) {
-                    return '<div class="text-center">' . ($value ? \Carbon\Carbon::parse($value)->format('d/m/Y') : '-') . '</div>';
-                })
-                ->html(),
-
-            Column::make('Status Pembayaran', 'bukti_pengembalian')
-                ->sortable()
-                ->format(function ($value) {
-                    if ($value) {
-                        return '<div class="text-center"><span class="badge bg-label-success">Lunas</span></div>';
+                    if ($jumlahLunas == $jumlahTotal && $jumlahTotal > 0) {
+                        return '<div class="text-center"><span class="badge bg-label-success">Lunas (' . $jumlahLunas . '/' . $jumlahTotal . ')</span></div>';
+                    } elseif ($jumlahLunas > 0) {
+                        return '<div class="text-center"><span class="badge bg-label-warning">Sebagian Lunas (' . $jumlahLunas . '/' . $jumlahTotal . ')</span></div>';
                     } else {
-                        return '<div class="text-center"><span class="badge bg-label-danger">Belum Lunas</span></div>';
+                        return '<div class="text-center"><span class="badge bg-label-danger">Belum Lunas (0/' . $jumlahTotal . ')</span></div>';
                     }
                 })
                 ->html(),
 
-            Column::make('Bukti Transfer', 'bukti_pengembalian')
-                ->format(function ($value) {
-                    if ($value) {
-                        return '<div class="text-center">
-                            <a href="/storage/' . $value . '" target="_blank" class="btn btn-outline-primary">
-                                <i class="ti ti-file"></i>
-                            </a>
-                        </div>';
-                    } else {
-                        return '<div class="text-center"><span class="text-muted">-</span></div>';
-                    }
+            Column::make('Action')
+                ->label(function ($row) {
+                    $nomorKontrak = $row->pi_nomor_kontrak ?? '';
+                    return '<div class="text-center">
+                        <button wire:click="showKontrakDetail(\'' . $nomorKontrak . '\')" 
+                                class="btn btn-sm btn-primary">
+                            <i class="ti ti-eye me-1"></i> Lihat Detail
+                        </button>
+                    </div>';
                 })
                 ->html(),
         ];

@@ -63,7 +63,7 @@ class DebiturDanInvestor extends Component
         // For investor: exclude debitur-specific fields
         else {
             $listInput = array_filter($listInput, function ($value) {
-                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp', 'kode_perusahaan']);
+                return !in_array($value, ['nama_ceo', 'id_kol', 'npwp']);
             });
         }
 

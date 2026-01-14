@@ -31,6 +31,7 @@ class HistoryStatusPengajuanInvestasiFinlog extends Model
         'validasi_pengajuan',
         'persetujuan_ceo_finlog',
         'catatan_penolakan',
+        'catatan',
         'status',
         'reject_by',
         'approve_by',

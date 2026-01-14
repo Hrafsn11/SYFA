@@ -19,9 +19,18 @@ class KontrakInvestasiService
     ];
 
     private const BULAN_INDONESIA = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember'
     ];
 
     /**
@@ -43,11 +52,14 @@ class KontrakInvestasiService
             'nomor_kontrak' => $nomorKontrak ?? $this->generateDefaultNomorKontrak(),
             'hari' => $this->getHariIndonesia($tanggalInvestasi),
             'tanggal_kontrak' => $this->formatTanggalIndonesia($tanggalInvestasi),
-            'nama_investor' => $pengajuan->nama_investor ?? 'N/A',
+            'nama_investor' => $pengajuan->nama_pic_kontrak ?? $pengajuan->nama_investor ?? 'N/A',
             'perusahaan_investor' => $pengajuan->nama_investor ?? 'N/A',
             'alamat_investor' => $pengajuan->investor->alamat ?? 'N/A',
-            'jumlah_investasi_angka' => 'Rp. ' . number_format($pengajuan->jumlah_investasi, 0, ',', '.'),
-            'jumlah_investasi_text' => Terbilang::rupiah($pengajuan->jumlah_investasi),
+            'jumlah_investasi_angka' => 'Rp. ' . number_format((float) ($pengajuan->jumlah_investasi ?? 0), 0, ',', '.'),
+            'jumlah_investasi_text' => Terbilang::rupiah((float) ($pengajuan->jumlah_investasi ?? 0)),
+            'lama_investasi' => $pengajuan->lama_investasi . ' bulan',
+            'tanggal_mulai' => $this->formatTanggalIndonesia($tanggalInvestasi),
+            'tanggal_berakhir' => $this->formatTanggalIndonesia($tanggalJatuhTempo),
             'tanggal_jatuh_tempo' => $this->formatTanggalIndonesia($tanggalJatuhTempo),
             'bagi_hasil' => $bagiHasil,
             'bagi_hasil_persen' => $bagiHasil . '%',
@@ -69,7 +81,7 @@ class KontrakInvestasiService
             // Regular: Always 31 December of investment year
             return Carbon::createFromDate($tanggalInvestasi->year, 12, 31);
         }
-        
+
         // Khusus: tanggal_investasi + lama_investasi months
         return $tanggalInvestasi->copy()->addMonths($pengajuan->lama_investasi);
     }
