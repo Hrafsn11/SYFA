@@ -16,6 +16,7 @@
     $isRejectedStatus = in_array($currentStatus, ['Draft', 'Ditolak']);
 
     $isEditModeRequested = request()->query('edit') === 'true';
+    $isEditDokumenMode = request()->query('edit-dokumen') === 'true';
 
     $canSubmitPengajuan = $isDraft || ($isPerbaikanDokumen && $currentStep == 1);
     $canApproveStep2 = $currentStep == 2 && !$isRejectedStatus && $hasEvaluasi && !$isPerluEvaluasiUlang;
@@ -24,6 +25,9 @@
 
     $canApproveStep3 = $currentStep == 3 && !$isRejectedStatus;
     $canApproveStep4 = $currentStep == 4 && !$isRejectedStatus;
+
+    // Check if user can edit documents (when status is Perbaikan Dokumen)
+    $canEditDokumen = $isPerbaikanDokumen && $currentStep == 1 && auth()->user()->can('pengajuan_restrukturisasi.ajukan_restrukturisasi');
 @endphp
 
 <div class="tab-pane fade show active" id="detail-restrukturisasi" role="tabpanel">
@@ -31,6 +35,16 @@
     <div class="d-flex justify-content-between items-center mt-4 mb-3 mb-md-4 flex-wrap gap-2">
         <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
         <div class="d-flex gap-2 flex-wrap">
+            {{-- Perbaikan Dokumen: Edit Dokumen Button --}}
+            @can('pengajuan_restrukturisasi.ajukan_restrukturisasi')
+                @if ($canEditDokumen && !$isEditDokumenMode)
+                    <a href="{{ request()->fullUrlWithQuery(['edit-dokumen' => 'true']) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Dokumen
+                    </a>
+                @endif
+            @endcan
+
             {{-- Step 1: Submit Pengajuan --}}
             @can('pengajuan_restrukturisasi.ajukan_restrukturisasi')
                 @if ($canSubmitPengajuan)
@@ -89,6 +103,15 @@
     </div>
 
     <hr class="my-3 my-md-4">
+
+    {{-- Form Upload Dokumen (shown when status is Perbaikan Dokumen) --}}
+    @if ($canEditDokumen)
+        @include('livewire.pengajuan-restrukturisasi.partials._dokumen-upload-form', [
+            'pengajuan' => $pengajuan,
+            'histories' => $histories,
+            'isEditDokumenMode' => $isEditDokumenMode,
+        ])
+    @endif
 
     {{-- Detail Information --}}
     <div class="row">
