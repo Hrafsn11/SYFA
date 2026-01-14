@@ -10,13 +10,15 @@ use App\Models\Project;
 use Livewire\WithFileUploads;
 use App\Attributes\FieldInput;
 use App\Attributes\ParameterIDRoute;
+use App\Livewire\Traits\HasModal;
 use App\Livewire\Traits\HasValidate;
+use App\Livewire\Traits\HandleComponentEvent;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\SFinlog\PenyaluranDepositoSfinlogRequest;
 
 class PenyaluranDepositoSfinlogIndex extends Component
 {
-    use HasUniversalFormAction, HasValidate, WithFileUploads;
+    use HasUniversalFormAction, HasValidate, HasModal, HandleComponentEvent, WithFileUploads;
     
     private string $validateClass = PenyaluranDepositoSfinlogRequest::class;
 
@@ -47,7 +49,6 @@ class PenyaluranDepositoSfinlogIndex extends Component
             ->get();
     }
 
-
     /**
      * Get cells project dari master data
      */
@@ -57,39 +58,54 @@ class PenyaluranDepositoSfinlogIndex extends Component
     }
 
     /**
+     * Load projects berdasarkan cell bisnis
+     */
+    private function loadProjectsByCellBisnis($cellBisnisId)
+    {
+        if (!$cellBisnisId) {
+            $this->availableProjects = [];
+            return;
+        }
+
+        $cellsProject = CellsProject::with('projects')->find($cellBisnisId);
+        
+        if ($cellsProject && $cellsProject->projects && $cellsProject->projects->isNotEmpty()) {
+            $this->availableProjects = $cellsProject->projects->map(fn($p) => [
+                'id_project' => $p->id_project,
+                'nama_project' => $p->nama_project
+            ])->toArray();
+        } else {
+            $this->availableProjects = [];
+        }
+    }
+
+    /**
      * Handle ketika id_pengajuan_investasi_finlog berubah
      */
     public function updatedIdPengajuanInvestasiFinlog($value)
     {
-        if ($value) {
-            $pengajuan = PengajuanInvestasiFinlog::with('project.projects')->find($value);
-            if ($pengajuan && $pengajuan->project) {
-                $this->id_cells_project = $pengajuan->id_cells_project;
-                
-                // Load projects untuk cell bisnis ini
-                $cellsProject = CellsProject::with('projects')->find($pengajuan->id_cells_project);
-                if ($cellsProject && $cellsProject->projects && $cellsProject->projects->isNotEmpty()) {
-                    $this->availableProjects = $cellsProject->projects->map(function($project) {
-                        return [
-                            'id_project' => $project->id_project,
-                            'nama_project' => $project->nama_project
-                        ];
-                    })->toArray();
-                    
-                    // Set project pertama dari pengajuan investasi jika ada
-                    if ($pengajuan->project->projects->isNotEmpty()) {
-                        $this->id_project = $pengajuan->project->projects->first()->id_project;
-                    }
-                } else {
-                    $this->availableProjects = [];
-                    $this->id_project = null;
-                }
-            }
-        } else {
+        if (!$value) {
             $this->id_cells_project = null;
             $this->id_project = null;
             $this->availableProjects = [];
+            return;
         }
+
+        $pengajuan = PengajuanInvestasiFinlog::with('project.projects')->find($value);
+        
+        if (!$pengajuan || !$pengajuan->project) {
+            return;
+        }
+
+        $this->id_cells_project = $pengajuan->id_cells_project;
+        $this->loadProjectsByCellBisnis($pengajuan->id_cells_project);
+        
+        // Set project pertama dari pengajuan investasi jika ada
+        if ($pengajuan->project->projects->isNotEmpty()) {
+            $this->id_project = $pengajuan->project->projects->first()->id_project;
+        }
+
+        $this->dispatch('updateProjects', projects: $this->availableProjects);
     }
 
     /**
@@ -97,29 +113,15 @@ class PenyaluranDepositoSfinlogIndex extends Component
      */
     public function updatedIdCellsProject($value)
     {
-        // Jangan reset id_project jika sudah ada value (untuk edit mode)
+        // Jangan reset id_project jika dalam edit mode
         if (!$this->id) {
             $this->id_project = null;
         }
         
-        if ($value) {
-            $cellsProject = CellsProject::with('projects')->find($value);
-            if ($cellsProject && $cellsProject->projects && $cellsProject->projects->isNotEmpty()) {
-                $this->availableProjects = $cellsProject->projects->map(function($project) {
-                    return [
-                        'id_project' => $project->id_project,
-                        'nama_project' => $project->nama_project
-                    ];
-                })->toArray();
-            } else {
-                $this->availableProjects = [];
-            }
-        } else {
-            $this->availableProjects = [];
-        }
+        $this->loadProjectsByCellBisnis($value);
         
-        // Dispatch event untuk update dropdown project di frontend
-        $this->dispatch('updateProjects', ['projects' => $this->availableProjects]);
+        // Dispatch event with projects data
+        $this->dispatch('updateProjects', projects: $this->availableProjects);
     }
 
     public function render()
