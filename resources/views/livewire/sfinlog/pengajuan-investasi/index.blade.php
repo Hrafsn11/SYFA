@@ -280,6 +280,26 @@
             $modal.modal('show');
         };
 
+        // Event listener for edit button
+        $(document).on('click', '.investor-edit-btn', function() {
+            const id = $(this).data('id');
+            
+            $.ajax({
+                url: `/sfinlog/pengajuan-investasi/${id}/edit`,
+                method: 'GET',
+                success: (res) => {
+                    if (!res.error && res.data) {
+                        window.editPengajuanInvestasi(res.data);
+                    } else {
+                        alert('error', res.message || 'Gagal mengambil data');
+                    }
+                },
+                error: (xhr) => {
+                    alert('error', xhr.responseJSON?.message || 'Gagal mengambil data pengajuan');
+                }
+            });
+        });
+
         // Delete function
         $('#btnHapusPengajuanInvestasi').click(function(e) {
             e.preventDefault();
