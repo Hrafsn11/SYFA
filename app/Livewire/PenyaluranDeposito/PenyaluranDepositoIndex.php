@@ -12,6 +12,7 @@ use Livewire\Attributes\Renderless;
 use App\Livewire\Traits\HasValidate;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\PenyaluranDepositoRequest;
+use Illuminate\Support\Facades\DB;
 
 class PenyaluranDepositoIndex extends Component
 {
@@ -71,6 +72,8 @@ class PenyaluranDepositoIndex extends Component
     public function updateNominalPengembalian($id, $nominal)
     {
         try {
+            DB::beginTransaction();
+
             $penyaluran = \App\Models\PenyaluranDeposito::findOrFail($id);
 
             if ($nominal > $penyaluran->nominal_yang_disalurkan) {
@@ -84,10 +87,25 @@ class PenyaluranDepositoIndex extends Component
                 return;
             }
 
-            // Update nominal
+            // Ambil nominal lama untuk hitung selisih
+            $nominalLama = $penyaluran->nominal_yang_dikembalikan ?? 0;
+            $selisih = $nominal - $nominalLama;
+
+            // Update nominal di penyaluran deposito
             $penyaluran->update([
                 'nominal_yang_dikembalikan' => $nominal
             ]);
+
+            // Update total_kembali_dari_penyaluran di pengajuan_investasi
+            $pengajuan = \App\Models\PengajuanInvestasi::find($penyaluran->id_pengajuan_investasi);
+            if ($pengajuan) {
+                $totalKembaliLama = $pengajuan->total_kembali_dari_penyaluran ?? 0;
+                $pengajuan->update([
+                    'total_kembali_dari_penyaluran' => $totalKembaliLama + $selisih
+                ]);
+            }
+
+            DB::commit();
 
             // Refresh table
             $this->dispatch('refreshPenyaluranDepositoTable');
@@ -96,6 +114,7 @@ class PenyaluranDepositoIndex extends Component
             $this->dispatch('pengembalian-success', message: 'Nominal pengembalian berhasil disimpan!');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error updating nominal pengembalian: ' . $e->getMessage());
             $this->dispatch('showAlert', type: 'error', message: 'Terjadi kesalahan saat menyimpan data!');
         }
