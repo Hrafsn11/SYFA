@@ -388,18 +388,11 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox"
-                                                    name="jenis_restrukturisasi[]" value="Lainnya"
-                                                    id="checkLainnya" />
-                                                <label class="form-check-label" for="checkLainnya">
-                                                    Lainnya:
-                                                </label>
-                                            </div>
+                                            <label for="inputLainnya" class="form-label">Keterangan Tambahan (Opsional)</label>
                                             <input type="text"
-                                                class="form-control mt-2 @error('jenis_restrukturisasi_lainnya') is-invalid @enderror"
-                                                placeholder="Jelaskan keterangan lainnya..."
-                                                name="jenis_restrukturisasi_lainnya" id="inputLainnya" disabled />
+                                                class="form-control @error('jenis_restrukturisasi_lainnya') is-invalid @enderror"
+                                                placeholder="Jelaskan keterangan tambahan jika ada..."
+                                                name="jenis_restrukturisasi_lainnya" id="inputLainnya" />
                                             @error('jenis_restrukturisasi_lainnya')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror

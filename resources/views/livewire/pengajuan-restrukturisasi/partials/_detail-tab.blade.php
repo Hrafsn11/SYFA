@@ -57,7 +57,8 @@
                     </a>
                 @elseif($currentStep == 2 && !$isRejectedStatus && !$hasEvaluasi)
                     {{-- Show info badge if at Step 2 but evaluation not saved yet --}}
-                    <span class="badge bg-warning text-dark d-flex align-items-center px-3 py-2">
+                    <span class="badge bg-warning text-white d-flex gap-2 align-items-center px-3 py-2">
+                        <i class="fas fa-info-circle"></i>
                         Simpan Evaluasi terlebih dahulu
                     </span>
                 @endif
@@ -188,15 +189,15 @@
 
         {{-- Additional Info --}}
         <div class="col-12 mt-3">
-            <div class="alert alert-secondary py-2" role="alert">
+            <div class="alert alert-light py-2" role="alert">
                 <p class="mb-1"><strong>Alasan Restrukturisasi:</strong></p>
                 <small>{{ $pengajuan->alasan_restrukturisasi ?? 'Tidak ada keterangan' }}</small>
             </div>
-            <div class="alert alert-secondary py-2" role="alert">
+            <div class="alert alert-light py-2" role="alert">
                 <p class="mb-1"><strong>Rencana Pemulihan Usaha:</strong></p>
                 <small>{{ $pengajuan->rencana_pemulihan_usaha ?? 'Tidak ada keterangan' }}</small>
             </div>
-            <div class="alert alert-secondary py-2" role="alert">
+            <div class="alert alert-light py-2" role="alert">
                 <p class="mb-2"><strong>Jenis Restrukturisasi yang Diajukan:</strong></p>
                 @if ($pengajuan->jenis_restrukturisasi && count($pengajuan->jenis_restrukturisasi) > 0)
                     <div class="d-flex flex-wrap gap-2">
@@ -217,6 +218,12 @@
                     <small class="text-muted">Belum ada jenis restrukturisasi yang dipilih</small>
                 @endif
             </div>
+            @if ($pengajuan->jenis_restrukturisasi_lainnya)
+                <div class="alert alert-light border py-2" role="alert">
+                    <p class="mb-1"><strong>Keterangan Tambahan:</strong></p>
+                    <small>{{ $pengajuan->jenis_restrukturisasi_lainnya }}</small>
+                </div>
+            @endif
         </div>
     </div>
 

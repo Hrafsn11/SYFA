@@ -58,28 +58,6 @@
             });
         }
 
-        function initCheckboxLainnya() {
-            const $checkbox = $('#checkLainnya');
-            const $input = $('#inputLainnya');
-
-            if ($checkbox.length && $input.length) {
-                $checkbox.off('change.lainnya').on('change.lainnya', function() {
-                    const isChecked = this.checked;
-                    $input.prop('disabled', !isChecked);
-
-                    if (isChecked) {
-                        $input.removeClass('disabled').focus();
-                    } else {
-                        $input.addClass('disabled').val('');
-                    }
-                });
-
-                if ($checkbox.is(':checked')) {
-                    $input.prop('disabled', false);
-                }
-            }
-        }
-
         function resetWizard() {
             if (wizardRestrukturisasi) {
                 wizardRestrukturisasi.to(1);
@@ -386,9 +364,6 @@
                 });
                 window.initCleaveRupiah();
             }
-
-            // Initialize checkbox Lainnya handler
-            initCheckboxLainnya();
         }
 
         function loadPengajuanData(idPengajuan) {
