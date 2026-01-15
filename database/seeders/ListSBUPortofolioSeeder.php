@@ -19,6 +19,7 @@ class ListSBUPortofolioSeeder extends Seeder
                 'nama_sbu' => $sbu,
                 'tahun' => date('Y'),
                 'edit_by' => 'seeder',
+                'path_file' => 'templates/template_excel/' . $sbu . '.xlsx',
             ]);
         }
     }

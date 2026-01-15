@@ -12,4 +12,6 @@ class LaporanInvestasi extends Model
 
     protected $table = 'laporan_investasi';
     protected $primaryKey = 'id_laporan_investasi';
+
+    protected $guarded = [];
 }
