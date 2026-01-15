@@ -30,6 +30,7 @@ class HistoryStatusPengajuanInvestor extends Model
         'date',
         'validasi_bagi_hasil',
         'catatan_validasi_dokumen_ditolak',
+        'catatan',
         'status',
         'reject_by',
         'approve_by',

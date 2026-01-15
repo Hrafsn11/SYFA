@@ -49,28 +49,23 @@ class PengajuanInvestasiController extends Controller
             $payload = array_merge($validated, [
                 'tanggal_berakhir_investasi' => $tanggalBerakhir,
                 'nominal_bagi_hasil_yang_didapat' => $nominalBagiHasil,
-                'status' => 'Menunggu Validasi Finance SKI',
-                'current_step' => 2,
+                'status' => 'Draft',
+                'current_step' => 1,
                 'created_by' => Auth::id(),
                 'updated_by' => Auth::id(),
             ]);
 
             $pengajuan = PengajuanInvestasiFinlog::create($payload);
 
-            $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
-                'status' => 'Menunggu Validasi Finance SKI',
-                'current_step' => 2,
+            $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
+                'status' => 'Draft',
+                'current_step' => 1,
                 'submit_step1_by' => Auth::id(),
             ]);
 
             DB::commit();
 
-            // Reload pengajuan dengan relasi investor untuk notifikasi
-            $pengajuan->refresh();
-            $pengajuan->load('investor');
-            ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
-
-            return Response::success($pengajuan, 'Pengajuan investasi berhasil dibuat!');
+            return Response::success($pengajuan, 'Pengajuan investasi berhasil dibuat! Silakan submit untuk melanjutkan proses.');
         } catch (\Exception $e) {
             DB::rollBack();
             return Response::errorCatch($e, 'Gagal membuat pengajuan investasi');
@@ -122,8 +117,10 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
 
-            if ($pengajuan->status !== 'Draft') {
-                return Response::error('Pengajuan tidak dapat diubah setelah disubmit');
+            if ($pengajuan->status !== 'Draft' && 
+                $pengajuan->status !== 'Menunggu Validasi Finance SKI' && 
+                !($pengajuan->status === 'Ditolak Finance SKI' && $pengajuan->current_step == 2)) {
+                return Response::error('Pengajuan tidak dapat diubah pada status: ' . $pengajuan->status);
             }
 
             $validated = $request->validated();
@@ -252,6 +249,10 @@ class PengajuanInvestasiController extends Controller
                 $historyData['catatan_penolakan'] = $request->input('catatan_penolakan', $request->input('catatan', ''));
             } else {
                 $historyData['approve_by'] = Auth::id();
+                // Simpan catatan validasi jika ada (untuk approval)
+                if ($request->filled('catatan')) {
+                    $historyData['catatan'] = $request->input('catatan');
+                }
             }
 
             $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, $historyData);

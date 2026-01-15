@@ -99,7 +99,7 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
 
             Column::make('No Kontrak')
                 ->label(function ($row) {
-                    $noKontrak = $row->pengajuanInvestasiFinlog->nomor_kontrak ?? '-';
+                    $noKontrak = $row->pengajuanInvestasiFinlog?->nomor_kontrak ?? '-';
                     return '<div class="text-center">' . $noKontrak . '</div>';
                 })
                 ->html()
@@ -107,7 +107,7 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
 
             Column::make('Cell Bisnis')
                 ->label(function ($row) {
-                    $cellBisnis = $row->pengajuanInvestasiFinlog->project->nama_cells_bisnis ?? '-';
+                    $cellBisnis = $row->cellsProject?->nama_cells_bisnis ?? '-';
                     return '<div class="text-start">' . $cellBisnis . '</div>';
                 })
                 ->html()
@@ -115,9 +115,7 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
 
             Column::make('Project')
                 ->label(function ($row) {
-                    // Jika ada project terkait, tampilkan nama project, jika tidak tampilkan cell bisnis
-                    $project = $row->pengajuanInvestasiFinlog->project->projects->first();
-                    $projectName = $project ? $project->nama_project : ($row->pengajuanInvestasiFinlog->project->nama_cells_bisnis ?? '-');
+                    $projectName = $row->project?->nama_project ?? '-';
                     return '<div class="text-start">' . $projectName . '</div>';
                 })
                 ->html()
@@ -171,7 +169,6 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
 
             Column::make('Aksi')
                 ->label(function ($row) {
-                    // Only show for users with edit permission (Finance SKI)
                     if (!auth()->user() || !auth()->user()->can('penyaluran_deposito_finlog.edit')) {
                         return '';
                     }
@@ -181,15 +178,15 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
                         'id_pengajuan_investasi_finlog' => $row->id_pengajuan_investasi_finlog,
                         'id_cells_project' => $row->id_cells_project,
                         'id_project' => $row->id_project,
-                        'nominal_yang_disalurkan' => $row->nominal_yang_disalurkan,
-                        'tanggal_pengiriman_dana' => $row->tanggal_pengiriman_dana->format('Y-m-d'),
-                        'tanggal_pengembalian' => $row->tanggal_pengembalian->format('Y-m-d'),
+                        'nominal_yang_disalurkan' => (int) $row->nominal_yang_disalurkan,
+                        'tanggal_pengiriman_dana' => $row->tanggal_pengiriman_dana?->format('Y-m-d'),
+                        'tanggal_pengembalian' => $row->tanggal_pengembalian?->format('Y-m-d'),
                     ];
 
-                    $jsonData = htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8');
+                    $encodedData = base64_encode(json_encode($data));
 
                     return '<div class="text-center">
-                        <button type="button" class="btn btn-sm btn-warning" onclick="editDataDirect(this)" data-item=\'' . $jsonData . '\'>
+                        <button type="button" class="btn btn-sm btn-warning" onclick="editDataDirect(this)" data-item="' . $encodedData . '">
                             <i class="ti ti-edit"></i>
                         </button>
                     </div>';
