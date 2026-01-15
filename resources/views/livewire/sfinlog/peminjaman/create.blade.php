@@ -62,7 +62,7 @@
                         @enderror
                     </div>
 
-                                        <div class="col-md-3 mb-3">
+                                        <div class="col-md-6 mb-3">
                         <label for="durasi_project" class="form-label">Durasi Project (Bulan) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project" class="form-control"
@@ -71,22 +71,12 @@
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="durasi_project_hari" class="form-label">Durasi Project (Hari) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project_hari" class="form-control"
                             placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" value="0" min="0" required>
                         @error('durasi_project_hari')
-                            <span class="text-danger">{{ $message }}</span>
-                        @enderror
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
-                                class="text-danger">*</span></label>
-                        <input type="file" id="nib_perusahaan" class="form-control" 
-                            wire:model.blur="nib_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
-                        <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
-                        @error('nib_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
@@ -196,8 +186,19 @@
                 <!-- Dokumen Persyaratan -->
                 <h5 class="mb-3">Dokumen Persyaratan</h5>
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="dokumen_mitra" class="form-label">Dokumen Mitra/Vendor yang Diusulkan (Kontrak/PO/Invoice/PKS)</label>
+                    <div class="col-md-4 mb-3">
+                        <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
+                                class="text-danger">*</span></label>
+                        <input type="file" id="nib_perusahaan" class="form-control" 
+                            wire:model.blur="nib_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
+                        @error('nib_perusahaan')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="dokumen_mitra" class="form-label">Company profile</label>
                         <input type="file" id="dokumen_mitra" class="form-control"
                             wire:model.blur="dokumen_mitra" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
@@ -206,7 +207,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="form_new_customer" class="form-label">Form New Customer <span
                                 class="text-danger">*</span></label>
                         <input type="file" id="form_new_customer" class="form-control"
@@ -218,7 +219,7 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="dokumen_kerja_sama" class="form-label">Dokumen Kerja Sama <span
+                        <label for="dokumen_kerja_sama" class="form-label">Dokumen kerja sama (Kontrak/PO/Invoice/PKS) <span
                                 class="text-danger">*</span></label>
                         <input type="file" id="dokumen_kerja_sama" class="form-control"
                             wire:model.blur="dokumen_kerja_sama" accept=".pdf,.doc,.docx" required>
