@@ -60,7 +60,7 @@
                                 <input type="text" class="form-control" value="{{ $tanggal_pencairan }}" readonly>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">TOP</label>
+                                <label class="form-label">TOP (Term of Payment)</label>
                                 <input type="text" class="form-control" value="{{ $top }}" readonly>
                             </div>
                             <div class="col-md-4">
