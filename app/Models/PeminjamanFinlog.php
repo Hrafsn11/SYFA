@@ -17,6 +17,7 @@ class PeminjamanFinlog extends Model
 
     protected $fillable = [
         'nomor_peminjaman',
+        'tgl_pengajuan',
         'id_debitur',
         'id_cells_project',
         'nama_project',
@@ -55,6 +56,7 @@ class PeminjamanFinlog extends Model
         'biaya_administrasi' => 'decimal:2',
         'harapan_tanggal_pencairan' => 'date',
         'rencana_tgl_pengembalian' => 'date',
+        'tgl_pengajuan' => 'datetime',
         'durasi_project' => 'integer',
         'durasi_project_hari' => 'integer',
         'top' => 'integer',
