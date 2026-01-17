@@ -18,13 +18,15 @@ class ImportExcelPortofolio implements ShouldQueue
     public $tries = 3;
 
     protected $filePath;
+    protected $id_laporan;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($path)
+    public function __construct($path = null, $id_laporan = null)
     {
         $this->filePath = $path;
+        $this->id_laporan = $id_laporan;
     }
 
     /**

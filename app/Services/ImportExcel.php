@@ -11,10 +11,12 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 class ImportExcel
 {
     protected $path;
+    protected $id_laporan;
 
-    public function __construct($filePath = null)
+    public function __construct($filePath = null, $id_laporan = null)
     {
         $this->path = $filePath;
+        $this->id_laporan = $id_laporan;
     }
 
     public function import()
@@ -27,9 +29,12 @@ class ImportExcel
 
         $data = $this->mappingData($sheet);
 
+        $laporan = LaporanInvestasi::where('id_laporan_investasi', $this->id_laporan)->first();
         
         try {
             DB::beginTransaction();
+
+            $dataToInsert = [];
 
             foreach ($data as $key => $value) {
                 

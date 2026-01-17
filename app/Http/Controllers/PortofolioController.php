@@ -41,6 +41,7 @@ class PortofolioController extends Controller
 
             $data = $request->validated();
             $data['path_file'] = $path;
+            unset($data['file_excel']);
 
             if ($port) {
                 $path_prev = $port->path_file;
@@ -55,9 +56,10 @@ class PortofolioController extends Controller
                 $port = LaporanInvestasi::create($data);
             }
 
+            (new ImportExcel($path))->import();
+
             DB::commit();
 
-            // dd((new ImportExcel($path))->import());
             ImportExcelPortofolio::dispatch($path);
 
             return Response::success(

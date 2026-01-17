@@ -24,7 +24,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah/Edit portofolio</h5>
+                    <h5 class="modal-title">Manage portofolio</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form wire:submit='{!! $urlAction["store_porto"] !!}'>
@@ -40,8 +40,11 @@
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
-                            <label for="tahun" class="form-label">Tahun <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="tahun" placeholder="Masukkan Persentase Pencairan" wire:model.blur="tahun">
+                            <div class="d-flex justify-content-between">
+                                <label for="file_excel" class="form-label">File Excel <span class="text-danger">*</span></label>
+                                <a id="current_excel" href="" download target="_blank" rel="noopener noreferrer">Current Excel</a>
+                            </div>
+                            <input type="file" class="form-control" id="file_excel" placeholder="Masukkan Persentase Pencairan" wire:model.blur="file_excel">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -73,6 +76,8 @@
         
         const modal = $('#modal-edit-porto');
         const form = modal.find('form');
+
+        form.find('a#current_excel').attr('href', `{{ url('storage') }}` + '/' + data.file_path);
 
         // tampilkan modal
         modal.modal('show');

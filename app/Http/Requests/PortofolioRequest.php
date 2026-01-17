@@ -29,6 +29,7 @@ class PortofolioRequest extends FormRequest
                 'integer',
                 'date_format:Y',
             ],
+            'file_excel' => 'nullable|file|mimes:xlsx,xls',
         ];
     }
 
@@ -41,6 +42,8 @@ class PortofolioRequest extends FormRequest
             'tahun.required' => 'Tahun wajib diisi.',
             'tahun.integer' => 'Tahun harus berupa angka.',
             'tahun.date_format' => 'Tahun harus dalam format YYYY.',
+            'file_excel.file' => 'File harus berupa file yang valid.',
+            'file_excel.mimes' => 'File harus berformat xlsx atau xls.',
         ];
     }
 }
