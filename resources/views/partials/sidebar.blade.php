@@ -252,29 +252,18 @@
                     </li>
                 @endcanany
 
-                {{-- Report Penyaluran Dana Investasi --}}
+                {{-- Aset Investasi (formerly Report Penyaluran Dana Investasi) --}}
                 @canany(['sfinance.menu.report_penyaluran_dana', 'sfinlog.menu.report_penyaluran_dana'])
-                    <li class="menu-item {{ RouteHelper::is('*report-penyaluran-dana-investasi*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('report-penyaluran-dana-investasi.index') }}" class="menu-link" wire:navigate.hover>
-                            <i class="menu-icon tf-icons ti ti-report-money"></i>
-                            <div data-i18n="Report Penyaluran Dana">Report Penyaluran Dana</div>
-                        </a>
-                    </li>
-                @endcanany
-
-                {{-- Penyaluran Deposito --}}
-                @canany(['sfinance.menu.penyaluran_deposito', 'sfinlog.menu.penyaluran_deposito'])
-                    <li
-                        class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
+                    <li class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
                         @if ($isSFinance)
-                            <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link" wire:navigate.hover>
-                            @elseif($isSFinlog)
-                                <a href="{{ route('sfinlog.penyaluran-deposito-sfinlog.index') }}" class="menu-link" wire:navigate.hover>
-                                @else
-                                    <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link" wire:navigate.hover>
+                            <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link">
+                        @elseif($isSFinlog)
+                            <a href="{{ route('sfinlog.penyaluran-deposito-sfinlog.index') }}" class="menu-link">
+                        @else
+                            <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
                         @endif
-                        <i class="menu-icon tf-icons ti ti-building-bank"></i>
-                        <div data-i18n="Penyaluran Deposito">Penyaluran Deposito</div>
+                            <i class="menu-icon tf-icons ti ti-report-money"></i>
+                            <div data-i18n="Aset Investasi">Aset Investasi</div>
                         </a>
                     </li>
                 @endcanany

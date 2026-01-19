@@ -86,12 +86,8 @@ class PengembalianInvestasi extends Component
             // Calculate sisa dana di perusahaan first (using accessor)
             $this->sisa_dana_di_perusahaan = $investasi->sisa_dana_di_perusahaan;
 
-            // For DISPLAY: Show actual balance after accounting for penyaluran
-            // This makes it clearer for users
-            $totalDisalurkan = floatval($investasi->total_disalurkan ?? 0);
-            $sisaPokokDisplay = floatval($investasi->sisa_pokok ?? 0) - $totalDisalurkan;
-
-            $this->sisa_pokok = max(0, $sisaPokokDisplay);  // Show actual remaining
+            // Sisa pokok = yang belum dikembalikan ke investor (jangan dikurangi total disalurkan!)
+            $this->sisa_pokok = floatval($investasi->sisa_pokok ?? 0);
             $this->sisa_bagi_hasil = $investasi->sisa_bagi_hasil;
 
             // Dana tersedia = what can actually be returned now
