@@ -116,9 +116,6 @@
         modal.find('#password-confirm-label').html('Konfirmasi Password Baru');
         modal.find('#password-required').addClass('d-none');
         modal.find('#password-confirm-required').addClass('d-none');
-        
-        // tampilkan modal
-        modal.find('.password-section').addClass('d-none');
         // Sembunyikan required asterisk untuk tanda tangan saat edit
         modal.find('#ttd-required').hide();
         modal.modal('show');

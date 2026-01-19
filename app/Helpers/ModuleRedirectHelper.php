@@ -54,18 +54,18 @@ class ModuleRedirectHelper
                 // Then feature routes (for debitur/investor)
                 ['route' => 'sfinance.peminjaman', 'permission' => 'sfinance.menu.pengajuan_peminjaman'],
                 ['route' => 'sfinance.pengajuan-investasi.index', 'permission' => 'sfinance.menu.pengajuan_investasi'],
-                ['route' => 'sfinance.penyaluran-deposito.index', 'permission' => 'sfinance.menu.penyaluran_dana'],
+                ['route' => 'sfinance.penyaluran-deposito.index', 'permission' => 'sfinance.menu.penyaluran_deposito'],
                 ['route' => 'sfinance.pengembalian.index', 'permission' => 'sfinance.menu.pengembalian_dana'],
-                ['route' => 'sfinance.pengembalian-investasi.index', 'permission' => 'sfinance.menu.pengembalian_dana'],
+                ['route' => 'sfinance.pengembalian-investasi.index', 'permission' => 'sfinance.menu.pengembalian_investasi'],
             ],
             'sfinlog' => [
                 // Dashboard routes first (for admin/finance roles)
                 ['route' => 'sfinlog.dashboard.pembiayaan', 'permission' => 'sfinlog.menu.dashboard_pembiayaan'],
                 ['route' => 'sfinlog.dashboard.investasi-deposito', 'permission' => 'sfinlog.menu.dashboard_investasi_deposito'],
-                // Then feature routes (for debitur/investor)
-                ['route' => 'sfinlog.peminjaman.index', 'permission' => 'sfinlog.menu.pengajuan_peminjaman'],
+                // Then feature routes (for debitur/investor/IO)
+                ['route' => 'sfinlog.peminjaman.index', 'permission' => 'sfinlog.menu.peminjaman_dana'],
                 ['route' => 'sfinlog.pengajuan-investasi.index', 'permission' => 'sfinlog.menu.pengajuan_investasi'],
-                ['route' => 'sfinlog.penyaluran-deposito-sfinlog.index', 'permission' => 'sfinlog.menu.penyaluran_dana'],
+                ['route' => 'sfinlog.penyaluran-deposito-sfinlog.index', 'permission' => 'sfinlog.menu.penyaluran_deposito'],
                 ['route' => 'sfinlog.pengembalian-pinjaman.index', 'permission' => 'sfinlog.menu.pengembalian_dana'],
             ],
         ];

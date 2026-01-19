@@ -75,7 +75,7 @@ class ListNotifSFinance
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $pengembalian->pengajuanPeminjaman->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $pengembalian->pengajuanPeminjaman->debitur->nama_debitur ?? $pengembalian->pengajuanPeminjaman->debitur->nama ?? 'N/A',
             '[[nominal]]' => $nominalFormatted,
         ];
 
@@ -110,7 +110,7 @@ class ListNotifSFinance
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? $pengajuan->debitur->nama ?? 'N/A',
             '[[tanggal]]' => $tanggalFormatted,
         ];
 
@@ -145,7 +145,7 @@ class ListNotifSFinance
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? $pengajuan->debitur->nama ?? 'N/A',
             '[[tanggal]]' => $tanggalFormatted,
         ];
 

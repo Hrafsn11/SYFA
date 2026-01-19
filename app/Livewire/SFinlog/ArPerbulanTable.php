@@ -3,16 +3,16 @@
 namespace App\Livewire\Sfinlog;
 
 use App\Models\ArPerbulanFinlog;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
+use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 
 class ArPerbulanTable extends DataTableComponent
 {
     protected $model = ArPerbulanFinlog::class;
 
-    protected $listeners = ['refreshArPerbulanTable' => '$refresh', 'filterByMonth'];
-
-    public $selectedMonth = '';
+    protected $listeners = ['refreshArPerbulanTable' => '$refresh'];
 
     public function configure(): void
     {
@@ -37,23 +37,55 @@ class ArPerbulanTable extends DataTableComponent
             ->setPerPageFieldAttributes([
                 'class' => 'form-select',
             ])
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setBulkActionsDisabled();
     }
 
-    public function filterByMonth($month)
+    public function filters(): array
     {
-        $this->selectedMonth = $month;
+        return [
+            SelectFilter::make('Bulan')
+                ->options([
+                    '' => 'Semua Bulan',
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("MONTH(bulan) = ?", [$value]);
+                    }
+                }),
+
+            SelectFilter::make('Tahun')
+                ->options([
+                    '' => 'Semua Tahun',
+                    '2023' => '2023',
+                    '2024' => '2024',
+                    '2025' => '2025',
+                    '2026' => '2026',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->whereRaw("YEAR(bulan) = ?", [$value]);
+                    }
+                }),
+        ];
     }
 
-    public function builder(): \Illuminate\Database\Eloquent\Builder
+    public function builder(): Builder
     {
-        $query = ArPerbulanFinlog::query();
-
-        if ($this->selectedMonth) {
-            $query->where('bulan', $this->selectedMonth);
-        }
-
-        return $query;
+        return ArPerbulanFinlog::query();
     }
 
     public function columns(): array
@@ -66,35 +98,42 @@ class ArPerbulanTable extends DataTableComponent
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
 
-                    return '<div class="text-center">'.$number.'</div>';
+                    return '<div class="text-center">' . $number . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
 
+            Column::make('Bulan', 'bulan')
+                ->sortable()
+                ->format(function ($value) {
+                    return '<div class="text-center">' . \Carbon\Carbon::parse($value)->translatedFormat('F Y') . '</div>';
+                })
+                ->html(),
+
             Column::make('Nama Perusahaan', 'nama_perusahaan')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-start">'.($value ?: '-').'</div>')
+                ->format(fn($value) => '<div class="text-start">' . ($value ?: '-') . '</div>')
                 ->html(),
 
             Column::make('Sisa AR Piutang Pokok', 'sisa_ar_pokok')
                 ->sortable()
                 ->format(function ($value) {
-                    return '<div class="text-end">Rp '.number_format($value, 0, ',', '.').'</div>';
+                    return '<div class="text-end">Rp ' . number_format($value, 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
             Column::make('Sisa Bagi Hasil', 'sisa_bagi_hasil')
                 ->sortable()
                 ->format(function ($value) {
-                    return '<div class="text-end">Rp '.number_format($value, 0, ',', '.').'</div>';
+                    return '<div class="text-end">Rp ' . number_format($value, 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
             Column::make('Sisa AR Pokok + Bagi Hasil', 'sisa_ar_total')
                 ->sortable()
                 ->format(function ($value) {
-                    return '<div class="text-end"><strong>Rp '.number_format($value, 0, ',', '.').'</strong></div>';
+                    return '<div class="text-end"><strong>Rp ' . number_format($value, 0, ',', '.') . '</strong></div>';
                 })
                 ->html(),
         ];

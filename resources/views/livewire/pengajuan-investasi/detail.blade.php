@@ -203,10 +203,8 @@
                                                 <div class="card-body">
                                                     <form id="formGenerateKontrak">
                                                         <div class="row g-3">
-                                                            @php
+                                                        @php
                                                                 $kontrakFields = [
-                                                                    'Nama Investor' =>
-                                                                        $investasi['nama_investor'] ?? '-',
                                                                     'Nama Perusahaan' =>
                                                                         $investasi['nama_investor'] ?? '-',
                                                                     'Jenis Deposito' => ucfirst(
@@ -256,6 +254,22 @@
                                                                         : '-',
                                                                 ];
                                                             @endphp
+                                                            
+                                                            {{-- Input Nama PIC (Editable) --}}
+                                                            <div class="col-md-6">
+                                                                <label for="namaPicKontrak" class="form-label">
+                                                                    Nama PIC/CEO Investor <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control" id="namaPicKontrak" 
+                                                                    name="nama_pic_kontrak"
+                                                                    value="{{ $investasi['nama_pic_kontrak'] ?? '' }}"
+                                                                    placeholder="Masukkan nama PIC/CEO investor"
+                                                                    {{ !empty($investasi['nomor_kontrak']) ? 'readonly' : 'required' }}>
+                                                                <div class="invalid-feedback">
+                                                                    Nama PIC/CEO harus diisi
+                                                                </div>
+                                                            </div>
+                                                            
                                                             @foreach ($kontrakFields as $label => $value)
                                                                 <div class="col-md-6">
                                                                     <label
@@ -273,31 +287,69 @@
                                                                 <textarea class="form-control" rows="2" readonly>{{ $investasi['alamat'] ?? '-' }}</textarea>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <label for="nomorKontrak" class="form-label">Nomor Kontrak
-                                                                    <span class="text-danger">*</span></label>
-                                                                <input type="text" class="form-control" id="nomorKontrak"
-                                                                    name="nomor_kontrak"
-                                                                    placeholder="Contoh: 001/SKI/INV/2025"
-                                                                    value="{{ old('nomor_kontrak', $investasi['nomor_kontrak'] ?? '') }}"
-                                                                    required>
+                                                                <label for="nomorKontrak" class="form-label">Nomor Kontrak</label>
+                                                                @if(!empty($investasi['nomor_kontrak']))
+                                                                    <input type="text" class="form-control" 
+                                                                        value="{{ $investasi['nomor_kontrak'] }}" readonly>
+                                                                    <div class="form-text text-success">
+                                                                        <i class="ti ti-check-circle me-1"></i>Nomor kontrak sudah di-generate
+                                                                    </div>
+                                                                @elseif(!empty($investasi['preview_nomor_kontrak']))
+                                                                    <input type="text" class="form-control bg-light" 
+                                                                        id="nomorKontrak"
+                                                                        value="{{ $investasi['preview_nomor_kontrak'] }}"
+                                                                        readonly>
+                                                                    <div class="form-text text-warning">
+                                                                        <i class="ti ti-alert-circle me-1"></i>Preview nomor kontrak (belum tersimpan)
+                                                                    </div>
+                                                                @elseif(!empty($investasi['kode_perusahaan_missing']))
+                                                                    <input type="text" class="form-control bg-light" 
+                                                                        id="nomorKontrak"
+                                                                        value="Kode perusahaan investor belum diisi"
+                                                                        readonly>
+                                                                    <div class="form-text text-danger">
+                                                                        <i class="ti ti-alert-triangle me-1"></i>Hubungi admin untuk mengisi kode perusahaan investor terlebih dahulu
+                                                                    </div>
+                                                                @else
+                                                                    <input type="text" class="form-control bg-light" 
+                                                                        id="nomorKontrak"
+                                                                        value="Menunggu approval CEO"
+                                                                        readonly>
+                                                                    <div class="form-text text-muted">
+                                                                        <i class="ti ti-info-circle me-1"></i>Nomor kontrak akan muncul setelah disetujui CEO
+                                                                    </div>
+                                                                @endif
                                                             </div>
                                                         </div>
 
                                                         <hr class="my-4">
 
                                                         <div class="d-flex justify-content-end gap-2">
-                                                            <button type="button" class="btn btn-outline-primary"
-                                                                id="btnPreviewKontrak">
-                                                                <i class="ti ti-eye me-2"></i>
-                                                                Preview Kontrak
-                                                            </button>
-                                                            <button type="submit" class="btn btn-success"
-                                                                id="btnGenerateKontrak">
-                                                                <span class="spinner-border spinner-border-sm me-2 d-none"
-                                                                    id="btnGenerateKontrakSpinner"></span>
-                                                                <i class="ti ti-file-check me-2"></i>
-                                                                Generate Kontrak
-                                                            </button>
+                                                            @if(!empty($investasi['nomor_kontrak']))
+                                                                <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['nomor_kontrak']]) }}" 
+                                                                    class="btn btn-outline-primary" target="_blank">
+                                                                    <i class="ti ti-eye me-2"></i>
+                                                                    Preview Kontrak
+                                                                </a>
+                                                            @elseif(!empty($investasi['preview_nomor_kontrak']))
+                                                                <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['preview_nomor_kontrak']]) }}" 
+                                                                    class="btn btn-outline-secondary" target="_blank">
+                                                                    <i class="ti ti-eye me-2"></i>
+                                                                    Preview Kontrak
+                                                                </a>
+                                                                <button type="submit" class="btn btn-success"
+                                                                    id="btnGenerateKontrak">
+                                                                    <span class="spinner-border spinner-border-sm me-2 d-none"
+                                                                        id="btnGenerateKontrakSpinner"></span>
+                                                                    <i class="ti ti-file-check me-2"></i>
+                                                                    Generate Kontrak
+                                                                </button>
+                                                            @elseif(!empty($investasi['kode_perusahaan_missing']))
+                                                                <button type="button" class="btn btn-secondary" disabled>
+                                                                    <i class="ti ti-alert-triangle me-2"></i>
+                                                                    Kode Perusahaan Belum Diisi
+                                                                </button>
+                                                            @endif
                                                         </div>
                                                     </form>
                                                 </div>
@@ -306,7 +358,7 @@
                                             <div class="alert alert-info">
                                                 Anda tidak memiliki izin untuk melakukan generate kontrak.
                                             </div>
-                                        @endcan
+                                        @endif
                                     </div>
                                     <!-- End Konten Step 5 -->
                                 </div>
@@ -333,7 +385,7 @@
                                     @else
                                         <!-- Timeline dari database -->
                                         <div class="timeline">
-                                            @foreach ($histories->reverse() as $history)
+                                            @foreach ($histories as $history)
                                                 <div class="activity-item mb-4">
                                                     <div class="row align-items-start">
                                                         <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -441,6 +493,13 @@
                                                                         @endphp
                                                                         {!! $statusDescriptions[$history->status] ?? $history->status !!}
                                                                     </p>
+                                                                    
+                                                                    @if($history->catatan && !str_contains($history->status, 'Ditolak'))
+                                                                        <div class="alert alert-info alert-sm mt-2 mb-0" style="font-size: 0.875rem; padding: 0.5rem 0.75rem;">
+                                                                            <strong><i class="ti ti-note me-1"></i>Catatan:</strong> {{ $history->catatan }}
+                                                                        </div>
+                                                                    @endif
+                                                                    
                                                                     @if ($history->submittedBy)
                                                                         <small class="text-muted">
                                                                         </small>
@@ -504,8 +563,14 @@
                     </div>
                     <hr class="my-2">
                     <div class="modal-body">
-                        <h5 class="mb-2">Apakah anda yakin menyetujui Bagi Hasil Investasi ini?</h5>
-                        <p class="mb-0">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
+                        <h5 class="mb-3">Apakah anda yakin menyetujui Bagi Hasil Investasi ini?</h5>
+                        
+                        <div class="mb-3">
+                            <label for="catatan_validasi_finance" class="form-label">Catatan Validasi <small class="text-muted">(Opsional)</small></label>
+                            <textarea class="form-control" id="catatan_validasi_finance" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                        </div>
+                        
+                        <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
                             menolak.</p>
                     </div>
                     <div class="modal-footer">
@@ -613,6 +678,12 @@
                     <div class="modal-body">
                         <h5 class="mb-2">Apakah Anda yakin menyetujui pengajuan investasi ini?</h5>
                         <p class="mb-0">Dengan menyetujui, pengajuan akan dilanjutkan ke proses upload bukti transfer.</p>
+                        
+                        <div class="mt-3">
+                            <label for="catatan_validasi_ceo" class="form-label">Catatan Validasi (Opsional)</label>
+                            <textarea class="form-control" id="catatan_validasi_ceo" rows="3" placeholder="Tambahkan catatan jika diperlukan"></textarea>
+                            <div class="form-text">Catatan ini akan ditampilkan di riwayat aktivitas</div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" id="btnKonfirmasiCEO">
@@ -755,7 +826,8 @@
             $('#btnKonfirmasiSetuju').click(() => ajaxPost(
                 `/pengajuan-investasi/${ID}/approval`, {
                     status: 'Dokumen Tervalidasi',
-                    validasi_bagi_hasil: 'disetujui'
+                    validasi_bagi_hasil: 'disetujui',
+                    catatan: $('#catatan_validasi_finance').val()
                 },
                 () => (hideModal('modalPersetujuanInvestasi'), showSuccessReload(
                     'Pengajuan berhasil disetujui')),
@@ -789,7 +861,8 @@
 
             $('#btnKonfirmasiCEO').click(() => ajaxPost(
                 `/pengajuan-investasi/${ID}/approval`, {
-                    status: 'Disetujui oleh CEO SKI'
+                    status: 'Disetujui oleh CEO SKI',
+                    catatan: $('#catatan_validasi_ceo').val()
                 },
                 () => (hideModal('modalValidasiCEO'), showSuccessReload('Pengajuan disetujui CEO')),
                 '#btnKonfirmasiCEO',
@@ -835,40 +908,80 @@
                     `/pengajuan-investasi/${ID}/preview-kontrak${nomor ? '?nomor_kontrak=' + encodeURIComponent(nomor) : ''}`,
                     '_blank');
 
-            $('#btnPreviewKontrak').click(() => {
-                const nomor = $('#nomorKontrak').val();
-                nomor ? openPreview(nomor) : (Swal.fire('Perhatian!', 'Mohon isi nomor kontrak', 'warning'),
-                    $('#nomorKontrak').focus());
-            });
-
             window.previewKontrakFromHistory = () => openPreview();
 
-            $('#formGenerateKontrak').submit(function(e) {
+            $('#formGenerateKontrak').submit(async function(e) {
                 e.preventDefault();
-                if (!this.checkValidity()) return (e.stopPropagation(), $(this).addClass('was-validated'));
-
-                Swal.fire({
-                    title: 'Konfirmasi',
-                    text: 'Generate kontrak ini?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Generate'
-                }).then(result => {
-                    if (result.isConfirmed) {
-                        const nomor = $('#nomorKontrak').val();
-                        savedNomorKontrak = nomor;
-                        localStorage.setItem(`kontrak_${ID}`, nomor);
-                        ajaxPost(
-                            `/pengajuan-investasi/${ID}/generate-kontrak`, {
-                                nomor_kontrak: nomor,
-                                status: 'Selesai'
-                            },
-                            () => showSuccessReload('Kontrak berhasil digenerate'),
-                            '#btnGenerateKontrak',
-                            '<span class="spinner-border spinner-border-sm me-2"></span>Generate...'
-                        );
+                
+                // Validasi form
+                if (!this.checkValidity()) {
+                    e.stopPropagation();
+                    $(this).addClass('was-validated');
+                    
+                    // Focus ke field yang error
+                    const namaPicInput = $('#namaPicKontrak');
+                    if (!namaPicInput.val()) {
+                        namaPicInput.focus();
+                        namaPicInput.addClass('is-invalid');
                     }
-                });
+                    return;
+                }
+                
+                const btnGenerate = $('#btnGenerateKontrak');
+                const spinner = $('#btnGenerateKontrakSpinner');
+                const namaPicKontrak = $('#namaPicKontrak').val();
+                
+                try {
+                    const result = await Swal.fire({
+                        title: 'Konfirmasi',
+                        html: `Generate nomor kontrak untuk investasi ini?<br><br><small><strong>Nama PIC/CEO:</strong> ${namaPicKontrak}</small>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Generate',
+                        cancelButtonText: 'Batal'
+                    });
+
+                    if (!result.isConfirmed) return;
+
+                    btnGenerate.prop('disabled', true);
+                    spinner.removeClass('d-none');
+
+                    const response = await fetch(`/pengajuan-investasi/${ID}/generate-kontrak`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': CSRF,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            nama_pic_kontrak: namaPicKontrak
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.error) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message || 'Nomor kontrak berhasil di-generate',
+                            showConfirmButton: true
+                        });
+                        window.location.reload();
+                    } else {
+                        throw new Error(data.message || 'Gagal generate kontrak');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: error.message || 'Terjadi kesalahan saat generate kontrak'
+                    });
+                } finally {
+                    btnGenerate.prop('disabled', false);
+                    spinner.addClass('d-none');
+                }
             });
 
             updateUI();

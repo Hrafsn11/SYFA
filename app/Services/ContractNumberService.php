@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\PengajuanPeminjaman;
+use App\Models\PengajuanInvestasi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -76,5 +77,50 @@ class ContractNumberService
             'running_number' => (int) $parts[1],
             'tanggal' => $parts[2],
         ];
+    }
+
+    /**
+     * Generate nomor kontrak untuk investasi
+     * Format: KODE_PERUSAHAAN-RUNNING_NUMBER-DDMMYYYY
+     * 
+     * @param string $kodePerusahaan
+     * @param string $jenisDeposito (Reguler/Khusus)
+     * @param string|null $tanggal
+     * @return string
+     */
+    public static function generateInvestasi(string $kodePerusahaan, string $jenisDeposito, ?string $tanggal = null): string
+    {
+        // Get all contracts to find highest running number (global across all deposito types)
+        $allContracts = PengajuanInvestasi::whereNotNull('nomor_kontrak')
+            ->where('nomor_kontrak', '!=', '')
+            ->lockForUpdate()
+            ->get();
+
+        $runningNumber = 1;
+        
+        if ($allContracts->isNotEmpty()) {
+            $maxNumber = 0;
+            
+            foreach ($allContracts as $contract) {
+                $parts = explode('-', $contract->nomor_kontrak);
+                
+                // Format: KODE-NUMBER-DATE
+                if (count($parts) >= 3) {
+                    $number = (int) $parts[1];
+                    if ($number > $maxNumber) {
+                        $maxNumber = $number;
+                    }
+                }
+            }
+            
+            $runningNumber = $maxNumber + 1;
+        }
+
+        $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
+        $formattedDate = $date->format('dmY');
+
+        $nomorKontrak = strtoupper($kodePerusahaan) . '-' . $runningNumber . '-' . $formattedDate;
+
+        return $nomorKontrak;
     }
 }

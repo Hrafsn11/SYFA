@@ -19,7 +19,7 @@
     @else
     <!-- Timeline -->
     <div class="timeline">
-        @foreach($pengajuan->histories->sortByDesc('created_at') as $history)
+        @foreach($pengajuan->histories as $history)
         <div class="activity-item mb-4">
             <div class="row align-items-start">
                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -78,6 +78,11 @@
                                 @endphp
                                 {!! $statusDescriptions[$history->status] ?? $history->status !!}
                             </p>
+                            @if($history->catatan && !str_contains($history->status, 'Ditolak'))
+                                <div class="alert alert-info alert-sm mt-2 mb-2">
+                                    <strong><i class="ti ti-note me-1"></i>Catatan:</strong> {{ $history->catatan }}
+                                </div>
+                            @endif
                             @if($history->approvedBy)
                                 <small class="text-muted">
                                     oleh {{ $history->approvedBy->name ?? '-' }}
