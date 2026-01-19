@@ -70,7 +70,7 @@ class PengajuanRestrukturisasi extends Model
     // ========================================
     // RELATIONSHIPS
     // ========================================
-    
+
     /**
      * Get the debitur that owns the pengajuan.
      */
@@ -109,8 +109,8 @@ class PengajuanRestrukturisasi extends Model
     public function latestHistory()
     {
         return $this->hasOne(HistoryStatusPengajuanRestrukturisasi::class, 'id_pengajuan_restrukturisasi', 'id_pengajuan_restrukturisasi')
-                    ->orderBy('id_history_status_restrukturisasi', 'desc')
-                    ->limit(1);
+            ->orderBy('id_history_status_restrukturisasi', 'desc')
+            ->limit(1);
     }
 
     /**
@@ -121,10 +121,18 @@ class PengajuanRestrukturisasi extends Model
         return $this->hasOne(EvaluasiPengajuanRestrukturisasi::class, 'id_pengajuan_restrukturisasi', 'id_pengajuan_restrukturisasi');
     }
 
+    /**
+     * Get the program restrukturisasi for this pengajuan.
+     */
+    public function programRestrukturisasi()
+    {
+        return $this->hasOne(ProgramRestrukturisasi::class, 'id_pengajuan_restrukturisasi', 'id_pengajuan_restrukturisasi');
+    }
+
     // ========================================
     // QUERY SCOPES
     // ========================================
-    
+
     /**
      * Scope to filter by status.
      */
@@ -160,7 +168,7 @@ class PengajuanRestrukturisasi extends Model
     // ========================================
     // HELPER METHODS
     // ========================================
-    
+
     /**
      * Check if pengajuan is in draft status.
      */
@@ -199,7 +207,7 @@ class PengajuanRestrukturisasi extends Model
      */
     public function getStatusBadgeClass(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'Draft' => 'warning',
             'Submit Dokumen' => 'info',
             'Dokumen Tervalidasi' => 'success',
@@ -216,7 +224,7 @@ class PengajuanRestrukturisasi extends Model
      */
     public function getCurrentStepName(): string
     {
-        return match($this->current_step) {
+        return match ($this->current_step) {
             1 => 'Pengajuan Restrukturisasi',
             2 => 'Validasi Dokumen',
             3 => 'Persetujuan CEO',
