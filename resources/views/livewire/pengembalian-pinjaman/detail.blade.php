@@ -107,6 +107,22 @@
                             <span class="fw-bold text-success text-end">Rp
                                 {{ number_format($totalDibayarkan, 0, ',', '.') }}</span>
                         </div>
+                        <div class="info-item py-3 border-bottom">
+                            <div class="ps-4 d-flex justify-content-between">
+                                <span class="text-muted">Bagi hasil yang dibayarkan</span>
+                                <span class="text-end">
+                                    Rp {{ number_format(($pengembalian->total_bagi_hasil - $pengembalian->sisa_bagi_hasil), 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="info-item py-3 border-bottom">
+                            <div class="ps-4 d-flex justify-content-between">
+                                <span class="text-muted">Pokok yang dibayarkan</span>
+                                <span class="text-end">
+                                    Rp {{ number_format(($pengembalian->total_pinjaman - $pengembalian->sisa_bayar_pokok), 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
                         <div class="info-item d-flex justify-content-between py-3 border-bottom">
                             <span class="text-muted">Sisa Bayar Pokok</span>
                             <span class="text-end">
