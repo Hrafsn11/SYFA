@@ -187,7 +187,8 @@ class PengajuanInvestasi extends Model
                 DB::raw('(
                     SELECT 
                         id_pengajuan_investasi as pd_id_pengajuan_investasi, 
-                        SUM(nominal_yang_disalurkan) as total_disalurkan 
+                        SUM(nominal_yang_disalurkan) as total_disalurkan,
+                        SUM(nominal_yang_dikembalikan) as total_dikembalikan
                     FROM penyaluran_deposito 
                     GROUP BY id_pengajuan_investasi
                 ) as pd_aggregated'),
@@ -198,7 +199,7 @@ class PengajuanInvestasi extends Model
             ->select([
                 'pengajuan_investasi.*',
                 DB::raw('COALESCE(pd_aggregated.total_disalurkan, 0) as total_disalurkan'),
-                DB::raw('(pengajuan_investasi.jumlah_investasi - COALESCE(pd_aggregated.total_disalurkan, 0)) as sisa_dana')
+                DB::raw('(pengajuan_investasi.jumlah_investasi - COALESCE(pd_aggregated.total_disalurkan, 0) + COALESCE(pd_aggregated.total_dikembalikan, 0)) as sisa_dana')
             ]);
     }
 
@@ -235,14 +236,24 @@ class PengajuanInvestasi extends Model
      * Formula: sisa_pokok - sisa_dana_di_perusahaan
      * 
      * Logic:
-     * - Dana internal (tidak disalurkan) bisa langsung dikembalikan
-     * - Dana yang disalurkan harus nunggu perusahaan bayar dulu
+     * - Sisa Pokok = dana yang belum dikembalikan ke investor
+     * - Dana di Perusahaan = dana yang disalurkan tapi belum balik dari perusahaan
+     * - Dana Tersedia = dana yang bisa dikembalikan ke investor sekarang
+     * - Dana Tersedia = Sisa Pokok - Dana di Perusahaan
+     * 
+     * Contoh:
+     * - Investasi: 123jt
+     * - Disalurkan: 26jt (23jt + 3jt)
+     * - Dikembalikan dari perusahaan: 3jt
+     * - Dana di Perusahaan: 26jt - 3jt = 23jt
+     * - Sisa Pokok: 123jt (belum ada pengembalian ke investor)
+     * - Dana Tersedia: 123jt - 23jt = 100jt
      * 
      * @return float
      */
     public function getDanaTersediaAttribute(): float
     {
-        $sisaDiPerusahaan = $this->sisa_dana_di_perusahaan; // Pakai accessor
+        $sisaDiPerusahaan = $this->sisa_dana_di_perusahaan;
         return max(0, floatval($this->sisa_pokok ?? 0) - $sisaDiPerusahaan);
     }
 
