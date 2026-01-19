@@ -18,7 +18,7 @@ class PengajuanInvestasiFinlog extends Model
      * The table associated with the model.
      */
     protected $table = 'pengajuan_investasi_finlog';
-    
+
     /**
      * The primary key associated with the table.
      */
@@ -39,6 +39,7 @@ class PengajuanInvestasiFinlog extends Model
         'nominal_bagi_hasil_yang_didapat',
         'upload_bukti_transfer',
         'nomor_kontrak',
+        'nama_pic_kontrak',
         'status',
         'current_step',
         'created_by',

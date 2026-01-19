@@ -117,9 +117,11 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
 
-            if ($pengajuan->status !== 'Draft' && 
-                $pengajuan->status !== 'Menunggu Validasi Finance SKI' && 
-                !($pengajuan->status === 'Ditolak Finance SKI' && $pengajuan->current_step == 2)) {
+            if (
+                $pengajuan->status !== 'Draft' &&
+                $pengajuan->status !== 'Menunggu Validasi Finance SKI' &&
+                !($pengajuan->status === 'Ditolak Finance SKI' && $pengajuan->current_step == 2)
+            ) {
                 return Response::error('Pengajuan tidak dapat diubah pada status: ' . $pengajuan->status);
             }
 
@@ -360,23 +362,55 @@ class PengajuanInvestasiController extends Controller
     /**
      * Generate kontrak
      */
-    public function generateKontrak(PengajuanInvestasiFinlogRequest $request, $id)
+    public function generateKontrak(Request $request, $id)
     {
         try {
             DB::beginTransaction();
 
-            $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
+            $request->validate([
+                'nama_pic_kontrak' => 'required|string|max:255',
+            ], [
+                'nama_pic_kontrak.required' => 'Nama PIC/CEO harus diisi',
+                'nama_pic_kontrak.string' => 'Nama PIC/CEO harus berupa teks',
+                'nama_pic_kontrak.max' => 'Nama PIC/CEO maksimal 255 karakter',
+            ]);
 
-            // Update nomor kontrak and status to completed (Step 6: Selesai)
-            $pengajuan->update([
-                'nomor_kontrak' => $request->input('nomor_kontrak'),
+            // Get pengajuan investasi
+            $investasi = PengajuanInvestasiFinlog::with('investor')->findOrFail($id);
+
+            // Validasi: Pastikan pengajuan sudah disetujui CEO (current_step >= 4)
+            if ($investasi->current_step < 4) {
+                return Response::error('Pengajuan belum disetujui CEO. Tidak bisa generate kontrak.', 400);
+            }
+
+            // Validasi: Nomor kontrak belum pernah di-generate
+            if (!empty($investasi->nomor_kontrak)) {
+                return Response::error('Nomor kontrak sudah pernah di-generate: ' . $investasi->nomor_kontrak, 400);
+            }
+
+            // Validasi: Investor harus punya kode perusahaan
+            if (empty($investasi->investor->kode_perusahaan)) {
+                return Response::error('Kode perusahaan investor belum diisi. Hubungi administrator.', 400);
+            }
+
+            // Generate nomor kontrak using ContractNumberService
+            $nomorKontrak = \App\Services\ContractNumberService::generateInvestasi(
+                $investasi->investor->kode_perusahaan,
+                'Finlog', // Jenis deposito untuk SFinlog
+                $investasi->tanggal_investasi
+            );
+
+            // Update pengajuan investasi dengan nomor kontrak DAN nama_pic_kontrak
+            $investasi->update([
+                'nomor_kontrak' => $nomorKontrak,
+                'nama_pic_kontrak' => $request->nama_pic_kontrak,
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'updated_by' => Auth::id(),
             ]);
 
             // Create history for "Selesai"
-            $history = $this->createHistory($pengajuan->id_pengajuan_investasi_finlog, [
+            $history = $this->createHistory($investasi->id_pengajuan_investasi_finlog, [
                 'status' => 'Selesai',
                 'current_step' => 6,
                 'approve_by' => Auth::id(),
@@ -385,15 +419,28 @@ class PengajuanInvestasiController extends Controller
             DB::commit();
 
             // Reload pengajuan dengan relasi investor untuk notifikasi
-            $pengajuan->refresh();
-            $pengajuan->load('investor');
-            // Notifikasi kontrak dibuat (karena ada nomor_kontrak)
-            ListNotifSFinlog::menuPengajuanInvestasi($history->status, $pengajuan);
+            $investasi->refresh();
+            $investasi->load('investor');
 
-            return Response::success($pengajuan, 'Kontrak berhasil digenerate!');
+            // Notifikasi kontrak dibuat
+            try {
+                ListNotifSFinlog::menuPengajuanInvestasi($history->status, $investasi);
+            } catch (\Exception $notifException) {
+                Log::error('Failed to send notification for kontrak generation', [
+                    'pengajuan_id' => $investasi->id_pengajuan_investasi_finlog,
+                    'error' => $notifException->getMessage()
+                ]);
+            }
+
+            return Response::success([
+                'nomor_kontrak' => $nomorKontrak,
+                'id_pengajuan' => $investasi->id_pengajuan_investasi_finlog
+            ], 'Nomor kontrak berhasil di-generate: ' . $nomorKontrak);
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return Response::errorCatch($e, 'Terjadi kesalahan saat generate kontrak');
+            Log::error('Error generate kontrak investasi finlog: ' . $e->getMessage());
+            return Response::errorCatch($e, 'Gagal generate kontrak investasi');
         }
     }
 
@@ -449,8 +496,8 @@ class PengajuanInvestasiController extends Controller
         return [
             'nomor_kontrak' => $nomorKontrak,
             'tanggal_kontrak' => $tanggalKontrak,
-            'nama_investor' => $pengajuan->nama_investor,
-            'nama_perusahaan' => $pengajuan->nama_investor, // Asumsi dari code lama sama
+            'nama_investor' => $pengajuan->nama_pic_kontrak ?? $pengajuan->nama_investor,
+            'nama_perusahaan' => $pengajuan->nama_investor,
             'project' => $pengajuan->project->nama_cells_bisnis ?? '-',
             'nominal_investasi' => $pengajuan->nominal_investasi,
             'persentase_bagi_hasil' => $pengajuan->persentase_bagi_hasil,

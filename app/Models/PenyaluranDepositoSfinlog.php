@@ -24,13 +24,14 @@ class PenyaluranDepositoSfinlog extends Model
         'id_cells_project',
         'id_project',
         'nominal_yang_disalurkan',
+        'nominal_yang_dikembalikan',
         'tanggal_pengiriman_dana',
         'tanggal_pengembalian',
-        'bukti_pengembalian',
     ];
 
     protected $casts = [
         'nominal_yang_disalurkan' => 'decimal:2',
+        'nominal_yang_dikembalikan' => 'decimal:2',
         'tanggal_pengiriman_dana' => 'date',
         'tanggal_pengembalian' => 'date',
     ];
