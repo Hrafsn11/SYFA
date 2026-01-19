@@ -229,6 +229,7 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.program_restukturisasi',
             'sfinance.menu.penyaluran_deposito',
 
+            'sfinlog.menu.dashboard_pembiayaan',
             'sfinlog.menu.peminjaman_dana',
             'sfinlog.menu.pengembalian_dana',
             'sfinlog.menu.report_pengembalian',
@@ -289,6 +290,7 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.report_penyaluran_dana',
             'sfinance.menu.pengembalian_investasi',
 
+            'sfinlog.menu.dashboard_investasi_deposito',
             'sfinlog.menu.pengajuan_investasi',
             'sfinlog.menu.report_penyaluran_dana',
             'sfinlog.menu.pengembalian_investasi',
