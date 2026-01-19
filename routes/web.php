@@ -285,10 +285,10 @@ Route::middleware([
     Route::get('/check-notifications', [NotificationController::class, 'checkNew']);
     Route::resource('notification', NotificationController::class);
 
-    Route::prefix('portofolio')->name('portofolio.')->group(function () {
-        Route::get('laporan-investasi/{id}', [\App\Http\Controllers\PortofolioController::class, 'getData'])->name('get-data');
-        Route::post('store/{id}', [\App\Http\Controllers\PortofolioController::class, 'store'])->name('store');
-    });
+    // Route::prefix('portofolio')->name('portofolio.')->group(function () {
+    //     Route::get('laporan-investasi/{id}', [\App\Http\Controllers\PortofolioController::class, 'getData'])->name('get-data');
+    //     Route::post('store/{id}', [\App\Http\Controllers\PortofolioController::class, 'store'])->name('store');
+    // });
 });
 
 require __DIR__ . '/auth.php';
