@@ -221,6 +221,7 @@ class RolePermissionSeeder extends Seeder
         $debiturRole->permissions()->detach();
         $debiturRole->syncPermissions([
             // Menu Access - Peminjaman & Deposito
+            'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
             'sfinance.menu.pengembalian_dana',
@@ -283,6 +284,7 @@ class RolePermissionSeeder extends Seeder
         $investorRole->permissions()->detach();
         $investorRole->syncPermissions([
             // Menu Access - Investasi Only
+            'sfinance.menu.dashboard_pembiayaan_investasi',
             'sfinance.menu.pengajuan_investasi',
             'sfinance.menu.report_penyaluran_dana',
             'sfinance.menu.pengembalian_investasi',
@@ -449,6 +451,11 @@ class RolePermissionSeeder extends Seeder
             'sfinlog.menu.peminjaman_dana',
             'sfinlog.menu.pengembalian_dana',
             'sfinlog.menu.pengajuan_investasi',
+            'sfinlog.menu.ar_perbulan',
+            'sfinlog.menu.ar_performance',
+            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.kertas_kerja_investor',
+            'sfinlog.menu.debitur_piutang',
 
             // Peminjaman Finlog (CEO Finlog tidak bisa create, hanya approve)
             'peminjaman_finlog.view',
@@ -471,6 +478,11 @@ class RolePermissionSeeder extends Seeder
         $ioRole->syncPermissions([
             // Menu SFinlog
             'sfinlog.menu.peminjaman_dana',
+            'sfinlog.menu.ar_perbulan',
+            'sfinlog.menu.ar_performance',
+            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.kertas_kerja_investor',
+            'sfinlog.menu.debitur_piutang',
 
             // Peminjaman Finlog (IO tidak bisa create, hanya validasi)
             'peminjaman_finlog.view',
