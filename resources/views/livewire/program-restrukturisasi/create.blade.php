@@ -74,6 +74,8 @@
                     </div>
                 </div>
 
+                @if($specialCase)
+
                 <hr class="my-4">
 
                 {{-- PARAMETER --}}
@@ -174,6 +176,51 @@
                         </button>
                     </div>
                 </div>
+
+                @else
+
+                <hr class="my-4">
+
+                {{-- PARAMETER --}}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="mb-3">Parameter Perhitungan</h5>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
+                            wire:model.live="jangka_waktu_total" min="1">
+                        @error('jangka_waktu_total')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Jumlah Pembayaran <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
+                            wire:model.live="jangka_waktu_total" min="1">
+                        @error('jangka_waktu_total')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
+                            wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                            <span wire:loading.remove wire:target="hitungJadwalAngsuran"
+                                class="d-flex align-items-center">
+                                <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
+                            </span>
+                            <span wire:loading wire:target="hitungJadwalAngsuran">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                Menghitung...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                @endif
 
                 {{-- TABEL JADWAL --}}
                 @if ($show_jadwal && count($jadwal_angsuran) > 0)

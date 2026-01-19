@@ -41,6 +41,7 @@ class Create extends Component
     public $total_margin = 0;
     public $total_cicilan = 0;
     public $show_jadwal = false;
+    public $specialCase = true;
 
     // Options
     public $approvedRestrukturisasi = [];
@@ -49,6 +50,7 @@ class Create extends Component
     {
         $this->tanggal_mulai_cicilan = $this->tanggal_mulai_cicilan ?? date('Y-m-d');
         $this->show_jadwal = false;
+        $this->specialCase = true;
         $this->jadwal_angsuran = [];
         $this->loadApprovedRestrukturisasi($id);
     }
@@ -123,6 +125,11 @@ class Create extends Component
                 ->find($this->id_pengajuan_restrukturisasi);
 
             if ($restrukturisasi) {
+                $this->specialCase = true;
+                if (in_array('Pengurangan tunggakan pokok/margin', $restrukturisasi->jenis_restrukturisasi)) {
+                    $this->specialCase = false;
+                }
+
                 $this->nama_debitur = $restrukturisasi->debitur
                     ? $restrukturisasi->debitur->nama
                     : $restrukturisasi->nama_perusahaan;
