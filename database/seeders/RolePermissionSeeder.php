@@ -162,6 +162,7 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.edit',
             'program_restrukturisasi.edit_parameter',
             'program_restrukturisasi.upload',
+            'program_restrukturisasi.konfirmasi', // Konfirmasi pembayaran oleh admin/finance
             // Pengembalian Investasi
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
@@ -360,6 +361,7 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
             'program_restrukturisasi.edit_parameter',
+            'program_restrukturisasi.konfirmasi', // Finance SKI can confirm payments
 
             // Penyaluran Deposito Finlog (Finance SKI full access)
             'penyaluran_deposito_finlog.view',

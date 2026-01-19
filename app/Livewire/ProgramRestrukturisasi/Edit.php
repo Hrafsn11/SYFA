@@ -23,6 +23,14 @@ class Edit extends Create
     public $selectedAngsuranIndex = null;
     public $selectedAngsuranNo = null;
     public $uploadFile = null;
+    public $uploadNominalBayar = 0;
+    public $isEditingFile = false;
+
+    public $showKonfirmasiModal = false;
+    public $selectedKonfirmasiIndex = null;
+    public $selectedKonfirmasiNo = null;
+    public $catatanKonfirmasi = '';
+    public $showTolakModal = false;
 
     public string $pageTitle = 'Aksi Program Restrukturisasi';
     public string $pageSubtitle = 'Perbarui parameter program restrukturisasi';
@@ -43,14 +51,13 @@ class Edit extends Create
             'jadwalAngsuran' => fn($query) => $query->orderBy('no'),
         ])->findOrFail($id);
 
-        // Authorization check: Debitur hanya bisa edit data miliknya
         $user = Auth::user();
         $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance', 'Finance SKI']);
-        
+
         if (!$isAdmin) {
             $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
             $pengajuanDebiturId = $this->program->pengajuanRestrukturisasi->id_debitur ?? null;
-            
+
             if (!$debitur || $debitur->id_debitur !== $pengajuanDebiturId) {
                 abort(403, 'Anda tidak memiliki akses untuk mengedit data ini.');
             }
@@ -152,13 +159,9 @@ class Edit extends Create
         })->toArray();
     }
 
-    /**
-     * Override hitungJadwalAngsuran to preserve existing data
-     * When user recalculates in edit mode, we need to keep status & bukti_pembayaran
-     */
+
     public function hitungJadwalAngsuran()
     {
-        // Save current jadwal data (status, bukti_pembayaran, etc)
         $oldJadwalData = [];
         foreach ($this->jadwal_angsuran as $index => $item) {
             $oldJadwalData[$item['no']] = [
@@ -170,10 +173,8 @@ class Edit extends Create
             ];
         }
 
-        // Call parent to recalculate
         parent::hitungJadwalAngsuran();
 
-        // Merge back the preserved data
         foreach ($this->jadwal_angsuran as $index => $item) {
             $no = $item['no'];
             if (isset($oldJadwalData[$no])) {
@@ -251,7 +252,6 @@ class Edit extends Create
                 'updated_by' => Auth::id(),
             ]);
 
-            // Simpan mapping bukti pembayaran berdasarkan nomor angsuran
             $buktiMapping = $this->program->jadwalAngsuran->keyBy('no')->map(function ($item) {
                 return [
                     'bukti_pembayaran' => $item->bukti_pembayaran,
@@ -260,8 +260,6 @@ class Edit extends Create
                     'status' => $item->status,
                 ];
             });
-
-            // Delete dan recreate jadwal angsuran
             $this->program->jadwalAngsuran()->delete();
 
             foreach ($this->jadwal_angsuran as $item) {
@@ -340,19 +338,20 @@ class Edit extends Create
             }
         }
 
-        // Cek apakah sudah ada bukti pembayaran
-        if (!empty($angsuran['bukti_pembayaran'])) {
-            $this->dispatch('swal:modal', [
-                'type' => 'info',
-                'title' => 'Info',
-                'text' => 'Bukti pembayaran untuk angsuran ini sudah ada. Silakan hapus terlebih dahulu jika ingin mengganti.',
-            ]);
-            return;
-        }
+        // Check if this is editing existing file
+        $this->isEditingFile = !empty($angsuran['bukti_pembayaran']);
 
         $this->selectedAngsuranIndex = $index;
         $this->selectedAngsuranNo = $noAngsuran;
         $this->uploadFile = null;
+
+        // Set default nominal bayar dari total_cicilan atau nominal_bayar yang sudah ada
+        // Gunakan round() untuk membulatkan ke integer (tanpa desimal)
+        $defaultNominal = $this->isEditingFile
+            ? ($angsuran['nominal_bayar'] ?? $angsuran['total_cicilan'])
+            : $angsuran['total_cicilan'];
+        $this->uploadNominalBayar = (int) round($defaultNominal);
+
         $this->showUploadModal = true;
 
         // Dispatch event untuk trigger JavaScript buka modal
@@ -368,6 +367,8 @@ class Edit extends Create
         $this->selectedAngsuranIndex = null;
         $this->selectedAngsuranNo = null;
         $this->uploadFile = null;
+        $this->uploadNominalBayar = 0;
+        $this->isEditingFile = false;
         $this->resetValidation();
     }
 
@@ -403,14 +404,18 @@ class Edit extends Create
                 return;
             }
 
-            // Validasi file - Livewire sudah handle upload, jadi langsung validate
+            // Validasi file dan nominal - Livewire sudah handle upload, jadi langsung validate
             try {
                 $this->validate([
                     'uploadFile' => 'required|mimes:jpg,jpeg,png,pdf|max:2048',
+                    'uploadNominalBayar' => 'required|numeric|min:1',
                 ], [
                     'uploadFile.required' => 'File bukti pembayaran wajib diisi.',
                     'uploadFile.mimes' => 'File harus berupa gambar (jpg, jpeg, png) atau PDF.',
                     'uploadFile.max' => 'Ukuran file maksimal 2MB.',
+                    'uploadNominalBayar.required' => 'Nominal pembayaran wajib diisi.',
+                    'uploadNominalBayar.numeric' => 'Nominal pembayaran harus berupa angka.',
+                    'uploadNominalBayar.min' => 'Nominal pembayaran minimal Rp 1.',
                 ]);
             } catch (ValidationException $e) {
                 // Jika validasi gagal karena file belum ter-upload, tunggu sebentar
@@ -489,10 +494,12 @@ class Edit extends Create
 
             $jadwalAngsuran->update([
                 'bukti_pembayaran' => $path,
-                'status' => 'Lunas',
+                'status' => 'Tertunda', // Status tertunda sampai dikonfirmasi admin
                 'tanggal_bayar' => now(),
-                'nominal_bayar' => $angsuran['total_cicilan'],
+                'nominal_bayar' => (float) $this->uploadNominalBayar,
             ]);
+
+            // Catatan: total_terbayar hanya di-update saat admin konfirmasi pembayaran (status Lunas)
 
             // Reload jadwal angsuran dengan relasi untuk notifikasi
             $jadwalAngsuran->refresh();
@@ -534,6 +541,244 @@ class Edit extends Create
                 'type' => 'error',
                 'title' => 'System Error',
                 'text' => 'Gagal mengupload bukti pembayaran: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Buka modal konfirmasi pembayaran
+     */
+    public function openKonfirmasiModal($index)
+    {
+        // Cek permission
+        if (!auth()->user()->can('program_restrukturisasi.konfirmasi')) {
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'Akses Ditolak',
+                'text' => 'Anda tidak memiliki izin untuk mengkonfirmasi pembayaran.',
+            ]);
+            return;
+        }
+
+        if (!isset($this->jadwal_angsuran[$index])) {
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'Error',
+                'text' => 'Data angsuran tidak ditemukan.',
+            ]);
+            return;
+        }
+
+        $angsuran = $this->jadwal_angsuran[$index];
+
+        // Pastikan status adalah Tertunda
+        if ($angsuran['status'] !== 'Tertunda') {
+            $this->dispatch('swal:modal', [
+                'type' => 'warning',
+                'title' => 'Tidak Dapat Dikonfirmasi',
+                'text' => 'Hanya pembayaran dengan status Tertunda yang dapat dikonfirmasi.',
+            ]);
+            return;
+        }
+
+        $this->selectedKonfirmasiIndex = $index;
+        $this->selectedKonfirmasiNo = $angsuran['no'];
+        $this->showKonfirmasiModal = true;
+
+        // Dispatch event untuk trigger JavaScript buka modal
+        $this->dispatch('open-konfirmasi-modal');
+    }
+
+    /**
+     * Tutup modal konfirmasi
+     */
+    public function closeKonfirmasiModal()
+    {
+        $this->showKonfirmasiModal = false;
+        $this->selectedKonfirmasiIndex = null;
+        $this->selectedKonfirmasiNo = null;
+        $this->catatanKonfirmasi = '';
+        $this->showTolakModal = false;
+    }
+
+    /**
+     * Buka modal konfirmasi penolakan (berganti dari modal konfirmasi)
+     */
+    public function openTolakModal()
+    {
+        $this->showKonfirmasiModal = false;
+        $this->showTolakModal = true;
+        // Tutup modal konfirmasi dulu, lalu buka modal tolak
+        $this->dispatch('switch-to-tolak-modal');
+    }
+
+    /**
+     * Tutup modal konfirmasi penolakan
+     */
+    public function closeTolakModal()
+    {
+        $this->showTolakModal = false;
+    }
+
+    /**
+     * Submit konfirmasi pembayaran
+     * Mengubah status dari Tertunda ke Lunas dan update total_terbayar
+     */
+    public function submitKonfirmasi()
+    {
+        if ($this->selectedKonfirmasiIndex === null) {
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'Error',
+                'text' => 'Data angsuran tidak ditemukan.',
+            ]);
+            return;
+        }
+
+        $index = $this->selectedKonfirmasiIndex;
+        $angsuran = $this->jadwal_angsuran[$index];
+
+        // Pastikan ada bukti pembayaran
+        if (empty($angsuran['bukti_pembayaran'])) {
+            $this->dispatch('swal:modal', [
+                'type' => 'warning',
+                'title' => 'Tidak Ada Bukti',
+                'text' => 'Tidak ada bukti pembayaran yang diupload.',
+            ]);
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $jadwalAngsuran = JadwalAngsuran::find($angsuran['id']);
+            if (!$jadwalAngsuran) {
+                throw new \Exception('Data jadwal angsuran tidak ditemukan di database.');
+            }
+
+            // Gabungkan catatan lama dengan catatan konfirmasi jika ada
+            $catatanBaru = $jadwalAngsuran->catatan ?? '';
+            if (!empty($this->catatanKonfirmasi)) {
+                $catatanBaru = trim($catatanBaru . "\n[Dikonfirmasi] " . $this->catatanKonfirmasi);
+            }
+
+            // Update status ke Lunas
+            $jadwalAngsuran->update([
+                'status' => 'Lunas',
+                'catatan' => $catatanBaru,
+            ]);
+
+            $totalTerbayar = JadwalAngsuran::where('id_program_restrukturisasi', $this->program->id_program_restrukturisasi)
+                ->where('status', 'Lunas')
+                ->whereNotNull('nominal_bayar')
+                ->sum('nominal_bayar');
+
+            // Cek apakah program sudah lunas (total_terbayar >= total_cicilan)
+            $statusProgram = $totalTerbayar >= $this->total_cicilan ? 'Lunas' : 'Berjalan';
+
+            $this->program->update([
+                'total_terbayar' => $totalTerbayar,
+                'status' => $statusProgram,
+            ]);
+
+            DB::commit();
+
+            // Tutup modal via JavaScript
+            $this->dispatch('close-konfirmasi-modal');
+            $this->closeKonfirmasiModal();
+
+            // Reload data
+            $this->loadData();
+
+            $this->dispatch('swal:modal', [
+                'type' => 'success',
+                'title' => 'Berhasil',
+                'text' => 'Pembayaran angsuran bulan ' . $angsuran['no'] . ' telah dikonfirmasi dan status diubah menjadi Lunas.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error konfirmasi pembayaran: ' . $e->getMessage());
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'System Error',
+                'text' => 'Gagal mengkonfirmasi pembayaran: ' . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Tolak pembayaran
+     * Mengembalikan status ke Belum Jatuh Tempo/Jatuh Tempo dan hapus bukti pembayaran
+     */
+    public function tolakPembayaran()
+    {
+        if ($this->selectedKonfirmasiIndex === null) {
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'Error',
+                'text' => 'Data angsuran tidak ditemukan.',
+            ]);
+            return;
+        }
+
+        $index = $this->selectedKonfirmasiIndex;
+        $angsuran = $this->jadwal_angsuran[$index];
+
+        try {
+            DB::beginTransaction();
+
+            $jadwalAngsuran = JadwalAngsuran::find($angsuran['id']);
+            if (!$jadwalAngsuran) {
+                throw new \Exception('Data jadwal angsuran tidak ditemukan di database.');
+            }
+
+            // Hapus file bukti pembayaran dari storage
+            if (!empty($jadwalAngsuran->bukti_pembayaran)) {
+                \Storage::delete($jadwalAngsuran->bukti_pembayaran);
+            }
+
+            // Tentukan status baru berdasarkan tanggal jatuh tempo
+            $tanggalJatuhTempo = \Carbon\Carbon::parse($jadwalAngsuran->tanggal_jatuh_tempo);
+            $statusBaru = $tanggalJatuhTempo->isPast() ? 'Jatuh Tempo' : 'Belum Jatuh Tempo';
+
+            // Gabungkan catatan lama dengan alasan penolakan
+            $catatanBaru = $jadwalAngsuran->catatan ?? '';
+            if (!empty($this->catatanKonfirmasi)) {
+                $catatanBaru = trim($catatanBaru . "\n[Ditolak] " . $this->catatanKonfirmasi);
+            } else {
+                $catatanBaru = trim($catatanBaru . "\n[Ditolak] Pembayaran ditolak oleh finance.");
+            }
+
+            // Update jadwal angsuran - reset pembayaran
+            $jadwalAngsuran->update([
+                'status' => $statusBaru,
+                'bukti_pembayaran' => null,
+                'tanggal_bayar' => null,
+                'nominal_bayar' => null,
+                'catatan' => $catatanBaru,
+            ]);
+
+            DB::commit();
+
+            // Tutup modal via JavaScript
+            $this->dispatch('close-tolak-modal');
+            $this->closeKonfirmasiModal();
+
+            // Reload data
+            $this->loadData();
+
+            $this->dispatch('swal:modal', [
+                'type' => 'warning',
+                'title' => 'Pembayaran Ditolak',
+                'text' => 'Pembayaran angsuran bulan ' . $angsuran['no'] . ' telah ditolak. User harus mengupload ulang bukti pembayaran.',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error tolak pembayaran: ' . $e->getMessage());
+            $this->dispatch('swal:modal', [
+                'type' => 'error',
+                'title' => 'System Error',
+                'text' => 'Gagal menolak pembayaran: ' . $e->getMessage(),
             ]);
         }
     }

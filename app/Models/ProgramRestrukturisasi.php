@@ -27,6 +27,8 @@ class ProgramRestrukturisasi extends Model
         'total_pokok',
         'total_margin',
         'total_cicilan',
+        'total_terbayar',
+        'status',
         'created_by',
         'updated_by',
     ];
@@ -38,6 +40,8 @@ class ProgramRestrukturisasi extends Model
         'total_pokok' => 'decimal:2',
         'total_margin' => 'decimal:2',
         'total_cicilan' => 'decimal:2',
+        'total_terbayar' => 'decimal:2',
+        'status' => 'string',
         'tanggal_mulai_cicilan' => 'date',
         'jangka_waktu_total' => 'integer',
         'masa_tenggang' => 'integer',

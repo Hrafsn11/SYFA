@@ -36,8 +36,8 @@ class Table extends DataTableComponent
     public function builder(): Builder
     {
         $user = Auth::user();
-        
-        
+
+
         $isAdmin = $user && $user->roles()->where('restriction', 1)->exists();
 
         $query = ProgramRestrukturisasi::query()
@@ -121,6 +121,19 @@ class Table extends DataTableComponent
                         $builder->whereRaw("YEAR(program_restrukturisasi.created_at) = ?", [$value]);
                     }
                 }),
+
+            SelectFilter::make('Status')
+                ->options([
+                    '' => 'Semua Status',
+                    'Berjalan' => 'Berjalan',
+                    'Lunas' => 'Lunas',
+                    'Tertunda' => 'Tertunda',
+                ])
+                ->filter(function (Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        $builder->where('status', $value);
+                    }
+                }),
         ];
     }
 
@@ -163,6 +176,19 @@ class Table extends DataTableComponent
 
             Column::make('Total Dibayar (Rp)', 'total_cicilan')
                 ->label(fn($row) => number_format($row->total_cicilan, 0, ',', '.'))
+                ->sortable(),
+
+            Column::make('Status', 'status')
+                ->label(function ($row) {
+                    $status = $row->status ?? 'Berjalan';
+                    $badgeClass = match ($status) {
+                        'Lunas' => 'bg-success',
+                        'Tertunda' => 'bg-warning',
+                        default => 'bg-secondary',
+                    };
+                    return '<span class="badge ' . $badgeClass . '">' . $status . '</span>';
+                })
+                ->html()
                 ->sortable(),
 
             Column::make('Dibuat', 'created_at')
