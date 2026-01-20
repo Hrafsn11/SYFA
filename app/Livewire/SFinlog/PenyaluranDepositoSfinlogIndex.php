@@ -19,14 +19,14 @@ use App\Http\Requests\SFinlog\PenyaluranDepositoSfinlogRequest;
 class PenyaluranDepositoSfinlogIndex extends Component
 {
     use HasUniversalFormAction, HasValidate, HasModal, HandleComponentEvent, WithFileUploads;
-    
+
     private string $validateClass = PenyaluranDepositoSfinlogRequest::class;
 
     #[ParameterIDRoute]
     public $id;
-    
+
     #[FieldInput]
-    public $id_pengajuan_investasi_finlog, $id_cells_project, $id_project, $nominal_yang_disalurkan, $tanggal_pengiriman_dana, $tanggal_pengembalian, $bukti_pengembalian;
+    public $id_pengajuan_investasi_finlog, $id_cells_project, $id_project, $nominal_yang_disalurkan, $tanggal_pengiriman_dana, $tanggal_pengembalian;
 
     public $availableProjects = [];
 
@@ -68,7 +68,7 @@ class PenyaluranDepositoSfinlogIndex extends Component
         }
 
         $cellsProject = CellsProject::with('projects')->find($cellBisnisId);
-        
+
         if ($cellsProject && $cellsProject->projects && $cellsProject->projects->isNotEmpty()) {
             $this->availableProjects = $cellsProject->projects->map(fn($p) => [
                 'id_project' => $p->id_project,
@@ -92,14 +92,14 @@ class PenyaluranDepositoSfinlogIndex extends Component
         }
 
         $pengajuan = PengajuanInvestasiFinlog::with('project.projects')->find($value);
-        
+
         if (!$pengajuan || !$pengajuan->project) {
             return;
         }
 
         $this->id_cells_project = $pengajuan->id_cells_project;
         $this->loadProjectsByCellBisnis($pengajuan->id_cells_project);
-        
+
         // Set project pertama dari pengajuan investasi jika ada
         if ($pengajuan->project->projects->isNotEmpty()) {
             $this->id_project = $pengajuan->project->projects->first()->id_project;
@@ -117,11 +117,60 @@ class PenyaluranDepositoSfinlogIndex extends Component
         if (!$this->id) {
             $this->id_project = null;
         }
-        
+
         $this->loadProjectsByCellBisnis($value);
-        
+
         // Dispatch event with projects data
         $this->dispatch('updateProjects', projects: $this->availableProjects);
+    }
+
+    /**
+     * Update nominal yang dikembalikan dari project
+     */
+    public function updateNominalPengembalian($id, $nominal)
+    {
+        try {
+            $penyaluran = \App\Models\PenyaluranDepositoSfinlog::findOrFail($id);
+
+            // Validasi: nominal dikembalikan tidak boleh lebih besar dari nominal disalurkan
+            if ($nominal > $penyaluran->nominal_yang_disalurkan) {
+                $this->dispatch('showAlert', [
+                    'type' => 'error',
+                    'message' => 'Nominal yang dikembalikan tidak boleh lebih besar dari nominal yang disalurkan!'
+                ]);
+                return;
+            }
+
+            // Validasi: nominal tidak boleh negatif
+            if ($nominal < 0) {
+                $this->dispatch('showAlert', [
+                    'type' => 'error',
+                    'message' => 'Nominal yang dikembalikan tidak boleh negatif!'
+                ]);
+                return;
+            }
+
+            // Update nominal
+            $penyaluran->update([
+                'nominal_yang_dikembalikan' => $nominal
+            ]);
+
+            // Refresh table
+            $this->dispatch('refreshPenyaluranDepositoSfinlogTable');
+
+            $this->dispatch('showAlert', [
+                'type' => 'success',
+                'message' => 'Nominal pengembalian berhasil disimpan!'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error updating nominal pengembalian: ' . $e->getMessage());
+
+            $this->dispatch('showAlert', [
+                'type' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan data!'
+            ]);
+        }
     }
 
     public function render()
@@ -131,9 +180,9 @@ class PenyaluranDepositoSfinlogIndex extends Component
             'cellsProject' => $this->cellsProject,
             'availableProjects' => $this->availableProjects ?? [],
         ])
-        ->layout('layouts.app', [
-            'title' => 'Penyaluran Deposito - SFinlog'
-        ]);
+            ->layout('layouts.app', [
+                'title' => 'Aset Investasi - SFinlog'
+            ]);
     }
 }
 

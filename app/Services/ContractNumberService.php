@@ -29,10 +29,10 @@ class ContractNumberService
             ->first();
 
         $runningNumber = 1;
-        
+
         if ($lastContract && $lastContract->no_kontrak) {
             $parts = explode('-', $lastContract->no_kontrak);
-            
+
             if (count($parts) >= 2) {
                 $lastNumber = (int) $parts[1];
                 $runningNumber = $lastNumber + 1;
@@ -84,26 +84,35 @@ class ContractNumberService
      * Format: KODE_PERUSAHAAN-RUNNING_NUMBER-DDMMYYYY
      * 
      * @param string $kodePerusahaan
-     * @param string $jenisDeposito (Reguler/Khusus)
+     * @param string $jenisDeposito (Reguler/Khusus/Finlog)
      * @param string|null $tanggal
      * @return string
      */
     public static function generateInvestasi(string $kodePerusahaan, string $jenisDeposito, ?string $tanggal = null): string
     {
-        // Get all contracts to find highest running number (global across all deposito types)
-        $allContracts = PengajuanInvestasi::whereNotNull('nomor_kontrak')
-            ->where('nomor_kontrak', '!=', '')
-            ->lockForUpdate()
-            ->get();
+        // Determine which table to check based on jenisDeposito
+        if ($jenisDeposito === 'Finlog') {
+            // For SFinlog - check only SFinlog table
+            $allContracts = \App\Models\PengajuanInvestasiFinlog::whereNotNull('nomor_kontrak')
+                ->where('nomor_kontrak', '!=', '')
+                ->lockForUpdate()
+                ->get();
+        } else {
+            // For SFinance (Reguler/Khusus) - check only SFinance table
+            $allContracts = PengajuanInvestasi::whereNotNull('nomor_kontrak')
+                ->where('nomor_kontrak', '!=', '')
+                ->lockForUpdate()
+                ->get();
+        }
 
         $runningNumber = 1;
-        
+
         if ($allContracts->isNotEmpty()) {
             $maxNumber = 0;
-            
+
             foreach ($allContracts as $contract) {
                 $parts = explode('-', $contract->nomor_kontrak);
-                
+
                 // Format: KODE-NUMBER-DATE
                 if (count($parts) >= 3) {
                     $number = (int) $parts[1];
@@ -112,7 +121,7 @@ class ContractNumberService
                     }
                 }
             }
-            
+
             $runningNumber = $maxNumber + 1;
         }
 
