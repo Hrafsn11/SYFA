@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProgramRestrukturisasi;
 
+use App\Helpers\ListNotifSFinance;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\PengajuanRestrukturisasi;
@@ -438,6 +439,7 @@ class Create extends Component
                 ]);
             }
 
+            ListNotifSFinance::createProgramRestrukturisasi($program);
             DB::commit();
 
             $this->dispatch('swal:modal', [

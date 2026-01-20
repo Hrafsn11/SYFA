@@ -319,6 +319,37 @@ class ListNotifSFinance
         sendNotification($data);
     }
 
+    public static function createProgramRestrukturisasi($program){
+        // Notifikasi saat program restrukturisasi dibuat
+        $notif = NotificationFeature::where('name', 'program_restrukturisasi_dibuat')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $program->load('pengajuanRestrukturisasi.debitur');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $program->pengajuanRestrukturisasi->debitur->nama ?? 
+                                  $program->pengajuanRestrukturisasi->debitur->nama_debitur ?? 'N/A',
+        ];
+
+        // Generate link ke program restrukturisasi
+        $link = route('program-restrukturisasi.show', $program->id_program_restrukturisasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+            'id_debitur' => $program->pengajuanRestrukturisasi->id_debitur,
+            'id_investor' => null,
+        ];
+
+        sendNotification($data);
+    }
+
     public static function pembayaranRestrukturisasiTelat($jadwalAngsuran, $tanggalJatuhTempo)
     {
         // Notifikasi saat debitur telat dalam pembayaran restrukturisasi
