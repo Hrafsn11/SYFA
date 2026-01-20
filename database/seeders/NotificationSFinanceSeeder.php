@@ -569,5 +569,18 @@ class NotificationSFinanceSeeder extends Seeder
             'role_assigned' => json_encode([$investor->id]),
             'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].',
         ]);
+
+        // 3. Program Restrukturisasi Dibuat - SKI Finance
+
+        $program_restrukturisasi_dibuat = NotificationFeature::firstOrCreate([
+            'name' => 'program_restrukturisasi_dibuat',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $program_restrukturisasi_dibuat->id_notification_feature,
+            'role_assigned' => json_encode([$ceo->id, $debitur->id]),
+            'message' => 'Program Restrukturisasi untuk [[nama.debitur]] Telah berhasil dibuat.',
+        ]);
     }
 }
