@@ -47,7 +47,7 @@ class DebiturPiutangTable3 extends DataTableComponent
     public function columns(): array
     {
         return [
-            Column::make('Subtotal Sisa Pokok')->label(function ($row) {
+            Column::make('SUBTOTAL SISA POKOK + BAGI HASIL')->label(function ($row) {
                 $sisaPokok = max(0, $row->nilai_dicairkan - $row->total_bayar);
                 $subtotal = $sisaPokok + ($row->sisa_bagi_hasil ?? 0);
                 return 'Rp ' . number_format($subtotal, 0, ',', '.');

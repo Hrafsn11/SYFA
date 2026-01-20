@@ -289,13 +289,13 @@
                 @canany(['sfinance.menu.pengembalian_investasi', 'sfinlog.menu.pengembalian_investasi'])
                     <li class="menu-item {{ RouteHelper::is('*pengembalian-investasi*') ? 'active' : '' }}">
                         @if ($isSFinance)
-                            <a wire:navigate.hover href="{{ route('sfinance.pengembalian-investasi.index') }}"
+                            <a href="{{ route('sfinance.pengembalian-investasi.index') }}"
                                 class="menu-link">
                             @elseif($isSFinlog)
-                                <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-investasi.index') }}"
+                                <a href="{{ route('sfinlog.pengembalian-investasi.index') }}"
                                     class="menu-link">
                                 @else
-                                    <a wire:navigate.hover href="{{ RouteHelper::route('pengembalian-investasi.index') }}"
+                                    <a href="{{ RouteHelper::route('pengembalian-investasi.index') }}"
                                         class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-cash-banknote"></i>

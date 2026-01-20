@@ -75,7 +75,7 @@ class ListNotifSFinance
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $pengembalian->pengajuanPeminjaman->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $pengembalian->pengajuanPeminjaman->debitur->nama_debitur ?? $pengembalian->pengajuanPeminjaman->debitur->nama ?? 'N/A',
             '[[nominal]]' => $nominalFormatted,
         ];
 
@@ -110,7 +110,7 @@ class ListNotifSFinance
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? $pengajuan->debitur->nama ?? 'N/A',
             '[[tanggal]]' => $tanggalFormatted,
         ];
 
@@ -145,7 +145,7 @@ class ListNotifSFinance
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? $pengajuan->debitur->nama ?? 'N/A',
             '[[tanggal]]' => $tanggalFormatted,
         ];
 
@@ -313,6 +313,37 @@ class ListNotifSFinance
             'link' => $link,
             'notif' => $notif,
             'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
+            'id_investor' => null,
+        ];
+
+        sendNotification($data);
+    }
+
+    public static function createProgramRestrukturisasi($program){
+        // Notifikasi saat program restrukturisasi dibuat
+        $notif = NotificationFeature::where('name', 'program_restrukturisasi_dibuat')->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $program->load('pengajuanRestrukturisasi.debitur');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $program->pengajuanRestrukturisasi->debitur->nama ?? 
+                                  $program->pengajuanRestrukturisasi->debitur->nama_debitur ?? 'N/A',
+        ];
+
+        // Generate link ke program restrukturisasi
+        $link = route('program-restrukturisasi.show', $program->id_program_restrukturisasi);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+            'id_debitur' => $program->pengajuanRestrukturisasi->id_debitur,
             'id_investor' => null,
         ];
 

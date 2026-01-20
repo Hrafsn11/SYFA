@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ProgramRestrukturisasi;
 
+use App\Helpers\ListNotifSFinance;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\PengajuanRestrukturisasi;
@@ -71,11 +72,13 @@ class Create extends Component
                 $q->whereIn('status', $this->approvalStatuses());
             })
             ->whereNotNull('sisa_pokok_belum_dibayar')
-            ->where('sisa_pokok_belum_dibayar', '>', 0);
+            ->where('sisa_pokok_belum_dibayar', '>', 0)
+            // Exclude pengajuan yang sudah memiliki program restrukturisasi
+            ->whereDoesntHave('programRestrukturisasi');
 
         if (!$isAdmin) {
             $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
-            
+
             if ($debitur) {
                 $query->where('id_debitur', $debitur->id_debitur);
             } else {
@@ -102,7 +105,7 @@ class Create extends Component
     {
         if (property_exists($this, $modelName)) {
             $this->{$modelName} = $value;
-            
+
             // Trigger additional logic based on which field changed
             if ($modelName === 'id_pengajuan_restrukturisasi') {
                 $this->loadPengajuanData();
@@ -535,6 +538,7 @@ class Create extends Component
                 }
             }
 
+            ListNotifSFinance::createProgramRestrukturisasi($program);
             DB::commit();
 
             $this->dispatch('swal:modal', [

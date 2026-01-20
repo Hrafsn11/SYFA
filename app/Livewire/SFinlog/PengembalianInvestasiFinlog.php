@@ -39,6 +39,11 @@ class PengembalianInvestasiFinlog extends Component
     public $bisa_bayar_pokok = false;
     public $info_periode = '';
 
+    public $total_dana_disalurkan = 0;
+    public $total_dana_dikembalikan_penyaluran = 0;
+    public $sisa_dana_di_perusahaan = 0;
+    public $dana_pokok_tersedia = 0;
+
     public function mount()
     {
         $this->setUrlSaveData(
@@ -81,27 +86,54 @@ class PengembalianInvestasiFinlog extends Component
                 'tanggal_investasi',
             ])->findOrFail($idPengajuanInvestasiFinlog);
 
-            $this->nominal_investasi   = $investasi->nominal_investasi;
-            $this->lama_investasi      = $investasi->lama_investasi;
-            $this->bagi_hasil_total    = $investasi->nominal_bagi_hasil_yang_didapat;
-            $this->tanggal_investasi   = $investasi->tanggal_investasi;
+            $this->nominal_investasi = $investasi->nominal_investasi;
+            $this->lama_investasi = $investasi->lama_investasi;
+            $this->bagi_hasil_total = $investasi->nominal_bagi_hasil_yang_didapat;
+            $this->tanggal_investasi = $investasi->tanggal_investasi;
 
             $pengembalian = ModelPengembalianInvestasiFinlog::getTotalDikembalikan($idPengajuanInvestasiFinlog);
-            $this->total_pokok_dikembalikan   = $pengembalian->total_pokok ?? 0;
+            $this->total_pokok_dikembalikan = $pengembalian->total_pokok ?? 0;
             $this->total_bagi_hasil_dikembalikan = $pengembalian->total_bagi_hasil ?? 0;
-            $this->jumlah_transaksi           = $pengembalian->jumlah_transaksi ?? 0;
+            $this->jumlah_transaksi = $pengembalian->jumlah_transaksi ?? 0;
+
+            $this->calculatePenyaluranData($idPengajuanInvestasiFinlog);
 
             // Hitung bulan berjalan dari tanggal investasi
             $this->calculateBulanBerjalan();
-            
+
             // Cek tanggal pengembalian terakhir
             $this->getTanggalPengembalianTerakhir($idPengajuanInvestasiFinlog);
-            
+
             // Tentukan apakah bisa bayar bagi hasil dan pokok
             $this->checkPaymentEligibility();
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal memuat data kontrak: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Hitung data penyaluran deposito
+     */
+    private function calculatePenyaluranData($idPengajuanInvestasiFinlog)
+    {
+        $penyaluran = \DB::table('penyaluran_deposito_sfinlog')
+            ->where('id_pengajuan_investasi_finlog', $idPengajuanInvestasiFinlog)
+            ->selectRaw('
+                SUM(nominal_yang_disalurkan) as total_disalurkan,
+                SUM(nominal_yang_dikembalikan) as total_dikembalikan
+            ')
+            ->first();
+
+        $this->total_dana_disalurkan = floatval($penyaluran->total_disalurkan ?? 0);
+        $this->total_dana_dikembalikan_penyaluran = floatval($penyaluran->total_dikembalikan ?? 0);
+
+        // Sisa dana yang masih di perusahaan (belum dikembalikan dari penyaluran)
+        $this->sisa_dana_di_perusahaan = $this->total_dana_disalurkan - $this->total_dana_dikembalikan_penyaluran;
+
+        // Dana pokok yang tersedia untuk dikembalikan ke investor
+        // = Nominal Investasi - Total Pokok Sudah Dikembalikan - Sisa Dana di Perusahaan
+        $sisaPokokBelumDikembalikan = ($this->nominal_investasi ?? 0) - ($this->total_pokok_dikembalikan ?? 0);
+        $this->dana_pokok_tersedia = max(0, $sisaPokokBelumDikembalikan - $this->sisa_dana_di_perusahaan);
     }
 
     /**
@@ -116,22 +148,22 @@ class PengembalianInvestasiFinlog extends Component
 
         $tanggalInvestasi = Carbon::parse($this->tanggal_investasi)->startOfDay();
         $tanggalSekarang = Carbon::now()->startOfDay();
-        
+
         // Hitung selisih bulan dengan lebih akurat
         // Bulan ke-1 adalah bulan dimana investasi dimulai
         $tahunInvestasi = $tanggalInvestasi->year;
         $bulanInvestasi = $tanggalInvestasi->month;
         $tahunSekarang = $tanggalSekarang->year;
         $bulanSekarang = $tanggalSekarang->month;
-        
+
         // Hitung selisih bulan
         $selisihTahun = $tahunSekarang - $tahunInvestasi;
         $selisihBulan = $bulanSekarang - $bulanInvestasi;
         $totalBulan = ($selisihTahun * 12) + $selisihBulan;
-        
+
         // Bulan berjalan = bulan ke-1 adalah bulan investasi
         $this->bulan_berjalan = max(1, $totalBulan + 1);
-        
+
         // Jika sudah melewati lama investasi, set ke bulan terakhir
         if ($this->bulan_berjalan > $this->lama_investasi) {
             $this->bulan_berjalan = $this->lama_investasi;
@@ -146,7 +178,7 @@ class PengembalianInvestasiFinlog extends Component
         $pengembalianTerakhir = ModelPengembalianInvestasiFinlog::where('id_pengajuan_investasi_finlog', $idPengajuanInvestasiFinlog)
             ->orderBy('tanggal_pengembalian', 'desc')
             ->first();
-        
+
         $this->tanggal_pengembalian_terakhir = $pengembalianTerakhir ? $pengembalianTerakhir->tanggal_pengembalian : null;
     }
 
@@ -207,17 +239,17 @@ class PengembalianInvestasiFinlog extends Component
 
         $tanggalTerakhir = Carbon::parse($this->tanggal_pengembalian_terakhir)->startOfDay();
         $tanggalSekarang = Carbon::now()->startOfDay();
-        
+
         // Hitung selisih bulan dengan lebih akurat
         $tahunTerakhir = $tanggalTerakhir->year;
         $bulanTerakhir = $tanggalTerakhir->month;
         $tahunSekarang = $tanggalSekarang->year;
         $bulanSekarang = $tanggalSekarang->month;
-        
+
         $selisihTahun = $tahunSekarang - $tahunTerakhir;
         $selisihBulan = $bulanSekarang - $bulanTerakhir;
         $totalBulan = ($selisihTahun * 12) + $selisihBulan;
-        
+
         // Harus sudah 2 bulan atau lebih
         return $totalBulan >= 2;
     }
@@ -252,6 +284,12 @@ class PengembalianInvestasiFinlog extends Component
         $this->bisa_bayar_bagi_hasil = false;
         $this->bisa_bayar_pokok = false;
         $this->info_periode = '';
+
+        // Reset penyaluran data
+        $this->total_dana_disalurkan = 0;
+        $this->total_dana_dikembalikan_penyaluran = 0;
+        $this->sisa_dana_di_perusahaan = 0;
+        $this->dana_pokok_tersedia = 0;
     }
 
     public function resetForm()
@@ -274,8 +312,8 @@ class PengembalianInvestasiFinlog extends Component
         return view('livewire.sfinlog.pengembalian-investasi-sfinlog.index', [
             'pengajuanInvestasi' => $this->pengajuanInvestasi,
         ])->layout('layouts.app', [
-            'title' => 'Pengembalian Investasi - SFinlog'
-        ]);
+                    'title' => 'Pengembalian Investasi - SFinlog'
+                ]);
     }
 }
 

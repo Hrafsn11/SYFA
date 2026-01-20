@@ -45,26 +45,26 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                     );
 
                     $totalBagiHasilSudahDibayar = $totalSudahDibayar->total_bagi_hasil ?? 0;
-                    $totalPokokSudahDibayar     = $totalSudahDibayar->total_pokok ?? 0;
+                    $totalPokokSudahDibayar = $totalSudahDibayar->total_pokok ?? 0;
 
                     $sisaBagiHasil = max(0, $totalBagiHasil - $totalBagiHasilSudahDibayar);
-                    $sisaPokok     = max(0, ($pengajuan->nominal_investasi ?? 0) - $totalPokokSudahDibayar);
+                    $sisaPokok = max(0, ($pengajuan->nominal_investasi ?? 0) - $totalPokokSudahDibayar);
 
                     // Cek apakah sudah bulan terakhir
                     $tanggalInvestasi = Carbon::parse($pengajuan->tanggal_investasi)->startOfDay();
                     $tanggalSekarang = Carbon::now()->startOfDay();
-                    
+
                     // Hitung bulan berjalan dengan lebih akurat
                     $tahunInvestasi = $tanggalInvestasi->year;
                     $bulanInvestasi = $tanggalInvestasi->month;
                     $tahunSekarang = $tanggalSekarang->year;
                     $bulanSekarang = $tanggalSekarang->month;
-                    
+
                     $selisihTahun = $tahunSekarang - $tahunInvestasi;
                     $selisihBulan = $bulanSekarang - $bulanInvestasi;
                     $totalBulan = ($selisihTahun * 12) + $selisihBulan;
                     $bulanBerjalan = max(1, $totalBulan + 1);
-                    
+
                     if ($bulanBerjalan > $pengajuan->lama_investasi) {
                         $bulanBerjalan = $pengajuan->lama_investasi;
                     }
@@ -88,9 +88,30 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                         return;
                     }
 
-                    // 4) Nominal yang dibayar tidak boleh melebihi sisa pokok
-                    if ($value > $sisaPokok) {
-                        $fail('Dana pokok tidak boleh lebih dari sisa pokok (Rp ' . number_format($sisaPokok, 0, ',', '.') . ').');
+                    // 4) Hitung dana yang masih di perusahaan (dari penyaluran deposito)
+                    $penyaluran = \DB::table('penyaluran_deposito_sfinlog')
+                        ->where('id_pengajuan_investasi_finlog', $pengajuan->id_pengajuan_investasi_finlog)
+                        ->selectRaw('
+                            SUM(nominal_yang_disalurkan) as total_disalurkan,
+                            SUM(nominal_yang_dikembalikan) as total_dikembalikan
+                        ')
+                        ->first();
+
+                    $totalDanaDisalurkan = floatval($penyaluran->total_disalurkan ?? 0);
+                    $totalDanaDikembalikan = floatval($penyaluran->total_dikembalikan ?? 0);
+                    $sisaDanaDiPerusahaan = $totalDanaDisalurkan - $totalDanaDikembalikan;
+
+                    // Dana pokok yang tersedia untuk dikembalikan ke investor
+                    // = Sisa Pokok - Sisa Dana di Perusahaan
+                    $danaPokokTersedia = max(0, $sisaPokok - $sisaDanaDiPerusahaan);
+
+                    // 5) Nominal yang dibayar tidak boleh melebihi dana pokok tersedia
+                    if ($value > $danaPokokTersedia) {
+                        if ($sisaDanaDiPerusahaan > 0) {
+                            $fail('Dana pokok yang dapat dikembalikan maksimal Rp ' . number_format($danaPokokTersedia, 0, ',', '.') . '. Masih ada Rp ' . number_format($sisaDanaDiPerusahaan, 0, ',', '.') . ' yang belum dikembalikan dari perusahaan.');
+                        } else {
+                            $fail('Dana pokok tidak boleh lebih dari sisa pokok (Rp ' . number_format($sisaPokok, 0, ',', '.') . ').');
+                        }
                     }
                 },
             ],
@@ -112,18 +133,18 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                     // Cek periode penagihan (harus 2 bulan sekali atau bulan terakhir)
                     $tanggalInvestasi = Carbon::parse($pengajuan->tanggal_investasi)->startOfDay();
                     $tanggalSekarang = Carbon::now()->startOfDay();
-                    
+
                     // Hitung bulan berjalan dengan lebih akurat
                     $tahunInvestasi = $tanggalInvestasi->year;
                     $bulanInvestasi = $tanggalInvestasi->month;
                     $tahunSekarang = $tanggalSekarang->year;
                     $bulanSekarang = $tanggalSekarang->month;
-                    
+
                     $selisihTahun = $tahunSekarang - $tahunInvestasi;
                     $selisihBulan = $bulanSekarang - $bulanInvestasi;
                     $totalBulan = ($selisihTahun * 12) + $selisihBulan;
                     $bulanBerjalan = max(1, $totalBulan + 1);
-                    
+
                     if ($bulanBerjalan > $pengajuan->lama_investasi) {
                         $bulanBerjalan = $pengajuan->lama_investasi;
                     }
@@ -139,15 +160,15 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                     $bisaBayarBerdasarkanPeriode = true;
                     if ($pengembalianTerakhir) {
                         $tanggalTerakhir = Carbon::parse($pengembalianTerakhir->tanggal_pengembalian)->startOfDay();
-                        
+
                         // Hitung selisih bulan dengan lebih akurat
                         $tahunTerakhir = $tanggalTerakhir->year;
                         $bulanTerakhir = $tanggalTerakhir->month;
-                        
+
                         $selisihTahun = $tahunSekarang - $tahunTerakhir;
                         $selisihBulan = $bulanSekarang - $bulanTerakhir;
                         $totalBulan = ($selisihTahun * 12) + $selisihBulan;
-                        
+
                         $bisaBayarBerdasarkanPeriode = ($totalBulan >= 2);
                     } else {
                         // Jika belum ada pengembalian, harus minimal bulan ke-2
@@ -159,7 +180,7 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                         if (!$bulanGenap) {
                             $fail('Bagi Hasil hanya dapat dibayarkan di bulan genap (bulan ke-2, 4, 6, dst) atau bulan terakhir. Saat ini bulan ke-' . $bulanBerjalan . '.');
                         } else {
-                            $tanggalBerikutnya = $pengembalianTerakhir 
+                            $tanggalBerikutnya = $pengembalianTerakhir
                                 ? Carbon::parse($pengembalianTerakhir->tanggal_pengembalian)->addMonths(2)->format('d F Y')
                                 : Carbon::parse($pengajuan->tanggal_investasi)->addMonths(2)->format('d F Y');
                             $fail('Pembayaran berikutnya dapat dilakukan pada: ' . $tanggalBerikutnya);

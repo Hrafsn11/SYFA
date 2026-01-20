@@ -5,27 +5,28 @@ namespace App\Livewire;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
-use App\Models\PengembalianPinjamanFinlog;
+use App\Models\PeminjamanFinlog;
 use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PengembalianPeminjamanFinlogTable extends DataTableComponent
 {
-    protected $model = PengembalianPinjamanFinlog::class;
+    protected $model = PeminjamanFinlog::class;
 
     protected $listeners = ['refreshPengembalianPeminjamanFinlogTable' => '$refresh'];
 
     public function configure(): void
     {
-        $this->setPrimaryKey('id_pengembalian_pinjaman_finlog')
+        $this->setPrimaryKey('id_peminjaman_finlog')
             ->setSearchEnabled()
             ->setSearchPlaceholder('Cari Pengembalian...')
             ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('tanggal_pengembalian', 'desc')
+            ->setDefaultSort('id_peminjaman_finlog', 'desc')
             ->setTableAttributes(['class' => 'table table-bordered table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -56,7 +57,7 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->whereRaw("MONTH(pengembalian_pinjaman_finlog.tanggal_pengembalian) = ?", [$value]);
+                        $builder->whereRaw("MONTH(peminjaman_finlog.harapan_tanggal_pencairan) = ?", [$value]);
                     }
                 }),
 
@@ -70,7 +71,7 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->whereRaw("YEAR(pengembalian_pinjaman_finlog.tanggal_pengembalian) = ?", [$value]);
+                        $builder->whereRaw("YEAR(peminjaman_finlog.harapan_tanggal_pencairan) = ?", [$value]);
                     }
                 }),
         ];
@@ -78,9 +79,8 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        // Check if user has unrestricted role
         $hasUnrestrictedRole = false;
         if ($user) {
             if ($user->hasRole('super-admin')) {
@@ -93,41 +93,31 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             }
         }
 
-        if ($hasUnrestrictedRole) {
-            // Unrestricted users (Finance SKI, CEO Finlog, etc) - see all data
-            $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
-                ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
-                ->groupBy('ppf.id_pinjaman_finlog')
-                ->pluck('latest_id');
-        } else {
-            // Restricted users (Debitur) - only see their own data
-            $currentDebitur = MasterDebiturDanInvestor::where('user_id', auth()->id())->first();
+        $query = PeminjamanFinlog::query()
+            ->with(['debitur', 'latestPengembalian'])
+            ->where('peminjaman_finlog.status', 'Selesai')
+            ->select('peminjaman_finlog.*');
 
-            if (!$currentDebitur) {
-                // Return empty query if user is not a debitur
-                return PengembalianPinjamanFinlog::query()->whereRaw('1 = 0');
+        if (!$hasUnrestrictedRole) {
+            $debitur = MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
+
+            if (!$debitur) {
+                return PeminjamanFinlog::query()->whereRaw('1 = 0');
             }
 
-            // Get latest pengembalian per pinjaman, filtered by debitur
-            $latestIds = DB::table('pengembalian_pinjaman_finlog as ppf')
-                ->select('ppf.id_pinjaman_finlog', DB::raw('MAX(ppf.id_pengembalian_pinjaman_finlog) as latest_id'))
-                ->join('peminjaman_finlog as pf', 'ppf.id_pinjaman_finlog', '=', 'pf.id_peminjaman_finlog')
-                ->where('pf.id_debitur', $currentDebitur->id_debitur)
-                ->groupBy('ppf.id_pinjaman_finlog')
-                ->pluck('latest_id');
+            $query->where('id_debitur', $debitur->id_debitur);
         }
 
-        return PengembalianPinjamanFinlog::query()
-            ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
-            ->whereIn('id_pengembalian_pinjaman_finlog', $latestIds);
+        return $query;
     }
 
     public function columns(): array
     {
+        $rowNumber = 0;
+
         return [
             Column::make('No')
-                ->label(function ($row, Column $column) {
-                    static $rowNumber = 0;
+                ->label(function ($row) use (&$rowNumber) {
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
                     return '<div class="text-center fw-semibold">' . $number . '</div>';
@@ -135,55 +125,72 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
                 ->html()
                 ->excludeFromColumnSelect(),
 
-            Column::make('Nama Perusahaan', 'peminjamanFinlog.debitur.nama')
+            Column::make('Nama Perusahaan', 'debitur.nama')
                 ->sortable()
                 ->searchable()
                 ->format(fn($value) => '<div class="text-center">' . ($value ?: '-') . '</div>')
                 ->html(),
 
-            Column::make('Kode Peminjaman', 'peminjamanFinlog.nomor_peminjaman')
+            Column::make('Kode Peminjaman', 'nomor_peminjaman')
                 ->sortable()
                 ->searchable()
                 ->format(fn($value) => '<span class="badge bg-primary">' . ($value ?? '-') . '</span>')
                 ->html(),
 
-            Column::make('Jumlah Pengembalian', 'jumlah_pengembalian')
+            Column::make('Nama Project', 'nama_project')
+                ->sortable()
+                ->searchable()
+                ->format(fn($value) => '<div class="text-center">' . ($value ?: '-') . '</div>')
+                ->html(),
+
+            Column::make('Total Pinjaman', 'total_pinjaman')
                 ->sortable()
                 ->format(fn($value) => '<div class="text-end">Rp ' . number_format($value, 0, ',', '.') . '</div>')
                 ->html(),
 
-            Column::make('Sisa Pinjaman', 'sisa_pinjaman')
-                ->sortable()
-                ->format(fn($value) => '<div class="text-end text-danger fw-semibold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+            Column::make('Jumlah Pengembalian')
+                ->label(function ($row) {
+                    $totalPengembalian = $row->pengembalianPinjaman->sum('jumlah_pengembalian');
+                    return '<div class="text-end">Rp ' . number_format($totalPengembalian, 0, ',', '.') . '</div>';
+                })
                 ->html(),
 
-            Column::make('Sisa Bagi Hasil', 'sisa_bagi_hasil')
-                ->sortable()
-                ->format(fn($value) => '<div class="text-end text-warning fw-semibold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+            Column::make('Sisa Pinjaman')
+                ->label(function ($row) {
+                    $latest = $row->latestPengembalian;
+                    $sisa = $latest ? $latest->sisa_pinjaman : $row->nilai_pinjaman;
+                    return '<div class="text-end text-danger fw-semibold">Rp ' . number_format($sisa, 0, ',', '.') . '</div>';
+                })
                 ->html(),
 
-            Column::make('Total Sisa', 'total_sisa_pinjaman')
-                ->sortable()
-                ->format(fn($value) => '<div class="text-end text-primary fw-bold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+            Column::make('Sisa Bagi Hasil')
+                ->label(function ($row) {
+                    $latest = $row->latestPengembalian;
+                    $sisa = $latest ? $latest->sisa_bagi_hasil : $row->nilai_bagi_hasil;
+                    return '<div class="text-end text-warning fw-semibold">Rp ' . number_format($sisa, 0, ',', '.') . '</div>';
+                })
                 ->html(),
 
-            Column::make('Tanggal Pengembalian', 'tanggal_pengembalian')
-                ->sortable()
-                ->format(fn($value) => '<div class="text-center">' . ($value ? $value->format('d/m/Y') : '-') . '</div>')
-                ->html(),
-
-            Column::make('Status', 'status')
-                ->sortable()
-                ->format(function ($value) {
+            Column::make('Status')
+                ->label(function ($row) {
+                    $latest = $row->latestPengembalian;
+                    $status = $latest ? $latest->status : 'Belum Lunas';
                     $badges = [
                         'Lunas' => 'success',
                         'Belum Lunas' => 'warning',
                         'Terlambat' => 'danger',
                     ];
-                    $badgeClass = $badges[$value] ?? 'secondary';
-                    return '<div class="text-center"><span class="badge bg-' . $badgeClass . '">' . $value . '</span></div>';
+                    $badgeClass = $badges[$status] ?? 'secondary';
+                    return '<div class="text-center"><span class="badge bg-' . $badgeClass . '">' . $status . '</span></div>';
                 })
                 ->html(),
+
+            Column::make('Aksi')
+                ->label(fn($row) => view('livewire.sfinlog.pengembalian-pinjaman.partials.table-actions', [
+                    'id' => $row->id_peminjaman_finlog
+                ])->render())
+                ->html()
+                ->excludeFromColumnSelect(),
         ];
     }
 }

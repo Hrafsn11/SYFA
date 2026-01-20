@@ -33,6 +33,7 @@ class PengajuanRestrukturisasiController extends Controller
     {
         $this->middleware('can:pengajuan_restrukturisasi.add')->only(['store']);
         $this->middleware('can:pengajuan_restrukturisasi.edit')->only(['edit', 'update']);
+        $this->middleware('can:pengajuan_restrukturisasi.ajukan_restrukturisasi')->only(['updateDokumen']);
     }
 
     public function index()
@@ -185,6 +186,46 @@ class PengajuanRestrukturisasiController extends Controller
             return Response::success(null, 'Pengajuan restrukturisasi berhasil dihapus!');
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal menghapus pengajuan restrukturisasi');
+        }
+    }
+
+    public function updateDokumen(\Illuminate\Http\Request $request, $id)
+    {
+        try {
+            $pengajuan = PengajuanRestrukturisasi::findOrFail($id);
+
+            if ($pengajuan->status !== 'Perbaikan Dokumen') {
+                return Response::error('Pengajuan tidak dalam status Perbaikan Dokumen');
+            }
+
+            DB::beginTransaction();
+
+            $hasNewFile = false;
+            foreach (self::DOCUMENT_FIELDS as $field) {
+                if ($request->hasFile($field)) {
+                    $hasNewFile = true;
+                    if ($pengajuan->$field) {
+                        Storage::disk('public')->delete($pengajuan->$field);
+                    }
+
+                    $file = $request->file($field);
+                    $filename = time() . '_' . $field . '_' . $file->getClientOriginalName();
+                    $pengajuan->$field = $file->storeAs('restrukturisasi/dokumen', $filename, 'public');
+                }
+            }
+
+            if (!$hasNewFile) {
+                return Response::error('Tidak ada file yang diupload');
+            }
+
+            $pengajuan->save();
+
+            DB::commit();
+
+            return Response::success($pengajuan, 'Dokumen berhasil diperbarui!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return Response::errorCatch($e, 'Gagal memperbarui dokumen');
         }
     }
 
