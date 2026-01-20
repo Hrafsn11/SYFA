@@ -89,7 +89,7 @@
                                             <th class="text-center">Bagi Hasil Nominal</th>
                                             <th class="text-center">Bagi Hasil (%Bulan)</th>
                                             <th class="text-center">Bagi Hasil (COF/Bulan)</th>
-                                            <th class="text-center">CoF Per Akhir Des {{ $year }}</th>
+                                            <th class="text-center">CoF Per Akhir Desember</th>
                                             <th class="text-center">Status</th>
                                             <th class="text-center">Tanggal Pengembalian</th>
 

@@ -71,18 +71,6 @@ class KertasKerjaInvestorSFinanceController extends Controller
 
         $investasi = $query->orderBy('tanggal_investasi', 'desc')->get();
 
-        $pengembalianPerBulan = DB::table('pengembalian_investasi')
-            ->select([
-                'id_pengajuan_investasi',
-                DB::raw('MONTH(tanggal_pengembalian) as bulan'),
-                DB::raw('SUM(dana_pokok_dibayar) as total_pokok'),
-                DB::raw('SUM(bagi_hasil_dibayar) as total_bagi_hasil')
-            ])
-            ->whereYear('tanggal_pengembalian', $year)
-            ->groupBy('id_pengajuan_investasi', DB::raw('MONTH(tanggal_pengembalian)'))
-            ->get()
-            ->groupBy('id_pengajuan_investasi');
-
         $totalPengembalian = DB::table('pengembalian_investasi')
             ->select([
                 'id_pengajuan_investasi',
@@ -102,9 +90,8 @@ class KertasKerjaInvestorSFinanceController extends Controller
             ->get()
             ->keyBy('id_pengajuan_investasi');
 
-        $result = $investasi->map(function ($inv) use ($pengembalianPerBulan, $totalPengembalian, $tanggalPengembalianTerakhir, $year) {
+        $result = $investasi->map(function ($inv) use ($totalPengembalian, $tanggalPengembalianTerakhir, $year) {
             $id = $inv->id_pengajuan_investasi;
-            $pembayaranBulan = $pengembalianPerBulan->get($id, collect());
             $total = $totalPengembalian->get($id);
             $tglTerakhir = $tanggalPengembalianTerakhir->get($id);
 
@@ -114,6 +101,7 @@ class KertasKerjaInvestorSFinanceController extends Controller
             $tanggalMulai = \Carbon\Carbon::parse($inv->tanggal_investasi);
             $tanggalAkhirPeriode = \Carbon\Carbon::create($year, 12, 31);
 
+            // Hitung CoF akhir periode
             if ($tanggalMulai->year > $year) {
                 $cofAkhirPeriode = 0;
             } else {
@@ -132,6 +120,22 @@ class KertasKerjaInvestorSFinanceController extends Controller
                 $cofAkhirPeriode = max(0, $totalSeharusnya - $totalDibayar);
             }
 
+            // Hitung CoF per bulan (Jan-Des) berdasarkan periode investasi aktif
+            $tanggalJatuhTempo = \Carbon\Carbon::parse($inv->tanggal_investasi)->addMonths($inv->lama_investasi);
+            $cofPerBulan = [];
+
+            for ($bulan = 1; $bulan <= 12; $bulan++) {
+                // Buat tanggal untuk bulan tersebut di tahun yang dipilih
+                $tanggalBulanIni = \Carbon\Carbon::create($year, $bulan, 1);
+                $tanggalAkhirBulanIni = $tanggalBulanIni->copy()->endOfMonth();
+
+                // Cek apakah bulan ini dalam periode investasi aktif
+                $isAktif = $tanggalMulai->lte($tanggalAkhirBulanIni) && $tanggalJatuhTempo->gte($tanggalBulanIni);
+
+                // Jika aktif, isi dengan CoF per bulan, jika tidak isi dengan 0
+                $cofPerBulan[$bulan] = $isAktif ? $cofBulan : 0;
+            }
+
             return [
                 'id' => $id,
                 'nomor_kontrak' => $inv->nomor_kontrak,
@@ -148,18 +152,19 @@ class KertasKerjaInvestorSFinanceController extends Controller
                 'status' => $inv->status,
                 'tgl_pengembalian' => $tglTerakhir->tanggal_terakhir ?? null,
 
-                'jan' => $pembayaranBulan->where('bulan', 1)->first()->total_bagi_hasil ?? 0,
-                'feb' => $pembayaranBulan->where('bulan', 2)->first()->total_bagi_hasil ?? 0,
-                'mar' => $pembayaranBulan->where('bulan', 3)->first()->total_bagi_hasil ?? 0,
-                'apr' => $pembayaranBulan->where('bulan', 4)->first()->total_bagi_hasil ?? 0,
-                'mei' => $pembayaranBulan->where('bulan', 5)->first()->total_bagi_hasil ?? 0,
-                'jun' => $pembayaranBulan->where('bulan', 6)->first()->total_bagi_hasil ?? 0,
-                'jul' => $pembayaranBulan->where('bulan', 7)->first()->total_bagi_hasil ?? 0,
-                'agu' => $pembayaranBulan->where('bulan', 8)->first()->total_bagi_hasil ?? 0,
-                'sep' => $pembayaranBulan->where('bulan', 9)->first()->total_bagi_hasil ?? 0,
-                'okt' => $pembayaranBulan->where('bulan', 10)->first()->total_bagi_hasil ?? 0,
-                'nov' => $pembayaranBulan->where('bulan', 11)->first()->total_bagi_hasil ?? 0,
-                'des' => $pembayaranBulan->where('bulan', 12)->first()->total_bagi_hasil ?? 0,
+                // CoF per bulan berdasarkan periode investasi aktif
+                'jan' => $cofPerBulan[1],
+                'feb' => $cofPerBulan[2],
+                'mar' => $cofPerBulan[3],
+                'apr' => $cofPerBulan[4],
+                'mei' => $cofPerBulan[5],
+                'jun' => $cofPerBulan[6],
+                'jul' => $cofPerBulan[7],
+                'agu' => $cofPerBulan[8],
+                'sep' => $cofPerBulan[9],
+                'okt' => $cofPerBulan[10],
+                'nov' => $cofPerBulan[11],
+                'des' => $cofPerBulan[12],
 
                 'pengembalian_pokok' => $total->total_pokok_all ?? 0,
                 'pengembalian_bagi_hasil' => $total->total_bagi_hasil_all ?? 0,
