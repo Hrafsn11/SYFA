@@ -16,6 +16,7 @@
     $isRejectedStatus = in_array($currentStatus, ['Draft', 'Ditolak']);
 
     $isEditModeRequested = request()->query('edit') === 'true';
+    $isEditDokumenMode = request()->query('edit-dokumen') === 'true';
 
     $canSubmitPengajuan = $isDraft || ($isPerbaikanDokumen && $currentStep == 1);
     $canApproveStep2 = $currentStep == 2 && !$isRejectedStatus && $hasEvaluasi && !$isPerluEvaluasiUlang;
@@ -24,6 +25,9 @@
 
     $canApproveStep3 = $currentStep == 3 && !$isRejectedStatus;
     $canApproveStep4 = $currentStep == 4 && !$isRejectedStatus;
+
+    // Check if user can edit documents (when status is Perbaikan Dokumen)
+    $canEditDokumen = $isPerbaikanDokumen && $currentStep == 1 && auth()->user()->can('pengajuan_restrukturisasi.ajukan_restrukturisasi');
 @endphp
 
 <div class="tab-pane fade show active" id="detail-restrukturisasi" role="tabpanel">
@@ -31,6 +35,16 @@
     <div class="d-flex justify-content-between items-center mt-4 mb-3 mb-md-4 flex-wrap gap-2">
         <h5 class="mb-3 mb-md-4">Detail Pinjaman</h5>
         <div class="d-flex gap-2 flex-wrap">
+            {{-- Perbaikan Dokumen: Edit Dokumen Button --}}
+            @can('pengajuan_restrukturisasi.ajukan_restrukturisasi')
+                @if ($canEditDokumen && !$isEditDokumenMode)
+                    <a href="{{ request()->fullUrlWithQuery(['edit-dokumen' => 'true']) }}" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Dokumen
+                    </a>
+                @endif
+            @endcan
+
             {{-- Step 1: Submit Pengajuan --}}
             @can('pengajuan_restrukturisasi.ajukan_restrukturisasi')
                 @if ($canSubmitPengajuan)
@@ -57,7 +71,8 @@
                     </a>
                 @elseif($currentStep == 2 && !$isRejectedStatus && !$hasEvaluasi)
                     {{-- Show info badge if at Step 2 but evaluation not saved yet --}}
-                    <span class="badge bg-warning text-dark d-flex align-items-center px-3 py-2">
+                    <span class="badge bg-warning text-white d-flex gap-2 align-items-center px-3 py-2">
+                        <i class="fas fa-info-circle"></i>
                         Simpan Evaluasi terlebih dahulu
                     </span>
                 @endif
@@ -88,6 +103,15 @@
     </div>
 
     <hr class="my-3 my-md-4">
+
+    {{-- Form Upload Dokumen (shown when status is Perbaikan Dokumen) --}}
+    @if ($canEditDokumen)
+        @include('livewire.pengajuan-restrukturisasi.partials._dokumen-upload-form', [
+            'pengajuan' => $pengajuan,
+            'histories' => $histories,
+            'isEditDokumenMode' => $isEditDokumenMode,
+        ])
+    @endif
 
     {{-- Detail Information --}}
     <div class="row">
@@ -188,15 +212,15 @@
 
         {{-- Additional Info --}}
         <div class="col-12 mt-3">
-            <div class="alert alert-secondary py-2" role="alert">
+            <div class="alert alert-light py-2" role="alert">
                 <p class="mb-1"><strong>Alasan Restrukturisasi:</strong></p>
                 <small>{{ $pengajuan->alasan_restrukturisasi ?? 'Tidak ada keterangan' }}</small>
             </div>
-            <div class="alert alert-secondary py-2" role="alert">
+            <div class="alert alert-light py-2" role="alert">
                 <p class="mb-1"><strong>Rencana Pemulihan Usaha:</strong></p>
                 <small>{{ $pengajuan->rencana_pemulihan_usaha ?? 'Tidak ada keterangan' }}</small>
             </div>
-            <div class="alert alert-secondary py-2" role="alert">
+            <div class="alert alert-light py-2" role="alert">
                 <p class="mb-2"><strong>Jenis Restrukturisasi yang Diajukan:</strong></p>
                 @if ($pengajuan->jenis_restrukturisasi && count($pengajuan->jenis_restrukturisasi) > 0)
                     <div class="d-flex flex-wrap gap-2">
@@ -217,6 +241,12 @@
                     <small class="text-muted">Belum ada jenis restrukturisasi yang dipilih</small>
                 @endif
             </div>
+            @if ($pengajuan->jenis_restrukturisasi_lainnya)
+                <div class="alert alert-light border py-2" role="alert">
+                    <p class="mb-1"><strong>Keterangan Tambahan:</strong></p>
+                    <small>{{ $pengajuan->jenis_restrukturisasi_lainnya }}</small>
+                </div>
+            @endif
         </div>
     </div>
 

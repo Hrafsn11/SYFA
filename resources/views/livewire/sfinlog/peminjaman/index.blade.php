@@ -3,13 +3,25 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Peminjaman Dana</h4>
-                @can('peminjaman_finlog.add')
-                    <a href="{{ route('sfinlog.peminjaman.create') }}"
-                        class="btn btn-primary d-flex justify-center align-items-center gap-3">
-                        <i class="fa-solid fa-plus"></i>
-                        Peminjaman Dana
+                <div class="d-flex gap-2">
+                    <a href="{{ asset('templates/Format_NPA-SKI.xlsx') }}" 
+                        class="btn btn-primary d-flex justify-center align-items-center gap-2" download>
+                        <i class="fa-solid fa-download"></i>
+                        Download Template NPA
                     </a>
-                @endcan
+                    <a href="{{ asset('templates/New Customer OnBoarding Form - 2026.docx') }}" 
+                        class="btn btn-primary d-flex justify-center align-items-center gap-2" download>
+                        <i class="fa-solid fa-download"></i>
+                        Download Template OnBoardingForm
+                    </a>
+                    @can('peminjaman_finlog.add')
+                        <a href="{{ route('sfinlog.peminjaman.create') }}"
+                            class="btn btn-primary d-flex justify-center align-items-center gap-3">
+                            <i class="fa-solid fa-plus"></i>
+                            Peminjaman Dana
+                        </a>
+                    @endcan
+                </div>
             </div>
         </div>
     </div>

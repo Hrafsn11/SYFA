@@ -38,8 +38,6 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
         'lainnya' => 'secondary',
     ];
 
-    private const EDITABLE_STATUSES = ['Draft', 'Perbaikan Dokumen'];
-
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_restrukturisasi')
@@ -237,11 +235,10 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
         }
 
         $detailButton = $this->detailButton($row->id_pengajuan_restrukturisasi);
-        $editButton = $this->editButton($row->id_pengajuan_restrukturisasi, $row->status);
 
         return $this->html(
             '<div class="d-flex justify-content-center align-items-center gap-2">' .
-                $detailButton . $editButton .
+                $detailButton .
                 '</div>'
         );
     }
@@ -255,33 +252,6 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
                 <i class="ti ti-file"></i>
             </a>',
             e($url)
-        );
-    }
-
-    private function editButton(string $id, string $status): string
-    {
-        if (!auth()->user()->can('pengajuan_restrukturisasi.edit')) {
-            return '';
-        }
-
-        $isEditable = in_array($status, self::EDITABLE_STATUSES);
-
-        if ($isEditable) {
-            return sprintf(
-                '<a href="javascript:void(0);" onclick="editPengajuan(\'%s\')" 
-                   class="btn btn-sm btn-outline-warning" title="Edit">
-                    <i class="ti ti-edit"></i>
-                </a>',
-                e($id)
-            );
-        }
-
-        return sprintf(
-            '<button type="button" class="btn btn-sm btn-icon btn-text-secondary rounded-pill" 
-                     title="Tidak dapat diedit (Status: %s)" disabled>
-                <i class="ti ti-edit-off"></i>
-            </button>',
-            e($status)
         );
     }
 

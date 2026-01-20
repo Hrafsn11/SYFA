@@ -37,7 +37,7 @@
                                         style="position: absolute; top: 0; left: 0; width: 150px; height: 80px; object-fit: contain; z-index: 2; mix-blend-mode: multiply;"
                                         onload="this.style.opacity='1'" onerror="this.style.opacity='1'">
                                 </div>
-                                <p class="mb-0"><strong>Aditia Pratama</strong></p>
+                                <p class="mb-0"><strong>Rafi Ghani Razak</strong></p>
                             </div>
 
                             <div class="col-6 text-center">

@@ -50,21 +50,6 @@ Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->na
 Route::get('ar-performance/transactions', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'getTransactions'])->name('ar-performance.transactions');
 Route::get('ar-performance/export-pdf', [\App\Http\Controllers\SFinlog\ArPerformanceFinlogController::class, 'exportPDF'])->name('ar-performance.export-pdf');
 
-// Restrukturisasi Routes
-Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {
-    Route::get('/', [PengajuanRestrukturisasiController::class, 'index'])->name('index');
-    Route::post('/', [PengajuanRestrukturisasiController::class, 'store'])->name('store');
-    Route::get('{id}', [PengajuanRestrukturisasiController::class, 'show'])->name('show');
-    Route::get('{id}/edit', [PengajuanRestrukturisasiController::class, 'edit'])->name('edit');
-    Route::put('{id}', [PengajuanRestrukturisasiController::class, 'update'])->name('update');
-    Route::delete('{id}', [PengajuanRestrukturisasiController::class, 'destroy'])->name('destroy');
-    Route::get('peminjaman/{idDebitur}', [PengajuanRestrukturisasiController::class, 'getPeminjamanListApi'])->name('peminjaman.list');
-    Route::get('detail-pengajuan/{id}', [PengajuanRestrukturisasiController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
-    // Evaluasi endpoints
-    Route::post('{id}/evaluasi', [EvaluasiRestrukturisasiController::class, 'save'])->name('evaluasi.save');
-    Route::post('{id}/decision', [EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
-});
-
 // Program Restrukturisasi Routes - Full Livewire
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
     Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');

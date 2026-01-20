@@ -133,6 +133,7 @@
             const STATUS = '{{ $restrukturisasi['status'] }}';
             const STEP = {{ $restrukturisasi['current_step'] }};
             const CSRF = '{{ csrf_token() }}';
+            const BASE_URL = '{{ route('sfinance.pengajuan-restrukturisasi.show', ['id' => '__ID__']) }}'.replace('/__ID__', '');
             let pendingRejectStep = null;
 
             // Update stepper UI
@@ -169,7 +170,7 @@
             // Submit pengajuan (Draft -> Step 2)
             window.submitPengajuan = function() {
                 ajaxPost(
-                    `/pengajuan-restrukturisasi/${ID}/decision`, {
+                    `${BASE_URL}/${ID}/decision`, {
                         action: 'approve',
                         step: 1
                     },
@@ -208,7 +209,7 @@
             $('#btnKonfirmasiSetuju').click(function() {
                 bootstrap.Modal.getInstance($('#modalApproval')[0]).hide();
                 ajaxPost(
-                    `/pengajuan-restrukturisasi/${ID}/decision`, {
+                    `${BASE_URL}/${ID}/decision`, {
                         action: 'approve',
                         step: pendingRejectStep
                     },
@@ -263,7 +264,7 @@
                 $spinner.removeClass('d-none');
 
                 $.ajax({
-                    url: `/pengajuan-restrukturisasi/${ID}/decision`,
+                    url: `${BASE_URL}/${ID}/decision`,
                     method: 'POST',
                     data: {
                         _token: CSRF,
@@ -537,7 +538,7 @@
                         '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...');
 
                     $.ajax({
-                        url: `/pengajuan-restrukturisasi/${ID}/evaluasi`,
+                        url: `${BASE_URL}/${ID}/evaluasi`,
                         method: 'POST',
                         data: formData,
                         processData: false,
@@ -552,6 +553,64 @@
                     });
                 });
             @endif
+
+            // Form Update Dokumen (for Perbaikan Dokumen status)
+            const formUpdateDokumen = document.getElementById('formUpdateDokumen');
+            if (formUpdateDokumen) {
+                formUpdateDokumen.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const $btn = $('#btnSimpanDokumen');
+                    const $text = $('#btnSimpanDokumenText');
+                    const $spinner = $('#btnSimpanDokumenSpinner');
+                    const originalText = $text.text();
+
+                    // Check if at least one file is selected
+                    let hasFile = false;
+                    const fileInputs = this.querySelectorAll('input[type="file"]');
+                    fileInputs.forEach(input => {
+                        if (input.files.length > 0) hasFile = true;
+                    });
+
+                    if (!hasFile) {
+                        Swal.fire('Perhatian!', 'Pilih minimal satu dokumen untuk diupload', 'warning');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: `${BASE_URL}/${ID}/update-dokumen`,
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: () => {
+                            $btn.prop('disabled', true);
+                            $text.text('Menyimpan...');
+                            $spinner.removeClass('d-none');
+                        },
+                        success: (res) => {
+                            if (res.error) {
+                                Swal.fire('Error!', res.message, 'error');
+                            } else {
+                                Swal.fire('Berhasil!', res.message || 'Dokumen berhasil diperbarui!', 'success')
+                                    .then(() => {
+                                        // Remove edit-dokumen query param and reload
+                                        const url = new URL(window.location.href);
+                                        url.searchParams.delete('edit-dokumen');
+                                        window.location.href = url.toString();
+                                    });
+                            }
+                        },
+                        error: (xhr) => Swal.fire('Error!', xhr.responseJSON?.message || 'Terjadi kesalahan', 'error'),
+                        complete: () => {
+                            $btn.prop('disabled', false);
+                            $text.text(originalText);
+                            $spinner.addClass('d-none');
+                        }
+                    });
+                });
+            }
         });
     </script>
 @endsection

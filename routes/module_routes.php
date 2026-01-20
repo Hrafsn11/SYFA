@@ -57,6 +57,7 @@ Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->
     Route::get('{id}/edit', [PengajuanRestrukturisasiController::class, 'edit'])->name('edit');
     Route::put('{id}', [PengajuanRestrukturisasiController::class, 'update'])->name('update');
     Route::delete('{id}', [PengajuanRestrukturisasiController::class, 'destroy'])->name('destroy');
+    Route::post('{id}/update-dokumen', [PengajuanRestrukturisasiController::class, 'updateDokumen'])->name('update-dokumen');
     Route::get('peminjaman/{idDebitur}', [PengajuanRestrukturisasiController::class, 'getPeminjamanListApi'])->name('peminjaman.list');
     Route::get('detail-pengajuan/{id}', [PengajuanRestrukturisasiController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
     // Evaluasi endpoints

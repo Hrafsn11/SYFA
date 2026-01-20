@@ -207,8 +207,7 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="form_new_customer" class="form-label">Form New Customer <span
-                                class="text-danger">*</span></label>
+                        <label for="form_new_customer" class="form-label">Form New Customer</label>
                         <input type="file" id="form_new_customer" class="form-control"
                             wire:model.blur="form_new_customer" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
