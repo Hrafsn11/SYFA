@@ -146,8 +146,7 @@
                         <div class="mb-3">
                             <label for="tanggal_investasi_validasi" class="form-label">Tanggal Investasi</label>
                             <div class="input-group">
-                                <input type="text" class="form-control bs-datepicker"
-                                    id="tanggal_investasi_validasi"
+                                <input type="text" class="form-control bs-datepicker" id="tanggal_investasi_validasi"
                                     value="{{ $pengajuan->tanggal_investasi ? \Carbon\Carbon::parse($pengajuan->tanggal_investasi)->format('Y-m-d') : '' }}"
                                     placeholder="yyyy-mm-dd">
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
@@ -157,8 +156,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="catatan_validasi_finance" class="form-label">Catatan Validasi <small class="text-muted">(Opsional)</small></label>
-                            <textarea class="form-control" id="catatan_validasi_finance" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                            <label for="catatan_validasi_finance" class="form-label">Catatan Validasi <small
+                                    class="text-muted">(Opsional)</small></label>
+                            <textarea class="form-control" id="catatan_validasi_finance" rows="3"
+                                placeholder="Masukkan catatan jika ada..."></textarea>
                         </div>
 
                         <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button
@@ -192,8 +193,8 @@
                         <div class="mb-3">
                             <label for="alasan_penolakan" class="form-label">Alasan Penolakan <span
                                     class="text-danger">*</span></label>
-                            <textarea class="form-control" id="alasan_penolakan" rows="4" placeholder="Masukkan alasan penolakan..."
-                                required></textarea>
+                            <textarea class="form-control" id="alasan_penolakan" rows="4"
+                                placeholder="Masukkan alasan penolakan..." required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -219,14 +220,17 @@
                 <hr class="my-2">
                 <div class="modal-body">
                     <h5 class="mb-3">Apakah anda yakin menyetujui pengajuan investasi ini?</h5>
-                    
+
                     <div class="mb-3">
-                        <label for="catatan_validasi_ceo" class="form-label">Catatan Persetujuan <small class="text-muted">(Opsional)</small></label>
-                        <textarea class="form-control" id="catatan_validasi_ceo" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                        <label for="catatan_validasi_ceo" class="form-label">Catatan Persetujuan <small
+                                class="text-muted">(Opsional)</small></label>
+                        <textarea class="form-control" id="catatan_validasi_ceo" rows="3"
+                            placeholder="Masukkan catatan jika ada..."></textarea>
                         <small class="text-muted">Catatan ini akan ditampilkan di activity log</small>
                     </div>
-                    
-                    <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
+
+                    <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah
+                        untuk
                         menolak.</p>
                 </div>
                 <div class="modal-footer">
@@ -254,8 +258,8 @@
                         <div class="mb-3">
                             <label for="alasan_penolakan_ceo" class="form-label">Alasan Penolakan <span
                                     class="text-danger">*</span></label>
-                            <textarea class="form-control" id="alasan_penolakan_ceo" rows="4" placeholder="Masukkan alasan penolakan..."
-                                required></textarea>
+                            <textarea class="form-control" id="alasan_penolakan_ceo" rows="4"
+                                placeholder="Masukkan alasan penolakan..." required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -282,24 +286,16 @@
                 <form id="formGenerateKontrak">
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="nomor_kontrak" class="form-label">Nomor Kontrak <span
+                            <label for="nama_pic_kontrak" class="form-label">Nama PIC/CEO Investor <span
                                     class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="nomor_kontrak"
-                                placeholder="FINLOG/INV/2025/001" required>
-                            <small class="text-muted">Format: FINLOG/INV/TAHUN/NOMOR</small>
-                        </div>
-                        <div class="mb-3">
-                            <label for="tanggal_kontrak" class="form-label">Tanggal Kontrak <span
-                                    class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <input type="text" class="form-control bs-datepicker" id="tanggal_kontrak"
-                                    placeholder="yyyy-mm-dd" required>
-                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
-                            </div>
+                            <input type="text" class="form-control" id="nama_pic_kontrak"
+                                placeholder="Masukkan nama PIC/CEO investor" required>
+                            <small class="text-muted">Nama ini akan digunakan dalam kontrak investasi</small>
                         </div>
                         <div class="alert alert-info mb-0">
                             <i class="ti ti-info-circle me-2"></i>
-                            Kontrak akan digenerate berdasarkan data investasi yang sudah divalidasi.
+                            <strong>Nomor kontrak akan di-generate otomatis</strong> berdasarkan kode perusahaan
+                            investor dan tanggal investasi.
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -334,13 +330,14 @@
                         <div class="mb-3">
                             <label for="file_bukti_transfer" class="form-label">File Bukti Transfer <span
                                     class="text-danger">*</span></label>
-                            <input type="file" class="form-control" id="file_bukti_transfer"
-                                accept="image/*,.pdf" required>
+                            <input type="file" class="form-control" id="file_bukti_transfer" accept="image/*,.pdf"
+                                required>
                             <small class="text-muted">Format: JPG, PNG, PDF (Max: 2MB)</small>
                         </div>
                         <div class="mb-3">
                             <label for="keterangan_transfer" class="form-label">Keterangan</label>
-                            <textarea class="form-control" id="keterangan_transfer" rows="3" placeholder="Masukkan keterangan (opsional)"></textarea>
+                            <textarea class="form-control" id="keterangan_transfer" rows="3"
+                                placeholder="Masukkan keterangan (opsional)"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -365,8 +362,7 @@
                 </div>
                 <div class="modal-body text-center">
                     <img id="previewImage" src="" class="img-fluid d-none" alt="Bukti Transfer">
-                    <iframe id="previewPdf" src="" class="d-none"
-                        style="width:100%; height:500px;"></iframe>
+                    <iframe id="previewPdf" src="" class="d-none" style="width:100%; height:500px;"></iframe>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -381,7 +377,7 @@
 
     @push('scripts')
         <script>
-            (function() {
+            (function () {
                 'use strict';
 
                 const CFG = {
@@ -458,21 +454,21 @@
                 const file = {
                     validate: f => !f ? (alert('error', 'Pilih file terlebih dahulu'), false) : f.size >
                         CFG.maxSize ? (
-                            alert('error', 'Ukuran file maksimal 2MB'), false) : true,
+                        alert('error', 'Ukuran file maksimal 2MB'), false) : true,
                     upload: (e, f, n, m, id) => {
                         const fd = new FormData();
                         fd.append(n, f);
                         fd.append('_token', CFG.csrf);
                         $.ajax({
-                                url: url(e),
-                                method: 'POST',
-                                data: fd,
-                                processData: false,
-                                contentType: false,
-                                headers: {
-                                    'X-CSRF-TOKEN': CFG.csrf
-                                }
-                            })
+                            url: url(e),
+                            method: 'POST',
+                            data: fd,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'X-CSRF-TOKEN': CFG.csrf
+                            }
+                        })
                             .done(r => ajax.respond(r, m, id)).fail(x => alert('error', errMsg(x)));
                     }
                 };
@@ -484,7 +480,7 @@
                             autoclose: true,
                             todayHighlight: true,
                             orientation: 'bottom auto'
-                        }).on('changeDate', function(e) {
+                        }).on('changeDate', function (e) {
                             if (e.date) {
                                 const y = e.date.getFullYear();
                                 const m = String(e.date.getMonth() + 1).padStart(2, '0');
@@ -518,16 +514,16 @@
                         const catatan = $('#catatan_validasi_finance').val();
                         approval.approve('Dokumen Tervalidasi', 'validasi_pengajuan',
                             'modalValidasiFinanceSKI', {
-                                tanggal_investasi: tanggalInvestasi,
-                                catatan: catatan
-                            });
+                            tanggal_investasi: tanggalInvestasi,
+                            catatan: catatan
+                        });
                     });
                     $('#btnTolakFinanceSKI').click(() => (modal('modalValidasiFinanceSKI', true), modal(
                         'modalAlasanPenolakan', false, 300)));
                     $('#formAlasanPenolakan').submit(e => {
                         e.preventDefault();
                         approval.reject('Ditolak Finance SKI', 'validasi_pengajuan', $(
-                                '#alasan_penolakan')
+                            '#alasan_penolakan')
                             .val(), 'modalAlasanPenolakan');
                     });
 
@@ -537,8 +533,8 @@
                         const catatan = $('#catatan_validasi_ceo').val();
                         approval.approve('Disetujui CEO Finlog', 'persetujuan_ceo_finlog',
                             'modalValidasiCEO', {
-                                catatan: catatan
-                            });
+                            catatan: catatan
+                        });
                     });
                     $('#btnTolakCEO').click(() => (modal('modalValidasiCEO', true), modal(
                         'modalAlasanPenolakanCEO',
@@ -562,15 +558,13 @@
                     $('#btnGenerateKontrak').click(() => modal('modalGenerateKontrak'));
                     $('#formGenerateKontrak').submit(e => {
                         e.preventDefault();
-                        const n = $('#nomor_kontrak').val();
-                        const t = $('#tanggal_kontrak').val();
-                        n ? ajax.post(url('/generate-kontrak'), {
-                                nomor_kontrak: n,
-                                tanggal_kontrak: t
-                            }).done(r => ajax.respond(r, 'Kontrak berhasil digenerate!',
-                                'modalGenerateKontrak')).fail(x => alert('error', errMsg(x))) :
+                        const namaPic = $('#nama_pic_kontrak').val();
+                        namaPic ? ajax.post(url('/generate-kontrak'), {
+                            nama_pic_kontrak: namaPic
+                        }).done(r => ajax.respond(r, 'Kontrak berhasil digenerate!',
+                            'modalGenerateKontrak')).fail(x => alert('error', errMsg(x))) :
                             alert(
-                                'error', 'Nomor kontrak wajib diisi');
+                                'error', 'Nama PIC/CEO harus diisi');
                     });
 
                     // Preview

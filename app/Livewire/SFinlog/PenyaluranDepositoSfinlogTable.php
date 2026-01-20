@@ -78,9 +78,16 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
+        // Group by nomor kontrak
         return PenyaluranDepositoSfinlog::query()
-            ->with(['pengajuanInvestasiFinlog.project.projects', 'pengajuanInvestasiFinlog.investor', 'cellsProject', 'project'])
-            ->select('penyaluran_deposito_sfinlog.*');
+            ->with(['pengajuanInvestasiFinlog.investor'])
+            ->selectRaw('
+                penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog,
+                COUNT(*) as jumlah_penyaluran,
+                SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan) as total_disalurkan,
+                SUM(penyaluran_deposito_sfinlog.nominal_yang_dikembalikan) as total_dikembalikan
+            ')
+            ->groupBy('penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog');
     }
 
     public function columns(): array
@@ -100,99 +107,133 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
             Column::make('No Kontrak')
                 ->label(function ($row) {
                     $noKontrak = $row->pengajuanInvestasiFinlog?->nomor_kontrak ?? '-';
-                    return '<div class="text-center">' . $noKontrak . '</div>';
+                    return '<div class="text-center"><strong>' . $noKontrak . '</strong></div>';
                 })
                 ->html()
                 ->searchable(),
 
-            Column::make('Cell Bisnis')
+            Column::make('Nama Investor')
                 ->label(function ($row) {
-                    $cellBisnis = $row->cellsProject?->nama_cells_bisnis ?? '-';
-                    return '<div class="text-start">' . $cellBisnis . '</div>';
+                    $namaInvestor = $row->pengajuanInvestasiFinlog?->nama_investor ?? '-';
+                    return '<div class="text-start">' . $namaInvestor . '</div>';
                 })
                 ->html()
                 ->searchable(),
 
-            Column::make('Project')
+            Column::make('Jumlah Investasi')
                 ->label(function ($row) {
-                    $projectName = $row->project?->nama_project ?? '-';
-                    return '<div class="text-start">' . $projectName . '</div>';
-                })
-                ->html()
-                ->searchable(),
-
-            Column::make('Nominal Disalurkan', 'nominal_yang_disalurkan')
-                ->sortable()
-                ->format(function ($value) {
-                    return '<div class="text-end"><strong>Rp. ' . number_format($value ?? 0, 0, ',', '.') . '</strong></div>';
+                    $jumlahInvestasi = $row->pengajuanInvestasiFinlog?->nominal_investasi ?? 0;
+                    return '<div class="text-end">Rp ' . number_format($jumlahInvestasi, 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
-            Column::make('Tgl Pengiriman', 'tanggal_pengiriman_dana')
-                ->sortable()
-                ->format(function ($value) {
-                    return '<div class="text-center">' . \Carbon\Carbon::parse($value)->format('d/m/Y') . '</div>';
+            Column::make('Lama Investasi')
+                ->label(function ($row) {
+                    $lamaInvestasi = $row->pengajuanInvestasiFinlog?->lama_investasi ?? 0;
+                    return '<div class="text-center">' . $lamaInvestasi . ' Bulan</div>';
                 })
                 ->html(),
 
-            Column::make('Tgl Pengembalian', 'tanggal_pengembalian')
-                ->sortable()
-                ->format(function ($value) {
-                    return '<div class="text-center">' . \Carbon\Carbon::parse($value)->format('d/m/Y') . '</div>';
+            Column::make('Penyaluran Dana')
+                ->label(function ($row) {
+                    $total = $row->total_disalurkan ?? 0;
+                    return '<div class="text-end"><strong>Rp ' . number_format($total, 0, ',', '.') . '</strong></div>';
                 })
                 ->html(),
 
-            Column::make('Bukti Pengembalian', 'bukti_pengembalian')
-                ->format(function ($value, $row) {
-                    if ($value) {
-                        $fileExtension = pathinfo($value, PATHINFO_EXTENSION);
-                        $isImage = in_array(strtolower($fileExtension), ['jpg', 'jpeg', 'png']);
+            Column::make('Total Dikembalikan')
+                ->label(function ($row) {
+                    $total = $row->total_dikembalikan ?? 0;
+                    return '<div class="text-end"><strong class="text-success">Rp ' . number_format($total, 0, ',', '.') . '</strong></div>';
+                })
+                ->html(),
 
-                        return '<div class="text-center">
-                            <button type="button" class="btn btn-sm btn-success" onclick="previewBukti(\'' . $row->id_penyaluran_deposito_sfinlog . '\', \'' . $value . '\', ' . ($isImage ? 'true' : 'false') . ')">
-                                <i class="ti ti-eye me-1"></i>Preview
-                            </button>
-                        </div>';
+            Column::make('Status Pengembalian')
+                ->label(function ($row) {
+                    $totalDisalurkan = floatval($row->total_disalurkan ?? 0);
+                    $totalDikembalikan = floatval($row->total_dikembalikan ?? 0);
+
+                    if ($totalDikembalikan >= $totalDisalurkan && $totalDisalurkan > 0) {
+                        $badge = '<span class="badge bg-label-success">Lunas (100%)</span>';
+                    } elseif ($totalDikembalikan > 0) {
+                        $percentage = $totalDisalurkan > 0 ? round(($totalDikembalikan / $totalDisalurkan) * 100) : 0;
+                        $badge = '<span class="badge bg-label-warning">Sebagian Lunas (' . $percentage . '%)</span>';
                     } else {
-                        // Check if user has upload_bukti permission
-                        if (auth()->user() && auth()->user()->can('penyaluran_deposito_finlog.upload_bukti')) {
-                            return '<div class="text-center">
-                                <button type="button" class="btn btn-sm btn-primary" onclick="uploadBukti(\'' . $row->id_penyaluran_deposito_sfinlog . '\')">
-                                    <i class="ti ti-upload me-1"></i>Upload
-                                </button>
-                            </div>';
-                        }
-                        return '<div class="text-center"><span class="text-muted">-</span></div>';
+                        $badge = '<span class="badge bg-label-danger">Belum Lunas (0%)</span>';
                     }
+
+                    return '<div class="text-center">' . $badge . '</div>';
                 })
                 ->html(),
 
-            Column::make('Aksi')
+            Column::make('Action')
                 ->label(function ($row) {
-                    if (!auth()->user() || !auth()->user()->can('penyaluran_deposito_finlog.edit')) {
-                        return '';
-                    }
-
-                    $data = [
-                        'id' => $row->id_penyaluran_deposito_sfinlog,
-                        'id_pengajuan_investasi_finlog' => $row->id_pengajuan_investasi_finlog,
-                        'id_cells_project' => $row->id_cells_project,
-                        'id_project' => $row->id_project,
-                        'nominal_yang_disalurkan' => (int) $row->nominal_yang_disalurkan,
-                        'tanggal_pengiriman_dana' => $row->tanggal_pengiriman_dana?->format('Y-m-d'),
-                        'tanggal_pengembalian' => $row->tanggal_pengembalian?->format('Y-m-d'),
-                    ];
-
-                    $encodedData = base64_encode(json_encode($data));
+                    $nomorKontrak = $row->pengajuanInvestasiFinlog?->nomor_kontrak ?? '';
 
                     return '<div class="text-center">
-                        <button type="button" class="btn btn-sm btn-warning" onclick="editDataDirect(this)" data-item="' . $encodedData . '">
-                            <i class="ti ti-edit"></i>
+                        <button type="button" class="btn btn-sm btn-info" 
+                            wire:click="showKontrakDetail(\'' . $nomorKontrak . '\')"
+                            title="Lihat Detail Penyaluran">
+                            <i class="ti ti-eye me-1"></i>Lihat Detail
                         </button>
                     </div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
         ];
+    }
+
+    /**
+     * Show detail kontrak
+     */
+    public function showKontrakDetail($nomorKontrak)
+    {
+        \Log::info('showKontrakDetail called with: ' . $nomorKontrak);
+
+        $pengajuan = \App\Models\PengajuanInvestasiFinlog::where('nomor_kontrak', $nomorKontrak)->first();
+
+        if (!$pengajuan) {
+            \Log::warning('Pengajuan not found for contract: ' . $nomorKontrak);
+            return;
+        }
+
+        $penyaluranList = PenyaluranDepositoSfinlog::where('id_pengajuan_investasi_finlog', $pengajuan->id_pengajuan_investasi_finlog)
+            ->with(['cellsProject', 'project'])
+            ->orderBy('tanggal_pengiriman_dana', 'desc')
+            ->get();
+
+        $kontrakData = [
+            'nomor_kontrak' => $pengajuan->nomor_kontrak,
+            'nama_investor' => $pengajuan->nama_investor,
+            'nominal_investasi' => $pengajuan->nominal_investasi,
+            'lama_investasi' => $pengajuan->lama_investasi,
+            'details' => $penyaluranList->map(function ($item) {
+                $nominalDisalurkan = floatval($item->nominal_yang_disalurkan ?? 0);
+                $nominalDikembalikan = floatval($item->nominal_yang_dikembalikan ?? 0);
+
+                // Calculate status
+                if ($nominalDikembalikan >= $nominalDisalurkan && $nominalDisalurkan > 0) {
+                    $status = 'Lunas';
+                } elseif ($nominalDikembalikan > 0) {
+                    $status = 'Sebagian Lunas';
+                } else {
+                    $status = 'Belum Lunas';
+                }
+
+                return [
+                    'id' => $item->id_penyaluran_deposito_sfinlog,
+                    'cell_bisnis' => $item->cellsProject?->nama_cells_bisnis ?? '-',
+                    'project' => $item->project?->nama_project ?? '-',
+                    'nominal_yang_disalurkan' => $nominalDisalurkan,
+                    'nominal_yang_dikembalikan' => $nominalDikembalikan,
+                    'tanggal_pengiriman_dana' => $item->tanggal_pengiriman_dana?->format('Y-m-d'),
+                    'tanggal_pengembalian' => $item->tanggal_pengembalian?->format('Y-m-d'),
+                    'status' => $status,
+                ];
+            })->toArray()
+        ];
+
+        \Log::info('Dispatching kontrak-detail-loaded with data', $kontrakData);
+        $this->dispatch('kontrak-detail-loaded', data: $kontrakData);
     }
 }
