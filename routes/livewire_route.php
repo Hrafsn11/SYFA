@@ -58,6 +58,7 @@ Route::get('sfinlog/peminjaman/detail/{id}', \App\Livewire\SFinlog\PeminjamanDet
 // SFinlog - Pengembalian Pinjaman
 Route::get('sfinlog/pengembalian-pinjaman', \App\Livewire\SFinlog\PengembalianPinjamanFinlog::class)->name('sfinlog.pengembalian-pinjaman.index');
 Route::get('sfinlog/pengembalian-pinjaman/create', \App\Livewire\SFinlog\PengembalianPinjamanFinlogCreate::class)->name('sfinlog.pengembalian-pinjaman.create');
+Route::get('sfinlog/pengembalian-pinjaman/detail/{id}', \App\Livewire\SFinlog\DetailPengembalian::class)->name('sfinlog.pengembalian-pinjaman.detail');
 
 // SFinlog - AR Perbulan
 Route::get('sfinlog/ar-perbulan', \App\Livewire\SFinlog\ArPerbulan::class)->name('sfinlog.ar-perbulan.index');

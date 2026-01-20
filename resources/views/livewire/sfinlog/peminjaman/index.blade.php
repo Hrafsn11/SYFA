@@ -5,14 +5,14 @@
                 <h4 class="fw-bold">Peminjaman Dana</h4>
                 <div class="d-flex gap-2">
                     <a href="{{ asset('templates/Format_NPA-SKI.xlsx') }}" 
-                        class="btn btn-secondary btn-download-dokumen d-flex justify-center align-items-center gap-2" download>
+                        class="btn btn-primary d-flex justify-center align-items-center gap-2" download>
                         <i class="fa-solid fa-download"></i>
-                        Download Dokumen NPA
+                        Download Template NPA
                     </a>
                     <a href="{{ asset('templates/New Customer OnBoarding Form - 2026.docx') }}" 
-                        class="btn btn-secondary btn-download-dokumen d-flex justify-center align-items-center gap-2" download>
+                        class="btn btn-primary d-flex justify-center align-items-center gap-2" download>
                         <i class="fa-solid fa-download"></i>
-                        Download Dokumen
+                        Download Template OnBoardingForm
                     </a>
                     @can('peminjaman_finlog.add')
                         <a href="{{ route('sfinlog.peminjaman.create') }}"
@@ -181,17 +181,4 @@
             });
         });
     </script>
-@endpush
-
-@push('styles')
-    <style>
-        a.btn.btn-secondary.btn-download-dokumen {
-            transition: all 0.3s ease;
-        }
-        a.btn.btn-secondary.btn-download-dokumen:hover {
-            background-color: #249898 !important;
-            border-color: #249898 !important;
-            color: white !important;
-        }
-    </style>
 @endpush
