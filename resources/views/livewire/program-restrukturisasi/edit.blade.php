@@ -61,6 +61,8 @@
 
                 {{-- PARAMETER --}}
                 @can('program_restrukturisasi.edit_parameter')
+                    @if($specialCase)
+
                     <div class="row mb-4">
                         <div class="col-12">
                             <h5 class="mb-3">Parameter Perhitungan</h5>
@@ -140,10 +142,46 @@
                             </button>
                         </div>
                     </div>
+
+                    @else
+
+                    {{-- PARAMETER --}}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Parameter Perhitungan</h5>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
+                                wire:model.live="jangka_waktu_total" min="1">
+                            @error('jangka_waktu_total')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
+                                wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                                <span wire:loading.remove wire:target="hitungJadwalAngsuran"
+                                    class="d-flex align-items-center">
+                                    <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
+                                </span>
+                                <span wire:loading wire:target="hitungJadwalAngsuran">
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    Menghitung...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+
+                    @endif
                 @endcan
 
                 {{-- TABEL JADWAL --}}
                 @if ($show_jadwal && count($jadwal_angsuran) > 0)
+
+                    @if ($specialCase)
                     <div class="row mb-4">
                         <div class="col-12">
                             <h5 class="mb-3">Tabel Jadwal Angsuran</h5>
@@ -301,6 +339,142 @@
                             </div>
                         </div>
                     </div>
+
+                    @else 
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="mb-3">Tabel Jadwal Angsuran</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center" style="width: 60px;">No</th>
+                                            <th class="text-end" style="min-width: 120px;">Jumlah Pembayaran (Rp)</th>
+                                            <th class="text-center">Status</th>
+                                            @if ($isEdit)
+                                                <th class="text-center" style="min-width: 150px;">Bukti Pembayaran</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($jadwal_angsuran as $index => $item)
+                                            <tr>
+                                                <td class="text-center">{{ $item['no'] }}</td>
+                                                <td class="text-end">{{ number_format($item['pokok'], 0, ',', '.') }}</td>
+                                                <td class="text-center">
+                                                    @if (isset($item['status']))
+                                                        @if ($item['status'] === 'Lunas')
+                                                            <span
+                                                                class="badge bg-success">{{ $item['status'] }}</span>
+                                                        @elseif($item['status'] === 'Jatuh Tempo')
+                                                            <span class="badge bg-danger">{{ $item['status'] }}</span>
+                                                        @else
+                                                            <span
+                                                                class="badge bg-secondary">{{ $item['status'] }}</span>
+                                                        @endif
+                                                    @else
+                                                        <span class="badge bg-secondary">Belum Jatuh Tempo</span>
+                                                    @endif
+                                                </td>
+                                                @if ($isEdit)
+                                                    <td>
+                                                        @if (!empty($item['bukti_pembayaran']))
+                                                            <div class="d-flex flex-column gap-1">
+                                                                <a href="{{ Storage::url($item['bukti_pembayaran']) }}"
+                                                                    target="_blank" class="btn btn-sm btn-info">
+                                                                    <i class="ti ti-eye me-1"></i>Lihat Bukti
+                                                                </a>
+                                                                <small class="text-muted">
+                                                                    {{ isset($item['tanggal_bayar']) ? \Carbon\Carbon::parse($item['tanggal_bayar'])->format('d/m/Y') : '' }}
+                                                                </small>
+                                                            </div>
+                                                        @else
+                                                            @php
+                                                                // Cek apakah bisa upload (angsuran sebelumnya sudah lunas)
+                                                                $canUpload = true;
+                                                                $previousNo = null;
+                                                                if ($item['no'] > 1) {
+                                                                    $previousIndex = $index - 1;
+                                                                    if (isset($jadwal_angsuran[$previousIndex])) {
+                                                                        $previous = $jadwal_angsuran[$previousIndex];
+                                                                        $previousNo = $previous['no'];
+                                                                        // Check if previous has status and is not Lunas
+                                                                        $previousStatus =
+                                                                            $previous['status'] ?? 'Belum Jatuh Tempo';
+                                                                        if (
+                                                                            $previousStatus !== 'Lunas' ||
+                                                                            empty($previous['bukti_pembayaran'] ?? null)
+                                                                        ) {
+                                                                            $canUpload = false;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            @endphp
+                                                            <div>
+                                                                <button type="button" class="btn btn-sm btn-primary"
+                                                                    wire:click="openUploadModal({{ $index }})"
+                                                                    @if (!$canUpload) disabled @endif>
+                                                                    <i class="ti ti-upload me-1"></i>Upload Bukti
+                                                                </button>
+                                                                @if (!$canUpload)
+                                                                    <small class="text-danger d-block mt-1">
+                                                                        Bayar angsuran bulan {{ $previousNo }}
+                                                                        terlebih dahulu
+                                                                    </small>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="2">Total</th>
+                                            <th class="text-end">{{ number_format($total_pokok, 0, ',', '.') }}</th>
+                                            @if ($isEdit)
+                                                <th></th>
+                                            @endif
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card shadow-none">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Ringkasan Perhitungan</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div
+                                                class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                                <span class="text-muted">Total Pokok</span>
+                                                <span class="fw-semibold">Rp
+                                                    {{ number_format($total_pokok, 0, ',', '.') }}</span>
+                                            </div>
+                                            <div
+                                                class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                                <span class="text-muted">Total Margin</span>
+                                                <span class="fw-semibold">Rp
+                                                    {{ number_format($total_margin, 0, ',', '.') }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold">Total Dibayar</span>
+                                                <span class="fw-bold">Rp
+                                                    {{ number_format($total_cicilan, 0, ',', '.') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @endif
+
                 @endif
 
                 {{-- TOMBOL SIMPAN --}}
@@ -345,8 +519,10 @@
                                     @php
                                         $selectedAngsuran = $jadwal_angsuran[$selectedAngsuranIndex];
                                     @endphp
+                                    @if ($specialCase)
                                     <p class="mb-1"><strong>Tanggal Jatuh Tempo:</strong>
                                         {{ $selectedAngsuran['tanggal_jatuh_tempo'] }}</p>
+                                    @endif
                                     <p class="mb-0"><strong>Total Cicilan:</strong> Rp
                                         {{ number_format($selectedAngsuran['total_cicilan'], 0, ',', '.') }}</p>
                                 @endif

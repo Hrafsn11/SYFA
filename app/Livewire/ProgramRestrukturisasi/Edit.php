@@ -5,6 +5,7 @@ namespace App\Livewire\ProgramRestrukturisasi;
 use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
 use App\Helpers\ListNotifSFinance;
+use App\Models\PengajuanRestrukturisasi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,7 @@ class Edit extends Create
 {
     public bool $isEdit = true;
     public ProgramRestrukturisasi $program;
+    public PengajuanRestrukturisasi $pengajuanRestrukturisasi;
 
     // Property untuk file upload per angsuran
     public $buktiPembayaranFiles = [];
@@ -42,6 +44,11 @@ class Edit extends Create
             'pengajuanRestrukturisasi.debitur',
             'jadwalAngsuran' => fn($query) => $query->orderBy('no'),
         ])->findOrFail($id);
+
+        $this->pengajuanRestrukturisasi = $this->program->pengajuanRestrukturisasi;
+        if (in_array('Pengurangan tunggakan pokok/margin', $this->pengajuanRestrukturisasi->jenis_restrukturisasi)) {
+            $this->specialCase = false;
+        }
 
         // Authorization check: Debitur hanya bisa edit data miliknya
         $user = Auth::user();
@@ -204,17 +211,30 @@ class Edit extends Create
             return;
         }
 
+        $khususPenguranganTunggakanPokok = in_array('Pengurangan tunggakan pokok/margin', $this->pengajuanRestrukturisasi->jenis_restrukturisasi);
+
         try {
-            $this->validate([
-                'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
-                'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
-                'plafon_pembiayaan' => 'required|numeric|min:0',
-                'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
-                'jangka_waktu_total' => 'required|integer|min:1',
-                'masa_tenggang' => 'required|integer|min:0',
-                'tanggal_mulai_cicilan' => 'required|date',
-                'jadwal_angsuran' => 'required|array|min:1',
-            ], [
+            if ($khususPenguranganTunggakanPokok) {
+                $validate = [
+                    'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
+                    'plafon_pembiayaan' => 'required|numeric|min:0',
+                    'jangka_waktu_total' => 'required|integer|min:1',
+                    'jadwal_angsuran' => 'required|array|min:1',
+                ];
+            } else {
+                $validate = [
+                    'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
+                    'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
+                    'plafon_pembiayaan' => 'required|numeric|min:0',
+                    'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
+                    'jangka_waktu_total' => 'required|integer|min:1',
+                    'masa_tenggang' => 'required|integer|min:0',
+                    'tanggal_mulai_cicilan' => 'required|date',
+                    'jadwal_angsuran' => 'required|array|min:1',
+                ];
+            }
+
+            $this->validate($validate, [
                 'id_pengajuan_restrukturisasi.required' => 'Silakan pilih pengajuan restrukturisasi.',
                 'suku_bunga_per_tahun.max' => 'Suku bunga tidak boleh lebih dari 100%.',
                 'jadwal_angsuran.required' => 'Mohon hitung jadwal angsuran sebelum menyimpan.',
@@ -232,24 +252,40 @@ class Edit extends Create
             DB::beginTransaction();
 
             // Sanitasi metode_perhitungan
-            $metodeValid = trim($this->metode_perhitungan);
-            if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
-                throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
+            $metodeValid = null;
+            if (!$khususPenguranganTunggakanPokok) {
+                $metodeValid = trim($this->metode_perhitungan);
+                if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
+                    throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
+                }
+
+                $fill = [
+                    'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
+                    'metode_perhitungan' => $metodeValid,
+                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                    'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
+                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                    'masa_tenggang' => (int) $this->masa_tenggang,
+                    'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
+                    'total_pokok' => (float) $this->total_pokok,
+                    'total_margin' => (float) $this->total_margin,
+                    'total_cicilan' => (float) $this->total_cicilan,
+                    'updated_by' => Auth::id(),
+                ];
+            } else {
+                $fill = [
+                    'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
+                    'metode_perhitungan' => $metodeValid,
+                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                    'total_pokok' => (float) $this->total_pokok,
+                    'total_margin' => (float) $this->total_margin,
+                    'total_cicilan' => (float) $this->total_cicilan,
+                    'updated_by' => Auth::id(),
+                ];
             }
 
-            $this->program->update([
-                'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
-                'metode_perhitungan' => $metodeValid,
-                'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
-                'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
-                'jangka_waktu_total' => (int) $this->jangka_waktu_total,
-                'masa_tenggang' => (int) $this->masa_tenggang,
-                'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
-                'total_pokok' => (float) $this->total_pokok,
-                'total_margin' => (float) $this->total_margin,
-                'total_cicilan' => (float) $this->total_cicilan,
-                'updated_by' => Auth::id(),
-            ]);
+            $this->program->update($fill);
 
             // Simpan mapping bukti pembayaran berdasarkan nomor angsuran
             $buktiMapping = $this->program->jadwalAngsuran->keyBy('no')->map(function ($item) {
@@ -264,24 +300,43 @@ class Edit extends Create
             // Delete dan recreate jadwal angsuran
             $this->program->jadwalAngsuran()->delete();
 
-            foreach ($this->jadwal_angsuran as $item) {
-                $no = $item['no'];
-                $existingData = $buktiMapping->get($no);
+            if (!$khususPenguranganTunggakanPokok) {
+                foreach ($this->jadwal_angsuran as $item) {
+                    $no = $item['no'];
+                    $existingData = $buktiMapping->get($no);
 
-                $this->program->jadwalAngsuran()->create([
-                    'no' => $no,
-                    'tanggal_jatuh_tempo' => \Carbon\Carbon::parse($item['tanggal_jatuh_tempo_raw']),
-                    'pokok' => $item['pokok'],
-                    'margin' => $item['margin'],
-                    'total_cicilan' => $item['total_cicilan'],
-                    'catatan' => $item['catatan'],
-                    'is_grace_period' => $item['is_grace_period'] ?? false,
-                    'status' => $existingData ? $existingData['status'] : ($item['status'] ?? 'Belum Jatuh Tempo'),
-                    // Preserve bukti pembayaran jika ada
-                    'bukti_pembayaran' => $existingData ? $existingData['bukti_pembayaran'] : null,
-                    'tanggal_bayar' => $existingData ? $existingData['tanggal_bayar'] : null,
-                    'nominal_bayar' => $existingData ? $existingData['nominal_bayar'] : null,
-                ]);
+                    $this->program->jadwalAngsuran()->create([
+                        'no' => $no,
+                        'tanggal_jatuh_tempo' => \Carbon\Carbon::parse($item['tanggal_jatuh_tempo_raw']),
+                        'pokok' => $item['pokok'],
+                        'margin' => $item['margin'],
+                        'total_cicilan' => $item['total_cicilan'],
+                        'catatan' => $item['catatan'],
+                        'is_grace_period' => $item['is_grace_period'] ?? false,
+                        'status' => $existingData ? $existingData['status'] : ($item['status'] ?? 'Belum Jatuh Tempo'),
+                        // Preserve bukti pembayaran jika ada
+                        'bukti_pembayaran' => $existingData ? $existingData['bukti_pembayaran'] : null,
+                        'tanggal_bayar' => $existingData ? $existingData['tanggal_bayar'] : null,
+                        'nominal_bayar' => $existingData ? $existingData['nominal_bayar'] : null,
+                    ]);
+                }
+            } else {
+                foreach ($this->jadwal_angsuran as $item) {
+                    $no = $item['no'];
+                    $existingData = $buktiMapping->get($no);
+
+                    $this->program->jadwalAngsuran()->create([
+                        'no' => $no,
+                        'pokok' => $item['pokok'],
+                        'margin' => 0,
+                        'total_cicilan' =>  $item['pokok'],
+                        'status' => $existingData ? $existingData['status'] : ($item['status'] ?? 'Belum Jatuh Tempo'),
+                        // Preserve bukti pembayaran jika ada
+                        'bukti_pembayaran' => $existingData ? $existingData['bukti_pembayaran'] : null,
+                        'tanggal_bayar' => $existingData ? $existingData['tanggal_bayar'] : null,
+                        'nominal_bayar' => $existingData ? $existingData['nominal_bayar'] : null,
+                    ]);
+                }
             }
 
             DB::commit();
