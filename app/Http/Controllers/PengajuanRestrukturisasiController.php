@@ -41,6 +41,7 @@ class PengajuanRestrukturisasiController extends Controller
         $debitur = $this->getCurrentDebitur();
         $debiturList = $this->getActiveDebiturList();
         $peminjamanList = $debitur ? $this->getPeminjamanList($debitur->id_debitur) : [];
+        // dd($peminjamanList);
 
         return view('livewire.pengajuan-restrukturisasi.index', compact('debitur', 'debiturList', 'peminjamanList'));
     }

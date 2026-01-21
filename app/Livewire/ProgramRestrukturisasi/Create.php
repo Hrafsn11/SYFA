@@ -27,6 +27,7 @@ class Create extends Component
 
     // Form fields
     public $id_pengajuan_restrukturisasi = '';
+    public $restrukturisasi;
     public $nama_debitur = '';
     public $nomor_kontrak = '';
     public $metode_perhitungan = 'Flat';
@@ -42,6 +43,7 @@ class Create extends Component
     public $total_margin = 0;
     public $total_cicilan = 0;
     public $show_jadwal = false;
+    public $specialCase = true;
 
     // Options
     public $approvedRestrukturisasi = [];
@@ -50,6 +52,7 @@ class Create extends Component
     {
         $this->tanggal_mulai_cicilan = $this->tanggal_mulai_cicilan ?? date('Y-m-d');
         $this->show_jadwal = false;
+        $this->specialCase = true;
         $this->jadwal_angsuran = [];
         $this->loadApprovedRestrukturisasi($id);
     }
@@ -122,21 +125,32 @@ class Create extends Component
     public function loadPengajuanData()
     {
         if ($this->id_pengajuan_restrukturisasi) {
-            $restrukturisasi = PengajuanRestrukturisasi::with('debitur')
+            $this->restrukturisasi = PengajuanRestrukturisasi::with('debitur')
                 ->find($this->id_pengajuan_restrukturisasi);
 
-            if ($restrukturisasi) {
-                $this->nama_debitur = $restrukturisasi->debitur
-                    ? $restrukturisasi->debitur->nama
-                    : $restrukturisasi->nama_perusahaan;
-                $this->nomor_kontrak = $restrukturisasi->nomor_kontrak_pembiayaan;
-                $this->plafon_pembiayaan = (float) $restrukturisasi->sisa_pokok_belum_dibayar;
+            if ($this->restrukturisasi) {
+                $this->specialCase = true;
+                if (in_array('Pengurangan tunggakan pokok/margin', $this->restrukturisasi->jenis_restrukturisasi)) {
+                    $this->specialCase = false;
+                }
+
+                $this->nama_debitur = $this->restrukturisasi->debitur
+                    ? $this->restrukturisasi->debitur->nama
+                    : $this->restrukturisasi->nama_perusahaan;
+                $this->nomor_kontrak = $this->restrukturisasi->nomor_kontrak_pembiayaan;
+                $this->plafon_pembiayaan = (float) $this->restrukturisasi->sisa_pokok_belum_dibayar;
             }
         } else {
             $this->nama_debitur = '';
             $this->nomor_kontrak = '';
             $this->plafon_pembiayaan = 0;
         }
+
+        $this->metode_perhitungan = 'Flat';
+        $this->suku_bunga_per_tahun = 12;
+        $this->jangka_waktu_total = 12;
+        $this->masa_tenggang = 2;
+        $this->tanggal_mulai_cicilan = now()->format('Y-m-d');
 
         $this->show_jadwal = false;
         $this->jadwal_angsuran = [];
@@ -202,7 +216,9 @@ class Create extends Component
         }
 
         // [LOGIC PERHITUNGAN DISINI]
-        if ($this->metode_perhitungan === 'Flat') {
+        if (in_array('Pengurangan tunggakan pokok/margin', $this->restrukturisasi->jenis_restrukturisasi)) {
+            $this->calculatePenguranganTunggakanPokok();
+        } elseif ($this->metode_perhitungan === 'Flat') {
             $this->calculateFlatMethod();
         } elseif ($this->metode_perhitungan === 'Efektif (Anuitas)') {
             $this->calculateEfektifAnuitasMethod();
@@ -342,6 +358,35 @@ class Create extends Component
         $this->total_cicilan = $totalCicilan;
     }
 
+    // Khususon Pengurangan tunggakan pokok/margin
+    private function calculatePenguranganTunggakanPokok()
+    {
+        $totalPokok = $this->plafon_pembiayaan;
+        $bulan = $this->jangka_waktu_total;
+
+        $cicilan = $totalPokok/$bulan;
+
+        $jadwal = [];
+        $totalMargin = 0;
+        $totalCicilan = 0;
+
+        for ($i = 1; $i <= $this->jangka_waktu_total; $i++) {
+            $totalMargin += 0;
+            $totalCicilan += $cicilan;
+
+            $jadwal[] = [
+                'no' => $i,
+                'pokok' => $cicilan,
+                'margin' => 0,
+            ];
+        }
+
+        $this->jadwal_angsuran = $jadwal;
+        $this->total_pokok = $totalPokok;
+        $this->total_margin = $totalMargin;
+        $this->total_cicilan = $totalCicilan;
+    }
+
     /**
      * Simpan program restrukturisasi beserta jadwal angsuran
      * 
@@ -362,14 +407,37 @@ class Create extends Component
         // Validate using FormRequest rules directly
         try {
             $request = new ProgramRestrukturisasiRequest();
+
+            $khususPenguranganTunggakanPokok = in_array('Pengurangan tunggakan pokok/margin', $this->restrukturisasi->jenis_restrukturisasi);
+
+            $rules = $request->rules();
+            if ($khususPenguranganTunggakanPokok) {
+                $rules = [
+                    "id_pengajuan_restrukturisasi" => "required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi",
+                    "plafon_pembiayaan" => "required|numeric|min:0",
+                    "jangka_waktu_total" => "required|integer|min:1|max:360",
+                    "jadwal_angsuran" => "required|array|min:1",
+                    "jadwal_angsuran.*.no" => "required|integer|min:1",
+                    "jadwal_angsuran.*.pokok" => "required|numeric|min:0",
+                    "jadwal_angsuran.*.margin" => "required|numeric|min:0",
+                    "jadwal_angsuran.*.status" => "nullable|in:Belum Jatuh Tempo,Jatuh Tempo,Lunas",
+                    "jadwal_angsuran.*.bukti_pembayaran" => "nullable|string",
+                    "jadwal_angsuran.*.tanggal_bayar" => "nullable|date",
+                    "jadwal_angsuran.*.nominal_bayar" => "nullable|numeric|min:0",
+                    "total_pokok" => "required|numeric|min:0",
+                    "total_margin" => "required|numeric|min:0",
+                    "total_cicilan" => "required|numeric|min:0",
+                ];
+            }
+
             $this->validate(
-                $request->rules(),
+                $rules,
                 $request->messages(),
                 $request->attributes()
             );
 
             // Additional business logic validation (since passedValidation doesn't work with Livewire)
-            if ($this->masa_tenggang >= $this->jangka_waktu_total) {
+            if (!$khususPenguranganTunggakanPokok && ($this->masa_tenggang >= $this->jangka_waktu_total)) {
                 $this->addError('masa_tenggang', 'Masa tenggang tidak boleh lebih dari atau sama dengan jangka waktu total.');
                 throw ValidationException::withMessages([
                     'masa_tenggang' => 'Masa tenggang tidak boleh lebih dari atau sama dengan jangka waktu total.',
@@ -405,38 +473,69 @@ class Create extends Component
             DB::beginTransaction();
 
             // Sanitasi metode_perhitungan
-            $metodeValid = trim($this->metode_perhitungan);
-            if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
-                throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
+            $metodeValid = null;
+            if (!$khususPenguranganTunggakanPokok) {
+                $metodeValid = trim($this->metode_perhitungan);
+                if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
+                    throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
+                }
+
+                $filled = [
+                    'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
+                    'metode_perhitungan' => $metodeValid,
+                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                    'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
+                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                    'masa_tenggang' => (int) $this->masa_tenggang,
+                    'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
+                    'total_pokok' => (float) $this->total_pokok,
+                    'total_margin' => (float) $this->total_margin,
+                    'total_cicilan' => (float) $this->total_cicilan,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ];
+
+            } else {
+                $filled = [
+                    'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
+                    'metode_perhitungan' => $metodeValid,
+                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                    'total_pokok' => (float) $this->total_pokok,
+                    'total_margin' => (float) $this->total_margin,
+                    'total_cicilan' => (float) $this->total_cicilan,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ];
             }
 
-            $program = ProgramRestrukturisasi::create([
-                'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
-                'metode_perhitungan' => $metodeValid,
-                'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
-                'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
-                'jangka_waktu_total' => (int) $this->jangka_waktu_total,
-                'masa_tenggang' => (int) $this->masa_tenggang,
-                'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
-                'total_pokok' => (float) $this->total_pokok,
-                'total_margin' => (float) $this->total_margin,
-                'total_cicilan' => (float) $this->total_cicilan,
-                'created_by' => Auth::id(),
-                'updated_by' => Auth::id(),
-            ]);
+            $program = ProgramRestrukturisasi::create($filled);
 
-            foreach ($this->jadwal_angsuran as $item) {
-                JadwalAngsuran::create([
-                    'id_program_restrukturisasi' => $program->id_program_restrukturisasi,
-                    'no' => $item['no'],
-                    'tanggal_jatuh_tempo' => \Carbon\Carbon::parse($item['tanggal_jatuh_tempo_raw']),
-                    'pokok' => $item['pokok'],
-                    'margin' => $item['margin'],
-                    'total_cicilan' => $item['total_cicilan'],
-                    'catatan' => $item['catatan'],
-                    'is_grace_period' => $item['is_grace_period'],
-                    'status' => 'Belum Jatuh Tempo',
-                ]);
+            if (!in_array('Pengurangan tunggakan pokok/margin', $program->pengajuanRestrukturisasi->jenis_restrukturisasi)) {
+                foreach ($this->jadwal_angsuran as $item) {
+                    JadwalAngsuran::create([
+                        'id_program_restrukturisasi' => $program->id_program_restrukturisasi,
+                        'no' => $item['no'],
+                        'tanggal_jatuh_tempo' => \Carbon\Carbon::parse($item['tanggal_jatuh_tempo_raw']),
+                        'pokok' => $item['pokok'],
+                        'margin' => $item['margin'],
+                        'total_cicilan' => $item['total_cicilan'],
+                        'catatan' => $item['catatan'],
+                        'is_grace_period' => $item['is_grace_period'],
+                        'status' => 'Belum Jatuh Tempo',
+                    ]);
+                }
+            } else {
+                foreach ($this->jadwal_angsuran as $item) {
+                    JadwalAngsuran::create([
+                        'id_program_restrukturisasi' => $program->id_program_restrukturisasi,
+                        'no' => $item['no'],
+                        'pokok' => $item['pokok'],
+                        'margin' => 0,
+                        'total_cicilan' => $item['pokok'],
+                        'status' => 'Belum Jatuh Tempo',
+                    ]);
+                }
             }
 
             ListNotifSFinance::createProgramRestrukturisasi($program);
@@ -467,26 +566,36 @@ class Create extends Component
      */
     protected function validateCalculationParameters(): void
     {
-        $this->validate([
-            'plafon_pembiayaan' => 'required|numeric|min:1',
-            'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
-            'jangka_waktu_total' => 'required|integer|min:1|max:360',
-            'masa_tenggang' => 'required|integer|min:0|max:36',
-            'tanggal_mulai_cicilan' => 'required|date|after_or_equal:today',
-        ], [
-            'plafon_pembiayaan.required' => 'Plafon pembiayaan wajib diisi.',
-            'plafon_pembiayaan.min' => 'Plafon pembiayaan harus lebih dari 0.',
-            'suku_bunga_per_tahun.max' => 'Suku bunga tidak boleh lebih dari 100%.',
-            'jangka_waktu_total.min' => 'Jangka waktu minimal 1 bulan.',
-            'jangka_waktu_total.max' => 'Jangka waktu maksimal 360 bulan (30 tahun).',
-            'masa_tenggang.max' => 'Masa tenggang maksimal 36 bulan (3 tahun).',
-            'tanggal_mulai_cicilan.after_or_equal' => 'Tanggal mulai cicilan tidak boleh kurang dari hari ini.',
-        ]);
+        if (!in_array('Pengurangan tunggakan pokok/margin', $this->restrukturisasi->jenis_restrukturisasi)) {
+            $this->validate([
+                'plafon_pembiayaan' => 'required|numeric|min:1',
+                'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
+                'jangka_waktu_total' => 'required|integer|min:1|max:360',
+                'masa_tenggang' => 'required|integer|min:0|max:36',
+                'tanggal_mulai_cicilan' => 'required|date|after_or_equal:today',
+            ], [
+                'plafon_pembiayaan.required' => 'Plafon pembiayaan wajib diisi.',
+                'plafon_pembiayaan.min' => 'Plafon pembiayaan harus lebih dari 0.',
+                'suku_bunga_per_tahun.max' => 'Suku bunga tidak boleh lebih dari 100%.',
+                'jangka_waktu_total.min' => 'Jangka waktu minimal 1 bulan.',
+                'jangka_waktu_total.max' => 'Jangka waktu maksimal 360 bulan (30 tahun).',
+                'masa_tenggang.max' => 'Masa tenggang maksimal 36 bulan (3 tahun).',
+                'tanggal_mulai_cicilan.after_or_equal' => 'Tanggal mulai cicilan tidak boleh kurang dari hari ini.',
+            ]);
 
-        // Additional business logic validation
-        if ($this->masa_tenggang >= $this->jangka_waktu_total) {
-            throw ValidationException::withMessages([
-                'masa_tenggang' => 'Masa tenggang tidak boleh lebih dari atau sama dengan jangka waktu total.',
+            // Additional business logic validation
+            if ($this->masa_tenggang >= $this->jangka_waktu_total) {
+                throw ValidationException::withMessages([
+                    'masa_tenggang' => 'Masa tenggang tidak boleh lebih dari atau sama dengan jangka waktu total.',
+                ]);
+            }
+        } else {
+            $this->validate([
+                'jangka_waktu_total' => 'required|integer|min:1|max:360',
+            ], [
+                'jangka_waktu_total.required' => 'Jangka waktu harus diisi.',
+                'jangka_waktu_total.min' => 'Jangka waktu minimal 1 bulan.',
+                'jangka_waktu_total.max' => 'Jangka waktu maksimal 360 bulan (30 tahun).'
             ]);
         }
     }
@@ -498,11 +607,21 @@ class Create extends Component
      */
     public function getCanCalculateProperty(): bool
     {
-        return !empty($this->id_pengajuan_restrukturisasi)
-            && $this->plafon_pembiayaan > 0
-            && $this->suku_bunga_per_tahun >= 0
-            && $this->jangka_waktu_total > 0
-            && !empty($this->tanggal_mulai_cicilan);
+        if ($this->restrukturisasi) {
+            if (!in_array('Pengurangan tunggakan pokok/margin', $this->restrukturisasi->jenis_restrukturisasi)) {
+                return !empty($this->id_pengajuan_restrukturisasi)
+                    && $this->plafon_pembiayaan > 0
+                    && $this->suku_bunga_per_tahun >= 0
+                    && $this->jangka_waktu_total > 0
+                    && !empty($this->tanggal_mulai_cicilan);
+            } else {
+                return !empty($this->id_pengajuan_restrukturisasi)
+                    && $this->plafon_pembiayaan > 0
+                    && $this->jangka_waktu_total > 0;
+            }
+        }
+
+        return false;
     }
 
     /**

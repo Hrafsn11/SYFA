@@ -105,6 +105,20 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
+                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                            <label for="nama_direktur_holding" class="form-label">Nama Direktur Holding <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama_direktur_holding" placeholder="Masukkan Nama Direktur Holding"
+                                wire:model.blur="nama_direktur_holding">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                            <label for="nama_komisaris" class="form-label">Nama Komisaris <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="nama_komisaris" placeholder="Masukkan Nama Komisaris"
+                                wire:model.blur="nama_komisaris">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
                         <!-- Alamat (Untuk Debitur dan Investor) -->
                         <div class="col-12 mb-3 form-group">
                             <label for="alamat" class="form-label">

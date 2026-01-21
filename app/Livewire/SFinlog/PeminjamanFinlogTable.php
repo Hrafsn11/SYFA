@@ -107,6 +107,13 @@ class PeminjamanFinlogTable extends DataTableComponent
                 ->sortable()
                 ->searchable(),
 
+            Column::make('Tanggal pengajuan', 'tgl_pengajuan')
+                ->sortable()
+                ->searchable()
+                ->format(function ($value) {
+                    return $value ? \Carbon\Carbon::parse($value)->format('d/m/Y') : '-';
+                }),
+
             Column::make('Nama project', 'nama_project')
                 ->sortable()
                 ->searchable(),

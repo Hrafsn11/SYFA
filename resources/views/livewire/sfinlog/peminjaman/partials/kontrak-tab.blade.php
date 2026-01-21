@@ -118,7 +118,7 @@
                 <div class="col-md-6">
                     <label for="tenor_pembiayaan" class="form-label">Tenor Pembiayaan</label>
                     <input type="text" id="tenor_pembiayaan" name="tenor_pembiayaan" class="form-control"
-                        value="{{ $peminjaman->durasi_project ?? '' }} Bulan" readonly>
+                        value="{{ $peminjaman->top ?? '' }} Bulan" readonly>
                 </div>
 
                 <!-- Biaya dan Bagi Hasil -->
