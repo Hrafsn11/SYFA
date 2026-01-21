@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Livewire\Traits\HasDebiturAuthorization;
+use App\Models\PengembalianPinjaman;
 use App\Models\ReportPengembalian;
 use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
@@ -99,6 +100,19 @@ class ReportPengembalianTable extends DataTableComponent
     {
         $rowNumber = 0;
 
+        $query2 = ReportPengembalian::select(
+            'report_pengembalian.id_report_pengembalian',
+            'pengajuan_peminjaman.id_pengajuan_peminjaman'
+        )
+            ->leftJoin('pengajuan_peminjaman', 'report_pengembalian.nomor_peminjaman', '=', 'pengajuan_peminjaman.nomor_peminjaman')
+            ->get();
+        
+        $pengembalianPinjaman = PengembalianPinjaman::whereIn(
+            'id_pengajuan_peminjaman', 
+            $query2->pluck('id_pengajuan_peminjaman')->toArray()
+        )
+        ->get();
+
         return [
             Column::make('No')
                 ->label(function ($row) use (&$rowNumber) {
@@ -144,6 +158,24 @@ class ReportPengembalianTable extends DataTableComponent
             Column::make('Total Bulan Pemakaian', 'total_bulan_pemakaian')
                 ->sortable()
                 ->format(fn($value) => '<div class="text-center">' . ($value ?: '-') . '</div>')
+                ->html(),
+
+            Column::make('Bagi hasil yang dibayarkan')
+                ->sortable()
+                ->label(function ($row) use ($pengembalianPinjaman) {
+                    $picked = $pengembalianPinjaman->where('id_pengajuan_peminjaman', $row->id_pengajuan_peminjaman)->first();
+
+                    return 'Rp ' . number_format(($picked->total_bagi_hasil - $picked->sisa_bagi_hasil), 0, ',', '.');
+                })
+                ->html(),
+
+            Column::make('Pokok yang dibayarkan')
+                ->sortable()
+                ->label(function ($row) use ($pengembalianPinjaman) {
+                    $picked = $pengembalianPinjaman->where('id_pengajuan_peminjaman', $row->id_pengajuan_peminjaman)->first();
+
+                    return 'Rp ' . number_format(($picked->total_pinjaman - $picked->sisa_bayar_pokok), 0, ',', '.');
+                })
                 ->html(),
 
             Column::make('Nilai Total Pengembalian', 'nilai_total_pengembalian')

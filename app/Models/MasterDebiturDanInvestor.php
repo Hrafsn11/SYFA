@@ -30,6 +30,8 @@ class MasterDebiturDanInvestor extends Model
         'status',
         'deposito',
         'nama_ceo',
+        'nama_direktur_holding',
+        'nama_komisaris',
         'nama_bank',
         'no_rek',
         'npwp',
