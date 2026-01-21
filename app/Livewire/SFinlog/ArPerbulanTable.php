@@ -63,7 +63,8 @@ class ArPerbulanTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->whereRaw("MONTH(bulan) = ?", [$value]);
+                        // Format bulan: YYYY-MM, jadi ambil 2 karakter terakhir
+                        $builder->where('bulan', 'LIKE', '%-' . $value);
                     }
                 }),
 
@@ -77,7 +78,8 @@ class ArPerbulanTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->whereRaw("YEAR(bulan) = ?", [$value]);
+                        // Format bulan: YYYY-MM, jadi ambil 4 karakter pertama
+                        $builder->where('bulan', 'LIKE', $value . '-%');
                     }
                 }),
         ];
