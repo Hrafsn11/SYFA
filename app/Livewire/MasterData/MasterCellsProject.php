@@ -20,7 +20,7 @@ class MasterCellsProject extends Component
     public $id_cells_project;
 
     #[FieldInput]
-    public $nama_cells_bisnis, $nama_pic, $alamat, $deskripsi_bidang, $tanda_tangan_pic;
+    public $nama_cells_bisnis, $nama_pic, $alamat, $deskripsi_bidang, $tanda_tangan_pic, $profile_pict;
 
     #[FieldInput]
     public $projects = [];
@@ -32,17 +32,31 @@ class MasterCellsProject extends Component
         ]);
     }
 
+    public function updatedProfilePict()
+    {
+        $this->validate([
+            'profile_pict' => 'image|max:2048',
+        ]);
+    }
+
     public function setterFormData()
     {
         foreach ($this->getUniversalFieldInputs() as $field) {
             $this->form_data[$field] = $this->{$field};
         }
 
-        // 2. Handle File Upload
+        // Handle Tanda Tangan PIC File Upload
         if ($this->tanda_tangan_pic instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
             $fileName = time() . '_' . uniqid() . '_' . $this->tanda_tangan_pic->getClientOriginalName();
             $path = $this->tanda_tangan_pic->storeAs('tanda_tangan_pic', $fileName, 'public');
             $this->form_data['tanda_tangan_pic'] = $path;
+        }
+
+        // Handle Profile Picture File Upload
+        if ($this->profile_pict instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+            $fileName = time() . '_' . uniqid() . '_' . $this->profile_pict->getClientOriginalName();
+            $path = $this->profile_pict->storeAs('profile_pict', $fileName, 'public');
+            $this->form_data['profile_pict'] = $path;
         }
     }
 

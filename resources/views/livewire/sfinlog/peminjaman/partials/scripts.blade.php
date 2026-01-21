@@ -297,14 +297,8 @@
         $('#btnGenerateKontrak').click(function(e) {
             e.preventDefault();
             
-            const nomorKontrak = $('#nomor_kontrak').val();
             const biayaAdministrasi = $('#biaya_administrasi').val().replace(/\D/g, '');
             const jaminan = $('#jaminan').val();
-            
-            if (!nomorKontrak || nomorKontrak.trim() === '') {
-                alert('error', 'Nomor kontrak wajib diisi');
-                return;
-            }
             
             if (!biayaAdministrasi || parseFloat(biayaAdministrasi) <= 0) {
                 alert('error', 'Biaya administrasi wajib diisi');
@@ -319,7 +313,6 @@
             const btn = $(this);
             btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Memproses...');
 
-            @this.set('nomor_kontrak', nomorKontrak);
             @this.set('biaya_administrasi', biayaAdministrasi);
             @this.set('jaminan', jaminan);
             
