@@ -262,19 +262,29 @@ class PengembalianPinjamanController extends Controller
 
     private function getDueDate($pengajuan, $invoiceDibayarkan)
     {
+        // Untuk Installment tidak menggunakan due date berbasis tanggal pencairan
         if ($pengajuan->jenis_pembiayaan === 'Installment') {
             return null;
         }
 
-        $query = \App\Models\BuktiPeminjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman);
+        // Ambil tanggal pencairan dari history step 7 (Upload Dokumen Transfer)
+        $historyPencairan = \App\Models\HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
+            ->where('current_step', 7)
+            ->whereNotNull('tanggal_pencairan')
+            ->orderBy('created_at', 'desc')
+            ->first();
 
-        if ($pengajuan->jenis_pembiayaan === 'Invoice Financing') {
-            $query->where('no_invoice', $invoiceDibayarkan);
-        } else {
-            $query->where('no_kontrak', $invoiceDibayarkan);
+        if ($historyPencairan && $historyPencairan->tanggal_pencairan) {
+            // Due date = tanggal pencairan + 30 hari
+            return \Carbon\Carbon::parse($historyPencairan->tanggal_pencairan)->addDays(30)->format('Y-m-d');
         }
 
-        return $query->value('due_date');
+        // Fallback ke harapan_tanggal_pencairan + 30 hari jika history tidak ditemukan
+        if ($pengajuan->harapan_tanggal_pencairan) {
+            return \Carbon\Carbon::parse($pengajuan->harapan_tanggal_pencairan)->addDays(30)->format('Y-m-d');
+        }
+
+        return null;
     }
 
     /**
