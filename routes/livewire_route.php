@@ -72,3 +72,5 @@ Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembali
 Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');
 
 Route::get('sfinlog/cell-project-profile', \App\Livewire\SFinlog\CellProjectProfile::class)->name('sfinlog.cell-project-profile.index');
+// Portofolio
+// Route::get('portofolio', \App\Livewire\Portofolio\Index::class)->name('portofolio.index');

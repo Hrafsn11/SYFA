@@ -235,7 +235,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
 
             Column::make('Aksi')
                 ->label(fn ($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
-                    'id' => $row->ulid
+                    'route_detail' => route('pengembalian.detail', ['id' => $row->ulid])
                 ])->render())
                 ->html()
                 ->excludeFromColumnSelect(),

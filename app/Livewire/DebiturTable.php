@@ -94,6 +94,18 @@ class DebiturTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
+            Column::make('Nama Direktur Holding', 'nama_direktur_holding')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
+            Column::make('Nama Komisaris', 'nama_komisaris')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
             Column::make('Alamat', 'alamat')
                 ->sortable()
                 ->searchable()

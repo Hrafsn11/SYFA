@@ -297,7 +297,7 @@ class PeminjamanController extends Controller
             // Details
             'tujuan_pembiayaan' => $peminjaman->nama_project ?? '-',
             'nilai_pembiayaan' => $peminjaman->nilai_pinjaman ?? 0,
-            'tenor_pembiayaan' => $peminjaman->durasi_project ?? 0,
+            'tenor_pembiayaan' => $peminjaman->top ?? 0,
             'biaya_administrasi' => $peminjaman->biaya_administrasi ?? 0,
             'bagi_hasil' => $peminjaman->nilai_bagi_hasil ?? 0,
             'persentase_bagi_hasil' => $peminjaman->presentase_bagi_hasil ?? 0,

@@ -178,3 +178,12 @@ config/local.php
 
 # Cursor specific
 .cursor/
+
+/Dockerfile
+/docker-compose.yml
+/.dockerignore
+/docker/
+/supervisord.log
+/supervisord.pid
+.composer/
+.config/

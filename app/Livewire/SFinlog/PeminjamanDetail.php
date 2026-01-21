@@ -56,6 +56,7 @@ class PeminjamanDetail extends Component
             DB::beginTransaction();
 
             $this->peminjaman->update([
+                'tgl_pengajuan' => now(),
                 'current_step' => 2,
                 'status' => 'Menunggu Persetujuan'
             ]);
