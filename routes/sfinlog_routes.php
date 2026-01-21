@@ -3,7 +3,7 @@
 use App\Livewire\Dashboard;
 use App\Http\Controllers\SFinlog\ArPerbulanController;
 use App\Http\Controllers\SFinlog\DebiturPiutangController;
-use App\Http\Controllers\SFinlog\KertasKerjaInvestorSFinlogController;
+use App\Livewire\SFinlog\KertasKerjaInvestorSFinlog;
 use App\Http\Controllers\SFinlog\PeminjamanController;
 use App\Http\Controllers\SFinlog\PengajuanInvestasiController;
 use App\Http\Controllers\SFinlog\PengajuanRestrukturisasiController;
@@ -126,6 +126,4 @@ Route::prefix('penyaluran-deposito-sfinlog')->name('penyaluran-deposito-sfinlog.
 });
 
 // Kertas Kerja Investor SFinlog
-Route::prefix('kertas-kerja-investor-sfinlog')->name('kertas-kerja-investor-sfinlog.')->group(function () {
-    Route::get('/', [KertasKerjaInvestorSFinlogController::class, 'index'])->name('index');
-});
+Route::get('kertas-kerja-investor-sfinlog', KertasKerjaInvestorSFinlog::class)->name('kertas-kerja-investor-sfinlog.index');
