@@ -85,6 +85,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
     public function columns(): array
     {
         return [
+            // Aggregated from another table - NO EDIT
             Column::make('Pengembalian Pokok Deposito')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);
@@ -92,6 +93,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 })
                 ->html(),
 
+            // Aggregated from another table - NO EDIT
             Column::make('Pengembalian Bagi Hasil Deposito')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);
@@ -99,16 +101,31 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 })
                 ->html(),
 
+            // EDITABLE
             Column::make('Sisa Pokok Belum Dikembalikan', 'sisa_pokok')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center"><strong class="text-danger">Rp ' . number_format($value, 0, ',', '.') . '</strong></div>')
+                ->label(function ($row) {
+                    $value = 'Rp ' . number_format($row->sisa_pokok, 0, ',', '.');
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell"><strong class="text-danger">' . $value . '</strong>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'sisa_pokok\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
+            // EDITABLE
             Column::make('Sisa Bagi Hasil Belum Dikembalikan', 'sisa_bagi_hasil')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center"><strong class="text-danger">Rp ' . number_format($value, 0, ',', '.') . '</strong></div>')
+                ->label(function ($row) {
+                    $value = 'Rp ' . number_format($row->sisa_bagi_hasil, 0, ',', '.');
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell"><strong class="text-danger">' . $value . '</strong>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'sisa_bagi_hasil\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
+            // Calculated - NO EDIT
             Column::make('Total Belum Dikembalikan')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);

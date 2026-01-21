@@ -151,41 +151,84 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
 
             Column::make('Tanggal Uang Masuk', 'tanggal_investasi')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center">' . Carbon::parse($value)->format('d-m-Y') . '</div>')
+                ->label(function ($row) {
+                    $value = Carbon::parse($row->tanggal_investasi)->format('d-m-Y');
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'tanggal_investasi\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
             Column::make('Deposito', 'deposito')
                 ->sortable()
                 ->searchable()
-                ->format(fn($value) => '<div class="text-center">' . ($value ?? '-') . '</div>')
+                ->label(function ($row) {
+                    $value = $row->deposito ?? '-';
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'deposito\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
             Column::make('Deposan', 'nama_investor')
                 ->sortable()
                 ->searchable()
-                ->format(fn($value) => '<div class="text-center">' . $value . '</div>')
+                ->label(function ($row) {
+                    $value = $row->nama_investor;
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'nama_investor\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
             Column::make('Nominal Deposit', 'jumlah_investasi')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+                ->label(function ($row) {
+                    $value = 'Rp ' . number_format($row->jumlah_investasi, 0, ',', '.');
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'jumlah_investasi\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
             Column::make('Lama Deposito', 'lama_investasi')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center">' . $value . ' Bulan</div>')
+                ->label(function ($row) {
+                    $value = $row->lama_investasi . ' Bulan';
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'lama_investasi\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
             Column::make('Bagi Hasil (%PA)', 'bagi_hasil_pertahun')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center">' . number_format($value, 2) . '%</div>')
+                ->label(function ($row) {
+                    $value = number_format($row->bagi_hasil_pertahun, 2) . '%';
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'bagi_hasil_pertahun\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
             Column::make('Bagi Hasil Nominal', 'nominal_bagi_hasil_yang_didapatkan')
                 ->sortable()
-                ->format(fn($value) => '<div class="text-center">Rp ' . number_format($value, 0, ',', '.') . '</div>')
+                ->label(function ($row) {
+                    $value = 'Rp ' . number_format($row->nominal_bagi_hasil_yang_didapatkan, 0, ',', '.');
+                    $id = $row->id_pengajuan_investasi;
+                    return '<div class="text-center editable-cell">' . $value . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'nominal_bagi_hasil_yang_didapatkan\'})"></i>
+                    </div>';
+                })
                 ->html(),
 
+            // Calculated field - NO EDIT
             Column::make('Bagi Hasil (%Bulan)')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
@@ -193,6 +236,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
+            // Calculated field - NO EDIT
             Column::make('Bagi Hasil (COF/Bulan)')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
@@ -200,6 +244,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
+            // Calculated field - NO EDIT
             Column::make('CoF Per Akhir Des')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
@@ -210,14 +255,19 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             Column::make('Status', 'status')
                 ->sortable()
                 ->searchable()
-                ->format(function ($value) {
-                    if ($value === 'Lunas') {
-                        return '<div class="text-center"><span class="badge bg-label-success">Lunas</span></div>';
-                    }
-                    return '<div class="text-center"><span class="badge bg-label-warning">Aktif</span></div>';
+                ->label(function ($row) {
+                    $value = $row->status;
+                    $id = $row->id_pengajuan_investasi;
+                    $badge = $value === 'Lunas'
+                        ? '<span class="badge bg-label-success">Lunas</span>'
+                        : '<span class="badge bg-label-warning">Aktif</span>';
+                    return '<div class="text-center editable-cell">' . $badge . '
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'status\'})"></i>
+                    </div>';
                 })
                 ->html(),
 
+            // Tgl Pengembalian from another table - NO EDIT
             Column::make('Tgl Pengembalian')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
