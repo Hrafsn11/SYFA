@@ -44,6 +44,9 @@ class PengembalianInvestasiFinlog extends Component
     public $sisa_dana_di_perusahaan = 0;
     public $dana_pokok_tersedia = 0;
 
+    public $sisa_pokok_db = 0;
+    public $sisa_bagi_hasil_db = 0;
+
     public function mount()
     {
         $this->setUrlSaveData(
@@ -84,12 +87,16 @@ class PengembalianInvestasiFinlog extends Component
                 'lama_investasi',
                 'nominal_bagi_hasil_yang_didapat',
                 'tanggal_investasi',
+                'sisa_pokok',
+                'sisa_bagi_hasil',
             ])->findOrFail($idPengajuanInvestasiFinlog);
 
             $this->nominal_investasi = $investasi->nominal_investasi;
             $this->lama_investasi = $investasi->lama_investasi;
             $this->bagi_hasil_total = $investasi->nominal_bagi_hasil_yang_didapat;
             $this->tanggal_investasi = $investasi->tanggal_investasi;
+            $this->sisa_pokok_db = $investasi->sisa_pokok ?? $investasi->nominal_investasi;
+            $this->sisa_bagi_hasil_db = $investasi->sisa_bagi_hasil ?? $investasi->nominal_bagi_hasil_yang_didapat;
 
             $pengembalian = ModelPengembalianInvestasiFinlog::getTotalDikembalikan($idPengajuanInvestasiFinlog);
             $this->total_pokok_dikembalikan = $pengembalian->total_pokok ?? 0;
@@ -210,11 +217,12 @@ class PengembalianInvestasiFinlog extends Component
         // Bagi hasil bisa dibayar jika:
         // 1. Bulan genap (2, 4, 6, dst) DAN sudah 2 bulan sejak pengembalian terakhir
         // 2. ATAU bulan terakhir (tidak perlu cek periode 2 bulan untuk bulan terakhir)
-        $this->bisa_bayar_bagi_hasil = ($bulanGenap && $bisaBayarBerdasarkanPeriode) || $bulanTerakhir;
+        // 3. DAN masih ada sisa bagi hasil yang belum dikembalikan
+        $this->bisa_bayar_bagi_hasil = (($bulanGenap && $bisaBayarBerdasarkanPeriode) || $bulanTerakhir) && ($this->sisa_bagi_hasil_db > 0);
 
-        // Pokok hanya bisa dibayar di bulan terakhir DAN bagi hasil sudah lunas
-        $sisaBagiHasil = max(0, ($this->bagi_hasil_total ?? 0) - ($this->total_bagi_hasil_dikembalikan ?? 0));
-        $this->bisa_bayar_pokok = $bulanTerakhir && $sisaBagiHasil <= 0;
+        // Pokok hanya bisa dibayar di bulan terakhir DAN bagi hasil sudah lunas (from DB)
+        // Use sisa_bagi_hasil_db from database instead of calculating
+        $this->bisa_bayar_pokok = $bulanTerakhir && ($this->sisa_bagi_hasil_db <= 0) && ($this->sisa_pokok_db > 0);
 
         // Set info periode
         if (!$bisaBayarBerdasarkanPeriode && !$bulanTerakhir) {
@@ -290,6 +298,10 @@ class PengembalianInvestasiFinlog extends Component
         $this->total_dana_dikembalikan_penyaluran = 0;
         $this->sisa_dana_di_perusahaan = 0;
         $this->dana_pokok_tersedia = 0;
+
+        // Reset sisa from database
+        $this->sisa_pokok_db = 0;
+        $this->sisa_bagi_hasil_db = 0;
     }
 
     public function resetForm()

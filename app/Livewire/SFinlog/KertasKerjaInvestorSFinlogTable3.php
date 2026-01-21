@@ -56,6 +56,8 @@ class KertasKerjaInvestorSFinlogTable3 extends DataTableComponent
                 'nominal_investasi',
                 'lama_investasi',
                 'persentase_bagi_hasil',
+                'sisa_pokok',
+                'sisa_bagi_hasil',
                 'nomor_kontrak'
             ])
             ->whereNotNull('nomor_kontrak')
@@ -78,26 +80,9 @@ class KertasKerjaInvestorSFinlogTable3 extends DataTableComponent
             ->where('id_pengajuan_investasi_finlog', $id)
             ->first();
 
-        // Calculate bagi hasil per nominal
-        $bagiHasilNominalPa = ($row->persentase_bagi_hasil * $row->nominal_investasi) / 100;
-        $cofBulan = $bagiHasilNominalPa / 12;
-        $bagiHasilPerNominal = $row->lama_investasi * $cofBulan;
-
-        $totalPokokDikembalikan = $total->total_pokok_all ?? 0;
-        $totalBagiHasilDibayar = $total->total_bagi_hasil_all ?? 0;
-
-        // Sisa pokok = nominal investasi - total pokok yang sudah dikembalikan
-        $sisaPokok = max(0, $row->nominal_investasi - $totalPokokDikembalikan);
-
-        // Sisa bagi hasil = bagi hasil per nominal - total bagi hasil yang sudah dibayar
-        $sisaBagiHasil = max(0, $bagiHasilPerNominal - $totalBagiHasilDibayar);
-
         return [
-            'pengembalian_pokok' => $totalPokokDikembalikan,
-            'pengembalian_bagi_hasil' => $totalBagiHasilDibayar,
-            'sisa_pokok' => $sisaPokok,
-            'sisa_bagi_hasil' => $sisaBagiHasil,
-            'total_belum_dikembalikan' => $sisaPokok + $sisaBagiHasil,
+            'pengembalian_pokok' => $total->total_pokok_all ?? 0,
+            'pengembalian_bagi_hasil' => $total->total_bagi_hasil_all ?? 0,
         ];
     }
 
@@ -118,24 +103,35 @@ class KertasKerjaInvestorSFinlogTable3 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Sisa Pokok Belum Dikembalikan')
+            // EDITABLE - From database column
+            Column::make('Sisa Pokok Belum Dikembalikan', 'sisa_pokok')
+                ->sortable()
                 ->label(function ($row) {
-                    $data = $this->getPengembalianData($row);
-                    return '<div class="text-center"><strong class="text-danger">Rp ' . number_format($data['sisa_pokok'], 0, ',', '.') . '</strong></div>';
+                    $value = 'Rp ' . number_format($row->sisa_pokok ?? 0, 0, ',', '.');
+                    $id = $row->id_pengajuan_investasi_finlog;
+                    return '<div class="text-center editable-cell"><strong class="text-danger">' . $value . '</strong>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'sisa_pokok\'})"></i>
+                    </div>';
                 })
                 ->html(),
 
-            Column::make('Sisa Bagi Hasil Belum Dikembalikan')
+            // EDITABLE - From database column
+            Column::make('Sisa Bagi Hasil Belum Dikembalikan', 'sisa_bagi_hasil')
+                ->sortable()
                 ->label(function ($row) {
-                    $data = $this->getPengembalianData($row);
-                    return '<div class="text-center"><strong class="text-danger">Rp ' . number_format($data['sisa_bagi_hasil'], 0, ',', '.') . '</strong></div>';
+                    $value = 'Rp ' . number_format($row->sisa_bagi_hasil ?? 0, 0, ',', '.');
+                    $id = $row->id_pengajuan_investasi_finlog;
+                    return '<div class="text-center editable-cell"><strong class="text-danger">' . $value . '</strong>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'sisa_bagi_hasil\'})"></i>
+                    </div>';
                 })
                 ->html(),
 
+            // Calculated from database columns
             Column::make('Total Belum Dikembalikan')
                 ->label(function ($row) {
-                    $data = $this->getPengembalianData($row);
-                    return '<div class="text-center"><strong class="text-danger">Rp ' . number_format($data['total_belum_dikembalikan'], 0, ',', '.') . '</strong></div>';
+                    $total = ($row->sisa_pokok ?? 0) + ($row->sisa_bagi_hasil ?? 0);
+                    return '<div class="text-center"><strong class="text-danger">Rp ' . number_format($total, 0, ',', '.') . '</strong></div>';
                 })
                 ->html(),
         ];
