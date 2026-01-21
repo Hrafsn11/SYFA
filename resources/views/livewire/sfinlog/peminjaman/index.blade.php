@@ -12,7 +12,7 @@
                     <a href="{{ asset('templates/New Customer OnBoarding Form - 2026.docx') }}" 
                         class="btn btn-primary d-flex justify-center align-items-center gap-2" download>
                         <i class="fa-solid fa-download"></i>
-                        Download Template OnBoardingForm
+                        Download Template Form New Customer
                     </a>
                     @can('peminjaman_finlog.add')
                         <a href="{{ route('sfinlog.peminjaman.create') }}"
