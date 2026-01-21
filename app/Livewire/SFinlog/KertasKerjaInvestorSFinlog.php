@@ -79,6 +79,14 @@ class KertasKerjaInvestorSFinlog extends Component
 
         // Update the field
         $investasi->{$this->editField} = $this->editValue;
+
+        // Auto-recalculate tanggal_berakhir_investasi when lama_investasi or tanggal_investasi changes
+        if (in_array($this->editField, ['lama_investasi', 'tanggal_investasi'])) {
+            $tanggalInvestasi = \Carbon\Carbon::parse($investasi->tanggal_investasi);
+            $lamaInvestasi = (int) $investasi->lama_investasi;
+            $investasi->tanggal_berakhir_investasi = $tanggalInvestasi->copy()->addMonths($lamaInvestasi);
+        }
+
         $investasi->save();
 
         // Close modal and refresh tables
