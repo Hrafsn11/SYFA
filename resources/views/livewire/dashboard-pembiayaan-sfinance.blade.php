@@ -203,6 +203,72 @@
         </div>
     </div>
 
+    <!-- Table Disbursement - Full Width -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Detail Disbursement Pokok dan Bagi Hasil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 50px;">No</th>
+                                    <th>Debitur</th>
+                                    <th class="text-end">Pokok</th>
+                                    <th class="text-end">Bagi Hasil</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $disbursement = $chartData['disbursement'] ?? [];
+                                    $categories = $disbursement['categories'] ?? [];
+                                    $pokokData = $disbursement['pokok'] ?? [];
+                                    $bagiHasilData = $disbursement['bagi_hasil'] ?? [];
+                                    $totalPokok = 0;
+                                    $totalBagiHasil = 0;
+                                @endphp
+                                @forelse($categories as $index => $debitur)
+                                    @php
+                                        $pokok = $pokokData[$index] ?? 0;
+                                        $bagiHasil = $bagiHasilData[$index] ?? 0;
+                                        $total = $pokok + $bagiHasil;
+                                        $totalPokok += $pokok;
+                                        $totalBagiHasil += $bagiHasil;
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">{{ $index + 1 }}</td>
+                                        <td>{{ $debitur }}</td>
+                                        <td class="text-end">Rp {{ number_format($pokok, 0, ',', '.') }}</td>
+                                        <td class="text-end">Rp {{ number_format($bagiHasil, 0, ',', '.') }}</td>
+                                        <td class="text-end fw-medium">Rp {{ number_format($total, 0, ',', '.') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Tidak ada data</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if(count($categories) > 0)
+                            <tfoot class="table-light">
+                                <tr class="fw-bold">
+                                    <td colspan="2" class="text-center">Total</td>
+                                    <td class="text-end">Rp {{ number_format($totalPokok, 0, ',', '.') }}</td>
+                                    <td class="text-end">Rp {{ number_format($totalBagiHasil, 0, ',', '.') }}</td>
+                                    <td class="text-end">Rp {{ number_format($totalPokok + $totalBagiHasil, 0, ',', '.') }}</td>
+                                </tr>
+                            </tfoot>
+                            @endif
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4 mb-4">
         <div class="col-12 col-xl-6">
             <div class="card h-100">
