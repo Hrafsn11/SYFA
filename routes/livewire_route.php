@@ -41,6 +41,7 @@ Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-
 
 // Debitur Piutang
 Route::get('debitur-piutang', \App\Livewire\DebiturPiutangIndex::class)->name('debitur-piutang.index');
+Route::post('debitur-piutang/update', [\App\Http\Controllers\DebiturPiutangController::class, 'update'])->name('debitur-piutang.update');
 
 // Master Cells Project
 Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');
