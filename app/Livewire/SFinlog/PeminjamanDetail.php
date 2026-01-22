@@ -406,7 +406,6 @@ class PeminjamanDetail extends Component
     public function generateKontrak()
     {
         $this->validate([
-            'nomor_kontrak' => 'required|string|unique:peminjaman_finlog,nomor_kontrak',
             'biaya_administrasi' => 'required|numeric|min:0',
             'jaminan' => 'required|string',
         ]);
@@ -414,10 +413,36 @@ class PeminjamanDetail extends Component
         try {
             DB::beginTransaction();
 
+            // Auto-generate nomor kontrak: FINLOG + running_number + bulan + tanggal + tahun
+            // Contoh: FINLOG01012026 = kontrak ke-1, tanggal 01 bulan 01 tahun 2026
+            $today = now();
+            $bulan = $today->format('m');  // 01-12
+            $tanggal = $today->format('d'); // 01-31
+            $tahun = $today->format('y');   // 2 digit tahun (26 untuk 2026)
+            
+            // Cari running number untuk bulan ini
+            $prefix = 'FINLOG';
+            $suffix = $bulan . $tanggal . $tahun;
+            
+            // Cari kontrak terakhir dengan pattern yang sama di bulan & tahun ini
+            $lastKontrak = PeminjamanFinlog::where('nomor_kontrak', 'LIKE', $prefix . '%' . $bulan . '%' . $tahun)
+                ->orderBy('nomor_kontrak', 'desc')
+                ->first();
+            
+            if ($lastKontrak && $lastKontrak->nomor_kontrak) {
+                // Extract running number (2 digit setelah FINLOG)
+                $lastRunning = (int) substr($lastKontrak->nomor_kontrak, 6, 2);
+                $runningNumber = str_pad($lastRunning + 1, 2, '0', STR_PAD_LEFT);
+            } else {
+                $runningNumber = '01';
+            }
+            
+            $nomorKontrak = $prefix . $runningNumber . $suffix;
+
             $this->peminjaman->update([
                 'current_step' => 7,
                 'status' => 'Dicairkan',
-                'nomor_kontrak' => $this->nomor_kontrak,
+                'nomor_kontrak' => $nomorKontrak,
                 'biaya_administrasi' => $this->biaya_administrasi,
                 'jaminan' => $this->jaminan,
             ]);
@@ -438,8 +463,8 @@ class PeminjamanDetail extends Component
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
             
-            $this->reset(['nomor_kontrak', 'biaya_administrasi', 'jaminan']);
-            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Kontrak berhasil digenerate');
+            $this->reset(['biaya_administrasi', 'jaminan']);
+            $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Kontrak berhasil digenerate dengan nomor: ' . $nomorKontrak);
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('alert', icon: 'error', title: 'Error', text: $e->getMessage());

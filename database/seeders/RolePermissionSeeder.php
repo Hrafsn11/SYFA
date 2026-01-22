@@ -167,6 +167,9 @@ class RolePermissionSeeder extends Seeder
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
             'pengembalian_investasi.edit',
+            // Debitur Piutang
+            'debitur_piutang.edit',
+            'debitur_piutang_finlog.edit',
         ];
 
         foreach ($permissions as $permission) {
@@ -393,6 +396,10 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_investasi_finlog.add',
             'pengajuan_investasi_finlog.validasi_finance_ski',  // Step 2
             'pengajuan_investasi_finlog.generate_kontrak',      // Step 5
+
+            // Debitur Piutang
+            'debitur_piutang.edit',
+            'debitur_piutang_finlog.edit',
         ]);
 
         $ceoRole = Role::updateOrCreate(

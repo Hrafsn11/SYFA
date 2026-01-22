@@ -160,11 +160,18 @@ class Create extends Component
         // Reset late payment fields
         $this->resetLatePaymentFields();
 
-        if ($pengajuan->jenis_pembiayaan === 'Installment') {
-            $historyPencairan = $pengajuan->historyStatus()->where('status', 'Dana Sudah Dicairkan')->orderBy('created_at', 'desc')->first();
-            $this->tanggalPencairanReal = $historyPencairan ? $historyPencairan->created_at : $pengajuan->harapan_tanggal_pencairan;
-        } else {
-            $this->tanggalPencairanReal = $pengajuan->harapan_tanggal_pencairan;
+        // Ambil tanggal pencairan dari history step 7 (Upload Dokumen Transfer)
+        $historyPencairan = $pengajuan->historyStatus()
+            ->where('current_step', 7)
+            ->whereNotNull('tanggal_pencairan')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $this->tanggalPencairanReal = $historyPencairan?->tanggal_pencairan ?? $pengajuan->harapan_tanggal_pencairan;
+
+        // Untuk non-Installment: due date = tanggal pencairan + 30 hari
+        if ($pengajuan->jenis_pembiayaan !== 'Installment' && $this->tanggalPencairanReal) {
+            $this->selectedDueDate = Carbon::parse($this->tanggalPencairanReal)->addDays(30)->format('Y-m-d');
         }
         $this->tanggal_pencairan = Carbon::parse($this->tanggalPencairanReal)->format('d-m-Y');
 
@@ -203,11 +210,14 @@ class Create extends Component
     {
         $invoice = collect($this->availableInvoices)->firstWhere('label', $value);
         $this->nominal_invoice = $invoice ? $invoice['nilai'] : null;
-        $this->selectedDueDate = $invoice['due_date'] ?? null;
+
+        // Untuk non-Installment: due date sudah dihitung dari tanggal_pencairan + 30 hari
+        // Tidak perlu mengambil dari invoice['due_date'] lagi
+        // selectedDueDate sudah di-set di updatedKodePeminjaman
 
         $this->calculateLatePaymentAdjustment();
     }
-    
+
     private function calculateLatePaymentAdjustment(): void
     {
         $this->resetLatePaymentFields();

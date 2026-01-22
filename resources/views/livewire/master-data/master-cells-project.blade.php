@@ -84,6 +84,31 @@
                                 placeholder="Masukkan Deskripsi Bidang" wire:model.blur="deskripsi_bidang">
                             <div class="invalid-feedback"></div>
                         </div>
+                        <div class="mb-3 form-group">
+                            <label for="profile_pict" class="form-label">Profile Picture</label>
+                            <input type="file" class="form-control" id="profile_pict" wire:model="profile_pict"
+                                accept="image/*">
+                            <div class="text-muted small mt-1">Upload gambar profil cells project (JPG, PNG) maks 2MB.
+                            </div>
+
+                            @if ($profile_pict && !is_string($profile_pict))
+                                <div class="mt-2">
+                                    <img src="{{ $profile_pict->temporaryUrl() }}" alt="Preview" class="img-thumbnail"
+                                        style="max-height: 150px">
+                                </div>
+                            @elseif ($profile_pict && is_string($profile_pict))
+                                <div class="mt-2">
+                                    <img src="{{ asset('storage/' . $profile_pict) }}" alt="Current Profile"
+                                        class="img-thumbnail" style="max-height: 150px">
+                                </div>
+                            @endif
+
+                            <div class="invalid-feedback">
+                                @error('profile_pict')
+                                    {{ $message }}
+                                @enderror
+                            </div>
+                        </div>
 
                         <hr class="my-4">
 
@@ -202,6 +227,7 @@
             @this.set('nama_cells_bisnis', data.nama_cells_bisnis);
             @this.set('nama_pic', data.nama_pic);
             @this.set('tanda_tangan_pic', data.tanda_tangan_pic); // Populate file path
+            @this.set('profile_pict', data.profile_pict); // Populate profile picture path
             @this.set('alamat', data.alamat);
             @this.set('deskripsi_bidang', data.deskripsi_bidang);
 
@@ -226,8 +252,10 @@
             @this.set('nama_cells_bisnis', '');
             @this.set('nama_pic', '');
             @this.set('tanda_tangan_pic', null);
+            @this.set('profile_pict', null);
             // Reset input file value
             $('#tanda_tangan_pic').val('');
+            $('#profile_pict').val('');
             @this.set('alamat', '');
             @this.set('deskripsi_bidang', '');
             @this.set('projects', []);

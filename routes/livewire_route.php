@@ -41,6 +41,7 @@ Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-
 
 // Debitur Piutang
 Route::get('debitur-piutang', \App\Livewire\DebiturPiutangIndex::class)->name('debitur-piutang.index');
+Route::post('debitur-piutang/update', [\App\Http\Controllers\DebiturPiutangController::class, 'update'])->name('debitur-piutang.update');
 
 // Master Cells Project
 Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');
@@ -70,6 +71,8 @@ Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembali
 
 // SFinlog - Debitur Piutang
 Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');
+Route::post('sfinlog/debitur-piutang/update', [\App\Http\Controllers\SFinlog\DebiturPiutangFinlogController::class, 'update'])->name('sfinlog.debitur-piutang.update');
 
+Route::get('sfinlog/cell-project-profile', \App\Livewire\SFinlog\CellProjectProfile::class)->name('sfinlog.cell-project-profile.index');
 // Portofolio
 // Route::get('portofolio', \App\Livewire\Portofolio\Index::class)->name('portofolio.index');

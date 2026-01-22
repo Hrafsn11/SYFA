@@ -242,6 +242,13 @@
                     </li>
                 @endcanany
 
+                <li class="menu-item {{ RouteHelper::routeIs('sfinlog.cell-project-profile.index') ? 'active' : '' }}">
+                    <a href="{{ route('sfinlog.cell-project-profile.index') }}" class="menu-link" wire:navigate.hover>
+                        <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+                        <div data-i18n="Cell Project Profile">Cell Project Profile</div>
+                    </a>
+                </li>
+
                 {{-- Pengajuan Investasi --}}
                 @canany(['sfinance.menu.pengajuan_investasi', 'sfinlog.menu.pengajuan_investasi'])
                     <li class="menu-item {{ RouteHelper::is('*pengajuan-investasi*') ? 'active' : '' }}">

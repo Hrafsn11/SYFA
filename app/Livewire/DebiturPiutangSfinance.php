@@ -21,7 +21,6 @@ class DebiturPiutangSfinance extends DataTableComponent
             ->setTableAttributes(['class' => 'table-responsive text-nowrap'])
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPage(10)
-            ->setDefaultSort('harapan_tanggal_pencairan', 'desc')
             ->setColumnSelectStatus(true)
             ->setSearchEnabled()
             ->setSearchPlaceholder('Cari debitur, objek jaminan...')
@@ -40,29 +39,40 @@ class DebiturPiutangSfinance extends DataTableComponent
                 'pengajuan_peminjaman.persentase_bagi_hasil',
                 'pengajuan_peminjaman.total_bagi_hasil',
                 'master_debitur_dan_investor.nama as nama_debitur',
-                'bukti_peminjaman.nama_client as objek_jaminan',
-                'bukti_peminjaman.no_invoice',
-                'bukti_peminjaman.no_kontrak',
+                'first_bukti.id_bukti_peminjaman',
+                'first_bukti.nama_client as objek_jaminan',
+                'first_bukti.no_invoice',
+                'first_bukti.no_kontrak',
                 'pengembalian_pinjaman.lama_pemakaian as masa_penggunaan',
                 'pengembalian_pinjaman.sisa_bagi_hasil as kurang_bayar_bagi_hasil',
                 'pengembalian_pinjaman.sisa_bayar_pokok as sisa_pokok',
                 'pengembalian_pinjaman.ulid as id_pengembalian_pinjaman',
                 DB::raw('(SELECT nominal_yang_disetujui FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND validasi_dokumen = "disetujui" ORDER BY created_at DESC LIMIT 1) as nilai_dicairkan'),
+                DB::raw('(SELECT id_history_status_pengajuan_pinjaman FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND validasi_dokumen = "disetujui" ORDER BY created_at DESC LIMIT 1) as id_history_dicairkan'),
                 DB::raw('(SELECT tanggal_pencairan FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND tanggal_pencairan IS NOT NULL ORDER BY created_at DESC LIMIT 1) as tanggal_pencairan'),
                 DB::raw('(SELECT SUM(nilai_total_pengembalian) FROM report_pengembalian WHERE id_pengembalian = pengembalian_pinjaman.ulid) as nilai_bayar_total'),
                 DB::raw('(SELECT MAX(created_at) FROM report_pengembalian WHERE id_pengembalian = pengembalian_pinjaman.ulid) as tanggal_bayar_terakhir'),
             ])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
-            ->leftJoin('bukti_peminjaman', 'pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'bukti_peminjaman.id_pengajuan_peminjaman')
+            // Use subquery to get only first bukti_peminjaman per pengajuan (prevent duplicates)
+            ->leftJoin(DB::raw('(
+                SELECT bp1.* 
+                FROM bukti_peminjaman bp1
+                INNER JOIN (
+                    SELECT id_pengajuan_peminjaman, MIN(id_bukti_peminjaman) as first_id
+                    FROM bukti_peminjaman
+                    GROUP BY id_pengajuan_peminjaman
+                ) bp2 ON bp1.id_bukti_peminjaman = bp2.first_id
+            ) as first_bukti'), 'pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'first_bukti.id_pengajuan_peminjaman')
             ->leftJoin($this->getLatestPengembalianSubquery(), 'pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'pengembalian_pinjaman.id_pengajuan_peminjaman')
             ->whereIn('pengajuan_peminjaman.status', ['Aktif', 'Dana Sudah Dicairkan', 'Lunas', 'Tertunda', 'Ditolak']);
 
         if ($search = $this->getSearch()) {
             $query->where(function ($q) use ($search) {
                 $q->where('master_debitur_dan_investor.nama', 'LIKE', '%' . $search . '%')
-                    ->orWhere('bukti_peminjaman.nama_client', 'LIKE', '%' . $search . '%')
-                    ->orWhere('bukti_peminjaman.no_invoice', 'LIKE', '%' . $search . '%')
-                    ->orWhere('bukti_peminjaman.no_kontrak', 'LIKE', '%' . $search . '%')
+                    ->orWhere('first_bukti.nama_client', 'LIKE', '%' . $search . '%')
+                    ->orWhere('first_bukti.no_invoice', 'LIKE', '%' . $search . '%')
+                    ->orWhere('first_bukti.no_kontrak', 'LIKE', '%' . $search . '%')
                     ->orWhere('pengajuan_peminjaman.nomor_peminjaman', 'LIKE', '%' . $search . '%')
                     ->orWhere('pengajuan_peminjaman.status', 'LIKE', '%' . $search . '%');
             });
@@ -160,6 +170,31 @@ class DebiturPiutangSfinance extends DataTableComponent
                 $bagiHasilPerBulan = $masaPenggunaan > 0 ? $bagiHasil / $masaPenggunaan : 0;
                 return 'Rp ' . number_format($bagiHasilPerBulan, 0, ',', '.');
             }),
+
+            Column::make('Aksi')
+                ->label(function ($row) {
+                    if (!auth()->user()->can('debitur_piutang.edit')) {
+                        return '-';
+                    }
+
+                    $data = json_encode([
+                        'id_pengajuan' => $row->id_pengajuan_peminjaman,
+                        'id_bukti' => $row->id_bukti_peminjaman,
+                        'id_history' => $row->id_history_dicairkan,
+                        'id_pengembalian' => $row->id_pengembalian_pinjaman,
+                        'objek_jaminan' => $row->objek_jaminan,
+                        'nilai_dicairkan' => $row->nilai_dicairkan,
+                        'persentase_bagi_hasil' => $row->persentase_bagi_hasil,
+                        'kurang_bayar_bagi_hasil' => $row->kurang_bayar_bagi_hasil,
+                    ]);
+
+                    return '<button type="button" class="btn btn-sm btn-primary edit-debitur-piutang-btn" 
+                                data-row=\'' . htmlspecialchars($data, ENT_QUOTES) . '\'>
+                                <i class="ti ti-edit"></i>
+                            </button>';
+                })
+                ->html()
+                ->excludeFromColumnSelect(),
         ];
     }
 }

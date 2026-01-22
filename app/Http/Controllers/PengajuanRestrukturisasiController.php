@@ -287,10 +287,28 @@ class PengajuanRestrukturisasiController extends Controller
 
     private function getJatuhTempoTerakhir($idPengajuanPeminjaman)
     {
+        // Prioritas 1: Cari pengembalian pinjaman terakhir yang belum lunas
+        $pengembalianBelumLunas = PengembalianPinjaman::where('id_pengajuan_peminjaman', $idPengajuanPeminjaman)
+            ->where('status', '!=', 'Lunas')
+            ->orderBy('created_at', 'asc')
+            ->first();
+
+        if ($pengembalianBelumLunas && $pengembalianBelumLunas->tanggal_pencairan) {
+            // Jatuh tempo = tanggal pencairan cicilan + 30 hari
+            $tanggalJatuhTempo = Carbon::parse($pengembalianBelumLunas->tanggal_pencairan)->addDays(30);
+
+            return [
+                'jatuh_tempo_terakhir' => $tanggalJatuhTempo->format('Y-m-d'),
+                'jatuh_tempo_terakhir_formatted' => $tanggalJatuhTempo->locale('id')->isoFormat('D MMMM YYYY'),
+            ];
+        }
+
+        // Fallback: Jika belum ada pengembalian, ambil dari tanggal pencairan awal (step 7)
         $history = DB::table('history_status_pengajuan_pinjaman')
             ->where('id_pengajuan_peminjaman', $idPengajuanPeminjaman)
+            ->where('current_step', 7)
             ->whereNotNull('tanggal_pencairan')
-            ->orderBy('tanggal_pencairan', 'asc')
+            ->orderBy('created_at', 'desc')
             ->first();
 
         if (!$history || !$history->tanggal_pencairan) {
@@ -300,7 +318,8 @@ class PengajuanRestrukturisasiController extends Controller
             ];
         }
 
-        $tanggalJatuhTempo = Carbon::parse($history->tanggal_pencairan)->addMonth();
+        // Jatuh tempo = tanggal pencairan + 30 hari (bukan addMonth)
+        $tanggalJatuhTempo = Carbon::parse($history->tanggal_pencairan)->addDays(30);
 
         return [
             'jatuh_tempo_terakhir' => $tanggalJatuhTempo->format('Y-m-d'),
