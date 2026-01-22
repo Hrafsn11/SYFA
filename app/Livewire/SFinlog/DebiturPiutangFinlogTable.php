@@ -138,6 +138,32 @@ class DebiturPiutangFinlogTable extends DataTableComponent
 
             Column::make('Total Sisa')
                 ->label(fn($row) => 'Rp ' . number_format($this->getSisaPokok($row) + $this->getSisaBagiHasil($row), 0, ',', '.')),
+
+            Column::make('Aksi')
+                ->label(function ($row) {
+                    if (!auth()->user()->can('debitur_piutang_finlog.edit')) {
+                        return '-';
+                    }
+
+                    $data = json_encode([
+                        'id_peminjaman' => $row->id_peminjaman_finlog,
+                        'id_pengembalian' => $row->latestPengembalian?->id_pengembalian_pinjaman_finlog,
+                        'cells_bisnis' => $row->cellsProject?->nama_cells_bisnis ?? '-',
+                        'nama_client' => $row->debitur?->nama ?? '-',
+                        'nilai_pinjaman' => $row->nilai_pinjaman ?? 0,
+                        'presentase_bagi_hasil' => $row->presentase_bagi_hasil ?? 0,
+                        'nilai_bagi_hasil' => $row->nilai_bagi_hasil ?? 0,
+                        'sisa_pinjaman' => $this->getSisaPokok($row),
+                        'sisa_bagi_hasil' => $this->getSisaBagiHasil($row),
+                    ]);
+
+                    return '<button type="button" class="btn btn-sm btn-primary edit-debitur-piutang-finlog-btn" 
+                                data-row=\'' . htmlspecialchars($data, ENT_QUOTES) . '\'>
+                                <i class="ti ti-edit"></i>
+                            </button>';
+                })
+                ->html()
+                ->excludeFromColumnSelect(),
         ];
     }
 

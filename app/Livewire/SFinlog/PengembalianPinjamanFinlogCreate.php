@@ -359,10 +359,10 @@ class PengembalianPinjamanFinlogCreate extends Component
 
         return PeminjamanFinlog::query()
             ->with(['debitur', 'cellsProject'])
-            ->where('id_debitur', $this->currentDebitur->id_debitur)
-            ->where('status', 'Selesai')
-            ->whereNotIn('id_peminjaman_finlog', $lunasPeminjamanIds) // Exclude lunas
-            ->orderBy('created_at', 'desc')
+            ->where('peminjaman_finlog.id_debitur', $this->currentDebitur->id_debitur)
+            ->where('peminjaman_finlog.status', 'Selesai')
+            ->whereNotIn('peminjaman_finlog.id_peminjaman_finlog', $lunasPeminjamanIds) // Exclude lunas
+            ->orderBy('peminjaman_finlog.created_at', 'desc')
             ->get()
             ->map(fn($item) => (object)[
                 'id' => $item->id_peminjaman_finlog,

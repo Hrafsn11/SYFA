@@ -71,6 +71,7 @@ Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembali
 
 // SFinlog - Debitur Piutang
 Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');
+Route::post('sfinlog/debitur-piutang/update', [\App\Http\Controllers\SFinlog\DebiturPiutangFinlogController::class, 'update'])->name('sfinlog.debitur-piutang.update');
 
 Route::get('sfinlog/cell-project-profile', \App\Livewire\SFinlog\CellProjectProfile::class)->name('sfinlog.cell-project-profile.index');
 // Portofolio

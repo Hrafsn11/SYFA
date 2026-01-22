@@ -169,6 +169,7 @@ class RolePermissionSeeder extends Seeder
             'pengembalian_investasi.edit',
             // Debitur Piutang
             'debitur_piutang.edit',
+            'debitur_piutang_finlog.edit',
         ];
 
         foreach ($permissions as $permission) {
@@ -398,6 +399,7 @@ class RolePermissionSeeder extends Seeder
 
             // Debitur Piutang
             'debitur_piutang.edit',
+            'debitur_piutang_finlog.edit',
         ]);
 
         $ceoRole = Role::updateOrCreate(
