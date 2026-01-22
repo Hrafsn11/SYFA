@@ -124,6 +124,8 @@ Route::middleware([
         Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
         Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
         Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
+        Route::get('{id}/generate-kontrak', \App\Livewire\ProgramRestrukturisasi\GenerateKontrak::class)->name('generate-kontrak');
+        Route::get('{id}/preview-kontrak', \App\Livewire\ProgramRestrukturisasi\PreviewKontrak::class)->name('preview-kontrak');
         // Controller endpoints (if still needed)
         Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
         Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');

@@ -162,7 +162,8 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.edit',
             'program_restrukturisasi.edit_parameter',
             'program_restrukturisasi.upload',
-            'program_restrukturisasi.konfirmasi', // Konfirmasi pembayaran oleh admin/finance
+            'program_restrukturisasi.konfirmasi',
+            'program_restrukturisasi.generate_kontrak',
             // Pengembalian Investasi
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
@@ -365,7 +366,8 @@ class RolePermissionSeeder extends Seeder
             'program_restrukturisasi.add',
             'program_restrukturisasi.edit',
             'program_restrukturisasi.edit_parameter',
-            'program_restrukturisasi.konfirmasi', // Finance SKI can confirm payments
+            'program_restrukturisasi.konfirmasi',
+            'program_restrukturisasi.generate_kontrak',
 
             // Penyaluran Deposito Finlog (Finance SKI full access)
             'penyaluran_deposito_finlog.view',
@@ -498,7 +500,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Super Admin',
             'password' => bcrypt('password'),
         ]);
-        if (! $superAdmin->hasRole('super-admin')) {
+        if (!$superAdmin->hasRole('super-admin')) {
             $superAdmin->assignRole('super-admin');
         }
 
@@ -509,7 +511,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Admin User',
             'password' => bcrypt('password'),
         ]);
-        if (! $admin->hasRole('admin')) {
+        if (!$admin->hasRole('admin')) {
             $admin->assignRole('admin');
         }
 
@@ -519,7 +521,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Debitur User',
             'password' => bcrypt('password'),
         ]);
-        if (! $debitur->hasRole('Debitur')) {
+        if (!$debitur->hasRole('Debitur')) {
             $debitur->assignRole('Debitur');
         }
 
@@ -529,7 +531,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Finance User',
             'password' => bcrypt('password'),
         ]);
-        if (! $finance->hasRole('Finance SKI')) {
+        if (!$finance->hasRole('Finance SKI')) {
             $finance->assignRole('Finance SKI');
         }
 
@@ -539,7 +541,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'CEO User',
             'password' => bcrypt('password'),
         ]);
-        if (! $ceo->hasRole('CEO SKI')) {
+        if (!$ceo->hasRole('CEO SKI')) {
             $ceo->assignRole('CEO SKI');
         }
 
@@ -549,7 +551,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Direktur User',
             'password' => bcrypt('password'),
         ]);
-        if (! $direktur->hasRole('Direktur SKI')) {
+        if (!$direktur->hasRole('Direktur SKI')) {
             $direktur->assignRole('Direktur SKI');
         }
 
@@ -559,7 +561,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'CEO S-Finlog',
             'password' => bcrypt('password'),
         ]);
-        if (! $ceoFinlog->hasRole('CEO S-Finlog')) {
+        if (!$ceoFinlog->hasRole('CEO S-Finlog')) {
             $ceoFinlog->assignRole('CEO S-Finlog');
         }
 
@@ -569,7 +571,7 @@ class RolePermissionSeeder extends Seeder
             'name' => 'Investment Officer',
             'password' => bcrypt('password'),
         ]);
-        if (! $io->hasRole('IO (Investment Officer)')) {
+        if (!$io->hasRole('IO (Investment Officer)')) {
             $io->assignRole('IO (Investment Officer)');
         }
 
