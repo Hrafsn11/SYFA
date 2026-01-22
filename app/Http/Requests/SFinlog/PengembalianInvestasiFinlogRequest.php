@@ -38,17 +38,9 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                         return;
                     }
 
-                    $totalBagiHasil = $pengajuan->nominal_bagi_hasil_yang_didapat ?? 0;
-
-                    $totalSudahDibayar = PengembalianInvestasiFinlog::getTotalDikembalikan(
-                        $pengajuan->id_pengajuan_investasi_finlog
-                    );
-
-                    $totalBagiHasilSudahDibayar = $totalSudahDibayar->total_bagi_hasil ?? 0;
-                    $totalPokokSudahDibayar = $totalSudahDibayar->total_pokok ?? 0;
-
-                    $sisaBagiHasil = max(0, $totalBagiHasil - $totalBagiHasilSudahDibayar);
-                    $sisaPokok = max(0, ($pengajuan->nominal_investasi ?? 0) - $totalPokokSudahDibayar);
+                    // Use sisa from database columns instead of calculating
+                    $sisaBagiHasil = $pengajuan->sisa_bagi_hasil ?? 0;
+                    $sisaPokok = $pengajuan->sisa_pokok ?? $pengajuan->nominal_investasi;
 
                     // Cek apakah sudah bulan terakhir
                     $tanggalInvestasi = Carbon::parse($pengajuan->tanggal_investasi)->startOfDay();
@@ -188,12 +180,8 @@ class PengembalianInvestasiFinlogRequest extends FormRequest
                         return;
                     }
 
-                    $totalBagiHasil = $pengajuan->nominal_bagi_hasil_yang_didapat ?? 0;
-
-                    $totalSudahDibayar = PengembalianInvestasiFinlog::getTotalDikembalikan(
-                        $pengajuan->id_pengajuan_investasi_finlog
-                    )->total_bagi_hasil ?? 0;
-                    $sisaBagiHasil = max(0, $totalBagiHasil - $totalSudahDibayar);
+                    // Use sisa_bagi_hasil from database column instead of calculating
+                    $sisaBagiHasil = $pengajuan->sisa_bagi_hasil ?? 0;
 
                     // Jika masih ada sisa bagi hasil, nilai wajib diisi (tidak boleh kosong / null)
                     if ($sisaBagiHasil > 0 && ($value === null || $value === '')) {

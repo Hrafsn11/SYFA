@@ -3,7 +3,7 @@
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
-use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Livewire\KertasKerjaInvestorSFinance;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
@@ -124,6 +124,8 @@ Route::middleware([
         Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
         Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
         Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
+        Route::get('{id}/generate-kontrak', \App\Livewire\ProgramRestrukturisasi\GenerateKontrak::class)->name('generate-kontrak');
+        Route::get('{id}/preview-kontrak', \App\Livewire\ProgramRestrukturisasi\PreviewKontrak::class)->name('preview-kontrak');
         // Controller endpoints (if still needed)
         Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
         Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
@@ -163,7 +165,7 @@ Route::middleware([
     Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
-    Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
+    Route::get('kertas-kerja-investor-sfinance', KertasKerjaInvestorSFinance::class)->name('kertas-kerja-investor-sfinance.index');
 
     Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
         Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
@@ -214,10 +216,6 @@ Route::middleware([
         Route::get('{id}/download-sertifikat', [\App\Http\Controllers\PengajuanInvestasiController::class, 'downloadSertifikat'])->name('download-sertifikat');
     });
 
-    // Kertas Kerja Investor SFinance 
-    Route::prefix('kertas-kerja-investor-sfinance')->name('kertas-kerja-investor-sfinance.')->group(function () {
-        Route::get('/', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('index');
-    });
 
     // config matrix pinjaman
     // Route::get('config-matrix-pinjaman', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'index'])->name('matrixpinjaman');
