@@ -25,9 +25,12 @@ class PengajuanPeminjaman extends Model
         'tujuan_pembiayaan',
         'jenis_pembiayaan',
         'total_pinjaman',
+        'sisa_bayar_pokok',
         'nominal_pengajuan_awal',
         'harapan_tanggal_pencairan',
+        'tanggal_jatuh_tempo',
         'total_bagi_hasil',
+        'sisa_bagi_hasil',
         'rencana_tgl_pembayaran',
         'pembayaran_total',
         'catatan_lainnya',
@@ -42,6 +45,15 @@ class PengajuanPeminjaman extends Model
         'updated_by',
         'upload_bukti_transfer',
         'no_kontrak',
+    ];
+
+    protected $casts = [
+        'tanggal_jatuh_tempo' => 'date',
+        'harapan_tanggal_pencairan' => 'date',
+        'total_pinjaman' => 'decimal:2',
+        'sisa_bayar_pokok' => 'decimal:2',
+        'total_bagi_hasil' => 'decimal:2',
+        'sisa_bagi_hasil' => 'decimal:2',
     ];
 
     public function invoices()

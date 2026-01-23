@@ -38,6 +38,7 @@ class DebiturPiutangSfinance extends DataTableComponent
                 'pengajuan_peminjaman.status',
                 'pengajuan_peminjaman.persentase_bagi_hasil',
                 'pengajuan_peminjaman.total_bagi_hasil',
+                'pengajuan_peminjaman.tanggal_jatuh_tempo',
                 'master_debitur_dan_investor.nama as nama_debitur',
                 'first_bukti.id_bukti_peminjaman',
                 'first_bukti.nama_client as objek_jaminan',
@@ -52,9 +53,11 @@ class DebiturPiutangSfinance extends DataTableComponent
                 DB::raw('(SELECT tanggal_pencairan FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND tanggal_pencairan IS NOT NULL ORDER BY created_at DESC LIMIT 1) as tanggal_pencairan'),
                 DB::raw('(SELECT SUM(nilai_total_pengembalian) FROM report_pengembalian WHERE id_pengembalian = pengembalian_pinjaman.ulid) as nilai_bayar_total'),
                 DB::raw('(SELECT MAX(created_at) FROM report_pengembalian WHERE id_pengembalian = pengembalian_pinjaman.ulid) as tanggal_bayar_terakhir'),
+                DB::raw('(SELECT COALESCE(SUM(nilai_total_pengembalian), 0) FROM report_pengembalian WHERE nomor_peminjaman = pengajuan_peminjaman.nomor_peminjaman) as total_bayar'),
+                DB::raw('(SELECT COALESCE(MAX(hari_keterlambatan), 0) FROM report_pengembalian WHERE nomor_peminjaman = pengajuan_peminjaman.nomor_peminjaman) as telat_hari'),
             ])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
-            // Use subquery to get only first bukti_peminjaman per pengajuan (prevent duplicates)
+           
             ->leftJoin(DB::raw('(
                 SELECT bp1.* 
                 FROM bukti_peminjaman bp1
@@ -119,7 +122,21 @@ class DebiturPiutangSfinance extends DataTableComponent
                 ->sortable(),
 
             Column::make('Masa Penggunaan', 'masa_penggunaan')
-                ->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' bulan')
+                ->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' hari')
+                ->sortable(),
+
+            Column::make('Tanggal Jatuh Tempo', 'tanggal_jatuh_tempo')
+                ->label(function ($row) {
+                    if (!$row->tanggal_jatuh_tempo) return '-';
+                    $jatuhTempo = Carbon::parse($row->tanggal_jatuh_tempo);
+                    $isLate = $jatuhTempo->isPast();
+                    $formatted = $jatuhTempo->format('d/m/Y');
+                    if ($isLate) {
+                        return '<span class="text-danger">' . $formatted . ' <span class="badge bg-danger">Jatuh Tempo</span></span>';
+                    }
+                    return $formatted;
+                })
+                ->html()
                 ->sortable(),
 
             Column::make('Bagi Hasil Oleh Debitur', 'total_bagi_hasil')
@@ -139,7 +156,7 @@ class DebiturPiutangSfinance extends DataTableComponent
                 ->sortable(),
 
             Column::make('Lama Pinjaman', 'masa_penggunaan')
-                ->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' bulan')
+                ->label(fn($row) => ($row->masa_penggunaan ?? 0) . ' hari')
                 ->sortable(),
 
             Column::make('Nilai Bayar', 'nilai_bayar_total')
@@ -166,8 +183,10 @@ class DebiturPiutangSfinance extends DataTableComponent
 
             Column::make('Bagi Hasil/Bulan')->label(function ($row) {
                 $bagiHasil = $row->total_bagi_hasil ?? 0;
-                $masaPenggunaan = $row->masa_penggunaan ?? 1;
-                $bagiHasilPerBulan = $masaPenggunaan > 0 ? $bagiHasil / $masaPenggunaan : 0;
+                $masaPenggunaanHari = $row->masa_penggunaan ?? 0;
+                // Konversi hari ke bulan (30 hari = 1 bulan), minimal 1 bulan
+                $masaPenggunaanBulan = $masaPenggunaanHari > 0 ? max(1, ceil($masaPenggunaanHari / 30)) : 1;
+                $bagiHasilPerBulan = $bagiHasil / $masaPenggunaanBulan;
                 return 'Rp ' . number_format($bagiHasilPerBulan, 0, ',', '.');
             }),
 
@@ -195,6 +214,61 @@ class DebiturPiutangSfinance extends DataTableComponent
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
+
+            Column::make('Subtotal Sisa Pokok + Bagi Hasil')
+                ->label(function ($row) {
+                    // Jika belum ada pengembalian, gunakan nilai awal
+                    $sisaPokok = $row->sisa_pokok ?? $row->nilai_dicairkan ?? 0;
+                    $sisaBagiHasil = $row->kurang_bayar_bagi_hasil ?? $row->total_bagi_hasil ?? 0;
+                    $subtotal = $sisaPokok + $sisaBagiHasil;
+                    return '<strong>Rp ' . number_format($subtotal, 0, ',', '.') . '</strong>';
+                })
+                ->html(),
+
+            Column::make('Sisa Pokok', 'sisa_pokok')
+                ->label(function ($row) {
+                    // Jika belum ada pengembalian, gunakan nilai_dicairkan
+                    $sisaPokok = $row->sisa_pokok ?? $row->nilai_dicairkan ?? 0;
+                    return 'Rp ' . number_format($sisaPokok, 0, ',', '.');
+                })
+                ->html()
+                ->sortable(),
+
+            Column::make('Sisa Bagi Hasil', 'kurang_bayar_bagi_hasil')
+                ->label(function ($row) {
+                    // Jika belum ada pengembalian, gunakan total_bagi_hasil
+                    $sisaBagiHasil = $row->kurang_bayar_bagi_hasil ?? $row->total_bagi_hasil ?? 0;
+                    return 'Rp ' . number_format($sisaBagiHasil, 0, ',', '.');
+                })
+                ->html()
+                ->sortable(),
+
+            Column::make('Telat Hari', 'telat_hari')
+                ->label(function ($row) {
+                    // hari_keterlambatan berisi string seperti "14 Hari", extract angkanya
+                    $telatHariRaw = $row->telat_hari ?? '0';
+                    // Extract angka dari string
+                    $telatHari = intval(preg_replace('/[^0-9]/', '', $telatHariRaw));
+                    
+                    // Cek juga berdasarkan tanggal_jatuh_tempo jika ada
+                    if ($row->tanggal_jatuh_tempo) {
+                        $jatuhTempo = \Carbon\Carbon::parse($row->tanggal_jatuh_tempo);
+                        $today = \Carbon\Carbon::today();
+                        
+                        // Jika belum melewati tanggal jatuh tempo, tidak telat
+                        if ($today->lte($jatuhTempo)) {
+                            return '<span class="badge bg-success">0 hari</span>';
+                        }
+                        
+                        // Hitung hari keterlambatan dari tanggal jatuh tempo
+                        $telatHari = $today->diffInDays($jatuhTempo);
+                    }
+                    
+                    $badgeClass = $telatHari > 0 ? 'danger' : 'success';
+                    return '<span class="badge bg-' . $badgeClass . '">' . $telatHari . ' hari</span>';
+                })
+                ->html()
+                ->sortable(),
         ];
     }
 }

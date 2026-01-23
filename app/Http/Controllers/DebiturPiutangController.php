@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\BuktiPeminjaman;
 use App\Models\HistoryStatusPengajuanPinjaman;
 use App\Models\PengajuanPeminjaman;
+use App\Services\ArPerbulanService;
 use App\Services\DebiturPiutangService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 class DebiturPiutangController extends Controller
 {
     public function __construct(
-        private readonly DebiturPiutangService $service
+        private readonly DebiturPiutangService $service,
+        private readonly ArPerbulanService $arPerbulanService
     ) {}
 
     public function getHistoriPembayaran(Request $request): JsonResponse
@@ -123,11 +126,14 @@ class DebiturPiutangController extends Controller
                     ->update(['sisa_bagi_hasil' => $validated['kurang_bayar_bagi_hasil']]);
             }
 
+            $bulanSekarang = Carbon::now()->format('Y-m');
+            $this->arPerbulanService->updateOrCreateAR($pengajuan->id_debitur, $bulanSekarang);
+
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data berhasil diperbarui dan semua record terkait telah di-recalculate',
+                'message' => 'Data berhasil diperbarui dan AR Perbulan telah di-update',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

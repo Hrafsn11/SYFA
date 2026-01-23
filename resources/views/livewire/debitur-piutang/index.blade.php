@@ -19,18 +19,7 @@
 
     <div class="card">
         <div class="card-datatable table-responsive">
-            <div style="overflow-x: auto; white-space: nowrap;">
-
-                <div class="table-container"
-                    style="display: inline-block; vertical-align: top; margin-right: 20px; min-width: 1200px; white-space: normal;">
-                    <livewire:debitur-piutang-sfinance />
-                </div>
-
-                <div class="table-container" style="display: inline-block; vertical-align: top;">
-                    <livewire:debitur-piutang-table3 />
-                </div>
-
-            </div>
+            <livewire:debitur-piutang-sfinance />
         </div>
     </div>
 

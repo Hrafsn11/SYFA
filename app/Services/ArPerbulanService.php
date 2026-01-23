@@ -40,11 +40,11 @@ class ArPerbulanService
             $status = $this->determineStatus($sisaArTotal);
 
             $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth();
+            
             $jumlahPinjaman = PengajuanPeminjaman::where('pengajuan_peminjaman.id_debitur', $id_debitur)
                 ->where('pengajuan_peminjaman.status', 'Dana Sudah Dicairkan')
                 ->join('history_status_pengajuan_pinjaman', function($join) use ($endOfMonth) {
                     $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'history_status_pengajuan_pinjaman.id_pengajuan_peminjaman')
-                        ->whereIn('history_status_pengajuan_pinjaman.current_step', [3, 4, 6])
                         ->whereNotNull('history_status_pengajuan_pinjaman.tanggal_pencairan')
                         ->whereDate('history_status_pengajuan_pinjaman.tanggal_pencairan', '<=', $endOfMonth);
                 })
@@ -102,7 +102,6 @@ class ArPerbulanService
             ->where('pengajuan_peminjaman.status', 'Dana Sudah Dicairkan')
             ->join('history_status_pengajuan_pinjaman', function($join) use ($endOfMonth) {
                 $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'history_status_pengajuan_pinjaman.id_pengajuan_peminjaman')
-                    ->whereIn('history_status_pengajuan_pinjaman.current_step', [3, 4, 6])
                     ->whereNotNull('history_status_pengajuan_pinjaman.tanggal_pencairan')
                     ->whereDate('history_status_pengajuan_pinjaman.tanggal_pencairan', '<=', $endOfMonth);
             })

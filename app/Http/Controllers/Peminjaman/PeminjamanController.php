@@ -1447,14 +1447,30 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Dana Sudah Dicairkan') {
                 $historyData['approve_by'] = auth()->id();
                 $historyData['current_step'] = 9;
+                
+                // Ambil tanggal pencairan dari history sebelumnya
+                $existingHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)
+                    ->whereNotNull('tanggal_pencairan')
+                    ->latest()
+                    ->first();
+                $tanggalPencairan = $existingHistory?->tanggal_pencairan ?? now()->format('Y-m-d');
+                $historyData['tanggal_pencairan'] = $tanggalPencairan;
+                
+                // Set tanggal_jatuh_tempo (30 hari dari tanggal pencairan) dan inisialisasi sisa bayar
+                $peminjaman->tanggal_jatuh_tempo = Carbon::parse($tanggalPencairan)->addDays(30);
+                $peminjaman->sisa_bayar_pokok = $peminjaman->total_pinjaman;
+                $peminjaman->sisa_bagi_hasil = $peminjaman->total_bagi_hasil;
+                $peminjaman->save();
+            }
 
+            HistoryStatusPengajuanPinjaman::create($historyData);
+           
+            if ($status === 'Dana Sudah Dicairkan') {
                 app(ArPerbulanService::class)->updateAROnPencairan(
                     $peminjaman->id_debitur,
                     now()
                 );
             }
-
-            HistoryStatusPengajuanPinjaman::create($historyData);
 
             $history = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)->where('nominal_yang_disetujui', '!=', null)->latest()->first();
             $nominalDisetujui = $historyData['nominal_yang_disetujui'] ?? ($history ? $history->nominal_yang_disetujui : 0);

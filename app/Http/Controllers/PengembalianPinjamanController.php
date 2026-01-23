@@ -152,16 +152,22 @@ class PengembalianPinjamanController extends Controller
                     'status'                  => $this->determineStatus($validated['sisa_utang'], $validated['sisa_bagi_hasil']),
                 ]);
 
-                // 3. Process Invoices & Reports
+                // 3. Update sisa bayar di pengajuan_peminjaman
+                $pengajuan->update([
+                    'sisa_bayar_pokok'  => $validated['sisa_utang'],
+                    'sisa_bagi_hasil'   => $validated['sisa_bagi_hasil'],
+                ]);
+
+                // 4. Process Invoices & Reports
                 $this->processInvoices($pengembalian, $pengembalianInvoices, $validated, $pengajuan);
 
-                // 4. Update AR
+                // 5. Update AR
                 app(ArPerbulanService::class)->updateAROnPengembalian($validated['kode_peminjaman'], now());
 
-                // 5. Load relasi untuk notifikasi
+                // 6. Load relasi untuk notifikasi
                 $pengembalian->load('pengembalianInvoices');
 
-                // 6. Kirim notifikasi saat debitur melakukan pengembalian dana
+                // 7. Kirim notifikasi saat debitur melakukan pengembalian dana
                 ListNotifSFinance::pengembalianDana($pengembalian);
 
                 return Response::success([
@@ -267,9 +273,8 @@ class PengembalianPinjamanController extends Controller
             return null;
         }
 
-        // Ambil tanggal pencairan dari history step 7 (Upload Dokumen Transfer)
+        // Ambil tanggal pencairan dari history yang memiliki tanggal_pencairan (terbaru)
         $historyPencairan = \App\Models\HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
-            ->where('current_step', 7)
             ->whereNotNull('tanggal_pencairan')
             ->orderBy('created_at', 'desc')
             ->first();
@@ -346,6 +351,15 @@ class PengembalianPinjamanController extends Controller
                 'catatan' => $validated['catatan'] ?? null,
                 'status' => $status,
             ]);
+
+            // Update sisa bayar di pengajuan_peminjaman
+            $pengajuan = PengajuanPeminjaman::find($pengembalian->id_pengajuan_peminjaman);
+            if ($pengajuan) {
+                $pengajuan->update([
+                    'sisa_bayar_pokok'  => $validated['sisa_utang'],
+                    'sisa_bagi_hasil'   => $validated['sisa_bagi_hasil'],
+                ]);
+            }
 
             DB::commit();
 

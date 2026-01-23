@@ -79,6 +79,7 @@ class Create extends Component
     public $totalBagiHasilDisesuaikan = 0; // Total bagi hasil setelah penyesuaian
     public $selectedDueDate = null;        // Due Date tannggal keterlambaran
     public $isLate = false;                // Flag apakah terlambat
+    public $tanggal_jatuh_tempo = null;    // Tanggal jatuh tempo dari pengajuan_peminjaman
 
     protected $listeners = ['refreshData' => '$refresh'];
 
@@ -156,13 +157,13 @@ class Create extends Component
         $this->jenisPembiayaan = $pengajuan->jenis_pembiayaan;
         $this->tenorPembayaran = $pengajuan->tenor_pembayaran;
         $this->yangHarusDibayarkanPerBulan = $pengajuan->yang_harus_dibayarkan;
+        $this->tanggal_jatuh_tempo = $pengajuan->tanggal_jatuh_tempo;
 
         // Reset late payment fields
         $this->resetLatePaymentFields();
 
-        // Ambil tanggal pencairan dari history step 7 (Upload Dokumen Transfer)
+        // Ambil tanggal pencairan dari history yang memiliki tanggal_pencairan (terbaru)
         $historyPencairan = $pengajuan->historyStatus()
-            ->where('current_step', 7)
             ->whereNotNull('tanggal_pencairan')
             ->orderBy('created_at', 'desc')
             ->first();
@@ -433,5 +434,6 @@ class Create extends Component
         $this->totalBagiHasilDisesuaikan = 0;
         $this->selectedDueDate = null;
         $this->isLate = false;
+        $this->tanggal_jatuh_tempo = null;
     }
 }

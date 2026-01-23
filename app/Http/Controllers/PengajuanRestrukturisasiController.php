@@ -303,10 +303,9 @@ class PengajuanRestrukturisasiController extends Controller
             ];
         }
 
-        // Fallback: Jika belum ada pengembalian, ambil dari tanggal pencairan awal (step 7)
+        // Fallback: Jika belum ada pengembalian, ambil dari tanggal pencairan (terbaru)
         $history = DB::table('history_status_pengajuan_pinjaman')
             ->where('id_pengajuan_peminjaman', $idPengajuanPeminjaman)
-            ->where('current_step', 7)
             ->whereNotNull('tanggal_pencairan')
             ->orderBy('created_at', 'desc')
             ->first();
