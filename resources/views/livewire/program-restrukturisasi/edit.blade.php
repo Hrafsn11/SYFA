@@ -5,10 +5,39 @@
             <p class="text-muted">
                 {{ $pageSubtitle ?? 'Kelola program restrukturisasi berdasarkan pengajuan yang telah disetujui' }}</p>
         </div>
-        <a href="{{ route('program-restrukturisasi.index') }}" class="btn btn-outline-primary">
-            <i class="ti ti-arrow-left me-1"></i>Kembali
-        </a>
+        <div class="d-flex gap-2">
+            @if(isset($program) && is_null($program->kontrak_generated_at))
+                @can('program_restrukturisasi.generate_kontrak')
+                    <a href="{{ route('program-restrukturisasi.generate-kontrak', $program->id_program_restrukturisasi) }}" 
+                        class="btn btn-success">
+                        <i class="ti ti-file-check me-1"></i>Generate Kontrak
+                    </a>
+                @endcan
+            @endif
+            <a href="{{ route('program-restrukturisasi.index') }}" class="btn btn-outline-primary">
+                <i class="ti ti-arrow-left me-1"></i>Kembali
+            </a>
+        </div>
     </div>
+
+    {{-- Alert jika kontrak belum di-generate --}}
+    @if(isset($program) && is_null($program->kontrak_generated_at))
+        <div class="alert alert-warning mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="ti ti-alert-triangle me-2" style="font-size: 1.5rem;"></i>
+                <div>
+                    <h6 class="alert-heading mb-1">Kontrak Belum Di-generate</h6>
+                    <p class="mb-0">
+                        <strong>Fitur pembayaran cicilan dinonaktifkan.</strong> 
+                        Silakan generate kontrak terlebih dahulu untuk mengaktifkan fitur pembayaran cicilan.
+                        <a href="{{ route('program-restrukturisasi.generate-kontrak', $program->id_program_restrukturisasi) }}" class="alert-link">
+                            Klik di sini untuk generate kontrak →
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="card">
         <div class="card-body">
@@ -327,10 +356,11 @@
                                                     {{-- Kolom Aksi --}}
                                                     <td class="text-center">
                                                         @php
-                                                            // Cek apakah bisa upload (angsuran sebelumnya sudah lunas)
-                                                            $canUpload = true;
+                                                            $isKontrakGenerated = isset($program) && !is_null($program->kontrak_generated_at);
+                                                            
+                                                            $canUpload = $isKontrakGenerated;
                                                             $previousNo = null;
-                                                            if ($item['no'] > 1) {
+                                                            if ($canUpload && $item['no'] > 1) {
                                                                 $previousIndex = $index - 1;
                                                                 if (isset($jadwal_angsuran[$previousIndex])) {
                                                                     $previous = $jadwal_angsuran[$previousIndex];
@@ -364,7 +394,11 @@
                                                                     </button>
                                                                     @if (!$canUpload)
                                                                         <small class="text-danger d-block mt-1">
-                                                                            Bayar bulan {{ $previousNo }} dulu
+                                                                            @if(!$isKontrakGenerated)
+                                                                                Generate kontrak dulu
+                                                                            @elseif($previousNo)
+                                                                                Bayar bulan {{ $previousNo }} dulu
+                                                                            @endif
                                                                         </small>
                                                                     @endif
                                                                 </div>
@@ -513,10 +547,11 @@
                                                             </div>
                                                         @else
                                                             @php
-                                                                // Cek apakah bisa upload (angsuran sebelumnya sudah lunas)
-                                                                $canUpload = true;
+                                                                $isKontrakGenerated = isset($program) && !is_null($program->kontrak_generated_at);
+                                                                
+                                                                $canUpload = $isKontrakGenerated;
                                                                 $previousNo = null;
-                                                                if ($item['no'] > 1) {
+                                                                if ($canUpload && $item['no'] > 1) {
                                                                     $previousIndex = $index - 1;
                                                                     if (isset($jadwal_angsuran[$previousIndex])) {
                                                                         $previous = $jadwal_angsuran[$previousIndex];
@@ -541,8 +576,12 @@
                                                                 </button>
                                                                 @if (!$canUpload)
                                                                     <small class="text-danger d-block mt-1">
-                                                                        Bayar angsuran bulan {{ $previousNo }}
-                                                                        terlebih dahulu
+                                                                        @if(!$isKontrakGenerated)
+                                                                            Generate kontrak dulu
+                                                                        @elseif($previousNo)
+                                                                            Bayar angsuran bulan {{ $previousNo }}
+                                                                            terlebih dahulu
+                                                                        @endif
                                                                     </small>
                                                                 @endif
                                                             </div>

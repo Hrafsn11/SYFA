@@ -45,6 +45,12 @@ class CellsProjectRequest extends FormRequest
                 'string',
                 'max:255'
             ],
+            'tanda_tangan_pic' => [
+                'nullable',
+            ],
+            'profile_pict' => [
+                'nullable',
+            ],
         ];
 
         if ($this->id_cells_project) {
@@ -82,8 +88,14 @@ class CellsProjectRequest extends FormRequest
             $validate['tanda_tangan_pic'] = [
                 'nullable', // Validation image dilakukan di Livewire sebelum convert ke path
             ];
+            $validate['profile_pict'] = [
+                'nullable', // Validation image dilakukan di Livewire sebelum convert ke path
+            ];
         } else {
             $validate['tanda_tangan_pic'] = [
+                'nullable',
+            ];
+            $validate['profile_pict'] = [
                 'nullable',
             ];
         }

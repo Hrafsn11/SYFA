@@ -333,7 +333,8 @@ class Create extends Component
                 }
 
                 $sisaPokok -= $pokok;
-                if ($sisaPokok < 0) $sisaPokok = 0;
+                if ($sisaPokok < 0)
+                    $sisaPokok = 0;
             }
 
             $totalPokok += $pokok;
@@ -365,7 +366,7 @@ class Create extends Component
         $totalPokok = $this->nominal_yg_disetujui;
         $bulan = $this->jangka_waktu_total;
 
-        $cicilan = $totalPokok/$bulan;
+        $cicilan = $totalPokok / $bulan;
 
         $jadwal = [];
         $totalMargin = 0;
@@ -493,6 +494,7 @@ class Create extends Component
                     'total_pokok' => (float) $this->total_pokok,
                     'total_margin' => (float) $this->total_margin,
                     'total_cicilan' => (float) $this->total_cicilan,
+                    'status' => 'Menunggu Generate Kontrak',
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ];
@@ -507,6 +509,7 @@ class Create extends Component
                     'total_pokok' => (float) $this->total_pokok,
                     'total_margin' => (float) $this->total_margin,
                     'total_cicilan' => (float) $this->total_cicilan,
+                    'status' => 'Menunggu Generate Kontrak',
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ];
@@ -547,8 +550,8 @@ class Create extends Component
             $this->dispatch('swal:modal', [
                 'type' => 'success',
                 'title' => 'Berhasil',
-                'text' => 'Program restrukturisasi berhasil disimpan!',
-                'redirect_url' => route('program-restrukturisasi.index')
+                'text' => 'Program restrukturisasi berhasil disimpan! Silakan lanjutkan untuk generate kontrak.',
+                'redirect_url' => route('program-restrukturisasi.generate-kontrak', $program->id_program_restrukturisasi)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

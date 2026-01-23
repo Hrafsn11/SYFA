@@ -125,6 +125,7 @@ class Table extends DataTableComponent
             SelectFilter::make('Status')
                 ->options([
                     '' => 'Semua Status',
+                    'Menunggu Generate Kontrak' => 'Menunggu Generate Kontrak',
                     'Berjalan' => 'Berjalan',
                     'Lunas' => 'Lunas',
                     'Tertunda' => 'Tertunda',
@@ -180,10 +181,12 @@ class Table extends DataTableComponent
 
             Column::make('Status', 'status')
                 ->label(function ($row) {
-                    $status = $row->status ?? 'Berjalan';
+                    $status = $row->status ?? 'Menunggu Generate Kontrak';
                     $badgeClass = match ($status) {
-                        'Lunas' => 'bg-success',
-                        'Tertunda' => 'bg-warning',
+                        'Berjalan' => 'bg-success',
+                        'Menunggu Generate Kontrak' => 'bg-warning',
+                        'Lunas' => 'bg-primary',
+                        'Tertunda' => 'bg-danger',
                         default => 'bg-secondary',
                     };
                     return '<span class="badge ' . $badgeClass . '">' . $status . '</span>';
@@ -198,11 +201,20 @@ class Table extends DataTableComponent
             Column::make('Aksi')
                 ->label(function ($row) {
                     $detailUrl = route('program-restrukturisasi.show', $row->id_program_restrukturisasi);
-                    $editUrl   = auth()->user()->can('program_restrukturisasi.edit')
-                        ? route('program-restrukturisasi.edit', $row->id_program_restrukturisasi)
-                        : null;
 
-                    return view('components.table-actions', compact('detailUrl', 'editUrl'));
+                    // Edit hanya bisa jika kontrak sudah di-generate
+                    $editUrl = null;
+                    if (!is_null($row->kontrak_generated_at) && auth()->user()->can('program_restrukturisasi.edit')) {
+                        $editUrl = route('program-restrukturisasi.edit', $row->id_program_restrukturisasi);
+                    }
+
+                    // Tambah tombol Generate Kontrak jika kontrak belum di-generate
+                    $generateKontrakUrl = null;
+                    if (is_null($row->kontrak_generated_at) && auth()->user()->can('program_restrukturisasi.generate_kontrak')) {
+                        $generateKontrakUrl = route('program-restrukturisasi.generate-kontrak', $row->id_program_restrukturisasi);
+                    }
+
+                    return view('components.table-actions', compact('detailUrl', 'editUrl', 'generateKontrakUrl'));
                 })
                 ->html()
                 ->excludeFromColumnSelect(),

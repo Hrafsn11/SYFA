@@ -6,7 +6,7 @@ use App\Livewire\DashboardPembiayaanSfinance;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\DebiturPiutangController;
-use App\Http\Controllers\KertasKerjaInvestorSFinanceController;
+use App\Livewire\KertasKerjaInvestorSFinance;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
@@ -132,7 +132,7 @@ Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(functi
 });
 
 // Kertas Kerja Investor
-Route::get('kertas-kerja-investor-sfinance', [KertasKerjaInvestorSFinanceController::class, 'index'])->name('kertas-kerja-investor-sfinance.index');
+Route::get('kertas-kerja-investor-sfinance', KertasKerjaInvestorSFinance::class)->name('kertas-kerja-investor-sfinance.index');
 
 // Pengembalian Investasi sfinance
 Route::get('pengembalian-investasi', PengembalianInvestasi::class)->name('pengembalian-investasi.index');

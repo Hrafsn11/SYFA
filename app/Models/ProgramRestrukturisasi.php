@@ -18,6 +18,7 @@ class ProgramRestrukturisasi extends Model
 
     protected $fillable = [
         'id_pengajuan_restrukturisasi',
+        'nomor_kontrak_restrukturisasi',
         'metode_perhitungan',
         'plafon_pembiayaan',
         'suku_bunga_per_tahun',
@@ -29,6 +30,8 @@ class ProgramRestrukturisasi extends Model
         'total_margin',
         'total_cicilan',
         'total_terbayar',
+        'jaminan',
+        'kontrak_generated_at',
         'status',
         'created_by',
         'updated_by',
@@ -46,6 +49,7 @@ class ProgramRestrukturisasi extends Model
         'tanggal_mulai_cicilan' => 'date',
         'jangka_waktu_total' => 'integer',
         'masa_tenggang' => 'integer',
+        'kontrak_generated_at' => 'datetime',
     ];
 
     // Relationships

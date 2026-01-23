@@ -53,7 +53,7 @@
                             <input type="text" class="form-control" value="{{ $lama_investasi ?? 0 }} Bulan" readonly>
                         </div>
                         @php
-                            $sisaBagiHasilInfo = max(0, ($bagi_hasil_total ?? 0) - ($total_bagi_hasil_dikembalikan ?? 0));
+                            $sisaBagiHasilInfo = $sisa_bagi_hasil_db ?? 0;
                         @endphp
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Sisa Bagi Hasil</label>
@@ -146,7 +146,7 @@
                         @endif
 
                         @php
-                            $sisaBagiHasil = $sisaBagiHasilInfo ?? 0;
+                            $sisaBagiHasil = $sisa_bagi_hasil_db ?? 0;
                             $canPayBagiHasil = $sisaBagiHasil > 0 && ($bisa_bayar_bagi_hasil ?? false);
                         @endphp
                         <div class="col-md-6 mb-3 form-group">
@@ -175,7 +175,7 @@
                         </div>
 
                         @php
-                            $sisaPokokInfo = max(0, ($nominal_investasi ?? 0) - ($total_pokok_dikembalikan ?? 0));
+                            $sisaPokokInfo = $sisa_pokok_db ?? 0;
                             $canPayPokok = ($bisa_bayar_pokok ?? false) && $sisaPokokInfo > 0;
                         @endphp
 

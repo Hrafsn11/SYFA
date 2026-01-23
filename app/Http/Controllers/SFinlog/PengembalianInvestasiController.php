@@ -48,8 +48,10 @@ class PengembalianInvestasiController extends Controller
             // Load relasi untuk notifikasi
             $pengembalian->load('pengajuan.investor');
 
-            // Untuk sementara: belum ada kolom sisa_pokok / sisa_bagi_hasil di tabel finlog,
-            // jadi di sini belum ada update ke pengajuan_investasi_finlog.
+            // Update sisa_pokok dan sisa_bagi_hasil di pengajuan investasi
+            $pengajuan->sisa_pokok = max(0, $pengajuan->sisa_pokok - ($validated['dana_pokok_dibayar'] ?? 0));
+            $pengajuan->sisa_bagi_hasil = max(0, $pengajuan->sisa_bagi_hasil - ($validated['bagi_hasil_dibayar'] ?? 0));
+            $pengajuan->save();
 
             DB::commit();
 

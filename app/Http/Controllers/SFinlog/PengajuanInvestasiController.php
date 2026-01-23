@@ -401,11 +401,15 @@ class PengajuanInvestasiController extends Controller
             );
 
             // Update pengajuan investasi dengan nomor kontrak DAN nama_pic_kontrak
+            $bagiHasilPerNominal = ($investasi->persentase_bagi_hasil * $investasi->nominal_investasi / 100 / 12) * $investasi->lama_investasi;
+
             $investasi->update([
                 'nomor_kontrak' => $nomorKontrak,
                 'nama_pic_kontrak' => $request->nama_pic_kontrak,
                 'status' => 'Selesai',
                 'current_step' => 6,
+                'sisa_pokok' => $investasi->nominal_investasi,
+                'sisa_bagi_hasil' => $bagiHasilPerNominal,
                 'updated_by' => Auth::id(),
             ]);
 

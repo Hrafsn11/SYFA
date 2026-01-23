@@ -61,12 +61,18 @@
     @elseif($currentStep == 6 && !$peminjaman->nomor_kontrak)
         <form id="formGenerateKontrak">
             <div class="row g-3">
-                <!-- Nomor Kontrak -->
+                <!-- Nomor Kontrak (Auto Generate) -->
                 <div class="col-12">
-                    <label for="nomor_kontrak" class="form-label">Nomor Kontrak <span
-                            class="text-danger">*</span></label>
-                    <input type="text" id="nomor_kontrak" name="nomor_kontrak" class="form-control"
-                        placeholder="Masukkan nomor kontrak">
+                    <label class="form-label">Nomor Kontrak</label>
+                    @php
+                        $today = now();
+                        $previewNomor = 'FINLOG##' . $today->format('m') . $today->format('d') . $today->format('y');
+                    @endphp
+
+                    <input type="text" class="form-control bg-light" value="{{ $previewNomor }}" readonly>
+
+                    <small class="text-muted">Nomor kontrak akan di-generate otomatis saat tombol "Generate Kontrak"
+                        diklik</small>
                 </div>
 
                 <!-- Jenis Pembiayaan -->

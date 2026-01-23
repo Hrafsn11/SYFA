@@ -37,6 +37,8 @@ class PengajuanInvestasiFinlog extends Model
         'nominal_investasi',
         'persentase_bagi_hasil',
         'nominal_bagi_hasil_yang_didapat',
+        'sisa_pokok',
+        'sisa_bagi_hasil',
         'upload_bukti_transfer',
         'nomor_kontrak',
         'nama_pic_kontrak',
@@ -55,6 +57,8 @@ class PengajuanInvestasiFinlog extends Model
         'nominal_investasi' => 'decimal:2',
         'persentase_bagi_hasil' => 'decimal:2',
         'nominal_bagi_hasil_yang_didapat' => 'decimal:2',
+        'sisa_pokok' => 'decimal:2',
+        'sisa_bagi_hasil' => 'decimal:2',
         'lama_investasi' => 'integer',
         'current_step' => 'integer',
     ];

@@ -73,6 +73,9 @@ class PeminjamanController extends Controller
             }
 
             $data['nomor_peminjaman'] = "PMJ-{$yearMonth}-SLOG-{$runningText}";
+            $data['tgl_pengajuan'] = now();
+            $data['status'] = 'Draft';
+            $data['current_step'] = 1;
 
             $peminjaman = PeminjamanFinlog::create($data);
 

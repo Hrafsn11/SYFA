@@ -105,7 +105,7 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
                 return PeminjamanFinlog::query()->whereRaw('1 = 0');
             }
 
-            $query->where('id_debitur', $debitur->id_debitur);
+            $query->where('peminjaman_finlog.id_debitur', $debitur->id_debitur);
         }
 
         return $query;

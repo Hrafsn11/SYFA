@@ -62,7 +62,7 @@
                         @enderror
                     </div>
 
-                                        <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="durasi_project" class="form-label">Durasi Project (Bulan) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project" class="form-control"
@@ -75,7 +75,8 @@
                         <label for="durasi_project_hari" class="form-label">Durasi Project (Hari) <span
                                 class="text-danger">*</span></label>
                         <input type="number" id="durasi_project_hari" class="form-control"
-                            placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" value="0" min="0" required>
+                            placeholder="Masukkan durasi hari" wire:model="durasi_project_hari" value="0" min="0"
+                            required>
                         @error('durasi_project_hari')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
@@ -91,8 +92,8 @@
                         <label for="nilai_pinjaman" class="form-label">Nilai Pinjaman <span
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
-                            <input type="text" id="nilai_pinjaman" class="form-control input-rupiah"
-                                placeholder="Rp 0" required>
+                            <input type="text" id="nilai_pinjaman" class="form-control input-rupiah" placeholder="Rp 0"
+                                required>
                         </div>
                         @error('nilai_pinjaman')
                             <span class="text-danger">{{ $message }}</span>
@@ -129,8 +130,8 @@
                         <label for="total_pinjaman" class="form-label">Total Pinjaman <span
                                 class="text-danger">*</span></label>
                         <div wire:ignore>
-                            <input type="text" id="total_pinjaman" class="form-control input-rupiah"
-                                placeholder="Rp 0" readonly disabled>
+                            <input type="text" id="total_pinjaman" class="form-control input-rupiah" placeholder="Rp 0"
+                                readonly disabled>
                         </div>
                         @error('total_pinjaman')
                             <span class="text-danger">{{ $message }}</span>
@@ -171,8 +172,8 @@
                             <span class="text-danger">*</span></label>
                         <div class="input-group" wire:ignore>
                             <input type="text" class="form-control bs-datepicker" placeholder="yyyy-mm-dd"
-                                id="rencana_tanggal_pengembalian" name="rencana_tanggal_pengembalian" disabled
-                                required wire:model.blur="rencana_tgl_pengembalian" />
+                                id="rencana_tanggal_pengembalian" name="rencana_tanggal_pengembalian" disabled required
+                                wire:model.blur="rencana_tgl_pengembalian" />
                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                         </div>
                         @error('rencana_tgl_pengembalian')
@@ -186,21 +187,21 @@
                 <!-- Dokumen Persyaratan -->
                 <h5 class="mb-3">Dokumen Persyaratan</h5>
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="nib_perusahaan" class="form-label">NIB Perusahaan <span
                                 class="text-danger">*</span></label>
-                        <input type="file" id="nib_perusahaan" class="form-control" 
-                            wire:model.blur="nib_perusahaan" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <input type="file" id="nib_perusahaan" class="form-control" wire:model.blur="nib_perusahaan"
+                            accept=".pdf,.jpg,.jpeg,.png" required>
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
                         @error('nib_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
                         @enderror
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="dokumen_mitra" class="form-label">Company profile</label>
-                        <input type="file" id="dokumen_mitra" class="form-control"
-                            wire:model.blur="dokumen_mitra" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                        <input type="file" id="dokumen_mitra" class="form-control" wire:model.blur="dokumen_mitra"
+                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
                         @error('dokumen_mitra')
                             <span class="text-danger">{{ $message }}</span>
@@ -210,7 +211,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="form_new_customer" class="form-label">Form New Customer</label>
                         <input type="file" id="form_new_customer" class="form-control"
-                            wire:model.blur="form_new_customer" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+                            wire:model.blur="form_new_customer" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, DOC, DOCX, JPG, PNG (Max: 2MB)</small>
                         @error('form_new_customer')
                             <span class="text-danger">{{ $message }}</span>
@@ -218,8 +219,8 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="dokumen_kerja_sama" class="form-label">Dokumen kerja sama (Kontrak/PO/Invoice/PKS) <span
-                                class="text-danger">*</span></label>
+                        <label for="dokumen_kerja_sama" class="form-label">Dokumen kerja sama (Kontrak/PO/Invoice/PKS)
+                            <span class="text-danger">*</span></label>
                         <input type="file" id="dokumen_kerja_sama" class="form-control"
                             wire:model.blur="dokumen_kerja_sama" accept=".pdf,.doc,.docx" required>
                         <small class="text-muted">Format: PDF, DOC, DOCX (Max: 2MB)</small>
@@ -241,8 +242,8 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="akta_perusahaan" class="form-label">Akta Perusahaan</label>
-                        <input type="file" id="akta_perusahaan" class="form-control"
-                            wire:model.blur="akta_perusahaan" accept=".pdf,.jpg,.jpeg,.png">
+                        <input type="file" id="akta_perusahaan" class="form-control" wire:model.blur="akta_perusahaan"
+                            accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
                         @error('akta_perusahaan')
                             <span class="text-danger">{{ $message }}</span>
@@ -271,8 +272,8 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="surat_izin_usaha" class="form-label">Surat Izin Lokasi Usaha</label>
-                        <input type="file" id="surat_izin_usaha" class="form-control"
-                            wire:model.blur="surat_izin_usaha" accept=".pdf,.jpg,.jpeg,.png">
+                        <input type="file" id="surat_izin_usaha" class="form-control" wire:model.blur="surat_izin_usaha"
+                            accept=".pdf,.jpg,.jpeg,.png">
                         <small class="text-muted">Format: PDF, JPG, PNG (Max: 2MB)</small>
                         @error('surat_izin_usaha')
                             <span class="text-danger">{{ $message }}</span>
@@ -313,7 +314,7 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             let cleaveInstances = {};
             const cleaveConfig = {
                 numeral: true,
@@ -346,10 +347,10 @@
             });
 
             $('#id_cells_project').select2({
-                    placeholder: 'Pilih Cells Bisnis',
-                    allowClear: true
-                })
-                .on('change', async function() {
+                placeholder: 'Pilih Cells Bisnis',
+                allowClear: true
+            })
+                .on('change', async function () {
                     const cellsProjectId = $(this).val();
 
                     // Reset nama_project dropdown
@@ -376,7 +377,7 @@
             $('#nama_project').select2({
                 placeholder: 'Pilih Project',
                 allowClear: true
-            }).on('change', function() {
+            }).on('change', function () {
                 @this.set('nama_project', $(this).val());
             });
 
@@ -393,19 +394,19 @@
                     id: '3',
                     text: '3%'
                 }]
-            }).on('change', function() {
+            }).on('change', function () {
                 @this.set('presentase_bagi_hasil', $(this).val());
             });
 
             // Event handlers
-            $('#harapan_tanggal_pencairan').on('changeDate', function() {
+            $('#harapan_tanggal_pencairan').on('changeDate', function () {
                 @this.set('harapan_tanggal_pencairan', $(this).val());
                 hitungTanggalPengembalian();
             });
-            $('#rencana_tanggal_pengembalian').on('changeDate', function() {
+            $('#rencana_tanggal_pengembalian').on('changeDate', function () {
                 @this.set('rencana_tgl_pengembalian', $(this).val());
             });
-            $('#nilai_pinjaman').on('blur', function() {
+            $('#nilai_pinjaman').on('blur', function () {
                 @this.set('nilai_pinjaman', getCleave('nilai_pinjaman'));
             });
 
@@ -448,7 +449,7 @@
             $('#top').on('input', hitungTanggalPengembalian);
 
             // Form submit
-            $('#formPeminjamanDana').on('submit', function(e) {
+            $('#formPeminjamanDana').on('submit', function (e) {
                 e.preventDefault();
 
                 // Sync all Cleave values before submit
