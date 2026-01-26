@@ -46,7 +46,9 @@ class Select2 extends Component
         if ($this->previousValue !== $value) {
             $this->previousValue = $value;
             $this->skipRender();
+            // Dispatch event - akan ditangkap oleh semua component yang listen
             $this->dispatch('select2-updated', value: $value, modelName: $this->model_name);
+            $this->dispatch('select2-changed', value: $value, modelName: $this->model_name);
         }
     }
 }
