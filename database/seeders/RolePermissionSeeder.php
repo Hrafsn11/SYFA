@@ -150,12 +150,14 @@ class RolePermissionSeeder extends Seeder
             'penyaluran_deposito.add',
             'penyaluran_deposito.edit',
             'penyaluran_deposito.upload_bukti',
+            'penyaluran_deposito.input_pengembalian',
             // Penyaluran Deposito Finlog
             'penyaluran_deposito_finlog.view',
             'penyaluran_deposito_finlog.add',
             'penyaluran_deposito_finlog.edit',
             'penyaluran_deposito_finlog.delete',
             'penyaluran_deposito_finlog.upload_bukti',
+            'penyaluran_deposito_finlog.input_pengembalian',
             // Program Restrukturisasi
             'program_restrukturisasi.view',
             'program_restrukturisasi.add',
@@ -368,6 +370,7 @@ class RolePermissionSeeder extends Seeder
             'penyaluran_deposito.view',
             'penyaluran_deposito.add',
             'penyaluran_deposito.edit',
+            'penyaluran_deposito.input_pengembalian',
 
             'program_restrukturisasi.view',
             'program_restrukturisasi.add',
@@ -382,6 +385,7 @@ class RolePermissionSeeder extends Seeder
             'penyaluran_deposito_finlog.edit',
             'penyaluran_deposito_finlog.delete',
             'penyaluran_deposito_finlog.upload_bukti',
+            'penyaluran_deposito_finlog.input_pengembalian',
 
             // Pengembalian Investasi (Finance SKI can create/edit)
             'pengembalian_investasi.view',

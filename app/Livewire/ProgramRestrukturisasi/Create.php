@@ -626,12 +626,6 @@ class Create extends Component
                     && $this->jangka_waktu_total > 0
                     && !empty($this->tanggal_mulai_cicilan);
             } else {
-                dd(
-                    $this->id_pengajuan_restrukturisasi,
-                    $this->plafon_pembiayaan,
-                    $this->jangka_waktu_total,
-                    $this->nominal_yg_disetujui,
-                );
 
                 return !empty($this->id_pengajuan_restrukturisasi)
                     && $this->plafon_pembiayaan > 0

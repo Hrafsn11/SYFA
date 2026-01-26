@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanInvestasiFinlog;
 use Carbon\Carbon;
 
-class KertasKerjaInvestorSFinlogTable1 extends DataTableComponent
+class KertasKerjaInvestorSfinlogTable1 extends DataTableComponent
 {
     protected $model = PengajuanInvestasiFinlog::class;
 
