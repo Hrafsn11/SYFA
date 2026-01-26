@@ -23,6 +23,7 @@ class ProgramRestrukturisasi extends Model
         'plafon_pembiayaan',
         'suku_bunga_per_tahun',
         'jangka_waktu_total',
+        'nominal_yg_disetujui',
         'masa_tenggang',
         'tanggal_mulai_cicilan',
         'total_pokok',

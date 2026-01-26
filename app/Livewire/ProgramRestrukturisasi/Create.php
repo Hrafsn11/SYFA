@@ -36,6 +36,7 @@ class Create extends Component
     public $jangka_waktu_total = 12;
     public $masa_tenggang = 2;
     public $tanggal_mulai_cicilan;
+    public $nominal_yg_disetujui;
 
     // Calculated data
     public $jadwal_angsuran = [];
@@ -362,7 +363,7 @@ class Create extends Component
     // Khususon Pengurangan tunggakan pokok/margin
     private function calculatePenguranganTunggakanPokok()
     {
-        $totalPokok = $this->plafon_pembiayaan;
+        $totalPokok = $this->nominal_yg_disetujui;
         $bulan = $this->jangka_waktu_total;
 
         $cicilan = $totalPokok / $bulan;
@@ -417,6 +418,7 @@ class Create extends Component
                     "id_pengajuan_restrukturisasi" => "required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi",
                     "plafon_pembiayaan" => "required|numeric|min:0",
                     "jangka_waktu_total" => "required|integer|min:1|max:360",
+                    "nominal_yg_disetujui" => "required|integer|min:1",
                     "jadwal_angsuran" => "required|array|min:1",
                     "jadwal_angsuran.*.no" => "required|integer|min:1",
                     "jadwal_angsuran.*.pokok" => "required|numeric|min:0",
@@ -503,6 +505,7 @@ class Create extends Component
                     'metode_perhitungan' => $metodeValid,
                     'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
                     'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                    'nominal_yg_disetujui' => (double) $this->nominal_yg_disetujui,
                     'total_pokok' => (float) $this->total_pokok,
                     'total_margin' => (float) $this->total_margin,
                     'total_cicilan' => (float) $this->total_cicilan,
@@ -595,10 +598,15 @@ class Create extends Component
         } else {
             $this->validate([
                 'jangka_waktu_total' => 'required|integer|min:1|max:360',
+                'nominal_yg_disetujui' => 'required|integer|min:1|max:' . $this->plafon_pembiayaan,
             ], [
                 'jangka_waktu_total.required' => 'Jangka waktu harus diisi.',
                 'jangka_waktu_total.min' => 'Jangka waktu minimal 1 bulan.',
-                'jangka_waktu_total.max' => 'Jangka waktu maksimal 360 bulan (30 tahun).'
+                'jangka_waktu_total.max' => 'Jangka waktu maksimal 360 bulan (30 tahun).',
+                'nominal_yg_disetujui.required' => 'Nominal yang Disetujui harus diisi.',
+                'nominal_yg_disetujui.integer' => 'Nominal harus angka.',
+                'nominal_yg_disetujui.min' => 'Nominal tidak boleh 0',
+                'nominal_yg_disetujui.max' => 'Nominal tidak boleh lebih dari plafon',
             ]);
         }
     }
@@ -618,9 +626,17 @@ class Create extends Component
                     && $this->jangka_waktu_total > 0
                     && !empty($this->tanggal_mulai_cicilan);
             } else {
+                dd(
+                    $this->id_pengajuan_restrukturisasi,
+                    $this->plafon_pembiayaan,
+                    $this->jangka_waktu_total,
+                    $this->nominal_yg_disetujui,
+                );
+
                 return !empty($this->id_pengajuan_restrukturisasi)
                     && $this->plafon_pembiayaan > 0
-                    && $this->jangka_waktu_total > 0;
+                    && $this->jangka_waktu_total > 0
+                    && $this->nominal_yg_disetujui > 0;
             }
         }
 
