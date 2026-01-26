@@ -4,6 +4,7 @@ namespace App\Livewire\ProgramRestrukturisasi;
 
 use App\Models\ProgramRestrukturisasi;
 use App\Models\JadwalAngsuran;
+use App\Models\RiwayatPembayaranRestrukturisasi;
 use App\Helpers\ListNotifSFinance;
 use App\Models\PengajuanRestrukturisasi;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,7 @@ class Edit extends Create
     private const STATUS_BELUM_JATUH_TEMPO = 'Belum Jatuh Tempo';
     private const STATUS_JATUH_TEMPO = 'Jatuh Tempo';
     private const STATUS_TERTUNDA = 'Tertunda';
+    private const STATUS_DIBAYAR_SEBAGIAN = 'Dibayar Sebagian';
     private const STATUS_LUNAS = 'Lunas';
     private const STATUS_PROGRAM_BERJALAN = 'Berjalan';
 
@@ -36,6 +38,7 @@ class Edit extends Create
     public string $pageSubtitle = 'Perbarui parameter program restrukturisasi';
     public string $submitLabel = 'Perbarui Restrukturisasi';
 
+
     // ==========================================
     // PROPERTIES - Modal Upload
     // ==========================================
@@ -47,6 +50,8 @@ class Edit extends Create
     public $uploadFile = null;
     public $uploadNominalBayar = 0;
     public $isEditingFile = false;
+    public $maxNominalBayar = 0; // Maksimal nominal yang bisa dibayar (sisa pembayaran)
+    public $viewOnlyMode = false; // True = hanya lihat riwayat, False = bisa upload
 
     // ==========================================
     // PROPERTIES - Modal Konfirmasi
@@ -57,6 +62,15 @@ class Edit extends Create
     public $selectedKonfirmasiNo = null;
     public $catatanKonfirmasi = '';
     public $showTolakModal = false;
+
+    // ==========================================
+    // PROPERTIES - Riwayat Pembayaran
+    // ==========================================
+
+    public $riwayatPembayaran = []; // Riwayat pembayaran per angsuran yang dipilih
+    public $selectedRiwayatId = null; // ID riwayat yang akan dikonfirmasi
+    public $selectedRiwayat = null; // Data riwayat yang akan dikonfirmasi
+
 
     // ==========================================
     // LIFECYCLE METHODS
@@ -102,7 +116,8 @@ class Edit extends Create
         $user = Auth::user();
         $isAdmin = $user && $user->hasRole(['super-admin', 'admin', 'sfinance', 'Finance SKI']);
 
-        if ($isAdmin) return;
+        if ($isAdmin)
+            return;
 
         $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
         $pengajuanDebiturId = $this->program->pengajuanRestrukturisasi->id_debitur ?? null;
@@ -143,6 +158,16 @@ class Edit extends Create
         $sisaPokok = $this->plafon_pembiayaan;
 
         return $jadwalCollection->map(function ($item) use (&$sisaPokok) {
+            // Hitung total pembayaran tertunda (belum dikonfirmasi)
+            $totalTertunda = $item->riwayatPembayaran()
+                ->where('status', RiwayatPembayaranRestrukturisasi::STATUS_TERTUNDA)
+                ->sum('nominal_bayar');
+
+            // Hitung jumlah riwayat pembayaran tertunda
+            $jumlahTertunda = $item->riwayatPembayaran()
+                ->where('status', RiwayatPembayaranRestrukturisasi::STATUS_TERTUNDA)
+                ->count();
+
             $data = [
                 'id' => $item->id_jadwal_angsuran,
                 'no' => $item->no,
@@ -157,6 +182,10 @@ class Edit extends Create
                 'bukti_pembayaran' => $item->bukti_pembayaran,
                 'tanggal_bayar' => $item->tanggal_bayar ? optional($item->tanggal_bayar)->format('Y-m-d') : null,
                 'nominal_bayar' => (float) $item->nominal_bayar,
+                'total_terbayar' => (float) $item->total_terbayar,
+                'sisa_pembayaran' => max(0, (float) $item->total_cicilan - (float) $item->total_terbayar),
+                'total_tertunda' => (float) $totalTertunda,
+                'jumlah_tertunda' => $jumlahTertunda,
             ];
 
             if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
@@ -284,37 +313,38 @@ class Edit extends Create
         $metodeValid = null;
 
         if (!$khususPenguranganTunggakanPokok) {
-                $metodeValid = trim($this->metode_perhitungan);
-                if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
-                    throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
-                }
-
-                $fill = [
-                    'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
-                    'metode_perhitungan' => $metodeValid,
-                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
-                    'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
-                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
-                    'masa_tenggang' => (int) $this->masa_tenggang,
-                    'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
-                    'total_pokok' => (float) $this->total_pokok,
-                    'total_margin' => (float) $this->total_margin,
-                    'total_cicilan' => (float) $this->total_cicilan,
-                    'updated_by' => Auth::id(),
-                ];
-            } else {
-                $fill = [
-                    'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
-                    'metode_perhitungan' => $metodeValid,
-                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
-                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
-                    'nominal_yg_disetujui' => (double) $this->nominal_yg_disetujui,
-                    'total_pokok' => (float) $this->total_pokok,
-                    'total_margin' => (float) $this->total_margin,
-                    'total_cicilan' => (float) $this->total_cicilan,
-                    'updated_by' => Auth::id(),
-                ];
+            $metodeValid = trim($this->metode_perhitungan);
+            if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
+                throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
             }
+
+            $fill = [
+                'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
+                'metode_perhitungan' => $metodeValid,
+                'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                'suku_bunga_per_tahun' => (float) $this->suku_bunga_per_tahun,
+                'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                'masa_tenggang' => (int) $this->masa_tenggang,
+                'tanggal_mulai_cicilan' => $this->tanggal_mulai_cicilan,
+                'total_pokok' => (float) $this->total_pokok,
+                'total_margin' => (float) $this->total_margin,
+                'total_cicilan' => (float) $this->total_cicilan,
+                'updated_by' => Auth::id(),
+            ];
+        } else {
+            // Kasus khusus: Pengurangan tunggakan pokok/margin
+            $fill = [
+                'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
+                'metode_perhitungan' => $metodeValid,
+                'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
+                'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                'nominal_yg_disetujui' => (double) $this->nominal_yg_disetujui,
+                'total_pokok' => (float) $this->total_pokok,
+                'total_margin' => (float) $this->total_margin,
+                'total_cicilan' => (float) $this->total_cicilan,
+                'updated_by' => Auth::id(),
+            ];
+        }
 
         $this->program->update($fill);
     }
@@ -359,7 +389,7 @@ class Edit extends Create
                     'no' => $no,
                     'pokok' => $item['pokok'],
                     'margin' => 0,
-                    'total_cicilan' =>  $item['pokok'],
+                    'total_cicilan' => $item['pokok'],
                     'status' => $existingData ? $existingData['status'] : ($item['status'] ?? self::STATUS_BELUM_JATUH_TEMPO),
                     // Preserve bukti pembayaran jika ada
                     'bukti_pembayaran' => $existingData ? $existingData['bukti_pembayaran'] : null,
@@ -374,24 +404,59 @@ class Edit extends Create
     // MODAL UPLOAD BUKTI
     // ==========================================
 
-    public function openUploadModal(int $index): void
+    public function openUploadModal(int $index, bool $viewOnly = false): void
     {
-        if (!$this->validateAngsuranExists($index)) return;
+        if (!$this->validateAngsuranExists($index))
+            return;
 
         $angsuran = $this->jadwal_angsuran[$index];
 
-        if (!$this->validatePembayaranBerurutan($angsuran, $index)) return;
+        // Hitung sisa pembayaran yang bisa dibayar
+        $sisaPembayaran = $angsuran['sisa_pembayaran'] ?? ($angsuran['total_cicilan'] - ($angsuran['total_terbayar'] ?? 0));
 
-        $this->isEditingFile = !empty($angsuran['bukti_pembayaran']);
+        // Set view only mode
+        $this->viewOnlyMode = $viewOnly;
+
+        // Jika mode upload (bukan view only) dan belum lunas, validasi pembayaran berurutan
+        if (!$viewOnly && $sisaPembayaran > 0) {
+            if (!$this->validatePembayaranBerurutan($angsuran, $index))
+                return;
+        }
+
+        $this->isEditingFile = false; // Selalu false karena sekarang pakai riwayat
         $this->selectedAngsuranIndex = $index;
         $this->selectedAngsuranNo = $angsuran['no'];
         $this->uploadFile = null;
-        $this->uploadNominalBayar = (int) round($this->isEditingFile
-            ? ($angsuran['nominal_bayar'] ?? $angsuran['total_cicilan'])
-            : $angsuran['total_cicilan']);
+        $this->maxNominalBayar = (int) round($sisaPembayaran);
+        $this->uploadNominalBayar = $this->maxNominalBayar; // Default ke sisa pembayaran
         $this->showUploadModal = true;
 
+        // Load riwayat pembayaran untuk angsuran ini
+        $this->loadRiwayatPembayaran($angsuran['id']);
+
         $this->dispatch('open-upload-modal');
+    }
+
+    /**
+     * Load riwayat pembayaran untuk angsuran yang dipilih
+     */
+    private function loadRiwayatPembayaran(string $idJadwalAngsuran): void
+    {
+        $this->riwayatPembayaran = RiwayatPembayaranRestrukturisasi::where('id_jadwal_angsuran', $idJadwalAngsuran)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id_riwayat_pembayaran,
+                    'nominal_bayar' => (float) $item->nominal_bayar,
+                    'bukti_pembayaran' => $item->bukti_pembayaran,
+                    'tanggal_bayar' => optional($item->tanggal_bayar)->format('d/m/Y'),
+                    'status' => $item->status,
+                    'catatan' => $item->catatan,
+                    'created_at' => optional($item->created_at)->format('d/m/Y H:i'),
+                ];
+            })
+            ->toArray();
     }
 
     public function closeUploadModal(): void
@@ -401,13 +466,17 @@ class Edit extends Create
         $this->selectedAngsuranNo = null;
         $this->uploadFile = null;
         $this->uploadNominalBayar = 0;
+        $this->maxNominalBayar = 0;
         $this->isEditingFile = false;
+        $this->viewOnlyMode = false;
+        $this->riwayatPembayaran = [];
         $this->resetValidation();
     }
 
     public function submitUploadBukti(): void
     {
-        if (!$this->validateUploadPrerequisites()) return;
+        if (!$this->validateUploadPrerequisites())
+            return;
 
         try {
             $this->validateUploadFile();
@@ -420,11 +489,21 @@ class Edit extends Create
 
             $index = $this->selectedAngsuranIndex;
             $angsuran = $this->jadwal_angsuran[$index];
+            $nominalBayar = (float) $this->uploadNominalBayar;
+
+            // Validasi nominal tidak melebihi sisa pembayaran
+            $sisaPembayaran = $angsuran['sisa_pembayaran'] ?? ($angsuran['total_cicilan'] - ($angsuran['total_terbayar'] ?? 0));
+            if ($nominalBayar > $sisaPembayaran) {
+                $this->showError('Nominal Melebihi Sisa', 'Nominal pembayaran (Rp ' . number_format($nominalBayar, 0, ',', '.') . ') tidak boleh melebihi sisa pembayaran (Rp ' . number_format($sisaPembayaran, 0, ',', '.') . ').');
+                return;
+            }
+
+            if ($nominalBayar <= 0) {
+                $this->showError('Nominal Tidak Valid', 'Nominal pembayaran harus lebih dari 0.');
+                return;
+            }
 
             DB::beginTransaction();
-
-            $path = $this->uploadBuktiPembayaran($file, $angsuran['no']);
-            $this->deleteOldBukti($angsuran['bukti_pembayaran'] ?? null);
 
             $jadwalAngsuran = $this->findJadwalAngsuran($angsuran['id']);
             if (!$jadwalAngsuran) {
@@ -432,12 +511,27 @@ class Edit extends Create
                 return;
             }
 
-            $jadwalAngsuran->update([
+            // Upload bukti pembayaran
+            $path = $this->uploadBuktiPembayaran($file, $angsuran['no']);
+
+            // Simpan ke tabel riwayat pembayaran
+            $riwayat = RiwayatPembayaranRestrukturisasi::create([
+                'id_jadwal_angsuran' => $angsuran['id'],
+                'nominal_bayar' => $nominalBayar,
                 'bukti_pembayaran' => $path,
-                'status' => self::STATUS_TERTUNDA,
                 'tanggal_bayar' => now(),
-                'nominal_bayar' => (float) $this->uploadNominalBayar,
+                'status' => RiwayatPembayaranRestrukturisasi::STATUS_TERTUNDA,
             ]);
+
+            // Update status jadwal angsuran jika belum ada status pembayaran
+            if (
+                $jadwalAngsuran->status === self::STATUS_BELUM_JATUH_TEMPO ||
+                $jadwalAngsuran->status === self::STATUS_JATUH_TEMPO
+            ) {
+                $jadwalAngsuran->update([
+                    'status' => self::STATUS_TERTUNDA,
+                ]);
+            }
 
             $jadwalAngsuran->refresh();
             $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
@@ -448,7 +542,7 @@ class Edit extends Create
 
             $this->loadData();
             $this->closeUploadModal();
-            $this->showSuccess('Berhasil', 'Bukti pembayaran berhasil diupload dan status angsuran telah diperbarui menjadi Tertunda.');
+            $this->showSuccess('Berhasil', 'Bukti pembayaran berhasil diupload. Menunggu konfirmasi dari SKI.');
         } catch (ValidationException $e) {
             DB::rollBack();
             $this->showError('Validasi Gagal', collect($e->errors())->flatten()->join(', '));
@@ -533,12 +627,14 @@ class Edit extends Create
             return;
         }
 
-        if (!$this->validateAngsuranExists($index)) return;
+        if (!$this->validateAngsuranExists($index))
+            return;
 
         $angsuran = $this->jadwal_angsuran[$index];
 
-        if ($angsuran['status'] !== self::STATUS_TERTUNDA) {
-            $this->showWarning('Tidak Dapat Dikonfirmasi', 'Hanya pembayaran dengan status Tertunda yang dapat dikonfirmasi.');
+        // Cek apakah ada pembayaran yang perlu dikonfirmasi
+        if ($angsuran['jumlah_tertunda'] <= 0) {
+            $this->showWarning('Tidak Ada Pembayaran Tertunda', 'Tidak ada pembayaran yang menunggu konfirmasi untuk angsuran ini.');
             return;
         }
 
@@ -546,7 +642,53 @@ class Edit extends Create
         $this->selectedKonfirmasiNo = $angsuran['no'];
         $this->showKonfirmasiModal = true;
 
+        // Load riwayat pembayaran tertunda untuk angsuran ini
+        $this->loadRiwayatPembayaranTertunda($angsuran['id']);
+
         $this->dispatch('open-konfirmasi-modal');
+    }
+
+    /**
+     * Load riwayat pembayaran yang masih tertunda untuk angsuran tertentu
+     */
+    private function loadRiwayatPembayaranTertunda(string $idJadwalAngsuran): void
+    {
+        $this->riwayatPembayaran = RiwayatPembayaranRestrukturisasi::where('id_jadwal_angsuran', $idJadwalAngsuran)
+            ->where('status', RiwayatPembayaranRestrukturisasi::STATUS_TERTUNDA)
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id_riwayat_pembayaran,
+                    'nominal_bayar' => (float) $item->nominal_bayar,
+                    'bukti_pembayaran' => $item->bukti_pembayaran,
+                    'tanggal_bayar' => optional($item->tanggal_bayar)->format('d/m/Y'),
+                    'status' => $item->status,
+                    'catatan' => $item->catatan,
+                    'created_at' => optional($item->created_at)->format('d/m/Y H:i'),
+                ];
+            })
+            ->toArray();
+
+        // Set riwayat pertama sebagai selected by default
+        if (!empty($this->riwayatPembayaran)) {
+            $this->selectedRiwayatId = $this->riwayatPembayaran[0]['id'];
+            $this->selectedRiwayat = $this->riwayatPembayaran[0];
+        }
+    }
+
+    /**
+     * Select riwayat pembayaran tertentu untuk konfirmasi
+     */
+    public function selectRiwayat(string $riwayatId): void
+    {
+        foreach ($this->riwayatPembayaran as $riwayat) {
+            if ($riwayat['id'] === $riwayatId) {
+                $this->selectedRiwayatId = $riwayatId;
+                $this->selectedRiwayat = $riwayat;
+                break;
+            }
+        }
     }
 
     public function closeKonfirmasiModal(): void
@@ -556,6 +698,9 @@ class Edit extends Create
         $this->selectedKonfirmasiNo = null;
         $this->catatanKonfirmasi = '';
         $this->showTolakModal = false;
+        $this->riwayatPembayaran = [];
+        $this->selectedRiwayatId = null;
+        $this->selectedRiwayat = null;
     }
 
     public function openTolakModal(): void
@@ -570,34 +715,59 @@ class Edit extends Create
         $this->showTolakModal = false;
     }
 
+    /**
+     * Konfirmasi pembayaran - otomatis menentukan status Lunas atau Dibayar Sebagian
+     */
     public function submitKonfirmasi(): void
     {
-        if ($this->selectedKonfirmasiIndex === null) {
-            $this->showError('Error', 'Data angsuran tidak ditemukan.');
+        if ($this->selectedKonfirmasiIndex === null || $this->selectedRiwayatId === null) {
+            $this->showError('Error', 'Data pembayaran tidak ditemukan.');
             return;
         }
 
         $angsuran = $this->jadwal_angsuran[$this->selectedKonfirmasiIndex];
 
-        if (empty($angsuran['bukti_pembayaran'])) {
-            $this->showWarning('Tidak Ada Bukti', 'Tidak ada bukti pembayaran yang diupload.');
-            return;
-        }
-
         try {
             DB::beginTransaction();
 
             $jadwalAngsuran = $this->findJadwalAngsuran($angsuran['id']);
-            if (!$jadwalAngsuran) throw new \Exception('Data jadwal angsuran tidak ditemukan di database.');
+            if (!$jadwalAngsuran)
+                throw new \Exception('Data jadwal angsuran tidak ditemukan di database.');
 
-            $catatanBaru = $this->appendCatatan($jadwalAngsuran->catatan, '[Dikonfirmasi]', $this->catatanKonfirmasi);
+            $riwayat = RiwayatPembayaranRestrukturisasi::find($this->selectedRiwayatId);
+            if (!$riwayat)
+                throw new \Exception('Data riwayat pembayaran tidak ditemukan di database.');
+
+            // Update status riwayat pembayaran
+            $riwayat->update([
+                'status' => RiwayatPembayaranRestrukturisasi::STATUS_DIKONFIRMASI,
+                'catatan' => $this->catatanKonfirmasi ?: 'Pembayaran dikonfirmasi.',
+                'dikonfirmasi_oleh' => Auth::id(),
+                'dikonfirmasi_at' => now(),
+            ]);
+
+            // Hitung total pembayaran yang sudah dikonfirmasi
+            $totalDikonfirmasi = (float) $jadwalAngsuran->total_terbayar + (float) $riwayat->nominal_bayar;
+
+            // Otomatis tentukan status berdasarkan total
+            $isLunas = $totalDikonfirmasi >= (float) $jadwalAngsuran->total_cicilan;
+            $statusBaru = $isLunas ? self::STATUS_LUNAS : self::STATUS_DIBAYAR_SEBAGIAN;
+
+            // Update jadwal angsuran
+            $catatanBaru = $this->appendCatatan(
+                $jadwalAngsuran->catatan,
+                $isLunas ? '[Dikonfirmasi Lunas]' : '[Dikonfirmasi Sebagian]',
+                'Rp ' . number_format((float) $riwayat->nominal_bayar, 0, ',', '.') . ($this->catatanKonfirmasi ? ' - ' . $this->catatanKonfirmasi : '')
+            );
 
             $jadwalAngsuran->update([
-                'status' => self::STATUS_LUNAS,
+                'total_terbayar' => $totalDikonfirmasi,
+                'status' => $statusBaru,
                 'catatan' => $catatanBaru,
             ]);
 
-            $this->updateTotalTerbayar();
+            // Update total terbayar program
+            $this->updateProgramTotalTerbayar();
 
             DB::commit();
 
@@ -605,7 +775,11 @@ class Edit extends Create
             $this->closeKonfirmasiModal();
             $this->loadData();
 
-            $this->showSuccess('Berhasil', 'Pembayaran angsuran bulan ' . $angsuran['no'] . ' telah dikonfirmasi dan status diubah menjadi Lunas.');
+            $message = $isLunas
+                ? 'Pembayaran angsuran bulan ' . $angsuran['no'] . ' telah dikonfirmasi. Status: LUNAS.'
+                : 'Pembayaran Rp ' . number_format((float) $riwayat->nominal_bayar, 0, ',', '.') . ' untuk angsuran bulan ' . $angsuran['no'] . ' telah dikonfirmasi. Status: Dibayar Sebagian.';
+
+            $this->showSuccess('Berhasil', $message);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error konfirmasi pembayaran: ' . $e->getMessage());
@@ -613,38 +787,55 @@ class Edit extends Create
         }
     }
 
+
+    /**
+     * Tolak pembayaran dari riwayat
+     */
     public function tolakPembayaran(): void
     {
-        if ($this->selectedKonfirmasiIndex === null) {
-            $this->showError('Error', 'Data angsuran tidak ditemukan.');
+        if ($this->selectedRiwayatId === null) {
+            $this->showError('Error', 'Data pembayaran tidak ditemukan.');
             return;
         }
-
-        $angsuran = $this->jadwal_angsuran[$this->selectedKonfirmasiIndex];
 
         try {
             DB::beginTransaction();
 
-            $jadwalAngsuran = $this->findJadwalAngsuran($angsuran['id']);
-            if (!$jadwalAngsuran) throw new \Exception('Data jadwal angsuran tidak ditemukan di database.');
+            $riwayat = RiwayatPembayaranRestrukturisasi::find($this->selectedRiwayatId);
+            if (!$riwayat)
+                throw new \Exception('Data riwayat pembayaran tidak ditemukan di database.');
 
-            if (!empty($jadwalAngsuran->bukti_pembayaran)) {
-                Storage::delete($jadwalAngsuran->bukti_pembayaran);
+            // Hapus file bukti pembayaran
+            if (!empty($riwayat->bukti_pembayaran)) {
+                Storage::disk('public')->delete($riwayat->bukti_pembayaran);
             }
 
-            $tanggalJatuhTempo = \Carbon\Carbon::parse($jadwalAngsuran->tanggal_jatuh_tempo);
-            $statusBaru = $tanggalJatuhTempo->isPast() ? self::STATUS_JATUH_TEMPO : self::STATUS_BELUM_JATUH_TEMPO;
-
             $alasanPenolakan = !empty($this->catatanKonfirmasi) ? $this->catatanKonfirmasi : 'Pembayaran ditolak oleh finance.';
-            $catatanBaru = $this->appendCatatan($jadwalAngsuran->catatan, '[Ditolak]', $alasanPenolakan);
 
-            $jadwalAngsuran->update([
-                'status' => $statusBaru,
-                'bukti_pembayaran' => null,
-                'tanggal_bayar' => null,
-                'nominal_bayar' => null,
-                'catatan' => $catatanBaru,
+            // Update status riwayat menjadi ditolak
+            $riwayat->update([
+                'status' => RiwayatPembayaranRestrukturisasi::STATUS_DITOLAK,
+                'catatan' => $alasanPenolakan,
+                'dikonfirmasi_oleh' => Auth::id(),
+                'dikonfirmasi_at' => now(),
             ]);
+
+            // Cek apakah masih ada pembayaran tertunda lainnya
+            $jadwalAngsuran = $riwayat->jadwalAngsuran;
+            $masihAdaTertunda = $jadwalAngsuran->riwayatPembayaran()
+                ->where('status', RiwayatPembayaranRestrukturisasi::STATUS_TERTUNDA)
+                ->exists();
+
+            // Jika tidak ada pembayaran tertunda lagi dan belum ada yang dikonfirmasi, kembalikan status
+            if (!$masihAdaTertunda && $jadwalAngsuran->total_terbayar <= 0) {
+                $tanggalJatuhTempo = \Carbon\Carbon::parse($jadwalAngsuran->tanggal_jatuh_tempo);
+                $statusBaru = $tanggalJatuhTempo->isPast() ? self::STATUS_JATUH_TEMPO : self::STATUS_BELUM_JATUH_TEMPO;
+
+                $jadwalAngsuran->update([
+                    'status' => $statusBaru,
+                    'catatan' => $this->appendCatatan($jadwalAngsuran->catatan, '[Ditolak]', $alasanPenolakan),
+                ]);
+            }
 
             DB::commit();
 
@@ -652,7 +843,7 @@ class Edit extends Create
             $this->closeKonfirmasiModal();
             $this->loadData();
 
-            $this->showWarning('Pembayaran Ditolak', 'Pembayaran angsuran bulan ' . $angsuran['no'] . ' telah ditolak. User harus mengupload ulang bukti pembayaran.');
+            $this->showWarning('Pembayaran Ditolak', 'Pembayaran Rp ' . number_format((float) $riwayat->nominal_bayar, 0, ',', '.') . ' telah ditolak. User harus mengupload ulang bukti pembayaran.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error tolak pembayaran: ' . $e->getMessage());
@@ -660,12 +851,14 @@ class Edit extends Create
         }
     }
 
-    private function updateTotalTerbayar(): void
+    /**
+     * Update total terbayar program restrukturisasi
+     */
+    private function updateProgramTotalTerbayar(): void
     {
+        // Hitung total dari semua jadwal angsuran
         $totalTerbayar = JadwalAngsuran::where('id_program_restrukturisasi', $this->program->id_program_restrukturisasi)
-            ->where('status', self::STATUS_LUNAS)
-            ->whereNotNull('nominal_bayar')
-            ->sum('nominal_bayar');
+            ->sum('total_terbayar');
 
         $statusProgram = $totalTerbayar >= $this->total_cicilan ? self::STATUS_LUNAS : self::STATUS_PROGRAM_BERJALAN;
 
@@ -692,18 +885,22 @@ class Edit extends Create
     {
         $noAngsuran = $angsuran['no'];
 
-        if ($noAngsuran <= 1) return true;
+        if ($noAngsuran <= 1)
+            return true;
 
         $previousIndex = $index - 1;
-        if (!isset($this->jadwal_angsuran[$previousIndex])) return true;
+        if (!isset($this->jadwal_angsuran[$previousIndex]))
+            return true;
 
         $previous = $this->jadwal_angsuran[$previousIndex];
+        $previousStatus = $previous['status'] ?? 'Belum Jatuh Tempo';
 
-        if ($previous['status'] !== self::STATUS_LUNAS || empty($previous['bukti_pembayaran'])) {
+        // Angsuran sebelumnya harus Lunas atau Dibayar Sebagian (ada progress pembayaran)
+        if (!in_array($previousStatus, [self::STATUS_LUNAS, self::STATUS_DIBAYAR_SEBAGIAN])) {
             $this->showError(
                 'Pembayaran Berurutan',
-                'Anda harus melunasi angsuran bulan ' . $previous['no'] .
-                    ' terlebih dahulu sebelum dapat mengupload bukti pembayaran untuk bulan ' . $noAngsuran . '.'
+                'Angsuran bulan ' . $previous['no'] . ' belum dibayar. Status: ' . $previousStatus . '. ' .
+                'Silakan bayar angsuran bulan ' . $previous['no'] . ' terlebih dahulu.'
             );
             return false;
         }
@@ -741,7 +938,8 @@ class Edit extends Create
     private function showSuccess(string $title, string $text, ?string $redirectUrl = null): void
     {
         $data = ['type' => 'success', 'title' => $title, 'text' => $text];
-        if ($redirectUrl) $data['redirect_url'] = $redirectUrl;
+        if ($redirectUrl)
+            $data['redirect_url'] = $redirectUrl;
         $this->dispatch('swal:modal', $data);
     }
 
