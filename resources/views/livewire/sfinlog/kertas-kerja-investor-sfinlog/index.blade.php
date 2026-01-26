@@ -23,19 +23,19 @@
                 {{-- Tabel 1: Info Dasar --}}
                 <div class="table-container"
                     style="display: inline-block; vertical-align: top; margin-right: 20px; min-width: 1200px; white-space: normal;">
-                    <livewire:s-finlog.kertas-kerja-investor-sfinlog-table1 :year="$year" :key="'table1-' . $year" />
+                    <livewire:SFinlog.kertas-kerja-investor-sfinlog-table1 :year="$year" :key="'table1-' . $year" />
                 </div>
 
                 {{-- Tabel 2: COF Per Bulan --}}
                 <div class="table-container"
                     style="display: inline-block; vertical-align: top; margin-right: 20px; min-width: 800px; white-space: normal;">
-                    <livewire:s-finlog.kertas-kerja-investor-sfinlog-table2 :year="$year" :key="'table2-' . $year" />
+                    <livewire:SFinlog.kertas-kerja-investor-sfinlog-table2 :year="$year" :key="'table2-' . $year" />
                 </div>
 
                 {{-- Tabel 3: Pengembalian --}}
                 <div class="table-container"
                     style="display: inline-block; vertical-align: top; min-width: 600px; white-space: normal;">
-                    <livewire:s-finlog.kertas-kerja-investor-sfinlog-table3 :year="$year" :key="'table3-' . $year" />
+                    <livewire:SFinlog.kertas-kerja-investor-sfinlog-table3 :year="$year" :key="'table3-' . $year" />
                 </div>
             </div>
         </div>
