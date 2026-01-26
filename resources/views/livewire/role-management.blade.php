@@ -151,17 +151,23 @@
                                         'master_data' => 'Master Data',
                                         'peminjaman' => 'Peminjaman',
                                         'investasi' => 'Investasi',
+                                        'restrukturisasi' => 'Restrukturisasi',
                                         'sfinlog' => 'S-Finlog',
                                         'menu_sfinance' => 'Menu SFinance',
+                                        'menu_sfinlog' => 'Menu S-Finlog',
+                                        'lainnya' => 'Lainnya',
                                     ];
 
                                     $groupPrefixes = [
-                                        'config' => ['users', 'roles'],
+                                        'config' => ['users', 'roles', 'permissions', 'settings'],
                                         'master_data' => ['master_data'],
-                                        'peminjaman' => ['peminjaman', 'peminjaman_dana'],
-                                        'investasi' => ['investasi', 'penyaluran_deposito'],
+                                        'peminjaman' => ['peminjaman', 'peminjaman_dana', 'peminjaman_finlog', 'pengembalian_pinjaman', 'pengembalian_pinjaman_finlog'],
+                                        'investasi' => ['investasi', 'penyaluran_deposito', 'penyaluran_deposito_finlog', 'pengembalian_investasi'],
+                                        'restrukturisasi' => ['pengajuan_restrukturisasi', 'program_restrukturisasi'],
                                         'sfinlog' => ['pengajuan_investasi_finlog'],
-                                        'menu_sfinance' => ['sfinance'],
+                                        'menu_sfinance' => ['sfinance.menu'],
+                                        'menu_sfinlog' => ['sfinlog.menu'],
+                                        'lainnya' => ['debitur_piutang', 'debitur_piutang_finlog'],
                                     ];
                                 @endphp
 
@@ -220,15 +226,25 @@
                                                                             $groupMap = [
                                                                                 'roles' => 'roles',
                                                                                 'users' => 'users',
+                                                                                'permissions' => 'permissions',
+                                                                                'settings' => 'settings',
                                                                                 'peminjaman' => 'peminjaman',
                                                                                 'peminjaman_dana' => 'peminjaman dana',
+                                                                                'peminjaman_finlog' => 'peminjaman finlog',
+                                                                                'pengembalian_pinjaman' => 'pengembalian pinjaman',
+                                                                                'pengembalian_pinjaman_finlog' => 'pengembalian pinjaman finlog',
                                                                                 'investasi' => 'investasi',
-                                                                                'penyaluran_deposito' =>
-                                                                                    'penyaluran deposito',
+                                                                                'penyaluran_deposito' => 'penyaluran deposito',
+                                                                                'penyaluran_deposito_finlog' => 'penyaluran deposito finlog',
+                                                                                'pengembalian_investasi' => 'pengembalian investasi',
+                                                                                'pengajuan_restrukturisasi' => 'pengajuan restrukturisasi',
+                                                                                'program_restrukturisasi' => 'program restrukturisasi',
                                                                                 'master_data' => 'master data',
-                                                                                'pengajuan_investasi_finlog' =>
-                                                                                    'pengajuan investasi finlog',
+                                                                                'pengajuan_investasi_finlog' => 'pengajuan investasi finlog',
+                                                                                'debitur_piutang' => 'debitur piutang',
+                                                                                'debitur_piutang_finlog' => 'debitur piutang finlog',
                                                                                 'sfinance.menu' => 'menu sfinance',
+                                                                                'sfinlog.menu' => 'menu sfinlog',
                                                                             ];
 
                                                                             $name_group = $groupMap[$group] ?? $group;
