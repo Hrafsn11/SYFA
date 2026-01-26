@@ -20,13 +20,7 @@
                                     Terverifikasi, transparan, dan dikelola profesional.
                                 </p>
                                 <div class="d-flex flex-wrap gap-3">
-                                    @php
-                                        $isSFinlog = \App\Helpers\ModuleHelper::isSFinlog();
-                                        $pengajuanInvestasiRoute = $isSFinlog 
-                                            ? route('sfinlog.pengajuan-investasi.index') 
-                                            : route('pengajuan-investasi.index');
-                                    @endphp
-                                    <a href="{{ $pengajuanInvestasiRoute }}"
+                                    <a href="{{ route('sfinlog.pengajuan-investasi.index') }}"
                                         class="btn btn-lg btn-light fw-semibold px-4" style="color: #0D7A7A;">
                                         Mulai Berinvestasi <i class="ti ti-arrow-right ms-2"></i>
                                     </a>
