@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -26,10 +27,8 @@ class RolePermissionSeeder extends Seeder
             // This is safe to ignore as the cache will be cleared when needed
         }
 
-        // Delete all existing permissions first
-        Permission::query()->delete();
-
-        // Create permissions (idempotent)
+        DB::transaction(function () {
+            // Create permissions (idempotent)
         $permissions = [
             // User Management
             'users.view',
@@ -184,16 +183,12 @@ class RolePermissionSeeder extends Seeder
 
         // Create roles and assign permissions (idempotent)
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
-        // Remove all previous permissions before syncing
-        $superAdminRole->permissions()->detach();
         $superAdminRole->syncPermissions(Permission::all());
 
         $adminRole = Role::updateOrCreate(
             ['name' => 'admin'],
             ['restriction' => 1]
         );
-        // Remove all previous permissions before syncing
-        $adminRole->permissions()->detach();
         $adminRole->syncPermissions([
             'users.view',
             'users.add',
@@ -207,8 +202,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'moderator'],
             ['restriction' => 1]
         );
-        // Remove all previous permissions before syncing
-        $moderatorRole->permissions()->detach();
         $moderatorRole->syncPermissions([
             'users.view',
             'users.edit',
@@ -218,16 +211,12 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'user'],
             ['restriction' => 0]
         );
-        // Remove all previous permissions before syncing
-        $userRole->permissions()->detach();
         $userRole->syncPermissions([]);
 
         $debiturRole = Role::updateOrCreate(
             ['name' => 'Debitur'],
             ['restriction' => 0]
         );
-
-        $debiturRole->permissions()->detach();
         $debiturRole->syncPermissions([
             // Menu Access - Peminjaman & Deposito
             'sfinance.menu.dashboard_pembiayaan',
@@ -291,7 +280,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Investor'],
             ['restriction' => 0]
         );
-        $investorRole->permissions()->detach();
         $investorRole->syncPermissions([
             // Menu Access - Investasi Only
             'sfinance.menu.dashboard_pembiayaan_investasi',
@@ -324,7 +312,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Finance SKI'],
             ['restriction' => 1]
         );
-        $financeRole->permissions()->detach();
         $financeRole->syncPermissions([
             // SFinance Menu
             'sfinance.menu.dashboard_pembiayaan',
@@ -416,7 +403,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'CEO SKI'],
             ['restriction' => 1]
         );
-        $ceoRole->permissions()->detach();
         $ceoRole->syncPermissions([
             // Dashboard Access
             'sfinance.menu.dashboard_pembiayaan',
@@ -443,7 +429,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Direktur SKI'],
             ['restriction' => 1]
         );
-        $direkturRole->permissions()->detach();
         $direkturRole->syncPermissions([
             // Dashboard Access
             'sfinance.menu.dashboard_pembiayaan',
@@ -462,7 +447,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'CEO S-Finlog'],
             ['restriction' => 1]
         );
-        $ceoFinlogRole->permissions()->detach();
         $ceoFinlogRole->syncPermissions([
             // Menu SFinlog
             'sfinlog.menu.dashboard_pembiayaan',
@@ -493,7 +477,6 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'IO (Investment Officer)'],
             ['restriction' => 1]
         );
-        $ioRole->permissions()->detach();
         $ioRole->syncPermissions([
             // Menu SFinlog
             'sfinlog.menu.peminjaman_dana',
@@ -589,6 +572,7 @@ class RolePermissionSeeder extends Seeder
         if (!$io->hasRole('IO (Investment Officer)')) {
             $io->assignRole('IO (Investment Officer)');
         }
+        }); // End DB::transaction
 
         // Restore the original cache driver
         config(['cache.default' => $originalCacheDriver]);
