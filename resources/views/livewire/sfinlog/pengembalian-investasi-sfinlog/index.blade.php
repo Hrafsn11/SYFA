@@ -4,11 +4,13 @@
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Pengembalian Investasi - SFinlog</h4>
                 
-                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                    data-bs-toggle="modal" data-bs-target="#modalPengembalianInvestasiSfinlog">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Tambah Pengembalian</span>
-                </button>
+                @can('pengembalian_investasi_finlog.add')
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        data-bs-toggle="modal" data-bs-target="#modalPengembalianInvestasiSfinlog">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Pengembalian</span>
+                    </button>
+                @endcan
             </div>
         </div>
     </div>

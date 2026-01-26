@@ -169,6 +169,10 @@ class RolePermissionSeeder extends Seeder
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
             'pengembalian_investasi.edit',
+            // Pengembalian Investasi Finlog
+            'pengembalian_investasi_finlog.view',
+            'pengembalian_investasi_finlog.add',
+            'pengembalian_investasi_finlog.edit',
             // Debitur Piutang
             'debitur_piutang.edit',
             'debitur_piutang_finlog.edit',
@@ -378,6 +382,11 @@ class RolePermissionSeeder extends Seeder
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
             'pengembalian_investasi.edit',
+
+            // Pengembalian Investasi Finlog (Finance SKI can create/edit)
+            'pengembalian_investasi_finlog.view',
+            'pengembalian_investasi_finlog.add',
+            'pengembalian_investasi_finlog.edit',
 
             // SFinlog Peminjaman (Finance SKI tidak bisa create, hanya approve & generate)
             'peminjaman_finlog.view',
