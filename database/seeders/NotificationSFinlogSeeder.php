@@ -21,7 +21,7 @@ class NotificationSFinlogSeeder extends Seeder
         $finance = Role::firstOrCreate(['name' => 'Finance SKI', 'guard_name' => 'web'], ['restriction' => 0]);
         $ceo = Role::firstOrCreate(['name' => 'CEO SKI', 'guard_name' => 'web'], ['restriction' => 0]);
         $direktur = Role::firstOrCreate(['name' => 'Direktur SKI', 'guard_name' => 'web'], ['restriction' => 0]);
-        $investmentOfficer = Role::firstOrCreate(['name' => 'Investment Officer', 'guard_name' => 'web'], ['restriction' => 0]);
+        $investmentOfficer = Role::firstOrCreate(['name' => 'IO (Investment Officer)', 'guard_name' => 'web'], ['restriction' => 0]);
         // Notification Features untuk Peminjaman SFinlog
         // User akan mengatur message dan role_assigned sendiri karena sangat panjang
         
