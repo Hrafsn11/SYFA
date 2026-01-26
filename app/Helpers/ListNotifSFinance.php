@@ -163,6 +163,56 @@ class ListNotifSFinance
         sendNotification($data);
     }
 
+    public static function suratPeringatanPengembalianDana($pengajuan, $tanggalJatuhTempo, $spkNumber)
+    {
+        // Notifikasi saat surat peringatan pengembalian dana dibuat
+        if (empty($spkNumber)) {
+            return;
+        }
+
+        if($spkNumber === 1) {
+            $notifName = 'surat_peringatan_1_pengembalian_dana_sfinance';
+        } else if($spkNumber === 2) {
+            $notifName = 'surat_peringatan_2_pengembalian_dana_sfinance';
+        } else if($spkNumber === 3) {
+            $notifName = 'surat_peringatan_3_pengembalian_dana_sfinance';
+        } else {
+            return;
+        }
+        $notif = NotificationFeature::where('name', $notifName)->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $pengajuan->load('debitur');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $pengajuan->debitur->nama_debitur ?? $pengajuan->debitur->nama ?? 'N/A',
+            '[[tanggal]]' => $tanggalFormatted,
+            '[[sp]]' => $spkNumber,
+        ];
+
+        // Generate link ke pengembalian pinjaman
+        $link = route('pengembalian.index');
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+            'id_debitur' => $pengajuan->id_debitur,
+            'id_investor' => null,
+            'spk_number' => $spkNumber,
+        ];
+
+        sendNotificationWithMail($data);
+    }
+
     public static function menuRestrukturisasi($status, $pengajuan, $step = null)
     {
         // Mapping status dan step ke notification feature

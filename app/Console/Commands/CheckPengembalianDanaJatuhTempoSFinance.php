@@ -39,14 +39,26 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
         $daysBeforeDue = 3; // Kirim notifikasi 3 hari sebelum jatuh tempo
 
         // Ambil semua pengajuan peminjaman yang statusnya "Dana Sudah Dicairkan" dan belum lunas
-        $pengajuanList = PengajuanPeminjaman::with(['debitur', 'buktiPeminjaman'])
+        $pengajuanList = PengajuanPeminjaman::with(['debitur', 'buktiPeminjaman', 'historyStatus'])
             ->where('status', 'Dana Sudah Dicairkan')
             ->get();
 
         $countJatuhTempo = 0;
         $countTelat = 0;
+        $countBelumDimulai = 0;
+        $countSP1 = 0;
+        $countSP2 = 0;
+        $countSP3 = 0;
 
         foreach ($pengajuanList as $pengajuan) {
+            // Ambil history pencairan
+            $history = $pengajuan->historyStatus->whereNotNull('tanggal_pencairan')
+                ->sortByDesc('created_at')
+                ->first();
+            if (!$history || !$history->tanggal_pencairan) {
+                continue;
+            }
+
             // Cek apakah sudah lunas
             $pengembalianTerakhir = PengembalianPinjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
                 ->orderBy('created_at', 'desc')
@@ -57,15 +69,42 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
                 continue;
             }
 
+            // Hitung hari sejak pencairan
+            $daysSincePencairan = Carbon::parse($history->tanggal_pencairan)->diffInDays($today);
+            $jatuhTempo = Carbon::parse($history->tanggal_pencairan)->addDays(30);
+            $daySinceJatuhTempo = $today->diffInDays($jatuhTempo); // negatif jika sudah lewat jatuh tempo
+
+
+            // Jika belum ada pengembalian sama sekali, kirim notifikasi
+            if (!$pengembalianTerakhir) {
+                if ($daysSincePencairan == 10 || $daysSincePencairan == 20 || $daysSincePencairan == 27) {
+                    $this->info("Pengajuan peminjaman {$pengajuan->nomor_peminjaman} reminder pengembalian dana pada hari ke-{$daysSincePencairan}");
+                    ListNotifSFinance::pengembalianDanaJatuhTempo($pengajuan, $history->tanggal_pencairan);
+                    $countBelumDimulai++;
+                } elseif ($daySinceJatuhTempo == 1) {
+                    $this->info("Pengajuan peminjaman {$pengajuan->nomor_peminjaman} sudah telat dan belum memulai pengembalian dana");
+                    ListNotifSFinance::pengembalianDanaTelat($pengajuan, $history->tanggal_pencairan);
+                    $countTelat++;
+                }
+
+                 // hitung hari sejak pencairan untuk SP
+                if ($daySinceJatuhTempo == 1) {
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 1);
+                    $countSP1++;
+                } elseif ($daySinceJatuhTempo == 91) {
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 2);
+                    $countSP2++;
+                } elseif ($daySinceJatuhTempo == 180) {
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 3);
+                    $countSP3++;
+                }
+                continue;
+            }
+
             // Ambil semua invoice/kontrak yang belum lunas
             $buktiPeminjamanList = $pengajuan->buktiPeminjaman;
             
             foreach ($buktiPeminjamanList as $bukti) {
-                if (!$bukti->due_date) {
-                    continue;
-                }
-
-                $jatuhTempo = Carbon::parse($bukti->due_date);
                 
                 // Cek apakah invoice/kontrak ini sudah lunas
                 $labelField = $pengajuan->jenis_pembiayaan === 'Invoice Financing' 
@@ -84,19 +123,28 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
                     continue;
                 }
 
-                // Cek apakah sudah melewati jatuh tempo (telat)
-                if ($today->gt($jatuhTempo)) {
-                    // Sudah telat - kirim notifikasi telat
-                    $this->info("Pengajuan peminjaman {$pengajuan->nomor_peminjaman} sudah telat (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
-                    ListNotifSFinance::pengembalianDanaTelat($pengajuan, $bukti->due_date);
-                    $countTelat++;
-                } 
-                // Cek apakah mendekati jatuh tempo (3 hari sebelum jatuh tempo)
-                elseif ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
-                    // Mendekati jatuh tempo - kirim notifikasi
-                    $this->info("Pengajuan peminjaman {$pengajuan->nomor_peminjaman} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
-                    ListNotifSFinance::pengembalianDanaJatuhTempo($pengajuan, $bukti->due_date);
+                // Kirim notifikasi pada hari ke-10, 20, 3 sejak pencairan
+                if ($daysSincePencairan == 10 || $daysSincePencairan == 20 || $daysSincePencairan == 27) {
+                    $this->info("Pengajuan peminjaman {$pengajuan->nomor_peminjaman} reminder pengembalian dana pada hari ke-{$daysSincePencairan}");
+                    ListNotifSFinance::pengembalianDanaJatuhTempo($pengajuan, $history->tanggal_pencairan);
                     $countJatuhTempo++;
+                } 
+                // Jika sudah lebih dari 1 hari melewati jatuh tempo, kirim telat dan SP
+                elseif ($daySinceJatuhTempo == 1) {
+                    $this->info("Pengajuan peminjaman {$pengajuan->nomor_peminjaman} sudah telat (Hari ke-{$daysSincePencairan})");
+                    ListNotifSFinance::pengembalianDanaTelat($pengajuan, $history->tanggal_pencairan);
+                    $countTelat++;
+                }
+
+                if ($daySinceJatuhTempo == 1 ) {
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 1);
+                    $countSP1++;
+                } elseif ($daySinceJatuhTempo == 91) {
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 2);
+                    $countSP2++;
+                } elseif ($daySinceJatuhTempo == 180) {
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 3);
+                    $countSP3++;
                 }
             }
         }
@@ -142,9 +190,9 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
 
         $countInvestasiJatuhTempo = 0;
 
-        // Ambil semua penyaluran deposito yang belum dikembalikan (belum ada bukti_pengembalian)
+        // Ambil semua penyaluran deposito yang belum dikembalikan (belum ada nominal_yang_dikembalikan)
         $penyaluranList = PenyaluranDeposito::with(['debitur', 'pengajuanInvestasi'])
-            ->whereNull('bukti_pengembalian')
+            ->whereNull('nominal_yang_dikembalikan')
             ->whereNotNull('tanggal_pengembalian')
             ->get();
 
@@ -197,7 +245,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
             }
         }
 
-        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi jatuh tempo restrukturisasi: {$countRestrukturisasiJatuhTempo}, Notifikasi telat restrukturisasi: {$countRestrukturisasiTelat}, Notifikasi jatuh tempo investasi: {$countInvestasiJatuhTempo}, Notifikasi jatuh tempo investasi ke investor: {$countInvestasiKeInvestorJatuhTempo}");
+        $this->info("Pengecekan selesai. Notifikasi jatuh tempo pinjaman: {$countJatuhTempo}, Notifikasi telat pinjaman: {$countTelat}, Notifikasi SP1: {$countSP1}, SP2: {$countSP2}, SP3: {$countSP3}, Notifikasi belum dimulai: {$countBelumDimulai}, Notifikasi jatuh tempo restrukturisasi: {$countRestrukturisasiJatuhTempo}, Notifikasi telat restrukturisasi: {$countRestrukturisasiTelat}, Notifikasi jatuh tempo investasi: {$countInvestasiJatuhTempo}, Notifikasi jatuh tempo investasi ke investor: {$countInvestasiKeInvestorJatuhTempo}");
 
         return Command::SUCCESS;
     }
