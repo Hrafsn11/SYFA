@@ -24,7 +24,7 @@ class DebiturDanInvestor extends Component
     public $id; // untuk edit data
     
     #[FieldInput]
-    public $nama, $kode_perusahaan, $email, $nama_bank, $deposito, $nama_ceo, $nama_direktur_holding, $nama_komisaris, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging,$flagging_investor;
+    public $nama, $kode_perusahaan, $email, $nama_bank, $deposito, $nama_ceo, $email_ceo, $nama_direktur_holding, $email_direktur_holding, $nama_komisaris, $email_komisaris, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging, $flagging_investor;
 
     #[FieldInput]
     #[Renderless]
@@ -63,7 +63,7 @@ class DebiturDanInvestor extends Component
         // For investor: exclude debitur-specific fields
         else {
             $listInput = array_filter($listInput, function ($value) {
-                return !in_array($value, ['nama_ceo', 'nama_direktur_holding', 'nama_komisaris', 'id_kol', 'npwp']);
+                return !in_array($value, ['nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'id_kol', 'npwp']);
             });
         }
 
@@ -98,8 +98,11 @@ class DebiturDanInvestor extends Component
         $this->nama_bank = null;
         $this->deposito = null;
         $this->nama_ceo = null;
+        $this->email_ceo = null;
         $this->nama_direktur_holding = null;
+        $this->email_direktur_holding = null;
         $this->nama_komisaris = null;
+        $this->email_komisaris = null;
         $this->alamat = null;
         $this->no_telepon = null;
         $this->no_rek = null;

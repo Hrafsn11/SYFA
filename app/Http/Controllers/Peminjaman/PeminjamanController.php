@@ -1447,14 +1447,37 @@ class PeminjamanController extends Controller
             } elseif ($status === 'Dana Sudah Dicairkan') {
                 $historyData['approve_by'] = auth()->id();
                 $historyData['current_step'] = 9;
+                
+                // Ambil tanggal pencairan dari history sebelumnya
+                $existingHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)
+                    ->whereNotNull('tanggal_pencairan')
+                    ->latest()
+                    ->first();
+                $tanggalPencairan = $existingHistory?->tanggal_pencairan ?? now()->format('Y-m-d');
+                $historyData['tanggal_pencairan'] = $tanggalPencairan;
+                
+                // Set tanggal_jatuh_tempo dan inisialisasi sisa bayar
+                // Untuk Installment: jatuh tempo = tanggal pencairan + (tenor × 30 hari)
+                // Untuk Non-Installment: jatuh tempo = tanggal pencairan + 30 hari
+                if ($peminjaman->jenis_pembiayaan === 'Installment' && $peminjaman->tenor_pembayaran) {
+                    $hariJatuhTempo = $peminjaman->tenor_pembayaran * 30;
+                    $peminjaman->tanggal_jatuh_tempo = Carbon::parse($tanggalPencairan)->addDays($hariJatuhTempo);
+                } else {
+                    $peminjaman->tanggal_jatuh_tempo = Carbon::parse($tanggalPencairan)->addDays(30);
+                }
+                $peminjaman->sisa_bayar_pokok = $peminjaman->total_pinjaman;
+                $peminjaman->sisa_bagi_hasil = $peminjaman->total_bagi_hasil;
+                $peminjaman->save();
+            }
 
+            HistoryStatusPengajuanPinjaman::create($historyData);
+           
+            if ($status === 'Dana Sudah Dicairkan') {
                 app(ArPerbulanService::class)->updateAROnPencairan(
                     $peminjaman->id_debitur,
                     now()
                 );
             }
-
-            HistoryStatusPengajuanPinjaman::create($historyData);
 
             $history = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $peminjaman->id_pengajuan_peminjaman)->where('nominal_yang_disetujui', '!=', null)->latest()->first();
             $nominalDisetujui = $historyData['nominal_yang_disetujui'] ?? ($history ? $history->nominal_yang_disetujui : 0);

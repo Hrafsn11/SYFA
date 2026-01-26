@@ -58,7 +58,7 @@ class DebiturTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan','flagging_investor');
+            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor');
     }
 
     public function columns(): array
@@ -94,13 +94,31 @@ class DebiturTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
+            Column::make('Email CEO', 'email_ceo')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
             Column::make('Nama Direktur Holding', 'nama_direktur_holding')
                 ->sortable()
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
+            Column::make('Email Direktur Holding', 'email_direktur_holding')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
             Column::make('Nama Komisaris', 'nama_komisaris')
+                ->sortable()
+                ->searchable()
+                ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
+                ->html(),
+
+            Column::make('Email Komisaris', 'email_komisaris')
                 ->sortable()
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')

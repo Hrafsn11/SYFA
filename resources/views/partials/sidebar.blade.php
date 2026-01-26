@@ -159,7 +159,8 @@
 
                     @can('sfinance.menu.pengajuan_restukturisasi')
                         <li class="menu-item {{ RouteHelper::routeIs('pengajuan-restrukturisasi*') ? 'active' : '' }}">
-                            <a href="{{ RouteHelper::route('pengajuan-restrukturisasi.index') }}" class="menu-link" wire:navigate.hover>
+                            <a href="{{ RouteHelper::route('pengajuan-restrukturisasi.index') }}" class="menu-link"
+                                wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
                                 <div data-i18n="Pengajuan Restrukturisasi">Pengajuan Restrukturisasi</div>
                             </a>
@@ -168,7 +169,8 @@
 
                     @can('sfinance.menu.program_restukturisasi')
                         <li class="menu-item {{ RouteHelper::routeIs('program-restrukturisasi*') ? 'active' : '' }}">
-                            <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link" wire:navigate.hover>
+                            <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link"
+                                wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-calculator"></i>
                                 <div data-i18n="Program Restrukturisasi">Program Restrukturisasi</div>
                             </a>
@@ -187,8 +189,8 @@
                 @endcanany
 
                 @canany(['sfinance.menu.pengembalian_dana', 'sfinlog.menu.pengembalian_dana'])
-                    <li
-                        class="menu-item {{ RouteHelper::routeIs('pengembalian.index') || RouteHelper::routeIs('sfinlog.pengembalian-pinjaman.index') ? 'active' : '' }}" wire:navigate.hover>
+                    <li class="menu-item {{ RouteHelper::routeIs('pengembalian.index') || RouteHelper::routeIs('sfinlog.pengembalian-pinjaman.index') ? 'active' : '' }}"
+                        wire:navigate.hover>
                         @if ($isSFinlog)
                             <a wire:navigate.hover href="{{ route('sfinlog.pengembalian-pinjaman.index') }}"
                                 class="menu-link">
@@ -207,7 +209,8 @@
                         @if ($isSFinlog)
                             <a href="{{ route('sfinlog.debitur-piutang.index') }}" class="menu-link" wire:navigate.hover>
                             @else
-                                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link" wire:navigate.hover>
+                                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link"
+                                    wire:navigate.hover>
                         @endif
                         <i class="menu-icon tf-icons ti ti-receipt"></i>
                         <div data-i18n="Debitur Piutang">Debitur Piutang</div>
@@ -242,17 +245,24 @@
                     </li>
                 @endcanany
 
-                <li class="menu-item {{ RouteHelper::routeIs('sfinlog.cell-project-profile.index') ? 'active' : '' }}">
-                    <a href="{{ route('sfinlog.cell-project-profile.index') }}" class="menu-link" wire:navigate.hover>
-                        <i class="menu-icon tf-icons ti ti-file-dollar"></i>
-                        <div data-i18n="Cell Project Profile">Cell Project Profile</div>
-                    </a>
-                </li>
+                @if ($isSFinlog)
+                    @can('sfinlog.menu.cell_project_profile')
+                        <li
+                            class="menu-item {{ RouteHelper::routeIs('sfinlog.cell-project-profile.index') ? 'active' : '' }}">
+                            <a href="{{ route('sfinlog.cell-project-profile.index') }}" class="menu-link"
+                                wire:navigate.hover>
+                                <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+                                <div data-i18n="Cell Project Profile">Cell Project Profile</div>
+                            </a>
+                        </li>
+                    @endcan
+                @endif
 
                 {{-- Pengajuan Investasi --}}
                 @canany(['sfinance.menu.pengajuan_investasi', 'sfinlog.menu.pengajuan_investasi'])
                     <li class="menu-item {{ RouteHelper::is('*pengajuan-investasi*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('pengajuan-investasi.index') }}" class="menu-link" wire:navigate.hover>
+                        <a href="{{ RouteHelper::route('pengajuan-investasi.index') }}" class="menu-link"
+                            wire:navigate.hover>
                             <i class="menu-icon tf-icons ti ti-file-dollar"></i>
                             <div data-i18n="Pengajuan Investasi">Pengajuan Investasi</div>
                         </a>
@@ -261,16 +271,17 @@
 
                 {{-- Aset Investasi (formerly Report Penyaluran Dana Investasi) --}}
                 @canany(['sfinance.menu.report_penyaluran_dana', 'sfinlog.menu.report_penyaluran_dana'])
-                    <li class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
+                    <li
+                        class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
                         @if ($isSFinance)
                             <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link">
-                        @elseif($isSFinlog)
-                            <a href="{{ route('sfinlog.penyaluran-deposito-sfinlog.index') }}" class="menu-link">
-                        @else
-                            <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
+                            @elseif($isSFinlog)
+                                <a href="{{ route('sfinlog.penyaluran-deposito-sfinlog.index') }}" class="menu-link">
+                                @else
+                                    <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
                         @endif
-                            <i class="menu-icon tf-icons ti ti-report-money"></i>
-                            <div data-i18n="Aset Investasi">Aset Investasi</div>
+                        <i class="menu-icon tf-icons ti ti-report-money"></i>
+                        <div data-i18n="Aset Investasi">Aset Investasi</div>
                         </a>
                     </li>
                 @endcanany
@@ -279,12 +290,14 @@
                 @canany(['sfinance.menu.kertas_kerja_sfinance', 'sfinlog.menu.kertas_kerja_investor'])
                     <li class="menu-item {{ RouteHelper::is('*kertas-kerja-investor*') ? 'active' : '' }}">
                         @if ($isSFinance)
-                            <a href="{{ route('sfinance.kertas-kerja-investor-sfinance.index') }}" class="menu-link" wire:navigate.hover>
+                            <a href="{{ route('sfinance.kertas-kerja-investor-sfinance.index') }}" class="menu-link"
+                                wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
                                 <div data-i18n="Kertas Kerja Investor">Kertas Kerja Investor</div>
                             </a>
                         @elseif($isSFinlog)
-                            <a href="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}" class="menu-link" wire:navigate.hover>
+                            <a href="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}" class="menu-link"
+                                wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
                                 <div data-i18n="Kertas Kerja Investor">Kertas Kerja Investor</div>
                             </a>
@@ -296,14 +309,11 @@
                 @canany(['sfinance.menu.pengembalian_investasi', 'sfinlog.menu.pengembalian_investasi'])
                     <li class="menu-item {{ RouteHelper::is('*pengembalian-investasi*') ? 'active' : '' }}">
                         @if ($isSFinance)
-                            <a href="{{ route('sfinance.pengembalian-investasi.index') }}"
-                                class="menu-link">
+                            <a href="{{ route('sfinance.pengembalian-investasi.index') }}" class="menu-link">
                             @elseif($isSFinlog)
-                                <a href="{{ route('sfinlog.pengembalian-investasi.index') }}"
-                                    class="menu-link">
+                                <a href="{{ route('sfinlog.pengembalian-investasi.index') }}" class="menu-link">
                                 @else
-                                    <a href="{{ RouteHelper::route('pengembalian-investasi.index') }}"
-                                        class="menu-link">
+                                    <a href="{{ RouteHelper::route('pengembalian-investasi.index') }}" class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-cash-banknote"></i>
                         <div data-i18n="Pengembalian Investasi">Pengembalian Investasi</div>

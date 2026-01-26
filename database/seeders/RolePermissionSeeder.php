@@ -173,6 +173,9 @@ class RolePermissionSeeder extends Seeder
             // Debitur Piutang
             'debitur_piutang.edit',
             'debitur_piutang_finlog.edit',
+
+            //Menu cell project profile
+            'sfinlog.menu.cell_project_profile',
         ];
 
         foreach ($permissions as $permission) {
@@ -300,6 +303,7 @@ class RolePermissionSeeder extends Seeder
             'sfinlog.menu.pengajuan_investasi',
             'sfinlog.menu.report_penyaluran_dana',
             'sfinlog.menu.pengembalian_investasi',
+            'sfinlog.menu.cell_project_profile',
 
             // SFinance Investasi (Pengajuan Investasi)
             'investasi.view',

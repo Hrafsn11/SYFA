@@ -105,6 +105,21 @@
                             </div>
                         </div>
 
+                        {{-- Tanggal Jatuh Tempo --}}
+                        @if ($tanggal_jatuh_tempo)
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-{{ $isLate ? 'danger' : 'info' }} py-2 mb-0">
+                                        <i class="fa-solid fa-calendar-clock me-2"></i>
+                                        <strong>Tanggal Jatuh Tempo:</strong> {{ \Carbon\Carbon::parse($tanggal_jatuh_tempo)->format('d F Y') }}
+                                        @if ($isLate)
+                                            <span class="badge bg-danger ms-2">Sudah Jatuh Tempo</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Khusus Installment -->
                         @if ($jenisPembiayaan === 'Installment')
                             <div class="row mb-3">
