@@ -374,9 +374,10 @@ class NotificationSFinanceSeeder extends Seeder
             'module' => 's_finance',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pembayaran_restrukturisasi->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+        ], [
+            'role_assigned' => json_encode([$finance->id, $ceo->id]),
             'message' => 'Debitur [[nama.debitur]] telah melakukan pembayaran restrukturisasi sebesar [[nominal]].',
         ]);
 
@@ -521,9 +522,10 @@ class NotificationSFinanceSeeder extends Seeder
             'module' => 's_finance',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $kontrak_investasi_dibuat->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
+        ], [
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'Kontrak investasi dengan investor [[nama.investor]] telah berhasil dibuat.',
         ]);
 
@@ -533,9 +535,10 @@ class NotificationSFinanceSeeder extends Seeder
             'module' => 's_finance',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $investasi_berhasil_ditransfer->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+        ], [
+            'role_assigned' => json_encode([$finance->id, $ceo->id]),
             'message' => 'Dana investasi dari investor [[nama.investor]] sebesar [[nominal]] telah diterima. Status investasi: Selesai.',
         ]);
         
@@ -612,10 +615,11 @@ class NotificationSFinanceSeeder extends Seeder
             'module' => 's_finance',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $transfer_pengembalian_investasi_ke_investor->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
-            'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].',
+        ], [
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
+            'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].', 
         ]);
 
         // 3. Program Restrukturisasi Dibuat - SKI Finance
