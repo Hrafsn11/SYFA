@@ -10,7 +10,7 @@
                     </a>
 
                     @can('pengembalian_pinjaman.add')
-                        <a wire:navigate.hover href="{{ route('pengembalian.create') }}"
+                        <a href="{{ route('pengembalian.create') }}"
                             class="btn btn-primary d-flex align-items-center gap-2">
                             <i class="fa-solid fa-plus"></i>
                             Pengembalian Pinjaman
