@@ -244,6 +244,15 @@
                             @enderror
                         </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nominal yang Disetujui <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control @error('nominal_yg_disetujui') is-invalid @enderror"
+                                wire:model.live="nominal_yg_disetujui" min="1">
+                            @error('nominal_yg_disetujui')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="col-12 mb-3">
                             <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
                                 wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
