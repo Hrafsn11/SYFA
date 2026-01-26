@@ -17,6 +17,7 @@
         "maatwebsite/excel": "^3.1",
         "mpdf/mpdf": "^8.2",
         "phpoffice/phpspreadsheet": "^1.30",
+        "predis/predis": "^3.3",
         "rappasoft/laravel-livewire-tables": "^3.7",
         "spatie/laravel-permission": "*",
         "symfony/process": "^6.4"

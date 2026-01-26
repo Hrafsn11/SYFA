@@ -137,6 +137,7 @@ class Edit extends Create
         $this->plafon_pembiayaan = (float) $this->program->plafon_pembiayaan;
         $this->suku_bunga_per_tahun = (float) $this->program->suku_bunga_per_tahun;
         $this->jangka_waktu_total = (int) $this->program->jangka_waktu_total;
+        $this->nominal_yg_disetujui = (int) $this->program->nominal_yg_disetujui;
         $this->masa_tenggang = (int) $this->program->masa_tenggang;
         $this->tanggal_mulai_cicilan = optional($this->program->tanggal_mulai_cicilan)->format('Y-m-d');
 
@@ -283,6 +284,7 @@ class Edit extends Create
                 'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
                 'plafon_pembiayaan' => 'required|numeric|min:0',
                 'jangka_waktu_total' => 'required|integer|min:1',
+                'nominal_yg_disetujui' => 'required|integer|min:1',
                 'jadwal_angsuran' => 'required|array|min:1',
             ];
         } else {
@@ -330,11 +332,13 @@ class Edit extends Create
                 'updated_by' => Auth::id(),
             ];
         } else {
+            // Kasus khusus: Pengurangan tunggakan pokok/margin
             $fill = [
                 'id_pengajuan_restrukturisasi' => $this->id_pengajuan_restrukturisasi,
                 'metode_perhitungan' => $metodeValid,
                 'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
                 'jangka_waktu_total' => (int) $this->jangka_waktu_total,
+                'nominal_yg_disetujui' => (double) $this->nominal_yg_disetujui,
                 'total_pokok' => (float) $this->total_pokok,
                 'total_margin' => (float) $this->total_margin,
                 'total_cicilan' => (float) $this->total_cicilan,
