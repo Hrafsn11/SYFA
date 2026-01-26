@@ -5,7 +5,7 @@ namespace App\Livewire\SFinlog;
 use Livewire\Component;
 use App\Models\PengajuanInvestasiFinlog;
 
-class KertasKerjaInvestorSfinlog extends Component
+class KertasKerjaInvestorSFinlog extends Component
 {
     public $year;
 
