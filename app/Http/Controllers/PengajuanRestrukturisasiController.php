@@ -66,7 +66,7 @@ class PengajuanRestrukturisasiController extends Controller
                 'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan,
                 'jumlah_plafon_awal' => $this->getJumlahPlafonAwal($pengajuan),
                 'sisa_pokok_belum_dibayar' => $this->getSisaPokok($pengembalianTerakhir, $pengajuan),
-                'tunggakan_margin_bunga' => $this->getTunggakanMargin($pengembalianTerakhir),
+                'tunggakan_margin_bunga' => $this->getTunggakanMargin($pengajuan),
             ];
 
             $jatuhTempo = $this->getJatuhTempoTerakhir($pengajuan->id_pengajuan_peminjaman);
@@ -273,29 +273,28 @@ class PengajuanRestrukturisasiController extends Controller
 
     private function getSisaPokok($pengembalianTerakhir, $pengajuan)
     {
-        if ($pengembalianTerakhir) {
-            return $pengembalianTerakhir->sisa_bayar_pokok;
+        // Prioritas: ambil dari pengajuan_peminjaman.sisa_bayar_pokok
+        if ($pengajuan->sisa_bayar_pokok !== null) {
+            return $pengajuan->sisa_bayar_pokok;
         }
 
+        // Fallback: ambil dari jumlah plafon awal jika sisa_bayar_pokok belum diset
         return $this->getJumlahPlafonAwal($pengajuan);
     }
 
-    private function getTunggakanMargin($pengembalianTerakhir)
+    private function getTunggakanMargin($pengajuan)
     {
-        return $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bagi_hasil : 0;
+        // Ambil dari pengajuan_peminjaman.sisa_bagi_hasil
+        return $pengajuan->sisa_bagi_hasil ?? 0;
     }
 
     private function getJatuhTempoTerakhir($idPengajuanPeminjaman)
     {
-        // Prioritas 1: Cari pengembalian pinjaman terakhir yang belum lunas
-        $pengembalianBelumLunas = PengembalianPinjaman::where('id_pengajuan_peminjaman', $idPengajuanPeminjaman)
-            ->where('status', '!=', 'Lunas')
-            ->orderBy('created_at', 'asc')
-            ->first();
+        // Ambil langsung dari pengajuan_peminjaman.tanggal_jatuh_tempo
+        $pengajuan = PengajuanPeminjaman::find($idPengajuanPeminjaman);
 
-        if ($pengembalianBelumLunas && $pengembalianBelumLunas->tanggal_pencairan) {
-            // Jatuh tempo = tanggal pencairan cicilan + 30 hari
-            $tanggalJatuhTempo = Carbon::parse($pengembalianBelumLunas->tanggal_pencairan)->addDays(30);
+        if ($pengajuan && $pengajuan->tanggal_jatuh_tempo) {
+            $tanggalJatuhTempo = Carbon::parse($pengajuan->tanggal_jatuh_tempo);
 
             return [
                 'jatuh_tempo_terakhir' => $tanggalJatuhTempo->format('Y-m-d'),
@@ -303,26 +302,9 @@ class PengajuanRestrukturisasiController extends Controller
             ];
         }
 
-        // Fallback: Jika belum ada pengembalian, ambil dari tanggal pencairan (terbaru)
-        $history = DB::table('history_status_pengajuan_pinjaman')
-            ->where('id_pengajuan_peminjaman', $idPengajuanPeminjaman)
-            ->whereNotNull('tanggal_pencairan')
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        if (!$history || !$history->tanggal_pencairan) {
-            return [
-                'jatuh_tempo_terakhir' => null,
-                'jatuh_tempo_terakhir_formatted' => null,
-            ];
-        }
-
-        // Jatuh tempo = tanggal pencairan + 30 hari (bukan addMonth)
-        $tanggalJatuhTempo = Carbon::parse($history->tanggal_pencairan)->addDays(30);
-
         return [
-            'jatuh_tempo_terakhir' => $tanggalJatuhTempo->format('Y-m-d'),
-            'jatuh_tempo_terakhir_formatted' => $tanggalJatuhTempo->locale('id')->isoFormat('D MMMM YYYY'),
+            'jatuh_tempo_terakhir' => null,
+            'jatuh_tempo_terakhir_formatted' => null,
         ];
     }
 

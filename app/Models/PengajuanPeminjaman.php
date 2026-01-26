@@ -54,6 +54,12 @@ class PengajuanPeminjaman extends Model
         'sisa_bayar_pokok' => 'decimal:2',
         'total_bagi_hasil' => 'decimal:2',
         'sisa_bagi_hasil' => 'decimal:2',
+        'yang_harus_dibayarkan' => 'decimal:2',
+        'pps' => 'decimal:2',
+        's_finance' => 'decimal:2',
+        'pembayaran_total' => 'decimal:2',
+        'tenor_pembayaran' => 'integer',
+        'persentase_bagi_hasil' => 'decimal:2',
     ];
 
     public function invoices()

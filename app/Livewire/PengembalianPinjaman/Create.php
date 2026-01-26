@@ -18,12 +18,17 @@ use App\Livewire\Traits\HandleComponentEvent;
 use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\PengembalianPinjamanRequest;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Attributes\On;
 
 class Create extends Component
 {
     use HasUniversalFormAction, HasValidate, WithFileUploads, HandleComponentEvent;
 
     // Override HandleComponentEvent khusus untuk komponen ini
+    #[On('select2-updated')]
+    #[On('select2-changed')]
+    #[On('datepicker-updated')]
+    #[On('currency-updated')]
     public function handleComponentEvent($value, $modelName)
     {
         if (property_exists($this, $modelName)) {
@@ -156,8 +161,20 @@ class Create extends Component
         $this->persentaseBagiHasil = $pengajuan->persentase_bagi_hasil ?? 0;
         $this->jenisPembiayaan = $pengajuan->jenis_pembiayaan;
         $this->tenorPembayaran = $pengajuan->tenor_pembayaran;
-        $this->yangHarusDibayarkanPerBulan = $pengajuan->yang_harus_dibayarkan;
         $this->tanggal_jatuh_tempo = $pengajuan->tanggal_jatuh_tempo;
+
+        // Hitung yangHarusDibayarkanPerBulan dengan fallback jika null
+        if ($pengajuan->yang_harus_dibayarkan) {
+            $this->yangHarusDibayarkanPerBulan = $pengajuan->yang_harus_dibayarkan;
+        } elseif ($pengajuan->jenis_pembiayaan === 'Installment' && $pengajuan->tenor_pembayaran > 0) {
+            // Fallback: hitung manual dari (total_pinjaman + total_bagi_hasil) / tenor
+            $totalPinjaman = $pengajuan->total_pinjaman ?? 0;
+            $totalBagiHasil = $pengajuan->total_bagi_hasil ?? 0;
+            $pembayaranTotal = $totalPinjaman + $totalBagiHasil;
+            $this->yangHarusDibayarkanPerBulan = $pembayaranTotal / $pengajuan->tenor_pembayaran;
+        } else {
+            $this->yangHarusDibayarkanPerBulan = 0;
+        }
 
         // Reset late payment fields
         $this->resetLatePaymentFields();
@@ -279,16 +296,33 @@ class Create extends Component
     {
         if (!$value || $this->jenisPembiayaan !== 'Installment') {
             $this->yang_harus_dibayarkan = null;
+            $this->nominal_invoice = null;
+            $this->invoice_dibayarkan = null;
             return;
         }
 
         $bulanKe = (int) str_replace('Bulan ke-', '', $value);
-        $nominalBulanIni = $this->yangHarusDibayarkanPerBulan;
+        
+        // Pastikan yangHarusDibayarkanPerBulan ada
+        $nominalPerBulan = $this->yangHarusDibayarkanPerBulan ?? 0;
+        
+        // Fallback calculation jika masih 0
+        if ($nominalPerBulan <= 0 && $this->tenorPembayaran > 0) {
+            $totalPinjaman = $this->total_pinjaman ?? 0;
+            $totalBagiHasil = $this->bagiHasilAwal ?? 0;
+            $pembayaranTotal = $totalPinjaman + $totalBagiHasil;
+            $nominalPerBulan = $pembayaranTotal / $this->tenorPembayaran;
+        }
 
-        if ($bulanKe === 1) $nominalBulanIni += $this->total_bagi_hasil;
+        $nominalBulanIni = $nominalPerBulan;
+
+        // Bulan ke-1: cicilan + seluruh bagi hasil
+        if ($bulanKe === 1) {
+            $nominalBulanIni = $nominalPerBulan + ($this->total_bagi_hasil ?? 0);
+        }
 
         $this->yang_harus_dibayarkan = round($nominalBulanIni);
-        $this->nominal_invoice = $nominalBulanIni;
+        $this->nominal_invoice = round($nominalBulanIni);
         $this->invoice_dibayarkan = $value;
     }
 

@@ -1456,8 +1456,15 @@ class PeminjamanController extends Controller
                 $tanggalPencairan = $existingHistory?->tanggal_pencairan ?? now()->format('Y-m-d');
                 $historyData['tanggal_pencairan'] = $tanggalPencairan;
                 
-                // Set tanggal_jatuh_tempo (30 hari dari tanggal pencairan) dan inisialisasi sisa bayar
-                $peminjaman->tanggal_jatuh_tempo = Carbon::parse($tanggalPencairan)->addDays(30);
+                // Set tanggal_jatuh_tempo dan inisialisasi sisa bayar
+                // Untuk Installment: jatuh tempo = tanggal pencairan + (tenor × 30 hari)
+                // Untuk Non-Installment: jatuh tempo = tanggal pencairan + 30 hari
+                if ($peminjaman->jenis_pembiayaan === 'Installment' && $peminjaman->tenor_pembayaran) {
+                    $hariJatuhTempo = $peminjaman->tenor_pembayaran * 30;
+                    $peminjaman->tanggal_jatuh_tempo = Carbon::parse($tanggalPencairan)->addDays($hariJatuhTempo);
+                } else {
+                    $peminjaman->tanggal_jatuh_tempo = Carbon::parse($tanggalPencairan)->addDays(30);
+                }
                 $peminjaman->sisa_bayar_pokok = $peminjaman->total_pinjaman;
                 $peminjaman->sisa_bagi_hasil = $peminjaman->total_bagi_hasil;
                 $peminjaman->save();

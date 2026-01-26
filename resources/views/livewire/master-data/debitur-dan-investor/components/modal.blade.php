@@ -98,24 +98,45 @@
                         </div>
 
                         <!-- Nama CEO (Hanya untuk Debitur) -->
-                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
                             <label for="nama_ceo" class="form-label">Nama CEO <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nama_ceo" placeholder="Masukkan Nama CEO"
                                 wire:model.blur="nama_ceo">
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
+                            <label for="email_ceo" class="form-label">Email CEO</label>
+                            <input type="email" class="form-control" id="email_ceo" placeholder="Masukkan Email CEO"
+                                wire:model.blur="email_ceo">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
                             <label for="nama_direktur_holding" class="form-label">Nama Direktur Holding <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nama_direktur_holding" placeholder="Masukkan Nama Direktur Holding"
                                 wire:model.blur="nama_direktur_holding">
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <div class="col-12 mb-3 form-group debitur-section d-none">
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
+                            <label for="email_direktur_holding" class="form-label">Email Direktur Holding</label>
+                            <input type="email" class="form-control" id="email_direktur_holding" placeholder="Masukkan Email Direktur Holding"
+                                wire:model.blur="email_direktur_holding">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
                             <label for="nama_komisaris" class="form-label">Nama Komisaris <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nama_komisaris" placeholder="Masukkan Nama Komisaris"
                                 wire:model.blur="nama_komisaris">
+                            <div class="invalid-feedback"></div>
+                        </div>
+
+                        <div class="col-md-6 mb-3 form-group debitur-section d-none">
+                            <label for="email_komisaris" class="form-label">Email Komisaris</label>
+                            <input type="email" class="form-control" id="email_komisaris" placeholder="Masukkan Email Komisaris"
+                                wire:model.blur="email_komisaris">
                             <div class="invalid-feedback"></div>
                         </div>
 
