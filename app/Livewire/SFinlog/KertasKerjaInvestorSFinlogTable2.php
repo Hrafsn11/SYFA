@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Models\PengajuanInvestasiFinlog;
 use Carbon\Carbon;
 
-class KertasKerjaInvestorSfinlogTable2 extends DataTableComponent
+class KertasKerjaInvestorSFinlogTable2 extends DataTableComponent
 {
     protected $model = PengajuanInvestasiFinlog::class;
 
