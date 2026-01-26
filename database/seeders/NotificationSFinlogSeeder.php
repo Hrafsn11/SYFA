@@ -258,9 +258,10 @@ class NotificationSFinlogSeeder extends Seeder
             'module' => 's_finlog',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $disetujui_ski_finance_investasi->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
+            ], [
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh SKI Finance.',
         ]);
 
@@ -270,9 +271,10 @@ class NotificationSFinlogSeeder extends Seeder
             'module' => 's_finlog',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $ditolak_ski_finance_investasi->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
+        ], [
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh SKI Finance.',
         ]);
 
@@ -282,9 +284,10 @@ class NotificationSFinlogSeeder extends Seeder
             'module' => 's_finlog',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $disetujui_ceo_ski_investasi->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+        ], [
+            'role_assigned' => json_encode([$finance->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh CEO SKI.',
         ]);
 
@@ -294,9 +297,10 @@ class NotificationSFinlogSeeder extends Seeder
             'module' => 's_finlog',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $ditolak_ceo_ski_investasi->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+        ], [
+            'role_assigned' => json_encode([$finance->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh CEO SKI.',
         ]);
 
@@ -318,9 +322,10 @@ class NotificationSFinlogSeeder extends Seeder
             'module' => 's_finlog',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $investasi_berhasil_ditransfer->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+        ], [
+            'role_assigned' => json_encode([$finance->id, $ceo->id]),
             'message' => 'Dana investasi dari investor [[nama.investor]] telah berhasil diterima. Status investasi: Selesai.',
         ]);
 
@@ -402,9 +407,10 @@ class NotificationSFinlogSeeder extends Seeder
             'module' => 's_finlog',
         ]);
 
-        NotificationFeatureDetail::firstOrCreate([
+        NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $transfer_pengembalian_investasi_ke_investor->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
+        ], [
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].',
         ]);
     }
