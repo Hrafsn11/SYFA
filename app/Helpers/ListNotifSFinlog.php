@@ -201,7 +201,7 @@ class ListNotifSFinlog
         ];
 
         // Generate link ke detail pengajuan investasi
-        $link = route('sfinlog.pengajuan-investasi.show', $pengajuan->id_pengajuan_investasi_finlog);
+        $link = route('sfinlog.pengajuan-investasi.detail', $pengajuan->id_pengajuan_investasi_finlog);
 
         $data = [
             'notif_variable' => $notif_variable,
