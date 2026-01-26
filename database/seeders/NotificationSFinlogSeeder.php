@@ -174,6 +174,46 @@ class NotificationSFinlogSeeder extends Seeder
             'message' => 'Debitur [[nama.debitur]] telah mengonfirmasi penerimaan dana pinjaman.',
         ]);
 
+        // =============================================
+        // NOTIFIKATION UNTUK SURAT PERINGATAN 
+        // =============================================
+
+        $sp1 = NotificationFeature::firstOrCreate([
+            'name' => 'surat_peringatan_2_pengembalian_dana_sfinlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::updateOrCreate([
+            'notification_feature_id' => $sp1->id_notification_feature,
+        ], [
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Sehubungan dengan hasil evaluasi dan pemantauan yang telah kami lakukan, bersama email ini kami sampaikan bahwa perusahaan akan mengirimkan Surat Peringatan Pertama (SP 1) sebagai bentuk tindak lanjut atas hal-hal yang telah menjadi perhatian bersama. Adapun surat resmi terlampir pada email ini untuk dapat dipelajari dan ditindaklanjuti sebagaimana mestinya.',
+        ]);
+
+        $sp2 = NotificationFeature::firstOrCreate([
+            'name' => 'surat_peringatan_2_pengembalian_dana_sfinlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::updateOrCreate([
+            'notification_feature_id' => $sp2->id_notification_feature,
+        ], [
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Sehubungan dengan hasil evaluasi dan pemantauan yang telah kami lakukan, bersama email ini kami sampaikan bahwa perusahaan akan mengirimkan Surat Peringatan Kedua (SP 2) sebagai bentuk tindak lanjut atas hal-hal yang telah menjadi perhatian bersama. Adapun surat resmi terlampir pada email ini untuk dapat dipelajari dan ditindaklanjuti sebagaimana mestinya.',
+        ]);
+
+        $sp3 = NotificationFeature::firstOrCreate([
+            'name' => 'surat_peringatan_3_pengembalian_dana_sfinlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::updateOrCreate([
+            'notification_feature_id' => $sp3->id_notification_feature,
+        ], [
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Sehubungan dengan hasil evaluasi dan pemantauan yang telah kami lakukan, bersama email ini kami sampaikan bahwa perusahaan akan mengirimkan Surat Peringatan Ketiga (SP 3) sebagai bentuk tindak lanjut atas hal-hal yang telah menjadi perhatian bersama. Adapun surat resmi terlampir pada email ini untuk dapat dipelajari dan ditindaklanjuti sebagaimana mestinya.',
+        ]);
+
         // ============================================
         // NOTIFICATION FEATURES UNTUK PENGEMBALIAN DANA
         // ============================================
