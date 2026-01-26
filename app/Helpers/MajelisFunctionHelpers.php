@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\sendMailJob;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\Notification;
 use App\Models\NotificationFeatureDetail;
@@ -451,6 +452,121 @@ if (!function_exists('sendNotification')) {
                                     $not->link = $data['link'];
                                     $not->user_id = $value3;
                                     $not->save();
+                                }
+                            }
+                        }
+                    }
+                }
+            }   
+        }
+    }
+}
+
+if (!function_exists('sendNotificationWithMail')) {
+    function sendNotificationWithMail($data)
+    {
+        $detail_notif = NotificationFeatureDetail::where('notification_feature_id', $data['notif']->id_notification_feature)->get();
+
+        if(count($detail_notif) > 0) {
+            foreach($detail_notif as $key1 => $value1) {
+                $sentEmails = [];
+                $role_assigned = json_decode($value1->role_assigned);
+                if ($role_assigned) {
+                    $message_replaced = str_replace(array_keys($data['notif_variable']), array_values($data['notif_variable']), $value1->message);
+                    foreach($role_assigned as $key2 => $value2) {
+                        $role = Role::find($value2);
+                        if(isset($role)) {
+                            $roleName = $role->name;
+
+                            if (in_array($roleName, ['Debitur', 'Investor'])) {
+                                $debitur_and_investor = [];
+                                if(!empty($data['id_debitur'])) {
+                                    $debitur_and_investor[] = $data['id_debitur'];
+                                }
+                                if(!empty($data['id_investor'])) {
+                                    $debitur_and_investor[] = $data['id_investor'];
+                                }
+                                $user_temp = User::whereHas('debiturInvestor', function ($query) use ($debitur_and_investor) {
+                                    $query->whereIn('id_debitur', $debitur_and_investor);
+                                })->pluck('id')->toArray();
+
+                            } else {
+                                $user_temp = User::role($roleName)
+                                ->pluck('id')
+                                ->toArray();
+                            }
+                                                        
+                            if (count($user_temp) > 0) {
+                                foreach ($user_temp as $key3 => $value3) {
+                                    $not = new Notification();
+                                    $not->type = 'info';
+                                    $not->status = 'unread';
+                                    $not->content = $message_replaced;
+                                    $not->link = $data['link'];
+                                    $not->user_id = $value3;
+                                    $not->save();
+
+                                    $user = User::find($value3);
+                                    $url = secure_url($not->link);
+                                    $message_replaced = strip_tags($message_replaced);
+
+                                    // $data_queue = [
+                                    //     'email' => $user->email,
+                                    //     'name' => $user->name,
+                                    //     'message' => $message_replaced,
+                                    //     'url' => $url,
+                                    // ];
+                                    
+                                    // dispatch(new SendMailJob($data_queue));
+                                }
+
+                                // $emailTest = 'alfinadd11@gmail.com';
+                                // if (!isset($sentEmails[$emailTest])) {
+                                //     $sentEmails[$emailTest] = true;
+
+                                //     // Check if user exists before creating notification
+                                //     $testUserId = '01k9rbnfgb31mjkn25wwa74y8g';
+                                //     if (User::find($testUserId)) {
+                                //         $not3 = new Notification();
+                                //         $not3->type = 'info';
+                                //         $not3->status = 'unread';
+                                //         $not3->content = $message_replaced;
+                                //         $not3->link = $data['link'];
+                                //         $not3->user_id = $testUserId;
+                                //         $not3->save();
+                                //     }
+
+                                //     $data_queue3 = [
+                                //         'email' => $emailTest,
+                                //         'name'  => 'Alfina',
+                                //         'message' => $message_replaced,
+                                //         'url' => '-',
+                                //     ];
+
+                                //     dispatch(new sendMailJob($data_queue3));
+                                // }
+
+                                $emailTest2 = 'fahry.fauzan@gmail.com';
+                                if (!isset($sentEmails[$emailTest2])) {
+                                    $sentEmails[$emailTest2] = true;
+
+                                    $not4 = new Notification();
+                                    $not4->type = 'info';
+                                    $not4->status = 'unread';
+                                    $not4->content = $message_replaced;
+                                    $not4->link = $data['link'] ?? '-';
+                                    $not4->user_id = '01k9rbnfgb31mjkn25wwa74y8g';
+                                    $not4->save();
+
+                                    $data_queue4 = [
+                                        'email' => $emailTest2,
+                                        'name'  => 'Fahry Fauzan',
+                                        'message' => $message_replaced,
+                                        'url' => '-',
+                                        'spk_number' => $data['spk_number'] ?? 1
+                                    ];
+
+                                    dispatch(new sendMailJob($data_queue4));
                                 }
                             }
                         }
