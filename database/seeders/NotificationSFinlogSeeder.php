@@ -45,7 +45,7 @@ class NotificationSFinlogSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $disetujui_io->id_notification_feature,
-            'role_assigned' => json_encode([$debitur->id, $ceo->id]),
+            'role_assigned' => json_encode([$debitur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh Investment Officer.',
         ]);
 
@@ -57,7 +57,7 @@ class NotificationSFinlogSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $ditolak_io->id_notification_feature,
-            'role_assigned' => json_encode([$debitur->id, $ceo->id]),
+            'role_assigned' => json_encode([$debitur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh Investment Officer.',
         ]);
 
@@ -95,7 +95,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $disetujui_ski_finance->id_notification_feature,
             ], [
-            'role_assigned' => json_encode([$investmentOfficer->id]),
+            'role_assigned' => json_encode([$investmentOfficer->id, $ceo->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
         ]);
 
@@ -108,7 +108,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $ditolak_ski_finance->id_notification_feature,
             ], [
-            'role_assigned' => json_encode([$investmentOfficer->id]),
+            'role_assigned' => json_encode([$investmentOfficer->id, $ceo->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
         ]);
 
