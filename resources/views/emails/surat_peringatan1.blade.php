@@ -43,32 +43,45 @@
 <div class="container">
 
     <div class="title">
-        <div>Format Surat Peringatan – OVER DUE</div>
+        <div>Format Surat Peringatan - OVER DUE</div>
         <div>Surat Peringatan ke-1</div>
     </div>
 
     <div class="content">
         <p>
             Kepada yth,<br>
-            <strong>…………………… (FP. PT …………………………)</strong>
+            <strong>FP. {{ $debitur }}</strong>
         </p>
 
         <p>
             Bersama ini kami perlu informasikan bahwa tagihan piutang pembiayaan atas invoice
-            no <strong>……………</strong> sudah jatuh tempo <strong>……… hari</strong>, untuk itu mohon kiranya
+            no <strong>{{ $invoice }}</strong> sudah jatuh tempo <strong>1 hari</strong>, untuk itu mohon kiranya
             dapat mengkonfirmasikan kepada <strong>Luthfia</strong> ke
-            <strong>0811…….</strong> atau melalui email <strong>……………….</strong>
+            <strong>0858 9246 7566</strong> atau melalui email <strong><a href="mailto:luthfia@synnovac-capital.com">luthfia@synnovac-capital.com</a></strong>
             dan mengembalikan dana pembiayaan tersebut kepada
             <strong>S-Finance</strong> ke rekening nomor
-            <strong>……………………………………</strong>.
+            <strong>124-001-0052-851 PT Synnovac Kapital Indonesia</strong>.
         </p>
 
+        @php
+            $textKol = '';
+            if($kol == 0 || $kol == 1){
+                $textKol = 'LANCAR';
+            }else if($kol == 2){
+                $textKol = 'DALAM PERHATIAN KHUSUS';
+            }else if($kol == 3){
+                $textKol = 'TIDAK LANCAR';
+            }else if($kol == 4){
+                $textKol = 'DIRAGUKAN';
+            }else if($kol == 5){
+                $textKol = 'MACET';
+            }
+        @endphp
         <p>
             Status kolektibilitas pembiayaan saat ini adalah :
             <br>
             <strong>
-                LANCAR / DALAM PERHATIAN KHUSUS / TIDAK LANCAR /
-                DIRAGUKAN / MACET
+                {{ $textKol }}
             </strong>
             <br>
             <em>
@@ -98,8 +111,7 @@
 
     <div class="cc">
         <strong>CC :</strong><br>
-        CEO PT ……<br>
-        CEO S Finance
+        CEO {{ $debitur }}<br>
     </div>
 
 </div>

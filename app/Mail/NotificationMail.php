@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class NotificationMail extends Mailable implements ShouldQueue
 {
@@ -19,17 +20,23 @@ class NotificationMail extends Mailable implements ShouldQueue
     public $url;
     public $content;
     public $spkNumber;
+    public $debitur;
+    public $bukti;
+    public $kol;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $url, $content, $spkNumber)
+    public function __construct($user, $url, $content, $spkNumber, $debitur, $bukti, $kol)
     {
         //
         $this->user = $user;
         $this->url = $url;
         $this->content = $content;
         $this->spkNumber = $spkNumber;
+        $this->debitur = $debitur;
+        $this->bukti = $bukti;
+        $this->kol = $kol;
     }
 
     /**
@@ -38,7 +45,7 @@ class NotificationMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notifikasi Baru dari Aplikasi Syifa',
+            subject: 'Peringatan Tagihan Piutang Pembiayaan',
         );
     }
 
@@ -61,31 +68,27 @@ class NotificationMail extends Mailable implements ShouldQueue
     {
         $attachments = [];
 
-        // Generate PDF from blade
-        if ($this->spkNumber == 3) {
-            $pdf = Pdf::loadView('emails.surat_peringatan3');
+        $spkMap = [
+            1 => ['view' => 'emails.surat_peringatan1', 'file' => 'Surat Peringatan 1.pdf'],
+            2 => ['view' => 'emails.surat_peringatan2', 'file' => 'Surat Peringatan 2.pdf'],
+            3 => ['view' => 'emails.surat_peringatan3', 'file' => 'Surat Peringatan 3.pdf'],
+        ];
 
-            $attachments[] = Attachment::fromData(
-                fn () => $pdf->output(),
-                'Surat Peringatan 3.pdf'
-            )->withMime('application/pdf');
+        // Default to SP1 if spkNumber is invalid
+        $spk = $spkMap[$this->spkNumber] ?? $spkMap[1];
+        $invoice = $this->bukti->no_invoice ?? 'N/A';
+        $kol = $this->kol;
+        $debitur = $this->debitur;
 
-            return $attachments;
-        } elseif ($this->spkNumber == 2) {
-            $pdf = Pdf::loadView('emails.surat_peringatan2');
-
-            $attachments[] = Attachment::fromData(
-                fn () => $pdf->output(),
-                'Surat Peringatan 2.pdf'
-            )->withMime('application/pdf');
-
-            return $attachments;
-        }
-        $pdf = Pdf::loadView('emails.surat_peringatan1');
+        $pdf = Pdf::loadView($spk['view'], [
+            'invoice' => $invoice,
+            'kol' => $kol,
+            'debitur' => $debitur,
+        ])->setPaper('a4', 'portrait');
 
         $attachments[] = Attachment::fromData(
             fn () => $pdf->output(),
-            'Surat Peringatan 1.pdf'
+            $spk['file']
         )->withMime('application/pdf');
 
         return $attachments;
