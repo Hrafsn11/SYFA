@@ -9,6 +9,7 @@ class PengajuanInvestasiDetail extends Component
 {
     public $id;
     public $pengajuan;
+    public $projects = [];
 
     public function mount($id)
     {
@@ -43,6 +44,10 @@ class PengajuanInvestasiDetail extends Component
                 $this->pengajuan->kode_perusahaan_missing = true;
             }
         }
+
+        // Load projects for edit modal
+        $this->projects = \App\Models\CellsProject::orderBy('nama_cells_bisnis')
+            ->get();
     }
 
     public function refreshData()

@@ -6,11 +6,15 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4 flex-wrap gap-2 mt-3">
         <h5 class="mb-3 mb-md-4">Detail Investasi</h5>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            @php
+                $isOwner = Auth::id() == ($pengajuan->investor->user_id ?? null);
+                $isRejectedAtStep1 = $currentStep == 1 && str_contains($status, 'Ditolak');
+                $isRejectedAtStep2 = $currentStep == 2 && str_contains($status, 'Ditolak CEO Finlog');
+            @endphp
+
+            {{-- Step 1: Draft - Show Submit button --}}
             @if ($currentStep == 1 && $status == 'Draft')
-                @php
-                    $isOwner = Auth::id() == $pengajuan->investor->user_id ?? false;
-                @endphp
                 @if ($isOwner)
                     <button type="button" class="btn btn-success" id="btnSubmitPengajuan">
                         <i class="fas fa-paper-plane me-2"></i>
@@ -19,6 +23,15 @@
                 @endif
             @endif
 
+            {{-- Step 1: Rejected - Show Re-Submit button only (Edit via index page) --}}
+            @if ($isRejectedAtStep1 && $isOwner)
+                <button type="button" class="btn btn-success" id="btnResubmitPengajuan">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Re-Submit Pengajuan
+                </button>
+            @endif
+
+            {{-- Step 2: Menunggu Validasi Finance SKI --}}
             @can('pengajuan_investasi_finlog.validasi_finance_ski')
                 @if ($currentStep == 2 && str_contains($status, 'Menunggu Validasi Finance SKI'))
                     <button type="button" class="btn btn-primary" id="btnValidasiFinanceSKI">
@@ -26,8 +39,17 @@
                         Validasi Finance SKI
                     </button>
                 @endif
+
+                {{-- Step 2: Ditolak CEO Finlog - Show Re-Validasi button --}}
+                @if ($isRejectedAtStep2)
+                    <button type="button" class="btn btn-primary" id="btnValidasiFinanceSKI">
+                        <i class="fas fa-redo me-2"></i>
+                        Re-Validasi Finance SKI
+                    </button>
+                @endif
             @endcan
 
+            {{-- Step 3: Menunggu Persetujuan CEO Finlog --}}
             @can('pengajuan_investasi_finlog.validasi_ceo_finlog')
                 @if ($currentStep == 3 && str_contains($status, 'Menunggu Persetujuan CEO Finlog'))
                     <button type="button" class="btn btn-primary" id="btnValidasiCEO">
@@ -37,6 +59,7 @@
                 @endif
             @endcan
 
+            {{-- Step 4: Upload Bukti Transfer --}}
             @can('pengajuan_investasi_finlog.upload_bukti')
                 @if ($currentStep == 4 && str_contains($status, 'Menunggu Upload Bukti Transfer'))
                     <button type="button" class="btn btn-success" id="btnUploadBuktiTransfer">
@@ -45,13 +68,6 @@
                     </button>
                 @endif
             @endcan
-
-            @if (str_contains($status, 'Ditolak'))
-                <span class="badge bg-danger fs-6">
-                    <i class="ti ti-x me-1"></i>
-                    {{ $status }}
-                </span>
-            @endif
 
         </div>
     </div>

@@ -17,7 +17,15 @@
                                     class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="namaPicKontrakFinlog" name="nama_pic_kontrak"
                                 value="{{ $pengajuan->nama_pic_kontrak ?? '' }}"
-                                placeholder="Masukkan nama PIC/CEO investor" {{ !empty($pengajuan->nomor_kontrak) ? 'readonly' : 'required' }}>
+                                placeholder="Masukkan nama PIC/CEO investor" 
+                                @if(!empty($pengajuan->nomor_kontrak))
+                                    readonly
+                                @elseif(!auth()->user()->can('pengajuan_investasi_finlog.generate_kontrak'))
+                                    disabled
+                                @else
+                                    required
+                                @endif
+                            >
                             <small class="text-muted">Nama ini akan digunakan dalam kontrak investasi</small>
                         </div>
                         <div class="col-md-6">
@@ -101,17 +109,19 @@
 
                     <div class="d-flex justify-content-end gap-2">
                         @if(!empty($pengajuan->nomor_kontrak))
-                            <a href="{{ route('sfinlog.pengajuan-investasi.preview-kontrak', ['id' => $pengajuan->id_pengajuan_investasi_finlog]) }}"
-                                class="btn btn-outline-primary" target="_blank">
-                                <i class="ti ti-eye me-2"></i>
-                                Preview Kontrak
-                            </a>
-                        @elseif(!empty($pengajuan->preview_nomor_kontrak))
-                            <button type="button" class="btn btn-outline-primary" id="btnPreviewKontrakFinlog">
-                                <i class="ti ti-eye me-2"></i>
-                                Preview Kontrak
-                            </button>
                             @can('pengajuan_investasi_finlog.generate_kontrak')
+                                <a href="{{ route('sfinlog.pengajuan-investasi.preview-kontrak', ['id' => $pengajuan->id_pengajuan_investasi_finlog]) }}"
+                                    class="btn btn-outline-primary" target="_blank">
+                                    <i class="ti ti-eye me-2"></i>
+                                    Preview Kontrak
+                                </a>
+                            @endcan
+                        @elseif(!empty($pengajuan->preview_nomor_kontrak))
+                            @can('pengajuan_investasi_finlog.generate_kontrak')
+                                <button type="button" class="btn btn-outline-primary" id="btnPreviewKontrakFinlog">
+                                    <i class="ti ti-eye me-2"></i>
+                                    Preview Kontrak
+                                </button>
                                 <button type="submit" class="btn btn-success" id="btnGenerateKontrakFinlog">
                                     <span class="spinner-border spinner-border-sm me-2 d-none"
                                         id="btnGenerateKontrakFinlogSpinner"></span>
