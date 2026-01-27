@@ -531,6 +531,7 @@
                                                     <th class="text-center">Status</th>
                                                     @if ($isEdit)
                                                         <th class="text-center" style="min-width: 150px;">Bukti Pembayaran</th>
+                                                        <th class="text-center" style="min-width: 100px;">Aksi</th>
                                                     @endif
                                                 </tr>
                                             </thead>
@@ -544,6 +545,8 @@
                                                                 @if ($item['status'] === 'Lunas')
                                                                     <span
                                                                         class="badge bg-success">{{ $item['status'] }}</span>
+                                                                @elseif($item['status'] === 'Tertunda')
+                                                                    <span class="badge bg-info">Menunggu Konfirmasi</span>
                                                                 @elseif($item['status'] === 'Jatuh Tempo')
                                                                     <span class="badge bg-danger">{{ $item['status'] }}</span>
                                                                 @else
@@ -555,58 +558,97 @@
                                                             @endif
                                                         </td>
                                                         @if ($isEdit)
-                                                            <td>
-                                                                @if (!empty($item['bukti_pembayaran']))
-                                                                    <div class="d-flex flex-column gap-1">
-                                                                        <a href="{{ Storage::url($item['bukti_pembayaran']) }}"
-                                                                            target="_blank" class="btn btn-sm btn-info">
-                                                                            <i class="ti ti-eye me-1"></i>Lihat Bukti
-                                                                        </a>
-                                                                        <small class="text-muted">
-                                                                            {{ isset($item['tanggal_bayar']) ? \Carbon\Carbon::parse($item['tanggal_bayar'])->format('d/m/Y') : '' }}
-                                                                        </small>
-                                                                    </div>
-                                                                @else
-                                                                    @php
-                                                                        $isKontrakGenerated = isset($program) && !is_null($program->kontrak_generated_at);
+                                                            {{-- Kolom Bukti Pembayaran --}}
+                                                            <td class="text-center">
+                                                                @php
+                                                                    $totalDikonfirmasi = \App\Models\RiwayatPembayaranRestrukturisasi::where('id_jadwal_angsuran', $item['id'])
+                                                                        ->where('status', 'Dikonfirmasi')
+                                                                        ->count();
+                                                                    $totalTertunda = \App\Models\RiwayatPembayaranRestrukturisasi::where('id_jadwal_angsuran', $item['id'])
+                                                                        ->where('status', 'Tertunda')
+                                                                        ->count();
+                                                                    $totalRiwayat = $totalDikonfirmasi + $totalTertunda;
+                                                                @endphp
 
-                                                                        $canUpload = $isKontrakGenerated;
-                                                                        $previousNo = null;
-                                                                        if ($canUpload && $item['no'] > 1) {
-                                                                            $previousIndex = $index - 1;
-                                                                            if (isset($jadwal_angsuran[$previousIndex])) {
-                                                                                $previous = $jadwal_angsuran[$previousIndex];
-                                                                                $previousNo = $previous['no'];
-                                                                                // Check if previous has status and is not Lunas
-                                                                                $previousStatus =
-                                                                                    $previous['status'] ?? 'Belum Jatuh Tempo';
-                                                                                if (
-                                                                                    $previousStatus !== 'Lunas' ||
-                                                                                    empty($previous['bukti_pembayaran'] ?? null)
-                                                                                ) {
-                                                                                    $canUpload = false;
-                                                                                }
+                                                                @if ($totalRiwayat > 0)
+                                                                    <button type="button" class="btn btn-sm btn-info text-white" 
+                                                                        wire:click="openUploadModal({{ $index }}, true)"
+                                                                        title="Lihat riwayat pembayaran">
+                                                                        <i class="ti ti-history me-1"></i>Lihat Riwayat
+                                                                        <span class="badge bg-white text-info ms-1">{{ $totalRiwayat }}</span>
+                                                                    </button>
+                                                                @else
+                                                                    <span class="text-muted">-</span>
+                                                                @endif
+                                                            </td>
+                                                            {{-- Kolom Aksi --}}
+                                                            <td class="text-center">
+                                                                @php
+                                                                    $isKontrakGenerated = isset($program) && !is_null($program->kontrak_generated_at);
+                                                                    $sisaPembayaran = $item['sisa_pembayaran'] ?? ($item['pokok'] - ($item['total_terbayar'] ?? 0));
+                                                                    $sudahLunas = $item['status'] === 'Lunas';
+                                                                    $jumlahTertunda = $item['jumlah_tertunda'] ?? 0;
+
+                                                                    $canUpload = $isKontrakGenerated && !$sudahLunas && $sisaPembayaran > 0;
+                                                                    $previousNo = null;
+
+                                                                    // Cek apakah angsuran sebelumnya sudah lunas
+                                                                    if ($canUpload && $item['no'] > 1) {
+                                                                        $previousIndex = $index - 1;
+                                                                        if (isset($jadwal_angsuran[$previousIndex])) {
+                                                                            $previous = $jadwal_angsuran[$previousIndex];
+                                                                            $previousNo = $previous['no'];
+                                                                            $previousStatus = $previous['status'] ?? 'Belum Jatuh Tempo';
+                                                                            // Angsuran sebelumnya harus Lunas atau Dibayar Sebagian
+                                                                            if (!in_array($previousStatus, ['Lunas', 'Dibayar Sebagian'])) {
+                                                                                $canUpload = false;
                                                                             }
                                                                         }
-                                                                    @endphp
-                                                                    <div>
-                                                                        <button type="button" class="btn btn-sm btn-primary"
-                                                                            wire:click="openUploadModal({{ $index }})"
-                                                                            @if (!$canUpload) disabled @endif>
-                                                                            <i class="ti ti-upload me-1"></i>Upload Bukti
+                                                                    }
+                                                                @endphp
+
+                                                                {{-- Tombol Upload untuk User --}}
+                                                                @can('program_restrukturisasi.upload')
+                                                                    @if ($sudahLunas)
+                                                                        <span class="badge bg-success"><i class="ti ti-check me-1"></i>Lunas</span>
+                                                                    @elseif ($sisaPembayaran > 0)
+                                                                        <div>
+                                                                            <button type="button" class="btn btn-sm btn-primary mb-1"
+                                                                                wire:click="openUploadModal({{ $index }})"
+                                                                                @if (!$canUpload) disabled @endif>
+                                                                                <i class="ti ti-upload me-1"></i>Bayar
+                                                                            </button>
+                                                                            @if (!$canUpload)
+                                                                                <small class="text-danger d-block">
+                                                                                    @if(!$isKontrakGenerated)
+                                                                                        Generate kontrak dulu
+                                                                                    @elseif($previousNo)
+                                                                                        Selesaikan bulan {{ $previousNo }}
+                                                                                    @endif
+                                                                                </small>
+                                                                            @endif
+                                                                            @if ($sisaPembayaran < $item['pokok'])
+                                                                                <small class="text-muted d-block">
+                                                                                    Sisa: Rp {{ number_format($sisaPembayaran, 0, ',', '.') }}
+                                                                                </small>
+                                                                            @endif
+                                                                        </div>
+                                                                    @endif
+                                                                @endcan
+
+                                                                {{-- Tombol Konfirmasi untuk Admin (jika ada pembayaran tertunda) --}}
+                                                                @can('program_restrukturisasi.konfirmasi')
+                                                                    @if ($jumlahTertunda > 0)
+                                                                        <button type="button"
+                                                                            class="btn btn-sm btn-success text-white"
+                                                                            wire:click="openKonfirmasiModal({{ $index }})">
+                                                                            <i class="ti ti-check me-1"></i>Konfirmasi
+                                                                            @if ($jumlahTertunda > 1)
+                                                                                <span class="badge bg-white text-success ms-1">{{ $jumlahTertunda }}</span>
+                                                                            @endif
                                                                         </button>
-                                                                        @if (!$canUpload)
-                                                                            <small class="text-danger d-block mt-1">
-                                                                                @if(!$isKontrakGenerated)
-                                                                                    Generate kontrak dulu
-                                                                                @elseif($previousNo)
-                                                                                    Bayar angsuran bulan {{ $previousNo }}
-                                                                                    terlebih dahulu
-                                                                                @endif
-                                                                            </small>
-                                                                        @endif
-                                                                    </div>
-                                                                @endif
+                                                                    @endif
+                                                                @endcan
                                                             </td>
                                                         @endif
                                                     </tr>
@@ -614,9 +656,11 @@
                                             </tbody>
                                             <tfoot class="table-light">
                                                 <tr>
-                                                    <th colspan="2">Total</th>
+                                                    <th>Total</th>
                                                     <th class="text-end">{{ number_format($total_pokok, 0, ',', '.') }}</th>
+                                                    <th></th>
                                                     @if ($isEdit)
+                                                        <th></th>
                                                         <th></th>
                                                     @endif
                                                 </tr>
