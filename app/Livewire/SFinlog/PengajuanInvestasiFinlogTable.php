@@ -102,6 +102,7 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
         $query = PengajuanInvestasiFinlog::query()
             ->with(['investor', 'project'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_investasi_finlog.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
+            ->leftJoin('cells_projects', 'pengajuan_investasi_finlog.id_cells_project', '=', 'cells_projects.id_cells_project')
             ->select('pengajuan_investasi_finlog.*');
 
         return $this->applyDebiturAuthorization($query);
@@ -115,69 +116,71 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                 ->label(function ($row) use (&$rowNumber) {
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
-                    return '<div class="text-center">'.$number.'</div>';
+                    return '<div class="text-center">' . $number . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
-                
+
             Column::make('Nama Investor', 'nama_investor')
                 ->sortable()
                 ->searchable()
-                ->format(fn ($value) => '<div class="text-start"><strong>'.($value ?: '-').'</strong></div>')
+                ->format(fn($value) => '<div class="text-start"><strong>' . ($value ?: '-') . '</strong></div>')
                 ->html(),
-                
-            Column::make('Cells Bisnis')
+
+            Column::make('Cells Bisnis', 'cells_projects.nama_cells_bisnis')
                 ->label(function ($row) {
-                    $namaCellsBisnis = $row->project->nama_cells_bisnis ?? $row->project->nama_cells_bisnis ?? '-';
-                    return '<div class="text-start">'.$namaCellsBisnis.'</div>';
+                    $namaCellsBisnis = $row->project->nama_cells_bisnis ?? '-';
+                    return '<div class="text-start">' . $namaCellsBisnis . '</div>';
                 })
                 ->html()
-                ->searchable(),
-                
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->orWhere('cells_projects.nama_cells_bisnis', 'LIKE', '%' . $searchTerm . '%');
+                }),
+
             Column::make('Tanggal Investasi', 'tanggal_investasi')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    return '<div class="text-center">'.($value ? \Carbon\Carbon::parse($value)->format('d M Y') : '-').'</div>';
+                    return '<div class="text-center">' . ($value ? \Carbon\Carbon::parse($value)->format('d M Y') : '-') . '</div>';
                 })
                 ->html(),
             Column::make('Tanggal Berakhir', 'tanggal_berakhir_investasi')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    return '<div class="text-center">'.($value ? \Carbon\Carbon::parse($value)->format('d M Y') : '-').'</div>';
+                    return '<div class="text-center">' . ($value ? \Carbon\Carbon::parse($value)->format('d M Y') : '-') . '</div>';
                 })
                 ->html(),
-                
+
             Column::make('Nominal Investasi', 'nominal_investasi')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    return '<div class="text-end"><strong>Rp '.number_format($value ?? 0, 0, ',', '.').'</strong></div>';
+                    return '<div class="text-end"><strong>Rp ' . number_format($value ?? 0, 0, ',', '.') . '</strong></div>';
                 })
                 ->html(),
-                
+
             Column::make('Lama Investasi', 'lama_investasi')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    return '<div class="text-center">'.($value ? $value . ' Bulan' : '-').'</div>';
+                    return '<div class="text-center">' . ($value ? $value . ' Bulan' : '-') . '</div>';
                 })
                 ->html(),
-                
+
             Column::make('Bagi Hasil', 'persentase_bagi_hasil')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    return '<div class="text-center">'.($value ? number_format($value, 2) . '%' : '-').'</div>';
+                    return '<div class="text-center">' . ($value ? number_format($value, 2) . '%' : '-') . '</div>';
                 })
                 ->html(),
-                
+
             Column::make('Status', 'status')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    $badgeClass = match($value) {
+                    $badgeClass = match ($value) {
                         'Draft' => 'bg-warning text-dark',
                         'Menunggu Validasi Fia' => 'bg-info',
                         'Menunggu Validasi CEO' => 'bg-info',
@@ -188,12 +191,12 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                         'Ditolak' => 'bg-danger',
                         default => 'bg-secondary'
                     };
-                    return '<div class="text-center"><span class="badge '.$badgeClass.'">'.ucfirst($value ?: 'Draft').'</span></div>';
+                    return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ucfirst($value ?: 'Draft') . '</span></div>';
                 })
                 ->html(),
-                
+
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.sfinlog.pengajuan-investasi.partials.table-actions', [
+                ->label(fn($row) => view('livewire.sfinlog.pengajuan-investasi.partials.table-actions', [
                     'id' => $row->id_pengajuan_investasi_finlog,
                     'status' => $row->status,
                     'current_step' => $row->current_step,
