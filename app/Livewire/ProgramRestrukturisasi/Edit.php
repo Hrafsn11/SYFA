@@ -188,6 +188,11 @@ class Edit extends Create
                 'jumlah_tertunda' => $jumlahTertunda,
             ];
 
+            if ($data['sisa_pembayaran'] <= 1 && $data['status'] !== self::STATUS_LUNAS) {
+                $data['status'] = self::STATUS_LUNAS;
+                $item->update(['status' => self::STATUS_LUNAS]);
+            }
+
             if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
                 $data['sisa_pinjaman'] = $sisaPokok;
                 if (!$item->is_grace_period) {
@@ -749,9 +754,13 @@ class Edit extends Create
             // Hitung total pembayaran yang sudah dikonfirmasi
             $totalDikonfirmasi = (float) $jadwalAngsuran->total_terbayar + (float) $riwayat->nominal_bayar;
 
-            // Otomatis tentukan status berdasarkan total
-            $isLunas = $totalDikonfirmasi >= (float) $jadwalAngsuran->total_cicilan;
+            $sisaPembayaran = (float) $jadwalAngsuran->total_cicilan - $totalDikonfirmasi;
+            $isLunas = $sisaPembayaran <= 1; // Toleransi 1 rupiah
             $statusBaru = $isLunas ? self::STATUS_LUNAS : self::STATUS_DIBAYAR_SEBAGIAN;
+
+            if ($isLunas) {
+                $totalDikonfirmasi = (float) $jadwalAngsuran->total_cicilan;
+            }
 
             // Update jadwal angsuran
             $catatanBaru = $this->appendCatatan(
