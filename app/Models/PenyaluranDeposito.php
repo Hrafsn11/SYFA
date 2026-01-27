@@ -44,4 +44,18 @@ class PenyaluranDeposito extends Model
     {
         return $this->belongsTo(MasterDebiturDanInvestor::class, 'id_debitur', 'id_debitur');
     }
+
+    public function riwayatPengembalian()
+    {
+        return $this->hasMany(RiwayatPengembalianDeposito::class, 'id_penyaluran_deposito', 'id_penyaluran_deposito');
+    }
+
+    public function getTotalDikembalikanAttribute()
+    {
+        return $this->riwayatPengembalian()->sum('nominal_dikembalikan');
+    }
+    public function getSisaBelumDikembalikanAttribute()
+    {
+        return max(0, (float)$this->nominal_yang_disalurkan - $this->total_dikembalikan);
+    }
 }

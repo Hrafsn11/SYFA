@@ -1,3 +1,4 @@
+<div>
 {{-- Modal Tambah/Edit Penyaluran Deposito --}}
 <div class="modal fade" id="modalPenyaluranDeposito">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -150,6 +151,22 @@
                         <label class="form-label">Sisa yang Belum Dikembalikan</label>
                         <input type="text" class="form-control bg-light" id="pengembalian_sisa" readonly>
                     </div>
+
+                    <!-- Bukti Pengembalian (Opsional) -->
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Bukti Pengembalian <small class="text-muted">(Opsional)</small></label>
+                        <input type="file" class="form-control" wire:model="bukti_input_pengembalian" accept="image/*,.pdf">
+                        <small class="text-muted">Format: JPG, PNG, PDF (Max 2MB)</small>
+                        <div wire:loading wire:target="bukti_input_pengembalian" class="text-info mt-1">
+                            <span class="spinner-border spinner-border-sm"></span> Uploading...
+                        </div>
+                    </div>
+
+                    <!-- Catatan (Opsional) -->
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Catatan <small class="text-muted">(Opsional)</small></label>
+                        <textarea class="form-control" wire:model="catatan_pengembalian" rows="2" placeholder="Tulis catatan..."></textarea>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -185,6 +202,88 @@
     </div>
 </div>
 
+{{-- Modal Riwayat Pengembalian --}}
+<div wire:ignore.self class="modal fade" id="modalRiwayatPengembalian" tabindex="-1"
+    aria-labelledby="modalRiwayatPengembalianLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalRiwayatPengembalianLabel">Riwayat Pengembalian Dana</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Info Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Informasi Penyaluran</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-sm table-borderless">
+                                            <tr>
+                                                <td width="40%"><strong>No. Kontrak:</strong></td>
+                                                <td id="riwayat_no_kontrak">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Nama Perusahaan:</strong></td>
+                                                <td id="riwayat_nama_perusahaan">-</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-sm table-borderless">
+                                            <tr>
+                                                <td width="40%"><strong>Nominal Disalurkan:</strong></td>
+                                                <td id="riwayat_nominal_disalurkan">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Total Dikembalikan:</strong></td>
+                                                <td id="riwayat_total_dikembalikan" class="text-success fw-bold">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Sisa:</strong></td>
+                                                <td id="riwayat_sisa" class="text-danger fw-bold">-</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabel Riwayat -->
+                <h6 class="fw-bold mb-3">Daftar Riwayat Pengembalian</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="tableRiwayatPengembalian">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center" width="5%">No</th>
+                                <th class="text-center">Tanggal</th>
+                                <th class="text-center">Nominal</th>
+                                <th class="text-center">Bukti</th>
+                                <th class="text-center">Catatan</th>
+                                <th class="text-center">Diinput Oleh</th>
+                                <th class="text-center">Waktu Input</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayat_tbody">
+                            <tr>
+                                <td colspan="7" class="text-center">Tidak ada data</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 @push('scripts')
     <script>
         // Helper function - check if not already declared
@@ -195,7 +294,7 @@
         }
         
         // Global function untuk modal input pengembalian
-        window.openInputPengembalian = function(id, no_kontrak, nama_perusahaan, nominal_disalurkan, nominal_dikembalikan, tgl_pengiriman, tgl_pengembalian) {
+        window.openInputPengembalian = function(id, no_kontrak, nama_perusahaan, nominal_disalurkan, sisa_belum_dikembalikan, tgl_pengiriman, tgl_pengembalian) {
             $('#pengembalian_id').val(id);
             $('#pengembalian_no_kontrak').val(no_kontrak || '-');
             $('#pengembalian_nama_perusahaan').val(nama_perusahaan || '-');
@@ -204,25 +303,38 @@
             $('#pengembalian_nominal_disalurkan_raw').val(nominal_disalurkan);
             $('#pengembalian_nominal_disalurkan').val(window.formatRupiah(nominal_disalurkan));
             
-            const currentNominal = parseFloat(nominal_dikembalikan) || 0;
-            $('#pengembalian_nominal_dikembalikan_raw').val(currentNominal);
-            $('#pengembalian_nominal_dikembalikan').val(currentNominal > 0 ? window.formatRupiah(currentNominal) : '');
+            // Set sisa yang belum dikembalikan
+            const sisaBelumDikembalikan = parseFloat(sisa_belum_dikembalikan) || 0;
+            $('#pengembalian_nominal_dikembalikan_raw').val(0);  // Reset input to 0
+            $('#pengembalian_nominal_dikembalikan').val('');     // Clear input field
+            $('#pengembalian_sisa').val(window.formatRupiah(sisaBelumDikembalikan));
+            
+            // Store max value untuk validation
+            $('#pengembalian_max_input').remove();  // Remove if exists
+            $('#modalInputPengembalian .modal-body').append(`<input type="hidden" id="pengembalian_max_input" value="${sisaBelumDikembalikan}">`);
+            
+            // Reset Livewire properties untuk bukti dan catatan
+            @this.set('bukti_input_pengembalian', null);
+            @this.set('catatan_pengembalian', '');
             
             updatePengembalianCalculation();
             new bootstrap.Modal($('#modalInputPengembalian')[0]).show();
         };
 
         function updatePengembalianCalculation() {
-            const disalurkan = parseFloat($('#pengembalian_nominal_disalurkan_raw').val()) || 0;
-            const dikembalikan = parseFloat($('#pengembalian_nominal_dikembalikan_raw').val()) || 0;
-            const sisa = Math.max(0, disalurkan - dikembalikan);
+            const maxInput = parseFloat($('#pengembalian_max_input').val()) || 0;
+            const inputNominal = parseFloat($('#pengembalian_nominal_dikembalikan_raw').val()) || 0;
+            const sisa = Math.max(0, maxInput - inputNominal);
 
             $('#pengembalian_sisa').val(window.formatRupiah(sisa));
 
             const input = $('#pengembalian_nominal_dikembalikan');
-            if (dikembalikan > disalurkan) {
+            if (inputNominal > maxInput) {
                 input.addClass('is-invalid');
-                $('#pengembalian_validation_error').text('Nominal yang dikembalikan tidak boleh lebih besar dari nominal yang disalurkan!');
+                $('#pengembalian_validation_error').text('Nominal yang dikembalikan tidak boleh lebih besar dari sisa yang belum dikembalikan (Rp ' + new Intl.NumberFormat('id-ID').format(maxInput) + ')!');
+            } else if (inputNominal < 0) {
+                input.addClass('is-invalid');
+                $('#pengembalian_validation_error').text('Nominal tidak boleh negatif!');
             } else {
                 input.removeClass('is-invalid');
                 $('#pengembalian_validation_error').text('');
@@ -239,14 +351,24 @@
 
             $('#btnSimpanPengembalian').on('click', function() {
                 const id = $('#pengembalian_id').val();
-                const disalurkan = parseFloat($('#pengembalian_nominal_disalurkan_raw').val()) || 0;
+                const maxInput = parseFloat($('#pengembalian_max_input').val()) || 0;
                 const dikembalikan = parseFloat($('#pengembalian_nominal_dikembalikan_raw').val()) || 0;
 
-                if (dikembalikan < 0 || dikembalikan > disalurkan) {
+                if (dikembalikan <= 0) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Validasi Gagal',
-                        text: dikembalikan < 0 ? 'Nominal tidak boleh negatif!' : 'Nominal melebihi yang disalurkan!',
+                        text: 'Nominal harus lebih dari 0!',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                if (dikembalikan > maxInput) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validasi Gagal',
+                        text: 'Nominal melebihi sisa yang belum dikembalikan!',
                         confirmButtonText: 'OK'
                     });
                     return;
@@ -255,7 +377,7 @@
                 $(this).prop('disabled', true);
                 $('#pengembalian_spinner').removeClass('d-none');
 
-                @this.call('updateNominalPengembalian', id, dikembalikan)
+                @this.call('simpanPengembalian', id, dikembalikan)
                     .then(() => bootstrap.Modal.getInstance($('#modalInputPengembalian')[0])?.hide())
                     .finally(() => {
                         $(this).prop('disabled', false);
@@ -275,6 +397,55 @@
                 title: type === 'success' ? 'Berhasil!' : 'Gagal!',
                 text: message,
                 confirmButtonText: 'OK'
+            });
+        });
+
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('open-riwayat-modal', (event) => {
+                const data = event[0] || event;
+                
+                // Close detail modal first
+                const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailKontrakModal'));
+                if (detailModal) {
+                    detailModal.hide();
+                }
+                
+                // Populate info summary
+                $('#riwayat_no_kontrak').text(data.no_kontrak || '-');
+                $('#riwayat_nama_perusahaan').text(data.nama_perusahaan || '-');
+                $('#riwayat_nominal_disalurkan').text(data.nominal_disalurkan || '-');
+                $('#riwayat_total_dikembalikan').text(data.total_dikembalikan || '-');
+                $('#riwayat_sisa').text(data.sisa || '-');
+                
+                // Populate table
+                const riwayatList = @this.riwayat_list || [];
+                let html = '';
+                
+                if (riwayatList.length === 0) {
+                    html = '<tr><td colspan="7" class="text-center">Belum ada riwayat pengembalian</td></tr>';
+                } else {
+                    riwayatList.forEach((item, index) => {
+                        html += `
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td class="text-center">${item.tanggal || '-'}</td>
+                                <td class="text-end">${item.nominal || '-'}</td>
+                                <td class="text-center">${item.bukti ? '<a href="' + item.bukti + '" target="_blank" class="btn btn-sm btn-info"><i class="ti ti-file"></i> Lihat</a>' : '-'}</td>
+                                <td>${item.catatan || '-'}</td>
+                                <td class="text-center">${item.user || '-'}</td>
+                                <td class="text-center">${item.created_at || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                $('#riwayat_tbody').html(html);
+                
+                const modalEl = document.getElementById('modalRiwayatPengembalian');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.show();
+                }
             });
         });
     </script>

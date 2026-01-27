@@ -1,49 +1,51 @@
-<div wire:ignore>
-    <div class="row">
-        <div class="col-12">
-            <div class="mb-4 d-flex justify-content-between align-items-center">
-                <h4 class="fw-bold">Aset Investasi</h4>
+<div>
+    <div wire:ignore>
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold">Aset Investasi</h4>
 
-                @can('penyaluran_deposito.add')
-                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                        id="btnTambahPenyaluran" data-bs-toggle="modal" data-bs-target="#modalPenyaluranDeposito">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Tambah Penyaluran</span>
-                    </button>
-                @endcan
+                    @can('penyaluran_deposito.add')
+                        <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                            id="btnTambahPenyaluran" data-bs-toggle="modal" data-bs-target="#modalPenyaluranDeposito">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Tambah Penyaluran</span>
+                        </button>
+                    @endcan
 
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            <div class="card-datatable">
-                <livewire:penyaluran-deposito.penyaluran-deposito-table />
-            </div>
-        </div>
-    </div>
-
-    @include('livewire.penyaluran-deposito.components.modal')
-
-    <!-- Modal Detail Kontrak -->
-    <div wire:ignore.self class="modal fade" id="detailKontrakModal" tabindex="-1"
-        aria-labelledby="detailKontrakModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="detailKontrakModalLabel">Detail Aset Investasi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="detailKontrakContent">
-                    <div class="text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="card-datatable">
+                    <livewire:penyaluran-deposito.penyaluran-deposito-table />
+                </div>
+            </div>
+        </div>
+
+        @include('livewire.penyaluran-deposito.components.modal')
+
+        <!-- Modal Detail Kontrak -->
+        <div wire:ignore.self class="modal fade" id="detailKontrakModal" tabindex="-1"
+            aria-labelledby="detailKontrakModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailKontrakModalLabel">Detail Aset Investasi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="detailKontrakContent">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -52,7 +54,7 @@
 
 @push('scripts')
     <script>
-        let nilaiInvestasiMax = 0;
+    let nilaiInvestasiMax = 0;
         const canInputPengembalian = @json(auth()->user()->can('penyaluran_deposito.input_pengembalian'));
 
         function afterAction(payload) {
@@ -221,9 +223,10 @@
                     totalNominal += parseFloat(item.nominal_yang_disalurkan || 0);
                     const nominalDisalurkan = parseFloat(item.nominal_yang_disalurkan || 0);
                     const nominalDikembalikan = parseFloat(item.nominal_yang_dikembalikan || 0);
+                    const sisaBelumDikembalikan = parseFloat(item.sisa_belum_dikembalikan ?? (nominalDisalurkan - nominalDikembalikan));
 
                     let statusBadge = '<span class="badge bg-label-danger">Belum Lunas</span>';
-                    if (nominalDikembalikan >= nominalDisalurkan && nominalDikembalikan > 0) {
+                    if (sisaBelumDikembalikan <= 0) {
                         statusBadge = '<span class="badge bg-label-success">Lunas</span>';
                     } else if (nominalDikembalikan > 0) {
                         statusBadge = '<span class="badge bg-label-warning">Sebagian Lunas</span>';
@@ -239,20 +242,28 @@
                                     <td class="text-center">${item.tanggal_pengembalian ? new Date(item.tanggal_pengembalian).toLocaleDateString('id-ID') : '-'}</td>
                                     <td class="text-center">${statusBadge}</td>
                                     <td class="text-center">
-                                        ${canInputPengembalian ? `
-                                        <button type="button" class="btn btn-sm btn-primary" 
-                                            onclick="openInputPengembalian(
-                                                '${item.id}',
-                                                '${item.nomor_kontrak || '-'}',
-                                                '${item.nama_perusahaan || '-'}',
-                                                ${nominalDisalurkan},
-                                                ${nominalDikembalikan},
-                                                '${item.tanggal_pengiriman_dana}',
-                                                '${item.tanggal_pengembalian}'
-                                            ); $('#detailKontrakModal').modal('hide');">
-                                            <i class="ti ti-edit me-1"></i>Input Pengembalian
-                                        </button>
-                                        ` : '-'}
+                                        <div class="d-flex gap-1 justify-content-center">
+                                            ${canInputPengembalian && sisaBelumDikembalikan > 0 ? `
+                                            <button type="button" class="btn btn-sm btn-primary" 
+                                                onclick="openInputPengembalian(
+                                                    '${item.id}',
+                                                    '${item.nomor_kontrak || '-'}',
+                                                    '${item.nama_perusahaan || '-'}',
+                                                    ${nominalDisalurkan},
+                                                    ${sisaBelumDikembalikan},
+                                                    '${item.tanggal_pengiriman_dana}',
+                                                    '${item.tanggal_pengembalian}'
+                                                ); $('#detailKontrakModal').modal('hide');"
+                                                title="Input Pengembalian">
+                                                <i class="ti ti-edit"></i>
+                                            </button>
+                                            ` : ''}
+                                            <button type="button" class="btn btn-sm btn-info" 
+                                                wire:click="lihatRiwayat('${item.id}')"
+                                                title="Lihat History">
+                                                <i class="ti ti-history"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>`;
                 });
