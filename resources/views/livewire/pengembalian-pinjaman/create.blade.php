@@ -122,21 +122,26 @@
 
                         <!-- Khusus Installment -->
                         @if ($jenisPembiayaan === 'Installment')
+                            {{-- Info Tenor --}}
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="alert alert-primary py-2 mb-0">
+                                        <i class="fa-solid fa-calendar-check me-2"></i>
+                                        <strong>{{ $infoTenor ?? 'Menghitung tenor...' }}</strong>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row mb-3">
                                 <div class="col-md-6 mb-2">
-                                    <label for="bulan_pembayaran">Bulan Pembayaran <span
-                                            class="text-danger">*</span></label>
-                                    <livewire:components.select2 :key="'bulan-select-' . $kode_peminjaman" :list_data="collect($availableBulanPembayaran)->map(
-                                        fn($b) => ['value' => $b, 'label' => $b],
-                                    )"
-                                        model_name="bulan_pembayaran" value_name="value" value_label="label"
-                                        data_placeholder="Pilih Bulan" :value="$bulan_pembayaran" />
+                                    <label for="bulan_pembayaran">Pembayaran Tenor</label>
+                                    <input type="text" class="form-control" id="bulan_pembayaran"
+                                        value="{{ $bulan_pembayaran ?? '' }}" readonly>
                                     @error('bulan_pembayaran')
                                         <span class="text-danger small">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="yang_harus_dibayarkan">Yang Harus Dibayar Bulan Ini</label>
+                                    <label for="yang_harus_dibayarkan">Yang Harus Dibayar Tenor Ini</label>
                                     <input type="text" class="form-control" id="yang_harus_dibayarkan"
                                         value="{{ $yang_harus_dibayarkan ? 'Rp ' . number_format($yang_harus_dibayarkan, 0, ',', '.') : '' }}"
                                         readonly>

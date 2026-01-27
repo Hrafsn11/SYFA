@@ -510,14 +510,39 @@ if (!function_exists('sendNotificationWithMail')) {
                                     $url = secure_url($not->link);
                                     $message_replaced = strip_tags($message_replaced);
 
-                                    // $data_queue = [
-                                    //     'email' => $user->email,
-                                    //     'name' => $user->name,
-                                    //     'message' => $message_replaced,
-                                    //     'url' => $url,
-                                    // ];
+                                    $debitur = MasterDebiturDanInvestor::where('id_debitur', $data['id_debitur'])->first();
+                                    if($data['spk_number'] == 1) {
+                                        if(!$debitur) {
+                                            continue;
+                                        } else {
+                                            $name = $debitur->nama_ceo ?? '';
+                                            $email = $debitur->email_ceo ?? '';
+                                        }
+                                    }else if($data['spk_number'] == 2) {
+                                        if(!$debitur) {
+                                            continue;
+                                        } else {
+                                            $name = $debitur->nama_direktur_holding ?? '';
+                                            $email = $debitur->email_direktur_holding ?? '';
+                                        }
+                                    } else {
+                                        if(!$debitur) {
+                                            continue;
+                                        } else {
+                                            $name = $debitur->nama_komisaris ?? '';
+                                            $email = $debitur->email_komisaris ?? '';
+                                        }
+                                    }
+
+                                    $data_queue = [
+                                        'email' => $email,
+                                        'name' => $name,
+                                        'message' => $message_replaced,
+                                        'url' => $url,
+                                        'spk_number' => $data['spk_number'] ?? 1
+                                    ];
                                     
-                                    // dispatch(new SendMailJob($data_queue));
+                                    dispatch(new SendMailJob($data_queue));
                                 }
 
                                 // $emailTest = 'alfinadd11@gmail.com';
@@ -546,28 +571,28 @@ if (!function_exists('sendNotificationWithMail')) {
                                 //     dispatch(new sendMailJob($data_queue3));
                                 // }
 
-                                $emailTest2 = 'fahry.fauzan@gmail.com';
-                                if (!isset($sentEmails[$emailTest2])) {
-                                    $sentEmails[$emailTest2] = true;
+                                // $emailTest2 = 'fahry.fauzan@gmail.com';
+                                // if (!isset($sentEmails[$emailTest2])) {
+                                //     $sentEmails[$emailTest2] = true;
 
-                                    $not4 = new Notification();
-                                    $not4->type = 'info';
-                                    $not4->status = 'unread';
-                                    $not4->content = $message_replaced;
-                                    $not4->link = $data['link'] ?? '-';
-                                    $not4->user_id = '01k9rbnfgb31mjkn25wwa74y8g';
-                                    $not4->save();
+                                //     $not4 = new Notification();
+                                //     $not4->type = 'info';
+                                //     $not4->status = 'unread';
+                                //     $not4->content = $message_replaced;
+                                //     $not4->link = $data['link'] ?? '-';
+                                //     $not4->user_id = '01k9rbnfgb31mjkn25wwa74y8g';
+                                //     $not4->save();
 
-                                    $data_queue4 = [
-                                        'email' => $emailTest2,
-                                        'name'  => 'Fahry Fauzan',
-                                        'message' => $message_replaced,
-                                        'url' => '-',
-                                        'spk_number' => $data['spk_number'] ?? 1
-                                    ];
+                                //     $data_queue4 = [
+                                //         'email' => $emailTest2,
+                                //         'name'  => 'Fahry Fauzan',
+                                //         'message' => $message_replaced,
+                                //         'url' => '-',
+                                //         'spk_number' => $data['spk_number'] ?? 1
+                                //     ];
 
-                                    dispatch(new sendMailJob($data_queue4));
-                                }
+                                //     dispatch(new sendMailJob($data_queue4));
+                                // }
                             }
                         }
                     }

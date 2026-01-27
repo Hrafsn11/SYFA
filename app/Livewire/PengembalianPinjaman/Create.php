@@ -75,6 +75,10 @@ class Create extends Component
     public $tenorPembayaran;
     public $yangHarusDibayarkanPerBulan;
     public $tanggalPencairanReal;
+    
+    // Installment tracking
+    public $tenorSaatIni = 0;           
+    public $infoTenor = '';             
 
     // Late payment adjustment fields
     public $persentaseBagiHasil = 0;      // Persentase bagi hasil (e.g., 5 for 5%)
@@ -213,8 +217,26 @@ class Create extends Component
             $this->availableBulanPembayaran = collect(range(1, $pengajuan->tenor_pembayaran))
                 ->map(fn($i) => "Bulan ke-{$i}")
                 ->toArray();
+            
+            // Hitung tenor saat ini berdasarkan pengembalian yang sudah dilakukan
+            $jumlahPengembalianInstallment = PengembalianPinjaman::where('id_pengajuan_peminjaman', $value)
+                ->count();
+            
+            $this->tenorSaatIni = $jumlahPengembalianInstallment + 1; 
+            
+            if ($this->tenorSaatIni > $pengajuan->tenor_pembayaran) {
+                $this->tenorSaatIni = $pengajuan->tenor_pembayaran;
+            }
+            
+            $this->infoTenor = "Pembayaran Tenor ke-{$this->tenorSaatIni} dari {$pengajuan->tenor_pembayaran} tenor";
+            $this->bulan_pembayaran = "Bulan ke-{$this->tenorSaatIni}";
+            
+            // Hitung nominal yang harus dibayarkan
+            $this->calculateInstallmentPayment();
         } else {
             $this->availableBulanPembayaran = [];
+            $this->tenorSaatIni = 0;
+            $this->infoTenor = '';
         }
 
         $this->calculateLamaPemakaian();
@@ -290,6 +312,40 @@ class Create extends Component
         $this->bagiHasilTambahan = 0;
         $this->totalBagiHasilDisesuaikan = $this->bagiHasilAwal;
         $this->total_bagi_hasil = $this->bagiHasilAwal;
+    }
+
+    /**
+     * Hitung nominal pembayaran installment berdasarkan tenor saat ini
+     */
+    private function calculateInstallmentPayment(): void
+    {
+        if ($this->jenisPembiayaan !== 'Installment' || $this->tenorSaatIni <= 0) {
+            $this->yang_harus_dibayarkan = null;
+            $this->nominal_invoice = null;
+            return;
+        }
+
+        // Pastikan yangHarusDibayarkanPerBulan ada
+        $nominalPerBulan = $this->yangHarusDibayarkanPerBulan ?? 0;
+        
+        // Fallback calculation jika masih 0
+        if ($nominalPerBulan <= 0 && $this->tenorPembayaran > 0) {
+            $totalPinjaman = $this->total_pinjaman ?? 0;
+            $totalBagiHasil = $this->bagiHasilAwal ?? 0;
+            $pembayaranTotal = $totalPinjaman + $totalBagiHasil;
+            $nominalPerBulan = $pembayaranTotal / $this->tenorPembayaran;
+        }
+
+        $nominalBulanIni = $nominalPerBulan;
+
+        // Tenor ke-1: cicilan + seluruh bagi hasil
+        if ($this->tenorSaatIni === 1) {
+            $nominalBulanIni = $nominalPerBulan + ($this->total_bagi_hasil ?? 0);
+        }
+
+        $this->yang_harus_dibayarkan = round($nominalBulanIni);
+        $this->nominal_invoice = round($nominalBulanIni);
+        $this->invoice_dibayarkan = $this->bulan_pembayaran;
     }
 
     public function updatedBulanPembayaran($value)
@@ -377,11 +433,19 @@ class Create extends Component
             return;
         }
 
+        $pencairan = Carbon::parse($this->tanggalPencairanReal)->startOfDay();
+        $today = Carbon::now()->startOfDay();
+
+        if ($today->lte($pencairan)) {
+            $this->lama_pemakaian = 0;
+            return;
+        }
+
         if ($this->jenisPembiayaan === 'Installment') {
-            $this->lama_pemakaian = $this->tenorPembayaran * 30;
+            $this->lama_pemakaian = $pencairan->diffInDays($today);
         } else {
-            $pencairan = Carbon::parse($this->tanggalPencairanReal);
-            $this->lama_pemakaian = $pencairan->diffInDays(now());
+            
+            $this->lama_pemakaian = $pencairan->diffInDays($today);
         }
     }
 
