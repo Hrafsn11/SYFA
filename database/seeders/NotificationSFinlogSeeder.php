@@ -45,7 +45,7 @@ class NotificationSFinlogSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $disetujui_io->id_notification_feature,
-            'role_assigned' => json_encode([$debitur->id]),
+            'role_assigned' => json_encode([$debitur->id, $ceo->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh Investment Officer.',
         ]);
 
@@ -57,7 +57,7 @@ class NotificationSFinlogSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $ditolak_io->id_notification_feature,
-            'role_assigned' => json_encode([$debitur->id]),
+            'role_assigned' => json_encode([$debitur->id, $ceo->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh Investment Officer.',
         ]);
 
@@ -148,7 +148,7 @@ class NotificationSFinlogSeeder extends Seeder
             'notification_feature_id' => $kontrak_digenerate->id_notification_feature,
             ], [
             'role_assigned' => json_encode([$debitur->id, $investmentOfficer->id, $ceo->id]),
-            'message' => 'Kontrak pinjaman debitur [[nama.debitur]] telah berhasil dibuat.',
+            'message' => 'Kontrak pinjaman untuk debitur [[nama.debitur]] telah berhasil dibuat.',
         ]);
 
         // 11. Bukti Transfer Diupload (Status Selesai) - Debitur dan SKI Finance
