@@ -511,6 +511,7 @@ if (!function_exists('sendNotificationWithMail')) {
                                     $message_replaced = strip_tags($message_replaced);
 
                                     $debitur = MasterDebiturDanInvestor::where('id_debitur', $data['id_debitur'])->first();
+                                    $kol = $debitur->kol ? $debitur->kol->kol : 0;
                                     if($data['spk_number'] == 1) {
                                         if(!$debitur) {
                                             continue;
@@ -539,7 +540,10 @@ if (!function_exists('sendNotificationWithMail')) {
                                         'name' => $name,
                                         'message' => $message_replaced,
                                         'url' => $url,
-                                        'spk_number' => $data['spk_number'] ?? 1
+                                        'spk_number' => $data['spk_number'] ?? 1,
+                                        'debitur' => $debitur->nama ?? '',
+                                        'bukti' => $data['bukti'] ?? null,
+                                        'kol' => $kol
                                     ];
                                     
                                     dispatch(new SendMailJob($data_queue));

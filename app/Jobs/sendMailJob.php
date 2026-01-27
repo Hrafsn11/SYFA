@@ -40,7 +40,7 @@ class sendMailJob implements ShouldQueue
     public function handle()
     {
         //
-        Mail::to($this->data['email'])->send(new NotificationMail($this->data['name'], $this->data['url'], $this->data['message'], $this->data['spk_number'] ?? 1));
+        Mail::to($this->data['email'])->send(new NotificationMail($this->data['name'], $this->data['url'], $this->data['message'], $this->data['spk_number'] ?? 1, $this->data['debitur'] ?? '', $this->data['bukti'] ?? null, $this->data['kol'] ?? 0));
     }
 
     public function failed(\Exception $exception)

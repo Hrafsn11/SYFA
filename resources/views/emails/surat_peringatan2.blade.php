@@ -43,26 +43,38 @@
 <div class="container">
 
     <div class="title">
-        <div>Format Surat Peringatan – OVER DUE</div>
+        <div>Format Surat Peringatan - OVER DUE</div>
         <div>Surat Peringatan ke-2</div>
     </div>
 
     <div class="content">
         <p>
             Kepada yth,<br>
-            <strong>…………………… (FP. PT …………………………)</strong>
+            <strong>FP. {{ $debitur }}</strong>
         </p>
 
         <p>
-            Bersama ini kami perlu informasikan Kembali bahwa tagihan piutang pembiayaan atas invoice no……………sudah jatuh tempo ……… hari dan telah kami ingatkan sebelumnya melalui Surat Peringatan ke-1 tertanggal ……….., namun hingga hari ini kami belum mendapatkan realisasi pembayaran piutang pembiayaan tersebut, untuk itu mohon kiranya dapat mengkonfirmasikan kepada Luthfia ke 0811…….atau melalui email ………………. dan  mengembalikan dana pembiayaan tersebut SEGERA kepada S-Finance ke rekening nomor ……………………………………
+            Bersama ini kami perlu informasikan Kembali bahwa tagihan piutang pembiayaan atas invoice no <strong>{{ $invoice }}</strong> sudah jatuh tempo <strong>91 hari</strong> dan telah kami ingatkan sebelumnya melalui Surat Peringatan ke-1 tertanggal {{ \Carbon\Carbon::now()->subDays(90)->format('d-m-Y') }}, namun hingga hari ini kami belum mendapatkan realisasi pembayaran piutang pembiayaan tersebut, untuk itu mohon kiranya dapat mengkonfirmasikan kepada Luthfia ke 0858 9246 7566 atau melalui email <strong><a href="mailto:luthfia@synnovac-capital.com">luthfia@synnovac-capital.com</a></strong> dan mengembalikan dana pembiayaan tersebut SEGERA kepada S-Finance ke rekening nomor <strong>124-001-0052-851 PT Synnovac Kapital Indonesia</strong>.
         </p>
-
+        @php
+            $textKol = '';
+            if($kol == 0 || $kol == 1){
+                $textKol = 'LANCAR';
+            }else if($kol == 2){
+                $textKol = 'DALAM PERHATIAN KHUSUS';
+            }else if($kol == 3){
+                $textKol = 'TIDAK LANCAR';
+            }else if($kol == 4){
+                $textKol = 'DIRAGUKAN';
+            }else if($kol == 5){
+                $textKol = 'MACET';
+            }
+        @endphp
         <p>
             Status kolektibilitas pembiayaan saat ini adalah :
             <br>
             <strong>
-                LANCAR / DALAM PERHATIAN KHUSUS / TIDAK LANCAR /
-                DIRAGUKAN / MACET
+                {{ $textKol }}
             </strong>
             <br>
             <em>
@@ -92,8 +104,7 @@
 
     <div class="cc">
         <strong>CC :</strong><br>
-        CEO PT ……<br>
-        CEO S Finance
+        Direktur {{ $debitur }}<br>
     </div>
 
 </div>
