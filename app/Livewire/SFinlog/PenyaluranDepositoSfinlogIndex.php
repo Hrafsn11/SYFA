@@ -3,6 +3,8 @@
 namespace App\Livewire\SFinlog;
 
 use Livewire\Component;
+use App\Models\PenyaluranDepositoSfinlog;
+use App\Models\RiwayatPengembalianDepositoSfinlog;
 use App\Models\PengajuanInvestasiFinlog;
 use App\Models\MasterDebiturDanInvestor;
 use App\Models\CellsProject;
@@ -29,6 +31,9 @@ class PenyaluranDepositoSfinlogIndex extends Component
     public $id_pengajuan_investasi_finlog, $id_cells_project, $id_project, $nominal_yang_disalurkan, $tanggal_pengiriman_dana, $tanggal_pengembalian;
 
     public $availableProjects = [];
+
+    public $bukti_input_pengembalian;
+    public $catatan_pengembalian;
 
     public function mount()
     {
@@ -169,6 +174,117 @@ class PenyaluranDepositoSfinlogIndex extends Component
             $this->dispatch('showAlert', [
                 'type' => 'error',
                 'message' => 'Terjadi kesalahan saat menyimpan data!'
+            ]);
+        }
+    }
+
+    /**
+     * Simpan pengembalian dengan sistem riwayat
+     */
+    public function simpanPengembalian($id, $nominal)
+    {
+        try {
+            $penyaluran = PenyaluranDepositoSfinlog::findOrFail($id);
+            $sisaBelumDikembalikan = $penyaluran->sisa_belum_dikembalikan;
+
+            if ($nominal > $sisaBelumDikembalikan) {
+                $this->dispatch('showAlert', [
+                    'type' => 'error',
+                    'message' => 'Nominal yang dikembalikan tidak boleh lebih besar dari sisa yang belum dikembalikan (Rp ' . number_format($sisaBelumDikembalikan, 0, ',', '.') . ')!'
+                ]);
+                return;
+            }
+
+            if ($nominal <= 0) {
+                $this->dispatch('showAlert', [
+                    'type' => 'error',
+                    'message' => 'Nominal yang dikembalikan harus lebih dari 0!'
+                ]);
+                return;
+            }
+
+            $buktiPath = null;
+            if ($this->bukti_input_pengembalian) {
+                $buktiPath = $this->bukti_input_pengembalian->store('bukti-pengembalian-sfinlog', 'public');
+            }
+
+            $riwayat = RiwayatPengembalianDepositoSfinlog::create([
+                'id_penyaluran_deposito_sfinlog' => $id,
+                'nominal_dikembalikan' => $nominal,
+                'tanggal_pengembalian' => now(),
+                'bukti_pengembalian' => $buktiPath,
+                'catatan' => $this->catatan_pengembalian,
+            ]);
+
+            \Log::info('Riwayat created', ['id' => $riwayat->id_riwayat_pengembalian_deposito_sfinlog, 'nominal' => $nominal]);
+
+            $totalDikembalikan = RiwayatPengembalianDepositoSfinlog::where('id_penyaluran_deposito_sfinlog', $id)
+                ->sum('nominal_dikembalikan');
+            
+            \Log::info('Total dikembalikan calculated', ['total' => $totalDikembalikan, 'penyaluran_id' => $id]);
+            
+            $updated = $penyaluran->update([
+                'nominal_yang_dikembalikan' => $totalDikembalikan
+            ]);
+            
+            \Log::info('Penyaluran updated', ['success' => $updated, 'new_total' => $penyaluran->fresh()->nominal_yang_dikembalikan]);
+
+            $this->bukti_input_pengembalian = null;
+            $this->catatan_pengembalian = null;
+
+            $this->dispatch('refreshPenyaluranDepositoSfinlogTable');
+            
+            $this->dispatch('reload-page');
+
+            $this->dispatch('showAlert', [
+                'type' => 'success',
+                'message' => 'Pengembalian berhasil disimpan! Halaman akan dimuat ulang...'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error simpan pengembalian sfinlog: ' . $e->getMessage());
+
+            $this->dispatch('showAlert', [
+                'type' => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan data!'
+            ]);
+        }
+    }
+
+    /**
+     * Lihat riwayat pengembalian
+     */
+    public function lihatRiwayat($id)
+    {
+        try {
+            $penyaluran = PenyaluranDepositoSfinlog::with(['riwayatPengembalian', 'cellsProject', 'project'])->findOrFail($id);
+
+            $riwayatData = [
+                'id' => $penyaluran->id_penyaluran_deposito_sfinlog,
+                'cell_bisnis' => $penyaluran->cellsProject?->nama_cells_bisnis ?? '-',
+                'project' => $penyaluran->project?->nama_project ?? '-',
+                'nominal_disalurkan' => $penyaluran->nominal_yang_disalurkan,
+                'total_dikembalikan' => $penyaluran->total_dikembalikan,
+                'sisa_belum_dikembalikan' => $penyaluran->sisa_belum_dikembalikan,
+                'riwayat' => $penyaluran->riwayatPengembalian->map(function ($item) {
+                    return [
+                        'id' => $item->id_riwayat_pengembalian_deposito_sfinlog,
+                        'nominal' => $item->nominal_dikembalikan,
+                        'tanggal' => $item->tanggal_pengembalian?->format('d/m/Y'),
+                        'bukti' => $item->bukti_pengembalian ? asset('storage/' . $item->bukti_pengembalian) : null,
+                        'catatan' => $item->catatan,
+                    ];
+                })->toArray()
+            ];
+
+            $this->dispatch('riwayat-loaded', data: $riwayatData);
+
+        } catch (\Exception $e) {
+            \Log::error('Error lihat riwayat sfinlog: ' . $e->getMessage());
+
+            $this->dispatch('showAlert', [
+                'type' => 'error',
+                'message' => 'Terjadi kesalahan saat mengambil data riwayat!'
             ]);
         }
     }
