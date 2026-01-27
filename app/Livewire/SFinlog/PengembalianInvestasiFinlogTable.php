@@ -62,23 +62,29 @@ class PengembalianInvestasiFinlogTable extends DataTableComponent
                 ->label(function () use (&$rowNumber) {
                     $rowNumber++;
                     $number = (($this->getPage() - 1) * $this->getPerPage()) + $rowNumber;
-                    return '<div class="text-center">'.$number.'</div>';
+                    return '<div class="text-center">' . $number . '</div>';
                 })
                 ->html()
                 ->excludeFromColumnSelect(),
 
-            Column::make('No. Kontrak')
-                ->label(fn ($row) => '<div class="text-center">'.($row->nomor_kontrak ?? '-').'</div>')
-                ->html(),
+            Column::make('No. Kontrak', 'pif.nomor_kontrak')
+                ->label(fn($row) => '<div class="text-center">' . ($row->nomor_kontrak ?? '-') . '</div>')
+                ->html()
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->orWhere('pif.nomor_kontrak', 'LIKE', '%' . $searchTerm . '%');
+                }),
 
-            Column::make('Nama Investor')
-                ->label(fn ($row) => '<div>'.($row->nama_investor ?? '-').'</div>')
-                ->html(),
+            Column::make('Nama Investor', 'pif.nama_investor')
+                ->label(fn($row) => '<div>' . ($row->nama_investor ?? '-') . '</div>')
+                ->html()
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->orWhere('pif.nama_investor', 'LIKE', '%' . $searchTerm . '%');
+                }),
 
             Column::make('Tanggal Pengembalian', 'tanggal_pengembalian')
                 ->sortable()
                 ->format(function ($value) {
-                    return '<div class="text-center">'.($value ? \Carbon\Carbon::parse($value)->format('d/m/Y') : '-').'</div>';
+                    return '<div class="text-center">' . ($value ? \Carbon\Carbon::parse($value)->format('d/m/Y') : '-') . '</div>';
                 })
                 ->html(),
 
