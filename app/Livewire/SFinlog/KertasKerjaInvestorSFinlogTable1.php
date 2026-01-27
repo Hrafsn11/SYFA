@@ -15,12 +15,19 @@ class KertasKerjaInvestorSFinlogTable1 extends DataTableComponent
     protected $model = PengajuanInvestasiFinlog::class;
 
     public $year;
+    public $externalSearch = '';
 
-    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged' => 'setYear'];
+    protected $listeners = [
+        'refreshKertasKerjaTable' => '$refresh',
+        'yearChanged' => 'setYear',
+        'searchChanged' => 'setExternalSearch',
+        'perPageChanged' => 'setExternalPerPage',
+    ];
 
     public function mount(): void
     {
         $this->year = request()->get('year', date('Y'));
+        $this->externalSearch = request()->get('search', '');
     }
 
     public function setYear($year)
@@ -29,23 +36,32 @@ class KertasKerjaInvestorSFinlogTable1 extends DataTableComponent
         $this->resetPage();
     }
 
+    public function setExternalSearch($search)
+    {
+        $this->externalSearch = $search;
+        $this->resetPage();
+    }
+
+    public function setExternalPerPage($perPage)
+    {
+        $this->setPerPage($perPage);
+        $this->resetPage();
+    }
+
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_investasi_finlog')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari deposan, nomor kontrak, status...')
-            ->setSearchDebounce(500)
+            ->setSearchDisabled() // Disable built-in search, use parent's search
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
+            ->setPerPageVisibilityDisabled() // Disable, controlled by parent
             ->setPerPage(10)
             ->setTableAttributes(['class' => 'table border-top'])
             ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
             ->setBulkActionsDisabled()
-            ->setColumnSelectDisabled();
+            ->setColumnSelectDisabled()
+            ->setPaginationDisabled(); // Disable pagination, controlled by parent
     }
 
     public function filters(): array
@@ -69,7 +85,7 @@ class KertasKerjaInvestorSFinlogTable1 extends DataTableComponent
 
     public function builder(): Builder
     {
-        return PengajuanInvestasiFinlog::query()
+        $query = PengajuanInvestasiFinlog::query()
             ->select([
                 'id_pengajuan_investasi_finlog',
                 'tanggal_investasi',
@@ -83,6 +99,18 @@ class KertasKerjaInvestorSFinlogTable1 extends DataTableComponent
             ])
             ->whereNotNull('nomor_kontrak')
             ->where('nomor_kontrak', '!=', '');
+
+        // Apply external search
+        if (!empty($this->externalSearch)) {
+            $search = $this->externalSearch;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_investor', 'like', '%' . $search . '%')
+                    ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%');
+            });
+        }
+
+        return $query;
     }
 
     /**
