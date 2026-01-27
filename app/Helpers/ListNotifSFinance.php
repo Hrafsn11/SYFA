@@ -163,7 +163,7 @@ class ListNotifSFinance
         sendNotification($data);
     }
 
-    public static function suratPeringatanPengembalianDana($pengajuan, $tanggalJatuhTempo, $spkNumber)
+    public static function suratPeringatanPengembalianDana($pengajuan, $tanggalJatuhTempo, $spkNumber, $bukti)
     {
         // Notifikasi saat surat peringatan pengembalian dana dibuat
         if (empty($spkNumber)) {
@@ -208,6 +208,7 @@ class ListNotifSFinance
             'id_debitur' => $pengajuan->id_debitur,
             'id_investor' => null,
             'spk_number' => $spkNumber,
+            'bukti' => $bukti,
         ];
 
         sendNotificationWithMail($data);

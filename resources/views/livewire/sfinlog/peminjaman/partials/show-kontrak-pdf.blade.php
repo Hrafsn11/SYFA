@@ -133,7 +133,7 @@
                         style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 140px; height: 75px; object-fit: contain; z-index: 2;">
                 </div>
 
-                <p><strong>Aditia Pratama</strong></p>
+                <p><strong>Rafi Ghani Razak</strong></p>
             </td>
             <td width="50%">
                 <p><strong>Principal</strong></p>

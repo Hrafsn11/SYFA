@@ -42,7 +42,7 @@
                               <a href="{{ $url }}" style="background-color: #001a57; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Masuk ke Aplikasi</a>
                           </p>
 
-                          <p><strong>Dengan hormat,</strong><br>Synofac</p>
+                          <p><strong>Hormat Kami,</strong><br>Financial Planner<br><br>PT Synovac Capital Indonesia</p>
                       </td>
                     </tr>
 

@@ -126,10 +126,19 @@
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td>Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
                                                 <td>
-                                                    <a href="{{ Storage::url($item['bukti_file']) }}" target="_blank"
-                                                        class="btn btn-sm btn-outline-info">
-                                                        <i class="ti ti-eye me-1"></i> Lihat
-                                                    </a>
+                                                    @if($item['bukti_file'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                                                        <a href="{{ $item['bukti_file']->temporaryUrl() }}" target="_blank"
+                                                            class="btn btn-sm btn-outline-info">
+                                                            <i class="ti ti-eye me-1"></i> Lihat
+                                                        </a>
+                                                    @elseif(is_string($item['bukti_file']))
+                                                        <a href="{{ Storage::url($item['bukti_file']) }}" target="_blank"
+                                                            class="btn btn-sm btn-outline-info">
+                                                            <i class="ti ti-eye me-1"></i> Lihat
+                                                        </a>
+                                                    @else
+                                                        <span class="text-muted">-</span>
+                                                    @endif
                                                 </td>
                                                 <td class="text-center">
                                                     <button type="button" class="btn btn-sm btn-danger"

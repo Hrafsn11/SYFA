@@ -127,15 +127,13 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                 ->format(fn($value) => '<div class="text-start"><strong>' . ($value ?: '-') . '</strong></div>')
                 ->html(),
 
-            Column::make('Cells Bisnis', 'cells_projects.nama_cells_bisnis')
+            Column::make('Cells Bisnis')
                 ->label(function ($row) {
-                    $namaCellsBisnis = $row->project->nama_cells_bisnis ?? '-';
+                    $namaCellsBisnis = $row->project->nama_cells_bisnis ?? $row->project->nama_cells_bisnis ?? '-';
                     return '<div class="text-start">' . $namaCellsBisnis . '</div>';
                 })
                 ->html()
-                ->searchable(function (Builder $query, $searchTerm) {
-                    $query->orWhere('cells_projects.nama_cells_bisnis', 'LIKE', '%' . $searchTerm . '%');
-                }),
+                ->searchable(),
 
             Column::make('Tanggal Investasi', 'tanggal_investasi')
                 ->sortable()
@@ -180,17 +178,26 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
-                    $badgeClass = match ($value) {
-                        'Draft' => 'bg-warning text-dark',
-                        'Menunggu Validasi Fia' => 'bg-info',
-                        'Menunggu Validasi CEO' => 'bg-info',
-                        'Menunggu Informasi Rekening' => 'bg-info',
-                        'Menunggu Upload Bukti' => 'bg-info',
-                        'Disetujui' => 'bg-success',
-                        'Selesai' => 'bg-success',
-                        'Ditolak' => 'bg-danger',
-                        default => 'bg-secondary'
-                    };
+                    // Determine badge color based on status
+                    if (str_contains($value ?? '', 'Ditolak')) {
+                        // Rejection statuses - show in danger/warning
+                        if (str_contains($value, 'Perlu Revisi')) {
+                            $badgeClass = 'bg-warning text-dark';
+                        } else {
+                            $badgeClass = 'bg-danger';
+                        }
+                    } else {
+                        $badgeClass = match ($value) {
+                            'Draft' => 'bg-warning text-dark',
+                            'Menunggu Validasi Finance SKI' => 'bg-info',
+                            'Menunggu Persetujuan CEO Finlog' => 'bg-info',
+                            'Menunggu Upload Bukti Transfer' => 'bg-info',
+                            'Menunggu Generate Kontrak' => 'bg-info',
+                            'Disetujui' => 'bg-success',
+                            'Selesai' => 'bg-success',
+                            default => 'bg-secondary'
+                        };
+                    }
                     return '<div class="text-center"><span class="badge ' . $badgeClass . '">' . ucfirst($value ?: 'Draft') . '</span></div>';
                 })
                 ->html(),

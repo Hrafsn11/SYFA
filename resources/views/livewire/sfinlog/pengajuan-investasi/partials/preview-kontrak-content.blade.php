@@ -38,7 +38,7 @@
                 <tr>
                     <td style="width: 30px; vertical-align: top; padding: 0.5rem 0;">2.</td>
                     <td style="width: 150px; vertical-align: top; padding: 0.5rem 0;">Nama</td>
-                    <td style="vertical-align: top; padding: 0.5rem 0;">: Aditia Pratama</td>
+                    <td style="vertical-align: top; padding: 0.5rem 0;">: Rafi Ghani Razak</td>
                 </tr>
                 <tr>
                     <td style="vertical-align: top; padding: 0.5rem 0;"></td>

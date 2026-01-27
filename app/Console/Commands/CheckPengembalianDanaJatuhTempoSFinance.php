@@ -87,17 +87,22 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
                     $countTelat++;
                 }
 
-                 // hitung hari sejak pencairan untuk SP
-                if ($daySinceJatuhTempo == 1) {
-                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 1);
-                    $countSP1++;
-                } elseif ($daySinceJatuhTempo == 91) {
-                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 2);
-                    $countSP2++;
-                } elseif ($daySinceJatuhTempo == 180) {
-                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 3);
-                    $countSP3++;
+                $buktiPeminjamanListS = $pengajuan->buktiPeminjaman;
+
+                foreach ($buktiPeminjamanListS as $bukti) {
+                    if ($daySinceJatuhTempo == 1) {
+                        ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 1, $bukti);
+                        $countSP1++;
+                    } elseif ($daySinceJatuhTempo == 91) {
+                        ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 2, $bukti);
+                        $countSP2++;
+                    } elseif ($daySinceJatuhTempo == 180) {
+                        ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 3, $bukti);
+                        $countSP3++;
+                    }
                 }
+
+                 // hitung hari sejak pencairan untuk SP
                 continue;
             }
 
@@ -137,13 +142,13 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
                 }
 
                 if ($daySinceJatuhTempo == 1 ) {
-                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 1);
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 1, $bukti);
                     $countSP1++;
                 } elseif ($daySinceJatuhTempo == 91) {
-                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 2);
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 2, $bukti);
                     $countSP2++;
                 } elseif ($daySinceJatuhTempo == 180) {
-                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 3);
+                    ListNotifSFinance::suratPeringatanPengembalianDana($pengajuan, $history->tanggal_pencairan, 3, $bukti);
                     $countSP3++;
                 }
             }

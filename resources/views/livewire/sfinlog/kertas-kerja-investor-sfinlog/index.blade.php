@@ -17,6 +17,47 @@
         </div>
     </div>
 
+    {{-- Search and Per Page Controls --}}
+    <div class="card mb-3">
+        <div class="card-body py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent">
+                            <i class="ti ti-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Cari deposan, nomor kontrak, status..."
+                            wire:model.live.debounce.500ms="search" wire:keydown.escape="$set('search', '')">
+                        @if ($search)
+                            <button class="btn btn-outline-secondary" type="button" wire:click="$set('search', '')">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-md-end align-items-center gap-3 mt-2 mt-md-0">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 text-nowrap">Tampilkan:</label>
+                            <select class="form-select form-select-sm" style="width: auto;" wire:model.live="perPage">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                            <span class="text-muted">data</span>
+                        </div>
+                        @if ($search)
+                            <span class="badge bg-label-primary">
+                                <i class="ti ti-filter me-1"></i>Filter aktif
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-datatable table-responsive">
             <div style="overflow-x: auto; white-space: nowrap;">
@@ -75,7 +116,9 @@
                             @enderror
                         </div>
 
-                        @if ($editFieldType === 'number' && in_array($editField, ['nominal_investasi', 'sisa_pokok', 'sisa_bagi_hasil', 'nominal_bagi_hasil_yang_didapat']))
+                        @if (
+                            $editFieldType === 'number' &&
+                                in_array($editField, ['nominal_investasi', 'sisa_pokok', 'sisa_bagi_hasil', 'nominal_bagi_hasil_yang_didapat']))
                             <div class="alert alert-info small mb-0">
                                 <i class="ti ti-info-circle me-1"></i>
                                 Preview: <strong>Rp {{ number_format((float) $editValue, 0, ',', '.') }}</strong>

@@ -117,11 +117,15 @@ class PengajuanInvestasiController extends Controller
 
             $pengajuan = PengajuanInvestasiFinlog::findOrFail($id);
 
-            if (
-                $pengajuan->status !== 'Draft' &&
-                $pengajuan->status !== 'Menunggu Validasi Finance SKI' &&
-                !($pengajuan->status === 'Ditolak Finance SKI' && $pengajuan->current_step == 2)
-            ) {
+            // Allow editing only for:
+            // 1. Draft status
+            // 2. Status contains 'Perlu Revisi' (after rejection, rolled back to Step 1)
+            // 3. At Step 1 with any rejection status
+            $canEdit = $pengajuan->status === 'Draft'
+                || str_contains($pengajuan->status, 'Perlu Revisi')
+                || ($pengajuan->current_step == 1 && str_contains($pengajuan->status, 'Ditolak'));
+
+            if (!$canEdit) {
                 return Response::error('Pengajuan tidak dapat diubah pada status: ' . $pengajuan->status);
             }
 
@@ -198,9 +202,25 @@ class PengajuanInvestasiController extends Controller
                 'Selesai' => ['status' => 'Selesai', 'step' => 6],
             ];
 
-            // Handle rejection
+            // Handle rejection with step rollback for resubmit mechanism
+            // - Ditolak di Step 3 (CEO Finlog) → mundur ke Step 2 (re-validasi Finance SKI)
+            // - Ditolak di Step 2 (Finance SKI) → mundur ke Step 1 (revisi dan re-submit oleh investor)
             if ($status === 'Ditolak' || str_contains($status, 'Ditolak')) {
-                $currentStep = $pengajuan->current_step; // Stay at current step
+                $previousStep = $pengajuan->current_step;
+
+                // Determine rollback step based on current position
+                if ($previousStep == 3) {
+                    // Ditolak CEO Finlog → kembali ke Step 2 untuk re-validasi Finance SKI
+                    $currentStep = 2;
+                    $status = 'Ditolak CEO Finlog - Menunggu Re-validasi';
+                } elseif ($previousStep == 2) {
+                    // Ditolak Finance SKI → kembali ke Step 1 untuk revisi dan re-submit
+                    $currentStep = 1;
+                    $status = 'Ditolak Finance SKI - Perlu Revisi';
+                } else {
+                    // Untuk step lain, tetap di step saat ini
+                    $currentStep = $previousStep;
+                }
             } else {
                 $mapping = $stepMapping[$status] ?? ['status' => $status, 'step' => $pengajuan->current_step];
                 $status = $mapping['status'];
@@ -440,7 +460,6 @@ class PengajuanInvestasiController extends Controller
                 'nomor_kontrak' => $nomorKontrak,
                 'id_pengajuan' => $investasi->id_pengajuan_investasi_finlog
             ], 'Nomor kontrak berhasil di-generate: ' . $nomorKontrak);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error generate kontrak investasi finlog: ' . $e->getMessage());

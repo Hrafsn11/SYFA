@@ -95,7 +95,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $disetujui_ski_finance->id_notification_feature,
             ], [
-            'role_assigned' => json_encode([$investmentOfficer->id]),
+            'role_assigned' => json_encode([$investmentOfficer->id, $ceo->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh SKI Finance.',
         ]);
 
@@ -108,7 +108,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $ditolak_ski_finance->id_notification_feature,
             ], [
-            'role_assigned' => json_encode([$investmentOfficer->id]),
+            'role_assigned' => json_encode([$investmentOfficer->id, $ceo->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh SKI Finance.',
         ]);
 
@@ -148,7 +148,7 @@ class NotificationSFinlogSeeder extends Seeder
             'notification_feature_id' => $kontrak_digenerate->id_notification_feature,
             ], [
             'role_assigned' => json_encode([$debitur->id, $investmentOfficer->id, $ceo->id]),
-            'message' => 'Kontrak pinjaman debitur [[nama.debitur]] telah berhasil dibuat.',
+            'message' => 'Kontrak pinjaman untuk debitur [[nama.debitur]] telah berhasil dibuat.',
         ]);
 
         // 11. Bukti Transfer Diupload (Status Selesai) - Debitur dan SKI Finance
@@ -166,12 +166,12 @@ class NotificationSFinlogSeeder extends Seeder
         ]);
 
         // Notifikasi untuk SKI Finance - Konfirmasi penerimaan dana
-        NotificationFeatureDetail::updateOrCreate([
-            'notification_feature_id' => $bukti_transfer_diupload->id_notification_feature,
-            ], [
-            'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id]),
-            'message' => 'Debitur [[nama.debitur]] telah mengonfirmasi penerimaan dana pinjaman.',
-        ]);
+        // NotificationFeatureDetail::updateOrCreate([
+        //     'notification_feature_id' => $bukti_transfer_diupload->id_notification_feature,
+        //     ], [
+        //     'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id]),
+        //     'message' => 'Debitur [[nama.debitur]] telah mengonfirmasi penerimaan dana pinjaman.',
+        // ]);
 
         // =============================================
         // NOTIFIKATION UNTUK SURAT PERINGATAN 
