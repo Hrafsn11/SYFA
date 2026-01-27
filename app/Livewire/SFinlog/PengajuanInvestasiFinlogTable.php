@@ -102,6 +102,7 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
         $query = PengajuanInvestasiFinlog::query()
             ->with(['investor', 'project'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_investasi_finlog.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
+            ->leftJoin('cells_projects', 'pengajuan_investasi_finlog.id_cells_project', '=', 'cells_projects.id_cells_project')
             ->select('pengajuan_investasi_finlog.*');
 
         return $this->applyDebiturAuthorization($query);

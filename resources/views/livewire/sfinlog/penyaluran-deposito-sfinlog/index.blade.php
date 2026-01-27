@@ -48,6 +48,29 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Riwayat Pengembalian -->
+    <div wire:ignore.self class="modal fade" id="modalRiwayatPengembalian" tabindex="-1"
+        aria-labelledby="modalRiwayatPengembalianLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalRiwayatPengembalianLabel">Riwayat Pengembalian</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="riwayatContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -119,7 +142,6 @@
             if (State.isUpdatingProject) return;
             State.isUpdatingProject = true;
 
-            console.log('updateProjectDropdown called with:', projects, 'selected:', selectedValue);
 
             const $select = $(S.project);
 
@@ -138,10 +160,8 @@
                     $select.append(option);
                 });
                 $select.prop('disabled', false);
-                console.log('Projects added:', projects.length);
             } else {
                 $select.prop('disabled', true);
-                console.log('No projects available');
             }
 
             // Reinitialize select2
@@ -232,7 +252,6 @@
             const data = JSON.parse(atob(encodedData));
             const $modal = $(S.modal);
 
-            console.log('Edit data:', data);
 
             $modal.find('.form-control, .form-group').removeClass('is-invalid');
             $modal.find('.invalid-feedback').text('').hide();
@@ -372,7 +391,6 @@
             // Event: Cell Bisnis change - Load projects via Livewire
             $(S.cellBisnis).on('change', function () {
                 const val = $(this).val();
-                console.log('Cell Bisnis changed to:', val);
 
                 // Reset project first
                 updateProjectDropdown([], null);
@@ -389,13 +407,11 @@
             // Event: Project change
             $(S.project).on('select2:select select2:clear', function (e) {
                 const val = $(this).val();
-                console.log('Project changed to:', val);
                 @this.set('id_project', val || null);
             });
 
             // Livewire event listener for updateProjects
             Livewire.on('updateProjects', (payload) => {
-                console.log('updateProjects event received:', payload);
 
                 let projects = [];
                 if (Array.isArray(payload)) {
@@ -406,7 +422,6 @@
                     projects = payload;
                 }
 
-                console.log('Parsed projects:', projects);
 
                 const selectedProjectId = State.pendingProjectId || @this.id_project;
                 updateProjectDropdown(projects, selectedProjectId);
@@ -434,7 +449,6 @@
         // Listen for detail kontrak event
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('kontrak-detail-loaded', (event) => {
-                console.log('Event received!', event);
                 const kontrakData = event.data;
 
                 if (!kontrakData) return;
@@ -496,24 +510,15 @@
 
                     const tglPengiriman = item.tanggal_pengiriman_dana ? new Date(item.tanggal_pengiriman_dana).toLocaleDateString('id-ID') : '-';
                     const tglPengembalian = item.tanggal_pengembalian ? new Date(item.tanggal_pengembalian).toLocaleDateString('id-ID') : '-';
+                    const nominalDisalurkan = parseFloat(item.nominal_yang_disalurkan || 0);
+                    const sisaBelumDikembalikan = parseFloat(item.sisa_belum_dikembalikan ?? nominalDisalurkan);
 
-                    // Status badge
+                    // Status badge based on sisa
                     let statusBadge = '<span class="badge bg-label-danger">Belum Lunas</span>';
-                    if (item.status === 'Lunas') {
+                    if (sisaBelumDikembalikan <= 0) {
                         statusBadge = '<span class="badge bg-label-success">Lunas</span>';
-                    } else if (item.status === 'Sebagian Lunas') {
+                    } else if (item.nominal_yang_dikembalikan > 0) {
                         statusBadge = '<span class="badge bg-label-warning">Sebagian Lunas</span>';
-                    }
-
-                    // Button
-                    let buttonText = 'Input Pengembalian';
-                    let buttonClass = 'btn-primary';
-                    if (item.status === 'Sebagian Lunas') {
-                        buttonText = 'Update Pengembalian';
-                        buttonClass = 'btn-warning';
-                    } else if (item.status === 'Lunas') {
-                        buttonText = 'Lihat Detail';
-                        buttonClass = 'btn-success';
                     }
 
                     html += `
@@ -527,12 +532,20 @@
                                                     <td class="text-center">${tglPengembalian}</td>
                                                     <td class="text-center">${statusBadge}</td>
                                                     <td class="text-center">
-                                                        ${canInputPengembalian ? `
-                                                        <button type="button" class="btn btn-sm ${buttonClass}" 
-                                                            onclick="openInputPengembalian('${item.id}', '${item.cell_bisnis}', '${item.project}', ${item.nominal_yang_disalurkan}, ${item.nominal_yang_dikembalikan}, '${item.tanggal_pengiriman_dana}', '${item.tanggal_pengembalian}'); $('#detailKontrakModal').modal('hide');">
-                                                            <i class="ti ti-wallet me-1"></i>${buttonText}
-                                                        </button>
-                                                        ` : '-'}
+                                                        <div class="d-flex gap-1 justify-content-center">
+                                                            ${canInputPengembalian && sisaBelumDikembalikan > 0 ? `
+                                                            <button type="button" class="btn btn-sm btn-primary" 
+                                                                onclick="openInputPengembalian('${item.id}', '${item.cell_bisnis}', '${item.project}', ${item.nominal_yang_disalurkan}, ${sisaBelumDikembalikan}, '${item.tanggal_pengiriman_dana}', '${item.tanggal_pengembalian}'); $('#detailKontrakModal').modal('hide');"
+                                                                title="Input Pengembalian">
+                                                                <i class="ti ti-edit"></i>
+                                                            </button>
+                                                            ` : ''}
+                                                            <button type="button" class="btn btn-sm btn-info" 
+                                                                wire:click="lihatRiwayat('${item.id}')"
+                                                                title="Lihat History">
+                                                                <i class="ti ti-history"></i>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             `;
@@ -556,6 +569,77 @@
 
                 const modal = new bootstrap.Modal(document.getElementById('detailKontrakModal'));
                 modal.show();
+            });
+
+            // Event listener untuk riwayat pengembalian
+            Livewire.on('riwayat-loaded', (event) => {
+                const data = event.data;
+
+                if (!data) return;
+
+                // Close detail modal first
+                const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailKontrakModal'));
+                if (detailModal) detailModal.hide();
+
+                let html = `
+                    <div class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Cell Bisnis:</strong> ${data.cell_bisnis}</p>
+                                <p class="mb-1"><strong>Project:</strong> ${data.project}</p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p class="mb-1"><strong>Nominal Disalurkan:</strong> Rp ${new Intl.NumberFormat('id-ID').format(data.nominal_disalurkan)}</p>
+                                <p class="mb-1"><strong>Total Dikembalikan:</strong> <span class="text-success">Rp ${new Intl.NumberFormat('id-ID').format(data.total_dikembalikan)}</span></p>
+                                <p class="mb-1"><strong>Sisa:</strong> <span class="${data.sisa_belum_dikembalikan > 0 ? 'text-danger' : 'text-success'}">Rp ${new Intl.NumberFormat('id-ID').format(data.sisa_belum_dikembalikan)}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3">Riwayat Pengembalian</h6>`;
+
+                if (data.riwayat && data.riwayat.length > 0) {
+                    html += `
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center" width="5%">No</th>
+                                        <th class="text-center">Tanggal</th>
+                                        <th class="text-center">Nominal</th>
+                                        <th class="text-center">Bukti</th>
+                                        <th class="text-center">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                    data.riwayat.forEach((item, index) => {
+                        html += `
+                            <tr>
+                                <td class="text-center">${index + 1}</td>
+                                <td class="text-center">${item.tanggal || '-'}</td>
+                                <td class="text-end">Rp ${new Intl.NumberFormat('id-ID').format(item.nominal)}</td>
+                                <td class="text-center">
+                                    ${item.bukti ? `<a href="${item.bukti}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="ti ti-file me-1"></i>Lihat</a>` : '-'}
+                                </td>
+                                <td>${item.catatan || '-'}</td>
+                            </tr>`;
+                    });
+
+                    html += `
+                                </tbody>
+                            </table>
+                        </div>`;
+                } else {
+                    html += `<div class="alert alert-info">Belum ada riwayat pengembalian.</div>`;
+                }
+
+                document.getElementById('riwayatContent').innerHTML = html;
+
+                setTimeout(() => {
+                    const riwayatModal = new bootstrap.Modal(document.getElementById('modalRiwayatPengembalian'));
+                    riwayatModal.show();
+                }, 300);
             });
         });
     </script>

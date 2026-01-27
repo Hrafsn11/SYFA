@@ -132,6 +132,7 @@
                 <input type="hidden" id="pengembalian_id">
                 <input type="hidden" id="pengembalian_nominal_disalurkan_raw">
                 <input type="hidden" id="pengembalian_nominal_dikembalikan_raw">
+                <input type="hidden" id="pengembalian_sisa_raw">
 
                 <div class="row">
                     <!-- Cell Bisnis -->
@@ -164,18 +165,36 @@
                         <input type="text" class="form-control bg-light" id="pengembalian_nominal_disalurkan" readonly>
                     </div>
 
+                    <!-- Sisa Belum Dikembalikan -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Sisa Belum Dikembalikan</label>
+                        <input type="text" class="form-control bg-light" id="pengembalian_sisa" readonly>
+                    </div>
+
                     <!-- Nominal yang Dikembalikan -->
-                    <div class="col-md-6 mb-3 form-group">
+                    <div class="col-12 mb-3 form-group">
                         <label class="form-label">Nominal yang Dikembalikan <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="pengembalian_nominal_dikembalikan"
                             placeholder="Rp 0" autocomplete="off">
+                        <small class="text-muted">Masukkan nominal pengembalian (maksimal sisa belum dikembalikan)</small>
                         <div id="pengembalian_validation_error" class="invalid-feedback"></div>
                     </div>
 
-                    <!-- Sisa yang Belum Dikembalikan -->
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Sisa yang Belum Dikembalikan</label>
-                        <input type="text" class="form-control bg-light" id="pengembalian_sisa" readonly>
+                    <!-- Bukti Pengembalian -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Bukti Pengembalian</label>
+                        <input type="file" class="form-control" wire:model="bukti_input_pengembalian" accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted">Format: PDF, JPG, PNG (Maks 2MB)</small>
+                        <div wire:loading wire:target="bukti_input_pengembalian" class="mt-1">
+                            <span class="spinner-border spinner-border-sm text-primary"></span>
+                            <small class="text-muted">Mengupload...</small>
+                        </div>
+                    </div>
+
+                    <!-- Catatan -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Catatan</label>
+                        <textarea class="form-control" wire:model="catatan_pengembalian" rows="2" placeholder="Catatan (opsional)"></textarea>
                     </div>
                 </div>
             </div>
@@ -219,9 +238,16 @@
 
         /**
          * Open Modal Input Pengembalian
+         * @param {string} id - ID penyaluran deposito
+         * @param {string} cellBisnis - Nama cell bisnis
+         * @param {string} projectName - Nama project
+         * @param {number} nominal_disalurkan - Nominal yang disalurkan
+         * @param {number} sisa_belum_dikembalikan - Sisa yang belum dikembalikan
+         * @param {string} tgl_pengiriman - Tanggal pengiriman
+         * @param {string} tgl_pengembalian - Tanggal pengembalian
          */
-        function openInputPengembalian(id, cellBisnis, projectName, nominal_disalurkan, nominal_dikembalikan, tgl_pengiriman, tgl_pengembalian) {
-            console.log('Opening Input Pengembalian modal...', { id, cellBisnis, projectName, nominal_disalurkan });
+        function openInputPengembalian(id, cellBisnis, projectName, nominal_disalurkan, sisa_belum_dikembalikan, tgl_pengiriman, tgl_pengembalian) {
+            console.log('Opening Input Pengembalian modal...', { id, cellBisnis, projectName, nominal_disalurkan, sisa_belum_dikembalikan });
 
             // Destroy previous Cleave instance first
             if (cleavePengembalianNominal) {
@@ -232,7 +258,6 @@
             // Clear all inputs FIRST
             document.getElementById('pengembalian_nominal_dikembalikan').value = '';
             document.getElementById('pengembalian_nominal_dikembalikan_raw').value = '';
-            document.getElementById('pengembalian_sisa').value = '';
 
             // Remove validation classes
             document.getElementById('pengembalian_nominal_dikembalikan').classList.remove('is-invalid');
@@ -249,6 +274,10 @@
             document.getElementById('pengembalian_nominal_disalurkan_raw').value = nominal_disalurkan;
             document.getElementById('pengembalian_nominal_disalurkan').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominal_disalurkan);
 
+            // Set sisa belum dikembalikan
+            document.getElementById('pengembalian_sisa_raw').value = sisa_belum_dikembalikan;
+            document.getElementById('pengembalian_sisa').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(sisa_belum_dikembalikan);
+
             // Initialize Cleave untuk input nominal dikembalikan
             cleavePengembalianNominal = new Cleave('#pengembalian_nominal_dikembalikan', {
                 numeral: true,
@@ -261,19 +290,10 @@
                     const rawValue = parseFloat(e.target.rawValue) || 0;
                     document.getElementById('pengembalian_nominal_dikembalikan_raw').value = rawValue;
 
-                    // Calculate sisa
-                    updatePengembalianCalculation();
+                    // Validation
+                    updatePengembalianValidation();
                 }
             });
-
-            // Set nominal dikembalikan yang sudah ada (jika ada) - AFTER Cleave initialized
-            const currentNominal = parseFloat(nominal_dikembalikan) || 0;
-            if (currentNominal > 0) {
-                cleavePengembalianNominal.setRawValue(currentNominal);
-            }
-
-            // Initial calculation
-            updatePengembalianCalculation();
 
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('modalInputPengembalian'));
@@ -281,23 +301,22 @@
         }
 
         /**
-         * Update calculation untuk sisa
+         * Update validation untuk nominal dikembalikan
          */
-        function updatePengembalianCalculation() {
-            const nominalDisalurkan = parseFloat(document.getElementById('pengembalian_nominal_disalurkan_raw').value) || 0;
+        function updatePengembalianValidation() {
+            const sisaBelumDikembalikan = parseFloat(document.getElementById('pengembalian_sisa_raw').value) || 0;
             const nominalDikembalikan = parseFloat(document.getElementById('pengembalian_nominal_dikembalikan_raw').value) || 0;
-
-            // Calculate sisa
-            const sisa = Math.max(0, nominalDisalurkan - nominalDikembalikan);
-            document.getElementById('pengembalian_sisa').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(sisa);
 
             // Validation
             const input = document.getElementById('pengembalian_nominal_dikembalikan');
             const errorDiv = document.getElementById('pengembalian_validation_error');
 
-            if (nominalDikembalikan > nominalDisalurkan) {
+            if (nominalDikembalikan > sisaBelumDikembalikan) {
                 input.classList.add('is-invalid');
-                errorDiv.textContent = 'Nominal yang dikembalikan tidak boleh lebih besar dari nominal yang disalurkan!';
+                errorDiv.textContent = 'Nominal tidak boleh lebih besar dari sisa (Rp ' + new Intl.NumberFormat('id-ID').format(sisaBelumDikembalikan) + ')!';
+            } else if (nominalDikembalikan <= 0) {
+                input.classList.add('is-invalid');
+                errorDiv.textContent = 'Nominal harus lebih dari 0!';
             } else {
                 input.classList.remove('is-invalid');
                 errorDiv.textContent = '';
@@ -313,25 +332,25 @@
             if (btnSimpan) {
                 btnSimpan.addEventListener('click', function () {
                     const id = document.getElementById('pengembalian_id').value;
-                    const nominalDisalurkan = parseFloat(document.getElementById('pengembalian_nominal_disalurkan_raw').value) || 0;
+                    const sisaBelumDikembalikan = parseFloat(document.getElementById('pengembalian_sisa_raw').value) || 0;
                     const nominalDikembalikan = parseFloat(document.getElementById('pengembalian_nominal_dikembalikan_raw').value) || 0;
 
                     // Validation
-                    if (nominalDikembalikan < 0) {
+                    if (nominalDikembalikan <= 0) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Validasi Gagal',
-                            text: 'Nominal yang dikembalikan tidak boleh negatif!',
+                            text: 'Nominal yang dikembalikan harus lebih dari 0!',
                             confirmButtonText: 'OK'
                         });
                         return;
                     }
 
-                    if (nominalDikembalikan > nominalDisalurkan) {
+                    if (nominalDikembalikan > sisaBelumDikembalikan) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Validasi Gagal',
-                            text: 'Nominal yang dikembalikan tidak boleh lebih besar dari nominal yang disalurkan!',
+                            text: 'Nominal yang dikembalikan tidak boleh lebih besar dari sisa yang belum dikembalikan!',
                             confirmButtonText: 'OK'
                         });
                         return;
@@ -341,8 +360,8 @@
                     btnSimpan.disabled = true;
                     btnSimpan.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...';
 
-                    // Call Livewire method
-                    @this.call('updateNominalPengembalian', id, nominalDikembalikan)
+                    // Call Livewire method - gunakan simpanPengembalian untuk sistem riwayat
+                    @this.call('simpanPengembalian', id, nominalDikembalikan)
                         .then(() => {
                             // Close modal
                             const modal = bootstrap.Modal.getInstance(document.getElementById('modalInputPengembalian'));
@@ -375,7 +394,17 @@
                     customClass: {
                         confirmButton: 'btn btn-' + (data.type === 'success' ? 'success' : 'danger')
                     }
+                }).then(() => {
+                    if (data.type === 'success') {
+                        window.location.reload();
+                    }
                 });
+            });
+            
+            Livewire.on('reload-page', () => {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
             });
         });
     </script>

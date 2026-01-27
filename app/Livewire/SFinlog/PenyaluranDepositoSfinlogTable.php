@@ -7,6 +7,7 @@ use App\Livewire\Traits\HasUniversalFormAction;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
+use Illuminate\Database\Eloquent\Builder;
 
 class PenyaluranDepositoSfinlogTable extends DataTableComponent
 {
@@ -73,6 +74,32 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
                         $builder->whereRaw("YEAR(penyaluran_deposito_sfinlog.tanggal_pengiriman_dana) = ?", [$value]);
                     }
                 }),
+
+            SelectFilter::make('Status Pengembalian')
+                ->options([
+                    '' => 'Semua Status',
+                    'lunas' => 'Lunas',
+                    'sebagian' => 'Sebagian Lunas',
+                    'belum' => 'Belum Lunas',
+                ])
+                ->filter(function (\Illuminate\Database\Eloquent\Builder $builder, string $value) {
+                    if (!empty($value)) {
+                        switch ($value) {
+                            case 'lunas':
+                                // Lunas: total_dikembalikan >= total_disalurkan AND total_disalurkan > 0
+                                $builder->havingRaw('SUM(penyaluran_deposito_sfinlog.nominal_yang_dikembalikan) >= SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan) AND SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan) > 0');
+                                break;
+                            case 'sebagian':
+                                // Sebagian Lunas: total_dikembalikan > 0 AND total_dikembalikan < total_disalurkan
+                                $builder->havingRaw('SUM(penyaluran_deposito_sfinlog.nominal_yang_dikembalikan) > 0 AND SUM(penyaluran_deposito_sfinlog.nominal_yang_dikembalikan) < SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan)');
+                                break;
+                            case 'belum':
+                                // Belum Lunas: total_dikembalikan = 0 OR total_dikembalikan IS NULL
+                                $builder->havingRaw('COALESCE(SUM(penyaluran_deposito_sfinlog.nominal_yang_dikembalikan), 0) = 0');
+                                break;
+                        }
+                    }
+                }),
         ];
     }
 
@@ -81,11 +108,18 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
         // Group by nomor kontrak
         return PenyaluranDepositoSfinlog::query()
             ->with(['pengajuanInvestasiFinlog.investor'])
+            ->leftJoin('pengajuan_investasi_finlog', 'penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog', '=', 'pengajuan_investasi_finlog.id_pengajuan_investasi_finlog')
             ->selectRaw('
+                MIN(penyaluran_deposito_sfinlog.id_penyaluran_deposito_sfinlog) as id_penyaluran_deposito_sfinlog,
                 penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog,
                 COUNT(*) as jumlah_penyaluran,
-                SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan) as total_disalurkan,
-                SUM(penyaluran_deposito_sfinlog.nominal_yang_dikembalikan) as total_dikembalikan
+                COALESCE(SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan), 0) as total_disalurkan,
+                (
+                    SELECT COALESCE(SUM(r.nominal_dikembalikan), 0)
+                    FROM riwayat_pengembalian_deposito_sfinlog r
+                    INNER JOIN penyaluran_deposito_sfinlog p2 ON r.id_penyaluran_deposito_sfinlog = p2.id_penyaluran_deposito_sfinlog
+                    WHERE p2.id_pengajuan_investasi_finlog = penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog
+                ) as total_dikembalikan
             ')
             ->groupBy('penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog');
     }
@@ -104,21 +138,25 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
                 ->html()
                 ->excludeFromColumnSelect(),
 
-            Column::make('No Kontrak')
+            Column::make('No Kontrak', 'pengajuan_investasi_finlog.nomor_kontrak')
                 ->label(function ($row) {
                     $noKontrak = $row->pengajuanInvestasiFinlog?->nomor_kontrak ?? '-';
                     return '<div class="text-center"><strong>' . $noKontrak . '</strong></div>';
                 })
                 ->html()
-                ->searchable(),
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->orWhere('pengajuan_investasi_finlog.nomor_kontrak', 'LIKE', '%' . $searchTerm . '%');
+                }),
 
-            Column::make('Nama Investor')
+            Column::make('Nama Investor', 'pengajuan_investasi_finlog.nama_investor')
                 ->label(function ($row) {
                     $namaInvestor = $row->pengajuanInvestasiFinlog?->nama_investor ?? '-';
                     return '<div class="text-start">' . $namaInvestor . '</div>';
                 })
                 ->html()
-                ->searchable(),
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->orWhere('pengajuan_investasi_finlog.nama_investor', 'LIKE', '%' . $searchTerm . '%');
+                }),
 
             Column::make('Jumlah Investasi')
                 ->label(function ($row) {
@@ -127,23 +165,34 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Lama Investasi')
+            Column::make('Lama Investasi', 'pengajuan_investasi_finlog.lama_investasi')
                 ->label(function ($row) {
                     $lamaInvestasi = $row->pengajuanInvestasiFinlog?->lama_investasi ?? 0;
                     return '<div class="text-center">' . $lamaInvestasi . ' Bulan</div>';
                 })
-                ->html(),
+                ->html()
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->orWhere('pengajuan_investasi_finlog.lama_investasi', 'LIKE', '%' . $searchTerm . '%');
+                }),
 
             Column::make('Penyaluran Dana')
                 ->label(function ($row) {
                     $total = $row->total_disalurkan ?? 0;
                     return '<div class="text-end"><strong>Rp ' . number_format($total, 0, ',', '.') . '</strong></div>';
                 })
-                ->html(),
+                ->html()
+                ->searchable(function (Builder $query, $searchTerm) {
+                    $query->havingRaw('SUM(penyaluran_deposito_sfinlog.nominal_yang_disalurkan) LIKE ?', ['%' . $searchTerm . '%']);
+                }),
 
             Column::make('Total Dikembalikan')
                 ->label(function ($row) {
-                    $total = $row->total_dikembalikan ?? 0;
+                    $idPengajuan = $row->id_pengajuan_investasi_finlog;
+                    $total = \DB::table('riwayat_pengembalian_deposito_sfinlog as r')
+                        ->join('penyaluran_deposito_sfinlog as p', 'r.id_penyaluran_deposito_sfinlog', '=', 'p.id_penyaluran_deposito_sfinlog')
+                        ->where('p.id_pengajuan_investasi_finlog', $idPengajuan)
+                        ->sum('r.nominal_dikembalikan');
+
                     return '<div class="text-end"><strong class="text-success">Rp ' . number_format($total, 0, ',', '.') . '</strong></div>';
                 })
                 ->html(),
@@ -151,7 +200,12 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
             Column::make('Status Pengembalian')
                 ->label(function ($row) {
                     $totalDisalurkan = floatval($row->total_disalurkan ?? 0);
-                    $totalDikembalikan = floatval($row->total_dikembalikan ?? 0);
+
+                    $idPengajuan = $row->id_pengajuan_investasi_finlog;
+                    $totalDikembalikan = floatval(\DB::table('riwayat_pengembalian_deposito_sfinlog as r')
+                        ->join('penyaluran_deposito_sfinlog as p', 'r.id_penyaluran_deposito_sfinlog', '=', 'p.id_penyaluran_deposito_sfinlog')
+                        ->where('p.id_pengajuan_investasi_finlog', $idPengajuan)
+                        ->sum('r.nominal_dikembalikan'));
 
                     if ($totalDikembalikan >= $totalDisalurkan && $totalDisalurkan > 0) {
                         $badge = '<span class="badge bg-label-success">Lunas (100%)</span>';
@@ -208,13 +262,14 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
             'nominal_investasi' => $pengajuan->nominal_investasi,
             'lama_investasi' => $pengajuan->lama_investasi,
             'details' => $penyaluranList->map(function ($item) {
-                $nominalDisalurkan = floatval($item->nominal_yang_disalurkan ?? 0);
-                $nominalDikembalikan = floatval($item->nominal_yang_dikembalikan ?? 0);
+                $penyaluranModel = PenyaluranDepositoSfinlog::find($item->id_penyaluran_deposito_sfinlog);
+                $sisaBelumDikembalikan = $penyaluranModel ? $penyaluranModel->sisa_belum_dikembalikan : ($item->nominal_yang_disalurkan - ($item->nominal_yang_dikembalikan ?? 0));
+                $totalDikembalikan = $penyaluranModel ? $penyaluranModel->total_dikembalikan : ($item->nominal_yang_dikembalikan ?? 0);
 
                 // Calculate status
-                if ($nominalDikembalikan >= $nominalDisalurkan && $nominalDisalurkan > 0) {
+                if ($sisaBelumDikembalikan <= 0) {
                     $status = 'Lunas';
-                } elseif ($nominalDikembalikan > 0) {
+                } elseif ($totalDikembalikan > 0) {
                     $status = 'Sebagian Lunas';
                 } else {
                     $status = 'Belum Lunas';
@@ -224,8 +279,9 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
                     'id' => $item->id_penyaluran_deposito_sfinlog,
                     'cell_bisnis' => $item->cellsProject?->nama_cells_bisnis ?? '-',
                     'project' => $item->project?->nama_project ?? '-',
-                    'nominal_yang_disalurkan' => $nominalDisalurkan,
-                    'nominal_yang_dikembalikan' => $nominalDikembalikan,
+                    'nominal_yang_disalurkan' => floatval($item->nominal_yang_disalurkan ?? 0),
+                    'nominal_yang_dikembalikan' => $totalDikembalikan,
+                    'sisa_belum_dikembalikan' => $sisaBelumDikembalikan,
                     'tanggal_pengiriman_dana' => $item->tanggal_pengiriman_dana?->format('Y-m-d'),
                     'tanggal_pengembalian' => $item->tanggal_pengembalian?->format('Y-m-d'),
                     'status' => $status,

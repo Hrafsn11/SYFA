@@ -119,11 +119,13 @@ class PenyaluranDepositoTable extends DataTableComponent
                 'jumlah_investasi' => $firstDetail->jumlah_investasi,
                 'lama_investasi' => $firstDetail->lama_investasi,
                 'details' => $details->map(function ($item) use ($nomorKontrak) {
-                    // Hitung status berdasarkan nominal dikembalikan
+                    $penyaluranModel = \App\Models\PenyaluranDeposito::find($item->id_penyaluran_deposito);
+                    $sisaBelumDikembalikan = $penyaluranModel ? $penyaluranModel->sisa_belum_dikembalikan : ($item->nominal_yang_disalurkan - ($item->nominal_yang_dikembalikan ?? 0));
+                    
                     $status = 'Belum Lunas';
-                    if ($item->nominal_yang_dikembalikan >= $item->nominal_yang_disalurkan) {
+                    if ($sisaBelumDikembalikan <= 0) {
                         $status = 'Lunas';
-                    } elseif ($item->nominal_yang_dikembalikan > 0) {
+                    } elseif (($item->nominal_yang_dikembalikan ?? 0) > 0) {
                         $status = 'Sebagian Lunas';
                     }
 
@@ -135,6 +137,8 @@ class PenyaluranDepositoTable extends DataTableComponent
                         'nama_perusahaan' => $item->nama_perusahaan,
                         'nominal_yang_disalurkan' => $item->nominal_yang_disalurkan,
                         'nominal_yang_dikembalikan' => $item->nominal_yang_dikembalikan ?? 0,
+                        'total_dikembalikan' => $penyaluranModel ? $penyaluranModel->total_dikembalikan : ($item->nominal_yang_dikembalikan ?? 0),
+                        'sisa_belum_dikembalikan' => $sisaBelumDikembalikan,
                         'tanggal_pengiriman_dana' => $item->tanggal_pengiriman_dana,
                         'tanggal_pengembalian' => $item->tanggal_pengembalian,
                         'status' => $status,

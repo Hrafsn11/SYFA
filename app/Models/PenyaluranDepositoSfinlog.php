@@ -50,5 +50,20 @@ class PenyaluranDepositoSfinlog extends Model
     {
         return $this->belongsTo(Project::class, 'id_project', 'id_project');
     }
+
+    public function riwayatPengembalian()
+    {
+        return $this->hasMany(RiwayatPengembalianDepositoSfinlog::class, 'id_penyaluran_deposito_sfinlog', 'id_penyaluran_deposito_sfinlog');
+    }
+
+    public function getTotalDikembalikanAttribute()
+    {
+        return $this->riwayatPengembalian()->sum('nominal_dikembalikan');
+    }
+
+    public function getSisaBelumDikembalikanAttribute()
+    {
+        return max(0, (float)$this->nominal_yang_disalurkan - $this->total_dikembalikan);
+    }
 }
 
