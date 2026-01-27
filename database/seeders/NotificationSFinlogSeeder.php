@@ -166,12 +166,12 @@ class NotificationSFinlogSeeder extends Seeder
         ]);
 
         // Notifikasi untuk SKI Finance - Konfirmasi penerimaan dana
-        NotificationFeatureDetail::updateOrCreate([
-            'notification_feature_id' => $bukti_transfer_diupload->id_notification_feature,
-            ], [
-            'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id]),
-            'message' => 'Debitur [[nama.debitur]] telah mengonfirmasi penerimaan dana pinjaman.',
-        ]);
+        // NotificationFeatureDetail::updateOrCreate([
+        //     'notification_feature_id' => $bukti_transfer_diupload->id_notification_feature,
+        //     ], [
+        //     'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id]),
+        //     'message' => 'Debitur [[nama.debitur]] telah mengonfirmasi penerimaan dana pinjaman.',
+        // ]);
 
         // =============================================
         // NOTIFIKATION UNTUK SURAT PERINGATAN 

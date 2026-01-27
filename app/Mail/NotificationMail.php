@@ -20,17 +20,23 @@ class NotificationMail extends Mailable implements ShouldQueue
     public $url;
     public $content;
     public $spkNumber;
+    public $debitur;
+    public $bukti;
+    public $kol;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $url, $content, $spkNumber)
+    public function __construct($user, $url, $content, $spkNumber, $debitur, $bukti, $kol)
     {
         //
         $this->user = $user;
         $this->url = $url;
         $this->content = $content;
         $this->spkNumber = $spkNumber;
+        $this->debitur = $debitur;
+        $this->bukti = $bukti;
+        $this->kol = $kol;
     }
 
     /**
@@ -39,7 +45,7 @@ class NotificationMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notifikasi Baru dari Aplikasi Syifa',
+            subject: 'Peringatan Tagihan Piutang Pembiayaan',
         );
     }
 
@@ -70,8 +76,15 @@ class NotificationMail extends Mailable implements ShouldQueue
 
         // Default to SP1 if spkNumber is invalid
         $spk = $spkMap[$this->spkNumber] ?? $spkMap[1];
+        $invoice = $this->bukti->no_invoice ?? 'N/A';
+        $kol = $this->kol;
+        $debitur = $this->debitur;
 
-        $pdf = Pdf::loadView($spk['view']);
+        $pdf = Pdf::loadView($spk['view'], [
+            'invoice' => $invoice,
+            'kol' => $kol,
+            'debitur' => $debitur,
+        ])->setPaper('a4', 'portrait');
 
         $attachments[] = Attachment::fromData(
             fn () => $pdf->output(),
