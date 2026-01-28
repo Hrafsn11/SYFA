@@ -319,7 +319,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $disetujui_ceo_ski_investasi->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$finance->id, $ceo->id]),
+            'role_assigned' => json_encode([$investor->id, $finance->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh CEO SKI.',
         ]);
 
@@ -332,7 +332,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $ditolak_ceo_ski_investasi->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$finance->id, $ceo->id]),
+            'role_assigned' => json_encode([$investor->id, $finance->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh CEO SKI.',
         ]);
 
