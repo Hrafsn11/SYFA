@@ -105,7 +105,7 @@ dist
 # Tapi ignore generated files di public/
 /public/hot
 /public/storage
-/public/build/
+# /public/build/
 /public/js/
 /public/css/
 /public/mix-manifest.json
@@ -119,7 +119,7 @@ tmp/
 temp/
 
 # Build outputs
-/public/build/
+# /public/build/
 /public/mix-manifest.json
 
 # Composer
@@ -163,7 +163,7 @@ composer.phar
 /storage/framework/sessions/*
 
 # Compiled assets
-/public/build/
+# /public/build/
 /public/hot
 
 # Local configuration
