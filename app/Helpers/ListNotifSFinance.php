@@ -209,6 +209,7 @@ class ListNotifSFinance
             'id_investor' => null,
             'spk_number' => $spkNumber,
             'bukti' => $bukti,
+            'modul' => 'sfinance'
         ];
 
         sendNotificationWithMail($data);

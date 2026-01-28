@@ -226,7 +226,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pengembalian_dana->id_notification_feature,
             ], [
-            'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id]),
+            'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id, $finance->id]),
             'message' => 'Debitur [[nama.debitur]] telah melakukan pembayaran pengembalian dana pinjaman.',
         ]);
 
@@ -240,17 +240,17 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pengembalian_jatuh_tempo->id_notification_feature,
             ], [
-            'role_assigned' => json_encode([$debitur->id, $investmentOfficer->id, $ceo->id]),
+            'role_assigned' => json_encode([$debitur->id, $investmentOfficer->id, $ceo->id, $finance->id]),
             'message' => 'Pengembalian dana pinjaman debitur [[nama.debitur]] akan segera jatuh tempo pada [[tanggal.jatuh.tempo]].',
         ]);
 
-        // Notifikasi untuk SKI Finance
-        NotificationFeatureDetail::updateOrCreate([
-            'notification_feature_id' => $pengembalian_jatuh_tempo->id_notification_feature,
-            ], [
-            'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id]),
-            'message' => 'Pengembalian dana pinjaman debitur [[nama.debitur]] akan segera jatuh tempo pada [[tanggal.jatuh.tempo]].',
-        ]);
+        // // Notifikasi untuk SKI Finance
+        // NotificationFeatureDetail::updateOrCreate([
+        //     'notification_feature_id' => $pengembalian_jatuh_tempo->id_notification_feature,
+        //     ], [
+        //     'role_assigned' => json_encode([$ceo->id, $investmentOfficer->id, $debitur->id, $finance->id]),
+        //     'message' => 'Pengembalian dana pinjaman debitur [[nama.debitur]] akan segera jatuh tempo pada [[tanggal.jatuh.tempo]].',
+        // ]);
 
         // 14. Pengembalian Dana Telat - Debitur dan SKI Finance
         $pengembalian_telat = NotificationFeature::firstOrCreate([
@@ -261,14 +261,7 @@ class NotificationSFinlogSeeder extends Seeder
         // Notifikasi untuk Debitur
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengembalian_telat->id_notification_feature,
-            'role_assigned' => json_encode([$debitur->id]),
-            'message' => 'Debitur [[nama.debitur]] telah melewati tanggal jatuh tempo dan belum melakukan pembayaran pengembalian dana.',
-        ]);
-
-        // Notifikasi untuk SKI Finance
-        NotificationFeatureDetail::firstOrCreate([
-            'notification_feature_id' => $pengembalian_telat->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+            'role_assigned' => json_encode([$debitur->id, $investmentOfficer->id, $ceo->id, $finance->id]),
             'message' => 'Debitur [[nama.debitur]] telah melewati tanggal jatuh tempo dan belum melakukan pembayaran pengembalian dana.',
         ]);
 
@@ -326,7 +319,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $disetujui_ceo_ski_investasi->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$finance->id, $ceo->id]),
+            'role_assigned' => json_encode([$investor->id, $finance->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah disetujui oleh CEO SKI.',
         ]);
 
@@ -339,7 +332,7 @@ class NotificationSFinlogSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $ditolak_ceo_ski_investasi->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$finance->id, $ceo->id]),
+            'role_assigned' => json_encode([$investor->id, $finance->id, $ceo->id]),
             'message' => 'Pengajuan investasi dari investor [[nama.investor]] telah ditolak oleh CEO SKI.',
         ]);
 
@@ -351,7 +344,7 @@ class NotificationSFinlogSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $kontrak_investasi_dibuat->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'Kontrak investasi untuk investor [[nama.investor]] telah berhasil dibuat.',
         ]);
 
@@ -365,7 +358,7 @@ class NotificationSFinlogSeeder extends Seeder
             'notification_feature_id' => $investasi_berhasil_ditransfer->id_notification_feature,
         ], [
             'role_assigned' => json_encode([$finance->id, $ceo->id]),
-            'message' => 'Dana investasi dari investor [[nama.investor]] telah berhasil diterima. Status investasi: Selesai.',
+            'message' => 'Dana investasi dari investor [[nama.investor]] telah berhasil diterima.',
         ]);
 
         // ============================================
@@ -451,6 +444,35 @@ class NotificationSFinlogSeeder extends Seeder
         ], [
             'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'SKI Finance telah melakukan transfer pengembalian dana investasi kepada investor [[nama.investor]].',
+        ]);
+
+        $sp1 = NotificationFeature::firstOrCreate([
+            'name' => 'surat_peringatan_1_pengembalian_dana_sfinlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::updateOrCreate([
+            'notification_feature_id' => $sp1->id_notification_feature,
+        ], [
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Sehubungan dengan hasil evaluasi dan pemantauan yang telah kami lakukan, bersama email ini kami sampaikan bahwa perusahaan akan mengirimkan Surat Peringatan Pertama (SP 1) sebagai bentuk tindak lanjut atas hal-hal yang telah menjadi perhatian bersama. Adapun surat resmi terlampir pada email ini untuk dapat dipelajari dan ditindaklanjuti sebagaimana mestinya.',
+        ]);
+
+        $sp2 = NotificationFeature::firstOrCreate([
+            'name' => 'surat_peringatan_2_pengembalian_dana_sfinlog',
+            'module' => 's_finlog',
+        ]);
+
+        NotificationFeatureDetail::updateOrCreate([
+            'notification_feature_id' => $sp2->id_notification_feature,
+        ], [
+            'role_assigned' => json_encode([$debitur->id]),
+            'message' => 'Sehubungan dengan hasil evaluasi dan pemantauan yang telah kami lakukan, bersama email ini kami sampaikan bahwa perusahaan akan mengirimkan Surat Peringatan Kedua (SP 2) sebagai bentuk tindak lanjut atas hal-hal yang telah menjadi perhatian bersama. Adapun surat resmi terlampir pada email ini untuk dapat dipelajari dan ditindaklanjuti sebagaimana mestinya.',
+        ]);
+
+        $sp3 = NotificationFeature::firstOrCreate([
+            'name' => 'surat_peringatan_3_pengembalian_dana_sfinlog',
+            'module' => 's_finlog',
         ]);
     }
 }
