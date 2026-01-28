@@ -344,7 +344,7 @@ class NotificationSFinlogSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $kontrak_investasi_dibuat->id_notification_feature,
-            'role_assigned' => json_encode([$investor->id]),
+            'role_assigned' => json_encode([$investor->id, $ceo->id]),
             'message' => 'Kontrak investasi untuk investor [[nama.investor]] telah berhasil dibuat.',
         ]);
 
@@ -358,7 +358,7 @@ class NotificationSFinlogSeeder extends Seeder
             'notification_feature_id' => $investasi_berhasil_ditransfer->id_notification_feature,
         ], [
             'role_assigned' => json_encode([$finance->id, $ceo->id]),
-            'message' => 'Dana investasi dari investor [[nama.investor]] telah berhasil diterima. Status investasi: Selesai.',
+            'message' => 'Dana investasi dari investor [[nama.investor]] telah berhasil diterima.',
         ]);
 
         // ============================================

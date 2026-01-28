@@ -163,17 +163,18 @@ class ListNotifSFinlog
 
     public static function menuPengajuanInvestasi($status, $pengajuan)
     {
+        // dd($pengajuan->current_step);
         // Mapping status dari history ke notification feature name
         if($status === 'Menunggu Validasi Finance SKI') {
             $notif = NotificationFeature::where('name', 'pengajuan_investasi_baru_finlog')->first();
-        } else if($status === 'Dokumen Tervalidasi') {
+        } else if($status === 'Menunggu Persetujuan CEO Finlog') {
             $notif = NotificationFeature::where('name', 'disetujui_ski_finance_investasi_finlog')->first();
-        } else if($status === 'Ditolak' || (str_contains($status, 'Ditolak') && $pengajuan->current_step == 2)) {
+        } else if ($pengajuan->current_step == 1 && ($status === 'Ditolak Finance SKI' || str_contains($status, 'Ditolak'))) {
             // Ditolak di step 2 (SKI Finance)
             $notif = NotificationFeature::where('name', 'ditolak_ski_finance_investasi_finlog')->first();
         } else if($status === 'Disetujui CEO Finlog' || $status === 'Menunggu Upload Bukti Transfer') {
             $notif = NotificationFeature::where('name', 'disetujui_ceo_ski_investasi_finlog')->first();
-        } else if(str_contains($status, 'Ditolak CEO') || (str_contains($status, 'Ditolak') && $pengajuan->current_step == 3)) {
+        } else if((str_contains($status, 'Ditolak CEO Finlog - Menunggu Re-validasi') || str_contains($status, 'Ditolak')) && $pengajuan->current_step == 2) {
             // Ditolak di step 3 (CEO)
             $notif = NotificationFeature::where('name', 'ditolak_ceo_ski_investasi_finlog')->first();
         } else if($status === 'Bukti Transfer Diupload') {
@@ -432,6 +433,59 @@ class ListNotifSFinlog
         ];
 
         sendNotification($data);
+    }
+
+    public static function suratPeringatanPengembalianDana($peminjaman, $tanggalJatuhTempo, $spkNumber)
+    {
+        // Notifikasi saat surat peringatan pengembalian dana dibuat
+        if (empty($spkNumber)) {
+            return;
+        }
+
+        if($spkNumber === 1) {
+            $notifName = 'surat_peringatan_1_pengembalian_dana_finlog';
+        } else if($spkNumber === 2) {
+            $notifName = 'surat_peringatan_2_pengembalian_dana_finlog';
+        } else if($spkNumber === 3) {
+            $notifName = 'surat_peringatan_3_pengembalian_dana_finlog';
+        } else {
+            return;
+        }
+
+        $notif = NotificationFeature::where('name', $notifName)->first();
+
+        if (!$notif) {
+            return;
+        }
+
+        // Load relasi yang diperlukan
+        $peminjaman->load('debitur');
+
+        // Format tanggal jatuh tempo
+        $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
+
+        // Siapkan variable untuk template notifikasi
+        $notif_variable = [
+            '[[nama.debitur]]' => $peminjaman->debitur->nama ?? 'N/A',
+            '[[nomor.peminjaman]]' => $peminjaman->nomor_peminjaman ?? 'N/A',
+            '[[nama.project]]' => $peminjaman->nama_project ?? 'N/A',
+            '[[tanggal.jatuh.tempo]]' => $tanggalFormatted,
+            '[[sp]]' => $spkNumber,
+        ];
+
+        // Generate link ke detail peminjaman
+        $link = route('sfinlog.peminjaman.detail', $peminjaman->id_peminjaman_finlog);
+
+        $data = [
+            'notif_variable' => $notif_variable,
+            'link' => $link,
+            'notif' => $notif,
+            'id_debitur' => $peminjaman->id_debitur,
+            'id_investor' => null,
+            'spk_number' => $spkNumber,
+        ];
+
+        sendNotificationWithMail($data);
     }
 }
 
