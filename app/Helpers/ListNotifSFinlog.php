@@ -443,11 +443,11 @@ class ListNotifSFinlog
         }
 
         if($spkNumber === 1) {
-            $notifName = 'surat_peringatan_1_pengembalian_dana_finlog';
+            $notifName = 'surat_peringatan_1_pengembalian_dana_sfinlog';
         } else if($spkNumber === 2) {
-            $notifName = 'surat_peringatan_2_pengembalian_dana_finlog';
+            $notifName = 'surat_peringatan_2_pengembalian_dana_sfinlog';
         } else if($spkNumber === 3) {
-            $notifName = 'surat_peringatan_3_pengembalian_dana_finlog';
+            $notifName = 'surat_peringatan_3_pengembalian_dana_sfinlog';
         } else {
             return;
         }
@@ -483,6 +483,8 @@ class ListNotifSFinlog
             'id_debitur' => $peminjaman->id_debitur,
             'id_investor' => null,
             'spk_number' => $spkNumber,
+            'bukti' => $peminjaman,
+            'modul' => 'sfinlog'
         ];
 
         sendNotificationWithMail($data);
