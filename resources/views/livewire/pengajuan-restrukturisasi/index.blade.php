@@ -352,10 +352,31 @@
                 }
             });
 
-            // Initialize Flatpickr
-            if (typeof window.initFlatpickr === 'function') {
-                window.initFlatpickr();
-            }
+            // Initialize Bootstrap Datepicker for date fields
+            // Use container to prevent datepicker from conflicting with stepper
+            $('#tanggal_akad').datepicker({
+                format: 'yyyy-mm-dd',
+                todayHighlight: true,
+                autoclose: true,
+                orientation: 'bottom auto',
+                container: '#modalRestrukturisasi'
+            }).on('show', function(e) {
+                e.stopPropagation();
+            }).on('hide', function(e) {
+                e.stopPropagation();
+            });
+            
+            $('#tanggal').datepicker({
+                format: 'yyyy-mm-dd',
+                todayHighlight: true,
+                autoclose: true,
+                orientation: 'bottom auto',
+                container: '#modalRestrukturisasi'
+            }).on('show', function(e) {
+                e.stopPropagation();
+            }).on('hide', function(e) {
+                e.stopPropagation();
+            });
 
             // Initialize Cleave.js for Rupiah format
             if (typeof window.initCleaveRupiah === 'function') {

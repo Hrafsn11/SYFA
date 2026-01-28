@@ -88,22 +88,11 @@
                         <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
                                 class="text-danger">*</span></label>
                         @if (!$isEdit)
-                            <div wire:ignore>
-                                <livewire:components.select2 
-                                    :list_data="collect([
-                                        ['value' => 'Flat', 'label' => 'Metode Flat'],
-                                        ['value' => 'Efektif (Anuitas)', 'label' => 'Metode Efektif (Anuitas)']
-                                    ])"
-                                    value_name="value"
-                                    value_label="label"
-                                    data_placeholder="Pilih Metode Perhitungan"
-                                    model_name="metode_perhitungan"
-                                    :value="$metode_perhitungan"
-                                    :allow_clear="false"
-                                    :tags="false"
-                                    wire:key="select2-metode-{{ $metode_perhitungan }}"
-                                />
-                            </div>
+                            <select class="form-select @error('metode_perhitungan') is-invalid @enderror"
+                                wire:model.live="metode_perhitungan">
+                                <option value="Flat">Metode Flat</option>
+                                <option value="Efektif (Anuitas)">Metode Efektif (Anuitas)</option>
+                            </select>
                         @else
                             <select class="form-select" disabled style="background-color: #f5f5f9;">
                                 <option value="{{ $metode_perhitungan }}" selected>
@@ -164,7 +153,7 @@
 
                     <div class="col-12 mb-3">
                         <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
-                            wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                            wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="hitungJadwalAngsuran"
                                 class="d-flex align-items-center">
                                 <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
@@ -207,7 +196,7 @@
 
                     <div class="col-12 mb-3">
                         <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
-                            wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                            wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="hitungJadwalAngsuran"
                                 class="d-flex align-items-center">
                                 <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran

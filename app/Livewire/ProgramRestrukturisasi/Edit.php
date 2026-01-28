@@ -432,7 +432,10 @@ class Edit extends Create
         $this->selectedAngsuranIndex = $index;
         $this->selectedAngsuranNo = $angsuran['no'];
         $this->uploadFile = null;
-        $this->maxNominalBayar = (int) round($sisaPembayaran);
+        $this->maxNominalBayar = (int) floor($sisaPembayaran);
+        if ($sisaPembayaran - $this->maxNominalBayar > 0 && $sisaPembayaran - $this->maxNominalBayar < 1) {
+            $this->maxNominalBayar = (int) ceil($sisaPembayaran);
+        }
         $this->uploadNominalBayar = $this->maxNominalBayar; // Default ke sisa pembayaran
         $this->showUploadModal = true;
 
@@ -496,11 +499,17 @@ class Edit extends Create
             $angsuran = $this->jadwal_angsuran[$index];
             $nominalBayar = (float) $this->uploadNominalBayar;
 
-            // Validasi nominal tidak melebihi sisa pembayaran
+            // Validasi nominal tidak melebihi sisa pembayaran (dengan toleransi 1 rupiah untuk selisih pembulatan)
             $sisaPembayaran = $angsuran['sisa_pembayaran'] ?? ($angsuran['total_cicilan'] - ($angsuran['total_terbayar'] ?? 0));
-            if ($nominalBayar > $sisaPembayaran) {
+            $toleransi = 1; // Toleransi 1 rupiah untuk menghindari masalah pembulatan
+            if ($nominalBayar > ($sisaPembayaran + $toleransi)) {
                 $this->showError('Nominal Melebihi Sisa', 'Nominal pembayaran (Rp ' . number_format($nominalBayar, 0, ',', '.') . ') tidak boleh melebihi sisa pembayaran (Rp ' . number_format($sisaPembayaran, 0, ',', '.') . ').');
                 return;
+            }
+
+            // Jika nominal bayar melebihi sisa karena selisih kecil, sesuaikan ke sisa pembayaran
+            if ($nominalBayar > $sisaPembayaran && $nominalBayar <= ($sisaPembayaran + $toleransi)) {
+                $nominalBayar = $sisaPembayaran;
             }
 
             if ($nominalBayar <= 0) {

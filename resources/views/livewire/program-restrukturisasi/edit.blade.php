@@ -215,7 +215,7 @@
 
                                     <div class="col-12 mb-3">
                                         <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
-                                            wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                                            wire:loading.attr="disabled">
                                             <span wire:loading.remove wire:target="hitungJadwalAngsuran"
                                                 class="d-flex align-items-center">
                                                 <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
@@ -257,7 +257,7 @@
 
                                 <div class="col-12 mb-3">
                                     <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
-                                        wire:loading.attr="disabled" @if (!$this->canCalculate) disabled @endif>
+                                        wire:loading.attr="disabled">
                                         <span wire:loading.remove wire:target="hitungJadwalAngsuran"
                                             class="d-flex align-items-center">
                                             <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran

@@ -1,8 +1,4 @@
 <style>
-    .flatpickr-input:not([readonly]) {
-        background-color: #fff !important;
-        cursor: text !important;
-    }
     
     .jenis-pembiayaan-radio:disabled + label,
     .jenis-pembiayaan-radio:disabled ~ .custom-option-content {
@@ -213,8 +209,8 @@
                                                 class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <input type="text"
-                                                class="form-control flatpickr @error('tanggal_akad') is-invalid @enderror"
-                                                id="tanggal_akad" name="tanggal_akad" placeholder="Pilih tanggal">
+                                                class="form-control @error('tanggal_akad') is-invalid @enderror"
+                                                id="tanggal_akad" name="tanggal_akad" placeholder="yyyy-mm-dd">
                                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                         </div>
                                         @error('tanggal_akad')
@@ -605,8 +601,8 @@
                                         <label for="tanggal" class="form-label">Tanggal</label>
                                         <div class="input-group">
                                             <input type="text"
-                                                class="form-control flatpickr @error('tanggal') is-invalid @enderror"
-                                                id="tanggal" name="tanggal" placeholder="Pilih tanggal">
+                                                class="form-control @error('tanggal') is-invalid @enderror"
+                                                id="tanggal" name="tanggal" placeholder="yyyy-mm-dd">
                                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                         </div>
                                         @error('tanggal')
