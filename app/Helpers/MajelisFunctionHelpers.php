@@ -543,7 +543,8 @@ if (!function_exists('sendNotificationWithMail')) {
                                         'spk_number' => $data['spk_number'] ?? 1,
                                         'debitur' => $debitur->nama ?? '',
                                         'bukti' => $data['bukti'] ?? null,
-                                        'kol' => $kol
+                                        'kol' => $kol,
+                                        'modul' => $data['modul'] ?? '',
                                     ];
                                     
                                     dispatch(new SendMailJob($data_queue));

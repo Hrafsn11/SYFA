@@ -23,11 +23,12 @@ class NotificationMail extends Mailable implements ShouldQueue
     public $debitur;
     public $bukti;
     public $kol;
+    public $modul;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $url, $content, $spkNumber, $debitur, $bukti, $kol)
+    public function __construct($user, $url, $content, $spkNumber, $debitur, $bukti, $kol, $modul)
     {
         //
         $this->user = $user;
@@ -37,6 +38,7 @@ class NotificationMail extends Mailable implements ShouldQueue
         $this->debitur = $debitur;
         $this->bukti = $bukti;
         $this->kol = $kol;
+        $this->modul = $modul;
     }
 
     /**
@@ -67,12 +69,22 @@ class NotificationMail extends Mailable implements ShouldQueue
     public function attachments(): array
     {
         $attachments = [];
-
+        $no_rek = '-';
         $spkMap = [
             1 => ['view' => 'emails.surat_peringatan1', 'file' => 'Surat Peringatan 1.pdf'],
             2 => ['view' => 'emails.surat_peringatan2', 'file' => 'Surat Peringatan 2.pdf'],
             3 => ['view' => 'emails.surat_peringatan3', 'file' => 'Surat Peringatan 3.pdf'],
         ];
+        if($this->modul === 'sfinance') {
+            $no_rek = '124-001-0052-851';
+        }else{
+            // $spkMap = [
+            //     1 => ['view' => 'emails.surat_peringatan_finlog1', 'file' => 'Surat Peringatan 1.pdf'],
+            //     2 => ['view' => 'emails.surat_peringatan_finlog2', 'file' => 'Surat Peringatan 2.pdf'],
+            //     3 => ['view' => 'emails.surat_peringatan_finlog3', 'file' => 'Surat Peringatan 3.pdf'],
+            // ];
+            $no_rek = '124-001-2977-113';
+        }
 
         // Default to SP1 if spkNumber is invalid
         $spk = $spkMap[$this->spkNumber] ?? $spkMap[1];
@@ -84,6 +96,7 @@ class NotificationMail extends Mailable implements ShouldQueue
             'invoice' => $invoice,
             'kol' => $kol,
             'debitur' => $debitur,
+            'no_rek' => $no_rek,
         ])->setPaper('a4', 'portrait');
 
         $attachments[] = Attachment::fromData(

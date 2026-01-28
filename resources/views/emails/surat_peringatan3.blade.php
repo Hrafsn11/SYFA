@@ -54,7 +54,7 @@
         </p>
 
         <p>
-            Bersama ini kami perlu informasikan Kembali bahwa tagihan piutang pembiayaan atas invoice no <strong>{{ $invoice }}</strong> sudah jatuh tempo <strong>180 hari</strong> dan telah kami ingatkan untuk yang ke 3 kalinya melalui Surat Peringatan maupun secara verbal, namun hingga hari ini kami belum mendapatkan realisasi pembayaran piutang pembiayaan tersebut, untuk itu mohon kiranya dapat mengkonfirmasikan kepada Luthfia ke 0858 9246 7566 atau melalui email <strong><a href="mailto:luthfia@synnovac-capital.com">luthfia@synnovac-capital.com</a></strong> dan mengembalikan dana pembiayaan tersebut SEGERA kepada S-Finance ke rekening nomor <strong>124-001-0052-851 PT Synnovac Kapital Indonesia</strong>.
+            Bersama ini kami perlu informasikan Kembali bahwa tagihan piutang pembiayaan atas invoice no <strong>{{ $invoice }}</strong> sudah jatuh tempo <strong>180 hari</strong> dan telah kami ingatkan untuk yang ke 3 kalinya melalui Surat Peringatan maupun secara verbal, namun hingga hari ini kami belum mendapatkan realisasi pembayaran piutang pembiayaan tersebut, untuk itu mohon kiranya dapat mengkonfirmasikan kepada Luthfia ke 0858 9246 7566 atau melalui email <strong><a href="mailto:luthfia@synnovac-capital.com">luthfia@synnovac-capital.com</a></strong> dan mengembalikan dana pembiayaan tersebut SEGERA kepada S-Finance ke rekening nomor <strong>{{ $no_rek }} PT Synnovac Kapital Indonesia</strong>.
         </p>
         @php
             $textKol = '';
