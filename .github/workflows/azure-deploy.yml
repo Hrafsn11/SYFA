@@ -1,0 +1,45 @@
+name: Deploy SYFA to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo, mysql, gd, zip
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
+
+      - name: Create deployment package
+        run: |
+          # Remove dev files
+          rm -rf tests node_modules storage/logs/*.log
+          # Create storage directories
+          mkdir -p storage/framework/{cache,sessions,views}
+          mkdir -p bootstrap/cache
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "syfa-app"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: .
+
+      - name: Run migrations via SSH
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az webapp ssh --name syfa-app --resource-group rg-syfa --command "cd /home/site/wwwroot && php artisan migrate --force" || true
