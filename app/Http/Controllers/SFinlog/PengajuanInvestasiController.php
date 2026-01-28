@@ -194,11 +194,11 @@ class PengajuanInvestasiController extends Controller
             $status = $request->input('status');
 
             // Determine next step based on status
+            // Note: Bukti Transfer upload is handled separately in uploadBuktiTransfer method
             $stepMapping = [
                 'Submit Pengajuan' => ['status' => 'Menunggu Validasi Finance SKI', 'step' => 2],
                 'Dokumen Tervalidasi' => ['status' => 'Menunggu Persetujuan CEO Finlog', 'step' => 3],
                 'Disetujui CEO Finlog' => ['status' => 'Menunggu Upload Bukti Transfer', 'step' => 4],
-                'Bukti Transfer Diupload' => ['status' => 'Menunggu Generate Kontrak', 'step' => 5],
                 'Selesai' => ['status' => 'Selesai', 'step' => 6],
             ];
 
@@ -207,7 +207,8 @@ class PengajuanInvestasiController extends Controller
             // - Ditolak di Step 2 (Finance SKI) → mundur ke Step 1 (revisi dan re-submit oleh investor)
             if ($status === 'Ditolak' || str_contains($status, 'Ditolak')) {
                 $previousStep = $pengajuan->current_step;
-
+                
+                // dd($previousStep);
                 // Determine rollback step based on current position
                 if ($previousStep == 3) {
                     // Ditolak CEO Finlog → kembali ke Step 2 untuk re-validasi Finance SKI
