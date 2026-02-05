@@ -96,7 +96,7 @@
         @endif
 
         {{-- SFinlog Card --}}
-        <div class="col-12 col-md-6 col-xl-3">
+        {{-- <div class="col-12 col-md-6 col-xl-3">
             <div class="card h-100 border service-card shadow-none">
                 <div class="card-body d-flex flex-column align-items-center text-center p-4">
                     <span class="badge bg-label-info text-uppercase mb-3 px-3 py-2 fw-semibold">Support</span>
@@ -114,7 +114,7 @@
                     </a>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         {{-- Master Data & Configuration Card --}}
         @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor', 'IO (Investment Officer)', 'CEO S-Finlog', 'Direktur SKI', 'CEO SKI']))
@@ -142,7 +142,7 @@
 
 
         {{-- Portofolio Card --}}
-        @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor', 'IO (Investment Officer)', 'CEO S-Finlog', 'Direktur SKI', 'CEO SKI']))
+        {{-- @if (!auth()->user()->hasAnyRole(['Debitur', 'Investor', 'IO (Investment Officer)', 'CEO S-Finlog', 'Direktur SKI', 'CEO SKI']))
             <div class="col-12 col-md-6 col-xl-3">
                 <div class="card h-100 border service-card shadow-none">
                     <div class="card-body d-flex flex-column align-items-center text-center p-4">
@@ -162,7 +162,7 @@
                     </div>
                 </div>
             </div>
-        @endif
+        @endif --}}
     </div>
 </div>
 

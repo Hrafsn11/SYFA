@@ -135,7 +135,7 @@
                     <li class="menu-item {{ RouteHelper::routeIs('ar-perbulan*') ? 'active' : '' }}">
                         <a href="{{ RouteHelper::route('ar-perbulan.index') }}" class="menu-link" wire:navigate.hover>
                             <i class="menu-icon tf-icons ti ti-archive"></i>
-                            <div data-i18n="AR Perbulan">AR Perbulan</div>
+                            <div data-i18n="Laporan Tagihan Bulanan">Laporan Tagihan Bulanan</div>
                         </a>
                     </li>
                 @endcanany
@@ -144,7 +144,7 @@
                     <li class="menu-item {{ RouteHelper::routeIs('ar-performance*') ? 'active' : '' }}">
                         <a href="{{ RouteHelper::route('ar-performance.index') }}" class="menu-link" wire:navigate.hover>
                             <i class="menu-icon tf-icons ti ti-chart-line"></i>
-                            <div data-i18n="AR Performance">AR Performance</div>
+                            <div data-i18n="Monitoring Pembayaran">Monitoring Pembayaran</div>
                         </a>
                     </li>
                 @endcanany
@@ -162,7 +162,7 @@
                             <a href="{{ RouteHelper::route('pengajuan-restrukturisasi.index') }}" class="menu-link"
                                 wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
-                                <div data-i18n="Pengajuan Restrukturisasi">Pengajuan Restrukturisasi</div>
+                                <div data-i18n="Pengajuan Cicilan">Pengajuan Cicilan</div>
                             </a>
                         </li>
                     @endcan
@@ -172,7 +172,7 @@
                             <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link"
                                 wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-calculator"></i>
-                                <div data-i18n="Program Restrukturisasi">Program Restrukturisasi</div>
+                                <div data-i18n="Penyesuaian Cicilan">Penyesuaian Cicilan</div>
                             </a>
                         </li>
                     @endcan
@@ -282,7 +282,7 @@
                                     <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-report-money"></i>
-                        <div data-i18n="Aset Investasi">Aset Investasi</div>
+                        <div data-i18n="Penyaluran Dana Investasi">Penyaluran Dana Investasi</div>
                         </a>
                     </li>
                 @endcanany
@@ -294,7 +294,7 @@
                             <a href="{{ route('sfinance.kertas-kerja-investor-sfinance.index') }}" class="menu-link"
                                 wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
-                                <div data-i18n="Kertas Kerja Investor">Kertas Kerja Investor</div>
+                                <div data-i18n="Laporan Investasi">Laporan Investasi</div>
                             </a>
                         @elseif($isSFinlog)
                             <a href="{{ route('sfinlog.kertas-kerja-investor-sfinlog.index') }}" class="menu-link"
