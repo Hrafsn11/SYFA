@@ -116,21 +116,21 @@ class ArPerbulanTable extends DataTableComponent
                 ->format(fn($value) => '<div class="text-start">' . ($value ?: '-') . '</div>')
                 ->html(),
 
-            Column::make('Sisa AR Piutang Pokok', 'sisa_ar_pokok')
+            Column::make('Sisa Pinjaman Pokok', 'sisa_ar_pokok')
                 ->sortable()
                 ->format(function ($value) {
                     return '<div class="text-end">Rp ' . number_format($value, 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
-            Column::make('Sisa Bagi Hasil', 'sisa_bagi_hasil')
+            Column::make('Sisa Bunga', 'sisa_bagi_hasil')
                 ->sortable()
                 ->format(function ($value) {
                     return '<div class="text-end">Rp ' . number_format($value, 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
-            Column::make('Sisa AR Pokok + Bagi Hasil', 'sisa_ar_total')
+            Column::make('Sisa Pinjaman Pokok + Bunga', 'sisa_ar_total')
                 ->sortable()
                 ->format(function ($value) {
                     return '<div class="text-end"><strong>Rp ' . number_format($value, 0, ',', '.') . '</strong></div>';

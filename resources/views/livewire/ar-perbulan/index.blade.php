@@ -4,7 +4,7 @@
             <div class="mb-3">
                 <div>
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="fw-bold mb-0">AR Perbulan</h4>
+                        <h4 class="fw-bold mb-0">Laporan Tagihan Bulanan</h4>
                         <div>
                             <button type="button" class="btn btn-primary d-flex justify-center align-items-center gap-3" wire:click="exportToZip"
                                 wire:loading.attr="disabled">

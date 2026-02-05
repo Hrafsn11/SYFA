@@ -212,7 +212,7 @@
                                 <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-receipt"></i>
-                        <div data-i18n="Debitur Piutang">Debitur Piutang</div>
+                        <div data-i18n="Riwayat Tagihan">Riwayat Tagihan </div>
                         </a>
                     </li>
                 @endcanany

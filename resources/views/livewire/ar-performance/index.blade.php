@@ -2,7 +2,7 @@
     {{-- Header & Filter --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-1">AR Performance</h4>
+            <h4 class="fw-bold mb-1">Monitoring Pembayaran</h4>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('ar-performance.export-pdf', ['tahun' => $tahun, 'bulan' => $bulan]) }}" 
