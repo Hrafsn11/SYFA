@@ -8,7 +8,7 @@ use App\Enums\JenisPembiayaanEnum;
 trait FieldInputCreate
 {
     #[FieldInput]
-    public $sumber_pembiayaan = 'Eksternal', 
+    public $sumber_pembiayaan = 'Internal', // Default Internal karena backend selalu set ke Internal 
         $id_instansi, 
         $nama_rekening, 
         $lampiran_sid, 

@@ -184,10 +184,8 @@
                     syncInputToComponent();
                 });
                 
-                $input.off('input.currency-field');
-                $input.on('input.currency-field', () => {
-                    syncInputToComponent();
-                });
+                // Hapus listener 'input' untuk menghindari sync saat mengetik
+                // yang menyebabkan fokus hilang dan input "berhenti sendiri"
             }
 
             let previousWireId = null;
