@@ -137,13 +137,13 @@ class NotificationSFinanceSeeder extends Seeder
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_disetujui_oleh_ceo_ski->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+            'role_assigned' => json_encode([$finance->id, $direktur->id, $debitur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah disetujui oleh CEO SKI.',
         ]);
 
         NotificationFeatureDetail::firstOrCreate([
             'notification_feature_id' => $pengajuan_ditolak_oleh_ceo_ski->id_notification_feature,
-            'role_assigned' => json_encode([$finance->id]),
+            'role_assigned' => json_encode([$finance->id, $direktur->id, $debitur->id]),
             'message' => 'Pengajuan pinjaman debitur [[nama.debitur]] telah ditolak oleh CEO SKI.',
         ]);
 
@@ -324,7 +324,7 @@ class NotificationSFinanceSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pengajuan_restrukturisasi_disetujui_ceo->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$debitur->id, $direktur->id]),
+            'role_assigned' => json_encode([$debitur->id, $direktur->id, $finance->id]),
             'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah disetujui oleh CEO SKI.',
         ]);
 
@@ -337,7 +337,7 @@ class NotificationSFinanceSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pengajuan_restrukturisasi_ditolak_ceo->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$debitur->id, $direktur->id]),
+            'role_assigned' => json_encode([$debitur->id, $direktur->id, $finance->id]),
             'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah ditolak oleh CEO SKI.',
         ]);
 
@@ -350,7 +350,7 @@ class NotificationSFinanceSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pengajuan_restrukturisasi_disetujui_direktur->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$ceo->id, $debitur->id]),
+            'role_assigned' => json_encode([$ceo->id, $debitur->id, $finance->id]),
             'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah disetujui oleh Direktur SKI.',
         ]);
 
@@ -363,7 +363,7 @@ class NotificationSFinanceSeeder extends Seeder
         NotificationFeatureDetail::updateOrCreate([
             'notification_feature_id' => $pengajuan_restrukturisasi_ditolak_direktur->id_notification_feature,
         ], [
-            'role_assigned' => json_encode([$ceo->id, $debitur->id]),
+            'role_assigned' => json_encode([$ceo->id, $debitur->id, $finance->id]),
             'message' => 'Pengajuan restrukturisasi debitur [[nama.debitur]] telah ditolak oleh Direktur SKI.',
         ]);
 

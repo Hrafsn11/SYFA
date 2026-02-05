@@ -42,7 +42,7 @@
                         <div class="mb-3 form-group">
                             <div class="d-flex justify-content-between">
                                 <label for="file_excel" class="form-label">File Excel <span class="text-danger">*</span></label>
-                                <a id="current_excel" href="" download target="_blank" rel="noopener noreferrer">Current Excel</a>
+                                <a id="current_excel" href="" download rel="noopener noreferrer">Current Excel</a>
                             </div>
                             <input type="file" class="form-control" id="file_excel" placeholder="Masukkan Persentase Pencairan" wire:model.blur="file_excel">
                             <div class="invalid-feedback"></div>
@@ -77,7 +77,7 @@
         const modal = $('#modal-edit-porto');
         const form = modal.find('form');
 
-        form.find('a#current_excel').attr('href', `{{ url('storage') }}` + '/' + data.file_path);
+        form.find('a#current_excel').attr('href', data.path_file);
 
         // tampilkan modal
         modal.modal('show');

@@ -474,7 +474,7 @@ class ListNotifSFinlog
         ];
 
         // Generate link ke detail peminjaman
-        $link = route('sfinlog.peminjaman.detail', $peminjaman->id_peminjaman_finlog);
+        $link = route('sfinlog.pengembalian-pinjaman.index');
 
         $data = [
             'notif_variable' => $notif_variable,

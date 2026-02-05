@@ -199,7 +199,7 @@
                         <tr>
                             <th class="text-center" style="width: 60px;">No</th>
                             <th style="min-width: 150px;">Tanggal Jatuh Tempo</th>
-                            @if ($program->metode_perhitungan === 'Efektif (Anuitas)')
+                            @if ($program->metode_perhitungan === 'Anuitas')
                                 <th class="text-end" style="min-width: 130px;">Sisa Pinjaman (Rp)</th>
                             @endif
                             <th class="text-end" style="min-width: 120px;">Pokok (Rp)</th>
@@ -220,7 +220,7 @@
                             <tr class="{{ $item->is_grace_period ? 'table-warning' : '' }}">
                                 <td class="text-center">{{ $item->no }}</td>
                                 <td>{{ optional($item->tanggal_jatuh_tempo)->format('d/m/Y') ?? '-' }}</td>
-                                @if ($program->metode_perhitungan === 'Efektif (Anuitas)')
+                                @if ($program->metode_perhitungan === 'Anuitas')
                                     <td class="text-end">{{ number_format($sisaPinjaman ?? 0, 0, ',', '.') }}</td>
                                 @endif
                                 <td class="text-end">{{ number_format($item->pokok, 0, ',', '.') }}</td>
@@ -257,7 +257,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ $program->metode_perhitungan === 'Efektif (Anuitas)' ? 9 : 8 }}"
+                                <td colspan="{{ $program->metode_perhitungan === 'Anuitas' ? 9 : 8 }}"
                                     class="text-center text-muted">Belum ada jadwal angsuran</td>
                             </tr>
                         @endforelse

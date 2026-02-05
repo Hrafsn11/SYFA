@@ -56,7 +56,8 @@ class CellsProjectTable extends DataTableComponent
     {
         return CellsProject::query()
             ->with('projects')
-            ->select('id_cells_project', 'nama_cells_bisnis', 'nama_pic', 'alamat', 'deskripsi_bidang', 'tanda_tangan_pic', 'created_at');
+            ->select('id_cells_project', 'nama_cells_bisnis', 'nama_pic', 'alamat', 'deskripsi_bidang', 'tanda_tangan_pic', 'created_at')
+            ->orderBy('created_at', 'desc');
     }
 
     public function columns(): array

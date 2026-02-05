@@ -43,6 +43,7 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
         $this->setPrimaryKey('id_pengajuan_restrukturisasi')
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPage(10)
+            ->setDefaultSort('created_at', 'desc')
             ->setSearchStatus(true)
             ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
@@ -98,7 +99,8 @@ class PengajuanRestrukturisasiTable extends DataTableComponent
                 'pengajuan_restrukturisasi.*',
                 'master_debitur_dan_investor.user_id',
             ])
-            ->leftJoin('master_debitur_dan_investor', 'pengajuan_restrukturisasi.id_debitur', '=', 'master_debitur_dan_investor.id_debitur');
+            ->leftJoin('master_debitur_dan_investor', 'pengajuan_restrukturisasi.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
+            ->orderBy('pengajuan_restrukturisasi.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

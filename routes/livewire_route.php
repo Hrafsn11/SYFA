@@ -75,4 +75,4 @@ Route::post('sfinlog/debitur-piutang/update', [\App\Http\Controllers\SFinlog\Deb
 
 Route::get('sfinlog/cell-project-profile', \App\Livewire\SFinlog\CellProjectProfile::class)->name('sfinlog.cell-project-profile.index');
 // Portofolio
-// Route::get('portofolio', \App\Livewire\Portofolio\Index::class)->name('portofolio.index');
+Route::get('portofolio', \App\Livewire\Portofolio\Index::class)->name('portofolio.index');

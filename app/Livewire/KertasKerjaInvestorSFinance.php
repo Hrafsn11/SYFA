@@ -10,6 +10,7 @@ class KertasKerjaInvestorSFinance extends Component
     public $year;
     public $perPage = 10;
     public $search = '';
+    public $globalSearch = '';
 
     // Edit modal properties
     public $showEditModal = false;
@@ -47,6 +48,16 @@ class KertasKerjaInvestorSFinance extends Component
     public function applyFilter()
     {
         $this->dispatch('yearChanged', $this->year);
+    }
+
+    public function updatedGlobalSearch($value)
+    {
+        $this->dispatch('globalSearchChanged', $value);
+    }
+
+    public function updatedYear($value)
+    {
+        $this->dispatch('yearChanged', $value);
     }
 
     public function openEditModal($id, $field)

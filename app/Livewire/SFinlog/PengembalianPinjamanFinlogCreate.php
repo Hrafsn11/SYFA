@@ -305,29 +305,18 @@ class PengembalianPinjamanFinlogCreate extends Component
         $this->tanggal_pencairan = $peminjaman->harapan_tanggal_pencairan?->format('d/m/Y') ?? '-';
         $this->jatuh_tempo = $peminjaman->rencana_tgl_pengembalian?->format('d/m/Y') ?? '-';
         $this->top = $peminjaman->top ?? '0';
+
+        // Nilai awal (tidak berubah)
         $this->nilai_pinjaman = $peminjaman->nilai_pinjaman ?? 0;
         $this->nilai_bagi_hasil = $peminjaman->nilai_bagi_hasil ?? 0;
         $this->total_pinjaman = $peminjaman->total_pinjaman ?? 0;
 
-        // Hitung jumlah minggu keterlambatan (mengikuti logika di DebiturPiutangFinlogTable)
-        if (!$peminjaman->rencana_tgl_pengembalian || $peminjaman->status === 'Lunas') {
-            $this->jumlah_minggu_keterlambatan = 0;
-        } elseif (now()->gt($peminjaman->rencana_tgl_pengembalian)) {
-            $this->jumlah_minggu_keterlambatan = abs(now()->diffInWeeks($peminjaman->rencana_tgl_pengembalian));
-        } else {
-            $this->jumlah_minggu_keterlambatan = 0;
-        }
+        // Ambil data keterlambatan dari database
+        $this->jumlah_minggu_keterlambatan = $peminjaman->jumlah_minggu_keterlambatan ?? 0;
 
-        // Hitung Bagi Hasil saat ini (termasuk keterlambatan)
-        // Logika: total = Bagi Hasil TOP + (Bagi Hasil per Minggu * jumlah_minggu_keterlambatan)
-        // dengan Bagi Hasil per Minggu = nilai_bagi_hasil / 4 (mengikuti DebiturPiutangFinlogTable)
-        if ($this->jumlah_minggu_keterlambatan > 0) {
-            $bagiHasilPerMinggu = $this->nilai_bagi_hasil / 4;
-            $this->nilai_bagi_hasil_saat_ini = $this->nilai_bagi_hasil + ($bagiHasilPerMinggu * $this->jumlah_minggu_keterlambatan);
-        } else {
-            // Jika tidak terlambat, gunakan nilai bagi hasil awal
-            $this->nilai_bagi_hasil_saat_ini = $this->nilai_bagi_hasil;
-        }
+        $this->sisa_utang = $peminjaman->nilai_pokok_saat_ini ?? $peminjaman->nilai_pinjaman ?? 0;
+        $this->sisa_bagi_hasil = $peminjaman->nilai_bagi_hasil_saat_ini ?? $peminjaman->nilai_bagi_hasil ?? 0;
+        $this->nilai_bagi_hasil_saat_ini = $this->sisa_bagi_hasil;
     }
 
     private function resolveProjectName(PeminjamanFinlog $peminjaman): string
@@ -378,22 +367,26 @@ class PengembalianPinjamanFinlogCreate extends Component
             return;
         }
 
-        $dbPayments = PengembalianPinjamanFinlog::where('id_pinjaman_finlog', $this->id_pinjaman_finlog)
-            ->sum('jumlah_pengembalian');
+        $peminjaman = $this->getSelectedPeminjaman();
+        if (!$peminjaman) {
+            $this->resetBalanceFields();
+            return;
+        }
 
+        // Nilai saat ini dari database (sudah termasuk pembayaran sebelumnya & denda)
+        $currentPokok = $peminjaman->nilai_pokok_saat_ini ?? $peminjaman->nilai_pinjaman ?? 0;
+        $currentBagiHasil = $peminjaman->nilai_bagi_hasil_saat_ini ?? $peminjaman->nilai_bagi_hasil ?? 0;
+
+        // Hitung total pembayaran baru (belum disimpan ke database)
         $newPayments = array_sum(array_column($this->pengembalian_list, 'nominal'));
-        $totalPaid = $dbPayments + $newPayments;
 
-        // Gunakan nilai_bagi_hasil_saat_ini (sudah termasuk denda keterlambatan bila ada)
-        $initialBagiHasil = $this->nilai_bagi_hasil_saat_ini ?: $this->nilai_bagi_hasil;
-        $initialUtang = $this->nilai_pinjaman;
+        // Alokasi pembayaran: Bagi Hasil dulu, baru Pokok
+        $paidToBagiHasil = min($newPayments, $currentBagiHasil);
+        $remainderForPokok = max(0, $newPayments - $currentBagiHasil);
+        $paidToPokok = min($remainderForPokok, $currentPokok);
 
-        $paidToBagiHasil = min($totalPaid, $initialBagiHasil);
-        $remainderForUtang = max(0, $totalPaid - $initialBagiHasil);
-        $paidToUtang = min($remainderForUtang, $initialUtang);
-
-        $this->sisa_bagi_hasil = max(0, $initialBagiHasil - $paidToBagiHasil);
-        $this->sisa_utang = max(0, $initialUtang - $paidToUtang);
+        $this->sisa_bagi_hasil = max(0, $currentBagiHasil - $paidToBagiHasil);
+        $this->sisa_utang = max(0, $currentPokok - $paidToPokok);
     }
 
     private function determineStatus($totalSisa)

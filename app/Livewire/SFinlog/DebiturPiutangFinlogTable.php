@@ -14,6 +14,7 @@ class DebiturPiutangFinlogTable extends DataTableComponent
     {
         $this->setPrimaryKey('id_peminjaman_finlog');
         $this->setAdditionalSelects(['peminjaman_finlog.id_peminjaman_finlog']);
+        $this->setDefaultSort('created_at', 'desc');
         $this->setTableAttributes([
             'class' => 'table-responsive text-nowrap',
         ]);
@@ -75,22 +76,18 @@ class DebiturPiutangFinlogTable extends DataTableComponent
                         return '-';
                     }
 
-                    // Jumlah minggu keterlambatan
+                    // Gunakan nilai dari database jika tersedia (diupdate oleh cron job)
+                    if ($row->nilai_bagi_hasil_saat_ini !== null) {
+                        return 'Rp ' . number_format($row->nilai_bagi_hasil_saat_ini, 0, ',', '.');
+                    }
+
+                    // Fallback: hitung real-time
                     $mingguTerlambat = abs(
                         now()->diffInWeeks($row->rencana_tgl_pengembalian)
                     );
-
-                    // Pembagi berdasarkan TOP
                     $pembagi = $this->getPembagiBerdasarkanTOP($row->top ?? 0);
-
-                    // Bagi hasil per minggu
                     $bagiHasilPerMinggu = $row->nilai_bagi_hasil / $pembagi;
-
-                    // Bagi hasil TOP (awal)
-                    $bagiHasilTOP = $row->nilai_bagi_hasil;
-
-                    // Total yang harus dibayar
-                    $total = ($bagiHasilPerMinggu * $mingguTerlambat) + $bagiHasilTOP;
+                    $total = ($bagiHasilPerMinggu * $mingguTerlambat) + $row->nilai_bagi_hasil;
 
                     return 'Rp ' . number_format($total, 0, ',', '.');
                 }),
@@ -98,6 +95,12 @@ class DebiturPiutangFinlogTable extends DataTableComponent
 
             Column::make('Jumlah Minggu Keterlambatan')
                 ->label(function ($row) {
+                    // Gunakan nilai dari database jika tersedia
+                    if ($row->jumlah_minggu_keterlambatan !== null && $row->jumlah_minggu_keterlambatan > 0) {
+                        return $row->jumlah_minggu_keterlambatan;
+                    }
+
+                    // Fallback: hitung real-time
                     if (!$row->rencana_tgl_pengembalian || $row->status === 'Lunas') {
                         return 0;
                     }
@@ -109,8 +112,19 @@ class DebiturPiutangFinlogTable extends DataTableComponent
                     return 0;
                 }),
 
+            Column::make('Denda Keterlambatan')
+                ->label(function ($row) {
+                    $denda = $row->denda_keterlambatan ?? 0;
+                    if ($denda <= 0) return '-';
+                    return 'Rp ' . number_format($denda, 0, ',', '.');
+                }),
+
             Column::make('Total Bagi Hasil', 'nilai_bagi_hasil')
-                ->format(fn($val) => 'Rp ' . number_format($val, 0, ',', '.')),
+                ->label(function ($row) {
+                    // Gunakan nilai_bagi_hasil_saat_ini jika tersedia (sudah termasuk denda)
+                    $nilai = $row->nilai_bagi_hasil_saat_ini ?? $row->nilai_bagi_hasil;
+                    return 'Rp ' . number_format($nilai, 0, ',', '.');
+                }),
 
             Column::make('Total Tagihan', 'total_pinjaman')
                 ->format(fn($val) => 'Rp ' . number_format($val, 0, ',', '.')),
@@ -206,11 +220,19 @@ class DebiturPiutangFinlogTable extends DataTableComponent
 
     private function getSisaPokok($row)
     {
+        // Prioritas: nilai_pokok_saat_ini dari database > latestPengembalian > nilai_pinjaman awal
+        if ($row->nilai_pokok_saat_ini !== null) {
+            return $row->nilai_pokok_saat_ini;
+        }
         return $row->latestPengembalian ? $row->latestPengembalian->sisa_pinjaman : $row->nilai_pinjaman;
     }
 
     private function getSisaBagiHasil($row)
     {
+        // Prioritas: nilai_bagi_hasil_saat_ini dari database (termasuk denda) > latestPengembalian > nilai_bagi_hasil awal
+        if ($row->nilai_bagi_hasil_saat_ini !== null) {
+            return $row->nilai_bagi_hasil_saat_ini;
+        }
         return $row->latestPengembalian ? $row->latestPengembalian->sisa_bagi_hasil : $row->nilai_bagi_hasil;
     }
 

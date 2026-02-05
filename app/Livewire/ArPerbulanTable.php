@@ -82,7 +82,8 @@ class ArPerbulanTable extends DataTableComponent
                 'ar_perbulan.*',
                 'master_debitur_dan_investor.user_id',
             ])
-            ->leftJoin('master_debitur_dan_investor', 'ar_perbulan.id_debitur', '=', 'master_debitur_dan_investor.id_debitur');
+            ->leftJoin('master_debitur_dan_investor', 'ar_perbulan.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
+            ->orderBy('ar_perbulan.bulan', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

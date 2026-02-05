@@ -18,6 +18,10 @@ class PortofolioController extends Controller
         try {
             $port = LaporanInvestasi::findOrFail($id);
 
+            if (Storage::disk('public')->exists($port->path_file)) {
+                $port->path_file = Storage::disk('public')->url($port->path_file);
+            }
+
             return Response::success(
                 $port,
                 'Data berhasil dimuat.'
@@ -41,26 +45,27 @@ class PortofolioController extends Controller
 
             $data = $request->validated();
             $data['path_file'] = $path;
+            $data['edit_by'] = json_encode([
+                auth()->user()->id,
+                auth()->user()->name,
+            ]);
             unset($data['file_excel']);
 
             if ($port) {
                 $path_prev = $port->path_file;
-
                 if ($path_prev != null && Storage::disk('public')->exists($path_prev)) {
                     Storage::disk('public')->delete($path_prev);
                 }
-
                 $port->update($data);
             } else {
-
                 $port = LaporanInvestasi::create($data);
             }
 
-            (new ImportExcel($path))->import();
+            (new ImportExcel($path, $request->nama_sbu, $request->tahun, $port->id_laporan_investasi))->import();
 
             DB::commit();
 
-            ImportExcelPortofolio::dispatch($path);
+            // ImportExcelPortofolio::dispatch($path, $request->nama_sbu, $request->tahun, $port->id_laporan_investasi);
 
             return Response::success(
                 null,

@@ -139,7 +139,10 @@ class Create extends Component
                     ? $this->restrukturisasi->debitur->nama
                     : $this->restrukturisasi->nama_perusahaan;
                 $this->nomor_kontrak = $this->restrukturisasi->nomor_kontrak_pembiayaan;
-                $this->plafon_pembiayaan = (float) $this->restrukturisasi->sisa_pokok_belum_dibayar;
+                // Plafon = Sisa Pokok + Tunggakan Margin (jika ada)
+                $sisaPokok = (float) $this->restrukturisasi->sisa_pokok_belum_dibayar;
+                $tunggakanMargin = (float) ($this->restrukturisasi->tunggakan_margin_bunga ?? 0);
+                $this->plafon_pembiayaan = $sisaPokok + $tunggakanMargin;
             }
         } else {
             $this->nama_debitur = '';
@@ -221,7 +224,7 @@ class Create extends Component
             $this->calculatePenguranganTunggakanPokok();
         } elseif ($this->metode_perhitungan === 'Flat') {
             $this->calculateFlatMethod();
-        } elseif ($this->metode_perhitungan === 'Efektif (Anuitas)') {
+        } elseif ($this->metode_perhitungan === 'Anuitas') {
             $this->calculateEfektifAnuitasMethod();
         }
 
@@ -479,7 +482,7 @@ class Create extends Component
             $metodeValid = null;
             if (!$khususPenguranganTunggakanPokok) {
                 $metodeValid = trim($this->metode_perhitungan);
-                if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
+                if (!in_array($metodeValid, ['Flat', 'Anuitas'])) {
                     throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
                 }
 

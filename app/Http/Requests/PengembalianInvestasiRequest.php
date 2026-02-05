@@ -18,7 +18,7 @@ class PengembalianInvestasiRequest extends FormRequest
         return [
             'id_pengajuan_investasi' => 'required|exists:pengajuan_investasi,id_pengajuan_investasi',
             'dana_pokok_dibayar' => [
-                'required',
+                'nullable',
                 'numeric',
                 'min:0',
                 function ($attribute, $value, $fail) {
@@ -36,6 +36,12 @@ class PengembalianInvestasiRequest extends FormRequest
                     $danaTersedia = $investasi->dana_tersedia; 
                     $sisaDiPerusahaan = $investasi->sisa_dana_di_perusahaan; 
 
+                    // Jika dana tersedia masih ada, field ini wajib diisi
+                    if ($danaTersedia > 0 && (is_null($value) || $value === '')) {
+                        $fail('Dana Pokok harus diisi karena masih ada dana tersedia Rp ' . number_format($danaTersedia, 0, ',', '.'));
+                        return;
+                    }
+
                     if ($value > $danaTersedia) {
                         $errorMsg = 'Dana tidak tersedia! Yang bisa dikembalikan: Rp ' . number_format($danaTersedia, 0, ',', '.');
                         
@@ -48,7 +54,7 @@ class PengembalianInvestasiRequest extends FormRequest
                 },
             ],
             'bagi_hasil_dibayar' => [
-                'required',
+                'nullable',
                 'numeric',
                 'min:0',
                 function ($attribute, $value, $fail) {
@@ -64,6 +70,12 @@ class PengembalianInvestasiRequest extends FormRequest
 
                     // Best Practice: Langsung pakai kolom sisa_bagi_hasil (fast & accurate!)
                     $sisaBagiHasil = $investasi->sisa_bagi_hasil ?? 0;
+
+                    // Jika sisa bagi hasil masih ada, field ini wajib diisi
+                    if ($sisaBagiHasil > 0 && (is_null($value) || $value === '')) {
+                        $fail('Bagi Hasil harus diisi karena masih ada sisa Rp ' . number_format($sisaBagiHasil, 0, ',', '.'));
+                        return;
+                    }
 
                     if ($value > $sisaBagiHasil) {
                         $fail('Bagi Hasil tidak boleh lebih dari Sisa Bagi Hasil (Rp ' . number_format($sisaBagiHasil, 0, ',', '.') . ')');

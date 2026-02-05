@@ -21,7 +21,7 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
     {
         $this->setPrimaryKey('id_pengajuan_investasi_finlog')
             ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari pengajuan investasi...')
+            ->setSearchPlaceholder('Cari nama investor, nomor kontrak, cells bisnis, nominal...')
             ->setSearchDebounce(500)
 
             // Pagination
@@ -30,7 +30,7 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
             ->setPerPage(10)
 
             // Default Sort
-            ->setDefaultSort('id_pengajuan_investasi_finlog', 'desc')
+            ->setDefaultSort('created_at', 'desc')
 
             // Table Styling
             ->setTableAttributes([
@@ -41,7 +41,7 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
             ])
             ->setSearchFieldAttributes([
                 'class' => 'form-control',
-                'placeholder' => 'Cari pengajuan investasi...',
+                'placeholder' => 'Cari nama investor, nomor kontrak, cells bisnis, nominal...',
             ])
             ->setPerPageFieldAttributes([
                 'class' => 'form-select',
@@ -53,6 +53,56 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
 
             // Disable Bulk Actions
             ->setBulkActionsDisabled();
+    }
+
+    /**
+     * Custom search for flexible searching across all fields
+     */
+    public function applySearch(): Builder
+    {
+        $searchTerm = $this->getSearch();
+
+        if (empty($searchTerm)) {
+            return $this->builder();
+        }
+
+        // Clean search term for nominal search - remove "Rp", dots, spaces
+        $cleanedSearch = preg_replace('/[Rp\s\.]/i', '', $searchTerm);
+        $isNumericSearch = is_numeric($cleanedSearch) && strlen($cleanedSearch) > 0;
+
+        return $this->builder()->where(function ($query) use ($searchTerm, $cleanedSearch, $isNumericSearch) {
+            // Search by nama_investor
+            $query->where('pengajuan_investasi_finlog.nama_investor', 'like', '%' . $searchTerm . '%');
+
+            // Search by nomor_kontrak
+            $query->orWhere('pengajuan_investasi_finlog.nomor_kontrak', 'like', '%' . $searchTerm . '%');
+
+            // Search by status
+            $query->orWhere('pengajuan_investasi_finlog.status', 'like', '%' . $searchTerm . '%');
+
+            // Search by tanggal_investasi
+            $query->orWhere('pengajuan_investasi_finlog.tanggal_investasi', 'like', '%' . $searchTerm . '%');
+
+            // Search by tanggal_berakhir_investasi
+            $query->orWhere('pengajuan_investasi_finlog.tanggal_berakhir_investasi', 'like', '%' . $searchTerm . '%');
+
+            // Search by cells bisnis name (through relation)
+            $query->orWhereHas('project', function ($q) use ($searchTerm) {
+                $q->where('nama_cells_bisnis', 'like', '%' . $searchTerm . '%');
+            });
+
+            // Search by investor name (through relation)
+            $query->orWhereHas('investor', function ($q) use ($searchTerm) {
+                $q->where('nama', 'like', '%' . $searchTerm . '%');
+            });
+
+            // If numeric, also search by nominal and other numeric fields
+            if ($isNumericSearch) {
+                $query->orWhere('pengajuan_investasi_finlog.nominal_investasi', 'like', '%' . $cleanedSearch . '%');
+                $query->orWhere('pengajuan_investasi_finlog.lama_investasi', '=', $cleanedSearch);
+                $query->orWhere('pengajuan_investasi_finlog.persentase_bagi_hasil', 'like', '%' . $cleanedSearch . '%');
+            }
+        });
     }
 
     public function filters(): array
@@ -103,7 +153,8 @@ class PengajuanInvestasiFinlogTable extends DataTableComponent
             ->with(['investor', 'project'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_investasi_finlog.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->leftJoin('cells_projects', 'pengajuan_investasi_finlog.id_cells_project', '=', 'cells_projects.id_cells_project')
-            ->select('pengajuan_investasi_finlog.*');
+            ->select('pengajuan_investasi_finlog.*')
+            ->orderBy('pengajuan_investasi_finlog.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

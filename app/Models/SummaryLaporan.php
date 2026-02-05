@@ -10,6 +10,6 @@ class SummaryLaporan extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $table = 'summary_laporan';
+    protected $table = 'summary_laporans';
     protected $primaryKey = 'id_summary_laporan';
 }

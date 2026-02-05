@@ -3,7 +3,8 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <div>
-                    <h4 class="fw-bold mb-1">Edit Peminjaman Dana - <span class="">{{ $peminjaman->nomor_peminjaman }}</span></h4>
+                    <h4 class="fw-bold mb-1">Edit Peminjaman Dana - <span
+                            class="">{{ $peminjaman->nomor_peminjaman }}</span></h4>
                 </div>
                 <a href="{{ route('sfinlog.peminjaman.detail', ['id' => $id_peminjaman]) }}"
                     class="btn btn-outline-primary">
@@ -565,9 +566,19 @@
                     title: 'Konfirmasi Perubahan',
                     text: 'Apakah Anda yakin ingin menyimpan perubahan peminjaman dana ini?',
                     icon: 'question',
+                    showConfirmButton: true,
                     showCancelButton: true,
+                    showDenyButton: false,
+                    showCloseButton: false,
                     confirmButtonText: 'Ya, Simpan',
-                    cancelButtonText: 'Batal'
+                    cancelButtonText: 'Batal',
+                    allowOutsideClick: true,
+                    allowEscapeKey: true,
+                    customClass: {
+                        confirmButton: 'btn btn-primary',
+                        cancelButton: 'btn btn-danger'
+                    },
+                    buttonsStyling: false
                 }).then((result) => {
                     if (result.isConfirmed) {
                         @this.call('saveData', 'sfinlog.peminjaman.update', {

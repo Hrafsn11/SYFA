@@ -211,6 +211,9 @@ class PenyaluranDepositoTable extends DataTableComponent
                 ->orHavingRaw("pi.nama_investor LIKE ?", ['%' . $search . '%']);
         }
 
+        // Order by created_at descending to show newest data first
+        $query->orderByRaw('MAX(penyaluran_deposito.created_at) DESC');
+
         return $query;
     }
 

@@ -26,7 +26,7 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_peminjaman_finlog', 'desc')
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-bordered table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -108,7 +108,7 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             $query->where('peminjaman_finlog.id_debitur', $debitur->id_debitur);
         }
 
-        return $query;
+        return $query->orderBy('peminjaman_finlog.created_at', 'desc');
     }
 
     public function columns(): array

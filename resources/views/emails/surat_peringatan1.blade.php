@@ -59,7 +59,7 @@
             dapat mengkonfirmasikan kepada <strong>Luthfia</strong> ke
             <strong>0858 9246 7566</strong> atau melalui email <strong><a href="mailto:luthfia@synnovac-capital.com">luthfia@synnovac-capital.com</a></strong>
             dan mengembalikan dana pembiayaan tersebut kepada
-            <strong>S-Finance</strong> ke rekening nomor
+            <strong>{{ $finance_finlog }}</strong> ke rekening nomor
             <strong>{{ $no_rek }} PT Synnovac Kapital Indonesia</strong>.
         </p>
 

@@ -3,7 +3,7 @@
         <div class="col-12">
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Pengembalian Investasi - SFinlog</h4>
-                
+
                 @can('pengembalian_investasi_finlog.add')
                     <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
                         data-bs-toggle="modal" data-bs-target="#modalPengembalianInvestasiSfinlog">
@@ -27,92 +27,123 @@
 </div>
 
 @push('scripts')
-<script>
-    let select2KontrakFinlog;
-    let flatpickrTanggalFinlog;
+    <script>
+        let select2KontrakFinlog;
+        let flatpickrTanggalFinlog;
 
-    function afterAction(payload) {
-        Livewire.dispatch('refreshPengembalianInvestasiFinlogTable');
-        $('.modal').modal('hide');
-        
-        if (payload && payload.message) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: payload.message,
-                confirmButtonText: 'OK',
-                customClass: {
-                    confirmButton: 'btn btn-success'
+        function afterAction(payload) {
+            Livewire.dispatch('refreshPengembalianInvestasiFinlogTable');
+            $('.modal').modal('hide');
+
+            if (payload && payload.message) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: payload.message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'btn btn-success'
+                    }
+                });
+            }
+        }
+
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('closeModal', () => $('#modalPengembalianInvestasiSfinlog').modal('hide'));
+        });
+
+        function formatRupiah(angka) {
+            if (!angka) return '';
+            const number = angka.toString().replace(/[^0-9]/g, '');
+            return 'Rp ' + number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function unformatRupiah(rupiah) {
+            return rupiah.replace(/[^0-9]/g, '');
+        }
+
+        $('#modalPengembalianInvestasiSfinlog').on('shown.bs.modal', function () {
+            if (select2KontrakFinlog) $('#id_pengajuan_investasi_finlog').select2('destroy');
+            if (flatpickrTanggalFinlog) flatpickrTanggalFinlog.destroy();
+
+            select2KontrakFinlog = $('#id_pengajuan_investasi_finlog').select2({
+                dropdownParent: $('#modalPengembalianInvestasiSfinlog'),
+                placeholder: 'Pilih No Kontrak',
+                allowClear: true,
+                width: '100%'
+            }).on('change', function () {
+                let value = $(this).val();
+
+                @this.set('id_pengajuan_investasi_finlog', value);
+
+                if (value) {
+                    @this.call('loadDataKontrak', value);
+                } else {
+                    @this.call('resetCalculatedFields');
                 }
             });
-        }
-    }
 
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('closeModal', () => $('#modalPengembalianInvestasiSfinlog').modal('hide'));
-    });
+            flatpickrTanggalFinlog = flatpickr('#tanggal_pengembalian_finlog', {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                onChange: function (selectedDates, dateStr) {
+                    @this.set('tanggal_pengembalian', dateStr);
+                }
+            });
 
-    function formatRupiah(angka) {
-        if (!angka) return '';
-        const number = angka.toString().replace(/[^0-9]/g, '');
-        return 'Rp ' + number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    }
+            $('#dana_pokok_dibayar_finlog').on('input', function () {
+                const rawValue = unformatRupiah($(this).val());
+                $(this).val(formatRupiah(rawValue));
+                $('#dana_pokok_raw_finlog').val(rawValue);
+                @this.set('dana_pokok_dibayar', rawValue);
+            });
 
-    function unformatRupiah(rupiah) {
-        return rupiah.replace(/[^0-9]/g, '');
-    }
+            $('#bagi_hasil_dibayar_finlog').on('input', function () {
+                const rawValue = unformatRupiah($(this).val());
+                $(this).val(formatRupiah(rawValue));
+                $('#bagi_hasil_raw_finlog').val(rawValue);
+                @this.set('bagi_hasil_dibayar', rawValue);
+            });
 
-    $('#modalPengembalianInvestasiSfinlog').on('shown.bs.modal', function () {
-        if (select2KontrakFinlog) $('#id_pengajuan_investasi_finlog').select2('destroy');
-        if (flatpickrTanggalFinlog) flatpickrTanggalFinlog.destroy();
+        }).on('hidden.bs.modal', function () {
+            if (select2KontrakFinlog) {
+                $('#id_pengajuan_investasi_finlog').val(null).trigger('change');
+            }
+            $('#dana_pokok_dibayar_finlog').val('');
+            $('#bagi_hasil_dibayar_finlog').val('');
 
-        select2KontrakFinlog = $('#id_pengajuan_investasi_finlog').select2({
-            dropdownParent: $('#modalPengembalianInvestasiSfinlog'),
-            placeholder: 'Pilih No Kontrak',
-            allowClear: true,
-            width: '100%'
-        }).on('change', function() {
-            let value = $(this).val();
-            
-            @this.set('id_pengajuan_investasi_finlog', value);
-            
-            if (value) {
-                @this.call('loadDataKontrak', value);
-            } else {
-                @this.call('resetCalculatedFields');
+            @this.call('resetForm');
+        });
+
+        // File validation for bukti_transfer
+        $('#bukti_transfer_finlog').on('change', function () {
+            const file = this.files[0];
+            const allowedExt = ['jpg', 'jpeg', 'png', 'pdf'];
+            const maxSize = 2 * 1024 * 1024; // 2MB
+
+            if (file) {
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (!allowedExt.includes(ext)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Format File Tidak Diizinkan',
+                        text: 'Gunakan format JPG, PNG, atau PDF.',
+                        confirmButtonText: 'OK'
+                    });
+                    $(this).val('');
+                    return false;
+                }
+                if (file.size > maxSize) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ukuran File Terlalu Besar',
+                        text: 'Ukuran file maksimal 2MB.',
+                        confirmButtonText: 'OK'
+                    });
+                    $(this).val('');
+                    return false;
+                }
             }
         });
-
-        flatpickrTanggalFinlog = flatpickr('#tanggal_pengembalian_finlog', {
-            dateFormat: 'Y-m-d',
-            allowInput: true,
-            onChange: function(selectedDates, dateStr) {
-                @this.set('tanggal_pengembalian', dateStr);
-            }
-        });
-
-        $('#dana_pokok_dibayar_finlog').on('input', function() {
-            const rawValue = unformatRupiah($(this).val());
-            $(this).val(formatRupiah(rawValue));
-            $('#dana_pokok_raw_finlog').val(rawValue);
-            @this.set('dana_pokok_dibayar', rawValue);
-        });
-
-        $('#bagi_hasil_dibayar_finlog').on('input', function() {
-            const rawValue = unformatRupiah($(this).val());
-            $(this).val(formatRupiah(rawValue));
-            $('#bagi_hasil_raw_finlog').val(rawValue);
-            @this.set('bagi_hasil_dibayar', rawValue);
-        });
-
-    }).on('hidden.bs.modal', function () {
-        if (select2KontrakFinlog) {
-            $('#id_pengajuan_investasi_finlog').val(null).trigger('change');
-        }
-        $('#dana_pokok_dibayar_finlog').val('');
-        $('#bagi_hasil_dibayar_finlog').val('');
-        
-        @this.call('resetForm');
-    });
-</script>
+    </script>
 @endpush

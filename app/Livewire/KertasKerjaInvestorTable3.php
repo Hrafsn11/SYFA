@@ -13,8 +13,9 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
     protected $model = PengajuanInvestasi::class;
 
     public $year;
+    public $globalSearch = '';
 
-    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged' => 'setYear'];
+    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged' => 'setYear', 'globalSearchChanged' => 'setGlobalSearch'];
 
     public function mount(): void
     {
@@ -27,37 +28,60 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
         $this->resetPage();
     }
 
+    public function setGlobalSearch($search)
+    {
+        $this->globalSearch = $search;
+        $this->resetPage();
+    }
+
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_investasi')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari deposan, nomor kontrak, status...')
-            ->setSearchDebounce(500)
+            ->setSearchDisabled()
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setTableAttributes(['class' => 'table border-top'])
             ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
             ->setPerPageFieldAttributes(['class' => 'form-select'])
-            ->setFiltersEnabled()
-            ->setFiltersVisibilityStatus(true)
+            ->setFiltersDisabled()
             ->setBulkActionsDisabled()
             ->setColumnSelectDisabled();
     }
 
     public function builder(): Builder
     {
-        return PengajuanInvestasi::query()
+        $query = PengajuanInvestasi::query()
             ->select([
                 'id_pengajuan_investasi',
                 'tanggal_investasi',
                 'sisa_pokok',
                 'sisa_bagi_hasil',
-                'nomor_kontrak'
+                'nomor_kontrak',
+                'nama_investor',
+                'deposito',
+                'status'
             ])
             ->whereNotNull('nomor_kontrak')
             ->where('nomor_kontrak', '!=', '');
+
+        // Apply global search filter
+        if (!empty($this->globalSearch)) {
+            $search = $this->globalSearch;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_investor', 'like', '%' . $search . '%')
+                    ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
+                    ->orWhere('deposito', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Apply year filter - filter by year of tanggal_investasi
+        if (!empty($this->year)) {
+            $query->whereYear('tanggal_investasi', $this->year);
+        }
+
+        return $query;
     }
 
     /**

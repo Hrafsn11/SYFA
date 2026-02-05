@@ -20,6 +20,7 @@ class Table extends DataTableComponent
         $this->setSearchEnabled();
         $this->setPerPageAccepted([10, 25, 50, 100]);
         $this->setPerPage(10);
+        $this->setDefaultSort('created_at', 'desc');
         $this->setSortingPillsEnabled();
     }
 
@@ -27,7 +28,8 @@ class Table extends DataTableComponent
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         return ConfigMatrixPinjaman::query()
-            ->select('id_matrix_pinjaman', 'nominal', 'approve_oleh');
+            ->select('id_matrix_pinjaman', 'nominal', 'approve_oleh', 'created_at')
+            ->orderBy('created_at', 'desc');
     }
 
     public function columns(): array

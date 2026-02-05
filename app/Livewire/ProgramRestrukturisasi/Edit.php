@@ -193,7 +193,7 @@ class Edit extends Create
                 $item->update(['status' => self::STATUS_LUNAS]);
             }
 
-            if ($this->metode_perhitungan === 'Efektif (Anuitas)') {
+            if ($this->metode_perhitungan === 'Anuitas') {
                 $data['sisa_pinjaman'] = $sisaPokok;
                 if (!$item->is_grace_period) {
                     $sisaPokok = max(0, $sisaPokok - (float) $item->pokok);
@@ -295,7 +295,7 @@ class Edit extends Create
         } else {
             $validate = [
                 'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
-                'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
+                'metode_perhitungan' => 'required|in:Flat,Anuitas',
                 'plafon_pembiayaan' => 'required|numeric|min:0',
                 'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
                 'jangka_waktu_total' => 'required|integer|min:1',
@@ -319,7 +319,7 @@ class Edit extends Create
 
         if (!$khususPenguranganTunggakanPokok) {
             $metodeValid = trim($this->metode_perhitungan);
-            if (!in_array($metodeValid, ['Flat', 'Efektif (Anuitas)'])) {
+            if (!in_array($metodeValid, ['Flat', 'Anuitas'])) {
                 throw new \Exception('Metode perhitungan tidak valid: ' . $metodeValid);
             }
 

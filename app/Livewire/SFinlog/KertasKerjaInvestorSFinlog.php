@@ -8,8 +8,6 @@ use App\Models\PengajuanInvestasiFinlog;
 class KertasKerjaInvestorSFinlog extends Component
 {
     public $year;
-    public $search = '';
-    public $perPage = 10;
 
     // Edit modal properties
     public $showEditModal = false;
@@ -21,10 +19,9 @@ class KertasKerjaInvestorSFinlog extends Component
 
     protected $queryString = [
         'year' => ['except' => ''],
-        'search' => ['except' => ''],
     ];
 
-    protected $listeners = ['openEditModal', 'syncPerPage'];
+    protected $listeners = ['openEditModal'];
 
     // Field configurations for SFinlog
     protected $editableFields = [
@@ -111,25 +108,6 @@ class KertasKerjaInvestorSFinlog extends Component
         $this->editId = null;
         $this->editField = null;
         $this->editValue = null;
-    }
-
-    public function updatedSearch()
-    {
-        // Dispatch search term to all child tables
-        $this->dispatch('searchChanged', search: $this->search);
-    }
-
-    public function updatedPerPage()
-    {
-        // Dispatch perPage to all child tables
-        $this->dispatch('perPageChanged', perPage: $this->perPage);
-    }
-
-    public function syncPerPage($perPage)
-    {
-        // Sync perPage when child table changes it
-        $this->perPage = $perPage;
-        $this->dispatch('perPageChanged', perPage: $this->perPage);
     }
 
     public function render()

@@ -207,10 +207,9 @@
                 @canany(['sfinance.menu.debitur_piutang', 'sfinlog.menu.debitur_piutang'])
                     <li class="menu-item {{ RouteHelper::routeIs('debitur-piutang*') ? 'active' : '' }}">
                         @if ($isSFinlog)
-                            <a href="{{ route('sfinlog.debitur-piutang.index') }}" class="menu-link" wire:navigate.hover>
+                            <a href="{{ route('sfinlog.debitur-piutang.index') }}" class="menu-link">
                             @else
-                                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link"
-                                    wire:navigate.hover>
+                                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-receipt"></i>
                         <div data-i18n="Debitur Piutang">Debitur Piutang</div>
@@ -240,9 +239,11 @@
                     'sfinlog.menu.report_penyaluran_dana', 'sfinlog.menu.penyaluran_deposito',
                     'sfinlog.menu.kertas_kerja_investor', 'sfinlog.menu.pengembalian_investasi'])
                     <!-- Investasi Section -->
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Investasi</span>
-                    </li>
+                    @if(Auth::user()->role !== 'debitur')
+                        <li class="menu-header small text-uppercase">
+                            <span class="menu-header-text">Investasi</span>
+                        </li>
+                    @endif
                 @endcanany
 
                 @if ($isSFinlog)

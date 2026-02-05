@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Sfinlog;
+namespace App\Livewire\SFinlog;
 
 use App\Models\ArPerbulanFinlog;
 use Illuminate\Database\Eloquent\Builder;
@@ -87,7 +87,8 @@ class ArPerbulanTable extends DataTableComponent
 
     public function builder(): Builder
     {
-        return ArPerbulanFinlog::query();
+        return ArPerbulanFinlog::query()
+            ->orderBy('bulan', 'desc');
     }
 
     public function columns(): array

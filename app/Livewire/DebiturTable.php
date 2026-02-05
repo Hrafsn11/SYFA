@@ -26,6 +26,7 @@ class DebiturTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -58,7 +59,8 @@ class DebiturTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor');
+            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor')
+            ->orderBy('created_at', 'desc');
     }
 
     public function columns(): array

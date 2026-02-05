@@ -48,7 +48,8 @@ class PengembalianInvestasiFinlogTable extends DataTableComponent
                 'pif.nomor_kontrak',
                 'pif.nama_investor',
                 'pif.nominal_investasi',
-            ]);
+            ])
+            ->orderBy('pengembalian_investasi_finlog.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

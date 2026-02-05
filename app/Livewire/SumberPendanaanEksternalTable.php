@@ -27,7 +27,7 @@ class SumberPendanaanEksternalTable extends DataTableComponent
             ->setPerPage(10)
 
             // Default Sort
-            ->setDefaultSort('id_instansi', 'asc')
+            ->setDefaultSort('created_at', 'desc')
 
             // Table Styling
             ->setTableAttributes([
@@ -51,7 +51,8 @@ class SumberPendanaanEksternalTable extends DataTableComponent
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         return MasterSumberPendanaanEksternal::query()
-            ->select('id_instansi', 'nama_instansi', 'persentase_bagi_hasil');
+            ->select('id_instansi', 'nama_instansi', 'persentase_bagi_hasil', 'created_at')
+            ->orderBy('created_at', 'desc');
     }
 
     public function columns(): array

@@ -30,7 +30,7 @@ class PengajuanInvestasiTable extends DataTableComponent
             ->setPerPage(10)
 
             // Default Sort
-            ->setDefaultSort('id_pengajuan_investasi', 'desc')
+            ->setDefaultSort('created_at', 'desc')
 
             // Table Styling
             ->setTableAttributes([
@@ -134,7 +134,8 @@ class PengajuanInvestasiTable extends DataTableComponent
         $query = PengajuanInvestasi::query()
             ->with(['investor'])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_investasi.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
-            ->select('pengajuan_investasi.*');
+            ->select('pengajuan_investasi.*')
+            ->orderBy('pengajuan_investasi.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

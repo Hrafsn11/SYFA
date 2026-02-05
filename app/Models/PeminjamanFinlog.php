@@ -46,6 +46,12 @@ class PeminjamanFinlog extends Model
         'biaya_administrasi',
         'jaminan',
         'bukti_transfer',
+        // Kolom keterlambatan
+        'jumlah_minggu_keterlambatan',
+        'denda_keterlambatan',
+        'nilai_bagi_hasil_saat_ini',
+        'last_penalty_calculation',
+        'nilai_pokok_saat_ini',
     ];
 
     protected $casts = [
@@ -61,6 +67,12 @@ class PeminjamanFinlog extends Model
         'durasi_project_hari' => 'integer',
         'top' => 'integer',
         'current_step' => 'integer',
+        // Kolom keterlambatan
+        'jumlah_minggu_keterlambatan' => 'integer',
+        'denda_keterlambatan' => 'decimal:2',
+        'nilai_bagi_hasil_saat_ini' => 'decimal:2',
+        'last_penalty_calculation' => 'datetime',
+        'nilai_pokok_saat_ini' => 'decimal:2',
     ];
 
     public function debitur()

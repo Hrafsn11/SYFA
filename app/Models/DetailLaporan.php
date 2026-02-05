@@ -12,4 +12,9 @@ class DetailLaporan extends Model
 
     protected $table = 'detail_laporan';
     protected $primaryKey = 'id_detail_laporan';
+
+    public function nilai_laporan()
+    {
+        return $this->hasMany(NilaiLaporan::class, 'id_detail_laporan', 'id_detail_laporan');
+    }
 }

@@ -35,7 +35,7 @@ class PeminjamanDetail extends Component
         $this->peminjaman = PeminjamanFinlog::with([
             'debitur',
             'cellsProject',
-            'histories' => function($query) {
+            'histories' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             },
             'histories.submitBy',
@@ -71,12 +71,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Pengajuan berhasil disubmit');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -119,12 +119,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['bagi_hasil_disetujui']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Validasi IO berhasil');
         } catch (\Exception $e) {
@@ -160,12 +160,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['catatan_penolakan']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Pengajuan kembali ke Draft');
         } catch (\Exception $e) {
@@ -182,7 +182,7 @@ class PeminjamanDetail extends Component
 
             // Get bagi hasil from last history
             $lastHistory = $this->peminjaman->histories()->latest()->first();
-            
+
             $this->peminjaman->update([
                 'current_step' => 4,
                 'status' => 'Menunggu Persetujuan',
@@ -199,12 +199,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan debitur berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -238,12 +238,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['catatan_penolakan']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Pengajuan ditolak oleh Debitur');
         } catch (\Exception $e) {
@@ -273,12 +273,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan SKI Finance berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -313,12 +313,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['catatan_penolakan']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Kembali ke Validasi IO');
         } catch (\Exception $e) {
@@ -348,12 +348,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Persetujuan CEO berhasil');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -388,12 +388,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['catatan_penolakan']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Penolakan berhasil dicatat. Kembali ke Persetujuan SKI Finance');
         } catch (\Exception $e) {
@@ -419,16 +419,16 @@ class PeminjamanDetail extends Component
             $bulan = $today->format('m');  // 01-12
             $tanggal = $today->format('d'); // 01-31
             $tahun = $today->format('y');   // 2 digit tahun (26 untuk 2026)
-            
+
             // Cari running number untuk bulan ini
             $prefix = 'FINLOG';
             $suffix = $bulan . $tanggal . $tahun;
-            
+
             // Cari kontrak terakhir dengan pattern yang sama di bulan & tahun ini
             $lastKontrak = PeminjamanFinlog::where('nomor_kontrak', 'LIKE', $prefix . '%' . $bulan . '%' . $tahun)
                 ->orderBy('nomor_kontrak', 'desc')
                 ->first();
-            
+
             if ($lastKontrak && $lastKontrak->nomor_kontrak) {
                 // Extract running number (2 digit setelah FINLOG)
                 $lastRunning = (int) substr($lastKontrak->nomor_kontrak, 6, 2);
@@ -436,7 +436,7 @@ class PeminjamanDetail extends Component
             } else {
                 $runningNumber = '01';
             }
-            
+
             $nomorKontrak = $prefix . $runningNumber . $suffix;
 
             $this->peminjaman->update([
@@ -457,12 +457,12 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['biaya_administrasi', 'jaminan']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Kontrak berhasil digenerate dengan nomor: ' . $nomorKontrak);
         } catch (\Exception $e) {
@@ -486,7 +486,10 @@ class PeminjamanDetail extends Component
             $this->peminjaman->update([
                 'current_step' => 8,
                 'status' => 'Selesai',
-                'bukti_transfer' => $path
+                'bukti_transfer' => $path,
+                // Inisialisasi nilai saat ini (untuk tracking pengembalian)
+                'nilai_pokok_saat_ini' => $this->peminjaman->nilai_pinjaman,
+                'nilai_bagi_hasil_saat_ini' => $this->peminjaman->nilai_bagi_hasil,
             ]);
 
             $history = HistoryPengajuanPinjamanFinlog::create([
@@ -499,18 +502,18 @@ class PeminjamanDetail extends Component
             ]);
 
             DB::commit();
-            
+
             // Auto-update AR Perbulan saat status berubah ke "Selesai"
             app(\App\Services\ArPerbulanFinlogService::class)->updateAROnSelesai(
                 $this->peminjaman->id_debitur,
                 now()
             );
-            
+
             // Reload peminjaman dengan relasi debitur untuk notifikasi
             $this->peminjaman->refresh();
             $this->peminjaman->load('debitur');
             ListNotifSFinlog::menuPeminjaman($history->status, $this->peminjaman);
-            
+
             $this->reset(['bukti_transfer']);
             $this->dispatch('alert', icon: 'success', title: 'Berhasil', text: 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {

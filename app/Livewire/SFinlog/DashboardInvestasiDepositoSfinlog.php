@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Sfinlog;
+namespace App\Livewire\SFinlog;
 
 use App\Services\DashboardInvestasiDepositoSfinlogService;
 use Livewire\Component;

@@ -24,6 +24,7 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-bordered'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -65,7 +66,8 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 'pif.lama_investasi as pif_lama_investasi',
                 \DB::raw('COALESCE(pds_sum.total_disalurkan_sum, 0) as total_disalurkan'),
                 \DB::raw('(pif.nominal_investasi - COALESCE(pds_sum.total_disalurkan_sum, 0)) as sisa_dana')
-            ]);
+            ])
+            ->orderBy('penyaluran_deposito_sfinlog.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

@@ -288,7 +288,7 @@
                                             <tr>
                                                 <th class="text-center" style="width: 60px;">No</th>
                                                 <th style="min-width: 150px;">Tanggal Jatuh Tempo</th>
-                                                @if ($metode_perhitungan === 'Efektif (Anuitas)')
+                                                @if ($metode_perhitungan === 'Anuitas')
                                                     <th class="text-end" style="min-width: 130px;">Sisa Pinjaman (Rp)
                                                     </th>
                                                 @endif
@@ -309,7 +309,7 @@
                                                 <tr class="{{ $item['is_grace_period'] ? 'table-warning' : '' }}">
                                                     <td class="text-center">{{ $item['no'] }}</td>
                                                     <td>{{ $item['tanggal_jatuh_tempo'] }}</td>
-                                                    @if ($metode_perhitungan === 'Efektif (Anuitas)')
+                                                    @if ($metode_perhitungan === 'Anuitas')
                                                         <td class="text-end">
                                                             {{ number_format($item['sisa_pinjaman'] ?? 0, 0, ',', '.') }}
                                                         </td>
@@ -444,7 +444,7 @@
                                             <tfoot class="table-light">
                                                 <tr>
                                                     <th colspan="2">Total</th>
-                                                    @if ($metode_perhitungan === 'Efektif (Anuitas)')
+                                                    @if ($metode_perhitungan === 'Anuitas')
                                                         <th></th>
                                                     @endif
                                                     <th class="text-end">{{ number_format($total_pokok, 0, ',', '.') }}

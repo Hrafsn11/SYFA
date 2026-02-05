@@ -124,10 +124,10 @@ new #[Layout('layouts.guest')] class extends Component {
                                             id="remember-me" />
                                         <label class="form-check-label" for="remember-me"> Remember Me </label>
                                     </div>
-                                    @if (Route::has('password.request'))
+                                    {{-- @if (Route::has('password.request'))
                                         <a href="{{ route('password.request') }}" class="text-decoration-none">Forgot
                                             Password?</a>
-                                    @endif
+                                    @endif --}}
                                 </div>
                             </div>
                             <div class="mb-6">

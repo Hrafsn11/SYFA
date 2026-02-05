@@ -28,7 +28,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('ulid', 'desc')
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari pengembalian pinjaman...'])
@@ -142,7 +142,8 @@ class PengembalianPeminjamanTable extends DataTableComponent
         return PengembalianPinjaman::query()
             ->with(['pengajuanPeminjaman', 'pengembalianInvoices'])
             ->whereIn('ulid', $latestRecords)
-            ->select('pengembalian_pinjaman.*');
+            ->select('pengembalian_pinjaman.*')
+            ->orderBy('pengembalian_pinjaman.created_at', 'desc');
     }
 
     public function columns(): array

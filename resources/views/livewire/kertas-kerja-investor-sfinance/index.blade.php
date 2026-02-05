@@ -17,6 +17,45 @@
         </div>
     </div>
 
+    {{-- Global Search & Filter --}}
+    <div class="card mb-3">
+        <div class="card-body py-3">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="ti ti-search"></i></span>
+                        <input type="text" 
+                            class="form-control" 
+                            placeholder="Cari deposan, nomor kontrak, status..." 
+                            wire:model.live.debounce.500ms="globalSearch"
+                        >
+                        @if($globalSearch)
+                            <button class="btn btn-outline-secondary" type="button" wire:click="$set('globalSearch', '')">
+                                <i class="ti ti-x"></i>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" wire:model.live="year">
+                        @for ($y = date('Y'); $y >= date('Y') - 10; $y--)
+                            <option value="{{ $y }}">Tahun {{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="col-md-5 text-end">
+                    <small class="text-muted">
+                        @if($globalSearch)
+                            Mencari: <strong>"{{ $globalSearch }}"</strong>
+                        @else
+                            Scroll horizontal untuk melihat semua tabel
+                        @endif
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-datatable table-responsive">
             <div style="overflow-x: auto; white-space: nowrap;">
@@ -75,7 +114,14 @@
                             @enderror
                         </div>
 
-                        @if ($editFieldType === 'number' && in_array($editField, ['jumlah_investasi', 'sisa_pokok', 'sisa_bagi_hasil', 'nominal_bagi_hasil_yang_didapatkan']))
+                        @if (
+                            $editFieldType === 'number' &&
+                                in_array($editField, [
+                                    'jumlah_investasi',
+                                    'sisa_pokok',
+                                    'sisa_bagi_hasil',
+                                    'nominal_bagi_hasil_yang_didapatkan',
+                                ]))
                             <div class="alert alert-info small mb-0">
                                 <i class="ti ti-info-circle me-1"></i>
                                 Preview: <strong>Rp {{ number_format((float) $editValue, 0, ',', '.') }}</strong>

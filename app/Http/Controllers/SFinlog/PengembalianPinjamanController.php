@@ -59,10 +59,30 @@ class PengembalianPinjamanController extends Controller
                 ]);
             }
 
+            // Update nilai saat ini di peminjaman_finlog berdasarkan pengembalian terakhir
+            $lastPengembalian = end($listPengembalian);
+            $peminjaman = PeminjamanFinlog::findOrFail($id_peminjaman_finlog);
+
+            $updateData = [
+                'nilai_pokok_saat_ini' => $lastPengembalian['sisa_pinjaman'] ?? 0,
+                'nilai_bagi_hasil_saat_ini' => $lastPengembalian['sisa_bagi_hasil'] ?? 0,
+            ];
+
+            // Jika total sisa = 0, update status menjadi Lunas
+            $totalSisa = ($lastPengembalian['sisa_pinjaman'] ?? 0) + ($lastPengembalian['sisa_bagi_hasil'] ?? 0);
+            if ($totalSisa <= 0) {
+                $updateData['status'] = 'Lunas';
+                // Reset denda keterlambatan karena sudah lunas
+                $updateData['jumlah_minggu_keterlambatan'] = 0;
+                $updateData['denda_keterlambatan'] = 0;
+            }
+
+            $peminjaman->update($updateData);
+
             DB::commit();
 
             // Reload peminjaman dengan relasi debitur untuk notifikasi
-            $peminjaman = PeminjamanFinlog::with('debitur')->findOrFail($id_peminjaman_finlog);
+            $peminjaman->load('debitur');
 
             // Kirim notifikasi pengembalian dana
             ListNotifSFinlog::pengembalianDana($peminjaman);

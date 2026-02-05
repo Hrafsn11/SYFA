@@ -37,8 +37,8 @@ class PengembalianPinjamanFinlogRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'id_peminjaman_finlog.required' => 'Peminjaman Finlog wajib dipilih.',
-            'id_peminjaman_finlog.exists' => 'Peminjaman Finlog tidak ditemukan.',
+            'id_pinjaman_finlog.required' => 'Kode Peminjaman wajib dipilih.',
+            'id_pinjaman_finlog.exists' => 'Kode Peminjaman tidak ditemukan.',
             'pengembalian_list.required' => 'Data pengembalian tidak boleh kosong.',
             'pengembalian_list.min' => 'Data pengembalian minimal 1.',
             'pengembalian_list.*.nominal.required' => 'Nominal pengembalian wajib diisi.',

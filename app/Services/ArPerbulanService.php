@@ -91,9 +91,7 @@ class ArPerbulanService
         }
     }
 
-    /**
-     * hitunng total pinjaman yang sudah dicairkan sampai bulan tertentu
-     */
+
     private function calculateTotalPinjaman(string $id_debitur, int $year, int $month): array
     {
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth();
@@ -107,7 +105,7 @@ class ArPerbulanService
             })
             ->selectRaw('
                 COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) as total_pokok,
-                COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bagi_hasil), 0) as total_bagi_hasil
+                COALESCE(SUM(DISTINCT COALESCE(pengajuan_peminjaman.total_bagi_hasil_saat_ini, pengajuan_peminjaman.total_bagi_hasil)), 0) as total_bagi_hasil
             ')
             ->first();
 

@@ -70,6 +70,8 @@ class NotificationMail extends Mailable implements ShouldQueue
     {
         $attachments = [];
         $no_rek = '-';
+        $invoice = 'N/A';
+        $finance_finlog = '';
         $spkMap = [
             1 => ['view' => 'emails.surat_peringatan1', 'file' => 'Surat Peringatan 1.pdf'],
             2 => ['view' => 'emails.surat_peringatan2', 'file' => 'Surat Peringatan 2.pdf'],
@@ -77,18 +79,16 @@ class NotificationMail extends Mailable implements ShouldQueue
         ];
         if($this->modul === 'sfinance') {
             $no_rek = '124-001-0052-851';
+            $invoice = $this->bukti->no_invoice ?? 'N/A';
+            $finance_finlog = 'S-Finance';
         }else{
-            // $spkMap = [
-            //     1 => ['view' => 'emails.surat_peringatan_finlog1', 'file' => 'Surat Peringatan 1.pdf'],
-            //     2 => ['view' => 'emails.surat_peringatan_finlog2', 'file' => 'Surat Peringatan 2.pdf'],
-            //     3 => ['view' => 'emails.surat_peringatan_finlog3', 'file' => 'Surat Peringatan 3.pdf'],
-            // ];
             $no_rek = '124-001-2977-113';
+            $invoice = $this->bukti->nomor_peminjaman ?? 'N/A';
+            $finance_finlog = 'S-Finlog';
         }
 
         // Default to SP1 if spkNumber is invalid
         $spk = $spkMap[$this->spkNumber] ?? $spkMap[1];
-        $invoice = $this->bukti->no_invoice ?? 'N/A';
         $kol = $this->kol;
         $debitur = $this->debitur;
 
@@ -97,6 +97,7 @@ class NotificationMail extends Mailable implements ShouldQueue
             'kol' => $kol,
             'debitur' => $debitur,
             'no_rek' => $no_rek,
+            'finance_finlog' => $finance_finlog,
         ])->setPaper('a4', 'portrait');
 
         $attachments[] = Attachment::fromData(

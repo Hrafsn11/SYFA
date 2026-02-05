@@ -150,7 +150,7 @@ class PengembalianInvestasiTable extends DataTableComponent
             });
         }
 
-        return $query;
+        return $query->orderBy('pengembalian_investasi.created_at', 'desc');
     }
 
     public function columns(): array

@@ -109,6 +109,16 @@ class PengembalianInvestasi extends Component
                 $this->jumlah_transaksi = 0;
                 $this->history = [];
             }
+
+            // Auto-set dana_pokok_dibayar ke 0 jika dana_tersedia sudah 0
+            if ($this->dana_tersedia == 0) {
+                $this->dana_pokok_dibayar = 0;
+            }
+
+            // Auto-set bagi_hasil_dibayar ke 0 jika sisa_bagi_hasil sudah 0
+            if ($this->sisa_bagi_hasil == 0) {
+                $this->bagi_hasil_dibayar = 0;
+            }
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal memuat data kontrak: ' . $e->getMessage());
         }

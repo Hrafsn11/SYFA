@@ -15,6 +15,7 @@ class DebiturPiutangFinlogService
                 'cellsProject',     
                 'latestPengembalian' 
             ])
-            ->select('peminjaman_finlog.*');
+            ->select('peminjaman_finlog.*')
+            ->orderBy('peminjaman_finlog.created_at', 'desc');
     }
 }

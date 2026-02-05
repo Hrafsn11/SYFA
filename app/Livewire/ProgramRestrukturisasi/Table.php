@@ -22,7 +22,7 @@ class Table extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_program_restrukturisasi', 'desc')
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari program restrukturisasi...'])
@@ -68,7 +68,8 @@ class Table extends DataTableComponent
             });
         });
 
-        return $query->select('program_restrukturisasi.*');
+        return $query->select('program_restrukturisasi.*')
+            ->orderBy('program_restrukturisasi.created_at', 'desc');
     }
 
     public function filters(): array
@@ -78,7 +79,7 @@ class Table extends DataTableComponent
                 ->options([
                     '' => 'Semua Metode',
                     'Flat' => 'Flat',
-                    'Efektif (Anuitas)' => 'Efektif (Anuitas)',
+                    'Anuitas' => 'Efektif (Anuitas)',
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {

@@ -26,7 +26,7 @@ class PeminjamanFinlogTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_peminjaman_finlog', 'desc')
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari peminjaman finlog...'])
@@ -84,7 +84,8 @@ class PeminjamanFinlogTable extends DataTableComponent
                 'peminjaman_finlog.*',
                 'master_debitur_dan_investor.user_id',
             ])
-            ->leftJoin('master_debitur_dan_investor', 'peminjaman_finlog.id_debitur', '=', 'master_debitur_dan_investor.id_debitur');
+            ->leftJoin('master_debitur_dan_investor', 'peminjaman_finlog.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
+            ->orderBy('peminjaman_finlog.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

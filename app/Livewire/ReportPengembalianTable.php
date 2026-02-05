@@ -25,7 +25,7 @@ class ReportPengembalianTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_report_pengembalian', 'desc')
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari report pengembalian...'])
@@ -91,7 +91,8 @@ class ReportPengembalianTable extends DataTableComponent
             ->leftJoin('bukti_peminjaman', function ($join) {
                 $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'bukti_peminjaman.id_pengajuan_peminjaman')
                     ->on('report_pengembalian.nomor_invoice', '=', 'bukti_peminjaman.no_invoice');
-            });
+            })
+            ->orderBy('report_pengembalian.created_at', 'desc');
 
         return $this->applyDebiturAuthorization($query);
     }

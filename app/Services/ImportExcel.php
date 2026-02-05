@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\SummaryLaporan;
-use App\Models\LaporanInvestasi;
+use App\Enums\NamaSBUEnum;
+use App\Models\NilaiLaporan;
+use App\Models\DetailLaporan;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -11,16 +12,25 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 class ImportExcel
 {
     protected $path;
+    protected $section;
+    protected $tahun;
     protected $id_laporan;
 
-    public function __construct($filePath = null, $id_laporan = null)
+    public function __construct($filePath = null, $section = null, $tahun = null, $id_laporan = null)
     {
         $this->path = $filePath;
+        $this->section = $section;
+        $this->tahun = $tahun;
         $this->id_laporan = $id_laporan;
     }
 
     public function import()
     {
+        if (!in_array($this->section, NamaSBUEnum::getConstants())) {
+            throw new \Exception(
+                'Import failed: Invalid section provided.',
+            );
+        }
 
         $filePath = public_path('storage/' . $this->path);
 
@@ -29,45 +39,23 @@ class ImportExcel
 
         $data = $this->mappingData($sheet);
 
-        $laporan = LaporanInvestasi::where('id_laporan_investasi', $this->id_laporan)->first();
+        $getFileName = NamaSBUEnum::getMapping($this->section);
+        $class = "\\App\\Services\\{$getFileName}";
+        $mappingData = $class::from($data, $this->tahun, $this->id_laporan)->mapping();
         
         try {
             DB::beginTransaction();
-
-            $dataToInsert = [];
-
-            foreach ($data as $key => $value) {
-                
-            }
-
-            for ($i=0; $i < 3; $i++) { 
-                LaporanInvestasi::create([
-                    'nama_sbu' => 'SBU Example '.$i,
-                    'tahun' => date('Y'),
-                    'edit_by' => 'import_excel',
-                    'path_file' => $this->path
-                ]);
-            }
-
-            // foreach ($rows as $index => $row) {
-            //     if ($index === 0) continue; // skip header
-
-            //     DB::table('users')->insert([
-            //         'name'  => $row[0],
-            //         'email' => $row[1],
-            //         'created_at' => now(),
-            //     ]);
-            // }
-
+            DetailLaporan::where('id_laporan_investasi', $this->id_laporan)->delete();
+            DetailLaporan::insert($mappingData['detail_laporan']);
+            NilaiLaporan::insert($mappingData['nilai_laporan']);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
             throw new \Exception(
                 'Import failed: ' . $e->getMessage(),
-                $e->getCode(),
+                0,
                 $e
             );
-
         }
     }
 
@@ -75,12 +63,15 @@ class ImportExcel
     {
         $cellMap = [];
 
-        $highestRow = $sheet->getHighestRow();
-        $highestColumn = $sheet->getHighestColumn();
-        $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
+        // $highestRow = $sheet->getHighestRow();
+        $highestRow = 300;
+        // $highestColumn = $sheet->getHighestColumn();
+        // $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
+         // Batasi sampai kolom X
+        $maxColumnIndex = Coordinate::columnIndexFromString('X'); // = 24
 
         for ($row = 1; $row <= $highestRow; $row++) {
-            for ($col = 1; $col <= $highestColumnIndex; $col++) {
+            for ($col = 1; $col <= $maxColumnIndex; $col++) {
                 $cellAddress = Coordinate::stringFromColumnIndex($col) . $row;
                 $cellMap[$cellAddress] = $sheet->getCell($cellAddress)->getValue();
             }

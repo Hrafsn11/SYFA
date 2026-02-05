@@ -27,6 +27,7 @@ class InvestorTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -59,7 +60,8 @@ class InvestorTable extends DataTableComponent
         return MasterDebiturDanInvestor::query()
             ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor');
+            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor')
+            ->orderBy('created_at', 'desc');
     }
 
     public function columns(): array
@@ -167,7 +169,7 @@ class InvestorTable extends DataTableComponent
                         }
                     }
 
-                    return '<div class="text-center">' . implode(' ', $badges) . '</div>';
+                    return '<div class="d-flex flex-column align-items-center justify-content-center gap-2">' . implode('', $badges) . '</div>';
                 })
                 ->html(),
 

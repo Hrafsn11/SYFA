@@ -26,7 +26,7 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('id_penyaluran_deposito_sfinlog', 'desc')
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -119,9 +119,11 @@ class PenyaluranDepositoSfinlogTable extends DataTableComponent
                     FROM riwayat_pengembalian_deposito_sfinlog r
                     INNER JOIN penyaluran_deposito_sfinlog p2 ON r.id_penyaluran_deposito_sfinlog = p2.id_penyaluran_deposito_sfinlog
                     WHERE p2.id_pengajuan_investasi_finlog = penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog
-                ) as total_dikembalikan
+                ) as total_dikembalikan,
+                MAX(penyaluran_deposito_sfinlog.created_at) as latest_created_at
             ')
-            ->groupBy('penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog');
+            ->groupBy('penyaluran_deposito_sfinlog.id_pengajuan_investasi_finlog')
+            ->orderBy('latest_created_at', 'desc');
     }
 
     public function columns(): array

@@ -160,8 +160,26 @@ class Create extends Component
             ->first();
 
         $this->total_pinjaman = $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bayar_pokok : $pengajuan->total_pinjaman;
-        $this->bagiHasilAwal = $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bagi_hasil : $pengajuan->total_bagi_hasil;
+        
+        if ($pengajuan->sisa_bagi_hasil !== null && $pengajuan->sisa_bagi_hasil > 0) {
+            $this->bagiHasilAwal = $pengajuan->sisa_bagi_hasil;
+        } elseif ($pengembalianTerakhir) {
+            $this->bagiHasilAwal = $pengembalianTerakhir->sisa_bagi_hasil;
+        } else {
+            $this->bagiHasilAwal = $pengajuan->total_bagi_hasil;
+        }
+        
         $this->total_bagi_hasil = $this->bagiHasilAwal; // Will be adjusted if late
+        
+        $this->bulanKeterlambatan = $pengajuan->jumlah_bulan_keterlambatan ?? 0;
+        $this->bagiHasilTambahan = $pengajuan->denda_keterlambatan ?? 0;
+        $this->isLate = $this->bulanKeterlambatan > 0;
+        
+        if ($this->isLate && $this->bagiHasilTambahan > 0) {
+            $this->totalBagiHasilDisesuaikan = $pengajuan->total_bagi_hasil_saat_ini ?? $this->bagiHasilAwal;
+            $this->total_bagi_hasil = $this->totalBagiHasilDisesuaikan;
+        }
+        
         $this->persentaseBagiHasil = $pengajuan->persentase_bagi_hasil ?? 0;
         $this->jenisPembiayaan = $pengajuan->jenis_pembiayaan;
         $this->tenorPembayaran = $pengajuan->tenor_pembayaran;
@@ -428,6 +446,17 @@ class Create extends Component
 
     public function calculateLamaPemakaian()
     {
+        // Prioritas: Ambil dari database (diupdate oleh cron job)
+        if ($this->kode_peminjaman) {
+            $pengajuan = PengajuanPeminjaman::find($this->kode_peminjaman);
+            
+            if ($pengajuan && $pengajuan->lama_pemakaian !== null) {
+                $this->lama_pemakaian = $pengajuan->lama_pemakaian;
+                return;
+            }
+        }
+
+        // Fallback: Hitung manual jika belum ada di database
         if (!$this->tanggalPencairanReal) {
             $this->lama_pemakaian = 0;
             return;
@@ -441,12 +470,7 @@ class Create extends Component
             return;
         }
 
-        if ($this->jenisPembiayaan === 'Installment') {
-            $this->lama_pemakaian = $pencairan->diffInDays($today);
-        } else {
-            
-            $this->lama_pemakaian = $pencairan->diffInDays($today);
-        }
+        $this->lama_pemakaian = $pencairan->diffInDays($today);
     }
 
     public function calculateSisa()

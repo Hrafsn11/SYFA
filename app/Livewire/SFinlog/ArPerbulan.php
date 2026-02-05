@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Sfinlog;
+namespace App\Livewire\SFinlog;
 
 use App\Exports\ArPerbulanFinlogExport;
 use App\Exports\ArPerbulanFinlogPdfExport;
@@ -24,7 +24,7 @@ class ArPerbulan extends Component
     public function exportToExcel()
     {
         $fileName = 'AR_Perbulan_Finlog_' . ($this->selectedMonth ?: 'All') . '_' . now()->format('Y-m-d_His') . '.xlsx';
-        
+
         return Excel::download(
             new ArPerbulanFinlogExport($this->selectedMonth),
             $fileName
@@ -35,31 +35,41 @@ class ArPerbulan extends Component
     {
         $pdfExport = new ArPerbulanFinlogPdfExport($this->selectedMonth);
         $data = $pdfExport->getData();
-        $fileName = $pdfExport->getFileName();
-        
+        $fileName = $pdfExport->getFileName() . '.pdf';
+
         // Render view to HTML
         $html = view('exports.ar-perbulan-finlog-pdf', [
             'data' => $data,
             'selectedMonth' => $this->selectedMonth,
         ])->render();
-        
+
         // Generate PDF with mPDF
         $mpdf = new Mpdf([
-            'tempDir' => storage_path('logs'),
+            'tempDir' => storage_path('app/temp'),
             'mode' => 'utf-8',
             'format' => 'A4-L', // Landscape
             'margin_left' => 10,
             'margin_right' => 10,
             'margin_top' => 10,
             'margin_bottom' => 10,
+            'default_font' => 'dejavusans',
         ]);
-        
+
         $mpdf->WriteHTML($html);
-        
-        return response($mpdf->Output('', 'S'), 200, [
+
+        // Simpan ke temporary file lalu download
+        $tempPath = storage_path('app/temp/' . $fileName);
+
+        // Pastikan direktori ada
+        if (!is_dir(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $mpdf->Output($tempPath, 'F');
+
+        return response()->download($tempPath, $fileName, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '.pdf"',
-        ]);
+        ])->deleteFileAfterSend();
     }
 
     public function exportToZip()
@@ -67,7 +77,7 @@ class ArPerbulan extends Component
         $pdfExport = new ArPerbulanFinlogPdfExport($this->selectedMonth);
         $data = $pdfExport->getData();
         $baseName = $pdfExport->getFileName();
-        
+
         // Create temporary directory
         $tempDir = storage_path('app/exports/' . uniqid());
         if (!is_dir($tempDir)) {
@@ -91,21 +101,22 @@ class ArPerbulan extends Component
             ])->render();
 
             $mpdf = new Mpdf([
-                'tempDir' => storage_path('logs'),
+                'tempDir' => storage_path('app/temp'),
                 'mode' => 'utf-8',
                 'format' => 'A4-L',
                 'margin_left' => 10,
                 'margin_right' => 10,
                 'margin_top' => 10,
                 'margin_bottom' => 10,
+                'default_font' => 'dejavusans',
             ]);
             $mpdf->WriteHTML($html);
-            file_put_contents($pdfFile, $mpdf->Output('', 'S'));
+            $mpdf->Output($pdfFile, 'F'); // Save directly to file
 
             // Create ZIP file
             $zipPath = storage_path('app/exports/' . $baseName . '.zip');
             $zip = new ZipArchive();
-            
+
             if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
                 $zip->addFile($excelFile, basename($excelFile));
                 $zip->addFile($pdfFile, basename($pdfFile));
@@ -134,4 +145,3 @@ class ArPerbulan extends Component
         return view('livewire.sfinlog.ar-perbulan.index');
     }
 }
-

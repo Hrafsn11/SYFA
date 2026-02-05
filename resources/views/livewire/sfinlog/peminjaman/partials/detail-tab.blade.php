@@ -66,7 +66,7 @@
 
             {{-- Status Ditolak --}}
             @if ($status == 'Ditolak')
-                <span class="badge bg-danger fs-6">
+                <span class="bg-danger p-4 rounded text-white fs-6">
                     <i class="ti ti-x me-1"></i>
                     {{ $status }}
                 </span>

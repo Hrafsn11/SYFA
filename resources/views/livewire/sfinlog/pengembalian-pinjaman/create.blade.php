@@ -69,36 +69,38 @@
                             </div>
                         </div>
 
-                        {{-- Row 3: Nilai Pinjaman, Bagi Hasil & Keterlambatan --}}
+                        {{-- Row 3: Nilai Awal Pinjaman --}}
                         <div class="row mb-3">
-                            {{-- Nilai Pinjaman --}}
                             <div class="col-md-4">
-                                <label class="form-label">Nilai Pinjaman</label>
+                                <label class="form-label">Nilai Pokok Awal</label>
                                 <input type="text" class="form-control"
                                     value="Rp {{ number_format($nilai_pinjaman, 0, ',', '.') }}" readonly>
                             </div>
-                            {{-- Bagi Hasil (termasuk keterlambatan jika ada) --}}
                             <div class="col-md-4">
-                                <label class="form-label">Bagi Hasil</label>
+                                <label class="form-label">Bagi Hasil Awal</label>
                                 <input type="text" class="form-control"
-                                    value="Rp {{ number_format($nilai_bagi_hasil_saat_ini ?? $nilai_bagi_hasil, 0, ',', '.') }}"
-                                    readonly>
+                                    value="Rp {{ number_format($nilai_bagi_hasil, 0, ',', '.') }}" readonly>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Jumlah Minggu Keterlambatan</label>
-                                <input type="text" class="form-control"
-                                    value="{{ $jumlah_minggu_keterlambatan }} Minggu" readonly>
-                            </div>
-                        </div>
-
-                        {{-- Row 4: Total Pinjaman --}}
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label">Total Pinjaman</label>
+                                <label class="form-label">Total Awal</label>
                                 <input type="text" class="form-control"
                                     value="Rp {{ number_format($total_pinjaman, 0, ',', '.') }}" readonly>
                             </div>
                         </div>
+
+                        {{-- Row 4: Keterlambatan (jika ada) --}}
+                        @if ($jumlah_minggu_keterlambatan > 0)
+                            <div class="alert alert-warning mb-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="ti ti-alert-triangle me-2 fs-4"></i>
+                                    <div>
+                                        <strong>Pinjaman Terlambat!</strong>
+                                        <span class="ms-2">{{ $jumlah_minggu_keterlambatan }} minggu
+                                            keterlambatan</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         {{-- List Pengembalian Invoice Table --}}
                         <div class="card shadow-none border mb-3" wire:key="pengembalian-table-container">
@@ -126,14 +128,14 @@
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td>Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
                                                 <td>
-                                                    @if($item['bukti_file'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
-                                                        <a href="{{ $item['bukti_file']->temporaryUrl() }}" target="_blank"
-                                                            class="btn btn-sm btn-outline-info">
+                                                    @if ($item['bukti_file'] instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                                                        <a href="{{ $item['bukti_file']->temporaryUrl() }}"
+                                                            target="_blank" class="btn btn-sm btn-outline-info">
                                                             <i class="ti ti-eye me-1"></i> Lihat
                                                         </a>
                                                     @elseif(is_string($item['bukti_file']))
-                                                        <a href="{{ Storage::url($item['bukti_file']) }}" target="_blank"
-                                                            class="btn btn-sm btn-outline-info">
+                                                        <a href="{{ Storage::url($item['bukti_file']) }}"
+                                                            target="_blank" class="btn btn-sm btn-outline-info">
                                                             <i class="ti ti-eye me-1"></i> Lihat
                                                         </a>
                                                     @else
@@ -169,17 +171,30 @@
                     </div>
                 </div>
 
-                {{-- Sisa Pembayaran --}}
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Sisa Bayar Pokok</label>
-                        <input type="text" class="form-control"
-                            value="Rp {{ number_format($sisa_utang, 0, ',', '.') }}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Sisa Bagi Hasil</label>
-                        <input type="text" class="form-control"
-                            value="Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}" readonly>
+                {{-- Sisa Yang Harus Dibayar --}}
+                <div class="card border shadow-none mb-3">
+                    <div class="card-body pt-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">Sisa Pokok</label>
+                                <input type="text" class="form-control fw-bold"
+                                    value="Rp {{ number_format($sisa_utang, 0, ',', '.') }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">Sisa Bagi Hasil @if ($jumlah_minggu_keterlambatan > 0)
+                                        <span class="text-danger">(+Denda)</span>
+                                    @endif
+                                </label>
+                                <input type="text" class="form-control fw-bold"
+                                    value="Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-muted">Total Sisa</label>
+                                <input type="text" class="form-control fw-bold text-primary"
+                                    value="Rp {{ number_format($sisa_utang + $sisa_bagi_hasil, 0, ',', '.') }}"
+                                    readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

@@ -15,7 +15,7 @@ class ProgramRestrukturisasiRequest extends FormRequest
     {
         return [
             'id_pengajuan_restrukturisasi' => 'required|exists:pengajuan_restrukturisasi,id_pengajuan_restrukturisasi',
-            'metode_perhitungan' => 'required|in:Flat,Efektif (Anuitas)',
+            'metode_perhitungan' => 'required|in:Flat,Anuitas',
             'plafon_pembiayaan' => 'required|numeric|min:0',
             'suku_bunga_per_tahun' => 'required|numeric|min:0|max:100',
             'jangka_waktu_total' => 'required|integer|min:1|max:360',
@@ -49,7 +49,7 @@ class ProgramRestrukturisasiRequest extends FormRequest
             'id_pengajuan_restrukturisasi.exists' => 'Pengajuan restrukturisasi tidak valid.',
 
             'metode_perhitungan.required' => 'Metode perhitungan harus dipilih.',
-            'metode_perhitungan.in' => 'Metode perhitungan harus Flat atau Efektif (Anuitas).',
+            'metode_perhitungan.in' => 'Metode perhitungan harus Flat atau Anuitas.',
 
             'plafon_pembiayaan.required' => 'Plafon pembiayaan harus diisi.',
             'plafon_pembiayaan.numeric' => 'Plafon pembiayaan harus berupa angka.',

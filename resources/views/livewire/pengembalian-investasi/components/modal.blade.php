@@ -104,15 +104,20 @@
 
                         <div class="col-md-6 mb-3 form-group">
                             <label for="dana_pokok_dibayar" class="form-label">
-                                Dana Pokok Yang Dibayarkan <span class="text-danger">*</span>
+                                Dana Pokok Yang Dibayarkan @if(!$id_pengajuan_investasi || $dana_tersedia > 0)<span class="text-danger">*</span>@endif
                             </label>
-                            <input type="text" class="form-control @error('dana_pokok_dibayar') is-invalid @enderror"
-                                id="dana_pokok_dibayar" placeholder="Ketik angka saja (contoh: 10000000)"
-                                autocomplete="off">
-                            <input type="hidden" id="dana_pokok_raw" wire:model="dana_pokok_dibayar">
+                            <div wire:ignore>
+                                <input type="text" class="form-control @error('dana_pokok_dibayar') is-invalid @enderror"
+                                    id="dana_pokok_dibayar" placeholder="Ketik angka saja (contoh: 10000000)"
+                                    autocomplete="off" {{ $id_pengajuan_investasi && $dana_tersedia == 0 ? 'disabled' : '' }}>
+                                <input type="hidden" id="dana_pokok_raw" wire:model="dana_pokok_dibayar">
+                            </div>
                             @if ($id_pengajuan_investasi && $dana_tersedia !== null)
-                                <small class="text-muted">Maksimal: Rp
-                                    {{ number_format($dana_tersedia, 0, ',', '.') }}</small>
+                                @if ($dana_tersedia == 0)
+                                    <small class="text-warning"><i class="ti ti-alert-circle me-1"></i>Tidak ada dana tersedia untuk dikembalikan</small>
+                                @else
+                                    <small class="text-muted">Maksimal: Rp {{ number_format($dana_tersedia, 0, ',', '.') }}</small>
+                                @endif
                             @endif
                             @error('dana_pokok_dibayar')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -121,15 +126,20 @@
 
                         <div class="col-md-6 mb-3 form-group">
                             <label for="bagi_hasil_dibayar" class="form-label">
-                                Bagi Hasil Yang Dibayarkan <span class="text-danger">*</span>
+                                Bagi Hasil Yang Dibayarkan @if(!$id_pengajuan_investasi || $sisa_bagi_hasil > 0)<span class="text-danger">*</span>@endif
                             </label>
-                            <input type="text" class="form-control @error('bagi_hasil_dibayar') is-invalid @enderror"
-                                id="bagi_hasil_dibayar" placeholder="Ketik angka saja (contoh: 1000000)"
-                                autocomplete="off">
-                            <input type="hidden" id="bagi_hasil_raw" wire:model="bagi_hasil_dibayar">
+                            <div wire:ignore>
+                                <input type="text" class="form-control @error('bagi_hasil_dibayar') is-invalid @enderror"
+                                    id="bagi_hasil_dibayar" placeholder="Ketik angka saja (contoh: 1000000)"
+                                    autocomplete="off" {{ $id_pengajuan_investasi && $sisa_bagi_hasil == 0 ? 'disabled' : '' }}>
+                                <input type="hidden" id="bagi_hasil_raw" wire:model="bagi_hasil_dibayar">
+                            </div>
                             @if ($id_pengajuan_investasi && $sisa_bagi_hasil !== null)
-                                <small class="text-muted">Maksimal: Rp
-                                    {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}</small>
+                                @if ($sisa_bagi_hasil == 0)
+                                    <small class="text-success"><i class="ti ti-check me-1"></i>Bagi hasil sudah lunas</small>
+                                @else
+                                    <small class="text-muted">Maksimal: Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}</small>
+                                @endif
                             @endif
                             @error('bagi_hasil_dibayar')
                                 <div class="invalid-feedback">{{ $message }}</div>

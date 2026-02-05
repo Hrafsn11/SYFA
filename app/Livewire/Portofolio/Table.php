@@ -31,7 +31,7 @@ class Table extends DataTableComponent
             ->setPerPage(10)
             
             // Default Sort
-            ->setDefaultSort('id_laporan_investasi', 'asc')
+            ->setDefaultSort('created_at', 'desc')
             
             // Table Styling
             ->setTableAttributes([
@@ -54,7 +54,9 @@ class Table extends DataTableComponent
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
-        return LaporanInvestasi::query()->select('id_laporan_investasi', 'nama_sbu', 'tahun');
+        return LaporanInvestasi::query()
+            ->select('id_laporan_investasi', 'nama_sbu', 'tahun', 'created_at')
+            ->orderBy('created_at', 'desc');
     }
 
     public function columns(): array

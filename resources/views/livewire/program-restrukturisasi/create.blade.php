@@ -67,7 +67,6 @@
                         <input type="number" class="form-control @error('plafon_pembiayaan') is-invalid @enderror"
                             wire:model="plafon_pembiayaan" step="0.01" min="0" readonly
                             @if ($isEdit) readonly style="background-color: #f5f5f9;" @endif>
-                        <small class="text-muted">Nominal sisa pokok</small>
                         @error('plafon_pembiayaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -91,7 +90,7 @@
                             <select class="form-select @error('metode_perhitungan') is-invalid @enderror"
                                 wire:model.live="metode_perhitungan">
                                 <option value="Flat">Metode Flat</option>
-                                <option value="Efektif (Anuitas)">Metode Efektif (Anuitas)</option>
+                                <option value="Anuitas">Metode Efektif (Anuitas)</option>
                             </select>
                         @else
                             <select class="form-select" disabled style="background-color: #f5f5f9;">
@@ -223,7 +222,7 @@
                                         <tr>
                                             <th class="text-center" style="width: 60px;">No</th>
                                             <th style="min-width: 150px;">Tanggal Jatuh Tempo</th>
-                                            @if ($metode_perhitungan === 'Efektif (Anuitas)')
+                                            @if ($metode_perhitungan === 'Anuitas')
                                                 <th class="text-end" style="min-width: 130px;">Sisa Pinjaman (Rp)</th>
                                             @endif
                                             <th class="text-end" style="min-width: 120px;">Pokok (Rp)</th>
@@ -242,7 +241,7 @@
                                             <tr class="{{ $item['is_grace_period'] ? 'table-warning' : '' }}">
                                                 <td class="text-center">{{ $item['no'] }}</td>
                                                 <td>{{ $item['tanggal_jatuh_tempo'] }}</td>
-                                                @if ($metode_perhitungan === 'Efektif (Anuitas)')
+                                                @if ($metode_perhitungan === 'Anuitas')
                                                     <td class="text-end">
                                                         {{ number_format($item['sisa_pinjaman'] ?? 0, 0, ',', '.') }}
                                                     </td>
@@ -325,7 +324,7 @@
                                     <tfoot class="table-light">
                                         <tr>
                                             <th colspan="2">Total</th>
-                                            @if ($metode_perhitungan === 'Efektif (Anuitas)')
+                                            @if ($metode_perhitungan === 'Anuitas')
                                                 <th></th>
                                             @endif
                                             <th class="text-end">{{ number_format($total_pokok, 0, ',', '.') }}</th>

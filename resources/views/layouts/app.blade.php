@@ -7,9 +7,9 @@
         : 'light-style layout-navbar-fixed layout-compact';
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="{{ $htmlLayoutClass }}" dir="ltr"
-    data-theme="theme-default" data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template"
-    data-style="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    class="{{ $htmlLayoutClass }}" dir="ltr" data-theme="theme-default"
+    data-assets-path="{{ asset('assets') }}/" data-template="vertical-menu-template" data-style="light">
 
 <head>
     <meta charset="utf-8">
@@ -60,7 +60,7 @@
         href="{{ asset('assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/jquery-timepicker/jquery-timepicker.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/apex-charts/apex-charts.css') }}" />
-
+    
     <script src="{{ asset('assets/vendor/js/helpers.js') }}"></script>
     <script src="{{ asset('assets/vendor/js/template-customizer.js') }}"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
@@ -84,7 +84,7 @@
 
     <!-- Custom CSS -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    
     <!-- Custom Readonly Styles -->
     <style>
         /* Make readonly text inputs and textareas look like disabled elements */
@@ -95,7 +95,7 @@
             cursor: default !important;
             border-color: #ced4da !important;
         }
-
+        
         /* Ensure flatpickr inputs remain white/editable looking even with readonly attribute */
         .form-control.flatpickr-input,
         .form-control.flatpickr-date-modal,
@@ -163,11 +163,11 @@
 
     {{-- ✅ CRITICAL: Livewire Scripts HARUS sebelum Rappasoft --}}
     @livewireScriptConfig
-
+    
     {{-- ✅ Rappasoft Table Scripts (butuh Livewire & Alpine sudah loaded) --}}
     @rappasoftTableScripts
     @rappasoftTableThirdPartyScripts
-
+    
     @assets
     <!-- Core JS -->
     <script src="{{ asset('assets/vendor/libs/jquery/jquery.js') }}"></script>
@@ -224,21 +224,21 @@
         document.addEventListener('menu:collapsed', updateNProgressPosition);
         document.addEventListener('menu:expanded', updateNProgressPosition);
 
-        document.addEventListener('livewire:navigated', () => {
+        document.addEventListener('livewire:navigated', () => { 
             window.Helpers.destroy();
             window.Helpers.init();
             // Update layout after page load
-            if (document.readyState === 'complete') Helpers.update(); else document.addEventListener('DOMContentLoaded', function onContentLoaded() {
+            if (document.readyState === 'complete') Helpers.update();else document.addEventListener('DOMContentLoaded', function onContentLoaded() {
                 Helpers.update();
                 document.removeEventListener('DOMContentLoaded', onContentLoaded);
-            });
+            });            
             window.initVuexy?.();
 
             updateNProgressPosition();
         });
     </script>
 
-    <script>
+<script>
         $(document).on('click', '#markAllRead', function () {
             $.ajax({
                 url: '{{ url("notif-read-all") }}',
@@ -271,12 +271,12 @@
                 },
                 success: function (response) {
                     console.log(response);
-
-                    notifItem.fadeOut(300, function () {
+                    
+                    notifItem.fadeOut(300, function() {
                         $(this).remove();
                     });
                     $('#count_notif').text(response.notif_count);
-                    if (response.notif_count <= 0) {
+                    if(response.notif_count <= 0){
                         $('.badge-notifications').remove();
                     }
                     console.log('Notification hidden successfully.');
@@ -287,10 +287,10 @@
             });
         });
     </script>
-
+    
     <script src="{{ asset('assets/vendor/js/content.js') }}"></script>
     @endassets
-    <!-- Main JS -->
+    <!-- Main JS -->   
     {{-- Custom page scripts --}}
     @stack('scripts')
 </body>

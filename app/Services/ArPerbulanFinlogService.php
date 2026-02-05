@@ -74,7 +74,6 @@ class ArPerbulanFinlogService
             ]);
 
             return $arPerbulan;
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("ArPerbulanFinlogService: Error saat update AR", [
@@ -88,6 +87,7 @@ class ArPerbulanFinlogService
 
     /**
      * Hitung total pinjaman yang status nya "Selesai" sampai bulan tertentu
+     * Menggunakan nilai_bagi_hasil_saat_ini jika tersedia (termasuk denda keterlambatan)
      */
     private function calculateTotalPinjaman(string $id_debitur, int $year, int $month): array
     {
@@ -98,7 +98,7 @@ class ArPerbulanFinlogService
             ->whereDate('created_at', '<=', $endOfMonth)
             ->selectRaw('
                 COALESCE(SUM(nilai_pinjaman), 0) as total_pokok,
-                COALESCE(SUM(nilai_bagi_hasil), 0) as total_bagi_hasil
+                COALESCE(SUM(COALESCE(nilai_bagi_hasil_saat_ini, nilai_bagi_hasil)), 0) as total_bagi_hasil
             ')
             ->first();
 
@@ -110,45 +110,40 @@ class ArPerbulanFinlogService
 
     /**
      * Hitung total pengembalian yang sudah dibayar sampai bulan tertentu
-     * Rumus: Total Dibayar = Total Pinjaman Awal - Sisa Hutang Terakhir
+     * Menggunakan nilai_pokok_saat_ini dan nilai_bagi_hasil_saat_ini dari database
+     * Rumus: Total Dibayar = Total Pinjaman Awal - Sisa Hutang Saat Ini
      */
     private function calculateTotalPengembalian(string $id_debitur, int $year, int $month): array
     {
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth();
 
         try {
-            $hasData = PengembalianPinjamanFinlog::exists();
-            
-            if (!$hasData) {
-                return [
-                    'pokok' => 0,
-                    'bagi_hasil' => 0,
-                ];
-            }
-
-            $pengembalianTerakhir = PengembalianPinjamanFinlog::whereHas('peminjamanFinlog', function ($query) use ($id_debitur) {
-                    $query->where('id_debitur', $id_debitur);
-                })
+            // Hitung berdasarkan selisih nilai awal vs nilai saat ini dari peminjaman_finlog
+            $result = PeminjamanFinlog::where('id_debitur', $id_debitur)
+                ->where('status', 'Selesai')
                 ->whereDate('created_at', '<=', $endOfMonth)
-                ->orderBy('created_at', 'desc')
-                ->get();
+                ->selectRaw('
+                    COALESCE(SUM(nilai_pinjaman - COALESCE(nilai_pokok_saat_ini, nilai_pinjaman)), 0) as total_bayar_pokok,
+                    COALESCE(SUM(COALESCE(nilai_bagi_hasil_saat_ini, nilai_bagi_hasil) - COALESCE(nilai_bagi_hasil_saat_ini, nilai_bagi_hasil)), 0) as total_bayar_bagi_hasil
+                ')
+                ->first();
 
-            $totalBayarPokok = 0;
-            $totalBayarBagiHasil = 0;
+            // Fallback ke metode lama jika nilai_pokok_saat_ini belum diisi (data lama)
+            $bayarPokok = $result->total_bayar_pokok ?? 0;
 
-            foreach ($pengembalianTerakhir->groupBy('id_pinjaman_finlog') as $pinjamanId => $pengembalians) {
-                $terakhir = $pengembalians->first();
-                $pinjaman = PeminjamanFinlog::find($pinjamanId);
-                
-                if ($pinjaman && $terakhir) {
-                    $totalBayarPokok += max(0, ($pinjaman->nilai_pinjaman - $terakhir->sisa_pinjaman));
-                    $totalBayarBagiHasil += max(0, ($pinjaman->nilai_bagi_hasil - $terakhir->sisa_bagi_hasil));
-                }
-            }
+            // Untuk bagi hasil, hitung dari record pengembalian jika ada
+            $bayarBagiHasil = PengembalianPinjamanFinlog::whereHas('peminjamanFinlog', function ($query) use ($id_debitur) {
+                $query->where('id_debitur', $id_debitur);
+            })
+                ->whereDate('created_at', '<=', $endOfMonth)
+                ->sum('jumlah_pengembalian') - $bayarPokok;
+
+            // Pastikan tidak negatif
+            $bayarBagiHasil = max(0, $bayarBagiHasil);
 
             return [
-                'pokok' => $totalBayarPokok,
-                'bagi_hasil' => $totalBayarBagiHasil,
+                'pokok' => $bayarPokok,
+                'bagi_hasil' => $bayarBagiHasil,
             ];
         } catch (\Exception $e) {
             Log::error("ArPerbulanFinlogService: Error calculate pengembalian", [
@@ -184,7 +179,7 @@ class ArPerbulanFinlogService
     public function updateAROnPengembalian(string $id_peminjaman_finlog, Carbon $tanggalPengembalian): void
     {
         $peminjaman = PeminjamanFinlog::find($id_peminjaman_finlog);
-        
+
         if (!$peminjaman) {
             Log::warning("ArPerbulanFinlogService: Peminjaman tidak ditemukan", [
                 'id_peminjaman_finlog' => $id_peminjaman_finlog,

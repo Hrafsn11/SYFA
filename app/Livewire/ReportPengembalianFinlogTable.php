@@ -93,7 +93,8 @@ class ReportPengembalianFinlogTable extends DataTableComponent
         if ($hasUnrestrictedRole) {
             // Unrestricted users (Finance SKI, CEO Finlog, etc) - see all report data
             return PengembalianPinjamanFinlog::query()
-                ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project']);
+                ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
+                ->orderBy('pengembalian_pinjaman_finlog.created_at', 'desc');
         } else {
             // Restricted users (Debitur) - only see their own report data
             $currentDebitur = MasterDebiturDanInvestor::where('user_id', auth()->id())->first();
@@ -108,7 +109,8 @@ class ReportPengembalianFinlogTable extends DataTableComponent
                 ->with(['peminjamanFinlog.debitur', 'cellsProject', 'project'])
                 ->whereHas('peminjamanFinlog', function ($query) use ($currentDebitur) {
                     $query->where('id_debitur', $currentDebitur->id_debitur);
-                });
+                })
+                ->orderBy('pengembalian_pinjaman_finlog.created_at', 'desc');
         }
     }
 

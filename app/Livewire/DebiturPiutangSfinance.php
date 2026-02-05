@@ -18,6 +18,7 @@ class DebiturPiutangSfinance extends DataTableComponent
     {
         $this->setPrimaryKey('id_pengajuan_peminjaman')
             ->setAdditionalSelects(['pengajuan_peminjaman.id_pengajuan_peminjaman'])
+            ->setDefaultSort('created_at', 'desc')
             ->setTableAttributes(['class' => 'table-responsive text-nowrap'])
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPage(10)
@@ -39,12 +40,17 @@ class DebiturPiutangSfinance extends DataTableComponent
                 'pengajuan_peminjaman.persentase_bagi_hasil',
                 'pengajuan_peminjaman.total_bagi_hasil',
                 'pengajuan_peminjaman.tanggal_jatuh_tempo',
+                // Kolom tracking keterlambatan
+                'pengajuan_peminjaman.jumlah_bulan_keterlambatan',
+                'pengajuan_peminjaman.denda_keterlambatan',
+                'pengajuan_peminjaman.total_bagi_hasil_saat_ini',
+                'pengajuan_peminjaman.sisa_bagi_hasil as sisa_bagi_hasil_pengajuan',
                 'master_debitur_dan_investor.nama as nama_debitur',
                 'first_bukti.id_bukti_peminjaman',
                 'first_bukti.nama_client as objek_jaminan',
                 'first_bukti.no_invoice',
                 'first_bukti.no_kontrak',
-                'pengembalian_pinjaman.lama_pemakaian as masa_penggunaan',
+                DB::raw('COALESCE(pengajuan_peminjaman.lama_pemakaian, pengembalian_pinjaman.lama_pemakaian, 0) as masa_penggunaan'),
                 'pengembalian_pinjaman.sisa_bagi_hasil as kurang_bayar_bagi_hasil',
                 'pengembalian_pinjaman.sisa_bayar_pokok as sisa_pokok',
                 'pengembalian_pinjaman.ulid as id_pengembalian_pinjaman',
@@ -81,7 +87,8 @@ class DebiturPiutangSfinance extends DataTableComponent
             });
         }
 
-        return $this->applyDebiturAuthorization($query);
+        return $this->applyDebiturAuthorization($query)
+            ->orderBy('pengajuan_peminjaman.created_at', 'desc');
     }
 
     public function columns(): array
@@ -181,6 +188,39 @@ class DebiturPiutangSfinance extends DataTableComponent
                 ->label(fn($row) => ($row->persentase_bagi_hasil ?? 0) . '%')
                 ->sortable(),
 
+            // Column::make('Bulan Keterlambatan', 'jumlah_bulan_keterlambatan')
+            //     ->label(function ($row) {
+            //         $bulan = $row->jumlah_bulan_keterlambatan ?? 0;
+            //         if ($bulan <= 0) {
+            //             return '<span class="badge bg-success">0 bulan</span>';
+            //         }
+            //         return '<span class="badge bg-danger">' . $bulan . ' bulan</span>';
+            //     })
+            //     ->html()
+            //     ->sortable(),
+
+            Column::make('Denda Keterlambatan', 'denda_keterlambatan')
+                ->label(function ($row) {
+                    $denda = $row->denda_keterlambatan ?? 0;
+                    if ($denda <= 0) {
+                        return '-';
+                    }
+                    return '<span class="text-danger fw-semibold">Rp ' . number_format($denda, 0, ',', '.') . '</span>';
+                })
+                ->html()
+                ->sortable(),
+
+            Column::make('Total Bagi Hasil Saat Ini', 'total_bagi_hasil_saat_ini')
+                ->label(function ($row) {
+                    // Prioritas: total_bagi_hasil_saat_ini dari database, fallback ke total_bagi_hasil
+                    $total = $row->total_bagi_hasil_saat_ini ?? $row->total_bagi_hasil ?? 0;
+                    $hasDenda = ($row->denda_keterlambatan ?? 0) > 0;
+                    $class = $hasDenda ? 'text-warning fw-semibold' : '';
+                    return '<span class="' . $class . '">Rp ' . number_format($total, 0, ',', '.') . '</span>';
+                })
+                ->html()
+                ->sortable(),
+
             Column::make('Bagi Hasil/Bulan')->label(function ($row) {
                 $bagiHasil = $row->total_bagi_hasil ?? 0;
                 $masaPenggunaanHari = $row->masa_penggunaan ?? 0;
@@ -236,9 +276,14 @@ class DebiturPiutangSfinance extends DataTableComponent
 
             Column::make('Sisa Bagi Hasil', 'kurang_bayar_bagi_hasil')
                 ->label(function ($row) {
-                    // Jika belum ada pengembalian, gunakan total_bagi_hasil
-                    $sisaBagiHasil = $row->kurang_bayar_bagi_hasil ?? $row->total_bagi_hasil ?? 0;
-                    return 'Rp ' . number_format($sisaBagiHasil, 0, ',', '.');
+                    // Prioritas: sisa_bagi_hasil dari pengajuan (termasuk denda), lalu dari pengembalian, fallback ke total_bagi_hasil
+                    $sisaBagiHasil = $row->sisa_bagi_hasil_pengajuan 
+                        ?? $row->kurang_bayar_bagi_hasil 
+                        ?? $row->total_bagi_hasil 
+                        ?? 0;
+                    $hasDenda = ($row->denda_keterlambatan ?? 0) > 0;
+                    $class = $hasDenda ? 'text-warning fw-semibold' : '';
+                    return '<span class="' . $class . '">Rp ' . number_format($sisaBagiHasil, 0, ',', '.') . '</span>';
                 })
                 ->html()
                 ->sortable(),

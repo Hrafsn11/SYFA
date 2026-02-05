@@ -24,10 +24,10 @@ class PeminjamanRequest extends FormRequest
     {
         return [
             'id_debitur' => ['required', 'exists:master_debitur_dan_investor,id_debitur'],
-            'id_cells_project' => ['nullable', 'exists:cells_projects,id_cells_project'],
+            'id_cells_project' => ['required', 'exists:cells_projects,id_cells_project'],
             'nama_project' => ['required', 'string', 'max:255'],
             'durasi_project' => ['required', 'integer', 'min:0'],
-            'durasi_project_hari' => ['required', 'integer', 'min:0'],
+            'durasi_project_hari' => ['nullable', 'integer', 'min:0'],
             'nib_perusahaan' => [
                 'required',
                 function ($attribute, $value, $fail) {
@@ -37,7 +37,7 @@ class PeminjamanRequest extends FormRequest
                         $fail('NIB perusahaan harus diupload sebagai file.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'jpg', 'jpeg', 'png'])) {
                         $fail('NIB perusahaan harus berformat PDF, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
@@ -65,8 +65,8 @@ class PeminjamanRequest extends FormRequest
                         $fail('Dokumen mitra harus berupa file.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
-                        $fail('Dokumen mitra harus berformat PDF, JPG, JPEG, atau PNG.');
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])) {
+                        $fail('Dokumen mitra (Company Profile) harus berformat PDF, DOC, DOCX, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
                         $fail('Ukuran dokumen mitra maksimal 2MB.');
@@ -79,13 +79,13 @@ class PeminjamanRequest extends FormRequest
                     if (is_string($value))
                         return;
                     if ($value === null)
-                        return; 
+                        return;
                     if (!$value instanceof \Illuminate\Http\UploadedFile) {
                         $fail('Form new customer harus berupa file.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
-                        $fail('Form new customer harus berformat PDF, JPG, JPEG, atau PNG.');
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'])) {
+                        $fail('Form new customer harus berformat PDF, DOC, DOCX, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
                         $fail('Ukuran form new customer maksimal 2MB.');
@@ -101,8 +101,8 @@ class PeminjamanRequest extends FormRequest
                         $fail('Dokumen kerja sama harus diupload.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
-                        $fail('Dokumen kerja sama harus berformat PDF, JPG, JPEG, atau PNG.');
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'doc', 'docx'])) {
+                        $fail('Dokumen kerja sama harus berformat PDF, DOC, atau DOCX.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
                         $fail('Ukuran dokumen kerja sama maksimal 2MB.');
@@ -118,8 +118,8 @@ class PeminjamanRequest extends FormRequest
                         $fail('Dokumen NPA harus diupload.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
-                        $fail('Dokumen NPA harus berformat PDF, JPG, JPEG, atau PNG.');
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'doc', 'docx', 'xls', 'xlsx'])) {
+                        $fail('Dokumen NPA harus berformat PDF, DOC, DOCX, XLS, atau XLSX.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
                         $fail('Ukuran dokumen NPA maksimal 2MB.');
@@ -135,7 +135,7 @@ class PeminjamanRequest extends FormRequest
                         $fail('Akta perusahaan harus diupload.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'jpg', 'jpeg', 'png'])) {
                         $fail('Akta perusahaan harus berformat PDF, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
@@ -152,7 +152,7 @@ class PeminjamanRequest extends FormRequest
                         $fail('KTP owner harus diupload.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'jpg', 'jpeg', 'png'])) {
                         $fail('KTP owner harus berformat PDF, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
@@ -169,7 +169,7 @@ class PeminjamanRequest extends FormRequest
                         $fail('KTP PIC harus diupload.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'jpg', 'jpeg', 'png'])) {
                         $fail('KTP PIC harus berformat PDF, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
@@ -186,7 +186,7 @@ class PeminjamanRequest extends FormRequest
                         $fail('Surat izin usaha harus berupa file.');
                         return;
                     }
-                    if (!in_array($value->getClientOriginalExtension(), ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    if (!in_array(strtolower($value->getClientOriginalExtension()), ['pdf', 'jpg', 'jpeg', 'png'])) {
                         $fail('Surat izin usaha harus berformat PDF, JPG, JPEG, atau PNG.');
                     }
                     if ($value->getSize() > 2048 * 1024) {
@@ -207,7 +207,8 @@ class PeminjamanRequest extends FormRequest
         return [
             'id_debitur.required' => 'Debitur harus dipilih.',
             'id_debitur.exists' => 'Debitur tidak valid.',
-            'id_cells_project.exists' => 'Project tidak valid.',
+            'id_cells_project.required' => 'Cells Bisnis harus dipilih.',
+            'id_cells_project.exists' => 'Cells Bisnis tidak valid.',
 
             'nama_project.required' => 'Nama project harus diisi.',
             'nama_project.string' => 'Nama project harus berupa teks.',
@@ -217,7 +218,6 @@ class PeminjamanRequest extends FormRequest
             'durasi_project.integer' => 'Durasi project harus berupa angka bulat.',
             'durasi_project.min' => 'Durasi project minimal 0 bulan.',
 
-            'durasi_project_hari.required' => 'Durasi project (hari) harus diisi.',
             'durasi_project_hari.integer' => 'Durasi project (hari) harus berupa angka bulat.',
             'durasi_project_hari.min' => 'Durasi project (hari) minimal 0 hari.',
 
@@ -244,24 +244,25 @@ class PeminjamanRequest extends FormRequest
 
             'rencana_tgl_pengembalian.date' => 'Rencana tanggal pengembalian harus berupa tanggal yang valid.',
 
-            'dokumen_mitra.file' => 'Dokumen mitra harus berupa file.',
-            'dokumen_mitra.mimes' => 'Dokumen mitra harus berformat PDF, JPG, JPEG, atau PNG.',
+            'dokumen_mitra.file' => 'Dokumen mitra (Company Profile) harus berupa file.',
+            'dokumen_mitra.mimes' => 'Dokumen mitra (Company Profile) harus berformat PDF, DOC, DOCX, JPG, JPEG, atau PNG.',
             'dokumen_mitra.max' => 'Ukuran dokumen mitra maksimal 2MB.',
 
             'form_new_customer.required' => 'Form new customer harus diupload.',
             'form_new_customer.file' => 'Form new customer harus berupa file.',
-            'form_new_customer.mimes' => 'Form new customer harus berformat PDF, JPG, JPEG, atau PNG.',
+            'form_new_customer.mimes' => 'Form new customer harus berformat PDF, DOC, DOCX, JPG, JPEG, atau PNG.',
             'form_new_customer.max' => 'Ukuran form new customer maksimal 2MB.',
 
             'dokumen_kerja_sama.required' => 'Dokumen kerja sama harus diupload.',
             'dokumen_kerja_sama.file' => 'Dokumen kerja sama harus berupa file.',
-            'dokumen_kerja_sama.mimes' => 'Dokumen kerja sama harus berformat PDF, JPG, JPEG, atau PNG.',
+            'dokumen_kerja_sama.mimes' => 'Dokumen kerja sama harus berformat PDF, DOC, atau DOCX.',
             'dokumen_kerja_sama.max' => 'Ukuran dokumen kerja sama maksimal 2MB.',
 
             'dokumen_npa.required' => 'Dokumen NPA harus diupload.',
             'dokumen_npa.file' => 'Dokumen NPA harus berupa file.',
-            'dokumen_npa.mimes' => 'Dokumen NPA harus berformat PDF, JPG, JPEG, atau PNG.',
+            'dokumen_npa.mimes' => 'Dokumen NPA harus berformat PDF, DOC, DOCX, XLS, atau XLSX.',
             'dokumen_npa.max' => 'Ukuran dokumen NPA maksimal 2MB.',
+
 
             'akta_perusahaan.file' => 'Akta perusahaan harus berupa file.',
             'akta_perusahaan.mimes' => 'Akta perusahaan harus berformat PDF, JPG, JPEG, atau PNG.',

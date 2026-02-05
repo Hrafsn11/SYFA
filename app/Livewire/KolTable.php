@@ -30,7 +30,7 @@ class KolTable extends DataTableComponent
             ->setPerPage(10)
             
             // Default Sort
-            ->setDefaultSort('id_kol', 'asc')
+            ->setDefaultSort('created_at', 'desc')
             
             // Table Styling
             ->setTableAttributes([
