@@ -20,12 +20,23 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, pdo, mysql, gd, zip
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install NPM dependencies
+        run: npm install
+
+      - name: Build frontend assets
+        run: npm run build
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
       - name: Create deployment package
         run: |
-          # Remove dev files
+          # Remove dev files but keep public/build
           rm -rf tests node_modules storage/logs/*.log
           # Create storage directories
           mkdir -p storage/framework/{cache,sessions,views}
