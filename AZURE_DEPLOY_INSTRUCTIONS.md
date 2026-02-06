@@ -1,34 +1,40 @@
 # Panduan Perbaikan Error Deploy ke Azure
 
-Error yang Anda alami (`Publish profile is invalid...`) kemungkinan besar disebabkan karena GitHub Actions Secret `AZURE_WEBAPP_PUBLISH_PROFILE` kosong atau berisi data yang tidak valid (seperti teks "REDACTED" yang ada di file `azure-publish-profile.xml`).
+Error yang Anda alami (`Publish profile is invalid...`) disebabkan karena GitHub Actions Secret `AZURE_WEBAPP_PUBLISH_PROFILE` tidak valid.
 
-File `azure-publish-profile.xml` di dalam repository ini **tidak bisa digunakan** untuk deployment karena password-nya telah disensor ("REDACTED").
+Selain itu, jika Anda melihat error **"Basic authentication is disabled"** saat mencoba mendownload Publish Profile, Anda perlu mengaktifkannya terlebih dahulu.
 
-Untuk memperbaiki error ini, Anda harus memperbarui GitHub Secret dengan kredensial yang valid.
+## Langkah 1: Mengaktifkan Basic Authentication (Solusi "Basic authentication is disabled")
 
-## Langkah-langkah Perbaikan
+Agar tombol **Download publish profile** bisa berfungsi, Anda harus mengaktifkan Basic Auth di Azure:
 
-1.  **Download Profil Publikasi Baru**:
-    *   Masuk ke [Azure Portal](https://portal.azure.com).
-    *   Buka resource App Service Anda yang bernama `syfa-app`.
-    *   Pada halaman **Overview**, klik tombol **Get publish profile** (atau **Download publish profile**) di menu bagian atas.
-    *   Ini akan mengunduh file berekstensi `.publishsettings`.
+1.  Buka **Azure Portal** dan masuk ke resource **App Service** Anda (`syfa-app`).
+2.  Di menu sebelah kiri, cari bagian **Settings**, lalu klik **Configuration**.
+3.  Klik tab **General settings**.
+4.  Scroll ke bawah sampai menemukan bagian **Platform settings** atau **SCM Basic Auth Publishing Credentials**.
+5.  Ubah opsi **SCM Basic Auth Publishing Credentials** menjadi **On**.
+    *   *(Opsional)* Anda juga bisa mengaktifkan "FTP Basic Auth Publishing Credentials" jika perlu, tapi yang utama adalah **SCM**.
+6.  Klik tombol **Save** di bagian atas dan tunggu proses selesai.
 
-2.  **Salin Isi Profil**:
-    *   Buka file yang baru saja diunduh menggunakan teks editor (seperti Notepad atau VS Code).
-    *   Salin **seluruh** isi teks di dalam file tersebut.
+## Langkah 2: Download Profil Publikasi
 
-3.  **Update GitHub Secret**:
-    *   Buka halaman repository ini di GitHub.
-    *   Klik tab **Settings** > **Secrets and variables** > **Actions**.
-    *   Cari secret bernama `AZURE_WEBAPP_PUBLISH_PROFILE`.
-    *   Klik ikon **Edit** (gambar pensil). Jika belum ada, klik **New repository secret** dan beri nama `AZURE_WEBAPP_PUBLISH_PROFILE`.
-    *   **Tempel (Paste)** isi file publish profile yang sudah disalin ke kolom **Value**.
-    *   Klik **Update secret** (atau **Add secret**).
+Setelah Basic Auth aktif:
 
-4.  **Coba Deploy Ulang**:
-    *   Buka tab **Actions** di GitHub.
-    *   Pilih workflow yang gagal terakhir kali.
-    *   Klik tombol **Re-run jobs** > **Re-run all jobs**.
+1.  Kembali ke halaman **Overview** App Service Anda.
+2.  Klik tombol **Download publish profile** (atau **Get publish profile**).
+3.  Sekarang file `.publishsettings` seharusnya berhasil terdownload.
 
-Setelah langkah ini, deployment seharusnya berhasil jika tidak ada masalah lain pada kode aplikasi.
+## Langkah 3: Update GitHub Secret
+
+1.  Buka file `.publishsettings` yang baru diunduh dengan Notepad atau VS Code.
+2.  Salin **seluruh** teks di dalamnya.
+3.  Buka repository GitHub ini > **Settings** > **Secrets and variables** > **Actions**.
+4.  Edit secret `AZURE_WEBAPP_PUBLISH_PROFILE`.
+5.  Tempel (Paste) isi file tadi ke kolom **Value**.
+6.  Klik **Update secret**.
+
+## Langkah 4: Deploy Ulang
+
+1.  Masuk ke tab **Actions** di GitHub.
+2.  Pilih workflow terakhir yang gagal.
+3.  Klik **Re-run jobs** > **Re-run all jobs**.
