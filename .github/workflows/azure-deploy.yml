@@ -26,6 +26,12 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Create required directories
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/{cache,sessions,views}
+          mkdir -p storage/logs
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
