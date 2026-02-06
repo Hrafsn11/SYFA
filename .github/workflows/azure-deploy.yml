@@ -40,6 +40,12 @@ jobs:
           npm ci
           npm run build
 
+      - name: Create storage symbolic link
+        run: |
+          cd public
+          rm -rf storage
+          ln -s ../storage/app/public storage
+
       - name: Prepare deployment package
         run: |
           rm -rf tests node_modules storage/logs/*.log .git .github

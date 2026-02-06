@@ -32,3 +32,26 @@ Anda perlu menambahkan **Startup Command** di Azure Portal agar konfigurasi Ngin
 7.  Restart aplikasi Anda.
 
 > **Catatan:** Perintah di atas menyalin konfigurasi Nginx dari repo ke sistem dan me-reload Nginx. Jika aplikasi gagal start setelah ini, coba hapus Startup Command dan simpan kembali untuk kembali ke default, lalu cek log error.
+
+---
+
+## Mengatasi Gambar/File Upload Tidak Muncul (Error 404)
+
+Jika Anda sudah berhasil upload file tapi saat diakses muncul error **404 Not Found**, ini biasanya karena symbolic link `storage` belum terpasang dengan benar di server.
+
+### Solusi Otomatis
+Repo ini telah diperbarui sehingga setiap kali deployment berjalan (via GitHub Actions), symbolic link akan otomatis dibuat. Anda cukup **menunggu deployment selanjutnya** atau **re-run deployment** di tab Actions GitHub.
+
+### Solusi Manual (Cepat)
+Jika Anda ingin memperbaiki tanpa menunggu deploy ulang, Anda bisa menjalankannya lewat **SSH** di Azure Portal:
+
+1.  Buka **Azure Portal** -> App Service Anda.
+2.  Di menu kiri, pilih **SSH** (di bawah Development Tools) -> Klik **Go**.
+3.  Setelah terminal terbuka, jalankan perintah berikut:
+
+    ```bash
+    cd /home/site/wwwroot/public
+    ln -s ../storage/app/public storage
+    ```
+
+4.  Coba akses kembali file gambar Anda.
