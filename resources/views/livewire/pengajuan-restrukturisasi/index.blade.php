@@ -8,14 +8,14 @@
         {{-- Header Section --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h4 class="fw-bold mb-1">Pengajuan Restrukturisasi
+                <h4 class="fw-bold mb-1">Pengajuan Cicilan
                 </h4>
             </div>
             @can('pengajuan_restrukturisasi.add')
                 <button type="button" class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal"
                     data-bs-target="#modalRestrukturisasi" id="btnTambahRestrukturisasi">
                     <i class="ti ti-plus me-1"></i>
-                    <span>Ajukan Restrukturisasi</span>
+                    <span>Ajukan Penyesuaian Cicilan</span>
                 </button>
             @endcan
         </div>

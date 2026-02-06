@@ -4,12 +4,12 @@
     {{-- Header Section --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-1">Program Restrukturisasi</h4>
-            <p class="text-muted">Daftar program restrukturisasi yang telah dibuat</p>
+            <h4 class="fw-bold mb-1">Penyesuaian Cicilan</h4>
+            <p class="text-muted">Daftar penyesuaian cicilan yang telah dibuat</p>
         </div>
         @can('program_restrukturisasi.add')
             <a href="{{ route('program-restrukturisasi.create') }}" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i>Tambah Program Restrukturisasi
+                <i class="ti ti-plus me-1"></i>Tambah Penyesuaian Cicilan
             </a>
         @endcan
     </div>
