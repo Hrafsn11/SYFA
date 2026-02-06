@@ -26,13 +26,13 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
+
       - name: Install NPM dependencies and build assets
         run: |
           npm ci
           npm run build
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
       - name: Create deployment package
         run: |
