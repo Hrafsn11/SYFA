@@ -31,6 +31,7 @@ jobs:
           mkdir -p bootstrap/cache
           mkdir -p storage/framework/{cache,sessions,views}
           mkdir -p storage/logs
+          mkdir -p storage/app/public
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
@@ -45,6 +46,9 @@ jobs:
           cd public
           rm -rf storage
           ln -s ../storage/app/public storage
+
+      - name: Make scripts executable
+        run: chmod +x scripts/startup.sh
 
       - name: Prepare deployment package
         run: |
