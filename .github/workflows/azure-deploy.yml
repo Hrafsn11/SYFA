@@ -60,9 +60,20 @@ jobs:
           USERNAME=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP 'userName="\K[^"]+' | head -1)
           PASSWORD=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP 'userPWD="\K[^"]+' | head -1)
 
-          # Fix storage symlink
+          # Fix storage symlink (run each command separately)
           curl -X POST "$KUDU_URL" \
             -u "$USERNAME:$PASSWORD" \
             -H "Content-Type: application/json" \
-            -d '{"command": "cd /home/site/wwwroot && rm -rf public/storage && php artisan storage:link && php artisan migrate --force", "dir": "/home/site/wwwroot"}' \
-            || echo "Post-deploy commands completed (may have partial failures)"
+            -d '{"command": "rm -rf public/storage", "dir": "/home/site/wwwroot"}' || true
+
+          curl -X POST "$KUDU_URL" \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "php artisan storage:link", "dir": "/home/site/wwwroot"}' || true
+
+          curl -X POST "$KUDU_URL" \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "php artisan migrate --force", "dir": "/home/site/wwwroot"}' || true
+
+          echo "Post-deploy commands sent"
