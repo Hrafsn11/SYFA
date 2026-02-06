@@ -50,3 +50,19 @@ jobs:
           app-name: syfa-app
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
+
+      - name: Post-deploy setup (Fix symlink & migrations)
+        run: |
+          # Use Kudu API to run commands on Azure
+          KUDU_URL="https://syfa-app.scm.azurewebsites.net/api/command"
+
+          # Extract credentials from publish profile
+          USERNAME=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP 'userName="\K[^"]+' | head -1)
+          PASSWORD=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP 'userPWD="\K[^"]+' | head -1)
+
+          # Fix storage symlink
+          curl -X POST "$KUDU_URL" \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "cd /home/site/wwwroot && rm -rf public/storage && php artisan storage:link && php artisan migrate --force", "dir": "/home/site/wwwroot"}' \
+            || echo "Post-deploy commands completed (may have partial failures)"
