@@ -20,17 +20,23 @@
     <script>
         (function() {
             const selectId = '{{ $model_name }}';
+            let isInitialized = false;
+            let initTimer = null;
             
             function initSelect2Component(selectId) {
                 const $select = $('#' + selectId);
                 
                 if ($select.length === 0) return;
 
+                // Destroy existing select2 instance if exists
                 if ($select.hasClass('select2-hidden-accessible')) {
-                    $select.removeClass('select2-hidden-accessible').next('.select2-container').remove();
-                    $select.removeAttr('data-select2-id tabindex aria-hidden');
-                    $select.parent().removeAttr('data-select2-id');
+                    $select.select2('destroy');
                 }
+
+                // Remove any orphaned select2 containers
+                $select.next('.select2-container').remove();
+                $select.removeAttr('data-select2-id tabindex aria-hidden');
+                $select.parent().removeAttr('data-select2-id');
 
                 if (!$select.parent().hasClass('position-relative')) {
                     $select.wrap('<div class="position-relative w-100"></div>');
@@ -118,6 +124,8 @@
                         }
                     }
                 }
+
+                isInitialized = true;
             }
 
             let previousWireId = null;
@@ -130,12 +138,22 @@
                 return $select2Component.length ? $select2Component.attr('wire:id') : null;
             }
 
-            function initializeSelect2Component() {
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        initSelect2Component(selectId);
-                    });
-                });
+            function initializeSelect2Component(forceReinit = false) {
+                // Clear any pending initialization
+                if (initTimer) {
+                    clearTimeout(initTimer);
+                }
+                
+                // Use debounce to prevent multiple rapid initializations
+                initTimer = setTimeout(() => {
+                    if (!isInitialized || forceReinit) {
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                initSelect2Component(selectId);
+                            });
+                        });
+                    }
+                }, 50);
             }
             
             document.addEventListener('livewire:init', () => {
@@ -144,6 +162,8 @@
             });
 
             document.addEventListener('livewire:navigated', () => {
+                // Reset initialization flag on navigation
+                isInitialized = false;
                 previousWireId = getCurrentWireId();
                 initializeSelect2Component();
 
@@ -152,7 +172,7 @@
                     // Only init if wire:id has changed
                     if (currentWireId !== previousWireId) {
                         previousWireId = currentWireId;
-                        initializeSelect2Component();
+                        initializeSelect2Component(true);
                     }
                 });
             });

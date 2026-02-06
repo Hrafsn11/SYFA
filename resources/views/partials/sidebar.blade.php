@@ -120,10 +120,9 @@
                     <li class="menu-item {{ RouteHelper::is('peminjaman') ? 'active' : '' }}">
                         @if ($isSFinlog)
                             <a href="{{ route('sfinlog.peminjaman.index') }}" class="menu-link" wire:navigate.hover>
-                            @elseif($isSFinance)
-                                <a href="{{ route('sfinance.peminjaman') }}" class="menu-link" wire:navigate.hover>
-                                @else
-                                    <a href="{{ route('peminjaman') }}" class="menu-link" wire:navigate.hover>
+                            @else
+                                {{-- Untuk SFinance dan fallback, gunakan route Livewire --}}
+                                <a href="{{ route('peminjaman.index') }}" class="menu-link" wire:navigate.hover>
                         @endif
                         <i class="menu-icon tf-icons ti ti-briefcase"></i>
                         <div data-i18n="Peminjaman Dana">Peminjaman Dana</div>

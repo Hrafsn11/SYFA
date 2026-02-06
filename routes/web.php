@@ -91,14 +91,18 @@ Route::middleware([
     // Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
     // Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
     Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
-    Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
-    Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
-    Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
-    Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update');
+    
+    // Peminjaman Routes - Index, Create, Edit sudah di-handle oleh Livewire (lihat livewire_route.php baris 33-37)
+    // Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman'); // Diganti oleh peminjaman.index Livewire
+    // Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit'); // Diganti oleh peminjaman.edit Livewire
+    // Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman'); // Diganti oleh peminjaman.create Livewire
+    
+    // Route Controller yang masih diperlukan (fitur yang belum ada di Livewire)
+    Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail'); // Detail page
+    Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update'); // Update endpoint
     Route::post('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
     Route::post('peminjaman/{id}/download-kontrak', [PeminjamanController::class, 'downloadKontrak'])->name('peminjaman.download-kontrak');
-    Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
-    Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
+    Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store'); // Store endpoint untuk Livewire form
     Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
     Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
     Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
