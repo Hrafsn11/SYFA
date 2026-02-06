@@ -20,6 +20,17 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, pdo, mysql, gd, zip
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install NPM dependencies and build assets
+        run: |
+          npm ci
+          npm run build
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
