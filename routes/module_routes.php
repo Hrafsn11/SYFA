@@ -27,14 +27,17 @@ Route::get('dashboard', Dashboard::class)->name('dashboard.index')->middleware('
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan')->middleware('can:sfinance.menu.dashboard_pembiayaan');
 Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito')->middleware('can:sfinance.menu.dashboard_pembiayaan_investasi');
 
-// Peminjaman Routes
-Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman');
+// Peminjaman Routes - Index, Create, Edit sudah menggunakan Livewire
+Route::get('peminjaman', \App\Livewire\PengajuanPinjaman\Index::class)->name('peminjaman');
+Route::get('peminjaman/create', \App\Livewire\PengajuanPinjaman\Create::class)->name('peminjaman.create');
+Route::get('peminjaman/{id}/edit', \App\Livewire\PengajuanPinjaman\Create::class)->name('peminjaman.edit');
+
+// Peminjaman Routes - Controller (fitur yang belum ada di Livewire)
 Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail');
-Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit');
 Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update');
 Route::post('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
 Route::post('peminjaman/{id}/download-kontrak', [PeminjamanController::class, 'downloadKontrak'])->name('peminjaman.download-kontrak');
-Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman');
+// Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman'); // Diganti oleh peminjaman.create Livewire
 Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store');
 Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
 Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');

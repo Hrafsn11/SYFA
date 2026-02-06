@@ -33,5 +33,18 @@ trait HandleCreateEvents
         }
     }
 
-}
+    /**
+     * Handler ketika jenis_pembiayaan berubah.
+     * Semua jenis pembiayaan menggunakan sumber_pembiayaan = Internal.
+     */
+    public function updatedJenisPembiayaan($value)
+    {
+        // Pastikan sumber_pembiayaan selalu Internal
+        $this->sumber_pembiayaan = 'Internal';
+        $this->id_instansi = null;
+        
+        // Reset form data invoice ketika jenis pembiayaan berubah
+        $this->form_data_invoice = [];
+    }
 
+}

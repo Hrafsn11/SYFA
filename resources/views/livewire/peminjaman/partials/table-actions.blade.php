@@ -12,6 +12,7 @@
     </a>
     
     @can('peminjaman_dana.edit')
+        {{-- Menggunakan route Livewire untuk edit --}}
         <a href="{{ route('peminjaman.edit', $id) }}" 
         wire:navigate.hover
         class="btn btn-sm btn-outline-warning action-btn edit-btn" 
