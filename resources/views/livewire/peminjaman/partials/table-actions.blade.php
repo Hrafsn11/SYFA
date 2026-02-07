@@ -3,7 +3,8 @@
 @endphp
 
 <div class="d-flex justify-content-center gap-1" id="action-row-{{ $id }}">
-    <a href="{{ route('peminjaman.detail', $id) }}" 
+    <a href="{{ route('peminjaman.detail-livewire', $id) }}" 
+       wire:navigate
        class="btn btn-sm btn-outline-primary action-btn" 
        title="Lihat Detail"
        data-action="detail"
