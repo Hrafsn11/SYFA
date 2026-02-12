@@ -187,3 +187,5 @@ config/local.php
 /supervisord.pid
 .composer/
 .config/
+
+/.agents
