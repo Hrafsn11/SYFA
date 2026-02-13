@@ -31,7 +31,8 @@ trait ApprovalActions
         'Ditolak oleh Direktur SKI',
         'Generate Kontrak',
         'Menunggu Konfirmasi Debitur',
-        'Konfirmasi Ditolak Debitur'
+        'Konfirmasi Ditolak Debitur',
+        'Konfirmasi Disetujui Debitur',
     ];
 
     /**
@@ -68,7 +69,7 @@ trait ApprovalActions
         $this->validate([
             'deviasi' => 'required|in:ya,tidak',
             'nominal_yang_disetujui' => 'required|numeric|min:0',
-            'tanggal_pencairan' => 'required|date',
+            'tanggal_pencairan' => 'required|date_format:d/m/Y',
             'persentase_bagi_hasil' => 'required|numeric|min:0|max:100',
         ]);
 
@@ -230,6 +231,84 @@ trait ApprovalActions
     }
 
     /**
+     * Generate kontrak peminjaman (Step 6 → 7).
+     */
+    public function generateKontrak()
+    {
+        $this->validate([
+            'biaya_administrasi' => 'required|numeric|min:0',
+        ]);
+
+        // Generate nomor kontrak menggunakan ContractNumberService
+        $debitur = $this->pengajuan->debitur;
+        $noKontrak = \App\Services\ContractNumberService::generate(
+            $debitur->kode_perusahaan,
+            $this->jenis_pembiayaan
+        );
+
+        return $this->processApproval('Generate Kontrak', [
+            'approve_by' => auth()->id(),
+            'current_step' => 7,
+        ], function ($pengajuan) use ($noKontrak) {
+            $pengajuan->update([
+                'no_kontrak' => $noKontrak,
+                'biaya_administrasi' => $this->biaya_administrasi,
+            ]);
+        });
+    }
+
+    /**
+     * Upload dokumen transfer (Step 7 → 8).
+     */
+    public function uploadDokumenTransfer()
+    {
+        $this->validate([
+            'dokumen_transfer' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        $path = $this->dokumen_transfer->store('dokumen-transfer', 'public');
+
+        return $this->processApproval('Menunggu Konfirmasi Debitur', [
+            'approve_by' => auth()->id(),
+            'current_step' => 8,
+        ], function ($pengajuan) use ($path) {
+            $pengajuan->update([
+                'upload_bukti_transfer' => $path,
+            ]);
+        });
+    }
+
+    /**
+     * Konfirmasi debitur terima dana (Step 8 → 9).
+     */
+    public function konfirmasiDebiturTerima()
+    {
+        return $this->processApproval('Dana Sudah Dicairkan', [
+            'approve_by' => auth()->id(),
+            'current_step' => 9,
+        ]);
+    }
+
+    /**
+     * Konfirmasi debitur tolak penerimaan dana.
+     */
+    public function konfirmasiDebiturTolak()
+    {
+        $this->validate([
+            'catatan_approval' => 'required|string|min:10',
+        ], [
+            'catatan_approval.required' => 'Catatan penolakan wajib diisi.',
+            'catatan_approval.min' => 'Catatan penolakan minimal 10 karakter.',
+        ]);
+
+        return $this->processApproval('Konfirmasi Ditolak Debitur', [
+            'reject_by' => auth()->id(),
+            'catatan_penolakan_konfirmasi' => $this->catatan_approval,
+            'current_step' => 7,
+        ]);
+    }
+
+    /**
      * Proses utama untuk semua jenis approval.
      *
      * @param string $status Status baru
@@ -274,7 +353,6 @@ trait ApprovalActions
             $this->dispatch('closeModal');
 
             return true;
-
         } catch (\Exception $e) {
             DB::rollBack();
             $this->dispatch('approvalError', message: 'Terjadi kesalahan: ' . $e->getMessage());

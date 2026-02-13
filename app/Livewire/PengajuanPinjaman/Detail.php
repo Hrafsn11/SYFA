@@ -12,6 +12,7 @@ use App\Models\HistoryStatusPengajuanPinjaman;
 use App\Livewire\PengajuanPinjaman\Approval\ApprovalActions;
 use App\Livewire\PengajuanPinjaman\Event\HandleDetailEvents;
 use App\Livewire\PengajuanPinjaman\FieldsInput\FieldInputDetail;
+use App\Livewire\PengajuanPinjaman\Kontrak\KontrakPdfHandler;
 
 /**
  * Class Detail
@@ -24,7 +25,8 @@ class Detail extends Component
     use WithFileUploads,
         FieldInputDetail,      // Properties untuk detail
         HandleDetailEvents,    // Event handlers
-        ApprovalActions;       // Approval logic
+        ApprovalActions,       // Approval logic
+        KontrakPdfHandler;     // Preview & Download kontrak PDF
 
     #[ParameterIDRoute]
     public $id;
@@ -67,8 +69,8 @@ class Detail extends Component
     protected function loadData(): void
     {
         $this->pengajuan = PengajuanPeminjaman::with([
-            'debitur.kol', 
-            'instansi', 
+            'debitur.kol',
+            'instansi',
             'buktiPeminjaman'
         ])->findOrFail($this->id);
 
@@ -76,7 +78,7 @@ class Detail extends Component
         $this->setDataPeminjaman();
         $this->setDataWorkflow();
         $this->setDetailsData();
-        
+
         $this->title = 'Detail Pengajuan Peminjaman - ' . $this->nomor_peminjaman;
     }
 
@@ -111,7 +113,7 @@ class Detail extends Component
      */
     protected function setDataPeminjaman(): void
     {
-        $persentase = $this->pengajuan->persentase_bagi_hasil 
+        $persentase = $this->pengajuan->persentase_bagi_hasil
             ?? ($this->pengajuan->instansi?->persentase_bagi_hasil ?? null);
 
         $this->nomor_peminjaman = $this->pengajuan->nomor_peminjaman;
@@ -124,7 +126,7 @@ class Detail extends Component
         $this->status = $this->pengajuan->status;
 
         // Nominal & Tanggal
-        $this->nominal_pinjaman = $this->pengajuan->nominal_pengajuan_awal 
+        $this->nominal_pinjaman = $this->pengajuan->nominal_pengajuan_awal
             ?? $this->pengajuan->total_pinjaman;
         $this->harapan_tanggal_pencairan = $this->pengajuan->harapan_tanggal_pencairan;
         $this->rencana_tgl_pembayaran = $this->pengajuan->rencana_tgl_pembayaran;
@@ -155,7 +157,7 @@ class Detail extends Component
     {
         // Get latest history
         $this->latestHistory = HistoryStatusPengajuanPinjaman::where(
-            'id_pengajuan_peminjaman', 
+            'id_pengajuan_peminjaman',
             $this->pengajuan->id_pengajuan_peminjaman
         )
             ->orderBy('created_at', 'desc')
@@ -163,7 +165,7 @@ class Detail extends Component
 
         // Get all history
         $this->allHistory = HistoryStatusPengajuanPinjaman::where(
-            'id_pengajuan_peminjaman', 
+            'id_pengajuan_peminjaman',
             $this->pengajuan->id_pengajuan_peminjaman
         )
             ->orderBy('created_at', 'desc')

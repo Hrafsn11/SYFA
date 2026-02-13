@@ -23,7 +23,7 @@ trait HandleDetailEvents
     public function handleApprovalSuccess($status, $message = null)
     {
         $this->refreshData();
-        
+
         $this->dispatch('notify', [
             'type' => 'success',
             'message' => $message ?? 'Status berhasil diperbarui ke: ' . $status
@@ -79,17 +79,17 @@ trait HandleDetailEvents
     protected function prepareApprovalData($modalType)
     {
         $isTolakModal = str_contains($modalType, 'tolak');
-        
+
         if ($isTolakModal) {
             // Hanya reset catatan untuk modal tolak
             $this->catatan_approval = '';
             return;
         }
-        
+
         // Untuk modal persetujuan, set nilai dari latest history
         $this->deviasi = $this->latestHistory->deviasi ?? null;
         $this->catatan_approval = '';
-        
+
         // Set nilai-nilai dari latest history jika ada
         if ($this->latestHistory) {
             $this->nominal_yang_disetujui = $this->latestHistory->nominal_yang_disetujui ?? $this->nominal_pinjaman;
@@ -113,7 +113,7 @@ trait HandleDetailEvents
     {
         $history = \App\Models\HistoryStatusPengajuanPinjaman::with(['approvedBy', 'rejectedBy', 'submittedBy'])
             ->find($historyId);
-        
+
         if ($history) {
             $this->selectedHistory = [
                 'id' => $history->id_history_status_pengajuan_pinjaman,
@@ -125,7 +125,7 @@ trait HandleDetailEvents
                 'tanggal_pencairan' => $history->tanggal_pencairan,
                 'persentase_bagi_hasil' => $history->persentase_bagi_hasil,
                 'total_bagi_hasil' => $history->total_bagi_hasil,
-                'catatan' => $history->catatan_validasi_dokumen_disetujui 
+                'catatan' => $history->catatan_validasi_dokumen_disetujui
                     ?? $history->catatan_validasi_dokumen_ditolak
                     ?? $history->catatan_persetujuan_debitur
                     ?? $history->catatan_penolakan_debitur
@@ -138,47 +138,8 @@ trait HandleDetailEvents
                 'rejected_by' => $history->rejectedBy?->name ?? null,
                 'submitted_by' => $history->submittedBy?->name ?? null,
             ];
-            
+
             $this->dispatch('open-modal', modal: 'modal-history-detail');
-        }
-    }
-
-    /**
-     * Preview kontrak peminjaman.
-     */
-    public function previewKontrak()
-    {
-        if (!empty($this->no_kontrak)) {
-            // Dispatch event untuk membuka preview kontrak
-            $this->dispatch('preview-kontrak', [
-                'no_kontrak' => $this->no_kontrak,
-                'id_pengajuan' => $this->id
-            ]);
-        } else {
-            $this->dispatch('notify', [
-                'type' => 'warning',
-                'message' => 'Kontrak belum tersedia'
-            ]);
-        }
-    }
-
-    /**
-     * Download kontrak peminjaman.
-     */
-    public function downloadKontrak()
-    {
-        if (!empty($this->no_kontrak)) {
-            // Generate PDF dan download
-            // Untuk sementara dispatch event
-            $this->dispatch('download-kontrak', [
-                'no_kontrak' => $this->no_kontrak,
-                'id_pengajuan' => $this->id
-            ]);
-        } else {
-            $this->dispatch('notify', [
-                'type' => 'warning',
-                'message' => 'Kontrak belum tersedia'
-            ]);
         }
     }
 }
