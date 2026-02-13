@@ -11,7 +11,7 @@ use App\Livewire\Traits\HasUniversalFormAction;
 use App\Http\Requests\SFinlog\PengajuanInvestasiFinlogRequest;
 use Illuminate\Support\Facades\Auth;
 
-class PengajuanInvestasi extends Component
+class PengajuanInvestasiSFinlog extends Component
 {    
     use HasUniversalFormAction, HasValidate;
     

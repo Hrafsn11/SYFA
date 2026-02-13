@@ -20,26 +20,70 @@ jobs:
           php-version: "8.2"
           extensions: mbstring, pdo, mysql, gd, zip
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Create required directories
+        run: |
+          mkdir -p bootstrap/cache
+          mkdir -p storage/framework/{cache,sessions,views}
+          mkdir -p storage/logs
+          mkdir -p storage/app/public
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
 
-      - name: Create deployment package
+      - name: Install NPM dependencies and build assets
         run: |
-          # Remove dev files
-          rm -rf tests node_modules storage/logs/*.log
-          # Create storage directories
-          mkdir -p storage/framework/{cache,sessions,views}
-          mkdir -p bootstrap/cache
+          npm ci
+          npm run build
+
+      - name: Create storage symbolic link
+        run: |
+          cd public
+          rm -rf storage
+          ln -s ../storage/app/public storage
+
+      - name: Make scripts executable
+        run: chmod +x scripts/startup.sh
+
+      - name: Prepare deployment package
+        run: |
+          rm -rf tests node_modules storage/logs/*.log .git .github
 
       - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
-          app-name: "syfa-app"
+          app-name: syfa-app
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
-      - name: Run migrations via SSH
-        uses: azure/CLI@v2
-        with:
-          inlineScript: |
-            az webapp ssh --name syfa-app --resource-group rg-syfa --command "cd /home/site/wwwroot && php artisan migrate --force" || true
+      - name: Post-deploy setup (Fix symlink & migrations)
+        run: |
+          # Use Kudu API to run commands on Azure
+          KUDU_URL="https://syfa-app.scm.azurewebsites.net/api/command"
+
+          # Extract credentials from publish profile
+          USERNAME=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP 'userName="\K[^"]+' | head -1)
+          PASSWORD=$(echo '${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}' | grep -oP 'userPWD="\K[^"]+' | head -1)
+
+          # Fix storage symlink (run each command separately)
+          curl -X POST "$KUDU_URL" \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "rm -rf public/storage", "dir": "/home/site/wwwroot"}' || true
+
+          curl -X POST "$KUDU_URL" \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "php artisan storage:link", "dir": "/home/site/wwwroot"}' || true
+
+          curl -X POST "$KUDU_URL" \
+            -u "$USERNAME:$PASSWORD" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "php artisan migrate --force", "dir": "/home/site/wwwroot"}' || true
+
+          echo "Post-deploy commands sent"
