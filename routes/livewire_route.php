@@ -34,6 +34,7 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::get('/', \App\Livewire\PengajuanPinjaman\Index::class)->name('index');
     Route::get('create', \App\Livewire\PengajuanPinjaman\Create::class)->name('create');
     Route::get('{id}/edit', \App\Livewire\PengajuanPinjaman\Create::class)->name('edit');
+    Route::get('detail/{id}', \App\Livewire\PengajuanPinjaman\Detail::class)->name('detail-livewire');
 });
 
 // AR Performance
