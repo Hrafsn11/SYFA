@@ -34,15 +34,15 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
     Route::get('/', \App\Livewire\PengajuanPinjaman\Index::class)->name('index');
     Route::get('create', \App\Livewire\PengajuanPinjaman\Create::class)->name('create');
     Route::get('{id}/edit', \App\Livewire\PengajuanPinjaman\Create::class)->name('edit');
-    Route::get('detail/{id}', \App\Livewire\PengajuanPinjaman\Detail::class)->name('detail-livewire');
+    Route::get('detail/{id}', \App\Livewire\PengajuanPinjaman\Detail::class)->name('detail');
 });
 
 // AR Performance
-Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-performance.index');
+Route::get('monitoring-pembayaran', \App\Livewire\ArPerformanceIndex::class)->name('monitoring-pembayaran.index');
 
 // Debitur Piutang
-Route::get('debitur-piutang', \App\Livewire\DebiturPiutangIndex::class)->name('debitur-piutang.index');
-Route::post('debitur-piutang/update', [\App\Http\Controllers\DebiturPiutangController::class, 'update'])->name('debitur-piutang.update');
+Route::get('riwayat-tagihan', \App\Livewire\DebiturPiutangIndex::class)->name('riwayat-tagihan.index');
+Route::post('riwayat-tagihan/update', [\App\Http\Controllers\DebiturPiutangController::class, 'update'])->name('riwayat-tagihan.update');
 
 // Master Cells Project
 Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');
@@ -63,16 +63,16 @@ Route::get('sfinlog/pengembalian-pinjaman/create', \App\Livewire\SFinlog\Pengemb
 Route::get('sfinlog/pengembalian-pinjaman/detail/{id}', \App\Livewire\SFinlog\DetailPengembalian::class)->name('sfinlog.pengembalian-pinjaman.detail');
 
 // SFinlog - AR Perbulan
-Route::get('sfinlog/ar-perbulan', \App\Livewire\SFinlog\ArPerbulan::class)->name('sfinlog.ar-perbulan.index');
+Route::get('sfinlog/laporan-tagihan-bulanan', \App\Livewire\SFinlog\ArPerbulan::class)->name('sfinlog.laporan-tagihan-bulanan.index');
 
 // SFinlog - AR Performance
-Route::get('sfinlog/ar-performance', \App\Livewire\SFinlog\ArPerformanceIndex::class)->name('sfinlog.ar-performance.index');
+Route::get('sfinlog/monitoring-pembayaran', \App\Livewire\SFinlog\ArPerformanceIndex::class)->name('sfinlog.monitoring-pembayaran.index');
 // SFinlog - Report Pengembalian
-Route::get('sfinlog/report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('sfinlog.report-pengembalian.index');
+Route::get('sfinlog/laporan-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('sfinlog.laporan-pengembalian.index');
 
 // SFinlog - Debitur Piutang
-Route::get('sfinlog/debitur-piutang', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.debitur-piutang.index');
-Route::post('sfinlog/debitur-piutang/update', [\App\Http\Controllers\SFinlog\DebiturPiutangFinlogController::class, 'update'])->name('sfinlog.debitur-piutang.update');
+Route::get('sfinlog/riwayat-tagihan', \App\Livewire\SFinlog\DebiturPiutangFinlog::class)->name('sfinlog.riwayat-tagihan.index');
+Route::post('sfinlog/riwayat-tagihan/update', [\App\Http\Controllers\SFinlog\DebiturPiutangFinlogController::class, 'update'])->name('sfinlog.riwayat-tagihan.update');
 
 Route::get('sfinlog/cell-project-profile', \App\Livewire\SFinlog\CellProjectProfile::class)->name('sfinlog.cell-project-profile.index');
 // Portofolio

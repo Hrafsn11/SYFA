@@ -41,15 +41,15 @@
                                     readonly>
                             </div>
                             <div class="col-md-6">
-                                <label for="total_bagi_hasil">
+                                <label for="total_bunga">
                                     Total Bagi Hasil
                                     @if ($isLate && $bagiHasilTambahan > 0)
                                         <span class="badge bg-warning ms-1">Disesuaikan</span>
                                     @endif
                                 </label>
                                 <input type="text" class="form-control {{ $isLate ? 'border-warning' : '' }}"
-                                    id="total_bagi_hasil"
-                                    value="{{ $total_bagi_hasil ? 'Rp ' . number_format($total_bagi_hasil, 0, ',', '.') : '' }}"
+                                    id="total_bunga"
+                                    value="{{ $total_bunga ? 'Rp ' . number_format($total_bunga, 0, ',', '.') : '' }}"
                                     readonly>
                             </div>
                         </div>
@@ -221,16 +221,16 @@
                                 <input type="hidden" wire:model="sisa_utang">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="sisa_bagi_hasil" class="form-label">
+                                <label for="sisa_bunga" class="form-label">
                                     Sisa Bagi Hasil
                                     @if ($isLate && $bagiHasilTambahan > 0)
                                         <span class="badge bg-warning ms-1">Disesuaikan</span>
                                     @endif
                                 </label>
                                 <input type="text" class="form-control {{ $isLate ? 'border-warning' : '' }}"
-                                    value="{{ $sisa_bagi_hasil ? 'Rp ' . number_format($sisa_bagi_hasil, 0, ',', '.') : 'Rp 0' }}"
+                                    value="{{ $sisa_bunga ? 'Rp ' . number_format($sisa_bunga, 0, ',', '.') : 'Rp 0' }}"
                                     readonly>
-                                <input type="hidden" wire:model="sisa_bagi_hasil">
+                                <input type="hidden" wire:model="sisa_bunga">
                             </div>
                         </div>
 

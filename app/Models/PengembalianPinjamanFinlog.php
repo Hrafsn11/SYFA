@@ -21,7 +21,7 @@ class PengembalianPinjamanFinlog extends Model
         'id_project',
         'jumlah_pengembalian',
         'sisa_pinjaman',
-        'sisa_bagi_hasil',
+        'sisa_bunga',
         'total_sisa_pinjaman',
         'tanggal_pengembalian',
         'bukti_pembayaran',
@@ -33,7 +33,7 @@ class PengembalianPinjamanFinlog extends Model
     protected $casts = [
         'jumlah_pengembalian' => 'decimal:2',
         'sisa_pinjaman' => 'decimal:2',
-        'sisa_bagi_hasil' => 'decimal:2',
+        'sisa_bunga' => 'decimal:2',
         'total_sisa_pinjaman' => 'decimal:2',
         'tanggal_pengembalian' => 'date',
         'jatuh_tempo' => 'date',

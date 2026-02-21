@@ -61,7 +61,7 @@ class DebiturPiutangController extends Controller
     public function update(Request $request): JsonResponse
     {
         // Check permission
-        if (!auth()->user()->can('debitur_piutang.edit')) {
+        if (!auth()->user()->can('riwayat_tagihan.edit')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki izin untuk mengedit data ini',
@@ -75,8 +75,8 @@ class DebiturPiutangController extends Controller
             'id_pengembalian' => 'nullable|string',
             'objek_jaminan' => 'required|string|max:255',
             'nilai_dicairkan' => 'required|numeric|min:0',
-            'persentase_bagi_hasil' => 'required|numeric|min:0|max:100',
-            'kurang_bayar_bagi_hasil' => 'required|numeric|min:0',
+            'persentase_bunga' => 'required|numeric|min:0|max:100',
+            'kurang_bayar_bunga' => 'required|numeric|min:0',
         ]);
 
         try {
@@ -94,8 +94,8 @@ class DebiturPiutangController extends Controller
                 $oldHistory = HistoryStatusPengajuanPinjaman::where('id_history_status_pengajuan_pinjaman', $validated['id_history'])->first();
                 $oldNilaiDicairkan = $oldHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman;
             }
-            $oldPersentase = $pengajuan->persentase_bagi_hasil ?? 0;
-            $oldTotalBagiHasil = $pengajuan->total_bagi_hasil ?? 0;
+            $oldPersentase = $pengajuan->persentase_bunga ?? 0;
+            $oldTotalBagiHasil = $pengajuan->total_bunga ?? 0;
 
             // 1. Update objek_jaminan di bukti_peminjaman (nama_client)
             if ($validated['id_bukti']) {
@@ -109,21 +109,21 @@ class DebiturPiutangController extends Controller
                     ->update(['nominal_yang_disetujui' => $validated['nilai_dicairkan']]);
             }
 
-            // 3. Calculate new total_bagi_hasil
+            // 3. Calculate new total_bunga
             $newNilaiDicairkan = $validated['nilai_dicairkan'];
-            $newPersentase = $validated['persentase_bagi_hasil'];
+            $newPersentase = $validated['persentase_bunga'];
             $newTotalBagiHasil = ($newNilaiDicairkan * $newPersentase) / 100;
 
             // 4. Update pengajuan_peminjaman
             $pengajuan->update([
-                'persentase_bagi_hasil' => $newPersentase,
-                'total_bagi_hasil' => $newTotalBagiHasil,
+                'persentase_bunga' => $newPersentase,
+                'total_bunga' => $newTotalBagiHasil,
             ]);
 
-            // 5. Update kurang_bayar_bagi_hasil (sisa_bagi_hasil) directly if id_pengembalian provided
+            // 5. Update kurang_bayar_bunga (sisa_bunga) directly if id_pengembalian provided
             if (!empty($validated['id_pengembalian'])) {
                 \App\Models\PengembalianPinjaman::where('ulid', $validated['id_pengembalian'])
-                    ->update(['sisa_bagi_hasil' => $validated['kurang_bayar_bagi_hasil']]);
+                    ->update(['sisa_bunga' => $validated['kurang_bayar_bunga']]);
             }
 
             $bulanSekarang = Carbon::now()->format('Y-m');
@@ -167,13 +167,13 @@ class DebiturPiutangController extends Controller
         foreach ($pengembalianRecords as $record) {
             $newSisaPokok = max(0, ($record->sisa_bayar_pokok ?? 0) + $diffNilaiDicairkan);
 
-            $newSisaBagiHasil = max(0, ($record->sisa_bagi_hasil ?? 0) + $diffBagiHasil);
+            $newSisaBagiHasil = max(0, ($record->sisa_bunga ?? 0) + $diffBagiHasil);
 
             $record->update([
                 'total_pinjaman' => max(0, ($record->total_pinjaman ?? 0) + $diffNilaiDicairkan),
-                'total_bagi_hasil' => max(0, ($record->total_bagi_hasil ?? 0) + $diffBagiHasil),
+                'total_bunga' => max(0, ($record->total_bunga ?? 0) + $diffBagiHasil),
                 'sisa_bayar_pokok' => $newSisaPokok,
-                'sisa_bagi_hasil' => $newSisaBagiHasil,
+                'sisa_bunga' => $newSisaBagiHasil,
             ]);
 
             if ($newSisaPokok <= 0 && $newSisaBagiHasil <= 0) {

@@ -48,7 +48,7 @@ trait KontrakPdfHandler
             'tenor' => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
             'biaya_admin' => 'Rp. ' . number_format($biayaAdmin, 0, ',', '.'),
             'biaya_admin_raw' => $biayaAdmin,
-            'nisbah' => ($pengajuan->persentase_bagi_hasil ?? 2) . '% flat / bulan',
+            'nisbah' => ($pengajuan->persentase_bunga ?? 2) . '% flat / bulan',
             'denda_keterlambatan' => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
             'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
             'tanda_tangan' => $pengajuan->debitur->tanda_tangan ?? null,

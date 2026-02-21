@@ -42,10 +42,10 @@
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
-                            <label for="persentase_bagi_hasil" class="form-label">Persentase Bagi Hasil <span
+                            <label for="persentase_bunga" class="form-label">Persentase Bagi Hasil <span
                                     class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="persentase_bagi_hasil"
-                                placeholder="Masukkan persentase bagi hasil" wire:model.blur="persentase_bagi_hasil">
+                            <input type="text" class="form-control" id="persentase_bunga"
+                                placeholder="Masukkan persentase bagi hasil" wire:model.blur="persentase_bunga">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
             modal.modal('show');
 
             @this.set('nama_instansi', data.nama_instansi)
-            @this.set('persentase_bagi_hasil', data.persentase_bagi_hasil)
+            @this.set('persentase_bunga', data.persentase_bunga)
         }
 
         $('.modal').on('hide.bs.modal', function() {

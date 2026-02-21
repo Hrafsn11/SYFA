@@ -54,7 +54,7 @@ class CalculateLatePenaltyFinlog extends Command
 
             // Cek apakah sudah lunas berdasarkan sisa pokok dan bagi hasil
             $sisaPokok = $peminjaman->nilai_pokok_saat_ini ?? $peminjaman->nilai_pinjaman;
-            $sisaBagiHasil = $peminjaman->nilai_bagi_hasil_saat_ini ?? $peminjaman->nilai_bagi_hasil;
+            $sisaBagiHasil = $peminjaman->nilai_bunga_saat_ini ?? $peminjaman->nilai_bunga;
             $totalSisa = $sisaPokok + $sisaBagiHasil;
 
             // Jika sudah lunas (sisa = 0), reset nilai keterlambatan
@@ -80,14 +80,14 @@ class CalculateLatePenaltyFinlog extends Command
                 $pembagi = $this->getPembagiBerdasarkanTOP($peminjaman->top ?? 0);
 
                 // Hitung bagi hasil per minggu (berdasarkan nilai bagi hasil awal)
-                $bagiHasilPerMinggu = $peminjaman->nilai_bagi_hasil / $pembagi;
+                $bagiHasilPerMinggu = $peminjaman->nilai_bunga / $pembagi;
 
                 // Hitung denda keterlambatan (bagi hasil tambahan)
                 $dendaKeterlambatan = $bagiHasilPerMinggu * $mingguKeterlambatan;
 
                 // Hitung nilai bagi hasil saat ini:
                 // = sisa bagi hasil yang belum dibayar + denda keterlambatan
-                // Jika belum ada pembayaran, gunakan nilai_bagi_hasil awal
+                // Jika belum ada pembayaran, gunakan nilai_bunga awal
                 $sisaBagiHasilSebelumDenda = $sisaBagiHasil - ($peminjaman->denda_keterlambatan ?? 0);
                 $nilaiBagiHasilSaatIni = $sisaBagiHasilSebelumDenda + $dendaKeterlambatan;
 
@@ -102,7 +102,7 @@ class CalculateLatePenaltyFinlog extends Command
                     $peminjaman->update([
                         'jumlah_minggu_keterlambatan' => $mingguKeterlambatan,
                         'denda_keterlambatan' => $dendaKeterlambatan,
-                        'nilai_bagi_hasil_saat_ini' => $nilaiBagiHasilSaatIni,
+                        'nilai_bunga_saat_ini' => $nilaiBagiHasilSaatIni,
                         'last_penalty_calculation' => now(),
                     ]);
 
@@ -122,7 +122,7 @@ class CalculateLatePenaltyFinlog extends Command
                         'nomor_peminjaman' => $peminjaman->nomor_peminjaman,
                         'minggu_keterlambatan' => $mingguKeterlambatan,
                         'denda_keterlambatan' => $dendaKeterlambatan,
-                        'nilai_bagi_hasil_saat_ini' => $nilaiBagiHasilSaatIni,
+                        'nilai_bunga_saat_ini' => $nilaiBagiHasilSaatIni,
                         'calculated_at' => now()->toDateTimeString(),
                     ]);
                 } else {
@@ -134,7 +134,7 @@ class CalculateLatePenaltyFinlog extends Command
                     $peminjaman->update([
                         'jumlah_minggu_keterlambatan' => 0,
                         'denda_keterlambatan' => 0,
-                        'nilai_bagi_hasil_saat_ini' => $peminjaman->nilai_bagi_hasil,
+                        'nilai_bunga_saat_ini' => $peminjaman->nilai_bunga,
                         'last_penalty_calculation' => now(),
                     ]);
                     $this->line("  [RESET] {$peminjaman->nomor_peminjaman} - Belum jatuh tempo, reset denda");

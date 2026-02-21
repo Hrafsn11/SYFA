@@ -20,7 +20,7 @@ class ArPerformanceController extends Controller
         $tahun = $request->input('tahun');
         $arData = $this->arService->getArPerformanceData($tahun);
 
-        return view('livewire.ar-performance.index', [
+        return view('livewire.monitoring-pembayaran.index', [
             'arData' => $arData,
             'tahun' => $tahun ?? date('Y'),
         ]);
@@ -83,7 +83,7 @@ class ArPerformanceController extends Controller
         $filename .= '_' . $tahun . '_' .'.pdf';
 
         // Generate PDF
-        $pdf = Pdf::loadView('livewire.ar-performance.export-pdf', [
+        $pdf = Pdf::loadView('livewire.monitoring-pembayaran.export-pdf', [
             'arData' => $arData,
             'tahun' => $tahun,
             'bulan' => $bulan,

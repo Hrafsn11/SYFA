@@ -52,7 +52,7 @@ class ArPerbulanExport implements FromQuery, WithHeadings, WithMapping, WithStyl
             $row->bulan,
             $row->nama_perusahaan ?? '-',
             $row->sisa_ar_pokok,
-            $row->sisa_bagi_hasil,
+            $row->sisa_bunga,
             $row->sisa_ar_total,
         ];
     }

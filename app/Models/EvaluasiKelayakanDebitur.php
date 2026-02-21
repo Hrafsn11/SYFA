@@ -25,7 +25,7 @@ class EvaluasiKelayakanDebitur extends Model
      * The attributes that are mass assignable.
      */
     protected $fillable = [
-        'id_evaluasi_restrukturisasi',
+        'id_evaluasi_cicilan',
         'kriteria',
         'status',
         'catatan',
@@ -36,7 +36,7 @@ class EvaluasiKelayakanDebitur extends Model
      */
     public function evaluasi(): BelongsTo
     {
-        return $this->belongsTo(EvaluasiPengajuanRestrukturisasi::class, 'id_evaluasi_restrukturisasi', 'id_evaluasi_restrukturisasi');
+        return $this->belongsTo(EvaluasiPengajuanCicilan::class, 'id_evaluasi_cicilan', 'id_evaluasi_cicilan');
     }
 
     /**

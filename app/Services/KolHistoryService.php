@@ -180,7 +180,7 @@ class KolHistoryService
             ->where(function($query) {
                 $query->where(function($q) {
                     $q->where('pp.sisa_bayar_pokok', '>', 0)
-                      ->orWhere('pp.sisa_bagi_hasil', '>', 0);
+                      ->orWhere('pp.sisa_bunga', '>', 0);
                 })
                 ->orWhere(function($q) {
                     $q->whereNull('pp.status')
@@ -211,7 +211,7 @@ class KolHistoryService
                 })
                 ->orWhere(function($q) use ($monthEnd) {
                     $q->where('pp.sisa_bayar_pokok', '<=', 0)
-                      ->where('pp.sisa_bagi_hasil', '<=', 0)
+                      ->where('pp.sisa_bunga', '<=', 0)
                       ->where(function($subQ) use ($monthEnd) {
                           $subQ->whereNotNull('pp.updated_at')
                                ->where('pp.updated_at', '<=', $monthEnd->format('Y-m-d 23:59:59'));

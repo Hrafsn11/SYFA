@@ -113,8 +113,8 @@ class Detail extends Component
      */
     protected function setDataPeminjaman(): void
     {
-        $persentase = $this->pengajuan->persentase_bagi_hasil
-            ?? ($this->pengajuan->instansi?->persentase_bagi_hasil ?? null);
+        $persentase = $this->pengajuan->persentase_bunga
+            ?? ($this->pengajuan->instansi?->persentase_bunga ?? null);
 
         $this->nomor_peminjaman = $this->pengajuan->nomor_peminjaman;
         $this->no_kontrak = $this->pengajuan->no_kontrak;
@@ -130,8 +130,8 @@ class Detail extends Component
             ?? $this->pengajuan->total_pinjaman;
         $this->harapan_tanggal_pencairan = $this->pengajuan->harapan_tanggal_pencairan;
         $this->rencana_tgl_pembayaran = $this->pengajuan->rencana_tgl_pembayaran;
-        $this->persentase_bagi_hasil = $persentase;
-        $this->total_bagi_hasil = $this->pengajuan->total_bagi_hasil;
+        $this->persentase_bunga = $persentase;
+        $this->total_bunga = $this->pengajuan->total_bunga;
         $this->pembayaran_total = $this->pengajuan->pembayaran_total;
 
         // Installment specific
@@ -210,7 +210,7 @@ class Detail extends Component
                 'nama_client' => $bukti->nama_client,
                 'nilai_invoice' => $bukti->nilai_invoice,
                 'nilai_pinjaman' => $bukti->nilai_pinjaman,
-                'nilai_bagi_hasil' => $bukti->nilai_bagi_hasil,
+                'nilai_bunga' => $bukti->nilai_bunga,
                 'invoice_date' => $bukti->invoice_date,
                 'kontrak_date' => $bukti->kontrak_date,
                 'due_date' => $bukti->due_date,

@@ -52,7 +52,7 @@ class ArPerbulanFinlogExport implements FromQuery, WithHeadings, WithMapping, Wi
             $row->bulan ?? '-',
             $row->nama_perusahaan ?? '-',
             $row->sisa_ar_pokok ?? 0,
-            $row->sisa_bagi_hasil ?? 0,
+            $row->sisa_bunga ?? 0,
             $row->sisa_ar_total ?? 0,
         ];
     }

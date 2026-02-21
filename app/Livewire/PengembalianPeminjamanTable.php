@@ -212,7 +212,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Sisa bagi hasil', 'sisa_bagi_hasil')
+            Column::make('Sisa bagi hasil', 'sisa_bunga')
                 ->sortable()
                 ->format(function ($value) {
                     $badgeClass = $value == 0 ? 'bg-success' : 'bg-warning';

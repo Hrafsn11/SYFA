@@ -26,7 +26,7 @@ class PeminjamanFinlog extends Model
         'nib_perusahaan',
         'nilai_pinjaman',
         'presentase_bagi_hasil',
-        'nilai_bagi_hasil',
+        'nilai_bunga',
         'total_pinjaman',
         'harapan_tanggal_pencairan',
         'top',
@@ -49,7 +49,7 @@ class PeminjamanFinlog extends Model
         // Kolom keterlambatan
         'jumlah_minggu_keterlambatan',
         'denda_keterlambatan',
-        'nilai_bagi_hasil_saat_ini',
+        'nilai_bunga_saat_ini',
         'last_penalty_calculation',
         'nilai_pokok_saat_ini',
     ];
@@ -57,7 +57,7 @@ class PeminjamanFinlog extends Model
     protected $casts = [
         'nilai_pinjaman' => 'decimal:2',
         'presentase_bagi_hasil' => 'decimal:2',
-        'nilai_bagi_hasil' => 'decimal:2',
+        'nilai_bunga' => 'decimal:2',
         'total_pinjaman' => 'decimal:2',
         'biaya_administrasi' => 'decimal:2',
         'harapan_tanggal_pencairan' => 'date',
@@ -70,7 +70,7 @@ class PeminjamanFinlog extends Model
         // Kolom keterlambatan
         'jumlah_minggu_keterlambatan' => 'integer',
         'denda_keterlambatan' => 'decimal:2',
-        'nilai_bagi_hasil_saat_ini' => 'decimal:2',
+        'nilai_bunga_saat_ini' => 'decimal:2',
         'last_penalty_calculation' => 'datetime',
         'nilai_pokok_saat_ini' => 'decimal:2',
     ];

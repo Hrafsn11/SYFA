@@ -261,7 +261,7 @@ class ListNotifSFinance
         ];
 
         // Generate link ke detail pengajuan restrukturisasi
-        $link = route('pengajuan-restrukturisasi.show', $pengajuan->id_pengajuan_restrukturisasi);
+        $link = route('pengajuan-restrukturisasi.show', $pengajuan->id_pengajuan_cicilan);
 
         $data = [
             'notif_variable' => $notif_variable,
@@ -284,27 +284,27 @@ class ListNotifSFinance
         }
 
         // Load relasi yang diperlukan
-        $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+        $jadwalAngsuran->load('PenyesuaianCicilan.PengajuanCicilan.debitur');
 
         // Format nominal
         $nominalFormatted = 'Rp ' . number_format($jadwalAngsuran->nominal_bayar ?? $jadwalAngsuran->total_cicilan, 0, ',', '.');
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama ?? 
-                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama_debitur ?? 
-                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->nama_perusahaan ?? 'N/A',
+            '[[nama.debitur]]' => $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->debitur->nama ?? 
+                                  $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->debitur->nama_debitur ?? 
+                                  $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->nama_perusahaan ?? 'N/A',
             '[[nominal]]' => $nominalFormatted,
         ];
 
-        // Generate link ke program restrukturisasi
-        $link = route('program-restrukturisasi.show', $jadwalAngsuran->programRestrukturisasi->id_program_restrukturisasi);
+        // Generate link ke penyesuaian cicilan
+        $link = route('penyesuaian-cicilan.show', $jadwalAngsuran->PenyesuaianCicilan->id_penyesuaian_cicilan);
 
         $data = [
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
-            'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
+            'id_debitur' => $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->id_debitur,
             'id_investor' => null,
         ];
 
@@ -321,34 +321,34 @@ class ListNotifSFinance
         }
 
         // Load relasi yang diperlukan
-        $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+        $jadwalAngsuran->load('PenyesuaianCicilan.PengajuanCicilan.debitur');
 
         // Format tanggal jatuh tempo
         $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama ?? 
-                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama_debitur ?? 
-                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->nama_perusahaan ?? 'N/A',
+            '[[nama.debitur]]' => $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->debitur->nama ?? 
+                                  $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->debitur->nama_debitur ?? 
+                                  $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->nama_perusahaan ?? 'N/A',
             '[[tanggal]]' => $tanggalFormatted,
         ];
 
-        // Generate link ke program restrukturisasi
-        $link = route('program-restrukturisasi.show', $jadwalAngsuran->programRestrukturisasi->id_program_restrukturisasi);
+        // Generate link ke penyesuaian cicilan
+        $link = route('penyesuaian-cicilan.show', $jadwalAngsuran->PenyesuaianCicilan->id_penyesuaian_cicilan);
 
         $data = [
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
-            'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
+            'id_debitur' => $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->id_debitur,
             'id_investor' => null,
         ];
 
         sendNotification($data);
     }
 
-    public static function createProgramRestrukturisasi($program){
+    public static function createPenyesuaianCicilan($program){
         // Notifikasi saat program restrukturisasi dibuat
         $notif = NotificationFeature::where('name', 'program_restrukturisasi_dibuat')->first();
 
@@ -357,22 +357,22 @@ class ListNotifSFinance
         }
 
         // Load relasi yang diperlukan
-        $program->load('pengajuanRestrukturisasi.debitur');
+        $program->load('PengajuanCicilan.debitur');
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $program->pengajuanRestrukturisasi->debitur->nama ?? 
-                                  $program->pengajuanRestrukturisasi->debitur->nama_debitur ?? 'N/A',
+            '[[nama.debitur]]' => $program->PengajuanCicilan->debitur->nama ?? 
+                                  $program->PengajuanCicilan->debitur->nama_debitur ?? 'N/A',
         ];
 
-        // Generate link ke program restrukturisasi
-        $link = route('program-restrukturisasi.show', $program->id_program_restrukturisasi);
+        // Generate link ke penyesuaian cicilan
+        $link = route('penyesuaian-cicilan.show', $program->id_penyesuaian_cicilan);
 
         $data = [
             'notif_variable' => $notif_variable,
             'link' => $link,
             'notif' => $notif,
-            'id_debitur' => $program->pengajuanRestrukturisasi->id_debitur,
+            'id_debitur' => $program->PengajuanCicilan->id_debitur,
             'id_investor' => null,
         ];
 
@@ -389,29 +389,21 @@ class ListNotifSFinance
         }
 
         // Load relasi yang diperlukan
-        $jadwalAngsuran->load('programRestrukturisasi.pengajuanRestrukturisasi.debitur');
+        $jadwalAngsuran->load('PenyesuaianCicilan.PengajuanCicilan.debitur');
 
         // Format tanggal jatuh tempo
         $tanggalFormatted = \Carbon\Carbon::parse($tanggalJatuhTempo)->format('d F Y');
 
         // Siapkan variable untuk template notifikasi
         $notif_variable = [
-            '[[nama.debitur]]' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama ?? 
-                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->debitur->nama_debitur ?? 
-                                  $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->nama_perusahaan ?? 'N/A',
+            '[[nama.debitur]]' => $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->debitur->nama ?? 
+                                  $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->debitur->nama_debitur ?? 
+                                  $jadwalAngsuran->PenyesuaianCicilan->PengajuanCicilan->nama_perusahaan ?? 'N/A',
             '[[tanggal]]' => $tanggalFormatted,
         ];
 
-        // Generate link ke program restrukturisasi
-        $link = route('program-restrukturisasi.show', $jadwalAngsuran->programRestrukturisasi->id_program_restrukturisasi);
-
-        $data = [
-            'notif_variable' => $notif_variable,
-            'link' => $link,
-            'notif' => $notif,
-            'id_debitur' => $jadwalAngsuran->programRestrukturisasi->pengajuanRestrukturisasi->id_debitur,
-            'id_investor' => null,
-        ];
+        // Generate link ke penyesuaian cicilan
+        $link = route('penyesuaian-cicilan.show', $jadwalAngsuran->PenyesuaianCicilan->id_penyesuaian_cicilan);
 
         sendNotification($data);
     }

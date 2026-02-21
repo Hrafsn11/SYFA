@@ -18,24 +18,24 @@ class Detail extends Component
     /**
      * Calculate how total payments are allocated between profit sharing and principal
      * 
-     * Logic: Payments go to Bagi Hasil first, then to Pokok after Bagi Hasil is fully paid
+     * Logic: Payments go to Bunga first, then to Pokok after Bunga is fully paid
      * 
-     * @return array{total: float, to_bagi_hasil: float, to_pokok: float}
+     * @return array{total: float, to_bunga: float, to_pokok: float}
      */
     private function calculatePaymentBreakdown(): array
     {
         $totalDibayarkan = (float) $this->pengembalian->pengembalianInvoices->sum('nominal_yg_dibayarkan');
-        $totalBagiHasil = (float) $this->pengembalian->total_bagi_hasil;
+        $totalBunga = (float) $this->pengembalian->total_bunga;
         $totalPokok = (float) $this->pengembalian->total_pinjaman;
 
-        // Payment allocation: Bagi Hasil first, then Pokok
-        $paidToBagiHasil = min($totalDibayarkan, $totalBagiHasil);
-        $remainingAfterBagiHasil = max(0, $totalDibayarkan - $totalBagiHasil);
-        $paidToPokok = min($remainingAfterBagiHasil, $totalPokok);
+        // Payment allocation: Bunga first, then Pokok
+        $paidToBunga = min($totalDibayarkan, $totalBunga);
+        $remainingAfterBunga = max(0, $totalDibayarkan - $totalBunga);
+        $paidToPokok = min($remainingAfterBunga, $totalPokok);
 
         return [
             'total' => $totalDibayarkan,
-            'to_bagi_hasil' => $paidToBagiHasil,
+            'to_bunga' => $paidToBunga,
             'to_pokok' => $paidToPokok,
         ];
     }
@@ -46,7 +46,7 @@ class Detail extends Component
 
         return view('livewire.pengembalian-pinjaman.detail', [
             'totalDibayarkan' => $breakdown['total'],
-            'dibayarkanKeBagiHasil' => $breakdown['to_bagi_hasil'],
+            'dibayarkanKeBunga' => $breakdown['to_bunga'],
             'dibayarkanKePokok' => $breakdown['to_pokok'],
         ])->layout('layouts.app', [
             'title' => 'Detail Pengembalian Pinjaman',

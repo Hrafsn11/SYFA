@@ -107,9 +107,9 @@
             @endif
 
             @if ($showSFinanceSidebar)
-                @canany(['sfinance.menu.pengajuan_peminjaman', 'sfinance.menu.ar_perbulan',
-                    'sfinance.menu.ar_performance', 'sfinlog.menu.peminjaman_dana', 'sfinlog.menu.ar_perbulan',
-                    'sfinlog.menu.ar_performance'])
+                @canany(['sfinance.menu.pengajuan_peminjaman', 'sfinance.menu.laporan_tagihan_bulanan',
+                    'sfinance.menu.monitoring_pembayaran', 'sfinlog.menu.peminjaman_dana', 'sfinlog.menu.laporan_tagihan_bulanan',
+                    'sfinlog.menu.monitoring_pembayaran'])
                     <!-- Peminjaman Section -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Peminjaman</span>
@@ -130,18 +130,18 @@
                     </li>
                 @endcanany
 
-                @canany(['sfinance.menu.ar_perbulan', 'sfinlog.menu.ar_perbulan'])
-                    <li class="menu-item {{ RouteHelper::routeIs('ar-perbulan*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('ar-perbulan.index') }}" class="menu-link" wire:navigate.hover>
+                @canany(['sfinance.menu.laporan_tagihan_bulanan', 'sfinlog.menu.laporan_tagihan_bulanan'])
+                    <li class="menu-item {{ RouteHelper::routeIs('laporan-tagihan-bulanan*') ? 'active' : '' }}">
+                        <a href="{{ RouteHelper::route('laporan-tagihan-bulanan.index') }}" class="menu-link" wire:navigate.hover>
                             <i class="menu-icon tf-icons ti ti-archive"></i>
                             <div data-i18n="Laporan Tagihan Bulanan">Laporan Tagihan Bulanan</div>
                         </a>
                     </li>
                 @endcanany
 
-                @canany(['sfinance.menu.ar_performance', 'sfinlog.menu.ar_performance'])
-                    <li class="menu-item {{ RouteHelper::routeIs('ar-performance*') ? 'active' : '' }}">
-                        <a href="{{ RouteHelper::route('ar-performance.index') }}" class="menu-link" wire:navigate.hover>
+                @canany(['sfinance.menu.monitoring_pembayaran', 'sfinlog.menu.monitoring_pembayaran'])
+                    <li class="menu-item {{ RouteHelper::routeIs('monitoring-pembayaran*') ? 'active' : '' }}">
+                        <a href="{{ RouteHelper::route('monitoring-pembayaran.index') }}" class="menu-link" wire:navigate.hover>
                             <i class="menu-icon tf-icons ti ti-chart-line"></i>
                             <div data-i18n="Monitoring Pembayaran">Monitoring Pembayaran</div>
                         </a>
@@ -149,7 +149,7 @@
                 @endcanany
 
                 @if (!$isSFinlog)
-                    @canany(['sfinance.menu.pengajuan_restukturisasi', 'sfinance.menu.program_restukturisasi'])
+                    @canany(['sfinance.menu.pengajuan_restukturisasi', 'sfinance.menu.penyesuaian_cicilan'])
                         <!-- Restrukturisasi Section -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Restrukturisasi</span>
@@ -157,8 +157,8 @@
                     @endcanany
 
                     @can('sfinance.menu.pengajuan_restukturisasi')
-                        <li class="menu-item {{ RouteHelper::routeIs('pengajuan-restrukturisasi*') ? 'active' : '' }}">
-                            <a href="{{ RouteHelper::route('pengajuan-restrukturisasi.index') }}" class="menu-link"
+                        <li class="menu-item {{ RouteHelper::routeIs('pengajuan-cicilan*') ? 'active' : '' }}">
+                            <a href="{{ RouteHelper::route('pengajuan-cicilan.index') }}" class="menu-link"
                                 wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
                                 <div data-i18n="Pengajuan Cicilan">Pengajuan Cicilan</div>
@@ -166,9 +166,9 @@
                         </li>
                     @endcan
 
-                    @can('sfinance.menu.program_restukturisasi')
-                        <li class="menu-item {{ RouteHelper::routeIs('program-restrukturisasi*') ? 'active' : '' }}">
-                            <a href="{{ RouteHelper::route('program-restrukturisasi.index') }}" class="menu-link"
+                    @can('sfinance.menu.penyesuaian_cicilan')
+                        <li class="menu-item {{ RouteHelper::routeIs('penyesuaian-cicilan*') ? 'active' : '' }}">
+                            <a href="{{ RouteHelper::route('penyesuaian-cicilan.index') }}" class="menu-link"
                                 wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-calculator"></i>
                                 <div data-i18n="Penyesuaian Cicilan">Penyesuaian Cicilan</div>
@@ -178,9 +178,9 @@
                 @endif
 
 
-                @canany(['sfinance.menu.pengembalian_dana', 'sfinance.menu.debitur_piutang',
-                    'sfinance.menu.report_pengembalian', 'sfinlog.menu.pengembalian_dana', 'sfinlog.menu.debitur_piutang',
-                    'sfinlog.menu.report_pengembalian'])
+                @canany(['sfinance.menu.pengembalian_dana', 'sfinance.menu.riwayat_tagihan',
+                    'sfinance.menu.laporan_pengembalian', 'sfinlog.menu.pengembalian_dana', 'sfinlog.menu.riwayat_tagihan',
+                    'sfinlog.menu.laporan_pengembalian'])
                     <!-- Pengembalian Section -->
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Pengembalian</span>
@@ -203,12 +203,12 @@
                     </li>
                 @endcanany
 
-                @canany(['sfinance.menu.debitur_piutang', 'sfinlog.menu.debitur_piutang'])
-                    <li class="menu-item {{ RouteHelper::routeIs('debitur-piutang*') ? 'active' : '' }}">
+                @canany(['sfinance.menu.riwayat_tagihan', 'sfinlog.menu.riwayat_tagihan'])
+                    <li class="menu-item {{ RouteHelper::routeIs('riwayat-tagihan*') ? 'active' : '' }}">
                         @if ($isSFinlog)
-                            <a href="{{ route('sfinlog.debitur-piutang.index') }}" class="menu-link">
+                            <a href="{{ route('sfinlog.riwayat-tagihan.index') }}" class="menu-link">
                             @else
-                                <a href="{{ RouteHelper::route('debitur-piutang.index') }}" class="menu-link">
+                                <a href="{{ RouteHelper::route('riwayat-tagihan.index') }}" class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-receipt"></i>
                         <div data-i18n="Riwayat Tagihan">Riwayat Tagihan </div>
@@ -216,13 +216,13 @@
                     </li>
                 @endcanany
 
-                @canany(['sfinance.menu.report_pengembalian', 'sfinlog.menu.report_pengembalian'])
-                    <li class="menu-item {{ RouteHelper::routeIs('report-pengembalian*') ? 'active' : '' }}">
+                @canany(['sfinance.menu.laporan_pengembalian', 'sfinlog.menu.laporan_pengembalian'])
+                    <li class="menu-item {{ RouteHelper::routeIs('laporan-pengembalian*') ? 'active' : '' }}">
                         @if ($isSFinlog)
-                            <a wire:navigate.hover href="{{ route('sfinlog.report-pengembalian.index') }}"
+                            <a wire:navigate.hover href="{{ route('sfinlog.laporan-pengembalian.index') }}"
                                 class="menu-link">
                             @else
-                                <a wire:navigate.hover href="{{ RouteHelper::route('report-pengembalian.index') }}"
+                                <a wire:navigate.hover href="{{ RouteHelper::route('laporan-pengembalian.index') }}"
                                     class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-file-text"></i>

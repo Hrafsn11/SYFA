@@ -42,7 +42,7 @@
                                             'Konfirmasi Disetujui Debitur' => ['icon' => 'ti-file-check', 'color' => 'success'],
                                             'Konfirmasi Ditolak Debitur' => ['icon' => 'ti-file-x', 'color' => 'danger'],
                                             'Dana Dicairkan' => ['icon' => 'ti-cash', 'color' => 'success'],
-                                            'Proses Restrukturisasi' => ['icon' => 'ti-refresh', 'color' => 'info'],
+                                            'Proses Cicilan' => ['icon' => 'ti-refresh', 'color' => 'info'],
                                             'Peminjaman Direstrukturisasi' => ['icon' => 'ti-check', 'color' => 'primary'],
                                         ];
                                         $config = $statusConfig[$history->status] ?? ['icon' => 'ti-circle', 'color' => 'secondary'];
@@ -121,8 +121,8 @@
                                             $displayText = 'Dana Dicairkan';
                                             $description = 'Proses pencairan dana telah selesai.';
                                             break;
-                                        case 'Proses Restrukturisasi':
-                                            $displayText = 'Proses Restrukturisasi';
+                                        case 'Proses Cicilan':
+                                            $displayText = 'Proses Cicilan';
                                             $description = 'Peminjaman sedang dalam proses restrukturisasi.';
                                             break;
                                         case 'Peminjaman Direstrukturisasi':

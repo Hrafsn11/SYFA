@@ -44,7 +44,7 @@
                     <td class="text-right">Rp {{ number_format($item->total_pinjaman, 0, ',', '.') }}</td>
                     <td class="text-right">Rp {{ number_format($totalDibayarkan, 0, ',', '.') }}</td>
                     <td class="text-right">Rp {{ number_format($item->sisa_bayar_pokok, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($item->sisa_bagi_hasil, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($item->sisa_bunga, 0, ',', '.') }}</td>
                     <td class="text-center">{{ $item->status ?? 'Belum Lunas' }}</td>
                 </tr>
             @empty

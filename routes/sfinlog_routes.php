@@ -51,10 +51,10 @@ Route::get('ar-performance/export-pdf', [\App\Http\Controllers\SFinlog\ArPerform
 
 // Program Restrukturisasi Routes - Full Livewire
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-    Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');
-    Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
-    Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
-    Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
+    Route::get('/', \App\Livewire\PenyesuaianCicilan\Index::class)->name('index');
+    Route::get('create', \App\Livewire\PenyesuaianCicilan\Create::class)->name('create');
+    Route::get('{id}', \App\Livewire\PenyesuaianCicilan\Show::class)->name('show');
+    Route::get('{id}/edit', \App\Livewire\PenyesuaianCicilan\Edit::class)->name('edit');
     Route::post('/', [ProgramRestrukturisasiController::class, 'store'])->name('store');
     Route::get('approved', [ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
     Route::get('detail/{id}', [ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');

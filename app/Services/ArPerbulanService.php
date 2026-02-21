@@ -34,7 +34,7 @@ class ArPerbulanService
             $totalPengembalian = $this->calculateTotalPengembalian($id_debitur, $year, $month);
 
             $sisaArPokok = $totalPinjaman['pokok'] - $totalPengembalian['pokok'];
-            $sisaBagiHasil = $totalPinjaman['bagi_hasil'] - $totalPengembalian['bagi_hasil'];
+            $sisaBagiHasil = $totalPinjaman['bunga'] - $totalPengembalian['bunga'];
             $sisaArTotal = $sisaArPokok + $sisaBagiHasil;
 
             $status = $this->determineStatus($sisaArTotal);
@@ -59,11 +59,11 @@ class ArPerbulanService
                     'nama_perusahaan' => $debitur->nama,
                     'periode' => $periode->toDateString(),
                     'total_pinjaman_pokok' => $totalPinjaman['pokok'],
-                    'total_bagi_hasil' => $totalPinjaman['bagi_hasil'],
+                    'total_bunga' => $totalPinjaman['bunga'],
                     'total_pengembalian_pokok' => $totalPengembalian['pokok'],
-                    'total_pengembalian_bagi_hasil' => $totalPengembalian['bagi_hasil'],
+                    'total_pengembalian_bunga' => $totalPengembalian['bunga'],
                     'sisa_ar_pokok' => $sisaArPokok,
-                    'sisa_bagi_hasil' => $sisaBagiHasil,
+                    'sisa_bunga' => $sisaBagiHasil,
                     'sisa_ar_total' => $sisaArTotal,
                     'jumlah_pinjaman' => $jumlahPinjaman,
                     'status' => $status,
@@ -105,13 +105,13 @@ class ArPerbulanService
             })
             ->selectRaw('
                 COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) as total_pokok,
-                COALESCE(SUM(DISTINCT COALESCE(pengajuan_peminjaman.total_bagi_hasil_saat_ini, pengajuan_peminjaman.total_bagi_hasil)), 0) as total_bagi_hasil
+                COALESCE(SUM(DISTINCT COALESCE(pengajuan_peminjaman.total_bunga_saat_ini, pengajuan_peminjaman.total_bunga)), 0) as total_bunga
             ')
             ->first();
 
         return [
             'pokok' => $result->total_pokok ?? 0,
-            'bagi_hasil' => $result->total_bagi_hasil ?? 0,
+            'bunga' => $result->total_bunga ?? 0,
         ];
     }
 
@@ -130,21 +130,21 @@ class ArPerbulanService
             ->orderBy('created_at', 'desc')
             ->get();
         $totalBayarPokok = 0;
-        $totalBayarBagiHasil = 0;
+        $totalBayarBunga = 0;
 
         foreach ($pengembalianTerakhir->groupBy('id_pengajuan_peminjaman') as $pengajuanId => $pengembalians) {
             $terakhir = $pengembalians->first();
             $pengajuan = PengajuanPeminjaman::find($pengajuanId);
-            
+
             if ($pengajuan) {
                 $totalBayarPokok += ($pengajuan->total_pinjaman - $terakhir->sisa_bayar_pokok);
-                $totalBayarBagiHasil += ($pengajuan->total_bagi_hasil - $terakhir->sisa_bagi_hasil);
+                $totalBayarBunga += ($pengajuan->total_bunga - $terakhir->sisa_bunga);
             }
         }
 
         return [
             'pokok' => $totalBayarPokok,
-            'bagi_hasil' => $totalBayarBagiHasil,
+            'bunga' => $totalBayarBunga,
         ];
     }
 

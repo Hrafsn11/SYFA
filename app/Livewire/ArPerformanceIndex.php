@@ -31,7 +31,7 @@ class ArPerformanceIndex extends Component
         // Always fetch fresh data (no cache)
         $arData = $this->arPerformanceService->getArPerformanceData($this->tahun, $this->bulan, false);
 
-        return view('livewire.ar-performance.index', [
+        return view('livewire.monitoring-pembayaran.index', [
             'arData' => $arData,
         ])->layout('layouts.app', [
             'title' => 'AR Performance'

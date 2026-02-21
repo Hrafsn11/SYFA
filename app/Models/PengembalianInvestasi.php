@@ -66,7 +66,7 @@ class PengembalianInvestasi extends Model
         return self::where('id_pengajuan_investasi', $idPengajuanInvestasi)
             ->selectRaw('
                 COALESCE(SUM(dana_pokok_dibayar), 0) as total_pokok,
-                COALESCE(SUM(bunga_dibayar), 0) as total_bagi_hasil,
+                COALESCE(SUM(bunga_dibayar), 0) as total_bunga,
                 COALESCE(SUM(total_dibayar), 0) as total_semua,
                 COUNT(*) as jumlah_transaksi
             ')

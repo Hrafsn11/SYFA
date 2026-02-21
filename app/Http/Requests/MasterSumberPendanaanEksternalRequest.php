@@ -23,7 +23,7 @@ class MasterSumberPendanaanEksternalRequest extends FormRequest
     {
         return [
             'nama_instansi' => 'required|string|max:255',
-            'persentase_bagi_hasil' => 'nullable|integer|min:0|max:100',
+            'persentase_bunga' => 'nullable|integer|min:0|max:100',
         ];
     }
 
@@ -31,9 +31,9 @@ class MasterSumberPendanaanEksternalRequest extends FormRequest
     {
         return [
             'nama_instansi.required' => 'Nama instansi harus diisi.',
-            'persentase_bagi_hasil.integer' => 'Persentase bagi hasil harus berupa angka.',
-            'persentase_bagi_hasil.min' => 'Persentase bagi hasil tidak boleh kurang dari :min.',
-            'persentase_bagi_hasil.max' => 'Persentase bagi hasil tidak boleh lebih dari :max.',
+            'persentase_bunga.integer' => 'Persentase bagi hasil harus berupa angka.',
+            'persentase_bunga.min' => 'Persentase bagi hasil tidak boleh kurang dari :min.',
+            'persentase_bunga.max' => 'Persentase bagi hasil tidak boleh lebih dari :max.',
         ];
     }
 }

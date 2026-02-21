@@ -91,7 +91,7 @@
                     <td>{{ $row['bulan'] }}</td>
                     <td>{{ $row['nama_perusahaan'] }}</td>
                     <td class="text-right">Rp {{ number_format($row['sisa_ar_pokok'], 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($row['sisa_bagi_hasil'], 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format($row['sisa_bunga'], 0, ',', '.') }}</td>
                     <td class="text-right"><strong>Rp {{ number_format($row['sisa_ar_total'], 0, ',', '.') }}</strong></td>
                 </tr>
             @empty

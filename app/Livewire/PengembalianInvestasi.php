@@ -99,13 +99,13 @@ class PengembalianInvestasi extends Component
             if ($hasHistory) {
                 $pengembalian = ModelsPengembalianInvestasi::getTotalDikembalikan($idPengajuanInvestasi);
                 $this->total_pokok_dikembalikan = $pengembalian->total_pokok ?? 0;
-                $this->total_bunga_dikembalikan = $pengembalian->total_bagi_hasil ?? 0;
+                $this->total_bunga_dikembalikan = $pengembalian->total_bunga ?? 0;
                 $this->jumlah_transaksi = $pengembalian->jumlah_transaksi ?? 0;
 
                 $this->history = [];
             } else {
                 $this->total_pokok_dikembalikan = 0;
-                $this->total_bagi_hasil_dikembalikan = 0;
+                $this->total_bunga_dikembalikan = 0;
                 $this->jumlah_transaksi = 0;
                 $this->history = [];
             }

@@ -16,7 +16,7 @@ class SumberPendanaanEksternal extends Component
     private string $validateClass = MasterSumberPendanaanEksternalRequest::class;
 
     #[FieldInput]
-    public $nama_instansi, $persentase_bagi_hasil;
+    public $nama_instansi, $persentase_bunga;
 
     public function mount() {
 

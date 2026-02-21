@@ -121,7 +121,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
                         ->where('invoice_dibayarkan', $labelField);
                 })->sum('nominal_yg_dibayarkan');
 
-                $totalHarusDibayar = (float) $bukti->nilai_pinjaman + (float) $bukti->nilai_bagi_hasil;
+                $totalHarusDibayar = (float) $bukti->nilai_pinjaman + (float) $bukti->nilai_bunga;
                 
                 if ($totalDibayar >= $totalHarusDibayar) {
                     // Sudah lunas, skip
@@ -163,7 +163,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
         $countRestrukturisasiTelat = 0;
 
         // Ambil semua jadwal angsuran yang belum lunas
-        $jadwalAngsuranList = JadwalAngsuran::with(['programRestrukturisasi.pengajuanRestrukturisasi.debitur'])
+        $jadwalAngsuranList = JadwalAngsuran::with(['PenyesuaianCicilan.PengajuanCicilan.debitur'])
             ->where('status', '!=', 'Lunas')
             ->whereNull('bukti_pembayaran')
             ->whereNotNull('tanggal_jatuh_tempo')
@@ -219,12 +219,12 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
 
         $countInvestasiKeInvestorJatuhTempo = 0;
 
-        // Ambil semua pengajuan investasi yang statusnya "Selesai" dan belum lunas (masih ada sisa_pokok atau sisa_bagi_hasil)
+        // Ambil semua pengajuan investasi yang statusnya "Selesai" dan belum lunas (masih ada sisa_pokok atau sisa_bunga)
         $pengajuanInvestasiList = PengajuanInvestasi::with('investor')
             ->where('status', 'Selesai')
             ->where(function ($query) {
                 $query->where('sisa_pokok', '>', 0)
-                      ->orWhere('sisa_bagi_hasil', '>', 0);
+                      ->orWhere('sisa_bunga', '>', 0);
             })
             ->whereNotNull('tanggal_investasi')
             ->get();

@@ -54,11 +54,11 @@ class ArPerbulanFinlogService
                     'nama_perusahaan' => $debitur->nama,
                     'periode' => $periode->toDateString(),
                     'total_pinjaman_pokok' => $totalPinjaman['pokok'],
-                    'total_bagi_hasil' => $totalPinjaman['bagi_hasil'],
+                    'total_bunga' => $totalPinjaman['bagi_hasil'],
                     'total_pengembalian_pokok' => $totalPengembalian['pokok'],
-                    'total_pengembalian_bagi_hasil' => $totalPengembalian['bagi_hasil'],
+                    'total_pengembalian_bunga' => $totalPengembalian['bagi_hasil'],
                     'sisa_ar_pokok' => $sisaArPokok,
-                    'sisa_bagi_hasil' => $sisaBagiHasil,
+                    'sisa_bunga' => $sisaBagiHasil,
                     'sisa_ar_total' => $sisaArTotal,
                     'jumlah_pinjaman' => $jumlahPinjaman,
                     'status' => $status,
@@ -87,7 +87,7 @@ class ArPerbulanFinlogService
 
     /**
      * Hitung total pinjaman yang status nya "Selesai" sampai bulan tertentu
-     * Menggunakan nilai_bagi_hasil_saat_ini jika tersedia (termasuk denda keterlambatan)
+     * Menggunakan nilai_bunga_saat_ini jika tersedia (termasuk denda keterlambatan)
      */
     private function calculateTotalPinjaman(string $id_debitur, int $year, int $month): array
     {
@@ -98,19 +98,19 @@ class ArPerbulanFinlogService
             ->whereDate('created_at', '<=', $endOfMonth)
             ->selectRaw('
                 COALESCE(SUM(nilai_pinjaman), 0) as total_pokok,
-                COALESCE(SUM(COALESCE(nilai_bagi_hasil_saat_ini, nilai_bagi_hasil)), 0) as total_bagi_hasil
+                COALESCE(SUM(COALESCE(nilai_bunga_saat_ini, nilai_bunga)), 0) as total_bunga
             ')
             ->first();
 
         return [
             'pokok' => $result->total_pokok ?? 0,
-            'bagi_hasil' => $result->total_bagi_hasil ?? 0,
+            'bagi_hasil' => $result->total_bunga ?? 0,
         ];
     }
 
     /**
      * Hitung total pengembalian yang sudah dibayar sampai bulan tertentu
-     * Menggunakan nilai_pokok_saat_ini dan nilai_bagi_hasil_saat_ini dari database
+     * Menggunakan nilai_pokok_saat_ini dan nilai_bunga_saat_ini dari database
      * Rumus: Total Dibayar = Total Pinjaman Awal - Sisa Hutang Saat Ini
      */
     private function calculateTotalPengembalian(string $id_debitur, int $year, int $month): array
@@ -124,7 +124,7 @@ class ArPerbulanFinlogService
                 ->whereDate('created_at', '<=', $endOfMonth)
                 ->selectRaw('
                     COALESCE(SUM(nilai_pinjaman - COALESCE(nilai_pokok_saat_ini, nilai_pinjaman)), 0) as total_bayar_pokok,
-                    COALESCE(SUM(COALESCE(nilai_bagi_hasil_saat_ini, nilai_bagi_hasil) - COALESCE(nilai_bagi_hasil_saat_ini, nilai_bagi_hasil)), 0) as total_bayar_bagi_hasil
+                    COALESCE(SUM(COALESCE(nilai_bunga_saat_ini, nilai_bunga) - COALESCE(nilai_bunga_saat_ini, nilai_bunga)), 0) as total_bayar_bagi_hasil
                 ')
                 ->first();
 

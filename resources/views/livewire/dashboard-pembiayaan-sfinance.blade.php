@@ -227,7 +227,7 @@
                                     $disbursement = $chartData['disbursement'] ?? [];
                                     $categories = $disbursement['categories'] ?? [];
                                     $pokokData = $disbursement['pokok'] ?? [];
-                                    $bagiHasilData = $disbursement['bagi_hasil'] ?? [];
+                                    $bagiHasilData = $disbursement['bunga'] ?? [];
                                     $totalPokok = 0;
                                     $totalBagiHasil = 0;
                                 @endphp
@@ -636,7 +636,7 @@
                     },
                     {
                         name: 'Bagi Hasil',
-                        data: data.disbursement.bagi_hasil || []
+                        data: data.disbursement.bunga || []
                     }
                 ];
                 const disbursementCategories = data.disbursement.categories || [];
@@ -653,7 +653,7 @@
                     },
                     {
                         name: 'Bagi Hasil',
-                        data: data.pembayaran.bagi_hasil || []
+                        data: data.pembayaran.bunga || []
                     }
                 ];
                 const pembayaranCategories = data.pembayaran.categories || [];
@@ -670,7 +670,7 @@
                     },
                     {
                         name: 'Bagi Hasil',
-                        data: data.sisa.bagi_hasil || []
+                        data: data.sisa.bunga || []
                     }
                 ];
                 const sisaCategories = data.sisa.categories || [];
@@ -687,7 +687,7 @@
                     },
                     {
                         name: 'Bagi Hasil',
-                        data: data.piutang.bagi_hasil || []
+                        data: data.piutang.bunga || []
                     }
                 ];
                 const piutangCategories = data.piutang.categories || [];

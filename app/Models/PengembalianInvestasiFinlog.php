@@ -58,7 +58,7 @@ class PengembalianInvestasiFinlog extends Model
         return self::where('id_pengajuan_investasi_finlog', $idPengajuanInvestasiFinlog)
             ->selectRaw('
                 COALESCE(SUM(dana_pokok_dibayar), 0) as total_pokok,
-                COALESCE(SUM(bagi_hasil_dibayar), 0) as total_bagi_hasil,
+                COALESCE(SUM(bagi_hasil_dibayar), 0) as total_bunga,
                 COALESCE(SUM(total_dibayar), 0) as total_semua,
                 COUNT(*) as jumlah_transaksi
             ')

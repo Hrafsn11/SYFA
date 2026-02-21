@@ -18,7 +18,7 @@ class BuktiPeminjaman extends Model
         'nama_client',
         'nilai_invoice',
         'nilai_pinjaman',
-        'nilai_bagi_hasil',
+        'nilai_bunga',
         'invoice_date',
         'due_date',
         'dokumen_invoice',

@@ -16,7 +16,7 @@ class JadwalAngsuran extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_program_restrukturisasi',
+        'id_penyesuaian_cicilan',
         'no',
         'tanggal_jatuh_tempo',
         'pokok',
@@ -44,9 +44,9 @@ class JadwalAngsuran extends Model
     ];
 
     // Relationships
-    public function programRestrukturisasi()
+    public function penyesuaianCicilan()
     {
-        return $this->belongsTo(ProgramRestrukturisasi::class, 'id_program_restrukturisasi', 'id_program_restrukturisasi');
+        return $this->belongsTo(PenyesuaianCicilan::class, 'id_penyesuaian_cicilan', 'id_penyesuaian_cicilan');
     }
 
     /**
@@ -54,7 +54,7 @@ class JadwalAngsuran extends Model
      */
     public function riwayatPembayaran()
     {
-        return $this->hasMany(RiwayatPembayaranRestrukturisasi::class, 'id_jadwal_angsuran', 'id_jadwal_angsuran');
+        return $this->hasMany(RiwayatPembayaranCicilan::class, 'id_jadwal_angsuran', 'id_jadwal_angsuran');
     }
 
     /**

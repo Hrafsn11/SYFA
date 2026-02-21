@@ -46,10 +46,10 @@
                         <div class="invalid-feedback">Nama instansi wajib diisi</div>
                     </div>
                     <div class="mb-3">
-                        <label for="persentase_bagi_hasil" class="form-label">
+                        <label for="persentase_bunga" class="form-label">
                             Persentase Bagi Hasil <span class="text-danger">*</span>
                         </label>
-                        <input type="number" class="form-control" id="persentase_bagi_hasil"
+                        <input type="number" class="form-control" id="persentase_bunga"
                             placeholder="Masukkan persentase bagi hasil" required min="0" max="100" step="1">
                         <div class="invalid-feedback">Persentase wajib diisi (0-100)</div>
                     </div>
@@ -124,7 +124,7 @@ $(document).ready(function() {
                     const d = response.data;
                     $('#editSumberId').val(d.id_instansi);
                     $('#nama_instansi').val(d.nama_instansi);
-                    $('#persentase_bagi_hasil').val(d.persentase_bagi_hasil);
+                    $('#persentase_bunga').val(d.persentase_bunga);
                     $('#modalTambahSumberPendanaanLabel').text('Edit Sumber Pendanaan Eksternal');
                     $modal.modal('show');
                 }
@@ -159,7 +159,7 @@ $(document).ready(function() {
         const id = $('#editSumberId').val();
         const formData = {
             nama_instansi: $('#nama_instansi').val(),
-            persentase_bagi_hasil: parseInt($('#persentase_bagi_hasil').val()) || 0,
+            persentase_bunga: parseInt($('#persentase_bunga').val()) || 0,
             _token: '{{ csrf_token() }}'
         };
 

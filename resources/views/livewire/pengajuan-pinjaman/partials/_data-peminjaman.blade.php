@@ -33,9 +33,9 @@
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4">
             <div class="mb-0">
-                <small class="text-light fw-semibold d-block mb-1">Persentase Bagi Hasil</small>
+                <small class="text-light fw-semibold d-block mb-1">Persentase Bunga</small>
                 @php
-                    $p = $persentase_bagi_hasil ?? null;
+                    $p = $persentase_bunga ?? null;
                     $p_display = '-';
                     if ($p !== null && $p !== '') {
                         $p_display = rtrim(rtrim(sprintf('%.4f', (float) $p), '0'), '.') . '%';
@@ -80,9 +80,9 @@
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4">
             <div class="mb-0">
-                <small class="text-light fw-semibold d-block mb-1">Persentase Bagi Hasil</small>
+                <small class="text-light fw-semibold d-block mb-1">Persentase Bunga</small>
                 @php
-                    $p = $persentase_bagi_hasil ?? null;
+                    $p = $persentase_bunga ?? null;
                     $p_display = '-';
                     if ($p !== null && $p !== '') {
                         $p_display = rtrim(rtrim(sprintf('%.4f', (float) $p), '0'), '.') . '%';
