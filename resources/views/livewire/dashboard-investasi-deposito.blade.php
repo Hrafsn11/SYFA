@@ -1,7 +1,7 @@
 <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-0">Dashboard Investasi Deposito SFinance</h4>
+            <h4 class="fw-bold mb-0">Dashboard Investasi SFinance</h4>
         </div>
     </div>
 
@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Deposito Pokok</h6>
+                            <h6 class="text-muted mb-2">Total Investasi Pokok</h6>
                             <h4 class="mb-2 fw-bold">Rp
                                 {{ number_format($summaryData['total_deposito_pokok'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
@@ -126,7 +126,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Outstanding Deposito</h6>
+                            <h6 class="text-muted mb-2">Total Outstanding Investasi</h6>
                             <h4 class="mb-2 fw-bold">Rp
                                 {{ number_format($summaryData['total_outstanding'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
@@ -165,7 +165,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Deposito Pokok yang Masuk Per Bulan</h5>
+                    <h5 class="card-title mb-0">Total Investasi Pokok yang Masuk Per Bulan</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanDepositoPokok" class="form-select select2"
                             data-placeholder="Pilih Bulan">
@@ -208,7 +208,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Pengembalian Pokok dan Bagi Hasil</h5>
+                    <h5 class="card-title mb-0">Total Pengembalian Pokok dan Bunga</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanPengembalian" class="form-select select2"
                             data-placeholder="Pilih Bulan">
@@ -229,7 +229,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Sisa Deposito yang Belum Dikembalikan</h5>
+                    <h5 class="card-title mb-0">Total Sisa Investasi yang Belum Dikembalikan</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanSisaDeposito" class="form-select select2"
                             data-placeholder="Pilih Bulan">

@@ -3,12 +3,11 @@
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
-use App\Livewire\KertasKerjaInvestorSFinance;
+use App\Livewire\LaporanInvestasiSFinance;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
-use App\Http\Controllers\PenyaluranDepositoController;
 use App\Livewire\ArPerbulan;
 use App\Livewire\ConfigMatrixScore;
 use App\Livewire\HomeServices;
@@ -169,14 +168,14 @@ Route::middleware([
     Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
-    Route::get('kertas-kerja-investor-sfinance', KertasKerjaInvestorSFinance::class)->name('kertas-kerja-investor-sfinance.index');
+    Route::get('laporan-investasi-sfinance', LaporanInvestasiSFinance::class)->name('laporan-investasi-sfinance.index');
 
-    Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
-        Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
-        Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
-        Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
-        Route::delete('{id}', [PenyaluranDepositoController::class, 'destroy'])->name('destroy');
-        Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
+    Route::prefix('penyaluran-dana-investasi')->name('penyaluran-dana-investasi.')->group(function () {
+        Route::post('/', [PenyaluranDanaInvestasiController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [PenyaluranDanaInvestasiController::class, 'edit'])->name('edit');
+        Route::put('{id}', [PenyaluranDanaInvestasiController::class, 'update'])->name('update');
+        Route::delete('{id}', [PenyaluranDanaInvestasiController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/upload-bukti', [PenyaluranDanaInvestasiController::class, 'uploadBukti'])->name('upload-bukti');
     });
 
     // Pengembalian Investasi Routes

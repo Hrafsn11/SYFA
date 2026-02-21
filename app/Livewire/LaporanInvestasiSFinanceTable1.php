@@ -9,18 +9,18 @@ use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanInvestasi;
 use Carbon\Carbon;
 
-class KertasKerjaInvestorTable1 extends DataTableComponent
+class LaporanInvestasiSFinanceTable1 extends DataTableComponent
 {
     protected $model = PengajuanInvestasi::class;
 
     public $year;
     public $globalSearch = '';
 
-    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged' => 'setYear', 'globalSearchChanged' => 'setGlobalSearch'];
+    protected $listeners = ['refreshLaporanInvestasiTable' => '$refresh', 'yearChanged' => 'setYear', 'globalSearchChanged' => 'setGlobalSearch'];
 
-    public function mount(): void
+    public function mount($year = null): void
     {
-        $this->year = request()->get('year', date('Y'));
+        $this->year = $year ?? '';
     }
 
     public function setYear($year)
@@ -203,7 +203,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Lama Deposito', 'lama_investasi')
+            Column::make('Lama Investasi', 'lama_investasi')
                 ->sortable()
                 ->label(function ($row) {
                     $value = $row->lama_investasi . ' Bulan';
@@ -245,7 +245,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 ->html(),
 
             // Calculated field - NO EDIT
-            Column::make('Bagi Hasil (COF/Bulan)')
+            Column::make('Bunga (COF/Bulan)')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
                     return '<div class="text-center">Rp ' . number_format($calc['cof_bulan'], 0, ',', '.') . '</div>';

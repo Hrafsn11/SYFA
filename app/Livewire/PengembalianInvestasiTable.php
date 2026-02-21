@@ -144,7 +144,7 @@ class PengembalianInvestasiTable extends DataTableComponent
                 $q->where('pi.nomor_kontrak', 'LIKE', '%' . $search . '%')
                     ->orWhere('pi.nama_investor', 'LIKE', '%' . $search . '%')
                     ->orWhere('pengembalian_investasi.dana_pokok_dibayar', 'LIKE', '%' . $search . '%')
-                    ->orWhere('pengembalian_investasi.bagi_hasil_dibayar', 'LIKE', '%' . $search . '%')
+                    ->orWhere('pengembalian_investasi.bunga_dibayar', 'LIKE', '%' . $search . '%')
                     ->orWhere('pengembalian_investasi.total_dibayar', 'LIKE', '%' . $search . '%')
                     ->orWhereRaw("DATE_FORMAT(pengembalian_investasi.tanggal_pengembalian, '%d/%m/%Y') LIKE ?", ['%' . $search . '%']);
             });
@@ -191,7 +191,7 @@ class PengembalianInvestasiTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Bagi Hasil', 'bagi_hasil_dibayar')
+            Column::make('Bunga', 'bunga_dibayar')
                 ->sortable()
                 ->format(function ($value) {
                     return '<div class="text-end"><strong>Rp ' . number_format($value, 0, ',', '.') . '</strong></div>';

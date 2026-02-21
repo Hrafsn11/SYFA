@@ -6,18 +6,17 @@ use App\Livewire\DashboardPembiayaanSfinance;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
 use App\Http\Controllers\DebiturPiutangController;
-use App\Livewire\KertasKerjaInvestorSFinance;
+use App\Livewire\LaporanInvestasiSFinance;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
-use App\Http\Controllers\PenyaluranDepositoController;
 use App\Http\Controllers\PengajuanInvestasiController;
 use App\Http\Controllers\PengajuanRestrukturisasiController;
 use App\Http\Controllers\PengembalianInvestasiController;
 use App\Livewire\ArPerbulan;
 use App\Livewire\ArPerformanceIndex;
 use App\Livewire\DebiturPiutangIndex;
-use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
+use App\Livewire\PenyaluranDanaInvestasi\PenyaluranDanaInvestasiIndex;
 use App\Livewire\PengembalianInvestasi;
 use App\Livewire\ReportPengembalian;
 use Illuminate\Support\Facades\Route;
@@ -124,18 +123,18 @@ Route::prefix('pengajuan-investasi')->name('pengajuan-investasi.')->group(functi
 // Report Penyaluran Dana Investasi
 Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
 
-// Penyaluran Deposito
-Route::get('penyaluran-deposito', PenyaluranDepositoIndex::class)->name('penyaluran-deposito.index');
-Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
-    Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
-    Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
-    Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
-    Route::delete('{id}', [PenyaluranDepositoController::class, 'destroy'])->name('destroy');
-    Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
+// Penyaluran Dana Investasi
+Route::get('penyaluran-dana-investasi', PenyaluranDanaInvestasiIndex::class)->name('penyaluran-dana-investasi.index');
+Route::prefix('penyaluran-dana-investasi')->name('penyaluran-dana-investasi.')->group(function () {
+    Route::post('/', [PenyaluranDanaInvestasiController::class, 'store'])->name('store');
+    Route::get('{id}/edit', [PenyaluranDanaInvestasiController::class, 'edit'])->name('edit');
+    Route::put('{id}', [PenyaluranDanaInvestasiController::class, 'update'])->name('update');
+    Route::delete('{id}', [PenyaluranDanaInvestasiController::class, 'destroy'])->name('destroy');
+    Route::post('{id}/upload-bukti', [PenyaluranDanaInvestasiController::class, 'uploadBukti'])->name('upload-bukti');
 });
 
-// Kertas Kerja Investor
-Route::get('kertas-kerja-investor-sfinance', KertasKerjaInvestorSFinance::class)->name('kertas-kerja-investor-sfinance.index');
+// Laporan Investasi SFinance
+Route::get('laporan-investasi-sfinance', LaporanInvestasiSFinance::class)->name('laporan-investasi-sfinance.index');
 
 // Pengembalian Investasi sfinance
 Route::get('pengembalian-investasi', PengembalianInvestasi::class)->name('pengembalian-investasi.index');

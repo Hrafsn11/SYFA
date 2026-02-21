@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanInvestasi;
 
-class KertasKerjaInvestorTable3 extends DataTableComponent
+class LaporanInvestasiSFinanceTable3 extends DataTableComponent
 {
     protected $model = PengajuanInvestasi::class;
 
     public $year;
     public $globalSearch = '';
 
-    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged' => 'setYear', 'globalSearchChanged' => 'setGlobalSearch'];
+    protected $listeners = ['refreshLaporanInvestasiTable' => '$refresh', 'yearChanged' => 'setYear', 'globalSearchChanged' => 'setGlobalSearch'];
 
-    public function mount(): void
+    public function mount($year = null): void
     {
-        $this->year = request()->get('year', date('Y'));
+        $this->year = $year ?? '';
     }
 
     public function setYear($year)
@@ -113,7 +113,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
     {
         return [
             // Aggregated from another table - NO EDIT
-            Column::make('Pengembalian Pokok Investasi')
+            Column::make('Pengembalian Pokok')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);
                     return '<div class="text-center">Rp ' . number_format($data['pengembalian_pokok'], 0, ',', '.') . '</div>';
@@ -121,7 +121,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 ->html(),
 
             // Aggregated from another table - NO EDIT
-            Column::make('Pengembalian Bunga Investasi')
+            Column::make('Pengembalian Bunga')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);
                     return '<div class="text-center">Rp ' . number_format($data['pengembalian_bunga'], 0, ',', '.') . '</div>';

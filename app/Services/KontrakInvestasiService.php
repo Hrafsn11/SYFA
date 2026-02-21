@@ -48,7 +48,7 @@ class KontrakInvestasiService
 
         return [
             'id_investasi' => $pengajuan->id_pengajuan_investasi,
-            'jenis_deposito' => strtoupper($pengajuan->deposito),
+            'jenis_deposito' => strtoupper($pengajuan->jenis_investasi),
             'nomor_kontrak' => $nomorKontrak ?? $this->generateDefaultNomorKontrak(),
             'hari' => $this->getHariIndonesia($tanggalInvestasi),
             'tanggal_kontrak' => $this->formatTanggalIndonesia($tanggalInvestasi),
@@ -77,7 +77,7 @@ class KontrakInvestasiService
      */
     private function calculateTanggalJatuhTempo(PengajuanInvestasi $pengajuan, Carbon $tanggalInvestasi): Carbon
     {
-        if ($pengajuan->deposito === 'Reguler') {
+        if ($pengajuan->jenis_investasi === 'Reguler') {
             // Regular: Always 31 December of investment year
             return Carbon::createFromDate($tanggalInvestasi->year, 12, 31);
         }
@@ -94,7 +94,7 @@ class KontrakInvestasiService
      */
     private function calculateBagiHasil(PengajuanInvestasi $pengajuan): int
     {
-        return $pengajuan->deposito === 'Reguler' ? 10 : $pengajuan->bagi_hasil_pertahun;
+        return $pengajuan->jenis_investasi === 'Reguler' ? 10 : $pengajuan->bunga_pertahun;
     }
 
     /**

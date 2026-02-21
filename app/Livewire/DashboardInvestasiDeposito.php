@@ -62,7 +62,7 @@ class DashboardInvestasiDeposito extends Component
             'chartData' => $chartData,
             'monthOptions' => $this->service->getMonthOptions(),
         ])->layout('layouts.app', [
-            'title' => 'Dashboard Investasi Deposito'
+            'title' => 'Dashboard Investasi SFinance'
         ]);
     }
 }

@@ -50,15 +50,15 @@ class PengembalianInvestasiController extends Controller
             $investasi = PengajuanInvestasi::findOrFail($validated['id_pengajuan_investasi']);
 
             $sisaPokokBaru = $investasi->sisa_pokok - $validated['dana_pokok_dibayar'];
-            $sisaBagiHasilBaru = $investasi->sisa_bagi_hasil - $validated['bagi_hasil_dibayar'];
+            $sisaBunaBaru = $investasi->sisa_bunga - $validated['bunga_dibayar'];
 
             $updateData = [
                 'sisa_pokok' => max(0, $sisaPokokBaru),
-                'sisa_bagi_hasil' => max(0, $sisaBagiHasilBaru),
+                'sisa_bunga' => max(0, $sisaBunaBaru),
             ];
 
             // Auto-update status jika lunas
-            if ($sisaPokokBaru <= 0 && $sisaBagiHasilBaru <= 0) {
+            if ($sisaPokokBaru <= 0 && $sisaBunaBaru <= 0) {
                 $updateData['status'] = 'Lunas';
             }
 
@@ -89,14 +89,14 @@ class PengembalianInvestasiController extends Controller
     {
         try {
             $pengembalian = PengembalianInvestasi::where('id_pengembalian_investasi', $id)
-                ->select('id_pengembalian_investasi', 'id_pengajuan_investasi', 'dana_pokok_dibayar', 'bagi_hasil_dibayar', 'tanggal_pengembalian', 'bukti_transfer')
+                ->select('id_pengembalian_investasi', 'id_pengajuan_investasi', 'dana_pokok_dibayar', 'bunga_dibayar', 'tanggal_pengembalian', 'bukti_transfer')
                 ->firstOrFail();
 
             $result = [
                 'id' => $pengembalian->id_pengembalian_investasi,
                 'id_pengajuan_investasi' => $pengembalian->id_pengajuan_investasi,
                 'dana_pokok_dibayar' => $pengembalian->dana_pokok_dibayar,
-                'bagi_hasil_dibayar' => $pengembalian->bagi_hasil_dibayar,
+                'bunga_dibayar' => $pengembalian->bunga_dibayar,
                 'tanggal_pengembalian' => $pengembalian->tanggal_pengembalian,
                 'bukti_transfer' => $pengembalian->bukti_transfer,
             ];
@@ -134,16 +134,16 @@ class PengembalianInvestasiController extends Controller
 
             // Restore sisa from old pengembalian
             $sisaPokokRestored = $investasi->sisa_pokok + $pengembalian->dana_pokok_dibayar;
-            $sisaBagiHasilRestored = $investasi->sisa_bagi_hasil + $pengembalian->bagi_hasil_dibayar;
+            $sisaBunaRestored = $investasi->sisa_bunga + $pengembalian->bunga_dibayar;
 
             // Subtract new pengembalian
             $sisaPokokBaru = $sisaPokokRestored - $validated['dana_pokok_dibayar'];
-            $sisaBagiHasilBaru = $sisaBagiHasilRestored - $validated['bagi_hasil_dibayar'];
+            $sisaBunaBaru = $sisaBunaRestored - $validated['bunga_dibayar'];
 
             $investasi->update([
                 'sisa_pokok' => max(0, $sisaPokokBaru),
-                'sisa_bagi_hasil' => max(0, $sisaBagiHasilBaru),
-                'status' => ($sisaPokokBaru <= 0 && $sisaBagiHasilBaru <= 0) ? 'Lunas' : $investasi->status
+                'sisa_bunga' => max(0, $sisaBunaBaru),
+                'status' => ($sisaPokokBaru <= 0 && $sisaBunaBaru <= 0) ? 'Lunas' : $investasi->status
             ]);
 
             // Update pengembalian
@@ -171,7 +171,7 @@ class PengembalianInvestasiController extends Controller
             $investasi = PengajuanInvestasi::findOrFail($pengembalian->id_pengajuan_investasi);
             $investasi->update([
                 'sisa_pokok' => $investasi->sisa_pokok + $pengembalian->dana_pokok_dibayar,
-                'sisa_bagi_hasil' => $investasi->sisa_bagi_hasil + $pengembalian->bagi_hasil_dibayar,
+                'sisa_bunga' => $investasi->sisa_bunga + $pengembalian->bunga_dibayar,
             ]);
 
             // Delete file

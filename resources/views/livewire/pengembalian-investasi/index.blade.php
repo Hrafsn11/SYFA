@@ -108,14 +108,14 @@
                             $('#dana_pokok_dibayar').prop('disabled', false);
                         }
 
-                        // Check if sisa_bagi_hasil is 0, auto-set bagi_hasil_dibayar to 0
-                        let sisaBagiHasil = @this.get('sisa_bagi_hasil');
-                        if (sisaBagiHasil == 0) {
-                            $('#bagi_hasil_dibayar').val('Rp 0').prop('disabled', true);
-                            $('#bagi_hasil_raw').val(0);
-                            @this.set('bagi_hasil_dibayar', 0);
+                        // Check if sisa_bunga is 0, auto-set bunga_dibayar to 0
+                        let sisaBunga = @this.get('sisa_bunga');
+                        if (sisaBunga == 0) {
+                            $('#bunga_dibayar').val('Rp 0').prop('disabled', true);
+                            $('#bunga_raw').val(0);
+                            @this.set('bunga_dibayar', 0);
                         } else {
-                            $('#bagi_hasil_dibayar').prop('disabled', false);
+                            $('#bunga_dibayar').prop('disabled', false);
                         }
                     });
                 } else {
@@ -137,12 +137,12 @@
                         @this.set('dana_pokok_dibayar', 0);
                     }
 
-                    // Handle bagi_hasil_dibayar
-                    let sisaBagiHasil = @this.get('sisa_bagi_hasil');
-                    if (sisaBagiHasil == 0) {
-                        $('#bagi_hasil_dibayar').val('Rp 0').prop('disabled', true);
-                        $('#bagi_hasil_raw').val(0);
-                        @this.set('bagi_hasil_dibayar', 0);
+                    // Handle bunga_dibayar
+                    let sisaBunga = @this.get('sisa_bunga');
+                    if (sisaBunga == 0) {
+                        $('#bunga_dibayar').val('Rp 0').prop('disabled', true);
+                        $('#bunga_raw').val(0);
+                        @this.set('bunga_dibayar', 0);
                     }
                 });
             }
@@ -163,11 +163,11 @@
                 @this.set('dana_pokok_dibayar', rawValue);
             });
 
-            $('#bagi_hasil_dibayar').on('input', function() {
+            $('#bunga_dibayar').on('input', function() {
                 const rawValue = unformatRupiah($(this).val());
                 $(this).val(formatRupiah(rawValue));
-                $('#bagi_hasil_raw').val(rawValue);
-                @this.set('bagi_hasil_dibayar', rawValue);
+                $('#bunga_raw').val(rawValue);
+                @this.set('bunga_dibayar', rawValue);
             });
 
         }).on('hidden.bs.modal', function() {
@@ -177,7 +177,7 @@
             }
             // Clear formatted inputs
             $('#dana_pokok_dibayar').val('');
-            $('#bagi_hasil_dibayar').val('');
+            $('#bunga_dibayar').val('');
 
             @this.call('resetForm');
         });

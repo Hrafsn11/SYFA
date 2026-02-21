@@ -53,9 +53,9 @@
                                 readonly>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Bagi Hasil Total</label>
+                            <label class="form-label">Bunga Total</label>
                             <input type="text" class="form-control"
-                                value="Rp {{ number_format($bagi_hasil_total ?? 0, 0, ',', '.') }}" readonly>
+                                value="Rp {{ number_format($bunga_total ?? 0, 0, ',', '.') }}" readonly>
                         </div>
 
                         @if ($jumlah_transaksi > 0)
@@ -66,9 +66,9 @@
                                     readonly>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Total Bagi Hasil Sudah Dikembalikan</label>
+                                <label class="form-label">Total Bunga Sudah Dikembalikan</label>
                                 <input type="text" class="form-control text-success fw-bold"
-                                    value="Rp {{ number_format($total_bagi_hasil_dikembalikan ?? 0, 0, ',', '.') }}"
+                                    value="Rp {{ number_format($total_bunga_dikembalikan ?? 0, 0, ',', '.') }}"
                                     readonly>
                             </div>
                         @endif
@@ -79,9 +79,9 @@
                                 value="Rp {{ number_format($sisa_pokok ?? 0, 0, ',', '.') }}" readonly>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Sisa Bagi Hasil</label>
+                            <label class="form-label">Sisa Bunga</label>
                             <input type="text" class="form-control text-warning fw-bold"
-                                value="Rp {{ number_format($sisa_bagi_hasil ?? 0, 0, ',', '.') }}" readonly>
+                                value="Rp {{ number_format($sisa_bunga ?? 0, 0, ',', '.') }}" readonly>
                         </div>
 
                         @if ($id_pengajuan_investasi)
@@ -125,23 +125,23 @@
                         </div>
 
                         <div class="col-md-6 mb-3 form-group">
-                            <label for="bagi_hasil_dibayar" class="form-label">
-                                Bagi Hasil Yang Dibayarkan @if(!$id_pengajuan_investasi || $sisa_bagi_hasil > 0)<span class="text-danger">*</span>@endif
+                            <label for="bunga_dibayar" class="form-label">
+                                Bunga Yang Dibayarkan @if(!$id_pengajuan_investasi || $sisa_bunga > 0)<span class="text-danger">*</span>@endif
                             </label>
                             <div wire:ignore>
-                                <input type="text" class="form-control @error('bagi_hasil_dibayar') is-invalid @enderror"
-                                    id="bagi_hasil_dibayar" placeholder="Ketik angka saja (contoh: 1000000)"
-                                    autocomplete="off" {{ $id_pengajuan_investasi && $sisa_bagi_hasil == 0 ? 'disabled' : '' }}>
-                                <input type="hidden" id="bagi_hasil_raw" wire:model="bagi_hasil_dibayar">
+                                <input type="text" class="form-control @error('bunga_dibayar') is-invalid @enderror"
+                                    id="bunga_dibayar" placeholder="Ketik angka saja (contoh: 1000000)"
+                                    autocomplete="off" {{ $id_pengajuan_investasi && $sisa_bunga == 0 ? 'disabled' : '' }}>
+                                <input type="hidden" id="bunga_raw" wire:model="bunga_dibayar">
                             </div>
-                            @if ($id_pengajuan_investasi && $sisa_bagi_hasil !== null)
-                                @if ($sisa_bagi_hasil == 0)
-                                    <small class="text-success"><i class="ti ti-check me-1"></i>Bagi hasil sudah lunas</small>
+                            @if ($id_pengajuan_investasi && $sisa_bunga !== null)
+                                @if ($sisa_bunga == 0)
+                                    <small class="text-success"><i class="ti ti-check me-1"></i>Bunga sudah lunas</small>
                                 @else
-                                    <small class="text-muted">Maksimal: Rp {{ number_format($sisa_bagi_hasil, 0, ',', '.') }}</small>
+                                    <small class="text-muted">Maksimal: Rp {{ number_format($sisa_bunga, 0, ',', '.') }}</small>
                                 @endif
                             @endif
-                            @error('bagi_hasil_dibayar')
+                            @error('bunga_dibayar')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
