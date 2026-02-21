@@ -3,7 +3,7 @@
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\ArPerbulanController;
 use App\Http\Controllers\ArPerformanceController;
-use App\Livewire\KertasKerjaInvestorSFinance;
+use App\Livewire\LaporanInvestasiSFinance;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
 use App\Http\Controllers\PengembalianPinjamanController;
@@ -169,7 +169,7 @@ Route::middleware([
     Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
 
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
-    Route::get('kertas-kerja-investor-sfinance', KertasKerjaInvestorSFinance::class)->name('kertas-kerja-investor-sfinance.index');
+    Route::get('laporan-investasi-sfinance', LaporanInvestasiSFinance::class)->name('laporan-investasi-sfinance.index');
 
     Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
         Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
