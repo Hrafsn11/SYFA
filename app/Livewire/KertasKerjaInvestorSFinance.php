@@ -29,15 +29,15 @@ class KertasKerjaInvestorSFinance extends Component
     // Field configurations
     protected $editableFields = [
         'tanggal_investasi' => ['label' => 'Tanggal Investasi', 'type' => 'date'],
-        'deposito' => ['label' => 'Deposito', 'type' => 'text'],
+        'jenis_investasi' => ['label' => 'Jenis Investasi', 'type' => 'text'],
         'nama_investor' => ['label' => 'Nama Investor', 'type' => 'text'],
         'jumlah_investasi' => ['label' => 'Jumlah Investasi', 'type' => 'number'],
         'lama_investasi' => ['label' => 'Lama Investasi (Bulan)', 'type' => 'number'],
-        'bagi_hasil_pertahun' => ['label' => 'Bagi Hasil (%PA)', 'type' => 'number'],
-        'nominal_bagi_hasil_yang_didapatkan' => ['label' => 'Bagi Hasil Nominal', 'type' => 'number'],
+        'bunga_pertahun' => ['label' => 'Bunga (%PA)', 'type' => 'number'],
+        'nominal_bunga_yang_didapatkan' => ['label' => 'Bunga Nominal', 'type' => 'number'],
         'status' => ['label' => 'Status', 'type' => 'select'],
         'sisa_pokok' => ['label' => 'Sisa Pokok', 'type' => 'number'],
-        'sisa_bagi_hasil' => ['label' => 'Sisa Bagi Hasil', 'type' => 'number'],
+        'sisa_bunga' => ['label' => 'Sisa Bunga', 'type' => 'number'],
     ];
 
     public function mount()

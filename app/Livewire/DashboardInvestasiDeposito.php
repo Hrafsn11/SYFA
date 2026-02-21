@@ -8,10 +8,10 @@ use Carbon\Carbon;
 
 class DashboardInvestasiDeposito extends Component
 {
-    public $bulanDepositoPokok;
+    public $bulanInvestasiPokok;
     public $bulanCoF;
     public $bulanPengembalian;
-    public $bulanSisaDeposito;
+    public $bulanSisaInvestasi;
 
     protected DashboardInvestasiDepositoService $service;
 
@@ -23,19 +23,19 @@ class DashboardInvestasiDeposito extends Component
     public function mount(): void
     {
         $currentMonth = Carbon::now()->format('m');
-        $this->bulanDepositoPokok = $currentMonth;
+        $this->bulanInvestasiPokok = $currentMonth;
         $this->bulanCoF = $currentMonth;
         $this->bulanPengembalian = $currentMonth;
-        $this->bulanSisaDeposito = $currentMonth;
+        $this->bulanSisaInvestasi = $currentMonth;
     }
 
-    public function updatedBulanDepositoPokok(): void {}
+    public function updatedBulanInvestasiPokok(): void {}
 
     public function updatedBulanCoF(): void {}
 
     public function updatedBulanPengembalian(): void {}
 
-    public function updatedBulanSisaDeposito(): void {}
+    public function updatedBulanSisaInvestasi(): void {}
 
     private function getSummaryData(): array
     {
@@ -45,10 +45,10 @@ class DashboardInvestasiDeposito extends Component
     private function getChartData(): array
     {
         return [
-            'deposito_pokok' => $this->service->getChartDepositoPokok($this->bulanDepositoPokok),
+            'investasi_pokok' => $this->service->getChartInvestasiPokok($this->bulanInvestasiPokok),
             'cof' => $this->service->getChartCoF($this->bulanCoF),
             'pengembalian' => $this->service->getChartPengembalian($this->bulanPengembalian),
-            'sisa_deposito' => $this->service->getChartSisaDeposito($this->bulanSisaDeposito),
+            'sisa_investasi' => $this->service->getChartSisaInvestasi($this->bulanSisaInvestasi),
         ];
     }
 

@@ -121,7 +121,7 @@
                 } else {
                     @this.call('resetCalculatedFields');
                     $('#dana_pokok_dibayar').val('').prop('disabled', false);
-                    $('#bagi_hasil_dibayar').val('').prop('disabled', false);
+                    $('#bunga_dibayar').val('').prop('disabled', false);
                 }
             });
 

@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 // Dashboard - Protected by permission
 Route::get('dashboard', Dashboard::class)->name('dashboard.index')->middleware('can:sfinance.menu.dashboard_pembiayaan');
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan')->middleware('can:sfinance.menu.dashboard_pembiayaan');
-Route::get('dashboard/investasi-deposito', DashboardInvestasiDeposito::class)->name('dashboard.investasi-deposito')->middleware('can:sfinance.menu.dashboard_pembiayaan_investasi');
+Route::get('dashboard/investasi', DashboardInvestasiDeposito::class)->name('dashboard.investasi')->middleware('can:sfinance.menu.dashboard_pembiayaan_investasi');
 
 // Peminjaman Routes - Index, Create, Edit sudah menggunakan Livewire
 Route::get('peminjaman', \App\Livewire\PengajuanPinjaman\Index::class)->name('peminjaman');

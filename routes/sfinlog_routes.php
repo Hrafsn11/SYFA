@@ -13,7 +13,6 @@ use App\Http\Controllers\SFinlog\PenyaluranDepositoController;
 use App\Http\Controllers\SFinlog\ProgramRestrukturisasiController;
 use App\Http\Controllers\SFinlog\EvaluasiRestrukturisasiController;
 use App\Livewire\DebiturPiutangIndex;
-use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
 use App\Livewire\PengembalianInvestasi;
 use App\Livewire\SFinlog\DashboardPembiayaanSfinlog;
 use App\Livewire\SFinlog\DashboardInvestasiDepositoSfinlog;

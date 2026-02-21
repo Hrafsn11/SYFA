@@ -28,7 +28,7 @@
                     <!-- Judul Kontrak -->
                     <div class="text-center mb-4">
                         <h5 class="fw-bold mb-2">SURAT PERJANJIAN KERJASAMA INVESTASI DEPOSITO
-                            {{ $kontrak['jenis_deposito'] }}
+                            {{ $kontrak['jenis_investasi'] }}
                         </h5>
                         <p class="mb-0"><strong>No: {{ $kontrak['nomor_kontrak'] }}</strong></p>
                     </div>
@@ -236,7 +236,7 @@
                             <p class="mt-3">Dalam Perjanjian Kerjasama Deposito ini, PARA PIHAK sepakat didalam hal
                                 pembagian hasil Deposito sebagai berikut :</p>
                             <div style="padding-left: 20px;">
-                                <p class="mb-2">1. Bagi Hasil kepada PIHAK PERTAMA sebesar {{ $kontrak['bagi_hasil'] }} %
+                                <p class="mb-2">1. Bagi Hasil kepada PIHAK PERTAMA sebesar {{ $kontrak['bunga'] }} %
                                     per Tahun terhitung dari tanggal diterimanya dana oleh PIHAK KEDUA dan nilai bagi hasil
                                     akan diberikan dari PIHAK KEDUA di akhir periode kerjasama.</p>
 

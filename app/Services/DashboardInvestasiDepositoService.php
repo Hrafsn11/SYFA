@@ -215,7 +215,7 @@ class DashboardInvestasiDepositoService
             ->value('total');
     }
 
-    public function getChartDepositoPokok(?string $bulan = null): array
+    public function getChartInvestasiPokok(?string $bulan = null): array
     {
         $currentYear = date('Y');
         $selectedMonth = $bulan ? (int)$bulan : (int)date('m');
@@ -353,7 +353,7 @@ class DashboardInvestasiDepositoService
         ];
     }
 
-    public function getChartSisaDeposito(?string $bulan = null): array
+    public function getChartSisaInvestasi(?string $bulan = null): array
     {
         $currentYear = date('Y');
         $selectedMonth = $bulan ? (int)$bulan : (int)date('m');
