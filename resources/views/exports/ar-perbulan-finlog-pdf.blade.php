@@ -101,7 +101,7 @@
                 <th class="text-center" width="15%">Periode</th>
                 <th width="30%">Nama Perusahaan</th>
                 <th class="text-right" width="17%">Sisa AR Pokok</th>
-                <th class="text-right" width="17%">Sisa Bagi Hasil</th>
+                <th class="text-right" width="17%">Sisa Bunga</th>
                 <th class="text-right" width="16%">Total AR</th>
             </tr>
         </thead>

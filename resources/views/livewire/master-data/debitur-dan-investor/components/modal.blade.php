@@ -44,21 +44,21 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <!-- Deposito (Khusus Investor) -->
+                        <!-- Jenis Investasi (Khusus Investor) -->
                         <div class="col-12 mb-3 form-group investor-section d-none">
-                            <label class="form-label">Deposito</label>
+                            <label class="form-label">Jenis Investasi</label>
                             <div class="d-flex gap-4">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="deposito_reguler" value="reguler"
-                                        wire:model.blur="deposito">
-                                    <label class="form-check-label" for="deposito_reguler">
+                                    <input class="form-check-input" type="radio" id="jenis investasi_reguler" value="reguler"
+                                        wire:model.blur="jenis investasi">
+                                    <label class="form-check-label" for="jenis investasi_reguler">
                                         Reguler
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="deposito_khusus" value="khusus"
-                                        wire:model.blur="deposito">
-                                    <label class="form-check-label" for="deposito_khusus">
+                                    <input class="form-check-input" type="radio" id="jenis investasi_khusus" value="khusus"
+                                        wire:model.blur="jenis investasi">
+                                    <label class="form-check-label" for="jenis investasi_khusus">
                                         Khusus
                                     </label>
                                 </div>

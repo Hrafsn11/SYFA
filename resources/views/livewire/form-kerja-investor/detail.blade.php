@@ -23,7 +23,7 @@
                         <div class="stepper-node"></div>
                         <div class="stepper-content">
                             <div class="step-label">STEP 2</div>
-                            <div class="step-name">Validasi Bagi Hasil</div>
+                            <div class="step-name">Validasi Bunga</div>
                         </div>
                     </div>
 
@@ -153,8 +153,8 @@
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
                                                     <small class="text-light fw-semibold d-block mb-1">Jenis
-                                                        Deposito</small>
-                                                    <p class="fw-bold mb-0">{{ ucfirst($formKerjaInvestor->deposito) }}</p>
+                                                        Jenis Investasi</small>
+                                                    <p class="fw-bold mb-0">{{ ucfirst($formKerjaInvestor->jenis investasi) }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
@@ -196,7 +196,7 @@
                                             </div>
                                             <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
                                                 <div class="mb-0">
-                                                    <small class="text-light fw-semibold d-block mb-1">Nominal Bagi Hasil
+                                                    <small class="text-light fw-semibold d-block mb-1">Nominal Bunga
                                                         Keseluruhan</small>
                                                     <p class="fw-bold mb-0">Rp {{ number_format($formKerjaInvestor->bagi_hasil_keseluruhan, 0, ',', '.') }}</p>
                                                 </div>
@@ -282,7 +282,7 @@
 
                                     <!-- Timeline Container - hanya muncul dari step 2 -->
                                     <div class="d-none" id="timeline-container">
-                                        <!-- Step 2: Validasi Bagi Hasil -->
+                                        <!-- Step 2: Validasi Bunga -->
                                         <div class="activity-item d-none mb-4">
                                             <div class="row align-items-center">
                                                 <div class="col-12 col-md-6 mb-3 mb-md-0">
@@ -296,7 +296,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-1">Validasi Bagi Hasil</h6>
+                                                            <h6 class="mb-1">Validasi Bunga</h6>
                                                             <p class="text-muted mb-0 small">
                                                                 Pengajuan sedang dalam proses validasi. Harap menunggu
                                                                 hingga proses selesai.

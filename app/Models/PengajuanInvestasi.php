@@ -34,8 +34,8 @@ class PengajuanInvestasi extends Model
         'tanggal_investasi',
         'lama_investasi',
         'jumlah_investasi',
-        'bagi_hasil_pertahun',
-        'nominal_bagi_hasil_yang_didapatkan',
+        'bunga_pertahun',
+        'nominal_bunga_yang_didapatkan',
         'upload_bukti_transfer',
         'status',
         'current_step',
@@ -43,7 +43,7 @@ class PengajuanInvestasi extends Model
         'updated_by',
         'nomor_kontrak',
         'sisa_pokok',
-        'sisa_bagi_hasil',
+        'sisa_bunga',
         'total_disalurkan',
         'total_kembali_dari_penyaluran',
     ];
@@ -54,12 +54,12 @@ class PengajuanInvestasi extends Model
     protected $casts = [
         'tanggal_investasi' => 'date',
         'jumlah_investasi' => 'decimal:2',
-        'nominal_bagi_hasil_yang_didapatkan' => 'decimal:2',
+        'nominal_bunga_yang_didapatkan' => 'decimal:2',
         'lama_investasi' => 'integer',
-        'bagi_hasil_pertahun' => 'integer',
+        'bunga_pertahun' => 'integer',
         'current_step' => 'integer',
         'sisa_pokok' => 'decimal:2',
-        'sisa_bagi_hasil' => 'decimal:2',
+        'sisa_bunga' => 'decimal:2',
         'total_disalurkan' => 'decimal:2',
         'total_kembali_dari_penyaluran' => 'decimal:2',
     ];
@@ -73,8 +73,8 @@ class PengajuanInvestasi extends Model
                 $investasi->sisa_pokok = $investasi->jumlah_investasi ?? 0;
             }
 
-            if (!$investasi->sisa_bagi_hasil || $investasi->sisa_bagi_hasil == 0) {
-                $investasi->sisa_bagi_hasil = $investasi->nominal_bagi_hasil_yang_didapatkan ?? 0;
+            if (!$investasi->sisa_bunga || $investasi->sisa_bunga == 0) {
+                $investasi->sisa_bunga = $investasi->nominal_bunga_yang_didapatkan ?? 0;
             }
         });
     }
@@ -162,9 +162,9 @@ class PengajuanInvestasi extends Model
     }
 
 
-    public function penyaluranDeposito(): HasMany
+    public function jenisInvestasi(): HasMany
     {
-        return $this->hasMany(PenyaluranDeposito::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
+        return $this->hasMany(JenisInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
     }
 
     /**
@@ -189,7 +189,7 @@ class PengajuanInvestasi extends Model
                         id_pengajuan_investasi as pd_id_pengajuan_investasi, 
                         SUM(nominal_yang_disalurkan) as total_disalurkan,
                         SUM(nominal_yang_dikembalikan) as total_dikembalikan
-                    FROM penyaluran_deposito 
+                    FROM jenis_investasi
                     GROUP BY id_pengajuan_investasi
                 ) as pd_aggregated'),
                 'pengajuan_investasi.id_pengajuan_investasi',
@@ -212,7 +212,7 @@ class PengajuanInvestasi extends Model
 
     public function getSisaDana(): float
     {
-        $totalDisalurkan = $this->penyaluranDeposito()
+        $totalDisalurkan = $this->jenisInvestasi()
             ->sum('nominal_yang_disalurkan');
 
         return floatval($this->jumlah_investasi) - floatval($totalDisalurkan);

@@ -16,33 +16,33 @@ Route::get('/master-data/sumber-pendanaan-eksternal', \App\Livewire\MasterData\S
 Route::get('/master-data/debitur-investor', \App\Livewire\MasterData\DebiturDanInvestor::class)->name('master-data.debitur-investor.index');
 Route::get('/master-data/master-karyawan-ski', \App\Livewire\MasterData\MasterKaryawanSki::class)->name('master-data.master-karyawan-ski.index');
 
-// Penyaluran Deposito
-Route::get('penyaluran-deposito', \App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex::class)->name('penyaluran-deposito.index');
+// Jenis Investasi (Penyaluran Deposito)
+Route::get('jenis-investasi', \App\Livewire\JenisInvestasi\JenisInvestasiIndex::class)->name('jenis-investasi.index');
 
 // Pengembalian Investasi
 Route::get('pengembalian-investasi', \App\Livewire\PengembalianInvestasi::class)->name('pengembalian-investasi.index');
 
 Route::get('config-matrix-pinjaman', \App\Livewire\ConfigMatrixPinjaman\Index::class)->name('config-matrix-pinjaman.index');
 
-Route::prefix('pengembalian')->name('pengembalian.')->group(function () {
-    Route::get('/', \App\Livewire\PengembalianPinjaman\Index::class)->name('index');
-    Route::get('create', \App\Livewire\PengembalianPinjaman\Create::class)->name('create');
-    Route::get('detail/{id}', \App\Livewire\PengembalianPinjaman\Detail::class)->name('detail');
+Route::prefix('pengembalian-tagihan-pinjaman')->name('pengembalian-tagihan-pinjaman.')->group(function () {
+    Route::get('/', \App\Livewire\PengembalianTagihanPinjaman\Index::class)->name('index');
+    Route::get('create', \App\Livewire\PengembalianTagihanPinjaman\Create::class)->name('create');
+    Route::get('detail/{id}', \App\Livewire\PengembalianTagihanPinjaman\Detail::class)->name('detail');
 });
 
-Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
-    Route::get('/', \App\Livewire\PengajuanPinjaman\Index::class)->name('index');
-    Route::get('create', \App\Livewire\PengajuanPinjaman\Create::class)->name('create');
-    Route::get('{id}/edit', \App\Livewire\PengajuanPinjaman\Create::class)->name('edit');
-    Route::get('detail/{id}', \App\Livewire\PengajuanPinjaman\Detail::class)->name('detail-livewire');
+Route::prefix('tagihan-pinjaman')->name('tagihan-pinjaman.')->group(function () {
+    Route::get('/', \App\Livewire\TagihanPinjaman\Index::class)->name('index');
+    Route::get('create', \App\Livewire\TagihanPinjaman\Create::class)->name('create');
+    Route::get('{id}/edit', \App\Livewire\TagihanPinjaman\Create::class)->name('edit');
+    Route::get('detail/{id}', \App\Livewire\TagihanPinjaman\Detail::class)->name('detail-livewire');
 });
 
-// AR Performance
-Route::get('ar-performance', \App\Livewire\ArPerformanceIndex::class)->name('ar-performance.index');
+// Monitoring Pembayaran (AR Performance)
+Route::get('monitoring-pembayaran', \App\Livewire\MonitoringPembayaranIndex::class)->name('monitoring-pembayaran.index');
 
-// Debitur Piutang
-Route::get('debitur-piutang', \App\Livewire\DebiturPiutangIndex::class)->name('debitur-piutang.index');
-Route::post('debitur-piutang/update', [\App\Http\Controllers\DebiturPiutangController::class, 'update'])->name('debitur-piutang.update');
+// Riwayat Tagihan Aktif (Debitur Piutang)
+Route::get('riwayat-tagihan-aktif', \App\Livewire\RiwayatTagihanAktifIndex::class)->name('riwayat-tagihan-aktif.index');
+Route::post('riwayat-tagihan-aktif/update', [\App\Http\Controllers\RiwayatTagihanAktifController::class, 'update'])->name('riwayat-tagihan-aktif.update');
 
 // Master Cells Project
 Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');

@@ -26,7 +26,7 @@
                 <th class="text-right">Total Pinjaman</th>
                 <th class="text-right">Nominal Dibayarkan</th>
                 <th class="text-right">Sisa Bayar Pokok</th>
-                <th class="text-right">Sisa Bagi Hasil</th>
+                <th class="text-right">Sisa Bunga</th>
                 <th class="text-center">Status</th>
             </tr>
         </thead>

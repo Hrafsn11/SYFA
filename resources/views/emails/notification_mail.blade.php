@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Peringatan Tagihan Piutang Pembiayaan</title>
+    <title>Peringatan Tagihan Tagihan Pinjaman Pembiayaan</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
     <table align="center" width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
@@ -23,7 +23,7 @@
 
                     <tr>
                         <td style="padding: 30px; font-family: Arial, sans-serif; color: #333;">
-                            <h2 style="margin-top: 0; color: #002147;">Peringatan Tagihan Piutang Pembiayaan</h2>
+                            <h2 style="margin-top: 0; color: #002147;">Peringatan Tagihan Tagihan Pinjaman Pembiayaan</h2>
                             <p>Yth. Bapak/Ibu <strong>{{ $user }}</strong></p>
                             <p>Dengan hormat,</p>
                         </td>

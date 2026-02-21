@@ -39,9 +39,9 @@ class HistoryStatusPengajuanPinjaman extends Model
     /**
      * Get the pengajuan peminjaman that this history belongs to.
      */
-    public function pengajuanPeminjaman(): BelongsTo
+    public function pengajuanTagihanPinjaman()
     {
-        return $this->belongsTo(PengajuanPeminjaman::class, 'id_pengajuan_peminjaman', 'id_pengajuan_peminjaman');
+        return $this->belongsTo(PengajuanTagihanPinjaman::class, 'id_pengajuan_peminjaman', 'id_pengajuan_peminjaman');
     }
 
     /**

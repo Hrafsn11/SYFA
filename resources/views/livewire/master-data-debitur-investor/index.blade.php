@@ -79,21 +79,21 @@
                                 <div class="invalid-feedback">Nama wajib diisi</div>
                             </div>
 
-                            <!-- Deposito (Khusus Investor) -->
-                            <div class="col-12 mb-3" id="div-deposito" style="display: none;">
-                                <label class="form-label">Deposito</label>
+                            <!-- Jenis Investasi (Khusus Investor) -->
+                            <div class="col-12 mb-3" id="div-jenis investasi" style="display: none;">
+                                <label class="form-label">Jenis Investasi</label>
                                 <div class="d-flex gap-4">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="deposito" id="deposito_reguler"
+                                        <input class="form-check-input" type="radio" name="jenis investasi" id="jenis investasi_reguler"
                                             value="reguler">
-                                        <label class="form-check-label" for="deposito_reguler">
+                                        <label class="form-check-label" for="jenis investasi_reguler">
                                             Reguler
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="deposito" id="deposito_khusus"
+                                        <input class="form-check-input" type="radio" name="jenis investasi" id="jenis investasi_khusus"
                                             value="khusus">
-                                        <label class="form-check-label" for="deposito_khusus">
+                                        <label class="form-check-label" for="jenis investasi_khusus">
                                             Khusus
                                         </label>
                                     </div>
@@ -286,7 +286,7 @@
                 if (currentTabType === 'investor') {
                     $('#btnTambahText').text('Investor');
                     $('#hiddenFlagging').val('ya');
-                    $('#div-deposito').show();
+                    $('#div-jenis investasi').show();
                     $('#div-nama-ceo').hide();
                     $('#div-alamat').hide();
                     $('#div-kol').hide();
@@ -297,7 +297,7 @@
                 } else {
                     $('#btnTambahText').text('Debitur');
                     $('#hiddenFlagging').val('tidak');
-                    $('#div-deposito').hide();
+                    $('#div-jenis investasi').hide();
                     $('#div-nama-ceo').show();
                     $('#div-alamat').show();
                     $('#div-kol').show();
@@ -326,7 +326,7 @@
                 if (currentTabType === 'investor') {
                     $('#modalTambahDebiturLabel').text('Tambah Investor');
                     $('#hiddenFlagging').val('ya');
-                    $('#div-deposito').show();
+                    $('#div-jenis investasi').show();
                     $('#div-nama-ceo').hide();
                     $('#div-alamat').hide();
                     $('#div-kol').hide();
@@ -338,7 +338,7 @@
                 } else {
                     $('#modalTambahDebiturLabel').text('Tambah Debitur');
                     $('#hiddenFlagging').val('tidak');
-                    $('#div-deposito').hide();
+                    $('#div-jenis investasi').hide();
                     $('#div-nama-ceo').show();
                     $('#div-alamat').show();
                     $('#div-kol').show();
@@ -353,7 +353,7 @@
                     $('#id_kol').prop('disabled', true);
                     $('#kol-info-text').show();
 
-                    $('input[name="deposito"]').prop('checked', false);
+                    $('input[name="jenis investasi"]').prop('checked', false);
                 }
 
                 $modal.modal('show');
@@ -378,9 +378,9 @@
                             $('#email').val(d.email);
                             $('#no_telepon').val(d.no_telepon);
 
-                            $('input[name="deposito"]').prop('checked', false);
-                            if (d.deposito) {
-                                $(`input[name="deposito"][value="${d.deposito}"]`).prop(
+                            $('input[name="jenis investasi"]').prop('checked', false);
+                            if (d.jenis investasi) {
+                                $(`input[name="jenis investasi"][value="${d.jenis investasi}"]`).prop(
                                     'checked', true);
                             }
 
@@ -401,7 +401,7 @@
 
                             if (d.flagging === 'ya') {
                                 $('#modalTambahDebiturLabel').text('Edit Investor');
-                                $('#div-deposito').show();
+                                $('#div-jenis investasi').show();
                                 $('#div-nama-ceo').hide();
                                 $('#div-alamat').hide();
                                 $('#div-kol').hide();
@@ -411,7 +411,7 @@
                                 $('#id_kol').prop('required', false);
                             } else {
                                 $('#modalTambahDebiturLabel').text('Edit Debitur');
-                                $('#div-deposito').hide();
+                                $('#div-jenis investasi').hide();
                                 $('#div-nama-ceo').show();
                                 $('#div-alamat').show();
                                 $('#div-kol').show();
@@ -559,7 +559,7 @@
                 formData.append('email', $('#email').val() || '');
                 formData.append('no_telepon', $('#no_telepon').val() || '');
                 formData.append('status', 'active');
-                formData.append('deposito', (flagging === 'ya') ? $('input[name="deposito"]:checked').val() || '' : '');
+                formData.append('jenis investasi', (flagging === 'ya') ? $('input[name="jenis investasi"]:checked').val() || '' : '');
                 formData.append('nama_bank', $('#nama_bank').val() || '');
                 formData.append('no_rek', $('#no_rek').val() || '');
                 formData.append('flagging', flagging);

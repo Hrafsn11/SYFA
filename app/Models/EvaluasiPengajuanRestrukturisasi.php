@@ -41,9 +41,9 @@ class EvaluasiPengajuanRestrukturisasi extends Model
     /**
      * Get the pengajuan restrukturisasi that this evaluasi belongs to.
      */
-    public function pengajuanRestrukturisasi(): BelongsTo
+    public function pengajuanCicilan()
     {
-        return $this->belongsTo(PengajuanRestrukturisasi::class, 'id_pengajuan_restrukturisasi', 'id_pengajuan_restrukturisasi');
+        return $this->belongsTo(PengajuanCicilan::class, 'id_pengajuan_restrukturisasi', 'id_pengajuan_restrukturisasi');
     }
 
     /**

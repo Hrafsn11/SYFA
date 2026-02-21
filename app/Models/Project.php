@@ -26,11 +26,11 @@ class Project extends Model
     }
 
     /**
-     * Relasi ke PengembalianPinjamanFinlog
+     * Relasi ke PengajuanTagihanPinjaman
      */
-    public function pengembalianPinjaman()
+    public function pengajuanTagihanPinjaman()
     {
-        return $this->hasMany(PengembalianPinjamanFinlog::class, 'id_project', 'id_project');
+        return $this->hasMany(PengajuanTagihanPinjaman::class, 'id_project');
     }
 
     /**

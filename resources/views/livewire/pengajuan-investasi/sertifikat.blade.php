@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate of Deposito - {{ $data['nomor_deposito'] }}</title>
+    <title>Certificate of Jenis Investasi - {{ $data['nomor_jenis investasi'] }}</title>
     <style>
         @font-face {
             font-family: 'Amsterdam Two';
@@ -564,7 +564,7 @@
         </div>
 
         <!-- Title -->
-        <div class="title">Certificate of Deposito</div>
+        <div class="title">Certificate of Jenis Investasi</div>
 
         <!-- Content -->
         <div class="content">
@@ -576,7 +576,7 @@
             <div class="content-row">
                 <div class="content-label">NOMOR DEPOSITO</div>
                 <div class="content-separator">:</div>
-                <div class="content-value">{{ $data['nomor_deposito'] }}</div>
+                <div class="content-value">{{ $data['nomor_jenis investasi'] }}</div>
             </div>
             <div class="content-row">
                 <div class="content-label">DESKRIPSI</div>
@@ -586,7 +586,7 @@
             <div class="content-row">
                 <div class="content-label">NILAI DEPOSITO</div>
                 <div class="content-separator">:</div>
-                <div class="content-value">{{ $data['nilai_deposito'] }}</div>
+                <div class="content-value">{{ $data['nilai_jenis investasi'] }}</div>
             </div>
             <div class="content-row">
                 <div class="content-label">KODE TRANSAKSI</div>

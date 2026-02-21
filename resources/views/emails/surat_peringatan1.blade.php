@@ -54,7 +54,7 @@
         </p>
 
         <p>
-            Bersama ini kami perlu informasikan bahwa tagihan piutang pembiayaan atas invoice
+            Bersama ini kami perlu informasikan bahwa tagihan tagihan pinjaman pembiayaan atas invoice
             no <strong>{{ $invoice }}</strong> sudah jatuh tempo <strong>1 hari</strong>, untuk itu mohon kiranya
             dapat mengkonfirmasikan kepada <strong>Luthfia</strong> ke
             <strong>0858 9246 7566</strong> atau melalui email <strong><a href="mailto:luthfia@synnovac-capital.com">luthfia@synnovac-capital.com</a></strong>

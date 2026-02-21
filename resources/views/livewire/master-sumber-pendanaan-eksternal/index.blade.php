@@ -47,10 +47,10 @@
                     </div>
                     <div class="mb-3">
                         <label for="persentase_bagi_hasil" class="form-label">
-                            Persentase Bagi Hasil <span class="text-danger">*</span>
+                            Persentase Bunga <span class="text-danger">*</span>
                         </label>
                         <input type="number" class="form-control" id="persentase_bagi_hasil"
-                            placeholder="Masukkan persentase bagi hasil" required min="0" max="100" step="1">
+                            placeholder="Masukkan persentase bunga" required min="0" max="100" step="1">
                         <div class="invalid-feedback">Persentase wajib diisi (0-100)</div>
                     </div>
                 </form>

@@ -29,9 +29,9 @@ class RiwayatPengembalianDeposito extends Model
         'tanggal_pengembalian' => 'date',
     ];
 
-    public function penyaluranDeposito(): BelongsTo
+    public function jenisInvestasi(): BelongsTo
     {
-        return $this->belongsTo(PenyaluranDeposito::class, 'id_penyaluran_deposito', 'id_penyaluran_deposito');
+        return $this->belongsTo(JenisInvestasi::class, 'id_penyaluran_deposito', 'id_penyaluran_deposito');
     }
 
     public function user(): BelongsTo

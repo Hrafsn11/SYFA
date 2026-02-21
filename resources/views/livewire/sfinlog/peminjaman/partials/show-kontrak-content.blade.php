@@ -28,7 +28,7 @@
 
     <p class="text-justify mt-4">
         Dengan ini sepakat untuk menetapkan hal-hal pokok, yang selanjutnya akan disebut sebagai
-        “<strong>Struktur dan Kontrak Pembiayaan</strong>” sehubungan dengan Perjanjian Pembiayaan
+        “<strong>Struktur dan Kontrak Pembiayaan</strong>” sehubagi hasiln dengan Perjanjian Pembiayaan
         Project Dengan Cara Pencairan Dengan Pembayaran Secara Angsuran atau Kontan ini (selanjutnya
         disebut sebagai “<strong>Perjanjian</strong>”), sebagai berikut:
     </p>

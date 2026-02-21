@@ -126,14 +126,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Outstanding Piutang</h6>
+                            <h6 class="text-muted mb-2">Total Yang Belum Dibayarkan Tagihan Pinjaman</h6>
                             <h4 class="mb-2 fw-bold">Rp
-                                {{ number_format($summaryData['total_outstanding_piutang'] ?? 0, 0, ',', '.') }}</h4>
+                                {{ number_format($summaryData['total_outstanding_tagihan pinjaman'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
                                 @php
-                                    $persen = $summaryData['total_outstanding_piutang_percentage'] ?? 0;
-                                    $isIncrease = $summaryData['total_outstanding_piutang_is_increase'] ?? false;
-                                    $isNew = $summaryData['total_outstanding_piutang_is_new'] ?? false;
+                                    $persen = $summaryData['total_outstanding_tagihan pinjaman_percentage'] ?? 0;
+                                    $isIncrease = $summaryData['total_outstanding_tagihan pinjaman_is_increase'] ?? false;
+                                    $isNew = $summaryData['total_outstanding_tagihan pinjaman_is_new'] ?? false;
                                     $colorClass = $isIncrease ? 'text-danger' : 'text-success';
                                 @endphp
                                 @if ($isNew)
@@ -165,7 +165,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Disbursement Pokok dan Bagi Hasil</h5>
+                    <h5 class="card-title mb-0">Total Disbursement Pokok dan Bunga</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanDisbursement" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
@@ -185,7 +185,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Pembayaran Pokok dan Bagi Hasil</h5>
+                    <h5 class="card-title mb-0">Total Pembayaran Pokok dan Bunga</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanPembayaran" class="form-select select2" data-placeholder="Pilih Bulan">
                             <option value=""></option>
@@ -208,7 +208,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Detail Disbursement Pokok dan Bagi Hasil</h5>
+                    <h5 class="card-title mb-0">Detail Disbursement Pokok dan Bunga</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -218,7 +218,7 @@
                                     <th style="width: 50px;">No</th>
                                     <th>Debitur</th>
                                     <th class="text-end">Pokok</th>
-                                    <th class="text-end">Bagi Hasil</th>
+                                    <th class="text-end">Bunga</th>
                                     <th class="text-end">Total</th>
                                 </tr>
                             </thead>
@@ -293,18 +293,18 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Pembayaran Piutang Per Tahun</h5>
+                    <h5 class="card-title mb-0">Total Pembayaran Tagihan Pinjaman Per Tahun</h5>
                     <div wire:ignore style="width: 150px;">
-                        <select id="filterTahunPiutang" class="form-select select2" data-placeholder="Pilih Tahun">
+                        <select id="filterTahunTagihan Pinjaman" class="form-select select2" data-placeholder="Pilih Tahun">
                             @foreach ($yearOptions as $value => $label)
-                                <option value="{{ $value }}" {{ $tahunPiutang == $value ? 'selected' : '' }}>
+                                <option value="{{ $value }}" {{ $tahunTagihan Pinjaman == $value ? 'selected' : '' }}>
                                     {{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div wire:ignore id="chartPembayaranPiutang" style="min-height: 350px;"></div>
+                    <div wire:ignore id="chartPembayaranTagihan Pinjaman" style="min-height: 350px;"></div>
                 </div>
             </div>
         </div>
@@ -382,7 +382,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Perbandingan AR dan Utang Pengembalian Deposito</h5>
+                    <h5 class="card-title mb-0">Perbandingan AR dan Utang Pengembalian Jenis Investasi</h5>
                     <div class="d-flex gap-2">
                         <div wire:ignore style="width: 120px;">
                             <select id="filterBulanComparison1" class="form-select select2"
@@ -431,7 +431,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="p-3 rounded-3" style="background-color: #fff8f0;">
-                                <small class="text-muted d-block mb-2">Selisih Utang Pengembalian Deposito</small>
+                                <small class="text-muted d-block mb-2">Selisih Utang Pengembalian Jenis Investasi</small>
                                 <h5 class="mb-0 fw-bold">
                                     Rp
                                     {{ number_format(abs($chartData['comparison']['utang_selisih'] ?? 0), 0, ',', '.') }}
@@ -456,7 +456,7 @@
 
     <div id="chart-data-holder" class="d-none" data-disbursement='@json($chartData['disbursement'] ?? [])'
         data-pembayaran='@json($chartData['pembayaran'] ?? [])' data-sisa='@json($chartData['sisa_belum_terbayar'] ?? [])'
-        data-piutang='@json($chartData['pembayaran_piutang_tahun'] ?? [])' data-comparison='@json($chartData['comparison'] ?? [])'>
+        data-tagihan pinjaman='@json($chartData['pembayaran_tagihan pinjaman_tahun'] ?? [])' data-comparison='@json($chartData['comparison'] ?? [])'>
     </div>
 </div>
 
@@ -473,7 +473,7 @@
         #filterBulanDisbursement+.select2-container,
         #filterBulanPembayaran+.select2-container,
         #filterBulanSisa+.select2-container,
-        #filterTahunPiutang+.select2-container {
+        #filterTahunTagihan Pinjaman+.select2-container {
             width: 150px !important;
             min-width: 150px !important;
             max-width: 150px !important;
@@ -507,7 +507,7 @@
                 disbursement: null,
                 pembayaran: null,
                 sisa: null,
-                piutang: null,
+                tagihan pinjaman: null,
                 comparison: null
             };
 
@@ -589,7 +589,7 @@
                         disbursement: JSON.parse(holder.getAttribute('data-disbursement') || '{}'),
                         pembayaran: JSON.parse(holder.getAttribute('data-pembayaran') || '{}'),
                         sisa: JSON.parse(holder.getAttribute('data-sisa') || '{}'),
-                        piutang: JSON.parse(holder.getAttribute('data-piutang') || '{}'),
+                        tagihan pinjaman: JSON.parse(holder.getAttribute('data-tagihan pinjaman') || '{}'),
                         comparison: JSON.parse(holder.getAttribute('data-comparison') || '{}')
                     };
                 } catch (e) {
@@ -635,7 +635,7 @@
                         data: data.disbursement.pokok || []
                     },
                     {
-                        name: 'Bagi Hasil',
+                        name: 'Bunga',
                         data: data.disbursement.bagi_hasil || []
                     }
                 ];
@@ -652,7 +652,7 @@
                         data: data.pembayaran.pokok || []
                     },
                     {
-                        name: 'Bagi Hasil',
+                        name: 'Bunga',
                         data: data.pembayaran.bagi_hasil || []
                     }
                 ];
@@ -669,7 +669,7 @@
                         data: data.sisa.pokok || []
                     },
                     {
-                        name: 'Bagi Hasil',
+                        name: 'Bunga',
                         data: data.sisa.bagi_hasil || []
                     }
                 ];
@@ -681,21 +681,21 @@
                     charts.sisa = createChart('chartSisaBelumTerbayar', sisaSeries, sisaCategories);
                 }
 
-                const piutangSeries = [{
+                const tagihan pinjamanSeries = [{
                         name: 'Pokok',
-                        data: data.piutang.pokok || []
+                        data: data.tagihan pinjaman.pokok || []
                     },
                     {
-                        name: 'Bagi Hasil',
-                        data: data.piutang.bagi_hasil || []
+                        name: 'Bunga',
+                        data: data.tagihan pinjaman.bagi_hasil || []
                     }
                 ];
-                const piutangCategories = data.piutang.categories || [];
+                const tagihan pinjamanCategories = data.tagihan pinjaman.categories || [];
 
-                if (charts.piutang) {
-                    updateChart(charts.piutang, piutangSeries, piutangCategories);
+                if (charts.tagihan pinjaman) {
+                    updateChart(charts.tagihan pinjaman, tagihan pinjamanSeries, tagihan pinjamanCategories);
                 } else {
-                    charts.piutang = createChart('chartPembayaranPiutang', piutangSeries, piutangCategories);
+                    charts.tagihan pinjaman = createChart('chartPembayaranTagihan Pinjaman', tagihan pinjamanSeries, tagihan pinjamanCategories);
                 }
 
                 const comparisonSeries = [{
@@ -733,8 +733,8 @@
                         width: 150
                     },
                     {
-                        id: 'filterTahunPiutang',
-                        property: 'tahunPiutang',
+                        id: 'filterTahunTagihan Pinjaman',
+                        property: 'tahunTagihan Pinjaman',
                         width: 150
                     },
                     {
@@ -811,7 +811,7 @@
 
                 observer.observe(holder, {
                     attributes: true,
-                    attributeFilter: ['data-disbursement', 'data-pembayaran', 'data-sisa', 'data-piutang',
+                    attributeFilter: ['data-disbursement', 'data-pembayaran', 'data-sisa', 'data-tagihan pinjaman',
                         'data-comparison'
                     ]
                 });

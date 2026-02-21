@@ -154,9 +154,9 @@
                     </div>
                     
                     <div class="row">
-                        {{-- Persentase Bagi Hasil --}}
+                        {{-- Persentase Bunga --}}
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Persentase Bagi Hasil (%) <span class="text-danger">*</span></label>
+                            <label class="form-label">Persentase Bunga (%) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" 
                                    wire:model="persentase_bagi_hasil"
                                    step="0.01" min="0" max="100"
@@ -686,11 +686,11 @@
                     @if($selectedHistory['persentase_bagi_hasil'] ?? null)
                     <div class="row">
                         <div class="col-6 mb-3">
-                            <label class="form-label text-muted small mb-1">Persentase Bagi Hasil</label>
+                            <label class="form-label text-muted small mb-1">Persentase Bunga</label>
                             <p class="mb-0">{{ $selectedHistory['persentase_bagi_hasil'] }}%</p>
                         </div>
                         <div class="col-6 mb-3">
-                            <label class="form-label text-muted small mb-1">Total Bagi Hasil</label>
+                            <label class="form-label text-muted small mb-1">Total Bunga</label>
                             <p class="mb-0">Rp {{ number_format($selectedHistory['total_bagi_hasil'] ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>

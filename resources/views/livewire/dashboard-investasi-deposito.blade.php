@@ -1,7 +1,7 @@
 <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-0">Dashboard Investasi Deposito SFinance</h4>
+            <h4 class="fw-bold mb-0">Dashboard Investasi Jenis Investasi SFinance</h4>
         </div>
     </div>
 
@@ -11,14 +11,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Deposito Pokok</h6>
+                            <h6 class="text-muted mb-2">Total Jenis Investasi Pokok</h6>
                             <h4 class="mb-2 fw-bold">Rp
-                                {{ number_format($summaryData['total_deposito_pokok'] ?? 0, 0, ',', '.') }}</h4>
+                                {{ number_format($summaryData['total_jenis investasi_pokok'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
                                 @php
-                                    $persen = $summaryData['total_deposito_pokok_percentage'] ?? 0;
-                                    $isIncrease = $summaryData['total_deposito_pokok_is_increase'] ?? false;
-                                    $isNew = $summaryData['total_deposito_pokok_is_new'] ?? false;
+                                    $persen = $summaryData['total_jenis investasi_pokok_percentage'] ?? 0;
+                                    $isIncrease = $summaryData['total_jenis investasi_pokok_is_increase'] ?? false;
+                                    $isNew = $summaryData['total_jenis investasi_pokok_is_new'] ?? false;
                                 @endphp
                                 @if ($isNew)
                                     <i class="ti ti-sparkles text-info me-1"></i>
@@ -126,7 +126,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Outstanding Deposito</h6>
+                            <h6 class="text-muted mb-2">Total Yang Belum Dibayarkan Jenis Investasi</h6>
                             <h4 class="mb-2 fw-bold">Rp
                                 {{ number_format($summaryData['total_outstanding'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
@@ -165,20 +165,20 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Deposito Pokok yang Masuk Per Bulan</h5>
+                    <h5 class="card-title mb-0">Total Jenis Investasi Pokok yang Masuk Per Bulan</h5>
                     <div wire:ignore style="width: 150px;">
-                        <select id="filterBulanDepositoPokok" class="form-select select2"
+                        <select id="filterBulanJenis InvestasiPokok" class="form-select select2"
                             data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @foreach ($monthOptions as $value => $label)
                                 <option value="{{ $value }}"
-                                    {{ $bulanDepositoPokok == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    {{ $bulanJenis InvestasiPokok == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div wire:ignore id="chartDepositoPokok" style="min-height: 350px;"></div>
+                    <div wire:ignore id="chartJenis InvestasiPokok" style="min-height: 350px;"></div>
                 </div>
             </div>
         </div>
@@ -208,7 +208,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Pengembalian Pokok dan Bagi Hasil</h5>
+                    <h5 class="card-title mb-0">Total Pengembalian Pokok dan Bunga</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanPengembalian" class="form-select select2"
                             data-placeholder="Pilih Bulan">
@@ -229,28 +229,28 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Sisa Deposito yang Belum Dikembalikan</h5>
+                    <h5 class="card-title mb-0">Total Sisa Jenis Investasi yang Belum Dikembalikan</h5>
                     <div wire:ignore style="width: 150px;">
-                        <select id="filterBulanSisaDeposito" class="form-select select2"
+                        <select id="filterBulanSisaJenis Investasi" class="form-select select2"
                             data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @foreach ($monthOptions as $value => $label)
                                 <option value="{{ $value }}"
-                                    {{ $bulanSisaDeposito == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    {{ $bulanSisaJenis Investasi == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div wire:ignore id="chartSisaDeposito" style="min-height: 350px;"></div>
+                    <div wire:ignore id="chartSisaJenis Investasi" style="min-height: 350px;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="chart-data-holder" class="d-none" data-deposito='@json($chartData['deposito_pokok'] ?? [])'
+    <div id="chart-data-holder" class="d-none" data-jenis investasi='@json($chartData['jenis investasi_pokok'] ?? [])'
         data-cof='@json($chartData['cof'] ?? [])' data-pengembalian='@json($chartData['pengembalian'] ?? [])'
-        data-sisa='@json($chartData['sisa_deposito'] ?? [])'>
+        data-sisa='@json($chartData['sisa_jenis investasi'] ?? [])'>
     </div>
 </div>
 
@@ -264,10 +264,10 @@
             width: 100% !important;
         }
 
-        #filterBulanDepositoPokok+.select2-container,
+        #filterBulanJenis InvestasiPokok+.select2-container,
         #filterBulanCoF+.select2-container,
         #filterBulanPengembalian+.select2-container,
-        #filterBulanSisaDeposito+.select2-container {
+        #filterBulanSisaJenis Investasi+.select2-container {
             width: 150px !important;
             min-width: 150px !important;
             max-width: 150px !important;
@@ -291,10 +291,10 @@
             'use strict';
 
             let charts = {
-                depositoPokok: null,
+                jenis investasiPokok: null,
                 cof: null,
                 pengembalian: null,
-                sisaDeposito: null
+                sisaJenis Investasi: null
             };
 
             const chartColors = ['#71dd37', '#ffab00'];
@@ -372,10 +372,10 @@
 
                 try {
                     return {
-                        depositoPokok: JSON.parse(holder.getAttribute('data-deposito') || '{}'),
+                        jenis investasiPokok: JSON.parse(holder.getAttribute('data-jenis investasi') || '{}'),
                         cof: JSON.parse(holder.getAttribute('data-cof') || '{}'),
                         pengembalian: JSON.parse(holder.getAttribute('data-pengembalian') || '{}'),
-                        sisaDeposito: JSON.parse(holder.getAttribute('data-sisa') || '{}')
+                        sisaJenis Investasi: JSON.parse(holder.getAttribute('data-sisa') || '{}')
                     };
                 } catch (e) {
                     console.error('Error parsing chart data:', e);
@@ -415,13 +415,13 @@
                 const data = getChartData();
                 if (!data) return;
 
-                const depositoSeries = data.depositoPokok.series || [];
-                const depositoCategories = data.depositoPokok.categories || [];
+                const jenis investasiSeries = data.jenis investasiPokok.series || [];
+                const jenis investasiCategories = data.jenis investasiPokok.categories || [];
 
-                if (charts.depositoPokok) {
-                    updateChart(charts.depositoPokok, depositoSeries, depositoCategories);
+                if (charts.jenis investasiPokok) {
+                    updateChart(charts.jenis investasiPokok, jenis investasiSeries, jenis investasiCategories);
                 } else {
-                    charts.depositoPokok = createChart('chartDepositoPokok', depositoSeries, depositoCategories);
+                    charts.jenis investasiPokok = createChart('chartJenis InvestasiPokok', jenis investasiSeries, jenis investasiCategories);
                 }
 
                 const cofSeries = data.cof.series || [];
@@ -443,20 +443,20 @@
                         chartColors);
                 }
 
-                const sisaSeries = data.sisaDeposito.series || [];
-                const sisaCategories = data.sisaDeposito.categories || [];
+                const sisaSeries = data.sisaJenis Investasi.series || [];
+                const sisaCategories = data.sisaJenis Investasi.categories || [];
 
-                if (charts.sisaDeposito) {
-                    updateChart(charts.sisaDeposito, sisaSeries, sisaCategories);
+                if (charts.sisaJenis Investasi) {
+                    updateChart(charts.sisaJenis Investasi, sisaSeries, sisaCategories);
                 } else {
-                    charts.sisaDeposito = createChart('chartSisaDeposito', sisaSeries, sisaCategories, chartColors);
+                    charts.sisaJenis Investasi = createChart('chartSisaJenis Investasi', sisaSeries, sisaCategories, chartColors);
                 }
             }
 
             function initSelect2() {
                 const filterConfigs = [{
-                        id: 'filterBulanDepositoPokok',
-                        property: 'bulanDepositoPokok',
+                        id: 'filterBulanJenis InvestasiPokok',
+                        property: 'bulanJenis InvestasiPokok',
                         width: 150
                     },
                     {
@@ -470,8 +470,8 @@
                         width: 150
                     },
                     {
-                        id: 'filterBulanSisaDeposito',
-                        property: 'bulanSisaDeposito',
+                        id: 'filterBulanSisaJenis Investasi',
+                        property: 'bulanSisaJenis Investasi',
                         width: 150
                     }
                 ];
@@ -528,7 +528,7 @@
 
                 observer.observe(holder, {
                     attributes: true,
-                    attributeFilter: ['data-deposito', 'data-cof', 'data-pengembalian', 'data-sisa']
+                    attributeFilter: ['data-jenis investasi', 'data-cof', 'data-pengembalian', 'data-sisa']
                 });
             }
 

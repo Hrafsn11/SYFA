@@ -126,7 +126,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Outstanding Deposito</h6>
+                            <h6 class="text-muted mb-2">Total Yang Belum Dibayarkan Deposito</h6>
                             <h4 class="mb-2 fw-bold">Rp
                                 {{ number_format($summaryData['total_outstanding'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">

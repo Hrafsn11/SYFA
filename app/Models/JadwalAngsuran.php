@@ -44,9 +44,9 @@ class JadwalAngsuran extends Model
     ];
 
     // Relationships
-    public function programRestrukturisasi()
+    public function penyesuaianCicilan()
     {
-        return $this->belongsTo(ProgramRestrukturisasi::class, 'id_program_restrukturisasi', 'id_program_restrukturisasi');
+        return $this->belongsTo(PenyesuaianCicilan::class, 'id_program_restrukturisasi', 'id_program_restrukturisasi');
     }
 
     /**

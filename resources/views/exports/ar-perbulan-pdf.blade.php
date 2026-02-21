@@ -80,7 +80,7 @@
                 <th width="12%">Bulan</th>
                 <th width="30%">Nama Perusahaan</th>
                 <th class="text-right" width="18%">Sisa AR Pokok</th>
-                <th class="text-right" width="18%">Sisa Bagi Hasil</th>
+                <th class="text-right" width="18%">Sisa Bunga</th>
                 <th class="text-right" width="17%">Sisa AR Total</th>
             </tr>
         </thead>

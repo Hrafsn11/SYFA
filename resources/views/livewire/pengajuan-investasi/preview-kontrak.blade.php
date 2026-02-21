@@ -28,7 +28,7 @@
                     <!-- Judul Kontrak -->
                     <div class="text-center mb-4">
                         <h5 class="fw-bold mb-2">SURAT PERJANJIAN KERJASAMA INVESTASI DEPOSITO
-                            {{ $kontrak['jenis_deposito'] }}
+                            {{ $kontrak['jenis_jenis investasi'] }}
                         </h5>
                         <p class="mb-0"><strong>No: {{ $kontrak['nomor_kontrak'] }}</strong></p>
                     </div>
@@ -103,28 +103,28 @@
 
                         <!-- Pendahuluan -->
                         <p class="mb-3">
-                            Bahwa sebelum ditandatanganinya Surat Perjanjian Investasi ini berupa Penempatan Dana Deposito,
+                            Bahwa sebelum ditandatanganinya Surat Perjanjian Investasi ini berupa Penempatan Dana Jenis Investasi,
                             PARA PIHAK terlebih dahulu menerangkan hal–hal sebagai berikut:
                         </p>
 
                         <div class="mb-4" style="padding-left: 20px;">
                             <p class="mb-2">1. Bahwa PIHAK PERTAMA adalah selaku Investor yang memiliki dana sebesar
                                 {{ $kontrak['jumlah_investasi_angka'] }} ({{ $kontrak['jumlah_investasi_text'] }}) untuk
-                                selanjutnya disebut sebagai Dana Deposito kepada S-Finance untuk Pembiayaan usaha yang
+                                selanjutnya disebut sebagai Dana Jenis Investasi kepada S-Finance untuk Pembiayaan usaha yang
                                 dibawah naungan S-Finance.
                             </p>
 
-                            <p class="mb-2">2. Bahwa PIHAK KEDUA adalah Penyalur, monitoring dan Penjamin Dana Deposito yang
-                                menerima Dana Deposito dari PIHAK PERTAMA.</p>
+                            <p class="mb-2">2. Bahwa PIHAK KEDUA adalah Penyalur, monitoring dan Penjamin Dana Jenis Investasi yang
+                                menerima Dana Jenis Investasi dari PIHAK PERTAMA.</p>
 
                             <p class="mb-2">3. Bahwa PARA PIHAK setuju untuk saling mengikatkan diri dalam suatu perjanjian
-                                kerjasama Deposito sesuai dengan ketentuan hukum yang berlaku.</p>
+                                kerjasama Jenis Investasi sesuai dengan ketentuan hukum yang berlaku.</p>
 
                             <p class="mb-2">4. PARA PIHAK menyatakan bahwa bertindak atas dasar sukarela dan tanpa paksaan
                                 dari pihak manapun.</p>
 
                             <p class="mb-2">5. Bahwa berdasarkan hal-hal tersebut di atas, PARA PIHAK menyatakan sepakat dan
-                                setuju untuk mengadakan Perjanjian Kerjasama Deposito ini yang dilaksanakan dengan ketentuan
+                                setuju untuk mengadakan Perjanjian Kerjasama Jenis Investasi ini yang dilaksanakan dengan ketentuan
                                 dan syarat-syarat sebagai berikut.</p>
                         </div>
 
@@ -134,7 +134,7 @@
                         <div class="mb-4">
                             <h6 class="fw-bold text-center">PASAL I<br>MAKSUD DAN TUJUAN</h6>
                             <p class="mt-3" style="padding-left: 20px;">
-                                1. Membentuk kerjasama Deposito dari PARA PIHAK untuk pembiayaan S-Finance yang saling
+                                1. Membentuk kerjasama Jenis Investasi dari PARA PIHAK untuk pembiayaan S-Finance yang saling
                                 menguntungkan dengan saling menjaga etika bisnis dari para pihak serta dilakukan secara
                                 profesional dan amanah
                             </p>
@@ -144,14 +144,14 @@
                         <div class="mb-4">
                             <h6 class="fw-bold text-center">PASAL II<br>RUANG LINGKUP</h6>
                             <div class="mt-3" style="padding-left: 20px;">
-                                <p class="mb-2">1. Dalam pelaksanaan perjanjian ini, PIHAK PERTAMA memberi Dana Deposito
+                                <p class="mb-2">1. Dalam pelaksanaan perjanjian ini, PIHAK PERTAMA memberi Dana Jenis Investasi
                                     kepada PIHAK KEDUA sebesar {{ $kontrak['jumlah_investasi_angka'] }}
                                     ({{ $kontrak['jumlah_investasi_text'] }}) dan PIHAK KEDUA dengan ini menerima penyerahan
-                                    Dana Deposito tersebut dari PIHAK PERTAMA serta menyanggupi sebagai penyalur,
-                                    monitoring, dan penjamin dana Deposito</p>
+                                    Dana Jenis Investasi tersebut dari PIHAK PERTAMA serta menyanggupi sebagai penyalur,
+                                    monitoring, dan penjamin dana Jenis Investasi</p>
 
                                 <p class="mb-2">2. PIHAK KEDUA dengan ini berjanji dan mengikatkan diri untuk mengelola
-                                    perputaran Dana Deposito secara khusus pada Usaha Pembiayaan di dibawah naungan
+                                    perputaran Dana Jenis Investasi secara khusus pada Usaha Pembiayaan di dibawah naungan
                                     S-Finance.</p>
                             </div>
                         </div>
@@ -165,15 +165,15 @@
                                     PIHAK dengan konfirmasi 2 minggu sebelum berakhir kontrak.
                                 </p>
 
-                                <p class="mb-2">2. Jangka waktu penutupan deposito adalah sampai
-                                    {{ $kontrak['tanggal_jatuh_tempo'] }}. Jika deposito diambil sebelum masa waktunya, maka
-                                    akan dikenakan penalti sebesar 1% dari nilai nominal deposito
+                                <p class="mb-2">2. Jangka waktu penutupan jenis investasi adalah sampai
+                                    {{ $kontrak['tanggal_jatuh_tempo'] }}. Jika jenis investasi diambil sebelum masa waktunya, maka
+                                    akan dikenakan penalti sebesar 1% dari nilai nominal jenis investasi
                                 </p>
 
                                 <p class="mb-2">3. Persetujuan perpanjangan Perjanjian kerjasama yang dimaksudkan dapat
                                     dilakukan secara otomatis berdasarkan konfirmasi awal dari PIHAK PERTAMA kepada PIHAK
-                                    KEDUA, atau Non Otomatis jika diperlukan adanya Keputusan Deposito dari PIHAK PERTAMA
-                                    jika terdapat perubahan objek atau skema Deposito didalam kelolaan usaha PIHAK KETIGA
+                                    KEDUA, atau Non Otomatis jika diperlukan adanya Keputusan Jenis Investasi dari PIHAK PERTAMA
+                                    jika terdapat perubahan objek atau skema Jenis Investasi didalam kelolaan usaha PIHAK KETIGA
                                 </p>
                             </div>
                         </div>
@@ -184,7 +184,7 @@
                             <p class="mt-3">Dalam Perjanjian Kerjasama ini, PIHAK PERTAMA memiliki Hak dan Kewajiban sebagai
                                 berikut:</p>
                             <div style="padding-left: 20px;">
-                                <p class="mb-2">1. Memberikan Dana Deposito kepada PIHAK KEDUA sebesar
+                                <p class="mb-2">1. Memberikan Dana Jenis Investasi kepada PIHAK KEDUA sebesar
                                     {{ $kontrak['jumlah_investasi_angka'] }} ({{ $kontrak['jumlah_investasi_text'] }}) yang
                                     di tempatkan/ditransfer ke rekening S-Finance, dengan data sebagai berikut :<br>
                                     Nama pemilik rekening : PT. Synnovac Kapital Indonesia<br>
@@ -192,16 +192,16 @@
                                     Nomor rekening : 1240010052851
                                 </p>
 
-                                <p class="mb-2">2. Berhak meminta kembali Dana Deposito yang telah diserahkan kepada PIHAK
+                                <p class="mb-2">2. Berhak meminta kembali Dana Jenis Investasi yang telah diserahkan kepada PIHAK
                                     KEDUA dengan ketentuan berdasarkan Pasal III Ayat 2.</p>
 
-                                <p class="mb-2">3. Menerima hasil keuntungan atas pengelolaan Dana Deposito dari PIHAK
+                                <p class="mb-2">3. Menerima hasil keuntungan atas pengelolaan Dana Jenis Investasi dari PIHAK
                                     KEDUA, sesuai dengan Pasal VI perjanjian ini</p>
 
-                                <p class="mb-2">4. Menerima hasil laporan pengelolaan dana Deposito dari PIHAK KEDUA secara
+                                <p class="mb-2">4. Menerima hasil laporan pengelolaan dana Jenis Investasi dari PIHAK KEDUA secara
                                     periodic</p>
 
-                                <p class="mb-2">5. PIHAK PERTAMA akan menerima bukti penerbitan dana Deposito pembiayaan
+                                <p class="mb-2">5. PIHAK PERTAMA akan menerima bukti penerbitan dana Jenis Investasi pembiayaan
                                     dari PIHAK KEDUA setelah dana diterima dan pembiayaan ditempatkan.</p>
                             </div>
                         </div>
@@ -209,23 +209,23 @@
                         <!-- PASAL V -->
                         <div class="mb-4">
                             <h6 class="fw-bold text-center">PASAL V<br>HAK DAN KEWAJIBAN PIHAK KEDUA</h6>
-                            <p class="mt-3">Dalam Perjanjian Kerjasama Deposito ini, PIHAK KEDUA memiliki Hak dan Kewajiban
+                            <p class="mt-3">Dalam Perjanjian Kerjasama Jenis Investasi ini, PIHAK KEDUA memiliki Hak dan Kewajiban
                                 sebagai berikut :</p>
                             <div style="padding-left: 20px;">
-                                <p class="mb-2">1. Menerima Dana Deposito dari PIHAK PERTAMA sebesar
+                                <p class="mb-2">1. Menerima Dana Jenis Investasi dari PIHAK PERTAMA sebesar
                                     {{ $kontrak['jumlah_investasi_angka'] }} ({{ $kontrak['jumlah_investasi_text'] }}) yang
                                     ditempatkan di rekening S-Finance
                                 </p>
 
-                                <p class="mb-2">2. PIHAK KEDUA akan memberikan bukti penerbitan dana Deposito pembiayaan
+                                <p class="mb-2">2. PIHAK KEDUA akan memberikan bukti penerbitan dana Jenis Investasi pembiayaan
                                     kepada PIHAK PERTAMA setelah dana diterima.</p>
 
-                                <p class="mb-2">3. Menyalurkan, monitoring Dana Deposito PIHAK PERTAMA</p>
+                                <p class="mb-2">3. Menyalurkan, monitoring Dana Jenis Investasi PIHAK PERTAMA</p>
 
                                 <p class="mb-2">4. Memberikan bagian hasil keuntungan kepada PIHAK PERTAMA, sesuai dengan
                                     Pasal VI perjanjian ini.</p>
 
-                                <p class="mb-2">5. Memberikan hasil laporan pengelolaan Dana Deposito kepada PIHAK PERTAMA
+                                <p class="mb-2">5. Memberikan hasil laporan pengelolaan Dana Jenis Investasi kepada PIHAK PERTAMA
                                     secara periodic</p>
                             </div>
                         </div>
@@ -233,19 +233,19 @@
                         <!-- PASAL VI -->
                         <div class="mb-4">
                             <h6 class="fw-bold text-center">PASAL VI<br>PEMBAGIAN HASIL</h6>
-                            <p class="mt-3">Dalam Perjanjian Kerjasama Deposito ini, PARA PIHAK sepakat didalam hal
-                                pembagian hasil Deposito sebagai berikut :</p>
+                            <p class="mt-3">Dalam Perjanjian Kerjasama Jenis Investasi ini, PARA PIHAK sepakat didalam hal
+                                pembagian hasil Jenis Investasi sebagai berikut :</p>
                             <div style="padding-left: 20px;">
-                                <p class="mb-2">1. Bagi Hasil kepada PIHAK PERTAMA sebesar {{ $kontrak['bagi_hasil'] }} %
-                                    per Tahun terhitung dari tanggal diterimanya dana oleh PIHAK KEDUA dan nilai bagi hasil
+                                <p class="mb-2">1. Bunga kepada PIHAK PERTAMA sebesar {{ $kontrak['bagi_hasil'] }} %
+                                    per Tahun terhitung dari tanggal diterimanya dana oleh PIHAK KEDUA dan nilai bunga
                                     akan diberikan dari PIHAK KEDUA di akhir periode kerjasama.</p>
 
-                                <p class="mb-2">2. Jika dana masuk di atas tanggal 20, maka bagi hasil akan di hitung di
+                                <p class="mb-2">2. Jika dana masuk di atas tanggal 20, maka bunga akan di hitung di
                                     bulan berikutnya.</p>
 
                                 <p class="mb-2">3. Bagi hasil yang dimaksud berlaku sampai dengan PIHAK PERTAMA menarik
-                                    kembali Dana Deposito yang telah diserahkan kepada PIHAK KEDUA atau masa berlaku
-                                    Deposito sudah berakhir.</p>
+                                    kembali Dana Jenis Investasi yang telah diserahkan kepada PIHAK KEDUA atau masa berlaku
+                                    Jenis Investasi sudah berakhir.</p>
                             </div>
                         </div>
 
@@ -256,15 +256,15 @@
                                 <p class="mb-2">1. Yang termasuk dalam Force Majeur adalah akibat dari kejadian-kejadian
                                     diluar kuasa dan kehendak dari kedua belah pihak diantaranya termasuk tidak terbatas
                                     bencana alam, banjir, badai, topan, gempa bumi, kebakaran, perang, huru-hara,
-                                    pemberontakan, demonstrasi, pemogokan, kegagalan Deposito.</p>
+                                    pemberontakan, demonstrasi, pemogokan, kegagalan Jenis Investasi.</p>
 
                                 <p class="mb-2">2. Jika dalam pelaksanaan perjanjian ini terhambat ataupun tertunda baik
                                     secara keseluruhan ataupun sebagian yang dikarenakan hal-hal tersebut dalam ayat 1
-                                    diatas, maka PIHAK KEDUA bersedia mengganti sejumlah Dana Deposito dari PIHAK PERTAMA
+                                    diatas, maka PIHAK KEDUA bersedia mengganti sejumlah Dana Jenis Investasi dari PIHAK PERTAMA
                                     secara penuh apabila belum ada pembagian hasil keuntungan, atau pengembalian Dana
-                                    Deposito dikurangi dengan pembagian hasil yang sudah terima oleh PIHAK PERTAMA.</p>
+                                    Jenis Investasi dikurangi dengan pembagian hasil yang sudah terima oleh PIHAK PERTAMA.</p>
 
-                                <p class="mb-2">3. Pengembalian Dana Deposito sebagaimana tersebut dalam ayat 2, mengenai
+                                <p class="mb-2">3. Pengembalian Dana Jenis Investasi sebagaimana tersebut dalam ayat 2, mengenai
                                     tata cara pengembaliannya akan diadakan musyawarah terlebih dahulu antara PIHAK PERTAMA
                                     dan PIHAK KEDUA mengenai proses atau jangka waktu pengembaliannya.</p>
                             </div>

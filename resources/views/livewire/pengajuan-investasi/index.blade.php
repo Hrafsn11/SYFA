@@ -34,7 +34,7 @@
                     <div class="modal-body">
                         <div class="alert alert-warning mb-4" role="alert" id="alertPeninjauan">
                             <i class="fas fa-info-circle me-2"></i>
-                            Deposito yang masuk setelah tanggal 20, untuk bagi hasil akan dihitung di bulan selanjutnya
+                            Jenis Investasi yang masuk setelah tanggal 20, untuk bunga akan dihitung di bulan selanjutnya
                         </div>
                         <form id="formTambahFormKerjaInvestor" novalidate>
                             <input type="hidden" id="editFormKerjaInvestorId" value="">
@@ -47,20 +47,20 @@
                                     <input type="text" class="form-control" id="nama_investor" name="nama_investor"
                                         placeholder="Nama Investor" required readonly>
                                 </div>
-                                <div class="col-12 mb-3" id="div-deposito">
-                                    <label class="form-label">Deposito <span class="text-danger">*</span></label>
+                                <div class="col-12 mb-3" id="div-jenis investasi">
+                                    <label class="form-label">Jenis Investasi <span class="text-danger">*</span></label>
                                     <div class="d-flex gap-4">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_reguler" value="reguler" required disabled>
-                                            <label class="form-check-label" for="deposito_reguler">
+                                            <input class="form-check-input" type="radio" name="jenis investasi"
+                                                id="jenis investasi_reguler" value="reguler" required disabled>
+                                            <label class="form-check-label" for="jenis investasi_reguler">
                                                 Reguler
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_khusus" value="khusus" required disabled>
-                                            <label class="form-check-label" for="deposito_khusus">
+                                            <input class="form-check-input" type="radio" name="jenis investasi"
+                                                id="jenis investasi_khusus" value="khusus" required disabled>
+                                            <label class="form-check-label" for="jenis investasi_khusus">
                                                 Khusus
                                             </label>
                                         </div>
@@ -88,17 +88,17 @@
                                         name="jumlah_investasi" placeholder="Rp 0" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="bagi_hasil" class="form-label">Bagi Hasil (%)/Tahun <span
+                                    <label for="bagi_hasil" class="form-label">Bunga (%)/Tahun <span
                                             class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="bagi_hasil" name="bagi_hasil_pertahun"
-                                        placeholder="Masukan bagi hasil" min="0" max="100" step="0.01"
+                                        placeholder="Masukan bunga" min="0" max="100" step="0.01"
                                         required>
                                     <small class="text-muted d-none" id="bagi-hasil-hint">
-                                        <i class="ti ti-info-circle"></i> Minimum 7% untuk deposito khusus
+                                        <i class="ti ti-info-circle"></i> Minimum 7% untuk jenis investasi khusus
                                     </small>
                                 </div>
                                 <div class="col-lg-12 mb-3">
-                                    <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bagi Hasil Yang Didapat
+                                    <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bunga Yang Didapat
                                         <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control input-rupiah non-editable"
                                         id="bagi_hasil_keseluruhan" placeholder="Rp 0" required disabled readonly>
@@ -153,7 +153,7 @@
             const $form = $('#formTambahFormKerjaInvestor');
             const INVESTOR = {
                 nama: '{{ optional($investor)->nama ?? '' }}',
-                deposito: '{{ optional($investor)->deposito ?? '' }}',
+                jenis investasi: '{{ optional($investor)->jenis investasi ?? '' }}',
                 id: '{{ optional($investor)->id_debitur ?? '' }}'
             };
             const CSRF = '{{ csrf_token() }}';
@@ -210,8 +210,8 @@
                 ['jumlah_investasi', 'bagi_hasil_keseluruhan'].forEach(id => setCleave(id, 0));
             };
 
-            const setDepositoMode = (deposito) => {
-                const isReguler = deposito === 'reguler';
+            const setJenis InvestasiMode = (jenis investasi) => {
+                const isReguler = jenis investasi === 'reguler';
                 $('#bagi_hasil').val(isReguler ? '10' : '').prop({
                     readonly: isReguler,
                     disabled: isReguler
@@ -228,19 +228,19 @@
             };
 
             $('#btnTambahFormKerjaInvestor').click(() => {
-                if (!INVESTOR.nama || !INVESTOR.deposito) return alert('warning',
+                if (!INVESTOR.nama || !INVESTOR.jenis investasi) return alert('warning',
                     'Anda belum terdaftar sebagai investor.<br>Silakan hubungi admin untuk mendaftar sebagai investor.',
                     'Data Investor Tidak Ditemukan');
 
                 resetForm();
                 $('#nama_investor').val(INVESTOR.nama);
                 $('#id_debitur_dan_investor').val(INVESTOR.id);
-                const deposito = INVESTOR.deposito.toLowerCase();
-                $('input[name="deposito"]').prop({
+                const jenis investasi = INVESTOR.jenis investasi.toLowerCase();
+                $('input[name="jenis investasi"]').prop({
                     checked: false,
                     disabled: true
-                }).filter(`[value="${deposito}"]`).prop('checked', true);
-                setDepositoMode(deposito);
+                }).filter(`[value="${jenis investasi}"]`).prop('checked', true);
+                setJenis InvestasiMode(jenis investasi);
                 $modal.modal('show');
                 setTimeout(initCleave, 100);
             });
@@ -284,22 +284,22 @@
 
             $('#btnSimpanFormKerjaInvestor').click(function() {
                 if (!$form[0].checkValidity()) return $form.addClass('was-validated');
-                if (!$('input[name="deposito"]:checked').val()) return alert('warning',
-                    'Pilih jenis deposito terlebih dahulu');
+                if (!$('input[name="jenis investasi"]:checked').val()) return alert('warning',
+                    'Pilih jenis jenis investasi terlebih dahulu');
                 if (!INVESTOR.id) return alert('warning',
                     'ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.',
                     'Data Investor Tidak Ditemukan');
 
                 const editId = $('#editFormKerjaInvestorId').val();
-                const deposito = $('input[name="deposito"]:checked').val();
+                const jenis investasi = $('input[name="jenis investasi"]:checked').val();
                 const $spinner = $('#btnSimpanSpinner');
 
-                $('input[name="deposito"]').prop('disabled', false);
+                $('input[name="jenis investasi"]').prop('disabled', false);
 
                 const data = {
                     id_debitur_dan_investor: INVESTOR.id,
                     nama_investor: $('#nama_investor').val(),
-                    deposito: deposito.charAt(0).toUpperCase() + deposito.slice(1),
+                    jenis investasi: jenis investasi.charAt(0).toUpperCase() + jenis investasi.slice(1),
                     tanggal_investasi: $('#bs-datepicker-tanggal-pembayaran').val(),
                     lama_investasi: $('#lama_investasi').val(),
                     jumlah_investasi: getCleave('jumlah_investasi'),
@@ -310,7 +310,7 @@
                     })
                 };
 
-                $('input[name="deposito"]').prop('disabled', true);
+                $('input[name="jenis investasi"]').prop('disabled', true);
                 $spinner.removeClass('d-none');
                 $(this).prop('disabled', true);
 
@@ -362,13 +362,13 @@
                                 'Edit Pengajuan Investasi');
                             $('#btnHapusFormKerjaInvestor').removeClass('d-none');
 
-                            const deposito = d.deposito?.toLowerCase();
-                            if (deposito) {
-                                $('input[name="deposito"]').prop({
+                            const jenis investasi = d.jenis investasi?.toLowerCase();
+                            if (jenis investasi) {
+                                $('input[name="jenis investasi"]').prop({
                                     checked: false,
                                     disabled: true
-                                }).filter(`[value="${deposito}"]`).prop('checked', true);
-                                setDepositoMode(deposito);
+                                }).filter(`[value="${jenis investasi}"]`).prop('checked', true);
+                                setJenis InvestasiMode(jenis investasi);
                             }
 
                             d.tanggal_investasi && $('#bs-datepicker-tanggal-pembayaran')

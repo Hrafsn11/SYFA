@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Report Pengembalian</title>
+    <title>Laporan Pengembalian</title>
     <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
         table { width: 100%; border-collapse: collapse; }
@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <h3>Report Pengembalian</h3>
+    <h3>Laporan Pengembalian</h3>
     <table>
         <thead>
             <tr>
@@ -44,7 +44,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center">Tidak ada data report pengembalian.</td>
+                    <td colspan="7" class="text-center">Tidak ada data laporan pengembalian.</td>
                 </tr>
             @endforelse
         </tbody>

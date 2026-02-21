@@ -42,10 +42,10 @@
                             <div class="invalid-feedback"></div>
                         </div>
                         <div class="mb-3 form-group">
-                            <label for="persentase_bagi_hasil" class="form-label">Persentase Bagi Hasil <span
+                            <label for="persentase_bagi_hasil" class="form-label">Persentase Bunga <span
                                     class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="persentase_bagi_hasil"
-                                placeholder="Masukkan persentase bagi hasil" wire:model.blur="persentase_bagi_hasil">
+                                placeholder="Masukkan persentase bunga" wire:model.blur="persentase_bagi_hasil">
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>

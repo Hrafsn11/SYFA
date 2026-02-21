@@ -38,15 +38,15 @@
             </div>
         </div>
         
-        {{-- Bagi Hasil --}}
+        {{-- Bunga --}}
         <div class="row mb-3">
             <div class="col-md-6">
-                <label class="form-label text-muted small">Persentase Bagi Hasil</label>
+                <label class="form-label text-muted small">Persentase Bunga</label>
                 <input type="text" class="form-control" 
                        value="{{ $latestHistory?->persentase_bagi_hasil ?? $persentase_bagi_hasil ?? 2 }}%" disabled>
             </div>
             <div class="col-md-6">
-                <label class="form-label text-muted small">Total Bagi Hasil</label>
+                <label class="form-label text-muted small">Total Bunga</label>
                 @php
                     $totalBagiHasilCalc = $latestHistory?->total_bagi_hasil 
                         ?? $total_bagi_hasil 

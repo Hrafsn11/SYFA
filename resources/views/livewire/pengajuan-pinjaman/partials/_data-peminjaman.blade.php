@@ -33,7 +33,7 @@
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4">
             <div class="mb-0">
-                <small class="text-light fw-semibold d-block mb-1">Persentase Bagi Hasil</small>
+                <small class="text-light fw-semibold d-block mb-1">Persentase Bunga</small>
                 @php
                     $p = $persentase_bagi_hasil ?? null;
                     $p_display = '-';
@@ -80,7 +80,7 @@
         </div>
         <div class="col-12 col-sm-6 col-md-4 col-lg-4">
             <div class="mb-0">
-                <small class="text-light fw-semibold d-block mb-1">Persentase Bagi Hasil</small>
+                <small class="text-light fw-semibold d-block mb-1">Persentase Bunga</small>
                 @php
                     $p = $persentase_bagi_hasil ?? null;
                     $p_display = '-';

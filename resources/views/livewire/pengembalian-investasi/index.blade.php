@@ -32,7 +32,7 @@
         let select2Kontrak;
         let flatpickrTanggal;
 
-        // Best Practice: Pattern from PenyaluranDeposito
+        // Best Practice: Pattern from PenyaluranJenis Investasi
         function afterAction(payload) {
             Livewire.dispatch('refreshPengembalianInvestasiTable');
             $('.modal').modal('hide');

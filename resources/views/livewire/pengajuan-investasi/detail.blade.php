@@ -10,7 +10,7 @@
             <!-- Stepper -->
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
-                    @foreach (['Pengajuan Investasi', 'Validasi Bagi Hasil', 'Validasi CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'] as $i => $name)
+                    @foreach (['Pengajuan Investasi', 'Validasi Bunga', 'Validasi CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'] as $i => $name)
                         <div class="stepper-item" data-step="{{ $i + 1 }}">
                             <div class="stepper-node"></div>
                             <div class="stepper-content">
@@ -32,7 +32,7 @@
                 @if ($investasi['current_step'] == 1)
                     <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        Pengajuan investasi Anda <strong>Ditolak pada Validasi Bagi Hasil</strong>. Anda dapat mengedit dan
+                        Pengajuan investasi Anda <strong>Ditolak pada Validasi Bunga</strong>. Anda dapat mengedit dan
                         submit ulang pengajuan dengan memperbaiki data yang diperlukan.
                     </div>
                 @elseif($investasi['current_step'] == 6)
@@ -104,7 +104,7 @@
                                                     <button type="button" class="btn btn-primary d-none"
                                                         id="btnSetujuiPengajuan">
                                                         <i class="fas fa-check me-2"></i>
-                                                        Validasi Bagi Hasil
+                                                        Validasi Bunga
                                                     </button>
                                                 @endcan
                                                 @can('investasi.validasi_ceo_ski')
@@ -128,7 +128,7 @@
                                             $dataFields = [
                                                 'Data Investasi' => [
                                                     'Nama Investor' => $investasi['nama_investor'] ?? '-',
-                                                    'Jenis Deposito' => ucfirst($investasi['deposito'] ?? '-'),
+                                                    'Jenis Jenis Investasi' => ucfirst($investasi['jenis investasi'] ?? '-'),
                                                     'Tanggal Investasi' => $investasi['tanggal_investasi']
                                                         ? \Carbon\Carbon::parse(
                                                             $investasi['tanggal_investasi'],
@@ -141,9 +141,9 @@
                                                     'Jumlah Investasi' =>
                                                         'Rp ' .
                                                         number_format($investasi['jumlah_investasi'] ?? 0, 0, ',', '.'),
-                                                    'Persentase Bagi Hasil' =>
+                                                    'Persentase Bunga' =>
                                                         ($investasi['bagi_hasil_pertahun'] ?? 0) . '%',
-                                                    'Nominal Bagi Hasil Keseluruhan' =>
+                                                    'Nominal Bunga Keseluruhan' =>
                                                         'Rp ' .
                                                         number_format(
                                                             $investasi['nominal_bagi_hasil_yang_didapatkan'] ?? 0,
@@ -193,7 +193,7 @@
                                     <!-- Konten Step 5: Generate Kontrak (After Dana Sudah Dicairkan) -->
                                     <div id="kontrak-step5" class="d-none">
                                         @can('investasi.generate_kontrak')
-                                            <h5 class="mb-4">Generate Kontrak Investasi Deposito</h5>
+                                            <h5 class="mb-4">Generate Kontrak Investasi Jenis Investasi</h5>
 
                                             <!-- Data Kontrak (10 Fields) -->
                                             <div class="card mb-4">
@@ -207,8 +207,8 @@
                                                                 $kontrakFields = [
                                                                     'Nama Perusahaan' =>
                                                                         $investasi['nama_investor'] ?? '-',
-                                                                    'Jenis Deposito' => ucfirst(
-                                                                        $investasi['deposito'] ?? '-',
+                                                                    'Jenis Jenis Investasi' => ucfirst(
+                                                                        $investasi['jenis investasi'] ?? '-',
                                                                     ),
                                                                     'Jumlah Investasi' =>
                                                                         'Rp ' .
@@ -218,8 +218,8 @@
                                                                             ',',
                                                                             '.',
                                                                         ),
-                                                                    'Persentase Bagi Hasil' =>
-                                                                        $investasi['deposito'] === 'Reguler'
+                                                                    'Persentase Bunga' =>
+                                                                        $investasi['jenis investasi'] === 'Reguler'
                                                                             ? '10%'
                                                                             : ($investasi['bagi_hasil_pertahun'] ?? 0) .
                                                                                 '%',
@@ -236,7 +236,7 @@
                                                                     'Tanggal Jatuh Tempo' => $investasi[
                                                                         'tanggal_investasi'
                                                                     ]
-                                                                        ? ($investasi['deposito'] === 'Reguler'
+                                                                        ? ($investasi['jenis investasi'] === 'Reguler'
                                                                             ? \Carbon\Carbon::createFromDate(
                                                                                 \Carbon\Carbon::parse(
                                                                                     $investasi['tanggal_investasi'],
@@ -448,12 +448,12 @@
                                                                                 'Draft' => 'Draft Pengajuan',
                                                                                 'Submit Dokumen' => 'Dokumen Disubmit',
                                                                                 'Dokumen Tervalidasi' =>
-                                                                                    'Validasi Bagi Hasil - Disetujui',
+                                                                                    'Validasi Bunga - Disetujui',
                                                                                 'Ditolak' => match (
                                                                                     $history->current_step
                                                                                 ) {
                                                                                     2
-                                                                                        => 'Validasi Bagi Hasil - Ditolak',
+                                                                                        => 'Validasi Bunga - Ditolak',
                                                                                     3 => 'Validasi CEO SKI - Ditolak',
                                                                                     default => 'Pengajuan Ditolak',
                                                                                 },
@@ -558,12 +558,12 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Validasi Bagi Hasil</h5>
+                        <h5 class="modal-title">Validasi Bunga</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <hr class="my-2">
                     <div class="modal-body">
-                        <h5 class="mb-3">Apakah anda yakin menyetujui Bagi Hasil Investasi ini?</h5>
+                        <h5 class="mb-3">Apakah anda yakin menyetujui Bunga Investasi ini?</h5>
                         
                         <div class="mb-3">
                             <label for="catatan_validasi_finance" class="form-label">Catatan Validasi <small class="text-muted">(Opsional)</small></label>

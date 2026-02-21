@@ -25,9 +25,9 @@ class PengembalianInvoice extends Model
         'nominal_yg_dibayarkan' => 'decimal:2',
     ];
 
-    public function pengembalianPinjaman()
+    public function pengembalianTagihanPinjaman()
     {
-        return $this->belongsTo(PengembalianPinjaman::class, 'id_pengembalian', 'ulid');
+        return $this->belongsTo(PengembalianTagihanPinjaman::class, 'id_pengembalian', 'ulid');
     }
     
     public function pengembalian()

@@ -126,7 +126,7 @@
     
                             <div class="row mb-3">
                                 <div class="col-md-4 form-group">
-                                    <label for="pps_debit" class="form-label">Persentase Bagi Hasil (Debit Cost)</label>
+                                    <label for="pps_debit" class="form-label">Persentase Bunga (Debit Cost)</label>
                                     <input type="text" class="form-control" id="pps_debit" wire:model="pps_debit" readonly disabled>
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -187,7 +187,7 @@
     
                             <div class="row">
                                 <div class="col-md-4 form-group mb-3">
-                                    <label for="total_bagi_hasil" class="form-label">Total Bagi Hasil</label>
+                                    <label for="total_bagi_hasil" class="form-label">Total Bunga</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control input-rupiah non-editable" id="total_bagi_hasil" wire:model="total_bagi_hasil" placeholder="2%" readonly disabled>
                                         <span class="input-group-text">/Bulan</span>

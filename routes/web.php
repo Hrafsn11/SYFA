@@ -1,15 +1,14 @@
 <?php
 
-use App\Http\Controllers\RencanaPenagihanDepositoController;
-use App\Http\Controllers\ArPerbulanController;
-use App\Http\Controllers\ArPerformanceController;
-use App\Livewire\KertasKerjaInvestorSFinance;
+use App\Http\Controllers\LaporanTagihanBulananController;
+use App\Http\Controllers\MonitoringPembayaranController;
+use App\Livewire\LaporanInvestasiSFinance;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Peminjaman\PeminjamanController;
-use App\Http\Controllers\PengembalianPinjamanController;
-use App\Http\Controllers\PenyaluranDanaInvestasiController;
-use App\Http\Controllers\PenyaluranDepositoController;
-use App\Livewire\ArPerbulan;
+use App\Http\Controllers\TagihanPinjamanController;
+use App\Http\Controllers\PengembalianTagihanPinjamanController;
+use App\Http\Controllers\PenyaluranDanaInvestasiController; // SFinlog one?
+use App\Http\Controllers\JenisInvestasiController;
+use App\Livewire\LaporanTagihanBulanan;
 use App\Livewire\ConfigMatrixScore;
 use App\Livewire\HomeServices;
 use App\Livewire\PermissionManagement;
@@ -74,8 +73,8 @@ Route::middleware([
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
 
-    // Peminjaman Routes
-    Route::prefix('peminjaman')->name('peminjaman.')->controller(PeminjamanController::class)->group(function () {
+    // Tagihan Pinjaman Routes
+    Route::prefix('tagihan-pinjaman')->name('tagihan-pinjaman.')->controller(TagihanPinjamanController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::get('/{id}', 'show')->name('detail');
         // Route::get('/{id}/edit', 'edit')->name('edit');
@@ -88,95 +87,84 @@ Route::middleware([
         Route::patch('/{id}/toggle-active', 'toggleActive')->name('toggle-active');
     });
 
-    // Route::get('pengembalian', [PengembalianPinjamanController::class, 'index'])->name('pengembalian.index');
-    // Route::get('pengembalian/create', [PengembalianPinjamanController::class, 'create'])->name('pengembalian.create');
-    Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
+    Route::post('pengembalian-tagihan-pinjaman/store', [PengembalianTagihanPinjamanController::class, 'store'])->name('pengembalian-tagihan-pinjaman.store');
     
-    // Peminjaman Routes - Index, Create, Edit sudah di-handle oleh Livewire (lihat livewire_route.php baris 33-37)
-    // Route::get('peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman'); // Diganti oleh peminjaman.index Livewire
-    // Route::get('peminjaman/{id}/edit', [PeminjamanController::class, 'edit'])->name('peminjaman.edit'); // Diganti oleh peminjaman.edit Livewire
-    // Route::get('ajukan-peminjaman', [PeminjamanController::class, 'create'])->name('ajukanpeminjaman'); // Diganti oleh peminjaman.create Livewire
+    // Tagihan Pinjaman Routes - Legacy support if needed or redundant
     
     // Route Controller yang masih diperlukan (fitur yang belum ada di Livewire)
-    Route::get('peminjaman/{id}', [PeminjamanController::class, 'show'])->name('peminjaman.detail'); // Detail page
-    Route::put('peminjaman/{id}', [PeminjamanController::class, 'update'])->name('peminjaman.update'); // Update endpoint
-    Route::post('peminjaman/{id}/preview-kontrak', [PeminjamanController::class, 'previewKontrak'])->name('peminjaman.preview-kontrak');
-    Route::post('peminjaman/{id}/download-kontrak', [PeminjamanController::class, 'downloadKontrak'])->name('peminjaman.download-kontrak');
-    Route::post('peminjaman', [PeminjamanController::class, 'store'])->name('peminjaman.store'); // Store endpoint untuk Livewire form
-    Route::post('peminjaman/{id}/approval', [PeminjamanController::class, 'approval'])->name('peminjaman.approval');
-    Route::get('peminjaman/history/{historyId}', [PeminjamanController::class, 'getHistoryDetail'])->name('peminjaman.history.detail');
-    Route::patch('peminjaman/{id}/toggle-active', [PeminjamanController::class, 'toggleActive'])->name('peminjaman.toggle-active');
+    Route::get('tagihan-pinjaman/{id}', [TagihanPinjamanController::class, 'show'])->name('tagihan-pinjaman.detail'); // Detail page
+    Route::put('tagihan-pinjaman/{id}', [TagihanPinjamanController::class, 'update'])->name('tagihan-pinjaman.update'); // Update endpoint
+    Route::post('tagihan-pinjaman/{id}/preview-kontrak', [TagihanPinjamanController::class, 'previewKontrak'])->name('tagihan-pinjaman.preview-kontrak');
+    Route::post('tagihan-pinjaman/{id}/download-kontrak', [TagihanPinjamanController::class, 'downloadKontrak'])->name('tagihan-pinjaman.download-kontrak');
+    Route::post('tagihan-pinjaman', [TagihanPinjamanController::class, 'store'])->name('tagihan-pinjaman.store'); // Store endpoint untuk Livewire form
+    Route::post('tagihan-pinjaman/{id}/approval', [TagihanPinjamanController::class, 'approval'])->name('tagihan-pinjaman.approval');
+    Route::get('tagihan-pinjaman/history/{historyId}', [TagihanPinjamanController::class, 'getHistoryDetail'])->name('tagihan-pinjaman.history.detail');
+    Route::patch('tagihan-pinjaman/{id}/toggle-active', [TagihanPinjamanController::class, 'toggleActive'])->name('tagihan-pinjaman.toggle-active');
 
-    // Restrukturisasi Routes - Controller actions only (index route in livewire_route.php)
-    Route::prefix('pengajuan-restrukturisasi')->name('pengajuan-restrukturisasi.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'index'])->name('index');
-        Route::post('/', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'store'])->name('store');
-        Route::get('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('show');
-        Route::get('{id}/edit', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'edit'])->name('edit');
-        Route::put('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'update'])->name('update');
-        Route::delete('{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'destroy'])->name('destroy');
-        Route::get('peminjaman/{idDebitur}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPeminjamanListApi'])->name('peminjaman.list');
-        Route::get('detail-pengajuan/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
+    // Pengajuan Cicilan Routes (Restrukturisasi)
+    Route::prefix('pengajuan-cicilan')->name('pengajuan-cicilan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PengajuanCicilanController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\PengajuanCicilanController::class, 'store'])->name('store');
+        Route::get('{id}', [\App\Http\Controllers\PengajuanCicilanController::class, 'show'])->name('show');
+        Route::get('{id}/edit', [\App\Http\Controllers\PengajuanCicilanController::class, 'edit'])->name('edit');
+        Route::put('{id}', [\App\Http\Controllers\PengajuanCicilanController::class, 'update'])->name('update');
+        Route::delete('{id}', [\App\Http\Controllers\PengajuanCicilanController::class, 'destroy'])->name('destroy');
+        Route::get('tagihan-pinjaman/{idDebitur}', [\App\Http\Controllers\PengajuanCicilanController::class, 'getPeminjamanListApi'])->name('tagihan-pinjaman.list');
+        Route::get('detail-pengajuan/{id}', [\App\Http\Controllers\PengajuanCicilanController::class, 'getPengajuanDetail'])->name('detail-pengajuan');
         // Evaluasi endpoints
         Route::post('{id}/evaluasi', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'save'])->name('evaluasi.save');
         Route::post('{id}/decision', [\App\Http\Controllers\EvaluasiRestrukturisasiController::class, 'decision'])->name('evaluasi.decision');
     });
 
-    // Program Restrukturisasi Routes - Full Livewire
-    Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-        Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');
-        Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
-        Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
-        Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
-        Route::get('{id}/generate-kontrak', \App\Livewire\ProgramRestrukturisasi\GenerateKontrak::class)->name('generate-kontrak');
-        Route::get('{id}/preview-kontrak', \App\Livewire\ProgramRestrukturisasi\PreviewKontrak::class)->name('preview-kontrak');
+    // Penyesuaian Cicilan Routes (Program Restrukturisasi)
+    Route::prefix('penyesuaian-cicilan')->name('penyesuaian-cicilan.')->group(function () {
+        Route::get('/', \App\Livewire\PenyesuaianCicilan\Index::class)->name('index');
+        Route::get('create', \App\Livewire\PenyesuaianCicilan\Create::class)->name('create');
+        Route::get('{id}', \App\Livewire\PenyesuaianCicilan\Show::class)->name('show');
+        Route::get('{id}/edit', \App\Livewire\PenyesuaianCicilan\Edit::class)->name('edit');
+        Route::get('{id}/generate-kontrak', \App\Livewire\PenyesuaianCicilan\GenerateKontrak::class)->name('generate-kontrak');
+        Route::get('{id}/preview-kontrak', \App\Livewire\PenyesuaianCicilan\PreviewKontrak::class)->name('preview-kontrak');
         // Controller endpoints (if still needed)
-        Route::post('/', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'store'])->name('store');
-        Route::get('approved', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
-        Route::get('detail/{id}', [\App\Http\Controllers\ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
+        Route::post('/', [\App\Http\Controllers\PenyesuaianCicilanController::class, 'store'])->name('store');
+        Route::get('approved', [\App\Http\Controllers\PenyesuaianCicilanController::class, 'getApprovedRestrukturisasi'])->name('approved');
+        Route::get('detail/{id}', [\App\Http\Controllers\PenyesuaianCicilanController::class, 'getRestrukturisasiDetail'])->name('detail');
     });
 
-    // Detail restrukturisasi menggunakan Controller dengan Pure AJAX (bukan Livewire component)
-    Route::get('detail-restrukturisasi/{id}', [\App\Http\Controllers\PengajuanRestrukturisasiController::class, 'show'])->name('detail-restrukturisasi');
+    // Detail cicilan menggunakan Controller dengan Pure AJAX (bukan Livewire component)
+    Route::get('detail-cicilan/{id}', [\App\Http\Controllers\PengajuanCicilanController::class, 'show'])->name('detail-cicilan');
 
-    // Pengembalian Pinjaman - Migrated to Livewire (see routes/livewire_route.php)
-    // Index and Create routes are handled by Livewire components
-    Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
-    Route::get('pengembalian/export-pdf', [PengembalianPinjamanController::class, 'exportPdf'])->name('pengembalian.export-pdf');
+    // Pengembalian Tagihan Pinjaman
+    Route::post('pengembalian-tagihan-pinjaman/store', [PengembalianTagihanPinjamanController::class, 'store'])->name('pengembalian-tagihan-pinjaman.store');
+    Route::get('pengembalian-tagihan-pinjaman/export-pdf', [PengembalianTagihanPinjamanController::class, 'exportPdf'])->name('pengembalian-tagihan-pinjaman.export-pdf');
 
-    // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
-    // Route::get('debitur-piutang', function () {
-    //     return view('livewire.debitur-piutang.index');
-    // })->name('debitur-piutang.index');
+    // Riwayat Tagihan Aktif (Debitur Piutang)
+    // AJAX endpoints
+    Route::get('riwayat-tagihan-aktif/histori', [App\Http\Controllers\RiwayatTagihanAktifController::class, 'getHistoriPembayaran'])->name('riwayat-tagihan-aktif.histori');
+    Route::get('riwayat-tagihan-aktif/summary', [App\Http\Controllers\RiwayatTagihanAktifController::class, 'getSummaryData'])->name('riwayat-tagihan-aktif.summary');
 
-    // AJAX endpoints for Debitur Piutang modals (Table 2 & 3)
-    Route::get('debitur-piutang/histori', [App\Http\Controllers\DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
-    Route::get('debitur-piutang/summary', [App\Http\Controllers\DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
+    // Laporan Tagihan Bulanan Routes
+    Route::get('laporan-tagihan-bulanan', LaporanTagihanBulanan::class)->name('laporan-tagihan-bulanan.index');
+    Route::post('laporan-tagihan-bulanan/update', [LaporanTagihanBulananController::class, 'updateLaporanTagihan'])->name('laporan-tagihan-bulanan.update');
 
-    // Ar Routes
-    Route::get('ar-perbulan', ArPerbulan::class)->name('ar-perbulan.index');
-    Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
-
-    // AR Performance - Migrated to Livewire (see routes/livewire_route.php)
-    // Main route moved to Livewire
-    // Route::get('ar-performance', [ArPerformanceController::class, 'index'])->name('ar-performance.index');
-
+    // Monitoring Pembayaran (AR Performance)
     // AJAX endpoints (still needed for modal)
-    Route::get('ar-performance/transactions', [ArPerformanceController::class, 'getTransactions'])->name('ar-performance.transactions');
-    Route::get('ar-performance/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('ar-performance.export-pdf');
+    Route::get('monitoring-pembayaran/transactions', [MonitoringPembayaranController::class, 'getTransactions'])->name('monitoring-pembayaran.transactions');
+    Route::get('monitoring-pembayaran/export-pdf', [MonitoringPembayaranController::class, 'exportPDF'])->name('monitoring-pembayaran.export-pdf');
 
-    Route::get('report-pengembalian', \App\Livewire\ReportPengembalian::class)->name('report-pengembalian.index');
-    Route::get('report-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('report-pengembalian.export-pdf');
+    Route::get('laporan-pengembalian', \App\Livewire\LaporanPengembalian::class)->name('laporan-pengembalian.index');
+    Route::get('laporan-pengembalian/export-pdf', [\App\Http\Controllers\LaporanPengembalianController::class, 'exportPdf'])->name('laporan-pengembalian.export-pdf');
 
+    // This one seems to be SFinlog controller in root folder (if exists) or SFinlog folder
     Route::get('report-penyaluran-dana-investasi', [PenyaluranDanaInvestasiController::class, 'index'])->name('report-penyaluran-dana-investasi.index');
-    Route::get('kertas-kerja-investor-sfinance', KertasKerjaInvestorSFinance::class)->name('kertas-kerja-investor-sfinance.index');
 
-    Route::prefix('penyaluran-deposito')->name('penyaluran-deposito.')->group(function () {
-        Route::post('/', [PenyaluranDepositoController::class, 'store'])->name('store');
-        Route::get('{id}/edit', [PenyaluranDepositoController::class, 'edit'])->name('edit');
-        Route::put('{id}', [PenyaluranDepositoController::class, 'update'])->name('update');
-        Route::delete('{id}', [PenyaluranDepositoController::class, 'destroy'])->name('destroy');
-        Route::post('{id}/upload-bukti', [PenyaluranDepositoController::class, 'uploadBukti'])->name('upload-bukti');
+    Route::get('laporan-investasi-sfinance', LaporanInvestasiSFinance::class)->name('laporan-investasi-sfinance.index');
+
+    Route::prefix('jenis-investasi')->name('jenis-investasi.')->group(function () {
+        Route::post('/', [JenisInvestasiController::class, 'store'])->name('store');
+        Route::get('{id}/edit', [JenisInvestasiController::class, 'edit'])->name('edit');
+        Route::put('{id}', [JenisInvestasiController::class, 'update'])->name('update');
+        Route::delete('{id}', [JenisInvestasiController::class, 'destroy'])->name('destroy');
+        Route::post('{id}/upload-bukti', [JenisInvestasiController::class, 'uploadBukti'])->name('upload-bukti');
     });
 
     // Pengembalian Investasi Routes

@@ -24,9 +24,9 @@ class CellsProject extends Model
         'profile_pict',
     ];
 
-    public function peminjamanFinlog()
+    public function pengajuanTagihanPinjaman()
     {
-        return $this->hasMany(PeminjamanFinlog::class, 'id_cells_project');
+        return $this->hasMany(PengajuanTagihanPinjaman::class, 'id_cells_project');
     }
 
     public function projects()

@@ -3,7 +3,7 @@
 @section('content')
     <div class="row">
         <div class="col-12 mb-4">
-            <h4 class="fw-bold">Penyaluran Dana Investasi - SFinlog</h4>
+            <h4 class="fw-bold">Aset Investasi - SFinlog</h4>
 
             <div class="content-wrapper">
                 <div class="card">
