@@ -3,7 +3,8 @@
 @endphp
 
 <div class="d-flex justify-content-center gap-1" id="action-row-{{ $id }}">
-    <a href="{{ route('peminjaman.detail', $id) }}" 
+    <a href="{{ route('peminjaman.detail-livewire', $id) }}" 
+       wire:navigate
        class="btn btn-sm btn-outline-primary action-btn" 
        title="Lihat Detail"
        data-action="detail"
@@ -12,6 +13,7 @@
     </a>
     
     @can('peminjaman_dana.edit')
+        {{-- Menggunakan route Livewire untuk edit --}}
         <a href="{{ route('peminjaman.edit', $id) }}" 
         wire:navigate.hover
         class="btn btn-sm btn-outline-warning action-btn edit-btn" 

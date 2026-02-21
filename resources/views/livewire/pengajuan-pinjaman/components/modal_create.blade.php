@@ -29,7 +29,7 @@
                                                 model_name="nilai_invoice"
                                                 :value="$nilai_invoice"
                                                 placeholder="Rp 0"
-                                                wire:key="nilai_invoice_{{ $nilai_invoice }}"
+                                                wire:key="invoice_financing_nilai_invoice"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -41,7 +41,7 @@
                                                 model_name="nilai_pinjaman"
                                                 :value="$nilai_pinjaman"
                                                 placeholder="Rp 0"
-                                                wire:key="nilai_pinjaman_{{ $nilai_pinjaman }}"
+                                                wire:key="invoice_financing_nilai_pinjaman"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -64,7 +64,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="invoice_date_{{ $invoice_date }}"
+                                                wire:key="invoice_financing_invoice_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -77,7 +77,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="due_date_{{ $due_date }}"
+                                                wire:key="invoice_financing_due_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -152,7 +152,7 @@
                                                 model_name="nilai_invoice"
                                                 :value="$nilai_invoice"
                                                 placeholder="Rp 0"
-                                                wire:key="nilai_invoice_{{ $nilai_invoice }}"
+                                                wire:key="po_financing_nilai_invoice"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -164,7 +164,7 @@
                                                 model_name="nilai_pinjaman"
                                                 :value="$nilai_pinjaman"
                                                 placeholder="Rp 0"
-                                                wire:key="nilai_pinjaman_{{ $nilai_pinjaman }}"
+                                                wire:key="po_financing_nilai_pinjaman"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -187,7 +187,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="kontrak_date_{{ $kontrak_date }}"
+                                                wire:key="po_financing_kontrak_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -200,7 +200,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="due_date_{{ $due_date }}"
+                                                wire:key="po_financing_due_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -286,7 +286,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="invoice_date_{{ $invoice_date }}"
+                                                wire:key="installment_invoice_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -367,7 +367,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="kontrak_date_{{ $kontrak_date }}"
+                                                wire:key="factoring_kontrak_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -380,7 +380,7 @@
                                                 format="dd/mm/yyyy"
                                                 :autoclose="true"
                                                 :today_highlight="true"
-                                                wire:key="due_date_{{ $due_date }}"
+                                                wire:key="factoring_due_date"
                                             />
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -455,15 +455,75 @@
         });
 
         Livewire.on('edit-invoice', (event) => {
-            // const data = event[0];
-            
-            // Object.entries(data).forEach(([key, value]) => {
-            //     if (['invoice_date', 'due_date'].includes(key)) {
-            //         $('#' + key).datepicker('setDate', value);
-            //     }
-            // });
-
             $('.modal').modal('show');
+        });
+
+        // Re-initialize datepickers and currency fields when modal is shown
+        $('#modalTambahInvoice').on('shown.bs.modal', function () {
+            // Re-init datepickers in modal
+            $(this).find('[datepicker-livewire]').each(function() {
+                const $input = $(this);
+                const inputId = $input.attr('id');
+                
+                if ($input.data('datepicker')) {
+                    $input.datepicker('destroy');
+                }
+
+                const datepickerOptions = {
+                    format: $input.attr('data-format') || 'dd/mm/yyyy',
+                    autoclose: $input.attr('data-autoclose') === 'true',
+                    todayHighlight: $input.attr('data-today-highlight') === 'true',
+                    orientation: 'bottom auto'
+                };
+
+                $input.datepicker(datepickerOptions).on('hide', function (e) {
+                    e.stopPropagation();
+                });
+
+                // Sync value on change
+                $input.off('changeDate.modal').on('changeDate.modal', function (e) {
+                    const dateValue = $input.val();
+                    if (dateValue) {
+                        const $wrapper = $input.closest('.input-group');
+                        let $componentElement = $wrapper.parents('[wire\\:id]').first();
+
+                        if ($componentElement.length) {
+                            const componentId = $componentElement.attr('wire:id');
+                            try {
+                                const component = Livewire.find(componentId);
+                                if (component) {
+                                    const modelName = $input.attr('datepicker-livewire') || inputId;
+                                    component.set(modelName, dateValue);
+                                }
+                            } catch (e) {
+                                console.warn('Livewire component not found:', e);
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Re-init Cleave.js for currency fields in modal
+            $(this).find('.currency-field-wrapper input').each(function() {
+                const input = this;
+                const inputId = $(this).attr('id');
+                
+                if (input._cleaveInstance) {
+                    return; // Already initialized
+                }
+
+                const cleaveInstance = new Cleave(input, {
+                    numeral: true,
+                    numeralThousandsGroupStyle: 'thousand',
+                    numeralDecimalScale: 0,
+                    prefix: input.dataset.prefix || 'Rp ',
+                    rawValueTrimPrefix: true,
+                    noImmediatePrefix: false
+                });
+
+                input._cleaveInstance = cleaveInstance;
+                input.dataset.cleaveInitialized = 'true';
+            });
         });
     });
 </script>

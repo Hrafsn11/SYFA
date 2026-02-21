@@ -16,43 +16,8 @@
                         <input type="text" class="form-control" id="nama_perusahaan" wire:model="nama_perusahaan" readonly disabled>
                     </div>
                 </div>
-                @if (in_array($jenis_pembiayaan, ['Invoice Financing', 'PO Financing']))
-                {{-- khusus Invoice Financing & PO Financing --}}
-                <div class="card border-1 mb-3 shadow-none" wire:block-when-change-state="sumber_pembiayaan">
-                    <div class="card-body">
-                        <div class="col-md-12 mb-3 form-group" wire:ignore>
-                            <label class="form-label mb-2">Sumber Pembiayaan</label>
-                            <div class="d-flex">
-                                <div class="form-check me-3">
-                                    <input wire:model.change="sumber_pembiayaan" class="form-check-input sumber-pembiayaan-radio" type="radio" value="Eksternal" id="sumber_eksternal">
-                                    <label class="form-check-label" for="sumber_eksternal">Eksternal</label>
-                                </div>
-                                <div class="form-check">
-                                    <input wire:model.change="sumber_pembiayaan" class="form-check-input sumber-pembiayaan-radio" type="radio" value="Internal" id="sumber_internal">
-                                    <label class="form-check-label" for="sumber_internal">Internal</label>
-                                </div>
-                            </div>
-                            <div class="invalid-feedback"></div>
-                        </div>
-                        @if ($sumber_pembiayaan == 'Eksternal')
-                        <div class="mt-2 form-group" id="divSumberEksternal" wire:ignore>
-                            <livewire:components.select2 
-                                :list_data="$sumber_eksternal"
-                                value_name="id_instansi"
-                                value_label="nama_instansi"
-                                data_placeholder="Pilih Sumber Pembiayaan Eksternal"
-                                model_name="id_instansi"
-                                :value="$id_instansi"
-                                :allow_clear="true"
-                                :tags="false"
-                            />
-                            <div class="invalid-feedback"></div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                {{-- end khusus Invoice Financing & PO Financing --}}
-                @endif
+                {{-- Sumber Pembiayaan dihilangkan karena sudah di-hardcode ke Internal di backend --}}
+                <input type="hidden" wire:model="sumber_pembiayaan" value="Internal">
     
                 <div class="card border-1 mb-3 shadow-none">
                     <div class="card-body">
@@ -214,6 +179,7 @@
                                         format="dd/mm/yyyy"
                                         :autoclose="true" 
                                         :today_highlight="true"
+                                        wire:key="create_harapan_tanggal_pencairan"
                                     />
                                     <div class="invalid-feedback"></div>
                                 </div>
@@ -237,6 +203,7 @@
                                         format="dd/mm/yyyy"
                                         :autoclose="true"
                                         :today_highlight="true"
+                                        wire:key="create_rencana_tgl_pembayaran"
                                     />
                                     <div class="invalid-feedback"></div>
                                 </div>

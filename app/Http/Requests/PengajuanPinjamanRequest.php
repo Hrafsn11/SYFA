@@ -75,8 +75,8 @@ class PengajuanPinjamanRequest extends FormRequest
             ],
             
             // Required for Invoice Financing, PO Financing, and Factoring
-            'harapan_tanggal_pencairan' => 'required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
-            'rencana_tgl_pembayaran' => 'required_unless:jenis_pembiayaan,Installment|date_format:Y-m-d',
+            'harapan_tanggal_pencairan' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
+            'rencana_tgl_pembayaran' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
             
             // Only for Installment
             'tenor_pembayaran' => 'nullable|required_if:jenis_pembiayaan,Installment|in:3,6,9,12',
@@ -146,9 +146,9 @@ class PengajuanPinjamanRequest extends FormRequest
             'form_data_invoice.*.dokumen_bast.mimes' => 'Dokumen BAST harus berupa file PDF, DOCX, XLS, PNG, RAR, atau ZIP.',
             'form_data_invoice.*.dokumen_bast.max' => 'Dokumen BAST tidak boleh lebih besar dari 2MB.',
             'harapan_tanggal_pencairan.required_unless' => 'Harapan tanggal pencairan harus diisi.',
-            'harapan_tanggal_pencairan.date_format' => 'Harapan tanggal pencairan harus berupa tanggal dengan format yang valid (YYYY-MM-DD).',
+            'harapan_tanggal_pencairan.date_format' => 'Harapan tanggal pencairan harus berupa tanggal dengan format DD/MM/YYYY.',
             'rencana_tgl_pembayaran.required_unless' => 'Rencana tanggal pembayaran harus diisi.',
-            'rencana_tgl_pembayaran.date_format' => 'Rencana tanggal pembayaran harus berupa tanggal dengan format yang valid (YYYY-MM-DD).',
+            'rencana_tgl_pembayaran.date_format' => 'Rencana tanggal pembayaran harus berupa tanggal dengan format DD/MM/YYYY.',
             'tenor_pembayaran.required_if' => 'Tenor pembayaran harus diisi untuk Installment.',
             'tenor_pembayaran.in' => 'Tenor pembayaran harus 3, 6, 9, atau 12 bulan.',
         ];
