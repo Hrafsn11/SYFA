@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
@@ -16,21 +16,21 @@ class PengajuanInvestasi extends Model
     /**
      * The table associated with the model.
      */
-    protected $table = 'pengajuan_investasi';
+    protected  = 'pengajuan_investasi';
 
     /**
      * The primary key associated with the table.
      */
-    protected $primaryKey = 'id_pengajuan_investasi';
+    protected  = 'id_pengajuan_investasi';
 
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [
+    protected  = [
         'id_debitur_dan_investor',
         'nama_investor',
         'nama_pic_kontrak',
-        'deposito',
+        'jenis_investasi',
         'tanggal_investasi',
         'lama_investasi',
         'jumlah_investasi',
@@ -51,7 +51,7 @@ class PengajuanInvestasi extends Model
     /**
      * The attributes that should be cast.
      */
-    protected $casts = [
+    protected  = [
         'tanggal_investasi' => 'date',
         'jumlah_investasi' => 'decimal:2',
         'nominal_bagi_hasil_yang_didapatkan' => 'decimal:2',
@@ -162,9 +162,9 @@ class PengajuanInvestasi extends Model
     }
 
 
-    public function penyaluranDeposito(): HasMany
+    public function penyaluranDanaInvestasi(): HasMany
     {
-        return $this->hasMany(PenyaluranDeposito::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
+        return $this->hasMany(PenyaluranDanaInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
     }
 
     /**
@@ -189,7 +189,7 @@ class PengajuanInvestasi extends Model
                         id_pengajuan_investasi as pd_id_pengajuan_investasi, 
                         SUM(nominal_yang_disalurkan) as total_disalurkan,
                         SUM(nominal_yang_dikembalikan) as total_dikembalikan
-                    FROM penyaluran_deposito 
+                    FROM penyaluran_dana_investasi
                     GROUP BY id_pengajuan_investasi
                 ) as pd_aggregated'),
                 'pengajuan_investasi.id_pengajuan_investasi',
@@ -212,7 +212,7 @@ class PengajuanInvestasi extends Model
 
     public function getSisaDana(): float
     {
-        $totalDisalurkan = $this->penyaluranDeposito()
+        $totalDisalurkan = $this->penyaluranDanaInvestasi()
             ->sum('nominal_yang_disalurkan');
 
         return floatval($this->jumlah_investasi) - floatval($totalDisalurkan);

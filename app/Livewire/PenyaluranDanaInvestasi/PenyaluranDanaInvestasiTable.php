@@ -1,32 +1,29 @@
 <?php
 
-namespace App\Livewire\PenyaluranDeposito;
+namespace App\Livewire\PenyaluranDanaInvestasi;
 
-use App\Models\PenyaluranDeposito;
-use App\Livewire\Traits\HasUniversalFormAction;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\PenyaluranDanaInvestasi;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
-class PenyaluranDepositoTable extends DataTableComponent
+class PenyaluranDanaInvestasiTable extends DataTableComponent
 {
-    use HasUniversalFormAction;
+    protected $model = PenyaluranDanaInvestasi::class;
 
-    protected $model = PenyaluranDeposito::class;
-
-    protected $listeners = ['refreshPenyaluranDepositoTable' => '$refresh'];
+    protected $listeners = ['refreshPenyaluranDanaInvestasiTable' => '$refresh'];
 
     public function configure(): void
     {
-        $this->setPrimaryKey('id_penyaluran_deposito')
+        $this->setPrimaryKey('id_penyaluran_dana_investasi')
             ->setSearchEnabled()
             ->setSearchPlaceholder('Cari aset investasi...')
             ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setDefaultSort('penyaluran_deposito.created_at', 'desc')
+            ->setDefaultSort('penyaluran_dana_investasi.created_at', 'desc')
             ->setTableAttributes(['class' => 'table table-hover'])
             ->setTheadAttributes(['class' => 'table-light'])
             ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
@@ -57,7 +54,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->whereRaw("MONTH(penyaluran_deposito.tanggal_pengiriman_dana) = ?", [$value]);
+                        $builder->whereRaw("MONTH(penyaluran_dana_investasi.tanggal_pengiriman_dana) = ?", [$value]);
                     }
                 }),
 
@@ -72,7 +69,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->whereRaw("YEAR(penyaluran_deposito.tanggal_pengiriman_dana) = ?", [$value]);
+                        $builder->whereRaw("YEAR(penyaluran_dana_investasi.tanggal_pengiriman_dana) = ?", [$value]);
                     }
                 }),
 
@@ -84,9 +81,13 @@ class PenyaluranDepositoTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if ($value === 'lunas') {
-                        $builder->whereNotNull('penyaluran_deposito.bukti_pengembalian');
+                        $builder->whereNotNull('penyaluran_dana_investasi.nominal_yang_dikembalikan')
+                            ->whereRaw('penyaluran_dana_investasi.nominal_yang_dikembalikan >= penyaluran_dana_investasi.nominal_yang_disalurkan');
                     } elseif ($value === 'belum_lunas') {
-                        $builder->whereNull('penyaluran_deposito.bukti_pengembalian');
+                         $builder->where(function($q) {
+                             $q->whereNull('penyaluran_dana_investasi.nominal_yang_dikembalikan')
+                               ->orWhereRaw('penyaluran_dana_investasi.nominal_yang_dikembalikan < penyaluran_dana_investasi.nominal_yang_disalurkan');
+                         });
                     }
                 }),
         ];
@@ -94,20 +95,20 @@ class PenyaluranDepositoTable extends DataTableComponent
 
     public function showKontrakDetail($nomorKontrak)
     {
-        // Load all penyaluran deposito for this contract number
-        $details = PenyaluranDeposito::query()
-            ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
-            ->leftJoin('master_debitur_dan_investor as mdi', 'penyaluran_deposito.id_debitur', '=', 'mdi.id_debitur')
+        // Load all penyaluran dana investasi for this contract number
+        $details = PenyaluranDanaInvestasi::query()
+            ->leftJoin('pengajuan_investasi as pi', 'penyaluran_dana_investasi.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->leftJoin('master_debitur_dan_investor as mdi', 'penyaluran_dana_investasi.id_debitur', '=', 'mdi.id_debitur')
             ->where('pi.nomor_kontrak', $nomorKontrak)
             ->select([
-                'penyaluran_deposito.*',
+                'penyaluran_dana_investasi.*',
                 'pi.nomor_kontrak',
                 'pi.nama_investor',
                 'pi.jumlah_investasi',
                 'pi.lama_investasi',
                 'mdi.nama as nama_perusahaan'
             ])
-            ->orderBy('penyaluran_deposito.created_at', 'desc')
+            ->orderBy('penyaluran_dana_investasi.created_at', 'desc')
             ->get();
 
         if ($details->isNotEmpty()) {
@@ -119,7 +120,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                 'jumlah_investasi' => $firstDetail->jumlah_investasi,
                 'lama_investasi' => $firstDetail->lama_investasi,
                 'details' => $details->map(function ($item) use ($nomorKontrak) {
-                    $penyaluranModel = \App\Models\PenyaluranDeposito::find($item->id_penyaluran_deposito);
+                    $penyaluranModel = PenyaluranDanaInvestasi::find($item->id_penyaluran_dana_investasi);
                     $sisaBelumDikembalikan = $penyaluranModel ? $penyaluranModel->sisa_belum_dikembalikan : ($item->nominal_yang_disalurkan - ($item->nominal_yang_dikembalikan ?? 0));
                     
                     $status = 'Belum Lunas';
@@ -130,7 +131,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                     }
 
                     return [
-                        'id' => $item->id_penyaluran_deposito,
+                        'id' => $item->id_penyaluran_dana_investasi,
                         'id_pengajuan_investasi' => $item->id_pengajuan_investasi,
                         'id_debitur' => $item->id_debitur,
                         'nomor_kontrak' => $nomorKontrak,
@@ -154,12 +155,12 @@ class PenyaluranDepositoTable extends DataTableComponent
         }
     }
 
-    public function builder(): \Illuminate\Database\Eloquent\Builder
+    public function builder(): Builder
     {
         $user = auth()->user();
 
-        $query = PenyaluranDeposito::query()
-            ->leftJoin('pengajuan_investasi as pi', 'penyaluran_deposito.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+        $query = PenyaluranDanaInvestasi::query()
+            ->leftJoin('pengajuan_investasi as pi', 'penyaluran_dana_investasi.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
             ->leftJoin('master_debitur_dan_investor', 'pi.id_debitur_dan_investor', '=', 'master_debitur_dan_investor.id_debitur')
             ->leftJoin(
                 \DB::raw('(
@@ -167,7 +168,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                         id_pengajuan_investasi, 
                         SUM(nominal_yang_disalurkan) as total_disalurkan_sum,
                         SUM(nominal_yang_dikembalikan) as total_dikembalikan_sum
-                    FROM penyaluran_deposito 
+                    FROM penyaluran_dana_investasi
                     GROUP BY id_pengajuan_investasi
                 ) as pd_sum'),
                 'pi.id_pengajuan_investasi',
@@ -175,9 +176,9 @@ class PenyaluranDepositoTable extends DataTableComponent
                 'pd_sum.id_pengajuan_investasi'
             )
             ->select([
-                \DB::raw('MIN(penyaluran_deposito.id_penyaluran_deposito) as id_penyaluran_deposito'),
-                \DB::raw('MIN(penyaluran_deposito.id_pengajuan_investasi) as id_pengajuan_investasi'),
-                \DB::raw('MIN(penyaluran_deposito.created_at) as created_at'),
+                \DB::raw('MIN(penyaluran_dana_investasi.id_penyaluran_dana_investasi) as id_penyaluran_dana_investasi'),
+                \DB::raw('MIN(penyaluran_dana_investasi.id_pengajuan_investasi) as id_pengajuan_investasi'),
+                \DB::raw('MIN(penyaluran_dana_investasi.created_at) as created_at'),
                 'pi.nomor_kontrak as pi_nomor_kontrak',
                 'pi.nama_investor as pi_nama_investor',
                 'pi.jumlah_investasi as pi_jumlah_investasi',
@@ -186,7 +187,7 @@ class PenyaluranDepositoTable extends DataTableComponent
                 \DB::raw('COALESCE(pd_sum.total_disalurkan_sum, 0) as total_disalurkan'),
                 \DB::raw('COALESCE(pd_sum.total_dikembalikan_sum, 0) as total_dikembalikan'),
                 \DB::raw('(pi.jumlah_investasi - COALESCE(pd_sum.total_disalurkan_sum, 0) + COALESCE(pd_sum.total_dikembalikan_sum, 0)) as sisa_dana'),
-                \DB::raw('COUNT(penyaluran_deposito.id_penyaluran_deposito) as jumlah_penyaluran')
+                \DB::raw('COUNT(penyaluran_dana_investasi.id_penyaluran_dana_investasi) as jumlah_penyaluran')
             ])
             ->groupBy('pi.nomor_kontrak', 'pi.nama_investor', 'pi.jumlah_investasi', 'pi.lama_investasi', 'pi.id_debitur_dan_investor', 'pd_sum.total_disalurkan_sum', 'pd_sum.total_dikembalikan_sum');
 
@@ -212,7 +213,7 @@ class PenyaluranDepositoTable extends DataTableComponent
         }
 
         // Order by created_at descending to show newest data first
-        $query->orderByRaw('MAX(penyaluran_deposito.created_at) DESC');
+        $query->orderByRaw('MAX(penyaluran_dana_investasi.created_at) DESC');
 
         return $query;
     }

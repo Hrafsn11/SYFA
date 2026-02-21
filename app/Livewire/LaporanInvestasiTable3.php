@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use App\Models\PengajuanInvestasi;
 
-class KertasKerjaInvestorTable3 extends DataTableComponent
+class LaporanInvestasiTable3 extends DataTableComponent
 {
     protected $model = PengajuanInvestasi::class;
 
@@ -59,7 +59,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 'sisa_bagi_hasil',
                 'nomor_kontrak',
                 'nama_investor',
-                'deposito',
+                'jenis_investasi',
                 'status'
             ])
             ->whereNotNull('nomor_kontrak')
@@ -71,7 +71,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
             $query->where(function ($q) use ($search) {
                 $q->where('nama_investor', 'like', '%' . $search . '%')
                     ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
-                    ->orWhere('deposito', 'like', '%' . $search . '%')
+                    ->orWhere('jenis_investasi', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%');
             });
         }

@@ -7,19 +7,19 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PenyaluranDeposito extends Model
+class PenyaluranDanaInvestasi extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $table = 'penyaluran_deposito';
+    protected  = 'penyaluran_dana_investasi';
 
-    protected $primaryKey = 'id_penyaluran_deposito';
+    protected  = 'id_penyaluran_dana_investasi';
 
-    public $incrementing = false;
+    public  = false;
 
-    protected $keyType = 'string';
+    protected  = 'string';
 
-    protected $fillable = [
+    protected  = [
         'id_pengajuan_investasi',
         'id_debitur',
         'nominal_yang_disalurkan',
@@ -28,7 +28,7 @@ class PenyaluranDeposito extends Model
         'tanggal_pengembalian',
     ];
 
-    protected $casts = [
+    protected  = [
         'nominal_yang_disalurkan' => 'decimal:2',
         'nominal_yang_dikembalikan' => 'decimal:2',
         'tanggal_pengiriman_dana' => 'date',
@@ -37,25 +37,25 @@ class PenyaluranDeposito extends Model
 
     public function pengajuanInvestasi(): BelongsTo
     {
-        return $this->belongsTo(PengajuanInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
+        return ->belongsTo(PengajuanInvestasi::class, 'id_pengajuan_investasi', 'id_pengajuan_investasi');
     }
 
     public function debitur(): BelongsTo
     {
-        return $this->belongsTo(MasterDebiturDanInvestor::class, 'id_debitur', 'id_debitur');
+        return ->belongsTo(MasterDebiturDanInvestor::class, 'id_debitur', 'id_debitur');
     }
 
     public function riwayatPengembalian()
     {
-        return $this->hasMany(RiwayatPengembalianDeposito::class, 'id_penyaluran_deposito', 'id_penyaluran_deposito');
+        return ->hasMany(RiwayatPengembalianDanaInvestasi::class, 'id_penyaluran_dana_investasi', 'id_penyaluran_dana_investasi');
     }
 
     public function getTotalDikembalikanAttribute()
     {
-        return $this->riwayatPengembalian()->sum('nominal_dikembalikan');
+        return ->riwayatPengembalian()->sum('nominal_dikembalikan');
     }
     public function getSisaBelumDikembalikanAttribute()
     {
-        return max(0, (float)$this->nominal_yang_disalurkan - $this->total_dikembalikan);
+        return max(0, (float)->nominal_yang_disalurkan - ->total_dikembalikan);
     }
 }

@@ -272,13 +272,13 @@
                 {{-- Aset Investasi (formerly Report Penyaluran Dana Investasi) --}}
                 @canany(['sfinance.menu.report_penyaluran_dana', 'sfinlog.menu.report_penyaluran_dana'])
                     <li
-                        class="menu-item {{ RouteHelper::is('*penyaluran-deposito*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
+                        class="menu-item {{ RouteHelper::is('*penyaluran-dana-investasi*') || RouteHelper::is('*penyaluran-deposito-sfinlog*') ? 'active' : '' }}">
                         @if ($isSFinance)
-                            <a href="{{ route('sfinance.penyaluran-deposito.index') }}" class="menu-link">
+                            <a href="{{ route('sfinance.penyaluran-dana-investasi.index') }}" class="menu-link">
                             @elseif($isSFinlog)
                                 <a href="{{ route('sfinlog.penyaluran-deposito-sfinlog.index') }}" class="menu-link">
                                 @else
-                                    <a href="{{ RouteHelper::route('penyaluran-deposito.index') }}" class="menu-link">
+                                    <a href="{{ RouteHelper::route('penyaluran-dana-investasi.index') }}" class="menu-link">
                         @endif
                         <i class="menu-icon tf-icons ti ti-report-money"></i>
                         <div data-i18n="Penyaluran Dana Investasi">Penyaluran Dana Investasi</div>
@@ -288,9 +288,9 @@
 
                 {{-- Kertas Kerja Investor --}}
                 @canany(['sfinance.menu.kertas_kerja_sfinance', 'sfinlog.menu.kertas_kerja_investor'])
-                    <li class="menu-item {{ RouteHelper::is('*kertas-kerja-investor*') ? 'active' : '' }}">
+                    <li class="menu-item {{ RouteHelper::is('*laporan-investasi-sfinance*') || RouteHelper::is('*kertas-kerja-investor*') ? 'active' : '' }}">
                         @if ($isSFinance)
-                            <a href="{{ route('sfinance.kertas-kerja-investor-sfinance.index') }}" class="menu-link"
+                            <a href="{{ route('sfinance.laporan-investasi-sfinance.index') }}" class="menu-link"
                                 wire:navigate.hover>
                                 <i class="menu-icon tf-icons ti ti-file-text"></i>
                                 <div data-i18n="Laporan Investasi">Laporan Investasi</div>

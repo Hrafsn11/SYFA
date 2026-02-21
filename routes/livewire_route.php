@@ -16,8 +16,8 @@ Route::get('/master-data/sumber-pendanaan-eksternal', \App\Livewire\MasterData\S
 Route::get('/master-data/debitur-investor', \App\Livewire\MasterData\DebiturDanInvestor::class)->name('master-data.debitur-investor.index');
 Route::get('/master-data/master-karyawan-ski', \App\Livewire\MasterData\MasterKaryawanSki::class)->name('master-data.master-karyawan-ski.index');
 
-// Penyaluran Deposito
-Route::get('penyaluran-deposito', \App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex::class)->name('penyaluran-deposito.index');
+// Penyaluran Dana Investasi
+Route::get('penyaluran-dana-investasi', \App\Livewire\PenyaluranDanaInvestasi\PenyaluranDanaInvestasiIndex::class)->name('penyaluran-dana-investasi.index');
 
 // Pengembalian Investasi
 Route::get('pengembalian-investasi', \App\Livewire\PengembalianInvestasi::class)->name('pengembalian-investasi.index');

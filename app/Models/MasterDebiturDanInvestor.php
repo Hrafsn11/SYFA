@@ -10,15 +10,15 @@ class MasterDebiturDanInvestor extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $table = 'master_debitur_dan_investor';
+    protected  = 'master_debitur_dan_investor';
 
-    protected $primaryKey = 'id_debitur';
+    protected  = 'id_debitur';
 
-    public $incrementing = false;
+    public  = false;
 
-    protected $keyType = 'string';
+    protected  = 'string';
 
-    protected $fillable = [
+    protected  = [
         'user_id',
         'id_kol',
         'nama',
@@ -43,7 +43,7 @@ class MasterDebiturDanInvestor extends Model
         'tanda_tangan',
     ];
 
-    protected $casts = [
+    protected  = [
         'flagging' => 'string',
         'flagging_investor' => 'string',
         'status' => 'string',
@@ -63,6 +63,11 @@ class MasterDebiturDanInvestor extends Model
     public function peminjamanFinlog()
     {
         return $this->hasMany(PeminjamanFinlog::class, 'id_debitur', 'id_debitur');
+    }
+
+    public function penyaluranDanaInvestasi()
+    {
+        return $this->hasMany(PenyaluranDanaInvestasi::class, 'id_debitur', 'id_debitur');
     }
 
     public function Debitur($query)

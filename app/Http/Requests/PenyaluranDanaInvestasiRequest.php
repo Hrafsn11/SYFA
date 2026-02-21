@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\PengajuanInvestasi;
 use Illuminate\Foundation\Http\FormRequest;
 
-class PenyaluranDepositoRequest extends FormRequest
+class PenyaluranDanaInvestasiRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,7 +14,7 @@ class PenyaluranDepositoRequest extends FormRequest
 
     public function rules(): array
     {
-        if ($this->routeIs('penyaluran-deposito.upload-bukti')) {
+        if ($this->routeIs('penyaluran-dana-investasi.upload-bukti')) {
             return [
                 'bukti_pengembalian' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             ];
@@ -45,7 +45,7 @@ class PenyaluranDepositoRequest extends FormRequest
                     $sisaDana = $pengajuan->sisa_dana;
 
                     if ($this->route('id')) {
-                        $penyaluranLama = \App\Models\PenyaluranDeposito::find($this->route('id'));
+                        $penyaluranLama = \App\Models\PenyaluranDanaInvestasi::find($this->route('id'));
                         
                         if ($penyaluranLama && $penyaluranLama->id_pengajuan_investasi == $this->id_pengajuan_investasi) {
                             $sisaDana += $penyaluranLama->nominal_yang_disalurkan;

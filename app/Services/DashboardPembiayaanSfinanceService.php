@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
-use App\Models\PenyaluranDeposito;
+use App\Models\PenyaluranDanaInvestasi;
 use App\Models\PengajuanInvestasi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;

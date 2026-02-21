@@ -11,7 +11,7 @@
         <div class="col-12">
             <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="fw-bold mb-0">Kertas Kerja Investor SFinance</h4>
+                    <h4 class="fw-bold mb-0">Laporan Investasi SFinance</h4>
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
                         <span class="input-group-text"><i class="ti ti-search"></i></span>
                         <input type="text" 
                             class="form-control" 
-                            placeholder="Cari deposan, nomor kontrak, status..." 
+                            placeholder="Cari investor, nomor kontrak, status..."
                             wire:model.live.debounce.500ms="globalSearch"
                         >
                         @if($globalSearch)
@@ -62,19 +62,19 @@
                 {{-- Tabel 1: Info Dasar --}}
                 <div class="table-container"
                     style="display: inline-block; vertical-align: top; margin-right: 20px; min-width: 1200px; white-space: normal;">
-                    <livewire:kertas-kerja-investor-table1 :year="$year" :key="'table1-' . $year" />
+                    <livewire:laporan-investasi-table1 :year="$year" :key="'table1-' . $year" />
                 </div>
 
                 {{-- Tabel 2: CoF Per Bulan --}}
                 <div class="table-container"
                     style="display: inline-block; vertical-align: top; margin-right: 20px; min-width: 800px; white-space: normal;">
-                    <livewire:kertas-kerja-investor-table2 :year="$year" :key="'table2-' . $year" />
+                    <livewire:laporan-investasi-table2 :year="$year" :key="'table2-' . $year" />
                 </div>
 
                 {{-- Tabel 3: Pengembalian --}}
                 <div class="table-container"
                     style="display: inline-block; vertical-align: top; min-width: 600px; white-space: normal;">
-                    <livewire:kertas-kerja-investor-table3 :year="$year" :key="'table3-' . $year" />
+                    <livewire:laporan-investasi-table3 :year="$year" :key="'table3-' . $year" />
                 </div>
             </div>
         </div>

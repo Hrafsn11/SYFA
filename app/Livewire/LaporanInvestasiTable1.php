@@ -2,52 +2,49 @@
 
 namespace App\Livewire;
 
+use App\Models\PengajuanInvestasi;
+use Illuminate\Database\Eloquent\Builder;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
-use App\Models\PengajuanInvestasi;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
-class KertasKerjaInvestorTable1 extends DataTableComponent
+class LaporanInvestasiTable1 extends DataTableComponent
 {
+    public $year;
+
     protected $model = PengajuanInvestasi::class;
 
-    public $year;
+    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged', 'globalSearchChanged'];
+
     public $globalSearch = '';
-
-    protected $listeners = ['refreshKertasKerjaTable' => '$refresh', 'yearChanged' => 'setYear', 'globalSearchChanged' => 'setGlobalSearch'];
-
-    public function mount(): void
-    {
-        $this->year = request()->get('year', date('Y'));
-    }
-
-    public function setYear($year)
-    {
-        $this->year = $year;
-        $this->resetPage();
-    }
-
-    public function setGlobalSearch($search)
-    {
-        $this->globalSearch = $search;
-        $this->resetPage();
-    }
 
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_investasi')
-            ->setSearchDisabled()
+            ->setSearchEnabled() // Disable default search, use global
+            ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-            ->setTableAttributes(['class' => 'table border-top'])
-            ->setTheadAttributes(['class' => 'table-light'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
-            ->setFiltersDisabled()
-            ->setBulkActionsDisabled()
-            ->setColumnSelectDisabled();
+            ->setDefaultSort('created_at', 'desc')
+            ->setTableAttributes(['class' => 'table table-hover table-bordered table-sm'])
+            ->setTheadAttributes(['class' => 'table-light text-center'])
+            ->setSearchFieldAttributes(['class' => 'd-none']) // Hide default search box
+            ->setPerPageFieldAttributes(['class' => 'd-none']) // Hide default per page
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(false)
+            ->setBulkActionsDisabled();
+    }
+
+    public function yearChanged($year)
+    {
+        $this->year = $year;
+    }
+
+    public function globalSearchChanged($value)
+    {
+        $this->globalSearch = $value;
     }
 
     public function builder(): Builder
@@ -56,7 +53,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             ->select([
                 'id_pengajuan_investasi',
                 'tanggal_investasi',
-                'deposito',
+                'jenis_investasi',
                 'nama_investor',
                 'jumlah_investasi',
                 'lama_investasi',
@@ -76,7 +73,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             $query->where(function ($q) use ($search) {
                 $q->where('nama_investor', 'like', '%' . $search . '%')
                     ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
-                    ->orWhere('deposito', 'like', '%' . $search . '%')
+                    ->orWhere('jenis_investasi', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%');
             });
         }
@@ -160,22 +157,22 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Deposito', 'deposito')
+            Column::make('Jenis Investasi', 'jenis_investasi')
                 ->sortable()
                 ->searchable(function (Builder $builder, $term) {
-                    $builder->orWhere('deposito', 'like', '%' . $term . '%')
+                    $builder->orWhere('jenis_investasi', 'like', '%' . $term . '%')
                         ->orWhere('nomor_kontrak', 'like', '%' . $term . '%');
                 })
                 ->label(function ($row) {
-                    $value = $row->deposito ?? '-';
+                    $value = $row->jenis_investasi ?? '-';
                     $id = $row->id_pengajuan_investasi;
                     return '<div class="text-center editable-cell">' . $value . '
-                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'deposito\'})"></i>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'jenis_investasi\'})"></i>
                     </div>';
                 })
                 ->html(),
 
-            Column::make('Deposan', 'nama_investor')
+            Column::make('Nama Investor', 'nama_investor')
                 ->sortable()
                 ->searchable(function (Builder $builder, $term) {
                     $builder->orWhere('nama_investor', 'like', '%' . $term . '%');
@@ -189,7 +186,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Nominal Deposit', 'jumlah_investasi')
+            Column::make('Nominal Investasi', 'jumlah_investasi')
                 ->sortable()
                 ->label(function ($row) {
                     $value = 'Rp ' . number_format($row->jumlah_investasi, 0, ',', '.');
@@ -200,7 +197,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Lama Deposito', 'lama_investasi')
+            Column::make('Lama Investasi', 'lama_investasi')
                 ->sortable()
                 ->label(function ($row) {
                     $value = $row->lama_investasi . ' Bulan';

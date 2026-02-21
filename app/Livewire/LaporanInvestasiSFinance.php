@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\PengajuanInvestasi;
 
-class KertasKerjaInvestorSFinance extends Component
+class LaporanInvestasiSFinance extends Component
 {
     public $year;
     public $perPage = 10;
@@ -29,7 +29,7 @@ class KertasKerjaInvestorSFinance extends Component
     // Field configurations
     protected $editableFields = [
         'tanggal_investasi' => ['label' => 'Tanggal Investasi', 'type' => 'date'],
-        'deposito' => ['label' => 'Deposito', 'type' => 'text'],
+        'jenis_investasi' => ['label' => 'Jenis Investasi', 'type' => 'text'],
         'nama_investor' => ['label' => 'Nama Investor', 'type' => 'text'],
         'jumlah_investasi' => ['label' => 'Jumlah Investasi', 'type' => 'number'],
         'lama_investasi' => ['label' => 'Lama Investasi (Bulan)', 'type' => 'number'],
@@ -63,6 +63,12 @@ class KertasKerjaInvestorSFinance extends Component
     public function openEditModal($id, $field)
     {
         $investasi = PengajuanInvestasi::find($id);
+
+        // Map 'deposito' to 'jenis_investasi' for backward compatibility in view calls if needed,
+        // but here we strictly use 'jenis_investasi' in editableFields.
+        if ($field === 'deposito') {
+            $field = 'jenis_investasi';
+        }
 
         if (!$investasi || !isset($this->editableFields[$field])) {
             return;
@@ -123,7 +129,7 @@ class KertasKerjaInvestorSFinance extends Component
 
     public function render()
     {
-        return view('livewire.kertas-kerja-investor-sfinance.index')
-            ->layout('layouts.app', ['title' => 'Kertas Kerja Investor SFinance']);
+        return view('livewire.laporan-investasi-sfinance.index')
+            ->layout('layouts.app', ['title' => 'Laporan Investasi SFinance']);
     }
 }

@@ -7,7 +7,7 @@ use App\Models\PengajuanPeminjaman;
 use App\Models\PengembalianPinjaman;
 use App\Models\BuktiPeminjaman;
 use App\Models\JadwalAngsuran;
-use App\Models\PenyaluranDeposito;
+use App\Models\PenyaluranDanaInvestasi;
 use App\Models\PengajuanInvestasi;
 use App\Helpers\ListNotifSFinance;
 use Carbon\Carbon;
@@ -196,7 +196,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
         $countInvestasiJatuhTempo = 0;
 
         // Ambil semua penyaluran deposito yang belum dikembalikan (belum ada nominal_yang_dikembalikan)
-        $penyaluranList = PenyaluranDeposito::with(['debitur', 'pengajuanInvestasi'])
+        $penyaluranList = PenyaluranDanaInvestasi::with(['debitur', 'pengajuanInvestasi'])
             ->whereNull('nominal_yang_dikembalikan')
             ->whereNotNull('tanggal_pengembalian')
             ->get();
@@ -208,7 +208,7 @@ class CheckPengembalianDanaJatuhTempoSFinance extends Command
             // Tidak perlu cek telat karena hanya perlu notifikasi sebelum jatuh tempo
             if ($today->diffInDays($jatuhTempo) <= $daysBeforeDue && $today->lte($jatuhTempo)) {
                 // Mendekati jatuh tempo - kirim notifikasi
-                $this->info("Penyaluran deposito ID {$penyaluran->id_penyaluran_deposito} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
+                $this->info("Penyaluran deposito ID {$penyaluran->id_penyaluran_dana_investasi} mendekati jatuh tempo (Jatuh tempo: {$jatuhTempo->format('d/m/Y')})");
                 ListNotifSFinance::pengembalianInvestasiJatuhTempo($penyaluran, $penyaluran->tanggal_pengembalian);
                 $countInvestasiJatuhTempo++;
             }
