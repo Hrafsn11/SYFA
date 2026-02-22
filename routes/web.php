@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\RencanaPenagihanDepositoController;
 use App\Http\Controllers\LaporanTagihanBulananController;
 use App\Http\Controllers\MonitoringPembayaranController;
@@ -37,6 +38,16 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->get('/home-services', HomeServices::class)->name('home.services');
+
+// Chatbot routes (auth only, no checkPermission - accessible by all logged-in users)
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage'])->name('chatbot.message');
+    Route::post('/chatbot/clear',   [ChatbotController::class, 'clearHistory'])->name('chatbot.clear');
+});
 
 // Authenticated routes dengan Jetstream dan Permission handling
 Route::middleware([

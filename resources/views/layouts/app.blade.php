@@ -293,6 +293,9 @@
     <!-- Main JS -->   
     {{-- Custom page scripts --}}
     @stack('scripts')
+
+    {{-- SYFA Chatbot Widget --}}
+    @include('partials.chatbot')
 </body>
 
 </html>
