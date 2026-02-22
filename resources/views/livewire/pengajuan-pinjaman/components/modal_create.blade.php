@@ -46,9 +46,9 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="nilai_bagi_hasil">Nilai Bagi Hasil</label>
+                                            <label class="form-label" for="nilai_bunga">NILAI BUNGA</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control input-rupiah" id="nilai_bagi_hasil" placeholder="Rp 0" readonly disabled wire:model.live="nilai_bagi_hasil">
+                                                <input type="text" class="form-control input-rupiah" id="nilai_bunga" placeholder="Rp 0" readonly disabled wire:model.live="nilai_bunga">
                                                 <span class="input-group-text">/Bulan</span>
                                             </div>
                                             <div class="invalid-feedback"></div>
@@ -169,9 +169,9 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="nilai_bagi_hasil">Nilai Bagi Hasil</label>
+                                            <label class="form-label" for="nilai_bunga">NILAI BUNGA</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control input-rupiah non-editable" id="nilai_bagi_hasil" placeholder="Rp 0" readonly disabled>
+                                                <input type="text" class="form-control input-rupiah non-editable" id="nilai_bunga" placeholder="Rp 0" readonly disabled>
                                                 <span class="input-group-text">/Bulan</span>
                                             </div>
                                             <div class="invalid-feedback"></div>
@@ -349,9 +349,9 @@
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="nilai_bagi_hasil">Nilai Bagi Hasil</label>
+                                            <label class="form-label" for="nilai_bunga">NILAI BUNGA</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control input-rupiah non-editable" id="nilai_bagi_hasil" placeholder="Rp 0" readonly disabled>
+                                                <input type="text" class="form-control input-rupiah non-editable" id="nilai_bunga" placeholder="Rp 0" readonly disabled>
                                                 <span class="input-group-text">/Bulan</span>
                                             </div>
                                             <div class="invalid-feedback"></div>

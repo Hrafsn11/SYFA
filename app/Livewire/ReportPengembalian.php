@@ -8,6 +8,6 @@ class ReportPengembalian extends Component
 {
     public function render()
     {
-        return view('livewire.report-pengembalian.index');
+        return view('livewire.laporan-pengembalian.index');
     }
 }

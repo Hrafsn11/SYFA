@@ -166,7 +166,7 @@ class DashboardInvestasiDepositoService
     private function getTotalCoF(int $year, int $month): float
     {
         $query = DB::table('pengajuan_investasi')
-            ->select('jumlah_investasi', 'bagi_hasil_pertahun')
+            ->select('jumlah_investasi', 'bunga_pertahun')
             ->whereYear('tanggal_investasi', $year)
             ->whereMonth('tanggal_investasi', $month);
 
@@ -177,9 +177,9 @@ class DashboardInvestasiDepositoService
 
         foreach ($data as $item) {
             $jumlahInvestasi = (float)$item->jumlah_investasi;
-            $bagiHasilPertahun = (float)$item->bagi_hasil_pertahun;
-            $bagiHasilPerBulan = $bagiHasilPertahun / 12;
-            $cofBulan = ($jumlahInvestasi * $bagiHasilPerBulan) / 100;
+            $bungaPertahun = (float)$item->bunga_pertahun;
+            $bungaPerBulan = $bungaPertahun / 12;
+            $cofBulan = ($jumlahInvestasi * $bungaPerBulan) / 100;
             $totalCof += $cofBulan;
         }
 
@@ -199,7 +199,7 @@ class DashboardInvestasiDepositoService
             return 0.0;
         }
 
-        return (float)$query->selectRaw('COALESCE(SUM(pi.dana_pokok_dibayar + pi.bagi_hasil_dibayar), 0) as total')
+        return (float)$query->selectRaw('COALESCE(SUM(pi.dana_pokok_dibayar + pi.bunga_dibayar), 0) as total')
             ->value('total');
     }
 
@@ -211,11 +211,11 @@ class DashboardInvestasiDepositoService
 
         $this->applyRestriction($query);
 
-        return (float)$query->selectRaw('COALESCE(SUM(sisa_pokok + sisa_bagi_hasil), 0) as total')
+        return (float)$query->selectRaw('COALESCE(SUM(sisa_pokok + sisa_bunga), 0) as total')
             ->value('total');
     }
 
-    public function getChartDepositoPokok(?string $bulan = null): array
+    public function getChartInvestasiPokok(?string $bulan = null): array
     {
         $currentYear = date('Y');
         $selectedMonth = $bulan ? (int)$bulan : (int)date('m');
@@ -255,7 +255,7 @@ class DashboardInvestasiDepositoService
         $selectedMonth = $bulan ? (int)$bulan : (int)date('m');
 
         $query = DB::table('pengajuan_investasi')
-            ->select('nama_investor', 'jumlah_investasi', 'bagi_hasil_pertahun')
+            ->select('nama_investor', 'jumlah_investasi', 'bunga_pertahun')
             ->whereYear('tanggal_investasi', $currentYear)
             ->whereMonth('tanggal_investasi', $selectedMonth);
 
@@ -272,9 +272,9 @@ class DashboardInvestasiDepositoService
         foreach ($data as $item) {
             $namaInvestor = $item->nama_investor;
             $jumlahInvestasi = (float)$item->jumlah_investasi;
-            $bagiHasilPertahun = (float)$item->bagi_hasil_pertahun;
-            $bagiHasilPerBulan = $bagiHasilPertahun / 12;
-            $cofBulan = ($jumlahInvestasi * $bagiHasilPerBulan) / 100;
+            $bungaPertahun = (float)$item->bunga_pertahun;
+            $bungaPerBulan = $bungaPertahun / 12;
+            $cofBulan = ($jumlahInvestasi * $bungaPerBulan) / 100;
 
             if (!isset($cofPerInvestor[$namaInvestor])) {
                 $cofPerInvestor[$namaInvestor] = 0;
@@ -303,7 +303,7 @@ class DashboardInvestasiDepositoService
             ->select(
                 'pj.nama_investor',
                 DB::raw('SUM(pi.dana_pokok_dibayar) as total_pokok'),
-                DB::raw('SUM(pi.bagi_hasil_dibayar) as total_bagi_hasil')
+                DB::raw('SUM(pi.bunga_dibayar) as total_bunga')
             )
             ->whereYear('pi.tanggal_pengembalian', $currentYear)
             ->whereMonth('pi.tanggal_pengembalian', $selectedMonth)
@@ -317,7 +317,7 @@ class DashboardInvestasiDepositoService
                 'categories' => [],
                 'series' => [
                     ['name' => 'Pokok', 'data' => []],
-                    ['name' => 'Bagi Hasil', 'data' => []]
+                    ['name' => 'Bunga', 'data' => []]
                 ]
             ];
         }
@@ -329,31 +329,31 @@ class DashboardInvestasiDepositoService
                 'categories' => [],
                 'series' => [
                     ['name' => 'Pokok', 'data' => []],
-                    ['name' => 'Bagi Hasil', 'data' => []]
+                    ['name' => 'Bunga', 'data' => []]
                 ]
             ];
         }
 
         $categories = [];
         $pokokData = [];
-        $bagiHasilData = [];
+        $bungaData = [];
 
         foreach ($data as $item) {
             $categories[] = $item->nama_investor;
             $pokokData[] = (float)$item->total_pokok;
-            $bagiHasilData[] = (float)$item->total_bagi_hasil;
+            $bungaData[] = (float)$item->total_bunga;
         }
 
         return [
             'categories' => $categories,
             'series' => [
                 ['name' => 'Pokok', 'data' => $pokokData],
-                ['name' => 'Bagi Hasil', 'data' => $bagiHasilData]
+                ['name' => 'Bunga', 'data' => $bungaData]
             ]
         ];
     }
 
-    public function getChartSisaDeposito(?string $bulan = null): array
+    public function getChartSisaInvestasi(?string $bulan = null): array
     {
         $currentYear = date('Y');
         $selectedMonth = $bulan ? (int)$bulan : (int)date('m');
@@ -362,7 +362,7 @@ class DashboardInvestasiDepositoService
             ->select(
                 'nama_investor',
                 DB::raw('SUM(sisa_pokok) as total_sisa_pokok'),
-                DB::raw('SUM(sisa_bagi_hasil) as total_sisa_bagi_hasil')
+                DB::raw('SUM(sisa_bunga) as total_sisa_bunga')
             )
             ->whereYear('tanggal_investasi', $currentYear)
             ->whereMonth('tanggal_investasi', $selectedMonth)
@@ -378,26 +378,26 @@ class DashboardInvestasiDepositoService
                 'categories' => [],
                 'series' => [
                     ['name' => 'Pokok', 'data' => []],
-                    ['name' => 'Bagi Hasil', 'data' => []]
+                    ['name' => 'Bunga', 'data' => []]
                 ]
             ];
         }
 
         $categories = [];
         $pokokData = [];
-        $bagiHasilData = [];
+        $bungaData = [];
 
         foreach ($data as $item) {
             $categories[] = $item->nama_investor;
             $pokokData[] = (float)$item->total_sisa_pokok;
-            $bagiHasilData[] = (float)$item->total_sisa_bagi_hasil;
+            $bungaData[] = (float)$item->total_sisa_bunga;
         }
 
         return [
             'categories' => $categories,
             'series' => [
                 ['name' => 'Pokok', 'data' => $pokokData],
-                ['name' => 'Bagi Hasil', 'data' => $bagiHasilData]
+                ['name' => 'Bunga', 'data' => $bungaData]
             ]
         ];
     }

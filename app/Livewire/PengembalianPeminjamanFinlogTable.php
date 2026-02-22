@@ -166,7 +166,7 @@ class PengembalianPeminjamanFinlogTable extends DataTableComponent
             Column::make('Sisa Bagi Hasil')
                 ->label(function ($row) {
                     $latest = $row->latestPengembalian;
-                    $sisa = $latest ? $latest->sisa_bagi_hasil : $row->nilai_bagi_hasil;
+                    $sisa = $latest ? $latest->sisa_bunga : $row->nilai_bunga;
                     return '<div class="text-end text-warning fw-semibold">Rp ' . number_format($sisa, 0, ',', '.') . '</div>';
                 })
                 ->html(),

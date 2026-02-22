@@ -70,10 +70,10 @@ trait ApprovalActions
             'deviasi' => 'required|in:ya,tidak',
             'nominal_yang_disetujui' => 'required|numeric|min:0',
             'tanggal_pencairan' => 'required|date_format:d/m/Y',
-            'persentase_bagi_hasil' => 'required|numeric|min:0|max:100',
+            'persentase_bunga' => 'required|numeric|min:0|max:100',
         ]);
 
-        $totalBagiHasil = $this->nominal_yang_disetujui * ($this->persentase_bagi_hasil / 100);
+        $totalBagiHasil = $this->nominal_yang_disetujui * ($this->persentase_bunga / 100);
 
         return $this->processApproval('Dokumen Tervalidasi', [
             'validasi_dokumen' => 'disetujui',
@@ -81,16 +81,16 @@ trait ApprovalActions
             'deviasi' => $this->deviasi,
             'nominal_yang_disetujui' => $this->nominal_yang_disetujui,
             'tanggal_pencairan' => $this->parseTanggal($this->tanggal_pencairan),
-            'persentase_bagi_hasil' => $this->persentase_bagi_hasil,
-            'total_bagi_hasil' => $totalBagiHasil,
+            'persentase_bunga' => $this->persentase_bunga,
+            'total_bunga' => $totalBagiHasil,
             'catatan_validasi_dokumen_disetujui' => $this->catatan_approval,
             'current_step' => 3,
         ], function ($pengajuan) use ($totalBagiHasil) {
             // Update data peminjaman
             $pengajuan->update([
                 'total_pinjaman' => $this->nominal_yang_disetujui,
-                'persentase_bagi_hasil' => $this->persentase_bagi_hasil,
-                'total_bagi_hasil' => $totalBagiHasil,
+                'persentase_bunga' => $this->persentase_bunga,
+                'total_bunga' => $totalBagiHasil,
                 'pembayaran_total' => $this->nominal_yang_disetujui + $totalBagiHasil,
             ]);
         });
@@ -280,13 +280,40 @@ trait ApprovalActions
 
     /**
      * Konfirmasi debitur terima dana (Step 8 → 9).
+     * Otomatis mengisi tanggal_jatuh_tempo berdasarkan tanggal_pencairan + 30 hari
+     * (atau tanggal_pencairan + tenor * 30 hari untuk jenis Installment).
+     *
+     * tanggal_pencairan diambil langsung dari history manapun karena step 7 & 8
+     * (generateKontrak & uploadDokumenTransfer) tidak meneruskan field ini ke latestHistory.
      */
     public function konfirmasiDebiturTerima()
     {
+        // Ambil tanggal_pencairan dari history yang menyimpannya (step validasi dokumen)
+        $tanggalPencairan = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $this->id)
+            ->whereNotNull('tanggal_pencairan')
+            ->orderBy('created_at', 'desc')
+            ->value('tanggal_pencairan');
+
         return $this->processApproval('Dana Sudah Dicairkan', [
             'approve_by' => auth()->id(),
             'current_step' => 9,
-        ]);
+            'tanggal_pencairan' => $tanggalPencairan,
+        ], function ($pengajuan) use ($tanggalPencairan) {
+            if ($tanggalPencairan) {
+                $pencairan = Carbon::parse($tanggalPencairan);
+                $isInstallment = ($pengajuan->jenis_pembiayaan === 'Installment');
+                $tenor = (int) ($pengajuan->tenor_pembayaran ?? 0);
+
+                $tanggalJatuhTempo = ($isInstallment && $tenor > 0)
+                    ? $pencairan->copy()->addDays($tenor * 30)
+                    : $pencairan->copy()->addDays(30);
+
+                $pengajuan->update([
+                    'tanggal_jatuh_tempo' => $tanggalJatuhTempo->format('Y-m-d'),
+                    'sisa_bayar_pokok'    => $pengajuan->sisa_bayar_pokok ?? $pengajuan->total_pinjaman,
+                ]);
+            }
+        });
     }
 
     /**

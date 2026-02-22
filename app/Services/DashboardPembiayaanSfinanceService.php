@@ -170,7 +170,7 @@ class DashboardPembiayaanSfinanceService
             return 0.0;
         }
 
-        $result = $query->selectRaw('COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) + COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bagi_hasil), 0) as total')
+        $result = $query->selectRaw('COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) + COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bunga), 0) as total')
             ->first();
         return (float)($result->total ?? 0);
     }
@@ -228,7 +228,7 @@ class DashboardPembiayaanSfinanceService
             $query->where('pm.id_debitur', $this->debiturId);
         }
 
-        $result = $query->selectRaw('COALESCE(SUM(pp.sisa_bayar_pokok), 0) + COALESCE(SUM(pp.sisa_bagi_hasil), 0) as total')
+        $result = $query->selectRaw('COALESCE(SUM(pp.sisa_bayar_pokok), 0) + COALESCE(SUM(pp.sisa_bunga), 0) as total')
             ->first();
         return (float)($result->total ?? 0);
     }
@@ -278,23 +278,23 @@ class DashboardPembiayaanSfinanceService
         if ($this->isRestricted && $this->debiturId) {
             $query->where('pengajuan_peminjaman.id_debitur', $this->debiturId);
         } elseif ($this->isRestricted && !$this->debiturId) {
-            return ['categories' => [], 'pokok' => [], 'bagi_hasil' => []];
+            return ['categories' => [], 'pokok' => [], 'bunga' => []];
         }
 
-        $result = $query->selectRaw('md.nama as debitur, COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) as pokok, COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bagi_hasil), 0) as bagi_hasil')
+        $result = $query->selectRaw('md.nama as debitur, COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) as pokok, COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bunga), 0) as bunga')
             ->groupBy('md.id_debitur', 'md.nama')
             ->orderBy('md.nama')
             ->get();
 
         $categories = [];
         $pokokData = [];
-        $bagiHasilData = [];
+        $bungaData = [];
         foreach ($result as $row) {
             $categories[] = $row->debitur;
             $pokokData[] = (float)($row->pokok ?? 0);
-            $bagiHasilData[] = (float)($row->bagi_hasil ?? 0);
+            $bungaData[] = (float)($row->bunga ?? 0);
         }
-        return ['categories' => $categories, 'pokok' => $pokokData, 'bagi_hasil' => $bagiHasilData];
+        return ['categories' => $categories, 'pokok' => $pokokData, 'bunga' => $bungaData];
     }
 
     public function getPembayaranData(?string $bulan = null, ?int $tahun = null): array
@@ -319,23 +319,23 @@ class DashboardPembiayaanSfinanceService
         if ($this->isRestricted && $this->debiturId) {
             $query->where('pm.id_debitur', $this->debiturId);
         } elseif ($this->isRestricted && !$this->debiturId) {
-            return ['categories' => [], 'pokok' => [], 'bagi_hasil' => []];
+            return ['categories' => [], 'pokok' => [], 'bunga' => []];
         }
 
-        $result = $query->select('md.nama as debitur', DB::raw('SUM(COALESCE(pp.total_pinjaman, 0) - COALESCE(pp.sisa_bayar_pokok, 0)) as total_pokok_dibayar'), DB::raw('SUM(COALESCE(pp.total_bagi_hasil, 0) - COALESCE(pp.sisa_bagi_hasil, 0)) as total_bagi_hasil_dibayar'))
+        $result = $query->select('md.nama as debitur', DB::raw('SUM(COALESCE(pp.total_pinjaman, 0) - COALESCE(pp.sisa_bayar_pokok, 0)) as total_pokok_dibayar'), DB::raw('SUM(COALESCE(pp.total_bunga, 0) - COALESCE(pp.sisa_bunga, 0)) as total_bunga_dibayar'))
             ->groupBy('md.id_debitur', 'md.nama')
             ->orderBy('md.nama')
             ->get();
 
         $categories = [];
         $pokokData = [];
-        $bagiHasilData = [];
+        $bungaData = [];
         foreach ($result as $row) {
             $categories[] = $row->debitur;
             $pokokData[] = (float)($row->total_pokok_dibayar ?? 0);
-            $bagiHasilData[] = (float)($row->total_bagi_hasil_dibayar ?? 0);
+            $bungaData[] = (float)($row->total_bunga_dibayar ?? 0);
         }
-        return ['categories' => $categories, 'pokok' => $pokokData, 'bagi_hasil' => $bagiHasilData];
+        return ['categories' => $categories, 'pokok' => $pokokData, 'bunga' => $bungaData];
     }
 
     public function getSisaBelumTerbayarData(?string $bulan = null, ?int $tahun = null): array
@@ -348,7 +348,7 @@ class DashboardPembiayaanSfinanceService
         $query = DB::table('pengembalian_pinjaman as pp')
             ->select('md.id_debitur', 'md.nama as debitur')
             ->selectRaw('COALESCE(SUM(pp.sisa_bayar_pokok), 0) as pokok')
-            ->selectRaw('COALESCE(SUM(pp.sisa_bagi_hasil), 0) as bagi_hasil')
+            ->selectRaw('COALESCE(SUM(pp.sisa_bunga), 0) as bunga')
             ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
             ->join('master_debitur_dan_investor as md', 'pm.id_debitur', '=', 'md.id_debitur')
             ->where('pm.status', 'Dana Sudah Dicairkan')
@@ -359,7 +359,7 @@ class DashboardPembiayaanSfinanceService
         if ($this->isRestricted && $this->debiturId) {
             $query->where('pm.id_debitur', $this->debiturId);
         } elseif ($this->isRestricted && !$this->debiturId) {
-            return ['categories' => [], 'pokok' => [], 'bagi_hasil' => []];
+            return ['categories' => [], 'pokok' => [], 'bunga' => []];
         }
 
         $result = $query->groupBy('md.id_debitur', 'md.nama')
@@ -368,13 +368,13 @@ class DashboardPembiayaanSfinanceService
 
         $categories = [];
         $pokokData = [];
-        $bagiHasilData = [];
+        $bungaData = [];
         foreach ($result as $row) {
             $categories[] = $row->debitur;
             $pokokData[] = (float)($row->pokok ?? 0);
-            $bagiHasilData[] = (float)($row->bagi_hasil ?? 0);
+            $bungaData[] = (float)($row->bunga ?? 0);
         }
-        return ['categories' => $categories, 'pokok' => $pokokData, 'bagi_hasil' => $bagiHasilData];
+        return ['categories' => $categories, 'pokok' => $pokokData, 'bunga' => $bungaData];
     }
 
     public function getPembayaranPiutangTahunData(?int $tahun = null): array
@@ -390,23 +390,23 @@ class DashboardPembiayaanSfinanceService
         if ($this->isRestricted && $this->debiturId) {
             $query->where('pm.id_debitur', $this->debiturId);
         } elseif ($this->isRestricted && !$this->debiturId) {
-            return ['categories' => [], 'pokok' => [], 'bagi_hasil' => []];
+            return ['categories' => [], 'pokok' => [], 'bunga' => []];
         }
 
-        $result = $query->select('md.nama as debitur', DB::raw('SUM(COALESCE(pp.total_pinjaman, 0) - COALESCE(pp.sisa_bayar_pokok, 0)) as total_pokok_dibayar'), DB::raw('SUM(COALESCE(pp.total_bagi_hasil, 0) - COALESCE(pp.sisa_bagi_hasil, 0)) as total_bagi_hasil_dibayar'))
+        $result = $query->select('md.nama as debitur', DB::raw('SUM(COALESCE(pp.total_pinjaman, 0) - COALESCE(pp.sisa_bayar_pokok, 0)) as total_pokok_dibayar'), DB::raw('SUM(COALESCE(pp.total_bunga, 0) - COALESCE(pp.sisa_bunga, 0)) as total_bunga_dibayar'))
             ->groupBy('md.id_debitur', 'md.nama')
             ->orderBy('md.nama')
             ->get();
 
         $categories = [];
         $pokokData = [];
-        $bagiHasilData = [];
+        $bungaData = [];
         foreach ($result as $row) {
             $categories[] = $row->debitur;
             $pokokData[] = (float)($row->total_pokok_dibayar ?? 0);
-            $bagiHasilData[] = (float)($row->total_bagi_hasil_dibayar ?? 0);
+            $bungaData[] = (float)($row->total_bunga_dibayar ?? 0);
         }
-        return ['categories' => $categories, 'pokok' => $pokokData, 'bagi_hasil' => $bagiHasilData];
+        return ['categories' => $categories, 'pokok' => $pokokData, 'bunga' => $bungaData];
     }
 
     public function getComparisonData(?string $bulan1 = null, ?string $bulan2 = null, ?int $tahun = null): array

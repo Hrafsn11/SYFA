@@ -41,7 +41,7 @@ trait FieldInputInvoice
             'nama_client' => $this->nama_client ?? '',
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'nilai_pinjaman' => $nilaiPinjaman,
-            'nilai_bagi_hasil' => $nilaiBagiHasil,
+            'nilai_bunga' => $nilaiBagiHasil,
             'invoice_date' => parseCarbonDate($this->invoice_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date)?->format('d/m/Y') ?? '',
             'dokumen_invoice' => $this->dokumen_invoice,
@@ -64,7 +64,7 @@ trait FieldInputInvoice
             'nama_client' => $this->nama_client ?? '',
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'nilai_pinjaman' => $nilaiPinjaman,
-            'nilai_bagi_hasil' => $nilaiBagiHasil,
+            'nilai_bunga' => $nilaiBagiHasil,
             'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date) ?? '',
             'dokumen_kontrak' => $this->dokumen_kontrak,
@@ -103,7 +103,7 @@ trait FieldInputInvoice
             'nama_client' => $this->nama_client ?? '',
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'nilai_pinjaman' => $nilaiPinjaman,
-            'nilai_bagi_hasil' => $nilaiBagiHasil,
+            'nilai_bunga' => $nilaiBagiHasil,
             'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date) ?? '',
             'dokumen_invoice' => $this->dokumen_invoice,
@@ -126,7 +126,7 @@ trait FieldInputInvoice
             'nama_client' => $this->nama_client ?? '',
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
             'nilai_pinjaman' => $nilaiPinjaman,
-            'nilai_bagi_hasil' => $nilaiBagiHasil,
+            'nilai_bunga' => $nilaiBagiHasil,
             'invoice_date' => parseCarbonDate($this->invoice_date)?->format('d/m/Y') ?? '',
             'due_date' => parseCarbonDate($this->due_date)?->format('d/m/Y') ?? '',
             'dokumen_invoice' => $this->dokumen_invoice,
@@ -145,7 +145,7 @@ trait FieldInputInvoice
      */
     private function calculateNilaiBagiHasilFromPinjaman(float $nilaiPinjaman): float
     {
-        return $nilaiPinjaman * (double) ($this->persentase_bagi_hasil ?? 0);
+        return $nilaiPinjaman * (double) ($this->persentase_bunga ?? 0);
     }
 
     public function updatedNilaiPinjaman($value)
@@ -163,16 +163,16 @@ trait FieldInputInvoice
     }
 
     /**
-     * Menghitung nilai_bagi_hasil berdasarkan nilai_pinjaman * persentase_bagi_hasil
+     * Menghitung nilai_bunga berdasarkan nilai_pinjaman * persentase_bunga
      */
     private function calculateNilaiBagiHasil()
     {
         // Parse nilai_pinjaman dari format "Rp 200,000" menjadi angka normal
         $nilaiPinjaman = rupiahToRawValue($this->nilai_pinjaman ?? 0);
-        $persentase = (double) ($this->persentase_bagi_hasil ?? 0);
+        $persentase = (double) ($this->persentase_bunga ?? 0);
         
         $nilaiBagiHasil = $nilaiPinjaman * $persentase;
-        $this->nilai_bagi_hasil = rupiahFormatter($nilaiBagiHasil);
+        $this->nilai_bunga = rupiahFormatter($nilaiBagiHasil);
     }
 
     private function edit()
@@ -206,12 +206,12 @@ trait FieldInputInvoice
     private function preparePersentaseBagiHasil()
     {
         if ($this->sumber_pembiayaan === 'Internal') {
-            $this->persentase_bagi_hasil = (double) 2/100;
+            $this->persentase_bunga = (double) 2/100;
             $this->id_instansi = null;
         } else {
             $sumberPendanaanEksternal = MasterSumberPendanaanEksternal::where('id_instansi', $this->id_instansi)->first();
             if ($sumberPendanaanEksternal) {
-                $this->persentase_bagi_hasil = (double) $sumberPendanaanEksternal->persentase_bagi_hasil / 100;
+                $this->persentase_bunga = (double) $sumberPendanaanEksternal->persentase_bunga / 100;
             }
         }
     }

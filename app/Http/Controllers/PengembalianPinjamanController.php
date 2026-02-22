@@ -39,11 +39,11 @@ class PengembalianPinjamanController extends Controller
         $pengajuanPeminjaman = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
             ->where('status', 'Dana Sudah Dicairkan')
             ->with(['buktiPeminjaman' => function ($query) {
-                $query->select('id_bukti_peminjaman', 'id_pengajuan_peminjaman', 'no_invoice', 'no_kontrak', 'nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil', 'due_date')
+                $query->select('id_bukti_peminjaman', 'id_pengajuan_peminjaman', 'no_invoice', 'no_kontrak', 'nilai_invoice', 'nilai_pinjaman', 'nilai_bunga', 'due_date')
                     ->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')
                     ->orderBy('due_date', 'asc');
             }])
-            ->select('id_pengajuan_peminjaman', 'nomor_peminjaman', 'jenis_pembiayaan', 'total_pinjaman', 'total_bagi_hasil', 'harapan_tanggal_pencairan', 'tenor_pembayaran', 'yang_harus_dibayarkan')
+            ->select('id_pengajuan_peminjaman', 'nomor_peminjaman', 'jenis_pembiayaan', 'total_pinjaman', 'total_bunga', 'harapan_tanggal_pencairan', 'tenor_pembayaran', 'yang_harus_dibayarkan')
             ->get()
             ->map(function ($item) {
                 $pengembalianTerakhir = PengembalianPinjaman::where('id_pengajuan_peminjaman', $item->id_pengajuan_peminjaman)
@@ -52,14 +52,14 @@ class PengembalianPinjamanController extends Controller
 
                 if ($pengembalianTerakhir) {
                     $item->total_pinjaman = $pengembalianTerakhir->sisa_bayar_pokok;
-                    $item->total_bagi_hasil = $pengembalianTerakhir->sisa_bagi_hasil;
+                    $item->total_bunga = $pengembalianTerakhir->sisa_bunga;
                 }
 
                 $jenisPembiayaan = $item->jenis_pembiayaan;
 
                 // Map invoice/kontrak yang belum lunas untuk dropdown pembayaran
                 $item->invoices_json = $item->buktiPeminjaman->map(function ($b) use ($jenisPembiayaan, $item) {
-                    $bagiHasil = (float) $b->nilai_bagi_hasil;
+                    $bagiHasil = (float) $b->nilai_bunga;
 
                     // Tentukan field yang digunakan berdasarkan jenis pembiayaan
                     if ($jenisPembiayaan === 'Invoice Financing') {
@@ -139,7 +139,7 @@ class PengembalianPinjamanController extends Controller
                     'nama_perusahaan'         => $validated['nama_perusahaan'],
                     'nomor_peminjaman'        => $pengajuan->nomor_peminjaman,
                     'total_pinjaman'          => $validated['total_pinjaman'],
-                    'total_bagi_hasil'        => $validated['total_bagi_hasil'],
+                    'total_bunga'        => $validated['total_bunga'],
                     'tanggal_pencairan'       => $tanggalPencairan,
                     'lama_pemakaian'          => $validated['lama_pemakaian'],
                     'nominal_invoice'         => $validated['nominal_invoice'],
@@ -147,15 +147,15 @@ class PengembalianPinjamanController extends Controller
                     'bulan_pembayaran'        => $validated['bulan_pembayaran'] ?? null,
                     'yang_harus_dibayarkan'   => $validated['yang_harus_dibayarkan'] ?? null,
                     'sisa_bayar_pokok'        => $validated['sisa_utang'],
-                    'sisa_bagi_hasil'         => $validated['sisa_bagi_hasil'],
+                    'sisa_bunga'         => $validated['sisa_bunga'],
                     'catatan'                 => $validated['catatan'] ?? null,
-                    'status'                  => $this->determineStatus($validated['sisa_utang'], $validated['sisa_bagi_hasil']),
+                    'status'                  => $this->determineStatus($validated['sisa_utang'], $validated['sisa_bunga']),
                 ]);
 
                 // 3. Update sisa bayar di pengajuan_peminjaman
                 $pengajuan->update([
                     'sisa_bayar_pokok'  => $validated['sisa_utang'],
-                    'sisa_bagi_hasil'   => $validated['sisa_bagi_hasil'],
+                    'sisa_bunga'   => $validated['sisa_bunga'],
                 ]);
 
                 // 4. Process Invoices & Reports
@@ -323,7 +323,7 @@ class PengembalianPinjamanController extends Controller
             $pengembalian = PengembalianPinjaman::where('ulid', $id)->firstOrFail();
 
             $status = 'Belum Lunas';
-            if ($validated['sisa_utang'] == 0 && $validated['sisa_bagi_hasil'] == 0) {
+            if ($validated['sisa_utang'] == 0 && $validated['sisa_bunga'] == 0) {
                 $status = 'Lunas';
             }
 
@@ -341,13 +341,13 @@ class PengembalianPinjamanController extends Controller
             $pengembalian->update([
                 'nama_perusahaan' => $validated['nama_perusahaan'],
                 'total_pinjaman' => $validated['total_pinjaman'],
-                'total_bagi_hasil' => $validated['total_bagi_hasil'],
+                'total_bunga' => $validated['total_bunga'],
                 'tanggal_pencairan' => $tanggalPencairan,
                 'lama_pemakaian' => $validated['lama_pemakaian'],
                 'nominal_invoice' => $validated['nominal_invoice'],
                 'invoice_dibayarkan' => $validated['invoice_dibayarkan'],
                 'sisa_bayar_pokok' => $validated['sisa_utang'],
-                'sisa_bagi_hasil' => $validated['sisa_bagi_hasil'],
+                'sisa_bunga' => $validated['sisa_bunga'],
                 'catatan' => $validated['catatan'] ?? null,
                 'status' => $status,
             ]);
@@ -357,7 +357,7 @@ class PengembalianPinjamanController extends Controller
             if ($pengajuan) {
                 $pengajuan->update([
                     'sisa_bayar_pokok'  => $validated['sisa_utang'],
-                    'sisa_bagi_hasil'   => $validated['sisa_bagi_hasil'],
+                    'sisa_bunga'   => $validated['sisa_bunga'],
                 ]);
             }
 

@@ -46,11 +46,11 @@ class PengajuanInvestasiRequest extends FormRequest
             $rules = [
                 'id_debitur_dan_investor' => 'required|exists:master_debitur_dan_investor,id_debitur',
                 'nama_investor' => 'required|string|max:255',
-                'deposito' => 'required|in:Reguler,Khusus',
+                'jenis_investasi' => 'required|in:Reguler,Khusus',
                 'tanggal_investasi' => 'required|date',
                 'lama_investasi' => 'required|integer|min:1',
                 'jumlah_investasi' => 'required|numeric|min:0',
-                'bagi_hasil_pertahun' => 'required|integer|min:0|max:100',
+                'bunga_pertahun' => 'required|integer|min:0|max:100',
             ];
 
             // Add nomor_kontrak validation if present (for edit mode)
@@ -107,8 +107,8 @@ class PengajuanInvestasiRequest extends FormRequest
             'nama_investor.required' => 'Nama investor harus diisi.',
             'nama_investor.string' => 'Nama investor harus berupa teks.',
             'nama_investor.max' => 'Nama investor maksimal 255 karakter.',
-            'deposito.required' => 'Jenis deposito harus dipilih.',
-            'deposito.in' => 'Jenis deposito harus Reguler atau Khusus.',
+            'jenis_investasi.required' => 'Jenis investasi harus dipilih.',
+            'jenis_investasi.in' => 'Jenis investasi harus Reguler atau Khusus.',
             'tanggal_investasi.required' => 'Tanggal investasi harus diisi.',
             'tanggal_investasi.date' => 'Tanggal investasi harus berupa tanggal yang valid.',
             'lama_investasi.required' => 'Lama investasi harus diisi.',
@@ -117,10 +117,10 @@ class PengajuanInvestasiRequest extends FormRequest
             'jumlah_investasi.required' => 'Jumlah investasi harus diisi.',
             'jumlah_investasi.numeric' => 'Jumlah investasi harus berupa angka.',
             'jumlah_investasi.min' => 'Jumlah investasi minimal :min.',
-            'bagi_hasil_pertahun.required' => 'Bagi hasil per tahun harus diisi.',
-            'bagi_hasil_pertahun.integer' => 'Bagi hasil per tahun harus berupa angka bulat.',
-            'bagi_hasil_pertahun.min' => 'Bagi hasil per tahun minimal :min%.',
-            'bagi_hasil_pertahun.max' => 'Bagi hasil per tahun maksimal :max%.',
+            'bunga_pertahun.required' => 'Bunga per tahun harus diisi.',
+            'bunga_pertahun.integer' => 'Bunga per tahun harus berupa angka bulat.',
+            'bunga_pertahun.min' => 'Bunga per tahun minimal :min%.',
+            'bunga_pertahun.max' => 'Bunga per tahun maksimal :max%.',
 
             // updateStatus messages
             'status.required' => 'Status harus diisi',

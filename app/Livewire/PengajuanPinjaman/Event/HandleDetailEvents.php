@@ -94,7 +94,7 @@ trait HandleDetailEvents
         if ($this->latestHistory) {
             $this->nominal_yang_disetujui = $this->latestHistory->nominal_yang_disetujui ?? $this->nominal_pinjaman;
             $this->tanggal_pencairan = $this->latestHistory->tanggal_pencairan ?? null;
-            $this->persentase_bagi_hasil = $this->latestHistory->persentase_bagi_hasil ?? null;
+            $this->persentase_bunga = $this->latestHistory->persentase_bunga ?? null;
         }
     }
 
@@ -123,8 +123,8 @@ trait HandleDetailEvents
                 'deviasi' => $history->deviasi,
                 'nominal_yang_disetujui' => $history->nominal_yang_disetujui,
                 'tanggal_pencairan' => $history->tanggal_pencairan,
-                'persentase_bagi_hasil' => $history->persentase_bagi_hasil,
-                'total_bagi_hasil' => $history->total_bagi_hasil,
+                'persentase_bunga' => $history->persentase_bunga,
+                'total_bunga' => $history->total_bunga,
                 'catatan' => $history->catatan_validasi_dokumen_disetujui
                     ?? $history->catatan_validasi_dokumen_ditolak
                     ?? $history->catatan_persetujuan_debitur

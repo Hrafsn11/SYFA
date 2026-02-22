@@ -47,20 +47,20 @@
                                     <input type="text" class="form-control" id="nama_investor" name="nama_investor"
                                         placeholder="Nama Investor" required readonly>
                                 </div>
-                                <div class="col-12 mb-3" id="div-deposito">
-                                    <label class="form-label">Deposito <span class="text-danger">*</span></label>
+                                <div class="col-12 mb-3" id="div-jenis-investasi">
+                                    <label class="form-label">Jenis Investasi <span class="text-danger">*</span></label>
                                     <div class="d-flex gap-4">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_reguler" value="reguler" required disabled>
-                                            <label class="form-check-label" for="deposito_reguler">
+                                            <input class="form-check-input" type="radio" name="jenis_investasi"
+                                                id="jenis_investasi_reguler" value="reguler" required disabled>
+                                            <label class="form-check-label" for="jenis_investasi_reguler">
                                                 Reguler
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="deposito"
-                                                id="deposito_khusus" value="khusus" required disabled>
-                                            <label class="form-check-label" for="deposito_khusus">
+                                            <input class="form-check-input" type="radio" name="jenis_investasi"
+                                                id="jenis_investasi_khusus" value="khusus" required disabled>
+                                            <label class="form-check-label" for="jenis_investasi_khusus">
                                                 Khusus
                                             </label>
                                         </div>
@@ -88,20 +88,20 @@
                                         name="jumlah_investasi" placeholder="Rp 0" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="bagi_hasil" class="form-label">Bagi Hasil (%)/Tahun <span
+                                    <label for="bunga" class="form-label">Bunga (%)/Tahun <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="bagi_hasil" name="bagi_hasil_pertahun"
-                                        placeholder="Masukan bagi hasil" min="0" max="100" step="0.01"
+                                    <input type="number" class="form-control" id="bunga" name="bunga_pertahun"
+                                        placeholder="Masukan bunga" min="0" max="100" step="0.01"
                                         required>
-                                    <small class="text-muted d-none" id="bagi-hasil-hint">
-                                        <i class="ti ti-info-circle"></i> Minimum 7% untuk deposito khusus
+                                    <small class="text-muted d-none" id="bunga-hint">
+                                        <i class="ti ti-info-circle"></i> Minimum 7% untuk jenis investasi khusus
                                     </small>
                                 </div>
                                 <div class="col-lg-12 mb-3">
-                                    <label for="bagi_hasil_keseluruhan" class="form-label">Nominal Bagi Hasil Yang Didapat
+                                    <label for="bunga_keseluruhan" class="form-label">Nominal Bunga Yang Didapat
                                         <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control input-rupiah non-editable"
-                                        id="bagi_hasil_keseluruhan" placeholder="Rp 0" required disabled readonly>
+                                        id="bunga_keseluruhan" placeholder="Rp 0" required disabled readonly>
                                 </div>
                             </div>
                         </form>
@@ -185,7 +185,7 @@
                 noImmediatePrefix: false
             };
 
-            const initCleave = () => ['jumlah_investasi', 'bagi_hasil_keseluruhan'].forEach(id => {
+            const initCleave = () => ['jumlah_investasi', 'bunga_keseluruhan'].forEach(id => {
                 cleaveInstances[id]?.destroy();
                 cleaveInstances[id] = new Cleave(`#${id}`, cleaveConfig);
             });
@@ -207,23 +207,23 @@
                 $('#editFormKerjaInvestorId, #modalTambahFormKerjaInvestorLabel').val('').filter(':last').text(
                     'Tambah Pengajuan Investasi');
                 $('#btnHapusFormKerjaInvestor').addClass('d-none');
-                ['jumlah_investasi', 'bagi_hasil_keseluruhan'].forEach(id => setCleave(id, 0));
+                ['jumlah_investasi', 'bunga_keseluruhan'].forEach(id => setCleave(id, 0));
             };
 
-            const setDepositoMode = (deposito) => {
-                const isReguler = deposito === 'reguler';
-                $('#bagi_hasil').val(isReguler ? '10' : '').prop({
+            const setJenisInvestasiMode = (jenisInvestasi) => {
+                const isReguler = jenisInvestasi === 'reguler';
+                $('#bunga').val(isReguler ? '10' : '').prop({
                     readonly: isReguler,
                     disabled: isReguler
                 }).toggleClass('non-editable', isReguler);
-                $('#bagi-hasil-hint').toggleClass('d-none', isReguler);
-                calculateBagiHasil();
+                $('#bunga-hint').toggleClass('d-none', isReguler);
+                calculateBunga();
             };
 
-            const calculateBagiHasil = () => {
-                const [jumlah, persen, lama] = [getCleave('jumlah_investasi'), parseFloat($('#bagi_hasil')
+            const calculateBunga = () => {
+                const [jumlah, persen, lama] = [getCleave('jumlah_investasi'), parseFloat($('#bunga')
                     .val()) || 0, parseInt($('#lama_investasi').val()) || 0];
-                setCleave('bagi_hasil_keseluruhan', (jumlah > 0 && persen > 0 && lama > 0) ? Math.round((
+                setCleave('bunga_keseluruhan', (jumlah > 0 && persen > 0 && lama > 0) ? Math.round((
                     jumlah * persen / 100) / 12 * lama) : 0);
             };
 
@@ -235,12 +235,12 @@
                 resetForm();
                 $('#nama_investor').val(INVESTOR.nama);
                 $('#id_debitur_dan_investor').val(INVESTOR.id);
-                const deposito = INVESTOR.deposito.toLowerCase();
-                $('input[name="deposito"]').prop({
+                const jenisInvestasi = INVESTOR.deposito.toLowerCase();
+                $('input[name="jenis_investasi"]').prop({
                     checked: false,
                     disabled: true
-                }).filter(`[value="${deposito}"]`).prop('checked', true);
-                setDepositoMode(deposito);
+                }).filter(`[value="${jenisInvestasi}"]`).prop('checked', true);
+                setJenisInvestasiMode(jenisInvestasi);
                 $modal.modal('show');
                 setTimeout(initCleave, 100);
             });
@@ -249,7 +249,7 @@
                 .on('hidden.bs.modal', () => (resetForm(), $('#btnSimpanSpinner').addClass('d-none'), $(
                     '#btnSimpanFormKerjaInvestor').prop('disabled', false)));
 
-            $('#jumlah_investasi, #bagi_hasil, #lama_investasi').on('input', calculateBagiHasil);
+            $('#jumlah_investasi, #bunga, #lama_investasi').on('input', calculateBunga);
 
             $('#btnHapusFormKerjaInvestor').click((e) => {
                 e.preventDefault();
@@ -284,33 +284,33 @@
 
             $('#btnSimpanFormKerjaInvestor').click(function() {
                 if (!$form[0].checkValidity()) return $form.addClass('was-validated');
-                if (!$('input[name="deposito"]:checked').val()) return alert('warning',
-                    'Pilih jenis deposito terlebih dahulu');
+                if (!$('input[name="jenis_investasi"]:checked').val()) return alert('warning',
+                    'Pilih jenis investasi terlebih dahulu');
                 if (!INVESTOR.id) return alert('warning',
                     'ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.',
                     'Data Investor Tidak Ditemukan');
 
                 const editId = $('#editFormKerjaInvestorId').val();
-                const deposito = $('input[name="deposito"]:checked').val();
+                const jenisInvestasi = $('input[name="jenis_investasi"]:checked').val();
                 const $spinner = $('#btnSimpanSpinner');
 
-                $('input[name="deposito"]').prop('disabled', false);
+                $('input[name="jenis_investasi"]').prop('disabled', false);
 
                 const data = {
                     id_debitur_dan_investor: INVESTOR.id,
                     nama_investor: $('#nama_investor').val(),
-                    deposito: deposito.charAt(0).toUpperCase() + deposito.slice(1),
+                    jenis_investasi: jenisInvestasi.charAt(0).toUpperCase() + jenisInvestasi.slice(1),
                     tanggal_investasi: $('#bs-datepicker-tanggal-pembayaran').val(),
                     lama_investasi: $('#lama_investasi').val(),
                     jumlah_investasi: getCleave('jumlah_investasi'),
-                    bagi_hasil_pertahun: $('#bagi_hasil').val(),
+                    bunga_pertahun: $('#bunga').val(),
                     _token: CSRF,
                     ...(editId && {
                         _method: 'PUT'
                     })
                 };
 
-                $('input[name="deposito"]').prop('disabled', true);
+                $('input[name="jenis_investasi"]').prop('disabled', true);
                 $spinner.removeClass('d-none');
                 $(this).prop('disabled', true);
 
@@ -355,20 +355,20 @@
                                 id_debitur_dan_investor: d.id_debitur_dan_investor,
                                 nama_investor: d.nama_investor,
                                 lama_investasi: d.lama_investasi,
-                                bagi_hasil: d.bagi_hasil_pertahun
+                                bunga: d.bunga_pertahun
                             }).forEach(([id, val]) => $(`#${id}`).val(val));
 
                             $('#modalTambahFormKerjaInvestorLabel').text(
                                 'Edit Pengajuan Investasi');
                             $('#btnHapusFormKerjaInvestor').removeClass('d-none');
 
-                            const deposito = d.deposito?.toLowerCase();
-                            if (deposito) {
-                                $('input[name="deposito"]').prop({
+                            const jenisInvestasi = d.jenis_investasi?.toLowerCase();
+                            if (jenisInvestasi) {
+                                $('input[name="jenis_investasi"]').prop({
                                     checked: false,
                                     disabled: true
-                                }).filter(`[value="${deposito}"]`).prop('checked', true);
-                                setDepositoMode(deposito);
+                                }).filter(`[value="${jenisInvestasi}"]`).prop('checked', true);
+                                setJenisInvestasiMode(jenisInvestasi);
                             }
 
                             d.tanggal_investasi && $('#bs-datepicker-tanggal-pembayaran')
@@ -380,8 +380,8 @@
                                 setTimeout(() => {
                                     setCleave('jumlah_investasi', d
                                         .jumlah_investasi || 0);
-                                    setCleave('bagi_hasil_keseluruhan', d
-                                        .nominal_bagi_hasil_yang_didapatkan ||
+                                    setCleave('bunga_keseluruhan', d
+                                        .nominal_bunga_yang_didapatkan ||
                                         0);
                                 }, 50);
                             }, 100);

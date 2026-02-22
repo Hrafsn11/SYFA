@@ -29,7 +29,7 @@ class DebiturPiutangIndex extends Component
 
     public function render()
     {
-        return view('livewire.debitur-piutang.index')
+        return view('livewire.riwayat-tagihan.index')
             ->layout('layouts.app', ['title' => 'AR Debitur Piutang']);
     }
 }

@@ -149,7 +149,7 @@ class ReportPengembalianFinlogTable extends DataTableComponent
                 ->format(fn($value) => '<div class="text-end text-danger fw-semibold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
                 ->html(),
 
-            Column::make('Sisa Bagi Hasil', 'sisa_bagi_hasil')
+            Column::make('Sisa Bagi Hasil', 'sisa_bunga')
                 ->sortable()
                 ->format(fn($value) => '<div class="text-end text-warning fw-semibold">Rp ' . number_format($value, 0, ',', '.') . '</div>')
                 ->html(),

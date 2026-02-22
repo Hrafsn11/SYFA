@@ -34,14 +34,14 @@ class DebiturPiutangExport implements FromCollection, WithHeadings, WithMapping,
                 'pengajuan_peminjaman.total_pinjaman',
                 'pengajuan_peminjaman.harapan_tanggal_pencairan',
                 'pengajuan_peminjaman.status',
-                'pengajuan_peminjaman.persentase_bagi_hasil',
-                'pengajuan_peminjaman.total_bagi_hasil',
+                'pengajuan_peminjaman.persentase_bunga',
+                'pengajuan_peminjaman.total_bunga',
                 'master_debitur_dan_investor.nama as nama_debitur',
                 'bukti_peminjaman.nama_client as objek_jaminan',
                 'bukti_peminjaman.no_invoice',
                 'bukti_peminjaman.no_kontrak',
                 'pengembalian_pinjaman.lama_pemakaian as masa_penggunaan',
-                'pengembalian_pinjaman.sisa_bagi_hasil as kurang_bayar_bagi_hasil',
+                'pengembalian_pinjaman.sisa_bunga as kurang_bayar_bunga',
                 'pengembalian_pinjaman.sisa_bayar_pokok as sisa_pokok',
                 DB::raw('(SELECT nominal_yang_disetujui FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND validasi_dokumen = "disetujui" ORDER BY created_at DESC LIMIT 1) as nilai_dicairkan'),
                 DB::raw('(SELECT tanggal_pencairan FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND tanggal_pencairan IS NOT NULL ORDER BY created_at DESC LIMIT 1) as tanggal_pencairan'),
@@ -115,12 +115,12 @@ class DebiturPiutangExport implements FromCollection, WithHeadings, WithMapping,
         $index++;
 
         $nilaiDicairkan = $row->nilai_dicairkan ?? 0;
-        $bagiHasil = $row->total_bagi_hasil ?? 0;
+        $bagiHasil = $row->total_bunga ?? 0;
         $masaPenggunaan = $row->masa_penggunaan ?? 1;
         $bagiHasilPerBulan = $masaPenggunaan > 0 ? $bagiHasil / $masaPenggunaan : 0;
         $nilaiHarusDibayar = $nilaiDicairkan + $bagiHasil;
         $sisaPokok = $row->sisa_pokok ?? 0;
-        $kurangBayarBagiHasil = $row->kurang_bayar_bagi_hasil ?? 0;
+        $kurangBayarBagiHasil = $row->kurang_bayar_bunga ?? 0;
         $totalSisa = $sisaPokok + $kurangBayarBagiHasil;
 
         return [
@@ -136,7 +136,7 @@ class DebiturPiutangExport implements FromCollection, WithHeadings, WithMapping,
             $row->tanggal_pencairan ? date('d/m/Y', strtotime($row->tanggal_pencairan)) : '-',
             $row->masa_penggunaan ?? 0,
             $bagiHasil,
-            $row->persentase_bagi_hasil ?? 0,
+            $row->persentase_bunga ?? 0,
             $bagiHasilPerBulan,
             $nilaiHarusDibayar,
             $row->status ?? '-',

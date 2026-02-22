@@ -15,9 +15,9 @@ class MasterSumberPendanaanEksternalSeeder extends Seeder
     DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $rows = [
-            ['nama_instansi' => 'Bank ABC', 'persentase_bagi_hasil' => 5],
-            ['nama_instansi' => 'Lembaga XYZ', 'persentase_bagi_hasil' => 7],
-            ['nama_instansi' => 'Investor 123', 'persentase_bagi_hasil' => 6],
+            ['nama_instansi' => 'Bank ABC', 'persentase_bunga' => 5],
+            ['nama_instansi' => 'Lembaga XYZ', 'persentase_bunga' => 7],
+            ['nama_instansi' => 'Investor 123', 'persentase_bunga' => 6],
         ];
 
         foreach ($rows as $r) {

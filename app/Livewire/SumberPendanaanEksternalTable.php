@@ -51,7 +51,7 @@ class SumberPendanaanEksternalTable extends DataTableComponent
     public function builder(): \Illuminate\Database\Eloquent\Builder
     {
         return MasterSumberPendanaanEksternal::query()
-            ->select('id_instansi', 'nama_instansi', 'persentase_bagi_hasil', 'created_at')
+            ->select('id_instansi', 'nama_instansi', 'persentase_bunga', 'created_at')
             ->orderBy('created_at', 'desc');
     }
 
@@ -73,7 +73,7 @@ class SumberPendanaanEksternalTable extends DataTableComponent
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.$value.'</div>')
                 ->html(), 
-            Column::make('Persentase bagi hasil', 'persentase_bagi_hasil')
+            Column::make('Persentase bagi hasil', 'persentase_bunga')
                 ->sortable()
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.($value ? $value.'%' : '-').'</div>')

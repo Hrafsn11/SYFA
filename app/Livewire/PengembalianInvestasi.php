@@ -22,17 +22,17 @@ class PengembalianInvestasi extends Component
     public $id;
 
     #[FieldInput]
-    public $id_pengajuan_investasi, $dana_pokok_dibayar, $bagi_hasil_dibayar, $bukti_transfer, $tanggal_pengembalian;
+    public $id_pengajuan_investasi, $dana_pokok_dibayar, $bunga_dibayar, $bukti_transfer, $tanggal_pengembalian;
 
     public $nominal_investasi;
     public $lama_investasi;
-    public $bagi_hasil_total;
+    public $bunga_total;
     public $sisa_pokok;
-    public $sisa_bagi_hasil;
+    public $sisa_bunga;
     public $dana_tersedia = 0;
     public $sisa_dana_di_perusahaan = 0;
     public $total_pokok_dikembalikan = 0;
-    public $total_bagi_hasil_dikembalikan = 0;
+    public $total_bunga_dikembalikan = 0;
     public $jumlah_transaksi = 0;
     public $history = [];
 
@@ -56,7 +56,7 @@ class PengembalianInvestasi extends Component
                 'nama_investor',
                 'jumlah_investasi',
                 'lama_investasi',
-                'nominal_bagi_hasil_yang_didapatkan',
+                'nominal_bunga_yang_didapatkan',
                 'status'
             ])
             ->orderBy('tanggal_investasi', 'desc')
@@ -72,40 +72,40 @@ class PengembalianInvestasi extends Component
             $investasi = PengajuanInvestasi::select([
                 'jumlah_investasi',
                 'lama_investasi',
-                'nominal_bagi_hasil_yang_didapatkan',
+                'nominal_bunga_yang_didapatkan',
                 'sisa_pokok',
-                'sisa_bagi_hasil',
+                'sisa_bunga',
                 'total_disalurkan',
                 'total_kembali_dari_penyaluran'
             ])->findOrFail($idPengajuanInvestasi);
 
             $this->nominal_investasi = $investasi->jumlah_investasi;
             $this->lama_investasi = $investasi->lama_investasi;
-            $this->bagi_hasil_total = $investasi->nominal_bagi_hasil_yang_didapatkan;
+            $this->bunga_total = $investasi->nominal_bunga_yang_didapatkan;
 
             // Calculate sisa dana di perusahaan first (using accessor)
             $this->sisa_dana_di_perusahaan = $investasi->sisa_dana_di_perusahaan;
 
             // Sisa pokok = yang belum dikembalikan ke investor (jangan dikurangi total disalurkan!)
             $this->sisa_pokok = floatval($investasi->sisa_pokok ?? 0);
-            $this->sisa_bagi_hasil = $investasi->sisa_bagi_hasil;
+            $this->sisa_bunga = $investasi->sisa_bunga;
 
             // Dana tersedia = what can actually be returned now
             $this->dana_tersedia = $investasi->dana_tersedia;
 
             $hasHistory = ($investasi->sisa_pokok < $this->nominal_investasi) ||
-                ($investasi->sisa_bagi_hasil < $this->bagi_hasil_total);
+                ($investasi->sisa_bunga < $this->bunga_total);
 
             if ($hasHistory) {
                 $pengembalian = ModelsPengembalianInvestasi::getTotalDikembalikan($idPengajuanInvestasi);
                 $this->total_pokok_dikembalikan = $pengembalian->total_pokok ?? 0;
-                $this->total_bagi_hasil_dikembalikan = $pengembalian->total_bagi_hasil ?? 0;
+                $this->total_bunga_dikembalikan = $pengembalian->total_bunga ?? 0;
                 $this->jumlah_transaksi = $pengembalian->jumlah_transaksi ?? 0;
 
                 $this->history = [];
             } else {
                 $this->total_pokok_dikembalikan = 0;
-                $this->total_bagi_hasil_dikembalikan = 0;
+                $this->total_bunga_dikembalikan = 0;
                 $this->jumlah_transaksi = 0;
                 $this->history = [];
             }
@@ -115,9 +115,9 @@ class PengembalianInvestasi extends Component
                 $this->dana_pokok_dibayar = 0;
             }
 
-            // Auto-set bagi_hasil_dibayar ke 0 jika sisa_bagi_hasil sudah 0
-            if ($this->sisa_bagi_hasil == 0) {
-                $this->bagi_hasil_dibayar = 0;
+            // Auto-set bunga_dibayar ke 0 jika sisa_bunga sudah 0
+            if ($this->sisa_bunga == 0) {
+                $this->bunga_dibayar = 0;
             }
         } catch (\Exception $e) {
             session()->flash('error', 'Gagal memuat data kontrak: ' . $e->getMessage());
@@ -131,11 +131,11 @@ class PengembalianInvestasi extends Component
     {
         $this->nominal_investasi = null;
         $this->lama_investasi = null;
-        $this->bagi_hasil_total = null;
+        $this->bunga_total = null;
         $this->total_pokok_dikembalikan = 0;
-        $this->total_bagi_hasil_dikembalikan = 0;
+        $this->total_bunga_dikembalikan = 0;
         $this->sisa_pokok = null;
-        $this->sisa_bagi_hasil = null;
+        $this->sisa_bunga = null;
         $this->dana_tersedia = 0;
         $this->sisa_dana_di_perusahaan = 0;
         $this->jumlah_transaksi = 0;
@@ -150,7 +150,7 @@ class PengembalianInvestasi extends Component
         $this->reset([
             'id_pengajuan_investasi',
             'dana_pokok_dibayar',
-            'bagi_hasil_dibayar',
+            'bunga_dibayar',
             'bukti_transfer',
         ]);
         $this->tanggal_pengembalian = date('Y-m-d');

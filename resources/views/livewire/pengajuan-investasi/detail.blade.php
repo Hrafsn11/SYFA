@@ -128,7 +128,7 @@
                                             $dataFields = [
                                                 'Data Investasi' => [
                                                     'Nama Investor' => $investasi['nama_investor'] ?? '-',
-                                                    'Jenis Deposito' => ucfirst($investasi['deposito'] ?? '-'),
+                                                    'Jenis Investasi' => ucfirst($investasi['jenis_investasi'] ?? '-'),
                                                     'Tanggal Investasi' => $investasi['tanggal_investasi']
                                                         ? \Carbon\Carbon::parse(
                                                             $investasi['tanggal_investasi'],
@@ -141,12 +141,12 @@
                                                     'Jumlah Investasi' =>
                                                         'Rp ' .
                                                         number_format($investasi['jumlah_investasi'] ?? 0, 0, ',', '.'),
-                                                    'Persentase Bagi Hasil' =>
-                                                        ($investasi['bagi_hasil_pertahun'] ?? 0) . '%',
-                                                    'Nominal Bagi Hasil Keseluruhan' =>
+                                                    'Persentase Bunga' =>
+                                                        ($investasi['bunga_pertahun'] ?? 0) . '%',
+                                                    'Nominal Bunga Keseluruhan' =>
                                                         'Rp ' .
                                                         number_format(
-                                                            $investasi['nominal_bagi_hasil_yang_didapatkan'] ?? 0,
+                                                            $investasi['nominal_bunga_yang_didapatkan'] ?? 0,
                                                             0,
                                                             ',',
                                                             '.',
@@ -193,7 +193,7 @@
                                     <!-- Konten Step 5: Generate Kontrak (After Dana Sudah Dicairkan) -->
                                     <div id="kontrak-step5" class="d-none">
                                         @can('investasi.generate_kontrak')
-                                            <h5 class="mb-4">Generate Kontrak Investasi Deposito</h5>
+                                            <h5 class="mb-4">Generate Kontrak Investasi</h5>
 
                                             <!-- Data Kontrak (10 Fields) -->
                                             <div class="card mb-4">
@@ -207,8 +207,8 @@
                                                                 $kontrakFields = [
                                                                     'Nama Perusahaan' =>
                                                                         $investasi['nama_investor'] ?? '-',
-                                                                    'Jenis Deposito' => ucfirst(
-                                                                        $investasi['deposito'] ?? '-',
+                                                                    'Jenis Investasi' => ucfirst(
+                                                                        $investasi['jenis_investasi'] ?? '-',
                                                                     ),
                                                                     'Jumlah Investasi' =>
                                                                         'Rp ' .
@@ -218,10 +218,10 @@
                                                                             ',',
                                                                             '.',
                                                                         ),
-                                                                    'Persentase Bagi Hasil' =>
-                                                                        $investasi['deposito'] === 'Reguler'
+                                                                    'Persentase Bunga' =>
+                                                                        $investasi['jenis_investasi'] === 'Reguler'
                                                                             ? '10%'
-                                                                            : ($investasi['bagi_hasil_pertahun'] ?? 0) .
+                                                                            : ($investasi['bunga_pertahun'] ?? 0) .
                                                                                 '%',
                                                                     'Lama Investasi' =>
                                                                         ($investasi['lama_investasi'] ?? '-') .
@@ -236,7 +236,7 @@
                                                                     'Tanggal Jatuh Tempo' => $investasi[
                                                                         'tanggal_investasi'
                                                                     ]
-                                                                        ? ($investasi['deposito'] === 'Reguler'
+                                                                        ? ($investasi['jenis_investasi'] === 'Reguler'
                                                                             ? \Carbon\Carbon::createFromDate(
                                                                                 \Carbon\Carbon::parse(
                                                                                     $investasi['tanggal_investasi'],

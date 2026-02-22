@@ -50,11 +50,11 @@ class ModuleRedirectHelper
             'sfinance' => [
                 // Dashboard routes first (for admin/finance roles)
                 ['route' => 'sfinance.dashboard.pembiayaan', 'permission' => 'sfinance.menu.dashboard_pembiayaan'],
-                ['route' => 'sfinance.dashboard.investasi-deposito', 'permission' => 'sfinance.menu.dashboard_pembiayaan_investasi'],
+                ['route' => 'sfinance.dashboard.investasi', 'permission' => 'sfinance.menu.dashboard_pembiayaan_investasi'],
                 // Then feature routes (for debitur/investor)
                 ['route' => 'sfinance.peminjaman', 'permission' => 'sfinance.menu.pengajuan_peminjaman'],
                 ['route' => 'sfinance.pengajuan-investasi.index', 'permission' => 'sfinance.menu.pengajuan_investasi'],
-                ['route' => 'sfinance.penyaluran-deposito.index', 'permission' => 'sfinance.menu.penyaluran_deposito'],
+                ['route' => 'sfinance.penyaluran-dana-investasi.index', 'permission' => 'sfinance.menu.penyaluran_deposito'],
                 ['route' => 'sfinance.pengembalian.index', 'permission' => 'sfinance.menu.pengembalian_dana'],
                 ['route' => 'sfinance.pengembalian-investasi.index', 'permission' => 'sfinance.menu.pengembalian_investasi'],
             ],

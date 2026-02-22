@@ -49,7 +49,7 @@ class Create extends Component
         $kode_peminjaman,
         $nama_perusahaan,
         $total_pinjaman,
-        $total_bagi_hasil,
+        $total_bunga,
         $tanggal_pencairan,
         $lama_pemakaian,
         $nominal_invoice,
@@ -57,7 +57,7 @@ class Create extends Component
         $bulan_pembayaran,
         $yang_harus_dibayarkan,
         $sisa_utang,
-        $sisa_bagi_hasil,
+        $sisa_bunga,
         $catatan;
 
     #[FieldInput]
@@ -107,13 +107,13 @@ class Create extends Component
         $this->pengajuanPeminjaman = isset($this->debitur)
             ? PengajuanPeminjaman::where('id_debitur', $this->debitur->id_debitur)
             ->where('status', 'Dana Sudah Dicairkan')
-            ->select('id_pengajuan_peminjaman', 'nomor_peminjaman', 'jenis_pembiayaan', 'total_pinjaman', 'total_bagi_hasil', 'harapan_tanggal_pencairan', 'tenor_pembayaran', 'yang_harus_dibayarkan')
+            ->select('id_pengajuan_peminjaman', 'nomor_peminjaman', 'jenis_pembiayaan', 'total_pinjaman', 'total_bunga', 'harapan_tanggal_pencairan', 'tenor_pembayaran', 'yang_harus_dibayarkan')
             ->get()
             : collect([]);
 
         $this->pengembalian_invoices = [];
         $this->sisa_utang = 0;
-        $this->sisa_bagi_hasil = 0;
+        $this->sisa_bunga = 0;
     }
 
     public function setterFormData()
@@ -145,7 +145,7 @@ class Create extends Component
         }
 
         $pengajuan = PengajuanPeminjaman::with(['buktiPeminjaman' => function ($query) {
-            $query->select('id_bukti_peminjaman', 'id_pengajuan_peminjaman', 'no_invoice', 'no_kontrak', 'nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil', 'due_date')
+            $query->select('id_bukti_peminjaman', 'id_pengajuan_peminjaman', 'no_invoice', 'no_kontrak', 'nilai_invoice', 'nilai_pinjaman', 'nilai_bunga', 'due_date')
                 ->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')
                 ->orderBy('due_date', 'asc');
         }])->find($value);
@@ -161,26 +161,26 @@ class Create extends Component
 
         $this->total_pinjaman = $pengembalianTerakhir ? $pengembalianTerakhir->sisa_bayar_pokok : $pengajuan->total_pinjaman;
         
-        if ($pengajuan->sisa_bagi_hasil !== null && $pengajuan->sisa_bagi_hasil > 0) {
-            $this->bagiHasilAwal = $pengajuan->sisa_bagi_hasil;
+        if ($pengajuan->sisa_bunga !== null && $pengajuan->sisa_bunga > 0) {
+            $this->bagiHasilAwal = $pengajuan->sisa_bunga;
         } elseif ($pengembalianTerakhir) {
-            $this->bagiHasilAwal = $pengembalianTerakhir->sisa_bagi_hasil;
+            $this->bagiHasilAwal = $pengembalianTerakhir->sisa_bunga;
         } else {
-            $this->bagiHasilAwal = $pengajuan->total_bagi_hasil;
+            $this->bagiHasilAwal = $pengajuan->total_bunga;
         }
         
-        $this->total_bagi_hasil = $this->bagiHasilAwal; // Will be adjusted if late
+        $this->total_bunga = $this->bagiHasilAwal; // Will be adjusted if late
         
         $this->bulanKeterlambatan = $pengajuan->jumlah_bulan_keterlambatan ?? 0;
         $this->bagiHasilTambahan = $pengajuan->denda_keterlambatan ?? 0;
         $this->isLate = $this->bulanKeterlambatan > 0;
         
         if ($this->isLate && $this->bagiHasilTambahan > 0) {
-            $this->totalBagiHasilDisesuaikan = $pengajuan->total_bagi_hasil_saat_ini ?? $this->bagiHasilAwal;
-            $this->total_bagi_hasil = $this->totalBagiHasilDisesuaikan;
+            $this->totalBagiHasilDisesuaikan = $pengajuan->total_bunga_saat_ini ?? $this->bagiHasilAwal;
+            $this->total_bunga = $this->totalBagiHasilDisesuaikan;
         }
         
-        $this->persentaseBagiHasil = $pengajuan->persentase_bagi_hasil ?? 0;
+        $this->persentaseBagiHasil = $pengajuan->persentase_bunga ?? 0;
         $this->jenisPembiayaan = $pengajuan->jenis_pembiayaan;
         $this->tenorPembayaran = $pengajuan->tenor_pembayaran;
         $this->tanggal_jatuh_tempo = $pengajuan->tanggal_jatuh_tempo;
@@ -189,9 +189,9 @@ class Create extends Component
         if ($pengajuan->yang_harus_dibayarkan) {
             $this->yangHarusDibayarkanPerBulan = $pengajuan->yang_harus_dibayarkan;
         } elseif ($pengajuan->jenis_pembiayaan === 'Installment' && $pengajuan->tenor_pembayaran > 0) {
-            // Fallback: hitung manual dari (total_pinjaman + total_bagi_hasil) / tenor
+            // Fallback: hitung manual dari (total_pinjaman + total_bunga) / tenor
             $totalPinjaman = $pengajuan->total_pinjaman ?? 0;
-            $totalBagiHasil = $pengajuan->total_bagi_hasil ?? 0;
+            $totalBagiHasil = $pengajuan->total_bunga ?? 0;
             $pembayaranTotal = $totalPinjaman + $totalBagiHasil;
             $this->yangHarusDibayarkanPerBulan = $pembayaranTotal / $pengajuan->tenor_pembayaran;
         } else {
@@ -315,7 +315,7 @@ class Create extends Component
 
                 // Adjust total profit sharing
                 $this->totalBagiHasilDisesuaikan = $this->bagiHasilAwal + $this->bagiHasilTambahan;
-                $this->total_bagi_hasil = $this->totalBagiHasilDisesuaikan;
+                $this->total_bunga = $this->totalBagiHasilDisesuaikan;
             }
         }
 
@@ -329,7 +329,7 @@ class Create extends Component
         $this->bulanKeterlambatan = 0;
         $this->bagiHasilTambahan = 0;
         $this->totalBagiHasilDisesuaikan = $this->bagiHasilAwal;
-        $this->total_bagi_hasil = $this->bagiHasilAwal;
+        $this->total_bunga = $this->bagiHasilAwal;
     }
 
     /**
@@ -358,7 +358,7 @@ class Create extends Component
 
         // Tenor ke-1: cicilan + seluruh bagi hasil
         if ($this->tenorSaatIni === 1) {
-            $nominalBulanIni = $nominalPerBulan + ($this->total_bagi_hasil ?? 0);
+            $nominalBulanIni = $nominalPerBulan + ($this->total_bunga ?? 0);
         }
 
         $this->yang_harus_dibayarkan = round($nominalBulanIni);
@@ -392,7 +392,7 @@ class Create extends Component
 
         // Bulan ke-1: cicilan + seluruh bagi hasil
         if ($bulanKe === 1) {
-            $nominalBulanIni = $nominalPerBulan + ($this->total_bagi_hasil ?? 0);
+            $nominalBulanIni = $nominalPerBulan + ($this->total_bunga ?? 0);
         }
 
         $this->yang_harus_dibayarkan = round($nominalBulanIni);
@@ -478,20 +478,20 @@ class Create extends Component
         // Hitung total yang sudah dibayarkan dari list invoice
         $totalBayar = collect($this->pengembalian_invoices)->sum('nominal');
 
-        $totalBagiHasil = $this->total_bagi_hasil;
+        $totalBagiHasil = $this->total_bunga;
         $totalPokok = $this->total_pinjaman;
 
         // Logic Prioritas: Bayar Bagi Hasil Dulu
         if ($totalBayar >= $totalBagiHasil) {
             // Jika pembayaran cukup untuk melunasi bagi hasil
-            $this->sisa_bagi_hasil = 0;
+            $this->sisa_bunga = 0;
 
             // Sisa uangnya dipakai untuk bayar pokok
             $sisaUntukPokok = $totalBayar - $totalBagiHasil;
             $this->sisa_utang = max(0, $totalPokok - $sisaUntukPokok);
         } else {
             // Jika pembayaran belum cukup melunasi bagi hasil
-            $this->sisa_bagi_hasil = $totalBagiHasil - $totalBayar;
+            $this->sisa_bunga = $totalBagiHasil - $totalBayar;
             $this->sisa_utang = $totalPokok; // Pokok utuh
         }
     }
@@ -535,7 +535,7 @@ class Create extends Component
     private function resetFormData()
     {
         $this->total_pinjaman = null;
-        $this->total_bagi_hasil = null;
+        $this->total_bunga = null;
         $this->tanggal_pencairan = null;
         $this->lama_pemakaian = 0;
         $this->nominal_invoice = null;
@@ -543,7 +543,7 @@ class Create extends Component
         $this->bulan_pembayaran = null;
         $this->yang_harus_dibayarkan = null;
         $this->sisa_utang = 0;
-        $this->sisa_bagi_hasil = 0;
+        $this->sisa_bunga = 0;
         $this->pengembalian_invoices = [];
         $this->availableInvoices = [];
         $this->availableBulanPembayaran = [];

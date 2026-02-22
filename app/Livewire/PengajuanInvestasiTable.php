@@ -58,7 +58,7 @@ class PengajuanInvestasiTable extends DataTableComponent
     public function filters(): array
     {
         return [
-            SelectFilter::make('Deposito')
+            SelectFilter::make('Jenis Investasi')
                 ->options([
                     '' => 'Semua Tipe',
                     'Reguler' => 'Reguler',
@@ -66,7 +66,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                 ])
                 ->filter(function (Builder $builder, string $value) {
                     if (!empty($value)) {
-                        $builder->where('deposito', $value);
+                        $builder->where('jenis_investasi', $value);
                     }
                 }),
 
@@ -167,7 +167,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                 ->html()
                 ->searchable(),
 
-            Column::make('Deposito', 'deposito')
+            Column::make('Jenis Investasi', 'jenis_investasi')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {
@@ -196,7 +196,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Bagi Hasil/Tahun', 'bagi_hasil_pertahun')
+            Column::make('Bunga/Tahun', 'bunga_pertahun')
                 ->sortable()
                 ->searchable()
                 ->format(function ($value) {

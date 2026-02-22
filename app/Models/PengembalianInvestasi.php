@@ -16,7 +16,7 @@ class PengembalianInvestasi extends Model
         'id_pengembalian_investasi',
         'id_pengajuan_investasi',
         'dana_pokok_dibayar',
-        'bagi_hasil_dibayar',
+        'bunga_dibayar',
         'total_dibayar',
         'bukti_transfer',
         'tanggal_pengembalian',
@@ -25,7 +25,7 @@ class PengembalianInvestasi extends Model
 
     protected $casts = [
         'dana_pokok_dibayar' => 'decimal:2',
-        'bagi_hasil_dibayar' => 'decimal:2',
+        'bunga_dibayar' => 'decimal:2',
         'total_dibayar' => 'decimal:2',
         'tanggal_pengembalian' => 'date',
     ];
@@ -40,12 +40,12 @@ class PengembalianInvestasi extends Model
             }
             
             // Auto calculate total
-            $model->total_dibayar = $model->dana_pokok_dibayar + $model->bagi_hasil_dibayar;
+            $model->total_dibayar = $model->dana_pokok_dibayar + $model->bunga_dibayar;
         });
 
         static::updating(function ($model) {
             // Auto calculate total
-            $model->total_dibayar = $model->dana_pokok_dibayar + $model->bagi_hasil_dibayar;
+            $model->total_dibayar = $model->dana_pokok_dibayar + $model->bunga_dibayar;
         });
     }
 
@@ -66,7 +66,7 @@ class PengembalianInvestasi extends Model
         return self::where('id_pengajuan_investasi', $idPengajuanInvestasi)
             ->selectRaw('
                 COALESCE(SUM(dana_pokok_dibayar), 0) as total_pokok,
-                COALESCE(SUM(bagi_hasil_dibayar), 0) as total_bagi_hasil,
+                COALESCE(SUM(bunga_dibayar), 0) as total_bunga,
                 COALESCE(SUM(total_dibayar), 0) as total_semua,
                 COUNT(*) as jumlah_transaksi
             ')
@@ -88,9 +88,9 @@ class PengembalianInvestasi extends Model
         return 'Rp ' . number_format($this->dana_pokok_dibayar, 0, ',', '.');
     }
 
-    public function getBagiHasilDibayarFormattedAttribute()
+    public function getBungaDibayarFormattedAttribute()
     {
-        return 'Rp ' . number_format($this->bagi_hasil_dibayar, 0, ',', '.');
+        return 'Rp ' . number_format($this->bunga_dibayar, 0, ',', '.');
     }
 
     public function getTotalDibayarFormattedAttribute()

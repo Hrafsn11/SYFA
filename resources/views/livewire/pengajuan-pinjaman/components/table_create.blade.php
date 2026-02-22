@@ -16,7 +16,7 @@
                                     <th>NAMA CLIENT</th>
                                     <th>NILAI INVOICE</th>
                                     <th>NILAI PINJAMAN</th>
-                                    <th>NILAI BAGI HASIL</th>
+                                    <th>NILAI BUNGA</th>
                                     <th>INVOICE DATE</th>
                                     <th>DUE DATE</th>
                                     <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
@@ -34,7 +34,7 @@
                                         <td>{{ $invoice['nama_client'] }}</td>
                                         <td>{{ rupiahFormatter($invoice['nilai_invoice']) }}</td>
                                         <td>{{ rupiahFormatter($invoice['nilai_pinjaman']) }}</td>
-                                        <td>{{ rupiahFormatter($invoice['nilai_bagi_hasil']) }}</td>
+                                        <td>{{ rupiahFormatter($invoice['nilai_bunga']) }}</td>
                                         <td>{{ parseCarbonDate($invoice['invoice_date'])->format('d F Y') }}</td>
                                         <td>{{ parseCarbonDate($invoice['due_date'])->format('d F Y') }}</td>
                                         <td>
@@ -93,7 +93,7 @@
                                     <th>NAMA CLIENT</th>
                                     <th>NILAI INVOICE</th>
                                     <th>NILAI PINJAMAN</th>
-                                    <th>NILAI BAGI HASIL</th>
+                                    <th>NILAI BUNGA</th>
                                     <th>KONTRAK DATE</th>
                                     <th>DUE DATE</th>
                                     <th>DOKUMEN KONTRAK <span class="text-danger">*</span></th>
@@ -114,7 +114,7 @@
                                         <td>Rp. {{ number_format((int) $po['nilai_pinjaman'], 0, ',', '.') }}
                                         </td>
                                         <td>Rp.
-                                            {{ number_format((int) $po['nilai_bagi_hasil'], 0, ',', '.') }}
+                                            {{ number_format((int) $po['nilai_bunga'], 0, ',', '.') }}
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($po['invoice_date'])->format('d F Y') }}
                                         </td>
@@ -228,7 +228,7 @@
                                     <th>NAMA CLIENT</th>
                                     <th>NILAI INVOICE</th>
                                     <th>NILAI PINJAMAN</th>
-                                    <th>NILAI BAGI HASIL</th>
+                                    <th>NILAI BUNGA</th>
                                     <th>KONTRAK DATE</th>
                                     <th>DUE DATE</th>
                                     <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
@@ -249,7 +249,7 @@
                                         <td>Rp. {{ number_format((int) $fact['nilai_pinjaman'], 0, ',', '.') }}
                                         </td>
                                         <td>Rp.
-                                            {{ number_format((int) $fact['nilai_bagi_hasil'], 0, ',', '.') }}
+                                            {{ number_format((int) $fact['nilai_bunga'], 0, ',', '.') }}
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($fact['invoice_date'])->format('d F Y') }}
                                         </td>

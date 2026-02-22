@@ -49,27 +49,27 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
             'sfinance.menu.pengajuan_peminjaman',
-            'sfinance.menu.ar_perbulan',
-            'sfinance.menu.ar_performance',
+            'sfinance.menu.laporan_tagihan_bulanan',
+            'sfinance.menu.monitoring_pembayaran',
             'sfinance.menu.pengajuan_restukturisasi',
-            'sfinance.menu.program_restukturisasi',
+            'sfinance.menu.penyesuaian_cicilan',
             'sfinance.menu.pengembalian_dana',
-            'sfinance.menu.debitur_piutang',
-            'sfinance.menu.report_pengembalian',
+            'sfinance.menu.riwayat_tagihan',
+            'sfinance.menu.laporan_pengembalian',
             'sfinance.menu.pengajuan_investasi',
             'sfinance.menu.report_penyaluran_dana',
-            'sfinance.menu.penyaluran_deposito',
-            'sfinance.menu.kertas_kerja_sfinance',
+            'sfinance.menu.penyaluran_dana_investasi',
+            'sfinance.menu.laporan_investasi',
             'sfinance.menu.pengembalian_investasi',
             // Menu SFinlog
             'sfinlog.menu.dashboard_pembiayaan',
             'sfinlog.menu.dashboard_investasi_deposito',
             'sfinlog.menu.peminjaman_dana',
-            'sfinlog.menu.ar_perbulan',
-            'sfinlog.menu.ar_performance',
+            'sfinlog.menu.laporan_tagihan_bulanan',
+            'sfinlog.menu.monitoring_pembayaran',
             'sfinlog.menu.pengembalian_dana',
-            'sfinlog.menu.debitur_piutang',
-            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.riwayat_tagihan',
+            'sfinlog.menu.laporan_pengembalian',
             'sfinlog.menu.pengajuan_investasi',
             'sfinlog.menu.penyaluran_deposito',
             'sfinlog.menu.report_penyaluran_dana',
@@ -111,13 +111,13 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.konfirmasi_debitur',
             'peminjaman_dana.upload_dokumen_transfer',
             // Restrukturisasi Management
-            'pengajuan_restrukturisasi.view',
-            'pengajuan_restrukturisasi.add',
-            'pengajuan_restrukturisasi.edit',
-            'pengajuan_restrukturisasi.ajukan_restrukturisasi',
-            'pengajuan_restrukturisasi.validasi_dokumen',
-            'pengajuan_restrukturisasi.persetujuan_ceo_ski',
-            'pengajuan_restrukturisasi.persetujuan_direktur',
+            'pengajuan_cicilan.view',
+            'pengajuan_cicilan.add',
+            'pengajuan_cicilan.edit',
+            'pengajuan_cicilan.ajukan_cicilan',
+            'pengajuan_cicilan.validasi_dokumen',
+            'pengajuan_cicilan.persetujuan_ceo_ski',
+            'pengajuan_cicilan.persetujuan_direktur',
             // Pengembalian Pinjaman Management
             'pengembalian_pinjaman.view',
             'pengembalian_pinjaman.add',
@@ -144,12 +144,12 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_investasi_finlog.validasi_ceo_finlog',
             'pengajuan_investasi_finlog.upload_bukti',
             'pengajuan_investasi_finlog.generate_kontrak',
-            // Penyaluran Deposito (SFinance)
-            'penyaluran_deposito.view',
-            'penyaluran_deposito.add',
-            'penyaluran_deposito.edit',
-            'penyaluran_deposito.upload_bukti',
-            'penyaluran_deposito.input_pengembalian',
+            // Penyaluran Dana Investasi (SFinance)
+            'penyaluran_dana_investasi.view',
+            'penyaluran_dana_investasi.add',
+            'penyaluran_dana_investasi.edit',
+            'penyaluran_dana_investasi.upload_bukti',
+            'penyaluran_dana_investasi.input_pengembalian',
             // Penyaluran Deposito Finlog
             'penyaluran_deposito_finlog.view',
             'penyaluran_deposito_finlog.add',
@@ -158,13 +158,13 @@ class RolePermissionSeeder extends Seeder
             'penyaluran_deposito_finlog.upload_bukti',
             'penyaluran_deposito_finlog.input_pengembalian',
             // Program Restrukturisasi
-            'program_restrukturisasi.view',
-            'program_restrukturisasi.add',
-            'program_restrukturisasi.edit',
-            'program_restrukturisasi.edit_parameter',
-            'program_restrukturisasi.upload',
-            'program_restrukturisasi.konfirmasi',
-            'program_restrukturisasi.generate_kontrak',
+            'penyesuaian_cicilan.view',
+            'penyesuaian_cicilan.add',
+            'penyesuaian_cicilan.edit',
+            'penyesuaian_cicilan.edit_parameter',
+            'penyesuaian_cicilan.upload',
+            'penyesuaian_cicilan.konfirmasi',
+            'penyesuaian_cicilan.generate_kontrak',
             // Pengembalian Investasi
             'pengembalian_investasi.view',
             'pengembalian_investasi.add',
@@ -174,7 +174,7 @@ class RolePermissionSeeder extends Seeder
             'pengembalian_investasi_finlog.add',
             'pengembalian_investasi_finlog.edit',
             // Debitur Piutang
-            'debitur_piutang.edit',
+            'riwayat_tagihan.edit',
             'debitur_piutang_finlog.edit',
 
             //Menu cell project profile
@@ -227,14 +227,12 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
             'sfinance.menu.pengembalian_dana',
-            'sfinance.menu.report_pengembalian',
-            'sfinance.menu.program_restukturisasi',
-            'sfinance.menu.penyaluran_deposito',
-
-            'sfinlog.menu.dashboard_pembiayaan',
+            'sfinance.menu.laporan_pengembalian',
+            'sfinance.menu.penyesuaian_cicilan',
+            'sfinance.menu.penyaluran_dana_investasi',
             'sfinlog.menu.peminjaman_dana',
             'sfinlog.menu.pengembalian_dana',
-            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.laporan_pengembalian',
             'sfinlog.menu.penyaluran_deposito',
 
             // SFinance Peminjaman
@@ -253,14 +251,14 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_finlog.persetujuan_debitur',
 
             // Restrukturisasi
-            'pengajuan_restrukturisasi.view',
-            'pengajuan_restrukturisasi.add',
-            'pengajuan_restrukturisasi.edit',
-            'pengajuan_restrukturisasi.ajukan_restrukturisasi',
-            'program_restrukturisasi.view',
-            // 'program_restrukturisasi.add',
-            'program_restrukturisasi.edit',
-            'program_restrukturisasi.upload',
+            'pengajuan_cicilan.view',
+            'pengajuan_cicilan.add',
+            'pengajuan_cicilan.edit',
+            'pengajuan_cicilan.ajukan_cicilan',
+            'penyesuaian_cicilan.view',
+            // 'penyesuaian_cicilan.add',
+            'penyesuaian_cicilan.edit',
+            'penyesuaian_cicilan.upload',
 
             // Pengembalian Pinjaman (SFinance)
             'pengembalian_pinjaman.view',
@@ -272,9 +270,9 @@ class RolePermissionSeeder extends Seeder
             'pengembalian_pinjaman_finlog.add',
             'pengembalian_pinjaman_finlog.edit',
 
-            // Penyaluran Deposito (Debitur can only view and upload bukti)
-            'penyaluran_deposito.view',
-            'penyaluran_deposito.upload_bukti',
+            // Penyaluran Dana Investasi (Debitur can only view and upload bukti)
+            'penyaluran_dana_investasi.view',
+            'penyaluran_dana_investasi.upload_bukti',
 
             // Penyaluran Deposito Finlog (Debitur hanya upload bukti)
             'penyaluran_deposito_finlog.upload_bukti',
@@ -321,28 +319,28 @@ class RolePermissionSeeder extends Seeder
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
             'sfinance.menu.pengajuan_peminjaman',
-            'sfinance.menu.ar_perbulan',
-            'sfinance.menu.ar_performance',
+            'sfinance.menu.laporan_tagihan_bulanan',
+            'sfinance.menu.monitoring_pembayaran',
             'sfinance.menu.pengajuan_restukturisasi',
-            'sfinance.menu.program_restukturisasi',
+            'sfinance.menu.penyesuaian_cicilan',
             'sfinance.menu.pengembalian_dana',
-            'sfinance.menu.debitur_piutang',
-            'sfinance.menu.report_pengembalian',
+            'sfinance.menu.riwayat_tagihan',
+            'sfinance.menu.laporan_pengembalian',
             'sfinance.menu.pengajuan_investasi',
             'sfinance.menu.report_penyaluran_dana',
-            'sfinance.menu.penyaluran_deposito',
-            'sfinance.menu.kertas_kerja_sfinance',
+            'sfinance.menu.penyaluran_dana_investasi',
+            'sfinance.menu.laporan_investasi',
             'sfinance.menu.pengembalian_investasi',
 
             // SFinlog Menu
             'sfinlog.menu.dashboard_pembiayaan',
             'sfinlog.menu.dashboard_investasi_deposito',
             'sfinlog.menu.peminjaman_dana',
-            'sfinlog.menu.ar_perbulan',
-            'sfinlog.menu.ar_performance',
+            'sfinlog.menu.laporan_tagihan_bulanan',
+            'sfinlog.menu.monitoring_pembayaran',
             'sfinlog.menu.pengembalian_dana',
-            'sfinlog.menu.debitur_piutang',
-            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.riwayat_tagihan',
+            'sfinlog.menu.laporan_pengembalian',
             'sfinlog.menu.pengajuan_investasi',
             'sfinlog.menu.penyaluran_deposito',
             'sfinlog.menu.report_penyaluran_dana',
@@ -353,22 +351,22 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.validasi_dokumen',
             'peminjaman_dana.generate_kontrak',  // Step 6 Generate Kontrak
             'peminjaman_dana.upload_dokumen_transfer',
-            'pengajuan_restrukturisasi.validasi_dokumen',
+            'pengajuan_cicilan.validasi_dokumen',
             'investasi.validasi_bagi_hasil',
             'investasi.generate_kontrak',
 
-            // Penyaluran Deposito (Finance SKI can create/edit)
-            'penyaluran_deposito.view',
-            'penyaluran_deposito.add',
-            'penyaluran_deposito.edit',
-            'penyaluran_deposito.input_pengembalian',
+            // Penyaluran Dana Investasi (Finance SKI can create/edit)
+            'penyaluran_dana_investasi.view',
+            'penyaluran_dana_investasi.add',
+            'penyaluran_dana_investasi.edit',
+            'penyaluran_dana_investasi.input_pengembalian',
 
-            'program_restrukturisasi.view',
-            'program_restrukturisasi.add',
-            'program_restrukturisasi.edit',
-            'program_restrukturisasi.edit_parameter',
-            'program_restrukturisasi.konfirmasi',
-            'program_restrukturisasi.generate_kontrak',
+            'penyesuaian_cicilan.view',
+            'penyesuaian_cicilan.add',
+            'penyesuaian_cicilan.edit',
+            'penyesuaian_cicilan.edit_parameter',
+            'penyesuaian_cicilan.konfirmasi',
+            'penyesuaian_cicilan.generate_kontrak',
 
             // Penyaluran Deposito Finlog (Finance SKI full access)
             'penyaluran_deposito_finlog.view',
@@ -404,7 +402,7 @@ class RolePermissionSeeder extends Seeder
             'pengajuan_investasi_finlog.generate_kontrak',      // Step 5
 
             // Debitur Piutang
-            'debitur_piutang.edit',
+            'riwayat_tagihan.edit',
             'debitur_piutang_finlog.edit',
         ]);
 
@@ -419,19 +417,19 @@ class RolePermissionSeeder extends Seeder
 
             // Menu Access
             'sfinance.menu.pengembalian_dana',
-            'sfinance.menu.report_pengembalian',
-            'sfinance.menu.ar_performance',
-            'sfinance.menu.ar_perbulan',
-            'sfinance.menu.debitur_piutang',
+            'sfinance.menu.laporan_pengembalian',
+            'sfinance.menu.monitoring_pembayaran',
+            'sfinance.menu.laporan_tagihan_bulanan',
+            'sfinance.menu.riwayat_tagihan',
             'sfinance.menu.pengajuan_investasi',
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.pengajuan_restukturisasi',
-            'sfinance.menu.program_restukturisasi',  // Program Restrukturisasi menu
+            'sfinance.menu.penyesuaian_cicilan',  // Program Restrukturisasi menu
 
             'peminjaman_dana.validasi_ceo_ski',
             'investasi.validasi_ceo_ski',  // CEO can approve investasi
 
-            'pengajuan_restrukturisasi.persetujuan_ceo_ski',
+            'pengajuan_cicilan.persetujuan_ceo_ski',
         ]);
 
         $direkturRole = Role::updateOrCreate(
@@ -449,7 +447,7 @@ class RolePermissionSeeder extends Seeder
             'sfinlog.menu.dashboard_investasi_deposito',
 
             'peminjaman_dana.validasi_direktur',
-            'pengajuan_restrukturisasi.persetujuan_direktur',
+            'pengajuan_cicilan.persetujuan_direktur',
         ]);
 
         $ceoFinlogRole = Role::updateOrCreate(
@@ -463,11 +461,11 @@ class RolePermissionSeeder extends Seeder
             'sfinlog.menu.peminjaman_dana',
             'sfinlog.menu.pengembalian_dana',
             'sfinlog.menu.pengajuan_investasi',
-            'sfinlog.menu.ar_perbulan',
-            'sfinlog.menu.ar_performance',
-            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.laporan_tagihan_bulanan',
+            'sfinlog.menu.monitoring_pembayaran',
+            'sfinlog.menu.laporan_pengembalian',
             'sfinlog.menu.kertas_kerja_investor',
-            'sfinlog.menu.debitur_piutang',
+            'sfinlog.menu.riwayat_tagihan',
 
             // Peminjaman Finlog (CEO Finlog tidak bisa create, hanya approve)
             'peminjaman_finlog.view',
@@ -489,11 +487,11 @@ class RolePermissionSeeder extends Seeder
         $ioRole->syncPermissions([
             // Menu SFinlog
             'sfinlog.menu.peminjaman_dana',
-            'sfinlog.menu.ar_perbulan',
-            'sfinlog.menu.ar_performance',
-            'sfinlog.menu.report_pengembalian',
+            'sfinlog.menu.laporan_tagihan_bulanan',
+            'sfinlog.menu.monitoring_pembayaran',
+            'sfinlog.menu.laporan_pengembalian',
             'sfinlog.menu.kertas_kerja_investor',
-            'sfinlog.menu.debitur_piutang',
+            'sfinlog.menu.riwayat_tagihan',
 
             // Peminjaman Finlog (IO tidak bisa create, hanya validasi)
             'peminjaman_finlog.view',

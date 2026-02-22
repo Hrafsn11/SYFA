@@ -1,7 +1,7 @@
 <div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-0">Dashboard Investasi Deposito SFinance</h4>
+            <h4 class="fw-bold mb-0">Dashboard Investasi SFinance</h4>
         </div>
     </div>
 
@@ -11,7 +11,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Deposito Pokok</h6>
+                            <h6 class="text-muted mb-2">Total Investasi Pokok</h6>
                             <h4 class="mb-2 fw-bold">Rp
                                 {{ number_format($summaryData['total_deposito_pokok'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
@@ -126,7 +126,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Total Outstanding Deposito</h6>
+                            <h6 class="text-muted mb-2">Total Outstanding Investasi</h6>
                             <h4 class="mb-2 fw-bold">Rp
                                 {{ number_format($summaryData['total_outstanding'] ?? 0, 0, ',', '.') }}</h4>
                             <div class="d-flex align-items-center">
@@ -165,20 +165,20 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Deposito Pokok yang Masuk Per Bulan</h5>
+                    <h5 class="card-title mb-0">Total Investasi Pokok yang Masuk Per Bulan</h5>
                     <div wire:ignore style="width: 150px;">
-                        <select id="filterBulanDepositoPokok" class="form-select select2"
+                        <select id="filterBulanInvestasiPokok" class="form-select select2"
                             data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @foreach ($monthOptions as $value => $label)
                                 <option value="{{ $value }}"
-                                    {{ $bulanDepositoPokok == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    {{ $bulanInvestasiPokok == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div wire:ignore id="chartDepositoPokok" style="min-height: 350px;"></div>
+                    <div wire:ignore id="chartInvestasiPokok" style="min-height: 350px;"></div>
                 </div>
             </div>
         </div>
@@ -208,7 +208,7 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Pengembalian Pokok dan Bagi Hasil</h5>
+                    <h5 class="card-title mb-0">Total Pengembalian Pokok dan Bunga</h5>
                     <div wire:ignore style="width: 150px;">
                         <select id="filterBulanPengembalian" class="form-select select2"
                             data-placeholder="Pilih Bulan">
@@ -229,28 +229,28 @@
         <div class="col-12 col-xl-6">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Total Sisa Deposito yang Belum Dikembalikan</h5>
+                    <h5 class="card-title mb-0">Total Sisa Investasi yang Belum Dikembalikan</h5>
                     <div wire:ignore style="width: 150px;">
-                        <select id="filterBulanSisaDeposito" class="form-select select2"
+                        <select id="filterBulanSisaInvestasi" class="form-select select2"
                             data-placeholder="Pilih Bulan">
                             <option value=""></option>
                             @foreach ($monthOptions as $value => $label)
                                 <option value="{{ $value }}"
-                                    {{ $bulanSisaDeposito == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    {{ $bulanSisaInvestasi == $value ? 'selected' : '' }}>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div wire:ignore id="chartSisaDeposito" style="min-height: 350px;"></div>
+                    <div wire:ignore id="chartSisaInvestasi" style="min-height: 350px;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="chart-data-holder" class="d-none" data-deposito='@json($chartData['deposito_pokok'] ?? [])'
+    <div id="chart-data-holder" class="d-none" data-investasi-pokok='@json($chartData['investasi_pokok'] ?? [])'
         data-cof='@json($chartData['cof'] ?? [])' data-pengembalian='@json($chartData['pengembalian'] ?? [])'
-        data-sisa='@json($chartData['sisa_deposito'] ?? [])'>
+        data-sisa-investasi='@json($chartData['sisa_investasi'] ?? [])'>
     </div>
 </div>
 
@@ -264,10 +264,10 @@
             width: 100% !important;
         }
 
-        #filterBulanDepositoPokok+.select2-container,
+        #filterBulanInvestasiPokok+.select2-container,
         #filterBulanCoF+.select2-container,
         #filterBulanPengembalian+.select2-container,
-        #filterBulanSisaDeposito+.select2-container {
+        #filterBulanSisaInvestasi+.select2-container {
             width: 150px !important;
             min-width: 150px !important;
             max-width: 150px !important;
@@ -291,10 +291,10 @@
             'use strict';
 
             let charts = {
-                depositoPokok: null,
+                investasiPokok: null,
                 cof: null,
                 pengembalian: null,
-                sisaDeposito: null
+                sisaInvestasi: null
             };
 
             const chartColors = ['#71dd37', '#ffab00'];
@@ -372,10 +372,10 @@
 
                 try {
                     return {
-                        depositoPokok: JSON.parse(holder.getAttribute('data-deposito') || '{}'),
+                        investasiPokok: JSON.parse(holder.getAttribute('data-investasi-pokok') || '{}'),
                         cof: JSON.parse(holder.getAttribute('data-cof') || '{}'),
                         pengembalian: JSON.parse(holder.getAttribute('data-pengembalian') || '{}'),
-                        sisaDeposito: JSON.parse(holder.getAttribute('data-sisa') || '{}')
+                        sisaInvestasi: JSON.parse(holder.getAttribute('data-sisa-investasi') || '{}')
                     };
                 } catch (e) {
                     console.error('Error parsing chart data:', e);
@@ -415,13 +415,13 @@
                 const data = getChartData();
                 if (!data) return;
 
-                const depositoSeries = data.depositoPokok.series || [];
-                const depositoCategories = data.depositoPokok.categories || [];
+                const depositoSeries = data.investasiPokok.series || [];
+                const depositoCategories = data.investasiPokok.categories || [];
 
-                if (charts.depositoPokok) {
-                    updateChart(charts.depositoPokok, depositoSeries, depositoCategories);
+                if (charts.investasiPokok) {
+                    updateChart(charts.investasiPokok, depositoSeries, depositoCategories);
                 } else {
-                    charts.depositoPokok = createChart('chartDepositoPokok', depositoSeries, depositoCategories);
+                    charts.investasiPokok = createChart('chartInvestasiPokok', depositoSeries, depositoCategories);
                 }
 
                 const cofSeries = data.cof.series || [];
@@ -443,20 +443,20 @@
                         chartColors);
                 }
 
-                const sisaSeries = data.sisaDeposito.series || [];
-                const sisaCategories = data.sisaDeposito.categories || [];
+                const sisaSeries = data.sisaInvestasi.series || [];
+                const sisaCategories = data.sisaInvestasi.categories || [];
 
-                if (charts.sisaDeposito) {
-                    updateChart(charts.sisaDeposito, sisaSeries, sisaCategories);
+                if (charts.sisaInvestasi) {
+                    updateChart(charts.sisaInvestasi, sisaSeries, sisaCategories);
                 } else {
-                    charts.sisaDeposito = createChart('chartSisaDeposito', sisaSeries, sisaCategories, chartColors);
+                    charts.sisaInvestasi = createChart('chartSisaInvestasi', sisaSeries, sisaCategories, chartColors);
                 }
             }
 
             function initSelect2() {
                 const filterConfigs = [{
-                        id: 'filterBulanDepositoPokok',
-                        property: 'bulanDepositoPokok',
+                        id: 'filterBulanInvestasiPokok',
+                        property: 'bulanInvestasiPokok',
                         width: 150
                     },
                     {
@@ -470,8 +470,8 @@
                         width: 150
                     },
                     {
-                        id: 'filterBulanSisaDeposito',
-                        property: 'bulanSisaDeposito',
+                        id: 'filterBulanSisaInvestasi',
+                        property: 'bulanSisaInvestasi',
                         width: 150
                     }
                 ];
@@ -528,7 +528,7 @@
 
                 observer.observe(holder, {
                     attributes: true,
-                    attributeFilter: ['data-deposito', 'data-cof', 'data-pengembalian', 'data-sisa']
+                    attributeFilter: ['data-investasi-pokok', 'data-cof', 'data-pengembalian', 'data-sisa-investasi']
                 });
             }
 

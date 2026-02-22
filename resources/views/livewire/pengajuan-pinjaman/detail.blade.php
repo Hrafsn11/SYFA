@@ -220,9 +220,9 @@
                             </div>
 
                             <div class="col-lg mb-3">
-                                <label class="form-label">Bagi Hasil (Nisbah)</label>
+                                <label class="form-label">Bunga (Nisbah)</label>
                                 <input type="text" class="form-control"
-                                    value="{{ $persentase_bagi_hasil ?? 2 }}% flat / bulan" disabled>
+                                    value="{{ $persentase_bunga ?? 2 }}% flat / bulan" disabled>
                             </div>
 
                             <div class="col-lg mb-3">
@@ -323,8 +323,8 @@
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4">
                                     <div class="mb-3">
-                                        <small class="text-muted fw-semibold d-block mb-1">Nisbah (Bagi Hasil)</small>
-                                        <p class="mb-0">{{ $persentase_bagi_hasil ?? 2 }}% flat / bulan</p>
+                                        <small class="text-muted fw-semibold d-block mb-1">Nisbah (Bunga)</small>
+                                        <p class="mb-0">{{ $persentase_bunga ?? 2 }}% flat / bulan</p>
                                     </div>
                                 </div>
                             </div>

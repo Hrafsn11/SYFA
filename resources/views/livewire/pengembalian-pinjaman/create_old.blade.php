@@ -34,7 +34,7 @@
                                 @foreach ($pengajuanPeminjaman as $item)
                                     <option value="{{ $item->id_pengajuan_peminjaman }}"
                                         data-total-pinjaman="{{ $item->total_pinjaman }}"
-                                        data-total-bagi-hasil="{{ $item->total_bagi_hasil }}"
+                                        data-total-bagi-hasil="{{ $item->total_bunga }}"
                                         data-tanggal-pencairan="{{ $item->harapan_tanggal_pencairan }}"
                                         data-jenis-pembiayaan="{{ $item->jenis_pembiayaan }}"
                                         data-invoices="{{ json_encode($item->invoices_json) }}"
@@ -56,8 +56,8 @@
                                         readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="total_bagi_hasil">Total Bagi Hasil</label>
-                                    <input type="text" class="form-control" id="total_bagi_hasil" name="total_bagi_hasil"
+                                    <label for="total_bunga">Total Bagi Hasil</label>
+                                    <input type="text" class="form-control" id="total_bunga" name="total_bunga"
                                         readonly>
                                 </div>
                             </div>
@@ -115,8 +115,8 @@
                             <input type="text" class="form-control" id="sisa_utang" name="sisa_utang" readonly>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="sisa_bagi_hasil" class="form-label">Sisa Bagi Hasil</label>
-                            <input type="text" class="form-control" id="sisa_bagi_hasil" name="sisa_bagi_hasil"
+                            <label for="sisa_bunga" class="form-label">Sisa Bagi Hasil</label>
+                            <input type="text" class="form-control" id="sisa_bunga" name="sisa_bunga"
                                 readonly>
                         </div>
                     </div>
@@ -292,7 +292,7 @@
 
         function fillFormData(data) {
             $('#total_pinjaman').val(formatRupiah(data.totalPinjaman));
-            $('#total_bagi_hasil').val(formatRupiah(data.totalBagiHasil));
+            $('#total_bunga').val(formatRupiah(data.totalBagiHasil));
             
             // Untuk Installment, gunakan tanggal_pencairan_real dari history
             const tanggalPencairan = data.jenisPembiayaan === 'Installment' ? data.tanggalPencairanReal : data.tanggalPencairan;
@@ -573,7 +573,7 @@
 
             sisaBayarPokok = Math.max(0, sisaBayarPokok);
 
-            $('#sisa_bagi_hasil').val(formatRupiah(sisaBagiHasil));
+            $('#sisa_bunga').val(formatRupiah(sisaBagiHasil));
             $('#sisa_utang').val(formatRupiah(sisaBayarPokok));
         }
 
@@ -622,11 +622,11 @@
         }
 
         function resetForm() {
-            $('#total_pinjaman, #total_bagi_hasil, #tanggal_pencairan, #lama_pemakaian, #nominal_invoice').val('');
+            $('#total_pinjaman, #total_bunga, #tanggal_pencairan, #lama_pemakaian, #nominal_invoice').val('');
             $('#invoice').empty().append('<option value="">Pilih Invoice</option>');
             $('#bulan_pembayaran').empty().append('<option value="">Pilih Bulan</option>');
             $('#yang_harus_dibayarkan').val('');
-            $('#sisa_utang, #sisa_bagi_hasil').val('');
+            $('#sisa_utang, #sisa_bunga').val('');
 
             pengembalianData = [];
             totalPinjaman = 0;
@@ -674,13 +674,13 @@
             formData.append('kode_peminjaman', kodePeminjaman);
             formData.append('nama_perusahaan', $('#nama_perusahaan').val());
             formData.append('total_pinjaman', totalPinjaman);
-            formData.append('total_bagi_hasil', totalBagiHasil);
+            formData.append('total_bunga', totalBagiHasil);
             formData.append('tanggal_pencairan', $('#tanggal_pencairan').val());
             formData.append('lama_pemakaian', lamaPemakaianHari);
             formData.append('nominal_invoice', nominalInvoiceTerpilih);
             formData.append('invoice_dibayarkan', nomorInvoiceTerpilih);
             formData.append('sisa_utang', $('#sisa_utang').val().replace(/[^0-9]/g, ''));
-            formData.append('sisa_bagi_hasil', $('#sisa_bagi_hasil').val().replace(/[^0-9]/g, ''));
+            formData.append('sisa_bunga', $('#sisa_bunga').val().replace(/[^0-9]/g, ''));
             formData.append('catatan', $('#catatan').val() || '');
             
             // Khusus untuk Installment

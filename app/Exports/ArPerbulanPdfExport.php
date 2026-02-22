@@ -31,7 +31,7 @@ class ArPerbulanPdfExport
                             'bulan' => $this->sanitizeUtf8($row->bulan),
                             'nama_perusahaan' => $this->sanitizeUtf8($row->nama_perusahaan ?? '-'),
                             'sisa_ar_pokok' => $row->sisa_ar_pokok,
-                            'sisa_bagi_hasil' => $row->sisa_bagi_hasil,
+                            'sisa_bunga' => $row->sisa_bunga,
                             'sisa_ar_total' => $row->sisa_ar_total,
                         ];
                     });

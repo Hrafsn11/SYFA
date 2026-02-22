@@ -91,10 +91,10 @@ trait FieldInputDetail
     public $rencana_tgl_pembayaran;
 
     #[FieldInput]
-    public $persentase_bagi_hasil;
+    public $persentase_bunga;
 
     #[FieldInput]
-    public $total_bagi_hasil;
+    public $total_bunga;
 
     #[FieldInput]
     public $pembayaran_total;

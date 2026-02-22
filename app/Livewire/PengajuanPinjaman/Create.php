@@ -36,7 +36,7 @@ class Create extends Component
     public $nilai_kol;
     // besides installment
     public $total_pinjaman;
-    public $total_bagi_hasil;
+    public $total_bunga;
     public $pembayaran_total;
     // installment
     public $nominal_pinjaman;

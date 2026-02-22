@@ -23,7 +23,7 @@ class PengembalianPinjaman extends Model
         'nama_perusahaan',
         'nomor_peminjaman',
         'total_pinjaman',
-        'total_bagi_hasil',
+        'total_bunga',
         'tanggal_pencairan',
         'lama_pemakaian',
         'invoice_dibayarkan',
@@ -31,18 +31,18 @@ class PengembalianPinjaman extends Model
         'yang_harus_dibayarkan',
         'nominal_invoice',
         'sisa_bayar_pokok',
-        'sisa_bagi_hasil',
+        'sisa_bunga',
         'catatan',
         'status',
     ];
 
     protected $casts = [
         'total_pinjaman' => 'decimal:2',
-        'total_bagi_hasil' => 'decimal:2',
+        'total_bunga' => 'decimal:2',
         'nominal_invoice' => 'decimal:2',
         'yang_harus_dibayarkan' => 'decimal:2',
         'sisa_bayar_pokok' => 'decimal:2',
-        'sisa_bagi_hasil' => 'decimal:2',
+        'sisa_bunga' => 'decimal:2',
         'tanggal_pencairan' => 'date',
         'lama_pemakaian' => 'integer',
     ];

@@ -1,8 +1,8 @@
 <?php
 
 use App\Livewire\Dashboard;
-use App\Http\Controllers\SFinlog\ArPerbulanController;
-use App\Http\Controllers\SFinlog\DebiturPiutangController;
+use App\Http\Controllers\SFinlog\LaporanTagihanBulananController;
+use App\Http\Controllers\SFinlog\RiwayatTagihanController;
 use App\Livewire\SFinlog\KertasKerjaInvestorSFinlog;
 use App\Http\Controllers\SFinlog\PeminjamanController;
 use App\Http\Controllers\SFinlog\PengajuanInvestasiController;
@@ -13,7 +13,6 @@ use App\Http\Controllers\SFinlog\PenyaluranDepositoController;
 use App\Http\Controllers\SFinlog\ProgramRestrukturisasiController;
 use App\Http\Controllers\SFinlog\EvaluasiRestrukturisasiController;
 use App\Livewire\DebiturPiutangIndex;
-use App\Livewire\PenyaluranDeposito\PenyaluranDepositoIndex;
 use App\Livewire\PengembalianInvestasi;
 use App\Livewire\SFinlog\DashboardPembiayaanSfinlog;
 use App\Livewire\SFinlog\DashboardInvestasiDepositoSfinlog;
@@ -41,7 +40,7 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
 // Index route: sfinlog.ar-perbulan.index
-Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
+Route::post('ar-perbulan/update', [LaporanTagihanBulananController::class, 'updateAR'])->name('ar-perbulan.update');
 
 
 // AR Performance - Moved to Livewire (see livewire_route.php)
@@ -52,10 +51,10 @@ Route::get('ar-performance/export-pdf', [\App\Http\Controllers\SFinlog\ArPerform
 
 // Program Restrukturisasi Routes - Full Livewire
 Route::prefix('program-restrukturisasi')->name('program-restrukturisasi.')->group(function () {
-    Route::get('/', \App\Livewire\ProgramRestrukturisasi\Index::class)->name('index');
-    Route::get('create', \App\Livewire\ProgramRestrukturisasi\Create::class)->name('create');
-    Route::get('{id}', \App\Livewire\ProgramRestrukturisasi\Show::class)->name('show');
-    Route::get('{id}/edit', \App\Livewire\ProgramRestrukturisasi\Edit::class)->name('edit');
+    Route::get('/', \App\Livewire\PenyesuaianCicilan\Index::class)->name('index');
+    Route::get('create', \App\Livewire\PenyesuaianCicilan\Create::class)->name('create');
+    Route::get('{id}', \App\Livewire\PenyesuaianCicilan\Show::class)->name('show');
+    Route::get('{id}/edit', \App\Livewire\PenyesuaianCicilan\Edit::class)->name('edit');
     Route::post('/', [ProgramRestrukturisasiController::class, 'store'])->name('store');
     Route::get('approved', [ProgramRestrukturisasiController::class, 'getApprovedRestrukturisasi'])->name('approved');
     Route::get('detail/{id}', [ProgramRestrukturisasiController::class, 'getRestrukturisasiDetail'])->name('detail');
@@ -70,8 +69,8 @@ Route::post('pengembalian-pinjaman/store', [PengembalianPinjamanController::clas
 
 // Debitur Piutang
 
-Route::get('debitur-piutang/histori', [DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
-Route::get('debitur-piutang/summary', [DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
+Route::get('debitur-piutang/histori', [RiwayatTagihanController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
+Route::get('debitur-piutang/summary', [RiwayatTagihanController::class, 'getSummaryData'])->name('debitur-piutang.summary');
 
 // Report Pengembalian Finlog
 Route::get('report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('report-pengembalian.index');

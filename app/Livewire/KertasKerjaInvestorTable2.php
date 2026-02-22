@@ -57,14 +57,17 @@ class KertasKerjaInvestorTable2 extends DataTableComponent
                 'tanggal_investasi',
                 'jumlah_investasi',
                 'lama_investasi',
-                'bagi_hasil_pertahun',
+                'bunga_pertahun',
                 'nomor_kontrak',
                 'nama_investor',
-                'deposito',
+                'jenis_investasi',
                 'status'
             ])
-            ->whereNotNull('nomor_kontrak')
-            ->where('nomor_kontrak', '!=', '');
+            ->where(function ($q) {
+                $q->whereNotNull('nomor_kontrak')
+                    ->where('nomor_kontrak', '!=', '')
+                    ->orWhereHas('penyaluranDanaInvestasi');
+            });
 
         // Apply global search filter
         if (!empty($this->globalSearch)) {
@@ -72,7 +75,7 @@ class KertasKerjaInvestorTable2 extends DataTableComponent
             $query->where(function ($q) use ($search) {
                 $q->where('nama_investor', 'like', '%' . $search . '%')
                     ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
-                    ->orWhere('deposito', 'like', '%' . $search . '%')
+                    ->orWhere('jenis_investasi', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%');
             });
         }
@@ -92,8 +95,8 @@ class KertasKerjaInvestorTable2 extends DataTableComponent
     {
         $year = $this->year;
 
-        $bagiHasilPerBulan = $row->bagi_hasil_pertahun / 12;
-        $cofBulan = ($row->jumlah_investasi * $bagiHasilPerBulan) / 100;
+        $bungaPerBulan = $row->bunga_pertahun / 12;
+        $cofBulan = ($row->jumlah_investasi * $bungaPerBulan) / 100;
 
         $tanggalMulai = Carbon::parse($row->tanggal_investasi);
         $tanggalJatuhTempo = Carbon::parse($row->tanggal_investasi)->addMonths($row->lama_investasi);

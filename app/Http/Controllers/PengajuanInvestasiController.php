@@ -62,12 +62,12 @@ class PengajuanInvestasiController extends Controller
 
             $validated = $request->validated();
 
-            // Calculate nominal bagi hasil
-            $nominalBagiHasil = ($validated['jumlah_investasi'] * $validated['bagi_hasil_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
+            // Calculate nominal bunga
+            $nominalBunga = ($validated['jumlah_investasi'] * $validated['bunga_pertahun'] / 100) * ($validated['lama_investasi'] / 12);
 
             // Prepare payload for creation. Only include nomor_kontrak if provided by user.
             $payload = array_merge($validated, [
-                'nominal_bagi_hasil_yang_didapatkan' => $nominalBagiHasil,
+                'nominal_bunga_yang_didapatkan' => $nominalBunga,
                 'status' => 'Draft',
                 'current_step' => 1,
                 'created_by' => Auth::id(),
@@ -123,12 +123,12 @@ class PengajuanInvestasiController extends Controller
             'nama_investor' => $pengajuan->nama_investor,
             'nama_perusahaan' => $pengajuan->investor->nama ?? '-',
             'alamat' => $pengajuan->investor->alamat ?? '-',
-            'deposito' => $pengajuan->deposito,
+            'jenis_investasi' => $pengajuan->jenis_investasi,
             'tanggal_investasi' => $pengajuan->tanggal_investasi,
             'lama_investasi' => $pengajuan->lama_investasi,
             'jumlah_investasi' => $pengajuan->jumlah_investasi,
-            'bagi_hasil_pertahun' => $pengajuan->bagi_hasil_pertahun,
-            'nominal_bagi_hasil_yang_didapatkan' => $pengajuan->nominal_bagi_hasil_yang_didapatkan,
+            'bunga_pertahun' => $pengajuan->bunga_pertahun,
+            'nominal_bunga_yang_didapatkan' => $pengajuan->nominal_bunga_yang_didapatkan,
             'upload_bukti_transfer' => $pengajuan->upload_bukti_transfer,
             'nomor_kontrak' => $pengajuan->nomor_kontrak,
             'status' => $pengajuan->status,
@@ -144,7 +144,7 @@ class PengajuanInvestasiController extends Controller
             if ($pengajuan->investor && !empty($pengajuan->investor->kode_perusahaan)) {
                 $previewNomorKontrak = ContractNumberService::generateInvestasi(
                     $pengajuan->investor->kode_perusahaan,
-                    $pengajuan->deposito,
+                    $pengajuan->jenis_investasi,
                     $pengajuan->tanggal_investasi
                 );
             } else {
@@ -528,7 +528,7 @@ class PengajuanInvestasiController extends Controller
             $nomorDeposito = 'DC' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
             // Get description based on deposito type
-            $deskripsi = $pengajuan->deposito === 'Khusus'
+            $deskripsi = $pengajuan->jenis_investasi === 'Khusus'
                 ? 'INVESTASI DEPOSITO KHUSUS'
                 : 'INVESTASI DEPOSITO REGULER';
 
@@ -548,7 +548,7 @@ class PengajuanInvestasiController extends Controller
                 'nilai_deposito' => 'Rp ' . number_format($pengajuan->jumlah_investasi, 0, ',', '.'),
                 'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
                 'jangka_waktu' => $jangkaWaktu,
-                'bagi_hasil' => $pengajuan->bagi_hasil_pertahun . ' % P.A NET',
+                'bagi_hasil' => $pengajuan->bunga_pertahun . ' % P.A NET',
                 'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->jumlah_investasi, 2, ',', '.'),
             ];
 
@@ -595,7 +595,7 @@ class PengajuanInvestasiController extends Controller
             // Generate nomor kontrak
             $nomorKontrak = ContractNumberService::generateInvestasi(
                 $investasi->investor->kode_perusahaan,
-                $investasi->deposito,
+                $investasi->jenis_investasi,
                 $investasi->tanggal_investasi
             );
 

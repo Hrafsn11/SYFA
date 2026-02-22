@@ -34,8 +34,8 @@ class InvoiceForm extends Component
         $dokumen_so_current = null,
         $dokumen_bast_current = null,
         $dokumen_lainnnya_current = null,
-        $nilai_bagi_hasil,
-        $persentase_bagi_hasil = 0;
+        $nilai_bunga,
+        $persentase_bunga = 0;
 
     public function render()
     {
@@ -90,7 +90,7 @@ class InvoiceForm extends Component
 
         $totalPinjaman = $data->sum(fn ($item) => (double) ($item['nilai_pinjaman'] ?? 0));
         $totalBagiHasil = $data->sum(function ($item) {
-            $persentase = (double) ($this->persentase_bagi_hasil ?? 0);
+            $persentase = (double) ($this->persentase_bunga ?? 0);
             $nilaiPinjaman = (double) ($item['nilai_pinjaman'] ?? 0);
 
             return $nilaiPinjaman * $persentase;

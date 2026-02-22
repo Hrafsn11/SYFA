@@ -157,7 +157,7 @@ class PengajuanPinjamanTable extends DataTableComponent
                         'pending' => 'bg-warning text-dark',
                         'disbursed' => 'bg-info',
                         'Dana Sudah Dicairkan' => 'bg-success',
-                        'Proses Restrukturisasi' => 'bg-info',
+                        'Proses Cicilan' => 'bg-info',
                         'Peminjaman Direstrukturisasi' => 'bg-primary',
                         'Disetujui oleh CEO SKI' => 'bg-success',
                         'Disetujui oleh Direktur SKI' => 'bg-success',
@@ -189,7 +189,7 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->html(),
 
             Column::make('Aksi')
-                ->label(fn($row) => view('livewire.peminjaman.partials.table-actions', [
+                ->label(fn($row) => view('livewire.pengajuan-pinjaman.partials.table-actions', [
                     'id' => $row->id_pengajuan_peminjaman,
                     'status' => $row->status,
                     'is_active' => $row->is_active

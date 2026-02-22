@@ -17,7 +17,7 @@ class MasterSumberPendanaanEksternal extends Model
 
     protected $fillable = [
         'nama_instansi',
-        'persentase_bagi_hasil'
+        'persentase_bunga'
     ];
 
     /**

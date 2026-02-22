@@ -26,7 +26,7 @@ trait HandleInvoiceEvents
                 continue;
             }
 
-            if (in_array($key, ['nilai_invoice', 'nilai_pinjaman', 'nilai_bagi_hasil'])) {
+            if (in_array($key, ['nilai_invoice', 'nilai_pinjaman', 'nilai_bunga'])) {
                 $this->{$key} = rupiahFormatter($value);
             } else if (in_array($key, ['invoice_date', 'due_date'])) {
                 $this->{$key} = parseCarbonDate($value)->format('d/m/Y');

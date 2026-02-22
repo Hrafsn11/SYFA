@@ -44,11 +44,11 @@ class KontrakInvestasiService
     {
         $tanggalInvestasi = Carbon::parse($pengajuan->tanggal_investasi);
         $tanggalJatuhTempo = $this->calculateTanggalJatuhTempo($pengajuan, $tanggalInvestasi);
-        $bagiHasil = $this->calculateBagiHasil($pengajuan);
+        $bunga = $this->calculateBunga($pengajuan);
 
         return [
             'id_investasi' => $pengajuan->id_pengajuan_investasi,
-            'jenis_deposito' => strtoupper($pengajuan->deposito),
+            'jenis_investasi' => strtoupper($pengajuan->jenis_investasi),
             'nomor_kontrak' => $nomorKontrak ?? $this->generateDefaultNomorKontrak(),
             'hari' => $this->getHariIndonesia($tanggalInvestasi),
             'tanggal_kontrak' => $this->formatTanggalIndonesia($tanggalInvestasi),
@@ -61,8 +61,8 @@ class KontrakInvestasiService
             'tanggal_mulai' => $this->formatTanggalIndonesia($tanggalInvestasi),
             'tanggal_berakhir' => $this->formatTanggalIndonesia($tanggalJatuhTempo),
             'tanggal_jatuh_tempo' => $this->formatTanggalIndonesia($tanggalJatuhTempo),
-            'bagi_hasil' => $bagiHasil,
-            'bagi_hasil_persen' => $bagiHasil . '%',
+            'bunga' => $bunga,
+            'bunga_persen' => $bunga . '%',
             'tanggal_full' => $this->getHariIndonesia($tanggalInvestasi) . ', ' . $this->formatTanggalIndonesia($tanggalInvestasi),
             'tanda_tangan_investor' => $pengajuan->investor->tanda_tangan ?? null,
         ];
@@ -77,7 +77,7 @@ class KontrakInvestasiService
      */
     private function calculateTanggalJatuhTempo(PengajuanInvestasi $pengajuan, Carbon $tanggalInvestasi): Carbon
     {
-        if ($pengajuan->deposito === 'Reguler') {
+        if ($pengajuan->jenis_investasi === 'Reguler') {
             // Regular: Always 31 December of investment year
             return Carbon::createFromDate($tanggalInvestasi->year, 12, 31);
         }
@@ -87,14 +87,14 @@ class KontrakInvestasiService
     }
 
     /**
-     * Calculate bagi hasil percentage
+     * Calculate bunga percentage
      *
      * @param PengajuanInvestasi $pengajuan
      * @return int
      */
-    private function calculateBagiHasil(PengajuanInvestasi $pengajuan): int
+    private function calculateBunga(PengajuanInvestasi $pengajuan): int
     {
-        return $pengajuan->deposito === 'Reguler' ? 10 : $pengajuan->bagi_hasil_pertahun;
+        return $pengajuan->jenis_investasi === 'Reguler' ? 10 : $pengajuan->bunga_pertahun;
     }
 
     /**

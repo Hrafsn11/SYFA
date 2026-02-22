@@ -53,7 +53,7 @@ class PengembalianInvestasiRequest extends FormRequest
                     }
                 },
             ],
-            'bagi_hasil_dibayar' => [
+            'bunga_dibayar' => [
                 'nullable',
                 'numeric',
                 'min:0',
@@ -68,17 +68,17 @@ class PengembalianInvestasiRequest extends FormRequest
                         return;
                     }
 
-                    // Best Practice: Langsung pakai kolom sisa_bagi_hasil (fast & accurate!)
-                    $sisaBagiHasil = $investasi->sisa_bagi_hasil ?? 0;
+                    // Best Practice: Langsung pakai kolom sisa_bunga (fast & accurate!)
+                    $sisaBunga = $investasi->sisa_bunga ?? 0;
 
-                    // Jika sisa bagi hasil masih ada, field ini wajib diisi
-                    if ($sisaBagiHasil > 0 && (is_null($value) || $value === '')) {
-                        $fail('Bagi Hasil harus diisi karena masih ada sisa Rp ' . number_format($sisaBagiHasil, 0, ',', '.'));
+                    // Jika sisa bunga masih ada, field ini wajib diisi
+                    if ($sisaBunga > 0 && (is_null($value) || $value === '')) {
+                        $fail('Bunga harus diisi karena masih ada sisa Rp ' . number_format($sisaBunga, 0, ',', '.'));
                         return;
                     }
 
-                    if ($value > $sisaBagiHasil) {
-                        $fail('Bagi Hasil tidak boleh lebih dari Sisa Bagi Hasil (Rp ' . number_format($sisaBagiHasil, 0, ',', '.') . ')');
+                    if ($value > $sisaBunga) {
+                        $fail('Bunga tidak boleh lebih dari Sisa Bunga (Rp ' . number_format($sisaBunga, 0, ',', '.') . ')');
                     }
                 },
             ],
@@ -97,9 +97,9 @@ class PengembalianInvestasiRequest extends FormRequest
             'dana_pokok_dibayar.required' => 'Dana Pokok harus diisi.',
             'dana_pokok_dibayar.numeric' => 'Dana Pokok harus berupa angka.',
             'dana_pokok_dibayar.min' => 'Dana Pokok minimal 0.',
-            'bagi_hasil_dibayar.required' => 'Bagi Hasil harus diisi.',
-            'bagi_hasil_dibayar.numeric' => 'Bagi Hasil harus berupa angka.',
-            'bagi_hasil_dibayar.min' => 'Bagi Hasil minimal 0.',
+            'bunga_dibayar.required' => 'Bunga harus diisi.',
+            'bunga_dibayar.numeric' => 'Bunga harus berupa angka.',
+            'bunga_dibayar.min' => 'Bunga minimal 0.',
             'bukti_transfer.required' => 'Bukti Transfer harus diupload.',
             'bukti_transfer.file' => 'Bukti Transfer harus berupa file.',
             'bukti_transfer.mimes' => 'Bukti Transfer harus berupa file PDF, JPG, JPEG, atau PNG.',

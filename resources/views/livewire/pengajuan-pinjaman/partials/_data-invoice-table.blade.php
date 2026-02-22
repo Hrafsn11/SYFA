@@ -56,7 +56,7 @@
                     <th>NILAI INVOICE</th>
                     <th>NAMA CLIENT</th>
                     <th>NILAI PINJAMAN</th>
-                    <th>NILAI BAGI HASIL</th>
+                    <th>NILAI BUNGA</th>
                     <th>KONTRAK DATE</th>
                     <th>DUE DATE</th>
                     <th>DOKUMEN KONTRAK</th>
@@ -73,7 +73,7 @@
                         <td>Rp. {{ number_format($po['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
                         <td>{{ $po['nama_client'] ?? '-' }}</td>
                         <td>Rp. {{ number_format($po['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
-                        <td>Rp. {{ number_format($po['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                        <td>Rp. {{ number_format($po['nilai_bunga'] ?? 0, 0, ',', '.') }}</td>
                         <td>{{ $po['kontrak_date'] ?? '-' }}</td>
                         <td>{{ $po['due_date'] ?? '-' }}</td>
                         <td>
@@ -120,7 +120,7 @@
                     <th>NAMA CLIENT</th>
                     <th>NILAI INVOICE</th>
                     <th>NILAI PINJAMAN</th>
-                    <th>NILAI BAGI HASIL</th>
+                    <th>NILAI BUNGA</th>
                     <th>KONTRAK DATE</th>
                     <th>DUE DATE</th>
                     <th>DOKUMEN INVOICE</th>
@@ -137,7 +137,7 @@
                         <td>{{ $fact['nama_client'] ?? '-' }}</td>
                         <td>Rp. {{ number_format($fact['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
                         <td>Rp. {{ number_format($fact['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
-                        <td>Rp. {{ number_format($fact['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                        <td>Rp. {{ number_format($fact['nilai_bunga'] ?? 0, 0, ',', '.') }}</td>
                         <td>{{ $fact['kontrak_date'] ?? '-' }}</td>
                         <td>{{ $fact['due_date'] ?? '-' }}</td>
                         <td>
@@ -185,7 +185,7 @@
                     <th>NAMA CLIENT</th>
                     <th>NILAI INVOICE</th>
                     <th>NILAI PINJAMAN</th>
-                    <th>NILAI BAGI HASIL</th>
+                    <th>NILAI BUNGA</th>
                     <th>INVOICE DATE</th>
                     <th>DUE DATE</th>
                     <th>DOKUMEN INVOICE <span class="text-danger">*</span></th>
@@ -202,7 +202,7 @@
                         <td>{{ $inv['nama_client'] ?? '-' }}</td>
                         <td>Rp. {{ number_format($inv['nilai_invoice'] ?? 0, 0, ',', '.') }}</td>
                         <td>Rp. {{ number_format($inv['nilai_pinjaman'] ?? 0, 0, ',', '.') }}</td>
-                        <td>Rp. {{ number_format($inv['nilai_bagi_hasil'] ?? 0, 0, ',', '.') }}</td>
+                        <td>Rp. {{ number_format($inv['nilai_bunga'] ?? 0, 0, ',', '.') }}</td>
                         <td>{{ $inv['invoice_date'] ?? '-' }}</td>
                         <td>{{ $inv['due_date'] ?? '-' }}</td>
                         <td>

@@ -131,6 +131,6 @@ class ArPerbulan extends Component
 
     public function render()
     {
-        return view('livewire.ar-perbulan.index');
+        return view('livewire.laporan-tagihan-bulanan.index');
     }
 }

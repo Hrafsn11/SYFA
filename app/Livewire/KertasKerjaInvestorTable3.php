@@ -56,14 +56,17 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 'id_pengajuan_investasi',
                 'tanggal_investasi',
                 'sisa_pokok',
-                'sisa_bagi_hasil',
+                'sisa_bunga',
                 'nomor_kontrak',
                 'nama_investor',
-                'deposito',
+                'jenis_investasi',
                 'status'
             ])
-            ->whereNotNull('nomor_kontrak')
-            ->where('nomor_kontrak', '!=', '');
+            ->where(function ($q) {
+                $q->whereNotNull('nomor_kontrak')
+                    ->where('nomor_kontrak', '!=', '')
+                    ->orWhereHas('penyaluranDanaInvestasi');
+            });
 
         // Apply global search filter
         if (!empty($this->globalSearch)) {
@@ -71,7 +74,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
             $query->where(function ($q) use ($search) {
                 $q->where('nama_investor', 'like', '%' . $search . '%')
                     ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
-                    ->orWhere('deposito', 'like', '%' . $search . '%')
+                    ->orWhere('jenis_investasi', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%');
             });
         }
@@ -94,15 +97,15 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
         $total = DB::table('pengembalian_investasi')
             ->select([
                 DB::raw('SUM(dana_pokok_dibayar) as total_pokok_all'),
-                DB::raw('SUM(bagi_hasil_dibayar) as total_bagi_hasil_all')
+                DB::raw('SUM(bunga_dibayar) as total_bunga_all')
             ])
             ->where('id_pengajuan_investasi', $id)
             ->first();
 
         return [
             'pengembalian_pokok' => $total->total_pokok_all ?? 0,
-            'pengembalian_bagi_hasil' => $total->total_bagi_hasil_all ?? 0,
-            'total_belum_dikembalikan' => $row->sisa_pokok + $row->sisa_bagi_hasil,
+            'pengembalian_bunga' => $total->total_bunga_all ?? 0,
+            'total_belum_dikembalikan' => $row->sisa_pokok + $row->sisa_bunga,
         ];
     }
 
@@ -110,7 +113,7 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
     {
         return [
             // Aggregated from another table - NO EDIT
-            Column::make('Pengembalian Pokok Deposito')
+            Column::make('Pengembalian Pokok Investasi')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);
                     return '<div class="text-center">Rp ' . number_format($data['pengembalian_pokok'], 0, ',', '.') . '</div>';
@@ -118,10 +121,10 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 ->html(),
 
             // Aggregated from another table - NO EDIT
-            Column::make('Pengembalian Bagi Hasil Deposito')
+            Column::make('Pengembalian Bunga Investasi')
                 ->label(function ($row) {
                     $data = $this->getPengembalianData($row);
-                    return '<div class="text-center">Rp ' . number_format($data['pengembalian_bagi_hasil'], 0, ',', '.') . '</div>';
+                    return '<div class="text-center">Rp ' . number_format($data['pengembalian_bunga'], 0, ',', '.') . '</div>';
                 })
                 ->html(),
 
@@ -138,13 +141,13 @@ class KertasKerjaInvestorTable3 extends DataTableComponent
                 ->html(),
 
             // EDITABLE
-            Column::make('Sisa Bagi Hasil Belum Dikembalikan', 'sisa_bagi_hasil')
+            Column::make('Sisa Bunga Belum Dikembalikan', 'sisa_bunga')
                 ->sortable()
                 ->label(function ($row) {
-                    $value = 'Rp ' . number_format($row->sisa_bagi_hasil, 0, ',', '.');
+                    $value = 'Rp ' . number_format($row->sisa_bunga, 0, ',', '.');
                     $id = $row->id_pengajuan_investasi;
                     return '<div class="text-center editable-cell"><strong class="text-danger">' . $value . '</strong>
-                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'sisa_bagi_hasil\'})"></i>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'sisa_bunga\'})"></i>
                     </div>';
                 })
                 ->html(),

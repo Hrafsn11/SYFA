@@ -56,19 +56,22 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             ->select([
                 'id_pengajuan_investasi',
                 'tanggal_investasi',
-                'deposito',
+                'jenis_investasi',
                 'nama_investor',
                 'jumlah_investasi',
                 'lama_investasi',
-                'bagi_hasil_pertahun',
-                'nominal_bagi_hasil_yang_didapatkan',
+                'bunga_pertahun',
+                'nominal_bunga_yang_didapatkan',
                 'sisa_pokok',
-                'sisa_bagi_hasil',
+                'sisa_bunga',
                 'status',
                 'nomor_kontrak'
             ])
-            ->whereNotNull('nomor_kontrak')
-            ->where('nomor_kontrak', '!=', '');
+            ->where(function ($q) {
+                $q->whereNotNull('nomor_kontrak')
+                    ->where('nomor_kontrak', '!=', '')
+                    ->orWhereHas('penyaluranDanaInvestasi');
+            });
 
         // Apply global search filter
         if (!empty($this->globalSearch)) {
@@ -76,7 +79,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             $query->where(function ($q) use ($search) {
                 $q->where('nama_investor', 'like', '%' . $search . '%')
                     ->orWhere('nomor_kontrak', 'like', '%' . $search . '%')
-                    ->orWhere('deposito', 'like', '%' . $search . '%')
+                    ->orWhere('jenis_investasi', 'like', '%' . $search . '%')
                     ->orWhere('status', 'like', '%' . $search . '%');
             });
         }
@@ -102,8 +105,8 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             ->where('id_pengajuan_investasi', $id)
             ->max('tanggal_pengembalian');
 
-        $bagiHasilPerBulan = $row->bagi_hasil_pertahun / 12;
-        $cofBulan = ($row->jumlah_investasi * $bagiHasilPerBulan) / 100;
+        $bungaPerBulan = $row->bunga_pertahun / 12;
+        $cofBulan = ($row->jumlah_investasi * $bungaPerBulan) / 100;
 
         $tanggalMulai = Carbon::parse($row->tanggal_investasi);
         $tanggalAkhirPeriode = Carbon::create($year, 12, 31);
@@ -122,13 +125,13 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
             $totalDibayar = DB::table('pengembalian_investasi')
                 ->where('id_pengajuan_investasi', $id)
                 ->where('tanggal_pengembalian', '<=', $tanggalBatas)
-                ->sum('bagi_hasil_dibayar');
+                ->sum('bunga_dibayar');
 
             $cofAkhirPeriode = max(0, $totalSeharusnya - $totalDibayar);
         }
 
         return [
-            'bagi_hasil_per_bulan' => $bagiHasilPerBulan,
+            'bunga_per_bulan' => $bungaPerBulan,
             'cof_bulan' => $cofBulan,
             'cof_akhir_periode' => $cofAkhirPeriode,
             'tgl_pengembalian' => $tglTerakhir,
@@ -160,17 +163,17 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Deposito', 'deposito')
+            Column::make('Jenis Investasi', 'jenis_investasi')
                 ->sortable()
                 ->searchable(function (Builder $builder, $term) {
-                    $builder->orWhere('deposito', 'like', '%' . $term . '%')
+                    $builder->orWhere('jenis_investasi', 'like', '%' . $term . '%')
                         ->orWhere('nomor_kontrak', 'like', '%' . $term . '%');
                 })
                 ->label(function ($row) {
-                    $value = $row->deposito ?? '-';
+                    $value = $row->jenis_investasi ?? '-';
                     $id = $row->id_pengajuan_investasi;
                     return '<div class="text-center editable-cell">' . $value . '
-                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'deposito\'})"></i>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'jenis_investasi\'})"></i>
                     </div>';
                 })
                 ->html(),
@@ -200,7 +203,7 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Lama Deposito', 'lama_investasi')
+            Column::make('Lama Investasi', 'lama_investasi')
                 ->sortable()
                 ->label(function ($row) {
                     $value = $row->lama_investasi . ' Bulan';
@@ -211,38 +214,38 @@ class KertasKerjaInvestorTable1 extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Bagi Hasil (%PA)', 'bagi_hasil_pertahun')
+            Column::make('Bunga (%PA)', 'bunga_pertahun')
                 ->sortable()
                 ->label(function ($row) {
-                    $value = number_format($row->bagi_hasil_pertahun, 2) . '%';
+                    $value = number_format($row->bunga_pertahun, 2) . '%';
                     $id = $row->id_pengajuan_investasi;
                     return '<div class="text-center editable-cell">' . $value . '
-                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'bagi_hasil_pertahun\'})"></i>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'bunga_pertahun\'})"></i>
                     </div>';
                 })
                 ->html(),
 
-            Column::make('Bagi Hasil Nominal', 'nominal_bagi_hasil_yang_didapatkan')
+            Column::make('Bunga Nominal', 'nominal_bunga_yang_didapatkan')
                 ->sortable()
                 ->label(function ($row) {
-                    $value = 'Rp ' . number_format($row->nominal_bagi_hasil_yang_didapatkan, 0, ',', '.');
+                    $value = 'Rp ' . number_format($row->nominal_bunga_yang_didapatkan, 0, ',', '.');
                     $id = $row->id_pengajuan_investasi;
                     return '<div class="text-center editable-cell">' . $value . '
-                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'nominal_bagi_hasil_yang_didapatkan\'})"></i>
+                        <i class="ti ti-pencil edit-icon" onclick="Livewire.dispatch(\'openEditModal\', {id: \'' . $id . '\', field: \'nominal_bunga_yang_didapatkan\'})"></i>
                     </div>';
                 })
                 ->html(),
 
             // Calculated field - NO EDIT
-            Column::make('Bagi Hasil (%Bulan)')
+            Column::make('Bunga (%Bulan)')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
-                    return '<div class="text-center">' . number_format($calc['bagi_hasil_per_bulan'], 2) . '%</div>';
+                    return '<div class="text-center">' . number_format($calc['bunga_per_bulan'], 2) . '%</div>';
                 })
                 ->html(),
 
             // Calculated field - NO EDIT
-            Column::make('Bagi Hasil (COF/Bulan)')
+            Column::make('Bunga (COF/Bulan)')
                 ->label(function ($row) {
                     $calc = $this->getCalculatedData($row);
                     return '<div class="text-center">Rp ' . number_format($calc['cof_bulan'], 0, ',', '.') . '</div>';

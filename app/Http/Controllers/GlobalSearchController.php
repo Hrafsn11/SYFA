@@ -164,7 +164,7 @@ class GlobalSearchController extends Controller
 
             // Restrukturisasi
             ['title' => 'Pengajuan Restrukturisasi', 'route' => 'pengajuan-restrukturisasi.index', 'keywords' => ['pengajuan', 'restrukturisasi', 'restructuring']],
-            ['title' => 'Program Restrukturisasi', 'route' => 'program-restrukturisasi.index', 'keywords' => ['program', 'restrukturisasi', 'restructuring']],
+            ['title' => 'Penyesuaian Cicilan', 'route' => 'penyesuaian-cicilan.index', 'keywords' => ['penyesuaian', 'cicilan', 'restrukturisasi', 'restructuring']],
 
             // Pengembalian
             ['title' => 'Pengembalian Dana', 'route' => 'pengembalian.index', 'keywords' => ['pengembalian', 'dana', 'return', 'payment']],

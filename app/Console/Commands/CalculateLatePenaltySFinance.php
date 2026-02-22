@@ -76,7 +76,7 @@ class CalculateLatePenaltySFinance extends Command
                     $pengajuan->update([
                         'jumlah_bulan_keterlambatan' => 0,
                         'denda_keterlambatan' => 0,
-                        'total_bagi_hasil_saat_ini' => $pengajuan->total_bagi_hasil,
+                        'total_bunga_saat_ini' => $pengajuan->total_bunga,
                         'last_penalty_calculation' => now(),
                     ]);
                     $this->line("  [LUNAS] {$pengajuan->nomor_peminjaman} - Reset denda keterlambatan");
@@ -92,8 +92,8 @@ class CalculateLatePenaltySFinance extends Command
             
             // Untuk bagi hasil, ambil dari pengembalian terakhir TANPA denda yang sudah dihitung
             $sisaBagiHasilAwal = $pengembalianTerakhir 
-                ? $pengembalianTerakhir->sisa_bagi_hasil 
-                : $pengajuan->total_bagi_hasil;
+                ? $pengembalianTerakhir->sisa_bunga 
+                : $pengajuan->total_bunga;
             
             // Kurangi denda yang sudah ada sebelumnya untuk mendapat sisa bagi hasil murni
             $dendaSebelumnya = $pengajuan->denda_keterlambatan ?? 0;
@@ -107,7 +107,7 @@ class CalculateLatePenaltySFinance extends Command
                     $pengajuan->update([
                         'jumlah_bulan_keterlambatan' => 0,
                         'denda_keterlambatan' => 0,
-                        'total_bagi_hasil_saat_ini' => 0,
+                        'total_bunga_saat_ini' => 0,
                         'last_penalty_calculation' => now(),
                     ]);
                     $this->line("  [LUNAS] {$pengajuan->nomor_peminjaman} - Reset denda keterlambatan");
@@ -140,7 +140,7 @@ class CalculateLatePenaltySFinance extends Command
 
                 // Hitung denda keterlambatan baru
                 // Rumus: Sisa Pokok × (Persentase Bagi Hasil / 100) × Selisih Bulan
-                $persentaseBagiHasil = (float) ($pengajuan->persentase_bagi_hasil ?? 0);
+                $persentaseBagiHasil = (float) ($pengajuan->persentase_bunga ?? 0);
                 $dendaKeterlambatanBaru = round($sisaPokok * ($persentaseBagiHasil / 100) * $selisihBulan);
 
                 // Total denda = denda sebelumnya + denda baru
@@ -161,8 +161,8 @@ class CalculateLatePenaltySFinance extends Command
                     $pengajuan->update([
                         'jumlah_bulan_keterlambatan' => $bulanKeterlambatanTotal,
                         'denda_keterlambatan' => $totalDendaKeterlambatan,
-                        'total_bagi_hasil_saat_ini' => $totalBagiHasilSaatIni,
-                        'sisa_bagi_hasil' => $totalBagiHasilSaatIni, 
+                        'total_bunga_saat_ini' => $totalBagiHasilSaatIni,
+                        'sisa_bunga' => $totalBagiHasilSaatIni, 
                         'last_penalty_calculation' => now(),
                     ]);
 
@@ -193,11 +193,11 @@ class CalculateLatePenaltySFinance extends Command
                         'hari_keterlambatan' => $hariKeterlambatan,
                         'bulan_keterlambatan' => $bulanKeterlambatanTotal,
                         'selisih_bulan' => $selisihBulan,
-                        'persentase_bagi_hasil' => $persentaseBagiHasil,
+                        'persentase_bunga' => $persentaseBagiHasil,
                         'sisa_pokok' => $sisaPokok,
                         'denda_baru' => $dendaKeterlambatanBaru,
                         'total_denda' => $totalDendaKeterlambatan,
-                        'total_bagi_hasil_saat_ini' => $totalBagiHasilSaatIni,
+                        'total_bunga_saat_ini' => $totalBagiHasilSaatIni,
                         'calculated_at' => now()->toDateTimeString(),
                     ]);
                 } elseif ($bulanKeterlambatanTotal > 0 && !$hasChanged) {
@@ -211,8 +211,8 @@ class CalculateLatePenaltySFinance extends Command
                     $pengajuan->update([
                         'jumlah_bulan_keterlambatan' => 0,
                         'denda_keterlambatan' => 0,
-                        'total_bagi_hasil_saat_ini' => $pengajuan->total_bagi_hasil,
-                        'sisa_bagi_hasil' => $sisaBagiHasilAwal,
+                        'total_bunga_saat_ini' => $pengajuan->total_bunga,
+                        'sisa_bunga' => $sisaBagiHasilAwal,
                         'last_penalty_calculation' => now(),
                     ]);
                     $this->line("  [RESET] {$pengajuan->nomor_peminjaman} - Belum jatuh tempo, reset denda");

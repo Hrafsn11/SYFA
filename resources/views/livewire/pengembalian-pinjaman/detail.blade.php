@@ -94,7 +94,7 @@
                         <div class="info-item d-flex justify-content-between py-3 border-bottom">
                             <span class="text-muted">Total Bagi Hasil</span>
                             <span class="fw-bold text-end">Rp
-                                {{ number_format($pengembalian->total_bagi_hasil, 0, ',', '.') }}</span>
+                                {{ number_format($pengembalian->total_bunga, 0, ',', '.') }}</span>
                         </div>
                         <div class="info-item d-flex justify-content-between py-3 border-bottom">
                             <span class="text-muted">Nominal Invoice</span>
@@ -127,7 +127,7 @@
                                                 <span class="text-muted">Bayar Bagi Hasil</span>
                                             </div>
                                             <span class="fw-semibold text-success">
-                                                Rp {{ number_format($dibayarkanKeBagiHasil, 0, ',', '.') }}
+                                                Rp {{ number_format($dibayarkanKeBunga, 0, ',', '.') }}
                                             </span>
                                         </div>
 
@@ -152,7 +152,7 @@
                             <div class="ps-4 d-flex justify-content-between">
                                 <span class="text-muted">Bagi hasil yang dibayarkan</span>
                                 <span class="text-end">
-                                    Rp {{ number_format(($pengembalian->total_bagi_hasil - $pengembalian->sisa_bagi_hasil), 0, ',', '.') }}
+                                    Rp {{ number_format(($pengembalian->total_bunga - $pengembalian->sisa_bunga), 0, ',', '.') }}
                                 </span>
                             </div>
                         </div>
@@ -179,8 +179,8 @@
                             <span class="text-muted">Sisa Bagi Hasil</span>
                             <span class="text-end">
                                 <span
-                                    class="badge {{ $pengembalian->sisa_bagi_hasil == 0 ? 'bg-success' : 'bg-warning' }}">
-                                    Rp {{ number_format($pengembalian->sisa_bagi_hasil, 0, ',', '.') }}
+                                    class="badge {{ $pengembalian->sisa_bunga == 0 ? 'bg-success' : 'bg-warning' }}">
+                                    Rp {{ number_format($pengembalian->sisa_bunga, 0, ',', '.') }}
                                 </span>
                             </span>
                         </div>
