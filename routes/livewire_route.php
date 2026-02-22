@@ -42,7 +42,7 @@ Route::get('monitoring-pembayaran', \App\Livewire\ArPerformanceIndex::class)->na
 
 // Debitur Piutang
 Route::get('riwayat-tagihan', \App\Livewire\DebiturPiutangIndex::class)->name('riwayat-tagihan.index');
-Route::post('riwayat-tagihan/update', [\App\Http\Controllers\DebiturPiutangController::class, 'update'])->name('riwayat-tagihan.update');
+Route::post('riwayat-tagihan/update', [\App\Http\Controllers\RiwayatTagihanController::class, 'update'])->name('riwayat-tagihan.update');
 
 // Master Cells Project
 Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');

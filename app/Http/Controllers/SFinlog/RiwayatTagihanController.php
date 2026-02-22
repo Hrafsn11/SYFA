@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class DebiturPiutangController extends Controller
+class RiwayatTagihanController extends Controller
 {
     /**
      * Get histori pembayaran for SFinlog

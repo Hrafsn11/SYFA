@@ -6,7 +6,7 @@ use App\Services\ArPerformanceService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class ArPerformanceController extends Controller
+class MonitoringPembayaranController extends Controller
 {
     protected $arService;
 

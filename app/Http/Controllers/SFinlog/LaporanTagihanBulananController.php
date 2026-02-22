@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ArPerbulanController extends Controller
+class LaporanTagihanBulananController extends Controller
 {
     /**
      * Display AR Perbulan index for SFinlog

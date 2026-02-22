@@ -1,8 +1,8 @@
 <?php
 
 use App\Livewire\Dashboard;
-use App\Http\Controllers\SFinlog\ArPerbulanController;
-use App\Http\Controllers\SFinlog\DebiturPiutangController;
+use App\Http\Controllers\SFinlog\LaporanTagihanBulananController;
+use App\Http\Controllers\SFinlog\RiwayatTagihanController;
 use App\Livewire\SFinlog\KertasKerjaInvestorSFinlog;
 use App\Http\Controllers\SFinlog\PeminjamanController;
 use App\Http\Controllers\SFinlog\PengajuanInvestasiController;
@@ -40,7 +40,7 @@ Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
 
 // AR Perbulan - Handled by Livewire (see livewire_route.php)
 // Index route: sfinlog.ar-perbulan.index
-Route::post('ar-perbulan/update', [ArPerbulanController::class, 'updateAR'])->name('ar-perbulan.update');
+Route::post('ar-perbulan/update', [LaporanTagihanBulananController::class, 'updateAR'])->name('ar-perbulan.update');
 
 
 // AR Performance - Moved to Livewire (see livewire_route.php)
@@ -69,8 +69,8 @@ Route::post('pengembalian-pinjaman/store', [PengembalianPinjamanController::clas
 
 // Debitur Piutang
 
-Route::get('debitur-piutang/histori', [DebiturPiutangController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
-Route::get('debitur-piutang/summary', [DebiturPiutangController::class, 'getSummaryData'])->name('debitur-piutang.summary');
+Route::get('debitur-piutang/histori', [RiwayatTagihanController::class, 'getHistoriPembayaran'])->name('debitur-piutang.histori');
+Route::get('debitur-piutang/summary', [RiwayatTagihanController::class, 'getSummaryData'])->name('debitur-piutang.summary');
 
 // Report Pengembalian Finlog
 Route::get('report-pengembalian', \App\Livewire\SFinlog\ReportPengembalian::class)->name('report-pengembalian.index');

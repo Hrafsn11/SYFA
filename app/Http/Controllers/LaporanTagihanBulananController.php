@@ -7,7 +7,7 @@ use App\Services\ArPerbulanService;
 use App\Helpers\Response;
 use Illuminate\Http\Request;
 
-class ArPerbulanController extends Controller
+class LaporanTagihanBulananController extends Controller
 {
     public function index()
     {

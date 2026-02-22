@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class DebiturPiutangController extends Controller
+class RiwayatTagihanController extends Controller
 {
     public function __construct(
         private readonly DebiturPiutangService $service,

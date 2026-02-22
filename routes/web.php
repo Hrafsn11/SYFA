@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\RencanaPenagihanDepositoController;
-use App\Http\Controllers\ArPerbulanController;
-use App\Http\Controllers\ArPerformanceController;
+use App\Http\Controllers\LaporanTagihanBulananController;
+use App\Http\Controllers\MonitoringPembayaranController;
 use App\Livewire\LaporanInvestasiSFinance;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Peminjaman\PeminjamanController;
@@ -129,20 +129,20 @@ Route::middleware([
     // })->name('riwayat-tagihan.index');
 
     // AJAX endpoints for Debitur Piutang modals (Table 2 & 3)
-    Route::get('riwayat-tagihan/histori', [App\Http\Controllers\DebiturPiutangController::class, 'getHistoriPembayaran'])->name('riwayat-tagihan.histori');
-    Route::get('riwayat-tagihan/summary', [App\Http\Controllers\DebiturPiutangController::class, 'getSummaryData'])->name('riwayat-tagihan.summary');
+    Route::get('riwayat-tagihan/histori', [App\Http\Controllers\RiwayatTagihanController::class, 'getHistoriPembayaran'])->name('riwayat-tagihan.histori');
+    Route::get('riwayat-tagihan/summary', [App\Http\Controllers\RiwayatTagihanController::class, 'getSummaryData'])->name('riwayat-tagihan.summary');
 
     // Ar Routes
     Route::get('laporan-tagihan-bulanan', ArPerbulan::class)->name('laporan-tagihan-bulanan.index');
-    Route::post('laporan-tagihan-bulanan/update', [ArPerbulanController::class, 'updateAR'])->name('laporan-tagihan-bulanan.update');
+    Route::post('laporan-tagihan-bulanan/update', [LaporanTagihanBulananController::class, 'updateAR'])->name('laporan-tagihan-bulanan.update');
 
     // AR Performance - Migrated to Livewire (see routes/livewire_route.php)
     // Main route moved to Livewire
-    // Route::get('monitoring-pembayaran', [ArPerformanceController::class, 'index'])->name('monitoring-pembayaran.index');
+    // Route::get('monitoring-pembayaran', [MonitoringPembayaranController::class, 'index'])->name('monitoring-pembayaran.index');
 
     // AJAX endpoints (still needed for modal)
-    Route::get('monitoring-pembayaran/transactions', [ArPerformanceController::class, 'getTransactions'])->name('monitoring-pembayaran.transactions');
-    Route::get('monitoring-pembayaran/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('monitoring-pembayaran.export-pdf');
+    Route::get('monitoring-pembayaran/transactions', [MonitoringPembayaranController::class, 'getTransactions'])->name('monitoring-pembayaran.transactions');
+    Route::get('monitoring-pembayaran/export-pdf', [MonitoringPembayaranController::class, 'exportPDF'])->name('monitoring-pembayaran.export-pdf');
 
     Route::get('laporan-pengembalian', \App\Livewire\ReportPengembalian::class)->name('laporan-pengembalian.index');
     Route::get('laporan-pengembalian/export-pdf', [\App\Http\Controllers\ReportPengembalianController::class, 'exportPdf'])->name('laporan-pengembalian.export-pdf');

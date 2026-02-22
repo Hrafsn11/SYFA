@@ -3,9 +3,9 @@
 use App\Livewire\Dashboard;
 use App\Livewire\DashboardInvestasiDeposito;
 use App\Livewire\DashboardPembiayaanSfinance;
-use App\Http\Controllers\ArPerbulanController;
-use App\Http\Controllers\ArPerformanceController;
-use App\Http\Controllers\DebiturPiutangController;
+use App\Http\Controllers\LaporanTagihanBulananController;
+use App\Http\Controllers\MonitoringPembayaranController;
+use App\Http\Controllers\RiwayatTagihanController;
 use App\Livewire\LaporanInvestasiSFinance;
 use App\Http\Controllers\PengembalianPinjamanController;
 use App\Http\Controllers\PenyaluranDanaInvestasiController;
@@ -27,12 +27,12 @@ Route::get('dashboard/investasi', DashboardInvestasiDeposito::class)->name('dash
 
 // AR Perbulan
 Route::get('laporan-tagihan-bulanan', ArPerbulan::class)->name('laporan-tagihan-bulanan.index');
-Route::post('laporan-tagihan-bulanan/update', [ArPerbulanController::class, 'updateAR'])->name('laporan-tagihan-bulanan.update');
+Route::post('laporan-tagihan-bulanan/update', [LaporanTagihanBulananController::class, 'updateAR'])->name('laporan-tagihan-bulanan.update');
 
 // AR Performance
 Route::get('monitoring-pembayaran', ArPerformanceIndex::class)->name('monitoring-pembayaran.index');
-Route::get('monitoring-pembayaran/transactions', [ArPerformanceController::class, 'getTransactions'])->name('monitoring-pembayaran.transactions');
-Route::get('monitoring-pembayaran/export-pdf', [ArPerformanceController::class, 'exportPDF'])->name('monitoring-pembayaran.export-pdf');
+Route::get('monitoring-pembayaran/transactions', [MonitoringPembayaranController::class, 'getTransactions'])->name('monitoring-pembayaran.transactions');
+Route::get('monitoring-pembayaran/export-pdf', [MonitoringPembayaranController::class, 'exportPDF'])->name('monitoring-pembayaran.export-pdf');
 
 // Restrukturisasi Routes
 Route::prefix('pengajuan-cicilan')->name('pengajuan-cicilan.')->group(function () {
@@ -66,8 +66,8 @@ Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store
 
 // Debitur Piutang
 Route::get('riwayat-tagihan', DebiturPiutangIndex::class)->name('riwayat-tagihan.index');
-Route::get('riwayat-tagihan/histori', [DebiturPiutangController::class, 'getHistoriPembayaran'])->name('riwayat-tagihan.histori');
-Route::get('riwayat-tagihan/summary', [DebiturPiutangController::class, 'getSummaryData'])->name('riwayat-tagihan.summary');
+Route::get('riwayat-tagihan/histori', [RiwayatTagihanController::class, 'getHistoriPembayaran'])->name('riwayat-tagihan.histori');
+Route::get('riwayat-tagihan/summary', [RiwayatTagihanController::class, 'getSummaryData'])->name('riwayat-tagihan.summary');
 
 // Report Pengembalian
 Route::get('laporan-pengembalian', ReportPengembalian::class)->name('laporan-pengembalian.index');
