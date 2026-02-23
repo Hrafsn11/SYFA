@@ -114,24 +114,6 @@
             </div>
             <form wire:submit.prevent="validasiDokumenSetuju">
                 <div class="modal-body">
-                    {{-- Deviasi --}}
-                    <div class="mb-3">
-                        <label class="form-label">Deviasi <span class="text-danger">*</span></label>
-                        <div class="d-flex gap-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" 
-                                       wire:model="deviasi" value="ya" id="modal_deviasi_ya">
-                                <label class="form-check-label" for="modal_deviasi_ya">Ya</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" 
-                                       wire:model="deviasi" value="tidak" id="modal_deviasi_tidak">
-                                <label class="form-check-label" for="modal_deviasi_tidak">Tidak</label>
-                            </div>
-                        </div>
-                        @error('deviasi') <span class="text-danger small">{{ $message }}</span> @enderror
-                    </div>
-                    
                     <div class="row">
                         {{-- Nominal Pengajuan --}}
                         <div class="col-md-6 mb-3">
@@ -155,7 +137,7 @@
                     
                     <div class="row">
                         {{-- Persentase Bunga --}}
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Persentase Bunga (%) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" 
                                    wire:model="persentase_bunga"
@@ -164,8 +146,16 @@
                             @error('persentase_bunga') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         
+                        {{-- Harapan Tanggal Pencairan (read-only, from pengajuan) --}}
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Harapan Tanggal Pencairan</label>
+                            <input type="text" class="form-control bg-light" 
+                                   value="{{ $harapan_tanggal_pencairan ? \Carbon\Carbon::parse($harapan_tanggal_pencairan)->format('d/m/Y') : '-' }}"
+                                   disabled readonly>
+                        </div>
+                        
                         {{-- Tanggal Pencairan --}}
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">Tanggal Pencairan <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="text" 

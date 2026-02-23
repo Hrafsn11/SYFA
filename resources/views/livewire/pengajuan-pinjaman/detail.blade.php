@@ -15,11 +15,6 @@
                 </ol>
             </nav>
         </div>
-        <div>
-            <span class="p-3 rounded text-white bg-{{ $status === 'Dana Sudah Dicairkan' ? 'success' : 'primary' }} fs-6">
-                {{ $status }}
-            </span>
-        </div>
     </div>
 
     {{-- Stepper --}}
@@ -208,15 +203,6 @@
                                     <input type="text" class="form-control"
                                         value="{{ $tenor_pembayaran ?? 1 }} Bulan" disabled>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Biaya Administrasi <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control"
-                                        id="input_biaya_administrasi"
-                                        placeholder="Rp 0"
-                                        autocomplete="off">
-                                    <input type="hidden" wire:model="biaya_administrasi" id="hidden_biaya_administrasi">
-                                    @error('biaya_administrasi') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
                             </div>
 
                             <div class="col-lg mb-3">
@@ -317,12 +303,6 @@
                                 </div>
                                 <div class="col-12 col-sm-6 col-md-4">
                                     <div class="mb-3">
-                                        <small class="text-muted fw-semibold d-block mb-1">Biaya Administrasi</small>
-                                        <p class="mb-0">Rp {{ number_format($pengajuan->biaya_administrasi ?? 0, 0, ',', '.') }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-6 col-md-4">
-                                    <div class="mb-3">
                                         <small class="text-muted fw-semibold d-block mb-1">Nisbah (Bunga)</small>
                                         <p class="mb-0">{{ $persentase_bunga ?? 2 }}% flat / bulan</p>
                                     </div>
@@ -399,45 +379,7 @@
             window.dispatchEvent(new CustomEvent('close-all-modals'));
         });
 
-        // Initialize Cleave.js for biaya_administrasi
-        function initBiayaAdminInput() {
-            const currencyInput = document.getElementById('input_biaya_administrasi');
-            const hiddenCurrency = document.getElementById('hidden_biaya_administrasi');
 
-            if (currencyInput && typeof Cleave !== 'undefined') {
-                if (currencyInput._cleaveInstance) {
-                    currencyInput._cleaveInstance.destroy();
-                }
-
-                const cleaveInstance = new Cleave(currencyInput, {
-                    numeral: true,
-                    numeralThousandsGroupStyle: 'thousand',
-                    numeralDecimalScale: 0,
-                    prefix: 'Rp ',
-                    rawValueTrimPrefix: true,
-                    noImmediatePrefix: false
-                });
-
-                currencyInput._cleaveInstance = cleaveInstance;
-
-                currencyInput.addEventListener('input', function() {
-                    if (hiddenCurrency) {
-                        const rawValue = cleaveInstance.getRawValue();
-                        hiddenCurrency.value = rawValue;
-                        hiddenCurrency.dispatchEvent(new Event('input', {
-                            bubbles: true
-                        }));
-                    }
-                });
-            }
-        }
-
-        // Init on page load and after Livewire updates
-        initBiayaAdminInput();
-
-        Livewire.hook('morph.updated', () => {
-            setTimeout(initBiayaAdminInput, 100);
-        });
     </script>
     @endscript
 </div>

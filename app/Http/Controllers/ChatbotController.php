@@ -23,15 +23,28 @@ class ChatbotController extends Controller
         $user    = Auth::user();
         $message = trim($request->input('message'));
 
-        // Ambil history dari session (max 6 pesan terakhir agar hemat token)
+        $isLocal  = config('services.llm.driver', 'nvidia') === 'local';
+        $isGroq   = config('services.llm.driver', 'nvidia') === 'groq';
+
+        // Groq: hemat kuota — 4 pesan + truncate 350 char
+        // Kimi/Local: simpan 6 pesan penuh tanpa truncate
+        $historyLimit = $isGroq ? 4 : 6;
         $history = session('chatbot_history', []);
-        $history = array_slice($history, -6);
+        // Bersihkan artefak truncation lama dari session sebelum dipakai
+        $history = array_map(function ($item) {
+            $item['content'] = str_replace('…[ringkasan tersimpan]', '', $item['content'] ?? '');
+            return $item;
+        }, $history);
+        $history = array_slice($history, -$historyLimit);
 
         $result = $this->chatbotService->chat($user, $message, $history);
 
-        // Simpan percakapan ke session
         $history[] = ['role' => 'user',  'content' => $message];
-        $history[] = ['role' => 'model', 'content' => $result['message']];
+        $botContent = $result['message'];
+        if ($isGroq && mb_strlen($botContent) > 350) {
+            $botContent = mb_substr($botContent, 0, 350) . '…[ringkasan tersimpan]';
+        }
+        $history[] = ['role' => 'model', 'content' => $botContent];
         session(['chatbot_history' => $history]);
 
         return response()->json([

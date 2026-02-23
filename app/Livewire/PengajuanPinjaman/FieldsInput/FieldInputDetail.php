@@ -145,11 +145,9 @@ trait FieldInputDetail
     // APPROVAL FORM FIELDS
     // ============================================
 
-    public $deviasi;
-
     public $catatan_approval;
 
-    public $biaya_administrasi;
+
 
     // ============================================
     // HISTORY & DATA COLLECTIONS

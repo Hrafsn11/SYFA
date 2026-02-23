@@ -1,135 +1,8 @@
-<?php
-
-namespace App\Livewire\PengajuanPinjaman\Kontrak;
-
-use App\Jobs\GeneratePeminjamanKontrakPdfJob;
-use App\Models\HistoryStatusPengajuanPinjaman;
-
-/**
- * Trait KontrakPdfHandler
- * 
- * Menangani pembuatan dan preview kontrak PDF pada halaman detail peminjaman.
- * Menggunakan DomPDF untuk generate PDF.
- */
-trait KontrakPdfHandler
-{
-
-    protected function prepareKontrakData(): array
-    {
-        $pengajuan = $this->pengajuan;
-
-        // Ensure debitur relation is loaded
-        if (!$pengajuan->relationLoaded('debitur')) {
-            $pengajuan->load('debitur');
-        }
-        $latestHistory = isset($this->allHistory)
-            ? $this->allHistory->firstWhere(fn ($h) => !is_null($h->nominal_yang_disetujui))
-            : HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
-                ->whereNotNull('nominal_yang_disetujui')
-                ->orderBy('created_at', 'desc')
-                ->first();
-
-        $nilaiPembiayaan = $latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0;
-        $biayaAdmin = 0;
-
-        return [
-            'id_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
-            'no_kontrak' => $pengajuan->no_kontrak ?? '',
-            'no_kontrak2' => $pengajuan->no_kontrak ?? '',
-            'tanggal_kontrak' => now()->format('d F Y'),
-            'nama_perusahaan' => 'SYNNOVAC CAPITAL',
-            'nama_debitur' => $pengajuan->debitur->nama ?? 'N/A',
-            'nama_pimpinan' => $pengajuan->debitur->nama_ceo ?? 'N/A',
-            'alamat' => $pengajuan->debitur->alamat ?? 'N/A',
-            'tujuan_pembiayaan' => $pengajuan->tujuan_pembiayaan ?? 'N/A',
-            'jenis_pembiayaan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
-            'nilai_pembiayaan' => 'Rp. ' . number_format($nilaiPembiayaan, 0, ',', '.'),
-            'hutang_pokok' => 'Rp. ' . number_format($nilaiPembiayaan, 0, ',', '.'),
-            'tenor' => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
-            'biaya_admin' => 'Rp. ' . number_format($biayaAdmin, 0, ',', '.'),
-            'biaya_admin_raw' => $biayaAdmin,
-            'nisbah' => ($pengajuan->persentase_bunga ?? 2) . '% flat / bulan',
-            'denda_keterlambatan' => ($pengajuan->persentase_bunga ?? 2) . '% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
-            'jaminan' => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
-            'tanda_tangan' => $pengajuan->debitur->tanda_tangan ?? null,
-        ];
-    }
-
-    /**
-     * Preview kontrak — redirect ke halaman preview.
-     */
-    public function previewKontrak(): mixed
-    {
-        $this->authorize('peminjaman_dana.generate_kontrak');
-
-        $id = $this->pengajuan->id_pengajuan_peminjaman;
-
-        return $this->redirect(
-            route('peminjaman.preview-kontrak', $id),
-            navigate: false
-        );
-    }
-
-    /**
-     * Download kontrak PDF.
-     *
-     * If a pre-generated PDF is already in storage (put there by the queued job
-     * on a previous request) we serve it immediately via redirect.
-     * Otherwise we dispatch the generation job and notify the user to check back.
-     * This prevents the HTTP worker from timing out on large PDF renders.
-     */
-    public function downloadKontrak(): mixed
-    {
-        $this->authorize('peminjaman_dana.generate_kontrak');
-
-        $id = $this->pengajuan->id_pengajuan_peminjaman;
-
-        // Check if a previously generated PDF is ready in cache
-        $pdfUrl = cache()->get("kontrak_pdf_ready:{$id}");
-
-        if ($pdfUrl) {
-            return $this->redirect($pdfUrl, navigate: false);
-        }
-
-        // Dispatch background job to generate and store the PDF
-        GeneratePeminjamanKontrakPdfJob::dispatch($id, auth()->id());
-
-        $this->dispatch('notify', [
-            'type'    => 'info',
-            'message' => 'PDF kontrak sedang diproses. Silakan klik tombol Download lagi dalam beberapa detik.',
-        ]);
-
-        return null;
-    }
-
-    /**
-     * Build custom HTML for PDF contract.
-     * Duplikasi logika dari PeminjamanController untuk konsistensi output.
-     */
-    protected function buildKontrakHTML(array $kontrak): string
-    {
-        $ttdKreditur = public_path('assets/img/ttd2.png');
-        $ttdKrediturBase64 = '';
-        if (file_exists($ttdKreditur)) {
-            $ttdKrediturBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdKreditur));
-        }
-
-        $ttdDebitur = '';
-        if (!empty($kontrak['tanda_tangan'])) {
-            $ttdDebiturPath = storage_path('app/public/' . $kontrak['tanda_tangan']);
-            if (file_exists($ttdDebiturPath)) {
-                $ttdDebitur = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdDebiturPath));
-            }
-        }
-
-        $e = fn($v) => htmlspecialchars($v ?? '', ENT_QUOTES, 'UTF-8');
-
-        $html = '
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Kontrak Peminjaman</title>
+    <title>Kontrak Peminjaman - {{ $kontrak['no_kontrak2'] ?? '' }}</title>
     <style>
         body {
             font-family: "DejaVu Sans", sans-serif;
@@ -212,36 +85,25 @@ trait KontrakPdfHandler
             width: 200px;
             margin: 10px auto;
         }
-        .fw-bold {
-            font-weight: bold;
-        }
-        .text-muted {
-            color: #666;
-        }
-        .mb-3 {
-            margin-bottom: 15px;
-        }
-        .mb-4 {
-            margin-bottom: 20px;
-        }
-        .mb-5 {
-            margin-bottom: 25px;
-        }
-        .ps-3 {
-            padding-left: 20px;
-        }
+        .fw-bold { font-weight: bold; }
+        .text-muted { color: #666; }
+        .mb-3 { margin-bottom: 15px; }
+        .mb-4 { margin-bottom: 20px; }
+        .mb-5 { margin-bottom: 25px; }
+        .ps-3 { padding-left: 20px; }
     </style>
 </head>
 <body>
+
     <!-- Header -->
     <div class="header">
-        <h2>' . $e($kontrak['nama_perusahaan']) . '</h2>
+        <h2>{{ $kontrak['nama_perusahaan'] }}</h2>
     </div>
 
     <!-- Title -->
     <div class="title">
         <h1>FINANCING CONTRACT</h1>
-        <h3>No: ' . $e($kontrak['no_kontrak2']) . '</h3>
+        <h3>No: {{ $kontrak['no_kontrak2'] }}</h3>
     </div>
 
     <!-- Content -->
@@ -250,12 +112,12 @@ trait KontrakPdfHandler
 
         <!-- Pihak Pertama -->
         <div class="section">
-            <p class="fw-bold mb-3">I. ' . $e($kontrak['nama_perusahaan']) . '</p>
+            <p class="fw-bold mb-3">I. {{ $kontrak['nama_perusahaan'] }}</p>
             <p>
                 suatu perusahaan yang mengelola treasury serta memberikan pelayanan private equity, yang
                 berkedudukan di Bandung, beralamat di PermataKuningan Building 17th Floor, Kawasan
                 Epicentrum, HR Rasuna Said, Jl. Kuningan Mulia, RT.6/RW.1, Menteng Atas, Setiabudi, South
-                Jakarta City, Jakarta12920 ("Kreditur") dalam hal ini diwakili oleh S-FINANCE berkedudukan
+                Jakarta City, Jakarta 12920 ("Kreditur") dalam hal ini diwakili oleh S-FINANCE berkedudukan
                 di Jakarta sebagai Pengelola Fasilitas yang menyalurkan dan mengelola transaksi-transaksi
                 terkait Fasilitas Pembiayaan yang bertindak sebagai kuasa (selanjutnya disebut "Perseroan"), dan
             </p>
@@ -278,7 +140,7 @@ trait KontrakPdfHandler
                 <tr>
                     <td width="5%">1.</td>
                     <td width="35%">Jenis Pembiayaan</td>
-                    <td width="60%">: ' . $e($kontrak['jenis_pembiayaan']) . '</td>
+                    <td width="60%">: {{ $kontrak['jenis_pembiayaan'] }}</td>
                 </tr>
                 <tr>
                     <td>2.</td>
@@ -288,22 +150,22 @@ trait KontrakPdfHandler
                 <tr>
                     <td></td>
                     <td class="ps-3">a. Nama Perusahaan</td>
-                    <td>: ' . $e($kontrak['nama_debitur']) . '</td>
+                    <td>: {{ $kontrak['nama_debitur'] }}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td class="ps-3">b. Nama Pimpinan</td>
-                    <td>: ' . $e($kontrak['nama_pimpinan']) . '</td>
+                    <td>: {{ $kontrak['nama_pimpinan'] }}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td class="ps-3">c. Alamat Perusahaan</td>
-                    <td>: ' . $e($kontrak['alamat']) . '</td>
+                    <td>: {{ $kontrak['alamat'] }}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td class="ps-3">d. Tujuan Pembiayaan</td>
-                    <td>: ' . $e($kontrak['tujuan_pembiayaan']) . '</td>
+                    <td>: {{ $kontrak['tujuan_pembiayaan'] }}</td>
                 </tr>
                 <tr>
                     <td>3.</td>
@@ -313,37 +175,37 @@ trait KontrakPdfHandler
                 <tr>
                     <td></td>
                     <td class="ps-3">a. Nilai Pembiayaan</td>
-                    <td class="fw-bold">: ' . $e($kontrak['nilai_pembiayaan']) . '</td>
+                    <td class="fw-bold">: {{ $kontrak['nilai_pembiayaan'] }}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td class="ps-3">b. Hutang Pokok</td>
-                    <td class="fw-bold">: ' . $e($kontrak['hutang_pokok']) . '</td>
+                    <td class="fw-bold">: {{ $kontrak['hutang_pokok'] }}</td>
                 </tr>
                 <tr>
                     <td>4.</td>
                     <td>Tenor Pembiayaan</td>
-                    <td>: ' . $e($kontrak['tenor']) . '</td>
+                    <td>: {{ $kontrak['tenor'] }}</td>
                 </tr>
                 <tr>
                     <td>5.</td>
                     <td>Biaya Administrasi</td>
-                    <td>: ' . $e($kontrak['biaya_admin']) . '</td>
+                    <td>: {{ $kontrak['biaya_admin'] }}</td>
                 </tr>
                 <tr>
                     <td>6.</td>
                     <td>Bagi Hasil (Nisbah)</td>
-                    <td>: ' . $e($kontrak['nisbah']) . '</td>
+                    <td>: {{ $kontrak['nisbah'] }}</td>
                 </tr>
                 <tr>
                     <td>7.</td>
                     <td>Denda Keterlambatan</td>
-                    <td>: ' . $e($kontrak['denda_keterlambatan']) . '</td>
+                    <td>: {{ $kontrak['denda_keterlambatan'] }}</td>
                 </tr>
                 <tr>
                     <td>8.</td>
                     <td>Jaminan</td>
-                    <td>: ' . $e($kontrak['jaminan']) . '</td>
+                    <td>: {{ $kontrak['jaminan'] }}</td>
                 </tr>
                 <tr>
                     <td>9.</td>
@@ -368,7 +230,7 @@ trait KontrakPdfHandler
 
         <!-- Tanggal -->
         <div class="section mb-5">
-            <p class="text-muted">Jakarta, ' . $e($kontrak['tanggal_kontrak']) . '</p>
+            <p class="text-muted">Jakarta, {{ $kontrak['tanggal_kontrak'] }}</p>
         </div>
 
         <!-- Tanda Tangan -->
@@ -376,14 +238,11 @@ trait KontrakPdfHandler
             <div class="signature-row">
                 <div class="signature-col">
                     <p class="fw-bold">Kreditur</p>
-                    <p>' . $e($kontrak['nama_perusahaan']) . '</p>
-                    <div class="signature-box">';
-
-        if ($ttdKrediturBase64) {
-            $html .= '<img src="' . $ttdKrediturBase64 . '" class="signature-img" />';
-        }
-
-        $html .= '
+                    <p>{{ $kontrak['nama_perusahaan'] }}</p>
+                    <div class="signature-box">
+                        @if (!empty($ttdKrediturBase64))
+                            <img src="{{ $ttdKrediturBase64 }}" class="signature-img" />
+                        @endif
                         <div class="signature-line"></div>
                         <p class="fw-bold">Muhamad Kurniawan</p>
                     </div>
@@ -391,25 +250,19 @@ trait KontrakPdfHandler
                 </div>
                 <div class="signature-col">
                     <p class="fw-bold">Debitur</p>
-                    <p>' . $e($kontrak['nama_pimpinan']) . '</p>
-                    <div class="signature-box">';
-
-        if ($ttdDebitur) {
-            $html .= '<img src="' . $ttdDebitur . '" class="signature-img" />';
-        }
-
-        $html .= '
+                    <p>{{ $kontrak['nama_pimpinan'] }}</p>
+                    <div class="signature-box">
+                        @if (!empty($ttdDebiturBase64))
+                            <img src="{{ $ttdDebiturBase64 }}" class="signature-img" />
+                        @endif
                         <div class="signature-line"></div>
-                        <p class="fw-bold">' . $e($kontrak['nama_pimpinan']) . '</p>
+                        <p class="fw-bold">{{ $kontrak['nama_pimpinan'] }}</p>
                     </div>
                     <p class="text-muted">Pimpinan</p>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>';
 
-        return $html;
-    }
-}
+</body>
+</html>

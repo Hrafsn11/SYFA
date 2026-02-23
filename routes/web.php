@@ -84,14 +84,12 @@ Route::middleware([
     Route::get('roles', RoleManagement::class)->name('roles.index');
     Route::get('permissions', PermissionManagement::class)->name('permissions.index');
 
-    // Peminjaman API endpoints — Index/Create/Edit/Detail ditangani oleh Livewire (lihat livewire_route.php)
-    // Store & Update dipanggil oleh Livewire Create melalui UniversalFormAction (resolusi controller via nama route)
-    // previewKontrak dipakai oleh Livewire Detail (KontrakPdfHandler redirect)
-    // toggleActive dipakai oleh JS fetch di pengajuan-pinjaman/index.blade.php
+    // Peminjaman API endpoints — Index/Create/Edit/Detail 
     Route::prefix('peminjaman')->name('peminjaman.')->controller(PeminjamanController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::post('/{id}', 'update')->name('update');
         Route::get('/{id}/preview-kontrak', 'previewKontrak')->name('preview-kontrak');
+        Route::post('/{id}/download-kontrak', 'downloadKontrakPdf')->name('download-kontrak');
         Route::patch('/{id}/toggle-active', 'toggleActive')->name('toggle-active');
     });
 

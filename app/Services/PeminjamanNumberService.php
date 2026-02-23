@@ -51,13 +51,10 @@ class PeminjamanNumberService
             });
         }
 
-        // If sequences table does not exist, fallback to a deterministic format based on time + random
-        // but prefer generateFromId($id, $typeCode) which uses header id. Here we return a safe temporary code.
-        $period = Carbon::now()->format('Ym');
-        // fallback temp seq: use uniqid tail adjusted to pad length
-        $uniq = uniqid();
-        $seq = substr($uniq, -max(1, $pad));
-        return sprintf('PMJ-%s-%s-%s', $period, strtoupper($seq), strtoupper($typeCode));
+        throw new \RuntimeException(
+            "Table 'peminjaman_sequences' does not exist. " .
+            "Please run migrations (php artisan migrate) before generating peminjaman numbers."
+        );
     }
 
     /**

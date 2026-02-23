@@ -4,6 +4,7 @@ namespace App\Livewire\PengajuanPinjaman\Approval;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Enums\PengajuanPeminjamanStatusEnum;
 use App\Models\PengajuanPeminjaman;
 use App\Models\HistoryStatusPengajuanPinjaman;
 
@@ -55,6 +56,7 @@ trait ApprovalActions
      */
     public function submitDokumen()
     {
+        $this->authorize('peminjaman_dana.pengajuan_peminjaman');
         return $this->processApproval('Submit Dokumen', [
             'submit_step1_by' => auth()->id(),
             'current_step' => 2,
@@ -66,8 +68,8 @@ trait ApprovalActions
      */
     public function validasiDokumenSetuju()
     {
+        $this->authorize('peminjaman_dana.validasi_dokumen');
         $this->validate([
-            'deviasi' => 'required|in:ya,tidak',
             'nominal_yang_disetujui' => 'required|numeric|min:0',
             'tanggal_pencairan' => 'required|date_format:d/m/Y',
             'persentase_bunga' => 'required|numeric|min:0|max:100',
@@ -78,7 +80,6 @@ trait ApprovalActions
         return $this->processApproval('Dokumen Tervalidasi', [
             'validasi_dokumen' => 'disetujui',
             'approve_by' => auth()->id(),
-            'deviasi' => $this->deviasi,
             'nominal_yang_disetujui' => $this->nominal_yang_disetujui,
             'tanggal_pencairan' => $this->parseTanggal($this->tanggal_pencairan),
             'persentase_bunga' => $this->persentase_bunga,
@@ -101,6 +102,7 @@ trait ApprovalActions
      */
     public function validasiDokumenTolak()
     {
+        $this->authorize('peminjaman_dana.validasi_dokumen');
         $this->validate([
             'catatan_approval' => 'required|string|min:10',
         ], [
@@ -121,6 +123,7 @@ trait ApprovalActions
      */
     public function persetujuanDebiturSetuju()
     {
+        $this->authorize('peminjaman_dana.persetujuan_debitur');
         $this->validate([
             'catatan_approval' => 'nullable|string',
         ]);
@@ -128,7 +131,6 @@ trait ApprovalActions
         return $this->processApproval('Debitur Setuju', [
             'approve_by' => auth()->id(),
             'catatan_persetujuan_debitur' => $this->catatan_approval,
-            'deviasi' => $this->latestHistory->deviasi ?? null,
             'nominal_yang_disetujui' => $this->latestHistory->nominal_yang_disetujui ?? $this->nominal_yang_disetujui,
             'tanggal_pencairan' => $this->latestHistory->tanggal_pencairan ?? null,
             'current_step' => 4,
@@ -140,6 +142,7 @@ trait ApprovalActions
      */
     public function persetujuanDebiturTolak()
     {
+        $this->authorize('peminjaman_dana.persetujuan_debitur');
         $this->validate([
             'catatan_approval' => 'required|string|min:10',
         ], [
@@ -155,21 +158,43 @@ trait ApprovalActions
     }
 
     /**
-     * Persetujuan CEO SKI (Step 4 -> 5).
+     * Persetujuan CEO SKI (Step 4 -> 5, atau Step 4 -> 6 jika nominal < threshold).
+     *
+     * Jika nominal_yang_disetujui < config('peminjaman.director_approval_threshold'),
+     * step persetujuan Direktur dilewati dan langsung masuk ke step Generate Kontrak.
      */
     public function persetujuanCEOSetuju()
     {
+        $this->authorize('peminjaman_dana.validasi_ceo_ski');
         $this->validate([
             'catatan_approval' => 'nullable|string',
         ]);
 
-        return $this->processApproval('Disetujui oleh CEO SKI', [
-            'approve_by' => auth()->id(),
-            'catatan_persetujuan_ceo' => $this->catatan_approval,
-            'deviasi' => $this->latestHistory->deviasi ?? null,
-            'nominal_yang_disetujui' => $this->latestHistory->nominal_yang_disetujui ?? $this->nominal_yang_disetujui,
-            'tanggal_pencairan' => $this->latestHistory->tanggal_pencairan ?? null,
-            'current_step' => 5,
+        $nominalDisetujui = (int) ($this->latestHistory->nominal_yang_disetujui
+            ?? $this->nominal_yang_disetujui
+            ?? 0);
+
+        $threshold = (int) config('peminjaman.director_approval_threshold', 300_000_000);
+
+        if ($nominalDisetujui >= $threshold) {
+            // Nominal >= threshold: alur normal, Direktur harus menyetujui
+            return $this->processApproval(PengajuanPeminjamanStatusEnum::DISETUJUI_CEO, [
+                'approve_by'              => auth()->id(),
+                'catatan_persetujuan_ceo' => $this->catatan_approval,
+                'nominal_yang_disetujui'  => $nominalDisetujui,
+                'tanggal_pencairan'       => $this->latestHistory->tanggal_pencairan ?? null,
+                'current_step'            => 5,
+            ]);
+        }
+
+        // Nominal < threshold: lewati Direktur, langsung ke Generate Kontrak (step 6)
+        return $this->processApproval(PengajuanPeminjamanStatusEnum::DISETUJUI_DIREKTUR, [
+            'approve_by'                   => auth()->id(),
+            'catatan_persetujuan_ceo'      => $this->catatan_approval,
+            'catatan_persetujuan_direktur' => 'Dilewati otomatis (nominal < Rp ' . number_format($threshold, 0, ',', '.') . ')',
+            'nominal_yang_disetujui'       => $nominalDisetujui,
+            'tanggal_pencairan'            => $this->latestHistory->tanggal_pencairan ?? null,
+            'current_step'                 => 6,
         ]);
     }
 
@@ -178,6 +203,7 @@ trait ApprovalActions
      */
     public function persetujuanCEOTolak()
     {
+        $this->authorize('peminjaman_dana.validasi_ceo_ski');
         $this->validate([
             'catatan_approval' => 'required|string|min:10',
         ], [
@@ -197,6 +223,7 @@ trait ApprovalActions
      */
     public function persetujuanDirekturSetuju()
     {
+        $this->authorize('peminjaman_dana.validasi_direktur');
         $this->validate([
             'catatan_approval' => 'nullable|string',
         ]);
@@ -204,7 +231,6 @@ trait ApprovalActions
         return $this->processApproval('Disetujui oleh Direktur SKI', [
             'approve_by' => auth()->id(),
             'catatan_persetujuan_direktur' => $this->catatan_approval,
-            'deviasi' => $this->latestHistory->deviasi ?? null,
             'nominal_yang_disetujui' => $this->latestHistory->nominal_yang_disetujui ?? $this->nominal_yang_disetujui,
             'tanggal_pencairan' => $this->latestHistory->tanggal_pencairan ?? null,
             'current_step' => 6,
@@ -216,6 +242,7 @@ trait ApprovalActions
      */
     public function persetujuanDirekturTolak()
     {
+        $this->authorize('peminjaman_dana.validasi_direktur');
         $this->validate([
             'catatan_approval' => 'required|string|min:10',
         ], [
@@ -235,12 +262,19 @@ trait ApprovalActions
      */
     public function generateKontrak()
     {
-        $this->validate([
-            'biaya_administrasi' => 'required|numeric|min:0',
-        ]);
-
+        $this->authorize('peminjaman_dana.generate_kontrak');
         // Generate nomor kontrak menggunakan ContractNumberService
         $debitur = $this->pengajuan->debitur;
+
+        if (!$debitur || empty($debitur->kode_perusahaan)) {
+            $this->dispatch('notify', [
+                'type'    => 'error',
+                'message' => 'Gagal generate kontrak: kode perusahaan debitur belum diisi. '
+                           . 'Silakan lengkapi data master debitur terlebih dahulu.',
+            ]);
+            return;
+        }
+
         $noKontrak = \App\Services\ContractNumberService::generate(
             $debitur->kode_perusahaan,
             $this->jenis_pembiayaan
@@ -252,7 +286,7 @@ trait ApprovalActions
         ], function ($pengajuan) use ($noKontrak) {
             $pengajuan->update([
                 'no_kontrak' => $noKontrak,
-                'biaya_administrasi' => $this->biaya_administrasi,
+
             ]);
         });
     }
@@ -262,6 +296,7 @@ trait ApprovalActions
      */
     public function uploadDokumenTransfer()
     {
+        $this->authorize('peminjaman_dana.upload_dokumen_transfer');
         $this->validate([
             'dokumen_transfer' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
@@ -288,6 +323,7 @@ trait ApprovalActions
      */
     public function konfirmasiDebiturTerima()
     {
+        $this->authorize('peminjaman_dana.konfirmasi_debitur');
         // Ambil tanggal_pencairan dari history yang menyimpannya (step validasi dokumen)
         $tanggalPencairan = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $this->id)
             ->whereNotNull('tanggal_pencairan')
@@ -321,6 +357,7 @@ trait ApprovalActions
      */
     public function konfirmasiDebiturTolak()
     {
+        $this->authorize('peminjaman_dana.konfirmasi_debitur');
         $this->validate([
             'catatan_approval' => 'required|string|min:10',
         ], [
@@ -374,6 +411,10 @@ trait ApprovalActions
 
             DB::commit();
 
+            // Reset form fields so the next step modal opens with a clean state
+            $this->resetApprovalForm();
+            $this->resetValidation();
+
             // Refresh data dan kirim event sukses
             $this->refreshData();
             $this->dispatch('approvalSuccess', status: $status);
@@ -421,7 +462,6 @@ trait ApprovalActions
      */
     protected function resetApprovalForm(): void
     {
-        $this->deviasi = null;
         $this->catatan_approval = '';
     }
 }
