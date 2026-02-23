@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Enums\JenisPembiayaanEnum;
+use App\Enums\PengajuanPeminjamanStatusEnum;
 use App\Models\PengajuanPeminjaman;
 use App\Attributes\ParameterIDRoute;
 use App\Models\HistoryStatusPengajuanPinjaman;
@@ -58,7 +59,7 @@ class Detail extends Component
     /**
      * Render view component.
      */
-    public function render()
+    public function render(): \Illuminate\View\View
     {
         return view('livewire.pengajuan-pinjaman.detail');
     }
@@ -155,15 +156,7 @@ class Detail extends Component
      */
     protected function setDataWorkflow(): void
     {
-        // Get latest history
-        $this->latestHistory = HistoryStatusPengajuanPinjaman::where(
-            'id_pengajuan_peminjaman',
-            $this->pengajuan->id_pengajuan_peminjaman
-        )
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        // Get all history
+ 
         $this->allHistory = HistoryStatusPengajuanPinjaman::where(
             'id_pengajuan_peminjaman',
             $this->pengajuan->id_pengajuan_peminjaman
@@ -171,6 +164,8 @@ class Detail extends Component
             ->orderBy('created_at', 'desc')
             ->with(['approvedBy', 'rejectedBy', 'submittedBy'])
             ->get();
+
+        $this->latestHistory = $this->allHistory->first();
 
         // Set current step
         if ($this->latestHistory?->current_step) {
@@ -185,8 +180,8 @@ class Detail extends Component
             $this->tanggal_pencairan = $this->latestHistory->tanggal_pencairan;
         }
 
-        // Generate preview nomor kontrak jika belum ada dan sudah di step 6+
-        if (empty($this->no_kontrak) && $this->currentStep >= 6) {
+
+        if (empty($this->no_kontrak) && $this->currentStep >= 6 && empty($this->preview_no_kontrak)) {
             $debitur = $this->pengajuan->debitur;
             if ($debitur && !empty($debitur->kode_perusahaan)) {
                 $this->preview_no_kontrak = \App\Services\ContractNumberService::generate(
@@ -235,7 +230,7 @@ class Detail extends Component
     /**
      * Format tanggal untuk tampilan.
      */
-    public function formatTanggal($tanggal, string $format = 'd/m/Y'): string
+    public function formatTanggal(mixed $tanggal, string $format = 'd/m/Y'): string
     {
         if (empty($tanggal)) {
             return '-';
@@ -251,7 +246,7 @@ class Detail extends Component
     /**
      * Format nominal ke Rupiah.
      */
-    public function formatRupiah($nominal): string
+    public function formatRupiah(mixed $nominal): string
     {
         if (empty($nominal) || !is_numeric($nominal)) {
             return 'Rp 0';
@@ -282,11 +277,14 @@ class Detail extends Component
     public function shouldShowButton(string $buttonType): bool
     {
         return match ($buttonType) {
-            'submit_dokumen' => $this->status === 'Draft',
-            'setujui_peminjaman' => in_array($this->status, ['Submit Dokumen', 'Ditolak oleh CEO SKI']),
-            'persetujuan_debitur' => $this->status === 'Dokumen Tervalidasi',
-            'persetujuan_ceo' => $this->status === 'Debitur Setuju',
-            'persetujuan_direktur' => $this->status === 'Disetujui oleh CEO SKI',
+            'submit_dokumen'     => $this->status === PengajuanPeminjamanStatusEnum::DRAFT,
+            'setujui_peminjaman' => in_array($this->status, [
+                                       PengajuanPeminjamanStatusEnum::SUBMIT_DOKUMEN,
+                                       PengajuanPeminjamanStatusEnum::DITOLAK_CEO,
+                                   ]),
+            'persetujuan_debitur'  => $this->status === PengajuanPeminjamanStatusEnum::DOKUMEN_TERVALIDASI,
+            'persetujuan_ceo'      => $this->status === PengajuanPeminjamanStatusEnum::DEBITUR_SETUJU,
+            'persetujuan_direktur' => $this->status === PengajuanPeminjamanStatusEnum::DISETUJUI_CEO,
             default => false,
         };
     }
@@ -296,6 +294,9 @@ class Detail extends Component
      */
     public function shouldShowAlertPeninjauan(): bool
     {
-        return in_array($this->status, ['Submit Dokumen', 'Debitur Setuju']);
+        return in_array($this->status, [
+            PengajuanPeminjamanStatusEnum::SUBMIT_DOKUMEN,
+            PengajuanPeminjamanStatusEnum::DEBITUR_SETUJU,
+        ]);
     }
 }

@@ -87,7 +87,6 @@ trait HandleDetailEvents
         }
 
         // Untuk modal persetujuan, set nilai dari latest history
-        $this->deviasi = $this->latestHistory->deviasi ?? null;
         $this->catatan_approval = '';
 
         // Set nilai-nilai dari latest history jika ada
