@@ -7,48 +7,93 @@ use App\Models\PengajuanPeminjaman;
 use App\Models\PengajuanCicilan;
 use App\Models\PenyesuaianCicilan;
 use App\Models\PengajuanInvestasi;
-use App\Models\JadwalAngsuran;
-use App\Models\MasterDebiturDanInvestor;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class ChatbotService
 {
+    protected string $apiUrl;
+    protected string $model;
     protected string $apiKey;
-    // gemini-2.5-flash via v1beta - terbukti bekerja dengan API key ini
-    protected string $apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    protected bool   $isLocal;
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key', '');
+        $driver = config('services.llm.driver', 'nvidia');
+        $this->isLocal = ($driver === 'local');
+
+        match ($driver) {
+            'groq' => [
+                $this->apiUrl = 'https://api.groq.com/openai/v1/chat/completions',
+                $this->model  = 'llama-3.1-8b-instant',
+                $this->apiKey = config('services.groq.api_key', ''),
+            ],
+            'local' => [
+                $base = rtrim(config('services.lmstudio.base_url', 'http://127.0.0.1:1234'), '/'),
+                $this->apiUrl = $base . '/v1/chat/completions',
+                $this->model  = config('services.lmstudio.model', 'google/gemma-3-4b'),
+                $this->apiKey = '',
+            ],
+            'nvidia' => [
+                $this->apiUrl = 'https://integrate.api.nvidia.com/v1/chat/completions',
+                $this->model  = config('services.nvidia.model', 'moonshotai/kimi-k2.5'),
+                $this->apiKey = config('services.nvidia.api_key', ''),
+            ],
+            default => [ // kimi
+                $this->apiUrl = 'https://api.moonshot.ai/v1/chat/completions',
+                $this->model  = config('services.kimi.model', 'kimi-k2-turbo-preview'),
+                $this->apiKey = config('services.kimi.api_key', ''),
+            ],
+        };
     }
 
     /**
-     * Kirim pesan ke Gemini dengan konteks data SYFA user.
+     * Kirim pesan ke Groq dengan konteks data SYFA user.
      */
     public function chat(User $user, string $message, array $history = []): array
     {
         $systemPrompt = $this->buildSystemPrompt($user, $message);
-        $contents     = $this->buildContents($history, $message);
+        $messages     = $this->buildMessages($systemPrompt, $history, $message);
 
         try {
-            $response = Http::timeout(30)
-                ->withHeaders(['X-goog-api-key' => $this->apiKey])
-                ->post($this->apiUrl, [
-                'systemInstruction' => [
-                    'parts' => [['text' => $systemPrompt]],
-                ],
-                'contents'          => $contents,
-                'generationConfig'  => [
-                    'temperature'     => 0.7,
-                    'maxOutputTokens' => 800,
-                ],
-            ]);
+            $headers = ['Content-Type' => 'application/json'];
+            if (!$this->isLocal && $this->apiKey) {
+                $headers['Authorization'] = 'Bearer ' . $this->apiKey;
+            }
+
+            $driver = config('services.llm.driver', 'nvidia');
+
+            $payload = [
+                'model'       => $this->model,
+                'messages'    => $messages,
+                'temperature' => ($driver === 'nvidia') ? 0.15 : 0.4,
+            ];
+
+            // Local  : tanpa batas — model tentukan sendiri
+            // Kimi   : 4096 (moonshot-v1-8k support 8k context)
+            // Groq   : 768 hemat kuota RPD
+            // NVIDIA : 2048, mistral-large-3
+            if ($driver === 'groq') {
+                $payload['max_tokens'] = 768;
+            } elseif ($driver === 'kimi') {
+                $payload['max_tokens'] = 4096;
+            } elseif ($driver === 'nvidia') {
+                $payload['max_tokens']         = 2048;
+                $payload['top_p']              = 1.0;
+                $payload['frequency_penalty']  = 0.0;
+                $payload['presence_penalty']   = 0.0;
+            }
+
+            $timeout = ($this->isLocal || $driver === 'nvidia') ? 120 : 60;
+            $response = Http::timeout($timeout)
+                ->withHeaders($headers)
+                ->post($this->apiUrl, $payload);
 
             if ($response->failed()) {
                 $status = $response->status();
-                Log::error('Gemini API error', ['status' => $status, 'body' => $response->body()]);
+                $driver = config('services.llm.driver', 'nvidia');
+                Log::error("LLM API error [{$driver}]", ['status' => $status, 'body' => $response->body()]);
 
                 if ($status === 429) {
                     return [
@@ -60,7 +105,7 @@ class ChatbotService
                 return $this->errorResponse();
             }
 
-            $text = $response->json('candidates.0.content.parts.0.text', '');
+            $text = $response->json('choices.0.message.content', '');
 
             return [
                 'message'      => $text ?: 'Maaf, saya tidak bisa menjawab saat ini.',
@@ -73,232 +118,383 @@ class ChatbotService
     }
 
     /**
-     * Bangun system prompt dengan data lengkap user SYFA.
+     * Bangun system prompt: base statis (lean) + dynamic context (keyword-filtered).
      */
     protected function buildSystemPrompt(User $user, string $message): string
     {
-        $debitur        = $user->debitur()->with('kol')->first();
-        $namaPerusahaan = $debitur?->nama ?? $user->name;
-        $today          = Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY');
-        $isAdmin        = $user->hasAnyRole(['super-admin', 'admin']) || $debitur === null;
+        $debitur = $user->debitur()->first();
+        $isAdmin = $user->hasAnyRole(['super-admin', 'admin']) || $debitur === null;
+        $today   = Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY');
+        $nama    = $debitur?->nama ?? $user->name;
+        $peran   = $isAdmin ? 'Admin SYFA' : "Finance Officer — {$nama}";
 
-        // ─── Jika Admin/Super-Admin: tidak ada data per-perusahaan ──
-        if ($isAdmin) {
-            $userContext = <<<TXT
-PERAN: Admin / Super Admin SYFA
-(Admin tidak memiliki data pinjaman/investasi pribadi.
- Admin dapat mengelola dan memonitor seluruh data anak perusahaan di sistem.)
-TXT;
-            $pinjamanInfo = 'N/A (User adalah Admin)';
-            $pendingInfo  = 'N/A (User adalah Admin)';
-            $cicilanInfo  = 'N/A (User adalah Admin)';
-            $jadwalInfo   = 'N/A (User adalah Admin)';
-            $investasiInfo = 'N/A (User adalah Admin)';
-        } else {
-            $userContext = "PERAN: Finance Officer / Perwakilan Anak Perusahaan\nPerusahaan: {$namaPerusahaan}";
+        // ── 1. BASE SYSTEM ROLE (statis, selalu dikirim, ~180 token) ─────────
+        $driver  = config('services.llm.driver', 'nvidia');
+        $maxResp = ($driver === 'groq')
+            ? 'Maks respons: 4 paragraf atau 1 tabel.'
+            : 'Jawab selengkap yang diperlukan; tabel boleh penuh semua baris.';
 
-            // ─── Data Pinjaman Aktif ─────────────────────────────────
+        $base = <<<PROMPT
+Kamu adalah **SYFA Assistant**, konsultan keuangan digital internal SYFA (Captive Finance Grup Holding).
+Hari ini: {$today} | Pengguna: **{$user->name}** ({$peran})
+
+ATURAN: Bahasa Indonesia formal. Sebut "Finance Officer". Bold angka rupiah & status penting.
+{$maxResp} Tolak topik di luar keuangan SYFA.
+Tutup tiap jawaban dengan kalimat pemandu langkah berikutnya.
+
+PRODUK SYFA:
+- Pinjaman: Invoice/PO Financing/Factoring/Installment, tenor 30 hari. Dokumen: KTP Direksi, NPWP, Akta, Rek Koran 3 bln, Laporan Keuangan.
+- Penyesuaian Cicilan: Flat (cicilan tetap) atau Anuitas (bunga menurun). Bunga & tenor ditetapkan Admin.
+- Investasi: Reguler (bunga standar) atau Khusus (bunga tinggi).
+
+ALUR SIMULASI — ikuti ketat:
+S1: Topik pinjaman → tawarkan: Simulasi / Info Denda / Syarat / Cara Ajukan.
+S2: Simulasi diminta → tanya jumlah pokok.
+S3: Jumlah masuk → tanya metode Flat atau Anuitas (1 kalimat penjelasan tiap metode).
+S4: Metode dipilih → tanya tenor. Jika user kirim "Flat 6 Bulan" → LANGSUNG hitung.
+S5: Tampilkan tabel + tabel perbandingan Flat vs Anuitas → tawarkan ajukan/coba tenor lain.
+S-DENDA: Jika tanya denda/jatuh tempo → jelaskan konsekuensi → tawarkan Penyesuaian.
+PROMPT;
+
+        // ── 2. DYNAMIC DATA (hanya fetch + inject berdasarkan topik pesan) ─────
+        $dataBlock = $isAdmin
+            ? "\n[MODE ADMIN — tidak ada data pinjaman/investasi pribadi. Bantu pertanyaan umum SYFA.]"
+            : $this->buildDynamicContext($debitur, $message);
+
+        // ── 3. RUMUS (inject hanya saat simulasi diperlukan, ~80 token) ────────
+        $formulaBlock = '';
+        if (preg_match('/simulasi|hitung|cicilan|flat|anuitas|tenor/i', $message)) {
+            $formulaBlock = "\nRUMUS: FLAT: cicilan=(P+P×r×n)/n, r=rate%/12."
+                . " ANUITAS: r=rate%/1200; cicilan=P×r×(1+r)^n/((1+r)^n-1)."
+                . " Tabel: |No|Pokok|Bunga|Cicilan|Sisa| min 3 baris+Total."
+                . " Jika rate tidak ada, pakai estimasi 2%/bln *(aktual ditentukan Admin SYFA)*.";
+        }
+
+        return $base . $dataBlock . $formulaBlock;
+    }
+
+    /**
+     * Fetch & format data keuangan user berdasarkan kata kunci pesan.
+     * Hanya query yang relevan yang dijalankan.
+     */
+    protected function buildDynamicContext($debitur, string $message): string
+    {
+        $needsPinjaman  = (bool) preg_match(
+            '/pinjam|invoice|po.?financing|factoring|pencairan|kontrak|status|jatuh.?tempo|denda|telat|macet|gagal.?bayar|simulasi|flat|anuitas/i',
+            $message
+        );
+        $needsCicilan   = (bool) preg_match('/cicilan|angsuran|penyesuaian|restrukturisasi|jadwal/i', $message);
+        $needsInvestasi = (bool) preg_match('/investasi|investor/i', $message);
+        $isGreeting     = !$needsPinjaman && !$needsCicilan && !$needsInvestasi;
+
+        // Greeting atau pesan pendek → hanya ringkasan singkat + cek alert urgent
+        if ($isGreeting) {
+            return $this->buildBriefSummary($debitur);
+        }
+
+        $ctx = '';
+
+        // ── PINJAMAN ────────────────────────────────────────────────────────
+        if ($needsPinjaman) {
             $pinjaman = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
                 ->whereNotIn('status', ['draft', 'rejected', 'cancelled', 'completed', 'paid'])
                 ->latest()
-                ->get();
+                ->get(['no_kontrak', 'jenis_pembiayaan', 'total_pinjaman', 'status',
+                       'tanggal_jatuh_tempo', 'sisa_bayar_pokok']);
 
-            $pinjamanInfo = $pinjaman->isEmpty() ? 'Tidak ada pinjaman aktif.' : '';
+            // Proactive alert
+            $alerts = '';
             foreach ($pinjaman as $p) {
-                $jatuhTempo = $p->tanggal_jatuh_tempo ? Carbon::parse($p->tanggal_jatuh_tempo) : null;
-                $sisaHari   = $jatuhTempo ? (int) Carbon::now()->diffInDays($jatuhTempo, false) : null;
-                $alert      = ($sisaHari !== null && $sisaHari <= 7 && $sisaHari >= 0) ? ' ⚠️ HAMPIR JATUH TEMPO!' : '';
-
-                $pinjamanInfo .= "  - Nomor Kontrak: " . ($p->no_kontrak ?? '-')
-                    . ", Tipe: " . ($p->jenis_pembiayaan ?? '-')
-                    . ", Jumlah: Rp " . number_format((float) ($p->total_pinjaman ?? 0), 0, ',', '.')
-                    . ", Status: " . ($p->status ?? '-')
-                    . ($jatuhTempo ? ", Jatuh Tempo: {$jatuhTempo->format('d M Y')}" : "")
-                    . ($sisaHari !== null ? " (sisa {$sisaHari} hari){$alert}" : "")
-                    . ", Sisa Pokok: Rp " . number_format((float) ($p->sisa_bayar_pokok ?? 0), 0, ',', '.')
-                    . "\n";
+                $jt   = $p->tanggal_jatuh_tempo ? Carbon::parse($p->tanggal_jatuh_tempo) : null;
+                $sisa = $jt ? (int) Carbon::now()->diffInDays($jt, false) : null;
+                if ($sisa !== null && $sisa >= 0 && $sisa <= 5) {
+                    $alerts .= "⚠️ {$p->no_kontrak} JT {$sisa} hari ({$jt->format('d/m/Y')})"
+                        . " sisa Rp" . number_format((float) ($p->sisa_bayar_pokok ?? 0), 0, ',', '.') . "\n";
+                }
+            }
+            if ($alerts) {
+                $ctx .= "\n🚨 ALERT JATUH TEMPO — PROAKTIF: Buka respons dengan info ini & tawarkan simulasi:\n{$alerts}";
             }
 
-            // ─── Pengajuan Pinjaman Pending ──────────────────────────
-            $pengajuanPending = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
+            if ($pinjaman->isEmpty()) {
+                $ctx .= "\n## Pinjaman Aktif\nTidak ada pinjaman aktif.\n";
+            } else {
+                $ctx .= "\n## Pinjaman Aktif\n";
+                foreach ($pinjaman as $p) {
+                    $jt   = $p->tanggal_jatuh_tempo ? Carbon::parse($p->tanggal_jatuh_tempo) : null;
+                    $sisa = $jt ? (int) Carbon::now()->diffInDays($jt, false) : null;
+                    $ctx .= "- {$p->no_kontrak} | {$p->jenis_pembiayaan}"
+                        . " | Rp" . number_format((float) ($p->total_pinjaman ?? 0), 0, ',', '.')
+                        . " | {$p->status}"
+                        . ($jt ? " | JT: {$jt->format('d/m/Y')} ({$sisa}hr)" : '')
+                        . " | Sisa: Rp" . number_format((float) ($p->sisa_bayar_pokok ?? 0), 0, ',', '.') . "\n";
+                }
+            }
+
+            // Pengajuan pending (ringkas)
+            $pending = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
                 ->whereIn('status', ['draft', 'pending', 'review', 'waiting', 'verifikasi'])
                 ->latest()
-                ->get();
+                ->get(['jenis_pembiayaan', 'total_pinjaman', 'status']);
 
-            $pendingInfo = $pengajuanPending->isEmpty() ? 'Tidak ada pengajuan pending.' : '';
-            foreach ($pengajuanPending as $pp) {
-                $pendingInfo .= "  - Tipe: " . ($pp->jenis_pembiayaan ?? '-')
-                    . ", Jumlah: Rp " . number_format((float) ($pp->total_pinjaman ?? 0), 0, ',', '.')
-                    . ", Status: " . ($pp->status ?? '-')
-                    . ", Diajukan: " . ($pp->created_at ? $pp->created_at->format('d M Y') : '-')
-                    . "\n";
+            if ($pending->isNotEmpty()) {
+                $ctx .= "## Pending\n";
+                foreach ($pending as $pp) {
+                    $ctx .= "- {$pp->jenis_pembiayaan} Rp"
+                        . number_format((float) ($pp->total_pinjaman ?? 0), 0, ',', '.') . " ({$pp->status})\n";
+                }
             }
+        }
 
-            // ─── Pengajuan Cicilan ───────────────────────────────────
+        // ── CICILAN ─────────────────────────────────────────────────────────
+        if ($needsCicilan) {
             $pengajuanCicilan = PengajuanCicilan::where('id_debitur', $debitur->id_debitur)
                 ->latest()
                 ->first();
 
-            $cicilanInfo = 'Tidak ada pengajuan penyesuaian cicilan.';
-            if ($pengajuanCicilan) {
+            $ctx .= "\n## Penyesuaian Cicilan\n";
+            if (!$pengajuanCicilan) {
+                $ctx .= "Tidak ada pengajuan penyesuaian cicilan.\n";
+            } else {
                 $jenisArr = is_array($pengajuanCicilan->jenis_restrukturisasi)
                     ? implode(', ', array_filter($pengajuanCicilan->jenis_restrukturisasi))
                     : ($pengajuanCicilan->jenis_restrukturisasi ?? '-');
 
-                $cicilanInfo = "Nomor Kontrak: " . ($pengajuanCicilan->nomor_kontrak_pembiayaan ?? '-')
-                    . ", Status: " . ($pengajuanCicilan->status ?? '-')
-                    . ", Sisa Pokok: Rp " . number_format((float) ($pengajuanCicilan->sisa_pokok_belum_dibayar ?? 0), 0, ',', '.')
-                    . ", Jenis: {$jenisArr}";
-            }
+                $ctx .= "Kontrak: {$pengajuanCicilan->nomor_kontrak_pembiayaan}"
+                    . " | Status: {$pengajuanCicilan->status}"
+                    . " | Sisa Pokok: Rp" . number_format((float) ($pengajuanCicilan->sisa_pokok_belum_dibayar ?? 0), 0, ',', '.')
+                    . " | Jenis: {$jenisArr}\n";
 
-            // ─── Penyesuaian Cicilan Aktif ───────────────────────────
-            $penyesuaianAktif = $pengajuanCicilan
-                ? PenyesuaianCicilan::where('id_pengajuan_cicilan', $pengajuanCicilan->id_pengajuan_cicilan)
+                $penyesuaian = PenyesuaianCicilan::where('id_pengajuan_cicilan', $pengajuanCicilan->id_pengajuan_cicilan)
                     ->whereIn('status', ['active', 'approved', 'running'])
                     ->with('jadwalAngsuran')
-                    ->first()
-                : null;
-
-            $jadwalInfo = 'Tidak ada jadwal cicilan aktif.';
-            if ($penyesuaianAktif) {
-                $angsuranBerikutnya = $penyesuaianAktif->jadwalAngsuran
-                    ->where('status', '!=', 'paid')
-                    ->sortBy('no')
                     ->first();
 
-                $jadwalInfo = "Metode: " . ($penyesuaianAktif->metode_perhitungan ?? '-')
-                    . ", Bunga: " . ($penyesuaianAktif->suku_bunga_per_tahun ?? 0) . "%/tahun"
-                    . ", Tenor: " . ($penyesuaianAktif->jangka_waktu_total ?? 0) . " bulan"
-                    . ", Total Cicilan: Rp " . number_format((float) ($penyesuaianAktif->total_cicilan ?? 0), 0, ',', '.');
-
-                if ($angsuranBerikutnya) {
-                    $jadwalInfo .= "\n  Angsuran ke-{$angsuranBerikutnya->no} (berikutnya): "
-                        . "Rp " . number_format((float) $angsuranBerikutnya->total_cicilan, 0, ',', '.')
-                        . " jatuh tempo " . Carbon::parse($angsuranBerikutnya->tanggal_jatuh_tempo)->format('d M Y');
+                if ($penyesuaian) {
+                    $next = $penyesuaian->jadwalAngsuran
+                        ->where('status', '!=', 'paid')
+                        ->sortBy('no')
+                        ->first();
+                    $ctx .= "Aktif: {$penyesuaian->metode_perhitungan}"
+                        . " | Bunga: {$penyesuaian->suku_bunga_per_tahun}%/thn"
+                        . " | Tenor: {$penyesuaian->jangka_waktu_total} bln\n";
+                    if ($next) {
+                        $ctx .= "Angsuran ke-{$next->no}: Rp"
+                            . number_format((float) $next->total_cicilan, 0, ',', '.')
+                            . " — " . Carbon::parse($next->tanggal_jatuh_tempo)->format('d/m/Y') . "\n";
+                    }
                 }
-            }
-
-            // ─── Investasi Aktif ─────────────────────────────────────
-            $investasi = PengajuanInvestasi::where('id_debitur_dan_investor', $debitur->id_debitur)
-                ->whereNotIn('status', ['draft', 'rejected', 'cancelled'])
-                ->latest()
-                ->get();
-
-            $investasiInfo = $investasi->isEmpty() ? 'Tidak ada investasi aktif.' : '';
-            foreach ($investasi as $inv) {
-                $investasiInfo .= "  - Nomor Kontrak: " . ($inv->nomor_kontrak ?? '-')
-                    . ", Jenis: " . ($inv->jenis_investasi ?? '-')
-                    . ", Jumlah: Rp " . number_format((float) ($inv->jumlah_investasi ?? 0), 0, ',', '.')
-                    . ", Bunga: " . ($inv->bunga_pertahun ?? 0) . "%/tahun"
-                    . ", Status: " . ($inv->status ?? '-')
-                    . "\n";
             }
         }
 
-        // ─── Build Prompt ────────────────────────────────────────────
-        return <<<PROMPT
-Kamu adalah SYFA Assistant, asisten keuangan platform SYFA (Captive Finance Internal grup holding).
-Hari ini: {$today}. Pengguna: {$user->name}. {$userContext}
+        // ── INVESTASI ────────────────────────────────────────────────────────
+        if ($needsInvestasi) {
+            $investasi = PengajuanInvestasi::where('id_debitur_dan_investor', $debitur->id_debitur)
+                ->whereNotIn('status', ['draft', 'rejected', 'cancelled'])
+                ->latest()
+                ->get(['nomor_kontrak', 'jenis_investasi', 'jumlah_investasi', 'bunga_pertahun', 'status']);
 
-DATA USER:
-Pinjaman aktif: {$pinjamanInfo}
-Pengajuan pending: {$pendingInfo}
-Penyesuaian cicilan: {$cicilanInfo}
-Jadwal cicilan: {$jadwalInfo}
-Investasi: {$investasiInfo}
+            $ctx .= "\n## Investasi Aktif\n";
+            if ($investasi->isEmpty()) {
+                $ctx .= "Tidak ada investasi aktif.\n";
+            } else {
+                foreach ($investasi as $inv) {
+                    $ctx .= "- {$inv->nomor_kontrak} | {$inv->jenis_investasi}"
+                        . " | Rp" . number_format((float) ($inv->jumlah_investasi ?? 0), 0, ',', '.')
+                        . " | {$inv->bunga_pertahun}%/thn | {$inv->status}\n";
+                }
+            }
+        }
 
-PRODUK SYFA (ringkas):
-- PINJAMAN: Tipe=Invoice Financing/PO Financing/Factoring/Installment. Tenor FIXED 30 hari. Proses: Pengajuan→Verifikasi Dokumen→Approval→Pencairan. Dokumen: KTP direksi, NPWP, Akta, Rek.koran 3bln, Lapkeu, Invoice/PO sesuai tipe.
-- PENYESUAIAN CICILAN: Jika tidak mampu lunasi pinjaman 30 hari. Proses: Form alasan→Upload dok→Approval SYFA→Hitung skema baru. Metode: Flat (cicilan tetap) atau Anuitas (bunga menurun). Tenor & bunga ditentukan Admin SYFA.
-- INVESTASI: Reguler=bunga standar, Khusus=bunga lebih tinggi (ditentukan saat daftar). Proses: Pengajuan→Approval→Penyaluran→Pengembalian.
-
-ATURAN:
-- Bahasa Indonesia, ramah, ringkas (max 3 paragraf)
-- Gunakan data aktual user di atas jika relevan
-- Lakukan kalkulasi nyata jika diminta simulasi cicilan (flat/anuitas)
-- Jangan buat keputusan approval, hanya info & simulasi
-- Format rupiah: Rp 1.000.000
-- Tolak pertanyaan di luar keuangan SYFA
-PROMPT;
+        return $ctx;
     }
 
     /**
-     * Bangun array contents untuk Gemini (multi-turn conversation).
+     * Ringkasan singkat untuk salam/pesan pendek: hanya jumlah + alert urgent.
+     * Hemat token: tidak query detail, hanya COUNT + cek jatuh tempo.
      */
-    protected function buildContents(array $history, string $newMessage): array
+    protected function buildBriefSummary($debitur): string
     {
-        $contents = [];
+        $pinjamanCount  = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
+            ->whereNotIn('status', ['draft', 'rejected', 'cancelled', 'completed', 'paid'])
+            ->count();
+        $investasiCount = PengajuanInvestasi::where('id_debitur_dan_investor', $debitur->id_debitur)
+            ->whereNotIn('status', ['draft', 'rejected', 'cancelled'])
+            ->count();
+
+        $ctx = "\n## Ringkasan Akun\n- Pinjaman aktif: {$pinjamanCount}\n- Investasi aktif: {$investasiCount}\n";
+
+        // Cek alert urgent (hanya select kolom minimal)
+        $pinjaman = PengajuanPeminjaman::where('id_debitur', $debitur->id_debitur)
+            ->whereNotIn('status', ['draft', 'rejected', 'cancelled', 'completed', 'paid'])
+            ->get(['no_kontrak', 'tanggal_jatuh_tempo', 'sisa_bayar_pokok']);
+
+        $alerts = '';
+        foreach ($pinjaman as $p) {
+            $jt   = $p->tanggal_jatuh_tempo ? Carbon::parse($p->tanggal_jatuh_tempo) : null;
+            $sisa = $jt ? (int) Carbon::now()->diffInDays($jt, false) : null;
+            if ($sisa !== null && $sisa >= 0 && $sisa <= 5) {
+                $alerts .= "⚠️ {$p->no_kontrak} jatuh tempo {$sisa} hari"
+                    . " — sisa Rp" . number_format((float) ($p->sisa_bayar_pokok ?? 0), 0, ',', '.') . "\n";
+            }
+        }
+
+        if ($alerts) {
+            $ctx = "\n🚨 ALERT JATUH TEMPO — PROAKTIF: Awali dengan alert ini & tawarkan simulasi:\n{$alerts}" . $ctx;
+        }
+
+        return $ctx;
+    }
+
+    /**
+     * Bangun array messages untuk Groq / OpenAI-compatible API (multi-turn conversation).
+     */
+    protected function buildMessages(string $systemPrompt, array $history, string $newMessage): array
+    {
+        $messages = [['role' => 'system', 'content' => $systemPrompt]];
 
         foreach ($history as $item) {
             if (!empty($item['role']) && !empty($item['content'])) {
-                $contents[] = [
-                    'role'  => $item['role'] === 'user' ? 'user' : 'model',
-                    'parts' => [['text' => $item['content']]],
+                // Bersihkan artefak truncation lama agar tidak ikut dikirim ke LLM
+                $content = str_replace('…[ringkasan tersimpan]', '', $item['content']);
+                $content = rtrim($content);
+                if ($content === '') continue;
+
+                $messages[] = [
+                    'role'    => $item['role'] === 'user' ? 'user' : 'assistant',
+                    'content' => $content,
                 ];
             }
         }
 
-        $contents[] = [
-            'role'  => 'user',
-            'parts' => [['text' => $newMessage]],
-        ];
+        $messages[] = ['role' => 'user', 'content' => $newMessage];
 
-        return $contents;
+        return $messages;
     }
 
     /**
      * Generate quick reply buttons berdasarkan konteks percakapan.
+     * Flow simulasi cicilan: Simulasi → Pilih Metode → Pilih Tenor → Hasil
      */
     protected function generateQuickReplies(string $userMessage, string $botResponse): array
     {
-        $lower = strtolower($userMessage . ' ' . $botResponse);
+        $u = strtolower($userMessage);
+        $b = strtolower($botResponse);
+        $all = $u . ' ' . $b;
 
-        // Intent: Pinjaman
-        if (str_contains($lower, 'pinjam') || str_contains($lower, 'invoice') || str_contains($lower, 'factoring') || str_contains($lower, 'installment')) {
+        // ═══════════════════════════════════════════════════════════
+        // GUIDED CONVERSATION — priority order (most-specific first)
+        // ═══════════════════════════════════════════════════════════
+
+        // ── Stage 5: POST-SIMULATION → after table rendered ──
+        // Detect simulation result in bot response (table with cicilan data)
+        $hasSimResult = (str_contains($b, '| 1 |') || str_contains($b, '|1|') ||
+                        str_contains($b, 'total cicilan') || str_contains($b, 'total bunga') ||
+                        (str_contains($b, 'bulan') && str_contains($b, 'rp') && str_contains($b, 'sisa')));
+        if ($hasSimResult) {
             return [
-                '📋 Syarat Pinjaman',
-                '🧮 Simulasi Pinjaman',
-                '📅 Cek Jadwal Jatuh Tempo',
+                '📊 Coba Metode Flat',
+                '📈 Coba Metode Anuitas',
+                '⚠️ Cek Info Denda',
+                '✅ Ajukan Penyesuaian Sekarang',
+            ];
+        }
+
+        // ── Stage 4: TENOR SELECTION → user already picked method ──
+        $choseFlat    = str_contains($all, 'metode flat') || str_contains($all, 'pilih flat') || str_contains($all, 'gunakan flat');
+        $choseAnuitas = str_contains($all, 'metode anuitas') || str_contains($all, 'pilih anuitas') || str_contains($all, 'gunakan anuitas');
+        if ($choseFlat && !str_contains($u, 'bulan')) {
+            return ['📊 Flat 3 Bulan', '📊 Flat 6 Bulan', '📊 Flat 12 Bulan', '✏️ Masukkan Tenor Lain'];
+        }
+        if ($choseAnuitas && !str_contains($u, 'bulan')) {
+            return ['📈 Anuitas 3 Bulan', '📈 Anuitas 6 Bulan', '📈 Anuitas 12 Bulan', '✏️ Masukkan Tenor Lain'];
+        }
+
+        // ── Stage 3: METHOD SELECTION → amount provided, pick method ──
+        $hasAmount = preg_match('/\d+\s*(juta|ribu|rp|rupiah|\.000)/i', $userMessage) ||
+                     preg_match('/rp\s?[\d\.]+/i', $userMessage);
+        $wantsSimulasi = str_contains($all, 'simulasi') || str_contains($all, 'hitung cicilan') ||
+                         str_contains($all, 'kalkulasi') || str_contains($all, 'berapa cicilan');
+        if ($wantsSimulasi && $hasAmount) {
+            return [
+                '📊 Pilih Metode Flat',
+                '📈 Pilih Metode Anuitas',
+                '⚖️ Bandingkan Flat vs Anuitas',
+            ];
+        }
+
+        // ── Stage 2: AMOUNT ENTRY → user wants simulation, no amount yet ──
+        if ($wantsSimulasi) {
+            return [
+                '💵 Simulasi Rp 50 Juta',
+                '💵 Simulasi Rp 100 Juta',
+                '💵 Simulasi Rp 250 Juta',
+                '✏️ Masukkan Jumlah Manual',
+            ];
+        }
+
+        // ── Stage 1a: PINJAMAN INFO → show loan menu ──
+        if (str_contains($all, 'pinjam') || str_contains($all, 'invoice financing') ||
+            str_contains($all, 'po financing') || str_contains($all, 'factoring') ||
+            str_contains($all, 'pencairan') || str_contains($all, 'tenor 30')) {
+            return [
+                '🧮 Simulasi Cicilan Pinjaman',
+                '⚠️ Info Denda & Jatuh Tempo',
+                '📋 Syarat & Dokumen Pinjaman',
                 '🔄 Ajukan Penyesuaian Cicilan',
             ];
         }
 
-        // Intent: Cicilan / Penyesuaian
-        if (str_contains($lower, 'cicilan') || str_contains($lower, 'penyesuaian') || str_contains($lower, 'flat') || str_contains($lower, 'anuitas')) {
+        // ── Stage 1b: DENDA / JATUH TEMPO ──
+        if (str_contains($all, 'denda') || str_contains($all, 'jatuh tempo') ||
+            str_contains($all, 'telat') || str_contains($all, 'macet') || str_contains($all, 'gagal bayar')) {
             return [
-                '📊 Simulasi Flat',
-                '📈 Simulasi Anuitas',
-                '⚖️ Bandingkan Flat vs Anuitas',
-                '📋 Cara Ajukan Penyesuaian',
+                '🔄 Ajukan Penyesuaian Cicilan',
+                '🧮 Simulasi Cicilan Baru',
+                '📅 Lihat Jadwal Cicilan',
+                '📞 Hubungi Admin SYFA',
             ];
         }
 
-        // Intent: Investasi
-        if (str_contains($lower, 'investasi') || str_contains($lower, 'reguler') || str_contains($lower, 'khusus') || str_contains($lower, 'bunga')) {
+        // ── Stage 1c: INVESTASI INFO ──
+        if (str_contains($all, 'investasi') || str_contains($all, 'investasi reguler') ||
+            str_contains($all, 'investasi khusus')) {
             return [
                 '📦 Info Investasi Reguler',
                 '⭐ Info Investasi Khusus',
-                '🔄 Bandingkan Reguler vs Khusus',
+                '⚖️ Bandingkan Reguler vs Khusus',
                 '📝 Cara Daftar Investasi',
             ];
         }
 
-        // Intent: Status
-        if (str_contains($lower, 'status') || str_contains($lower, 'pengajuan') || str_contains($lower, 'proses')) {
+        // ── Stage 1d: DOKUMEN / SYARAT / PROSES ──
+        if (str_contains($all, 'dokumen') || str_contains($all, 'syarat') ||
+            str_contains($all, 'cara ajukan') || str_contains($all, 'proses pengajuan')) {
             return [
-                '💼 Status Pinjaman',
-                '📈 Status Investasi',
-                '🔄 Status Penyesuaian Cicilan',
-                '📊 Rekap Dashboard',
+                '📋 Dokumen Pinjaman',
+                '📋 Dokumen Penyesuaian',
+                '🧮 Simulasi Dulu',
+                '📞 Hubungi Admin SYFA',
             ];
         }
 
-        // Default quick replies
+        // ── Stage 1e: STATUS ──
+        if (str_contains($all, 'status') || str_contains($all, 'pengajuan saya') ||
+            str_contains($all, 'rekap') || str_contains($all, 'portofolio')) {
+            return [
+                '💼 Status Pinjaman',
+                '📈 Status Investasi',
+                '🔄 Status Penyesuaian',
+                '📊 Rekap Portfolio',
+            ];
+        }
+
+        // ── Default — initial / unknown ──
         return [
-            '💰 Cek Status Pinjaman',
-            '🔄 Penyesuaian Cicilan',
+            '🧮 Simulasi Cicilan',
+            '📅 Cek Status Pinjaman',
             '📈 Info Investasi',
-            '📅 Cek Jatuh Tempo',
+            '⚠️ Info Denda & Jatuh Tempo',
         ];
     }
 
