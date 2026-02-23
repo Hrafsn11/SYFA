@@ -1,5 +1,5 @@
-<div>
-    <div wire:ignore>
+<div wire:ignore>
+    <div>
         <div class="row">
             <div class="col-12">
                 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -20,10 +20,7 @@
         <div class="card">
             <div class="card-body p-0">
                 <div class="card-datatable">
-                    <livewire:penyaluran-dana-investasi.penyaluran-dana-investasi-table />
-                </div>
-            </div>
-        </div>
+                        <livewire:penyaluran-dana-investasi.penyaluran-dana-investasi-table />
 
         @include('livewire.penyaluran-dana-investasi.components.modal')
 
@@ -58,8 +55,7 @@
         const canInputPengembalian = @json(auth()->user()->can('penyaluran_dana_investasi.input_pengembalian'));
 
         function afterAction(payload) {
-            Livewire.dispatch('refreshPenyaluranDanaInvestasiTable');
-            $('.modal').modal('hide');
+            window.location.reload();
         }
 
         function formatRupiah(angka) {
@@ -98,18 +94,17 @@
                 const selectedOption = $(this).find('option:selected');
                 const sisaDana = parseFloat(selectedOption.data('sisa-dana')) || 0;
                 const nilaiInvestasi = selectedOption.data('nilai-investasi');
-
                 nilaiInvestasiMax = sisaDana;
-
                 if (sisaDana && nilaiInvestasi) {
                     $('#nilai-investasi-info').html(`
-                                <div class="alert alert-info py-2 mt-2">
-                                    <small>
-                                        <strong>Nilai Investasi:</strong> Rp ${parseFloat(nilaiInvestasi).toLocaleString('id-ID')}<br>
-                                        <strong class="text-success">Sisa Dana Tersedia:</strong> Rp ${sisaDana.toLocaleString('id-ID')}
-                                    </small>
-                                </div>
-                            `);
+                        <div class="alert alert-info py-2 mt-2">
+                            <small>
+                                <i class="ti ti-info-circle me-1"></i>
+                                Nilai Investasi: <strong>Rp ${parseFloat(nilaiInvestasi).toLocaleString('id-ID')}</strong> |
+                                Sisa Dana Tersedia: <strong>Rp ${sisaDana.toLocaleString('id-ID')}</strong>
+                            </small>
+                        </div>
+                    `);
                 } else {
                     $('#nilai-investasi-info').html('');
                 }
