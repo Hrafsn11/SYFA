@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Dashboard;
+use App\Livewire\DashboardCicilan;
 use App\Livewire\DashboardInvestasiDeposito;
 use App\Livewire\DashboardPembiayaanSfinance;
 use App\Http\Controllers\LaporanTagihanBulananController;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('dashboard', Dashboard::class)->name('dashboard.index')->middleware('can:sfinance.menu.dashboard_pembiayaan');
 Route::get('dashboard/pembiayaan', DashboardPembiayaanSfinance::class)->name('dashboard.pembiayaan')->middleware('can:sfinance.menu.dashboard_pembiayaan');
 Route::get('dashboard/investasi', DashboardInvestasiDeposito::class)->name('dashboard.investasi')->middleware('can:sfinance.menu.dashboard_pembiayaan_investasi');
+Route::get('dashboard/cicilan', DashboardCicilan::class)->name('dashboard.cicilan');
 
 // AR Perbulan
 Route::get('laporan-tagihan-bulanan', ArPerbulan::class)->name('laporan-tagihan-bulanan.index');

@@ -1,6 +1,6 @@
 @php
     use Illuminate\Support\Facades\Storage;
-    $pengajuan = $program->pengajuanRestrukturisasi;
+    $pengajuan = $program->pengajuanCicilan;
     $debitur = $pengajuan?->debitur?->nama ?? ($pengajuan?->nama_perusahaan ?? '-');
     $nomorKontrakPembiayaan = $pengajuan?->nomor_kontrak_pembiayaan ?? '-';
 

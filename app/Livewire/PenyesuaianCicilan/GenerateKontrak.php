@@ -42,7 +42,7 @@ class GenerateKontrak extends Component
 
         // Jika kontrak sudah di-generate, redirect ke halaman show
         if ($this->program->kontrak_generated_at) {
-            redirect()->route('penyesuaian-cicilan.show', $this->program->id_penyesuaian_cicilan)->send();
+            $this->redirectRoute('penyesuaian-cicilan.show', $this->program->id_penyesuaian_cicilan);
             return;
         }
 
