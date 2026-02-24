@@ -16,20 +16,13 @@ class Table extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_penyesuaian_cicilan')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari penyesuaian cicilan...')
-            ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('created_at', 'desc')
-            ->setTableAttributes(['class' => 'table table-hover'])
-            ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari penyesuaian cicilan...'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-            ->setBulkActionsDisabled()
             ->setEmptyMessage('Tidak ada data penyesuaian cicilan');
     }
 

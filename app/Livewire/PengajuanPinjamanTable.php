@@ -20,34 +20,14 @@ class PengajuanPinjamanTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_peminjaman')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari pengajuan pinjaman...')
-            ->setSearchDebounce(500)
-
-            // Pagination
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-
             ->setDefaultSort('pengajuan_peminjaman.created_at', 'desc')
-
-            // Table Styling
-            ->setTableAttributes([
-                'class' => 'table table-hover',
-            ])
-            ->setTheadAttributes([
-                'class' => 'table-light',
-            ])
-            ->setSearchFieldAttributes([
-                'class' => 'form-control',
-                'placeholder' => 'Cari pengajuan pinjaman...',
-            ])
-            ->setPerPageFieldAttributes([
-                'class' => 'form-select',
-            ])
-
-            // Disable Bulk Actions
-            ->setBulkActionsDisabled();
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
+            ->setEmptyMessage('Tidak ada data pengajuan peminjaman');
     }
 
     public function builder(): \Illuminate\Database\Eloquent\Builder
@@ -142,14 +122,14 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->searchable()
                 ->label(function ($row) {
                     $status = $row->status;
-                    
+
                     $latestHistory = $row->historyStatus->sortByDesc('created_at')->first();
                     $currentStep = $latestHistory?->current_step ?? 1;
-                    
+
                     if ($status === 'Disetujui oleh CEO SKI' && $currentStep == 5) {
                         return '<div class="text-center"><span class="badge bg-info">Menunggu Validasi Direktur</span></div>';
                     }
-                    
+
                     $badgeClass = match ($status) {
                         'Draft' => 'bg-warning text-dark',
                         'Submitted' => 'bg-success',
@@ -173,17 +153,17 @@ class PengajuanPinjamanTable extends DataTableComponent
                     if ($row->status !== 'Dana Sudah Dicairkan') {
                         return '<div class="text-center"><span class="text-muted">-</span></div>';
                     }
-                    
+
                     $historyWithTanggalPencairan = $row->historyStatus
                         ->whereNotNull('tanggal_pencairan')
                         ->sortByDesc('created_at')
                         ->first();
-                    
+
                     if ($historyWithTanggalPencairan && $historyWithTanggalPencairan->tanggal_pencairan) {
                         $tanggal = Carbon::parse($historyWithTanggalPencairan->tanggal_pencairan)->format('d M Y');
                         return '<div class="text-center">' . $tanggal . '</div>';
                     }
-                    
+
                     return '<div class="text-center"><span class="text-muted">-</span></div>';
                 })
                 ->html(),

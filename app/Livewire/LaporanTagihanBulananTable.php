@@ -18,20 +18,14 @@ class LaporanTagihanBulananTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_ar_perbulan')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari perusahaan...')
-            ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('bulan', 'desc')
-            ->setTableAttributes(['class' => 'table table-hover'])
-            ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari perusahaan...'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-            ->setBulkActionsDisabled();
+            ->setEmptyMessage('Tidak ada data laporan tagihan bulanan');
     }
 
     public function filters(): array

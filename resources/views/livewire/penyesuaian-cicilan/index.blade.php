@@ -8,22 +8,22 @@
             <p class="text-muted">Daftar penyesuaian cicilan yang telah dibuat</p>
         </div>
         @can('penyesuaian_cicilan.add')
-            <a href="{{ route('penyesuaian-cicilan.create') }}" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i>Tambah Penyesuaian Cicilan
-            </a>
+        <a href="{{ route('penyesuaian-cicilan.create') }}" class="btn btn-primary">
+            <i class="ti ti-plus me-1"></i>Tambah Penyesuaian Cicilan
+        </a>
         @endcan
     </div>
 
     {{-- Flash Messages --}}
     @if (session()->has('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     @endif
 
     <div class="card">
-        <div class="card-body">
+        <div class="card-body mt-3">
             <livewire:penyesuaian-cicilan.table />
         </div>
     </div>

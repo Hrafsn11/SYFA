@@ -20,20 +20,14 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_penyaluran_dana_investasi')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari aset investasi...')
-            ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('penyaluran_dana_investasi.created_at', 'desc')
-            ->setTableAttributes(['class' => 'table table-hover'])
-            ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-            ->setBulkActionsDisabled();
+            ->setEmptyMessage('Tidak ada data penyaluran dana investasi');
     }
 
     public function filters(): array
@@ -120,7 +114,7 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                 'details' => $details->map(function ($item) use ($nomorKontrak) {
                     $penyaluranModel = \App\Models\PenyaluranDanaInvestasi::find($item->id_penyaluran_dana_investasi);
                     $sisaBelumDikembalikan = $penyaluranModel ? $penyaluranModel->sisa_belum_dikembalikan : ($item->nominal_yang_disalurkan - ($item->nominal_yang_dikembalikan ?? 0));
-                    
+
                     $status = 'Belum Lunas';
                     if ($sisaBelumDikembalikan <= 0) {
                         $status = 'Lunas';

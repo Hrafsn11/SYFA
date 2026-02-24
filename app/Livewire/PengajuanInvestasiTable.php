@@ -20,39 +20,14 @@ class PengajuanInvestasiTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_investasi')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari pengajuan investasi...')
-            ->setSearchDebounce(500)
-
-            // Pagination
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-
-            // Default Sort
             ->setDefaultSort('created_at', 'desc')
-
-            // Table Styling
-            ->setTableAttributes([
-                'class' => 'table table-hover',
-            ])
-            ->setTheadAttributes([
-                'class' => 'table-light',
-            ])
-            ->setSearchFieldAttributes([
-                'class' => 'form-control',
-                'placeholder' => 'Cari pengajuan investasi...',
-            ])
-            ->setPerPageFieldAttributes([
-                'class' => 'form-select',
-            ])
-
-            // Enable Filters
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-
-            // Disable Bulk Actions
-            ->setBulkActionsDisabled();
+            ->setEmptyMessage('Tidak ada data pengajuan investasi');
     }
 
     public function filters(): array

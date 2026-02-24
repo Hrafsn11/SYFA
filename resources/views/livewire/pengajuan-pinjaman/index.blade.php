@@ -4,11 +4,11 @@
             <div class="mb-4 d-flex justify-content-between align-items-center">
                 <h4 class="fw-bold">Menu Pengajuan Peminjaman .</h4>
                 @can('peminjaman_dana.add')
-                    <a wire:navigate.hover href="{{ route('peminjaman.create') }}"
-                        class="btn btn-primary d-flex justify-center align-items-center gap-3">
-                        <i class="fa-solid fa-plus"></i>
-                        Ajukan Peminjaman
-                    </a>
+                <a wire:navigate.hover href="{{ route('peminjaman.create') }}"
+                    class="btn btn-primary d-flex justify-center align-items-center gap-3">
+                    <i class="fa-solid fa-plus"></i>
+                    Ajukan Peminjaman
+                </a>
                 @endcan
             </div>
         </div>
@@ -16,7 +16,7 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-datatable">
+                <div class="card-body mt-3">
                     <livewire:pengajuan-pinjaman-table />
                 </div>
             </div>
@@ -49,12 +49,12 @@
         let currentRowId = null;
         const toggleModal = new bootstrap.Modal(document.getElementById('toggleStatusModal'));
         initializeEditButtons();
-        
+
         function initializeEditButtons() {
             document.querySelectorAll('.edit-btn').forEach(btn => {
                 const status = btn.getAttribute('data-status');
                 const canEdit = ['Draft', 'Validasi Ditolak'].includes(status);
-                
+
                 if (!canEdit) {
                     btn.classList.remove('btn-outline-warning');
                     btn.classList.add('btn-outline-secondary', 'disabled');
@@ -64,73 +64,73 @@
                 }
             });
         }
-        
+
         // Event delegation untuk button toggle
         document.addEventListener('click', function(e) {
             if (e.target.closest('.pengajuan-toggle-status-btn')) {
                 const button = e.target.closest('.pengajuan-toggle-status-btn');
                 const isActive = button.getAttribute('data-active') === 'true';
                 const rowId = button.getAttribute('data-id');
-                
+
                 currentToggleButton = button;
                 currentRowId = rowId;
-                
+
                 // Set pesan modal
-                const message = isActive 
-                    ? 'Apakah Anda yakin ingin menonaktifkan pengajuan ini? Semua tombol aksi akan dinonaktifkan.'
-                    : 'Apakah Anda yakin ingin mengaktifkan kembali pengajuan ini?';
-                
+                const message = isActive ?
+                    'Apakah Anda yakin ingin menonaktifkan pengajuan ini? Semua tombol aksi akan dinonaktifkan.' :
+                    'Apakah Anda yakin ingin mengaktifkan kembali pengajuan ini?';
+
                 document.getElementById('toggleStatusMessage').textContent = message;
-                
+
                 // Tampilkan modal
                 toggleModal.show();
             }
         });
-        
+
         // Konfirmasi toggle
         document.getElementById('confirmToggleStatus').addEventListener('click', function() {
             if (currentToggleButton && currentRowId) {
                 // Call API untuk update database
                 fetch(`/peminjaman/${currentRowId}/toggle-active`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update UI setelah berhasil
-                        toggleRowStatus(currentRowId, currentToggleButton, data.is_active);
-                        
-                        // Tampilkan notifikasi sukses (optional)
-                        // alert(data.message);
-                    } else {
-                        alert('Gagal: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat mengubah status');
-                });
-                
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update UI setelah berhasil
+                            toggleRowStatus(currentRowId, currentToggleButton, data.is_active);
+
+                            // Tampilkan notifikasi sukses (optional)
+                            // alert(data.message);
+                        } else {
+                            alert('Gagal: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat mengubah status');
+                    });
+
                 toggleModal.hide();
             }
         });
-        
+
         function toggleRowStatus(id, button, newStatus) {
             const row = document.getElementById('action-row-' + id);
             const isActive = newStatus === 'active';
             const actionButtons = row.querySelectorAll('.action-btn');
             const icon = button.querySelector('i');
-            
+
             if (!isActive) {
                 // Set to non-active (disabled)
                 actionButtons.forEach(btn => {
                     const status = btn.getAttribute('data-status');
                     const canEdit = status ? ['Draft', 'Validasi Ditolak'].includes(status) : true;
-                    
+
                     if (btn.tagName === 'A') {
                         btn.style.pointerEvents = 'none';
                         btn.style.opacity = '0.5';
@@ -141,7 +141,7 @@
                         btn.style.opacity = '0.5';
                     }
                 });
-                
+
                 // Ubah button menjadi success (aktifkan)
                 button.classList.remove('btn-text-danger');
                 button.classList.add('btn-text-success');
@@ -152,7 +152,7 @@
                 // Set to active (enabled)
                 actionButtons.forEach(btn => {
                     const originallyDisabled = btn.getAttribute('data-originally-disabled') === 'true';
-                    
+
                     if (btn.tagName === 'A') {
                         if (!originallyDisabled) {
                             btn.style.pointerEvents = '';
@@ -169,7 +169,7 @@
                         }
                     }
                 });
-                
+
                 // Ubah button kembali menjadi danger (nonaktifkan)
                 button.classList.remove('btn-text-success');
                 button.classList.add('btn-text-danger');
@@ -178,13 +178,13 @@
                 button.setAttribute('title', 'Nonaktifkan');
             }
         }
-        
+
         // Re-initialize ketika Livewire update (untuk pagination, search, dll)
         Livewire.hook('message.processed', (message, component) => {
             initializeEditButtons();
             initializeActiveStatus();
         });
-        
+
         // Initialize active status dari database saat page load
         function initializeActiveStatus() {
             document.querySelectorAll('.action-btn').forEach(btn => {
@@ -199,7 +199,7 @@
                 }
             });
         }
-        
+
         // Jalankan saat page load
         initializeActiveStatus();
     });

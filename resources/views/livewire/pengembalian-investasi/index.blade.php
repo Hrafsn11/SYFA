@@ -5,11 +5,11 @@
                 <h4 class="fw-bold">Pengembalian Investasi</h4>
 
                 @can('pengembalian_investasi.add')
-                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                        data-bs-toggle="modal" data-bs-target="#modalPengembalianInvestasi">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Tambah Pengembalian</span>
-                    </button>
+                <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                    data-bs-toggle="modal" data-bs-target="#modalPengembalianInvestasi">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Pengembalian</span>
+                </button>
                 @endcan
 
             </div>
@@ -17,10 +17,8 @@
     </div>
 
     <div class="card">
-        <div class="card-body p-0">
-            <div class="card-datatable">
-                @livewire('pengembalian-investasi-table')
-            </div>
+        <div class="card-body mt-3">
+            @livewire('pengembalian-investasi-table')
         </div>
     </div>
 
@@ -28,158 +26,158 @@
 </div>
 
 @push('scripts')
-    <script>
-        let select2Kontrak;
-        let flatpickrTanggal;
+<script>
+    let select2Kontrak;
+    let flatpickrTanggal;
 
-        // Best Practice: Pattern from PenyaluranDeposito
-        function afterAction(payload) {
-            Livewire.dispatch('refreshPengembalianInvestasiTable');
-            $('.modal').modal('hide');
+    // Best Practice: Pattern from PenyaluranDeposito
+    function afterAction(payload) {
+        Livewire.dispatch('refreshPengembalianInvestasiTable');
+        $('.modal').modal('hide');
 
-            if (payload && payload.message) {
-                showSuccessAlert(payload.message);
+        if (payload && payload.message) {
+            showSuccessAlert(payload.message);
+        }
+    }
+
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('closeModal', () => $('#modalPengembalianInvestasi').modal('hide'));
+    });
+
+    function formatRupiah(angka) {
+        if (!angka) return '';
+        const number = angka.toString().replace(/[^0-9]/g, '');
+        return 'Rp ' + number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function unformatRupiah(rupiah) {
+        return rupiah.replace(/[^0-9]/g, '');
+    }
+
+    function showSuccessAlert(message) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: message,
+            confirmButtonText: 'OK',
+            customClass: {
+                confirmButton: 'btn btn-success'
             }
-        }
-
-        document.addEventListener('livewire:init', () => {
-            Livewire.on('closeModal', () => $('#modalPengembalianInvestasi').modal('hide'));
         });
+    }
 
-        function formatRupiah(angka) {
-            if (!angka) return '';
-            const number = angka.toString().replace(/[^0-9]/g, '');
-            return 'Rp ' + number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
+    function showErrorAlert(message) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: message,
+            confirmButtonText: 'OK',
+            customClass: {
+                confirmButton: 'btn btn-danger'
+            }
+        });
+    }
 
-        function unformatRupiah(rupiah) {
-            return rupiah.replace(/[^0-9]/g, '');
-        }
+    $('#modalPengembalianInvestasi').on('shown.bs.modal', function() {
+        // Destroy previous instances
+        if (select2Kontrak) $('#id_pengajuan_investasi').select2('destroy');
+        if (flatpickrTanggal) flatpickrTanggal.destroy();
 
-        function showSuccessAlert(message) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: message,
-                confirmButtonText: 'OK',
-                customClass: {
-                    confirmButton: 'btn btn-success'
-                }
-            });
-        }
+        // Init Select2
+        select2Kontrak = $('#id_pengajuan_investasi').select2({
+            dropdownParent: $('#modalPengembalianInvestasi'),
+            placeholder: 'Pilih No Kontrak',
+            allowClear: true,
+            width: '100%'
+        }).on('change', function() {
+            let value = $(this).val();
 
-        function showErrorAlert(message) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: message,
-                confirmButtonText: 'OK',
-                customClass: {
-                    confirmButton: 'btn btn-danger'
-                }
-            });
-        }
+            @this.set('id_pengajuan_investasi', value);
 
-        $('#modalPengembalianInvestasi').on('shown.bs.modal', function() {
-            // Destroy previous instances
-            if (select2Kontrak) $('#id_pengajuan_investasi').select2('destroy');
-            if (flatpickrTanggal) flatpickrTanggal.destroy();
-
-            // Init Select2
-            select2Kontrak = $('#id_pengajuan_investasi').select2({
-                dropdownParent: $('#modalPengembalianInvestasi'),
-                placeholder: 'Pilih No Kontrak',
-                allowClear: true,
-                width: '100%'
-            }).on('change', function() {
-                let value = $(this).val();
-
-                @this.set('id_pengajuan_investasi', value);
-
-                if (value) {
-                    @this.call('loadDataKontrak', value).then(() => {
-                        // Check if dana_tersedia is 0, auto-set dana_pokok_dibayar to 0
-                        let danaTersedia = @this.get('dana_tersedia');
-                        if (danaTersedia == 0) {
-                            $('#dana_pokok_dibayar').val('Rp 0').prop('disabled', true);
-                            $('#dana_pokok_raw').val(0);
-                            @this.set('dana_pokok_dibayar', 0);
-                        } else {
-                            $('#dana_pokok_dibayar').prop('disabled', false);
-                        }
-
-                        // Check if sisa_bunga is 0, auto-set bunga_dibayar to 0
-                        let sisaBunga = @this.get('sisa_bunga');
-                        if (sisaBunga == 0) {
-                            $('#bunga_dibayar').val('Rp 0').prop('disabled', true);
-                            $('#bunga_raw').val(0);
-                            @this.set('bunga_dibayar', 0);
-                        } else {
-                            $('#bunga_dibayar').prop('disabled', false);
-                        }
-                    });
-                } else {
-                    @this.call('resetCalculatedFields');
-                    $('#dana_pokok_dibayar').val('').prop('disabled', false);
-                    $('#bunga_dibayar').val('').prop('disabled', false);
-                }
-            });
-
-            // ✅ NEW: Auto-reload if kontrak already selected when modal opens
-            let currentValue = $('#id_pengajuan_investasi').val();
-            if (currentValue) {
-                @this.call('loadDataKontrak', currentValue).then(() => {
-                    // Handle dana_pokok_dibayar
+            if (value) {
+                @this.call('loadDataKontrak', value).then(() => {
+                    // Check if dana_tersedia is 0, auto-set dana_pokok_dibayar to 0
                     let danaTersedia = @this.get('dana_tersedia');
                     if (danaTersedia == 0) {
                         $('#dana_pokok_dibayar').val('Rp 0').prop('disabled', true);
                         $('#dana_pokok_raw').val(0);
                         @this.set('dana_pokok_dibayar', 0);
+                    } else {
+                        $('#dana_pokok_dibayar').prop('disabled', false);
                     }
 
-                    // Handle bunga_dibayar
+                    // Check if sisa_bunga is 0, auto-set bunga_dibayar to 0
                     let sisaBunga = @this.get('sisa_bunga');
                     if (sisaBunga == 0) {
                         $('#bunga_dibayar').val('Rp 0').prop('disabled', true);
                         $('#bunga_raw').val(0);
                         @this.set('bunga_dibayar', 0);
+                    } else {
+                        $('#bunga_dibayar').prop('disabled', false);
                     }
                 });
+            } else {
+                @this.call('resetCalculatedFields');
+                $('#dana_pokok_dibayar').val('').prop('disabled', false);
+                $('#bunga_dibayar').val('').prop('disabled', false);
             }
+        });
 
-            // Init Flatpickr
-            flatpickrTanggal = flatpickr('#tanggal_pengembalian', {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-                onChange: function(selectedDates, dateStr) {
-                    @this.set('tanggal_pengembalian', dateStr);
+        // ✅ NEW: Auto-reload if kontrak already selected when modal opens
+        let currentValue = $('#id_pengajuan_investasi').val();
+        if (currentValue) {
+            @this.call('loadDataKontrak', currentValue).then(() => {
+                // Handle dana_pokok_dibayar
+                let danaTersedia = @this.get('dana_tersedia');
+                if (danaTersedia == 0) {
+                    $('#dana_pokok_dibayar').val('Rp 0').prop('disabled', true);
+                    $('#dana_pokok_raw').val(0);
+                    @this.set('dana_pokok_dibayar', 0);
+                }
+
+                // Handle bunga_dibayar
+                let sisaBunga = @this.get('sisa_bunga');
+                if (sisaBunga == 0) {
+                    $('#bunga_dibayar').val('Rp 0').prop('disabled', true);
+                    $('#bunga_raw').val(0);
+                    @this.set('bunga_dibayar', 0);
                 }
             });
+        }
 
-            $('#dana_pokok_dibayar').on('input', function() {
-                const rawValue = unformatRupiah($(this).val());
-                $(this).val(formatRupiah(rawValue));
-                $('#dana_pokok_raw').val(rawValue);
-                @this.set('dana_pokok_dibayar', rawValue);
-            });
-
-            $('#bunga_dibayar').on('input', function() {
-                const rawValue = unformatRupiah($(this).val());
-                $(this).val(formatRupiah(rawValue));
-                $('#bunga_raw').val(rawValue);
-                @this.set('bunga_dibayar', rawValue);
-            });
-
-        }).on('hidden.bs.modal', function() {
-            // Reset form
-            if (select2Kontrak) {
-                $('#id_pengajuan_investasi').val(null).trigger('change');
+        // Init Flatpickr
+        flatpickrTanggal = flatpickr('#tanggal_pengembalian', {
+            dateFormat: 'Y-m-d',
+            allowInput: true,
+            onChange: function(selectedDates, dateStr) {
+                @this.set('tanggal_pengembalian', dateStr);
             }
-            // Clear formatted inputs
-            $('#dana_pokok_dibayar').val('');
-            $('#bunga_dibayar').val('');
-
-            @this.call('resetForm');
         });
-    </script>
+
+        $('#dana_pokok_dibayar').on('input', function() {
+            const rawValue = unformatRupiah($(this).val());
+            $(this).val(formatRupiah(rawValue));
+            $('#dana_pokok_raw').val(rawValue);
+            @this.set('dana_pokok_dibayar', rawValue);
+        });
+
+        $('#bunga_dibayar').on('input', function() {
+            const rawValue = unformatRupiah($(this).val());
+            $(this).val(formatRupiah(rawValue));
+            $('#bunga_raw').val(rawValue);
+            @this.set('bunga_dibayar', rawValue);
+        });
+
+    }).on('hidden.bs.modal', function() {
+        // Reset form
+        if (select2Kontrak) {
+            $('#id_pengajuan_investasi').val(null).trigger('change');
+        }
+        // Clear formatted inputs
+        $('#dana_pokok_dibayar').val('');
+        $('#bunga_dibayar').val('');
+
+        @this.call('resetForm');
+    });
+</script>
 @endpush
