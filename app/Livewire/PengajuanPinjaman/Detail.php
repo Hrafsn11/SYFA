@@ -141,8 +141,6 @@ class Detail extends Component
         $this->s_finance = $this->pengajuan->s_finance;
         $this->yang_harus_dibayarkan = $this->pengajuan->yang_harus_dibayarkan;
 
-        // Factoring specific
-        $this->total_nominal_yang_dialihkan = $this->pengajuan->total_nominal_yang_dialihkan;
 
         // Upload
         $this->upload_bukti_transfer = $this->pengajuan->upload_bukti_transfer;
@@ -263,13 +261,6 @@ class Detail extends Component
         return $this->jenis_pembiayaan === JenisPembiayaanEnum::INSTALLMENT;
     }
 
-    /**
-     * Cek apakah jenis pembiayaan adalah Factoring.
-     */
-    public function isFactoring(): bool
-    {
-        return $this->jenis_pembiayaan === JenisPembiayaanEnum::FACTORING;
-    }
 
     /**
      * Cek apakah tombol approval tertentu harus ditampilkan.

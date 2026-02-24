@@ -45,15 +45,12 @@ class Create extends Component
     public $s_finance;
     public $total_pembayaran_installment;
     public $bayar_per_bulan;
+    public $title;
 
-    
     public $pengajuan = null;
     public $sumber_eksternal;
-    public $title;
     public $invoice_financing_data = [];
-    public $po_financing_data = [];
     public $installment_data = [];
-    public $factoring_data = [];
     public $list_tenor_pembayaran;
 
     public function mount($id = null)

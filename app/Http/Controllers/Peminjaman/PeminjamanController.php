@@ -186,32 +186,6 @@ class PeminjamanController extends Controller
             $rules['sfinance']             = 'nullable|numeric';
             $rules['total_pembayaran']     = 'nullable|numeric';
             $rules['yang_harus_dibayarkan'] = 'nullable|numeric';
-        } elseif ($jenisPembiayaan === 'PO Financing') {
-            $rules['details']                   = 'required|array|min:1';
-            $rules['id_instansi']               = 'nullable';
-            $rules['no_kontrak']                = 'nullable|string';
-            $rules['lampiran_sid']              = 'nullable|file|mimes:pdf,docx,xls,xlsx,png,jpg,jpeg,rar,zip|max:2048';
-            $rules['nilai_kol']                 = 'nullable|string';
-            $rules['sumber_pembiayaan']         = 'nullable';
-            $rules['tujuan_pembiayaan']         = 'nullable|string';
-            $rules['total_pinjaman']            = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'required|date_format:d/m/Y';
-            $rules['total_bunga']               = 'nullable';
-            $rules['rencana_tgl_pembayaran']    = 'required|date_format:d/m/Y';
-            $rules['pembayaran_total']          = 'nullable';
-        } elseif ($jenisPembiayaan === 'Factoring') {
-            $rules['details']                   = 'required|array|min:1';
-            $rules['lampiran_sid']              = 'nullable|file|mimes:pdf,docx,xls,xlsx,png,jpg,jpeg,rar,zip|max:2048';
-            $rules['nilai_kol']                 = 'nullable|string';
-            $rules['id_instansi']               = 'nullable';
-            $rules['sumber_pembiayaan']         = 'nullable';
-            $rules['tujuan_pembiayaan']         = 'nullable|string';
-            $rules['total_pinjaman']            = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'required|date_format:d/m/Y';
-            $rules['total_bunga']               = 'nullable';
-            $rules['rencana_tgl_pembayaran']    = 'required|date_format:d/m/Y';
-            $rules['pembayaran_total']          = 'nullable';
-            $rules['total_nominal_yang_dialihkan'] = 'nullable';
         }
 
         $formDataInvoice = $request->input('form_data_invoice', $request->input('details', []));
@@ -233,7 +207,7 @@ class PeminjamanController extends Controller
             $validated['id_instansi']        = null;
             $validated['sumber_pembiayaan']  = 'Internal';
             $validated['persentase_bunga']   = 10;
-        } elseif (in_array($jenisPembiayaan, ['Invoice Financing', 'PO Financing', 'Factoring'])) {
+        } elseif ($jenisPembiayaan === 'Invoice Financing') {
             $validated['id_instansi']        = null;
             $validated['sumber_pembiayaan']  = 'Internal';
             $validated['persentase_bunga']   = 2;
@@ -382,8 +356,8 @@ class PeminjamanController extends Controller
             }
 
             if ($dataPengajuanPeminjaman['jenis_pembiayaan'] === 'Installment') {
-                $dataPengajuanPeminjaman['pps']                   = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.40;
-                $dataPengajuanPeminjaman['s_finance']             = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.60;
+                $dataPengajuanPeminjaman['pps']                   = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.60;
+                $dataPengajuanPeminjaman['s_finance']             = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.40;
                 $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = (float) ($dataPengajuanPeminjaman['pembayaran_total'] / $dataPengajuanPeminjaman['tenor_pembayaran']);
                 $dataPengajuanPeminjaman['harapan_tanggal_pencairan'] = null;
                 $dataPengajuanPeminjaman['rencana_tgl_pembayaran']    = null;
@@ -442,9 +416,6 @@ class PeminjamanController extends Controller
         }
     }
 
-    /**
-     * Toggle active/non-active status (dipanggil oleh JS fetch di halaman index).
-     */
     public function toggleActive($id)
     {
         try {
@@ -502,20 +473,6 @@ class PeminjamanController extends Controller
                 'dokumen_bast'    => $getFile('dokumen_bast'),
                 'dokumen_lainnya' => $getFile('dokumen_lainnya'),
             ]);
-        } elseif ($jenis === 'PO Financing') {
-            BuktiPeminjaman::create($base + [
-                'no_kontrak'      => $det['no_kontrak']  ?? null,
-                'nama_client'     => $det['nama_client'] ?? null,
-                'nilai_invoice'   => $clean($det['nilai_invoice']  ?? null),
-                'nilai_pinjaman'  => $clean($det['nilai_pinjaman'] ?? null),
-                'nilai_bunga'     => $clean($det['nilai_bunga']    ?? null),
-                'kontrak_date'    => $det['kontrak_date'] ?? null,
-                'due_date'        => $det['due_date']     ?? null,
-                'dokumen_kontrak' => $getFile('dokumen_kontrak'),
-                'dokumen_so'      => $getFile('dokumen_so'),
-                'dokumen_bast'    => $getFile('dokumen_bast'),
-                'dokumen_lainnya' => $getFile('dokumen_lainnya'),
-            ]);
         } elseif ($jenis === 'Installment') {
             BuktiPeminjaman::create($base + [
                 'no_invoice'      => $det['no_invoice']  ?? null,
@@ -525,20 +482,6 @@ class PeminjamanController extends Controller
                 'invoice_date'    => $det['invoice_date'] ?? null,
                 'dokumen_invoice' => $getFile('dokumen_invoice'),
                 'dokumen_lainnya' => $getFile('dokumen_lainnya'),
-            ]);
-        } elseif ($jenis === 'Factoring') {
-            BuktiPeminjaman::create($base + [
-                'no_kontrak'      => $det['no_kontrak']  ?? null,
-                'nama_client'     => $det['nama_client'] ?? null,
-                'nilai_invoice'   => $clean($det['nilai_invoice']  ?? null),
-                'nilai_pinjaman'  => $clean($det['nilai_pinjaman'] ?? null),
-                'nilai_bunga'     => $clean($det['nilai_bunga']    ?? null),
-                'kontrak_date'    => $det['kontrak_date'] ?? null,
-                'due_date'        => $det['due_date']     ?? null,
-                'dokumen_invoice' => $getFile('dokumen_invoice'),
-                'dokumen_kontrak' => $getFile('dokumen_kontrak'),
-                'dokumen_so'      => $getFile('dokumen_so'),
-                'dokumen_bast'    => $getFile('dokumen_bast'),
             ]);
         }
     }

@@ -36,7 +36,7 @@
         
         {{-- Tanggal --}}
         <div class="row">
-            <div class="col-md-6">
+            <div class="{{ $jenis_pembiayaan === 'Invoice Financing' ? 'col-md-6' : 'col-md-12' }}">
                 <label class="form-label text-muted small">Tanggal Pencairan</label>
                 <div class="input-group">
                     <input type="text" class="form-control" 
@@ -46,6 +46,8 @@
                     </span>
                 </div>
             </div>
+            
+            @if($jenis_pembiayaan === 'Invoice Financing')
             <div class="col-md-6">
                 <label class="form-label text-muted small">Tanggal Pencairan yang Diharapkan</label>
                 <div class="input-group">
@@ -56,6 +58,7 @@
                     </span>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

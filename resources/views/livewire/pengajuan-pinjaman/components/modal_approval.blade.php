@@ -38,6 +38,7 @@
     background-color: #fff;
     border-radius: 0.5rem;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    overflow: visible !important;
 }
 
 .approval-modal-overlay .modal-header {
@@ -65,8 +66,7 @@
 
 .approval-modal-overlay .modal-body {
     padding: 1.5rem;
-    max-height: calc(100vh - 200px);
-    overflow-y: auto;
+    overflow: visible !important;
 }
 
 .approval-modal-overlay .modal-footer {
@@ -137,7 +137,7 @@
                     
                     <div class="row">
                         {{-- Persentase Bunga --}}
-                        <div class="col-md-4 mb-3">
+                        <div class="{{ $jenis_pembiayaan === 'Invoice Financing' ? 'col-md-4' : 'col-md-6' }} mb-3">
                             <label class="form-label">Persentase Bunga (%) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" 
                                    wire:model="persentase_bunga"
@@ -146,6 +146,7 @@
                             @error('persentase_bunga') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
                         
+                        @if($jenis_pembiayaan === 'Invoice Financing')
                         {{-- Harapan Tanggal Pencairan (read-only, from pengajuan) --}}
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Harapan Tanggal Pencairan</label>
@@ -153,9 +154,10 @@
                                    value="{{ $harapan_tanggal_pencairan ? \Carbon\Carbon::parse($harapan_tanggal_pencairan)->format('d/m/Y') : '-' }}"
                                    disabled readonly>
                         </div>
+                        @endif
                         
                         {{-- Tanggal Pencairan --}}
-                        <div class="col-md-4 mb-3">
+                        <div class="{{ $jenis_pembiayaan === 'Invoice Financing' ? 'col-md-4' : 'col-md-6' }} mb-3">
                             <label class="form-label">Tanggal Pencairan <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="text" 

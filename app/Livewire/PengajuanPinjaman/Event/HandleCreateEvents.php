@@ -24,6 +24,8 @@ trait HandleCreateEvents
         if (property_exists($this, 'form_data_invoice')) {
             $this->form_data_invoice = $formDataInvoice;
         }
+
+        $this->recalculateInstallment();
     }
 
     public function updatedLampiranSID($lampiranSID)
@@ -45,6 +47,47 @@ trait HandleCreateEvents
         
         // Reset form data invoice ketika jenis pembiayaan berubah
         $this->form_data_invoice = [];
+        $this->recalculateInstallment();
+    }
+
+    public function updatedTenorPembayaran($value)
+    {
+        $this->recalculateInstallment();
+    }
+
+    /**
+     * Recalculate all installment fields based on current invoice data
+     */
+    private function recalculateInstallment(): void
+    {
+        if ($this->jenis_pembiayaan !== \App\Enums\JenisPembiayaanEnum::INSTALLMENT) {
+            return;
+        }
+
+        // 1. Total Pinjaman = SUM of all nilai_invoice
+        $rawTotalPinjaman = collect($this->form_data_invoice ?? [])
+            ->sum(fn($row) => (int) str_replace(['.', ',', 'Rp', ' '], '', $row['nilai_invoice'] ?? 0));
+        
+        $this->nominal_pinjaman = rupiahFormatter($rawTotalPinjaman);
+
+        // 2. Persentase Bunga (Debit Cost) = 10% of Total Pinjaman
+        $rawPersentaseBunga = $rawTotalPinjaman * 0.10;
+        $this->pps_debit = rupiahFormatter($rawPersentaseBunga);
+
+        // 3. PPS = 60% of Persentase Bunga
+        $this->pps_percentage = rupiahFormatter($rawPersentaseBunga * 0.60);
+
+        // 4. S Finance = 40% of Persentase Bunga
+        $this->s_finance = rupiahFormatter($rawPersentaseBunga * 0.40);
+
+        // 5. Total Pembayaran = Total Pinjaman + Persentase Bunga
+        $rawTotalPembayaran = $rawTotalPinjaman + $rawPersentaseBunga;
+        $this->total_pembayaran_installment = rupiahFormatter($rawTotalPembayaran);
+
+        // 6. Yang harus dibayarkan per bulan = Total Pembayaran / Tenor
+        $tenor = (int) ($this->tenor_pembayaran ?? 0);
+        $rawBayarPerBulan = $tenor > 0 ? round($rawTotalPembayaran / $tenor) : 0;
+        $this->bayar_per_bulan = rupiahFormatter($rawBayarPerBulan);
     }
 
 }
