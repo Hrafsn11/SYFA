@@ -65,9 +65,6 @@ class PengembalianPinjamanController extends Controller
                     if ($jenisPembiayaan === 'Invoice Financing') {
                         $labelField = $b->no_invoice;
                         $nilaiAsli = (float) $b->nilai_pinjaman;
-                    } elseif (in_array($jenisPembiayaan, ['PO Financing', 'Factoring'])) {
-                        $labelField = $b->no_kontrak;
-                        $nilaiAsli = (float) $b->nilai_pinjaman;
                     } else {
                         $labelField = $b->no_invoice ?? $b->no_kontrak;
                         $nilaiAsli = (float) $b->nilai_pinjaman;

@@ -21,30 +21,36 @@ class ContractNumberService
      */
     public static function generate(string $kodePerusahaan, string $jenisPembiayaan, ?string $tanggal = null): string
     {
-        $lastContract = PengajuanPeminjaman::where('jenis_pembiayaan', $jenisPembiayaan)
-            ->whereNotNull('no_kontrak')
-            ->where('no_kontrak', '!=', '')
-            ->orderBy('created_at', 'DESC')
-            ->lockForUpdate()
-            ->first();
-
-        $runningNumber = 1;
-
-        if ($lastContract && $lastContract->no_kontrak) {
-            $parts = explode('-', $lastContract->no_kontrak);
-
-            if (count($parts) >= 2) {
-                $lastNumber = (int) $parts[1];
-                $runningNumber = $lastNumber + 1;
-            }
+        if (empty($kodePerusahaan)) {
+            throw new \InvalidArgumentException(
+                'Kode perusahaan debitur tidak boleh kosong untuk generate nomor kontrak.'
+            );
         }
 
-        $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
-        $formattedDate = $date->format('dmY');
+        return DB::transaction(function () use ($kodePerusahaan, $jenisPembiayaan, $tanggal) {
+            $lastContract = PengajuanPeminjaman::where('jenis_pembiayaan', $jenisPembiayaan)
+                ->whereNotNull('no_kontrak')
+                ->where('no_kontrak', '!=', '')
+                ->orderBy('created_at', 'DESC')
+                ->lockForUpdate()
+                ->first();
 
-        $nomorKontrak = strtoupper($kodePerusahaan) . '-' . $runningNumber . '-' . $formattedDate;
+            $runningNumber = 1;
 
-        return $nomorKontrak;
+            if ($lastContract && $lastContract->no_kontrak) {
+                $parts = explode('-', $lastContract->no_kontrak);
+
+                if (count($parts) >= 2) {
+                    $lastNumber = (int) $parts[1];
+                    $runningNumber = $lastNumber + 1;
+                }
+            }
+
+            $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
+            $formattedDate = $date->format('dmY');
+
+            return strtoupper($kodePerusahaan) . '-' . $runningNumber . '-' . $formattedDate;
+        });
     }
 
     /**
@@ -90,46 +96,28 @@ class ContractNumberService
      */
     public static function generateInvestasi(string $kodePerusahaan, string $jenisDeposito, ?string $tanggal = null): string
     {
-        // Determine which table to check based on jenisDeposito
-        if ($jenisDeposito === 'Finlog') {
-            // For SFinlog - check only SFinlog table
-            $allContracts = \App\Models\PengajuanInvestasiFinlog::whereNotNull('nomor_kontrak')
-                ->where('nomor_kontrak', '!=', '')
-                ->lockForUpdate()
-                ->get();
-        } else {
-            // For SFinance (Reguler/Khusus) - check only SFinance table
-            $allContracts = PengajuanInvestasi::whereNotNull('nomor_kontrak')
-                ->where('nomor_kontrak', '!=', '')
-                ->lockForUpdate()
-                ->get();
-        }
+        return DB::transaction(function () use ($kodePerusahaan, $jenisDeposito, $tanggal) {
+            $extractNumber = "MAX(CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(nomor_kontrak, '-', 2), '-', -1) AS UNSIGNED))";
 
-        $runningNumber = 1;
-
-        if ($allContracts->isNotEmpty()) {
-            $maxNumber = 0;
-
-            foreach ($allContracts as $contract) {
-                $parts = explode('-', $contract->nomor_kontrak);
-
-                // Format: KODE-NUMBER-DATE
-                if (count($parts) >= 3) {
-                    $number = (int) $parts[1];
-                    if ($number > $maxNumber) {
-                        $maxNumber = $number;
-                    }
-                }
+            if ($jenisDeposito === 'Finlog') {
+                $maxNumber = \App\Models\PengajuanInvestasiFinlog::whereNotNull('nomor_kontrak')
+                    ->where('nomor_kontrak', '!=', '')
+                    ->lockForUpdate()
+                    ->selectRaw("{$extractNumber} as max_num")
+                    ->value('max_num') ?? 0;
+            } else {
+                $maxNumber = PengajuanInvestasi::whereNotNull('nomor_kontrak')
+                    ->where('nomor_kontrak', '!=', '')
+                    ->lockForUpdate()
+                    ->selectRaw("{$extractNumber} as max_num")
+                    ->value('max_num') ?? 0;
             }
 
-            $runningNumber = $maxNumber + 1;
-        }
+            $runningNumber = ((int) $maxNumber) + 1;
+            $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
+            $formattedDate = $date->format('dmY');
 
-        $date = $tanggal ? Carbon::parse($tanggal) : Carbon::now();
-        $formattedDate = $date->format('dmY');
-
-        $nomorKontrak = strtoupper($kodePerusahaan) . '-' . $runningNumber . '-' . $formattedDate;
-
-        return $nomorKontrak;
+            return strtoupper($kodePerusahaan) . '-' . $runningNumber . '-' . $formattedDate;
+        });
     }
 }

@@ -51,6 +51,7 @@ class PengajuanPeminjaman extends Model
         'updated_by',
         'upload_bukti_transfer',
         'no_kontrak',
+        'is_active',
     ];
 
     protected $casts = [
@@ -72,6 +73,8 @@ class PengajuanPeminjaman extends Model
         'pembayaran_total' => 'decimal:2',
         'tenor_pembayaran' => 'integer',
         'persentase_bunga' => 'decimal:2',
+        'rencana_tgl_pembayaran' => 'date',
+        'total_nominal_yang_dialihkan' => 'decimal:2',
     ];
 
     public function invoices()

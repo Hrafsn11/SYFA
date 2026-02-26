@@ -18,13 +18,13 @@ class RiwayatTagihanSfinance extends DataTableComponent
     {
         $this->setPrimaryKey('id_pengajuan_peminjaman')
             ->setAdditionalSelects(['pengajuan_peminjaman.id_pengajuan_peminjaman'])
-            ->setDefaultSort('created_at', 'desc')
-            ->setTableAttributes(['class' => 'table-responsive text-nowrap'])
             ->setPerPageAccepted([10, 25, 50, 100])
             ->setPerPage(10)
+            ->setDefaultSort('created_at', 'desc')
+            ->setSearchStatus(true)
             ->setColumnSelectStatus(true)
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari debitur, objek jaminan...')
+            ->setFiltersEnabled()
+            ->setFiltersVisibilityStatus(true)
             ->setEmptyMessage('Tidak ada data debitur piutang');
     }
 
@@ -63,7 +63,7 @@ class RiwayatTagihanSfinance extends DataTableComponent
                 DB::raw('(SELECT COALESCE(MAX(hari_keterlambatan), 0) FROM report_pengembalian WHERE nomor_peminjaman = pengajuan_peminjaman.nomor_peminjaman) as telat_hari'),
             ])
             ->leftJoin('master_debitur_dan_investor', 'pengajuan_peminjaman.id_debitur', '=', 'master_debitur_dan_investor.id_debitur')
-           
+
             ->leftJoin(DB::raw('(
                 SELECT bp1.* 
                 FROM bukti_peminjaman bp1
@@ -277,9 +277,9 @@ class RiwayatTagihanSfinance extends DataTableComponent
             Column::make('Sisa Bunga', 'kurang_bayar_bunga')
                 ->label(function ($row) {
                     // Prioritas: sisa_bunga dari pengajuan (termasuk denda), lalu dari pengembalian, fallback ke total_bunga
-                    $sisaBagiHasil = $row->sisa_bunga_pengajuan 
-                        ?? $row->kurang_bayar_bunga 
-                        ?? $row->total_bunga 
+                    $sisaBagiHasil = $row->sisa_bunga_pengajuan
+                        ?? $row->kurang_bayar_bunga
+                        ?? $row->total_bunga
                         ?? 0;
                     $hasDenda = ($row->denda_keterlambatan ?? 0) > 0;
                     $class = $hasDenda ? 'text-warning fw-semibold' : '';
@@ -294,21 +294,21 @@ class RiwayatTagihanSfinance extends DataTableComponent
                     $telatHariRaw = $row->telat_hari ?? '0';
                     // Extract angka dari string
                     $telatHari = intval(preg_replace('/[^0-9]/', '', $telatHariRaw));
-                    
+
                     // Cek juga berdasarkan tanggal_jatuh_tempo jika ada
                     if ($row->tanggal_jatuh_tempo) {
                         $jatuhTempo = \Carbon\Carbon::parse($row->tanggal_jatuh_tempo);
                         $today = \Carbon\Carbon::today();
-                        
+
                         // Jika belum melewati tanggal jatuh tempo, tidak telat
                         if ($today->lte($jatuhTempo)) {
                             return '<span class="badge bg-success">0 hari</span>';
                         }
-                        
+
                         // Hitung hari keterlambatan dari tanggal jatuh tempo
                         $telatHari = $today->diffInDays($jatuhTempo);
                     }
-                    
+
                     $badgeClass = $telatHari > 0 ? 'danger' : 'success';
                     return '<span class="badge bg-' . $badgeClass . '">' . $telatHari . ' hari</span>';
                 })

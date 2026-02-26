@@ -45,15 +45,12 @@ class Create extends Component
     public $s_finance;
     public $total_pembayaran_installment;
     public $bayar_per_bulan;
+    public $title;
 
-    
     public $pengajuan = null;
     public $sumber_eksternal;
-    public $title;
     public $invoice_financing_data = [];
-    public $po_financing_data = [];
     public $installment_data = [];
-    public $factoring_data = [];
     public $list_tenor_pembayaran;
 
     public function mount($id = null)
@@ -72,21 +69,26 @@ class Create extends Component
             ['value' => '9', 'label' => '9 Bulan'],
             ['value' => '12', 'label' => '12 Bulan']
         ];
-    }
 
-    public function render()
-    {
         $masterDebiturDanInvestor = MasterDebiturDanInvestor::where('email', auth()->user()->email)
             ->where('flagging', 'tidak')
             ->where('status', 'active')
             ->with('kol')
             ->first();
-        
+
+        if (!$masterDebiturDanInvestor) {
+            abort(403, 'Data debitur tidak ditemukan untuk akun ini.');
+        }
+
         $this->nama_bank = $masterDebiturDanInvestor->nama_bank;
         $this->no_rekening = $masterDebiturDanInvestor->no_rek;
-        $this->nilai_kol = $masterDebiturDanInvestor->kol->kol;
+        $this->nilai_kol = $masterDebiturDanInvestor->kol?->kol;
 
         if ($this->id !== null) $this->edit();
+    }
+
+    public function render()
+    {
         return view('livewire.pengajuan-pinjaman.create');
     }
 

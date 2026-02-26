@@ -33,17 +33,22 @@ class InvoiceForm extends Component
         $dokumen_kontrak_current = null,
         $dokumen_so_current = null,
         $dokumen_bast_current = null,
-        $dokumen_lainnnya_current = null,
+        $dokumen_lainnya_current = null,
         $nilai_bunga,
         $persentase_bunga = 0;
 
-    public function render()
+    public function mount(): void
     {
         $this->prepareFormData();
         $this->prepareFormInvoice();
 
-        if ($this->pengajuan !== null) $this->edit();
+        if ($this->pengajuan !== null) {
+            $this->edit();
+        }
+    }
 
+    public function render(): \Illuminate\View\View
+    {
         return view('livewire.pengajuan-pinjaman.components.modal_create');
     }
 
@@ -69,7 +74,7 @@ class InvoiceForm extends Component
                 'dokumen_kontrak', 
                 'dokumen_so', 
                 'dokumen_bast', 
-                'dokumen_lainnnya'
+                'dokumen_lainnya'
             ] as $dokumen) {
                 if (array_key_exists($dokumen, $formData) && is_null($formData[$dokumen])) {
                     $formData[$dokumen] = $this->form_data_invoice[$this->index_data_invoice][$dokumen];
@@ -102,7 +107,7 @@ class InvoiceForm extends Component
                 'dokumen_kontrak', 
                 'dokumen_so', 
                 'dokumen_bast', 
-                'dokumen_lainnnya'
+                'dokumen_lainnya'
             ] as $dokumen) {
                 if (
                     array_key_exists($dokumen, $value) && 

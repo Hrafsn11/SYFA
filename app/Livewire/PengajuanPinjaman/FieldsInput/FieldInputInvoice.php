@@ -21,9 +21,7 @@ trait FieldInputInvoice
     {
         return match ($this->jenis_pembiayaan) {
             'Invoice Financing' => $this->prepareInvoiceFinancingData(),
-            'PO Financing' => $this->preparePOFinancingData(),
             'Installment' => $this->prepareInstallmentData(),
-            'Factoring' => $this->prepareFactoringData(),
             default => $this->prepareDefaultData(),
         };
     }
@@ -52,29 +50,6 @@ trait FieldInputInvoice
     }
 
     /**
-     * Menyiapkan data untuk PO Financing
-     */
-    private function preparePOFinancingData(): array
-    {
-        $nilaiPinjaman = rupiahToRawValue($this->nilai_pinjaman ?? 0);
-        $nilaiBagiHasil = $this->calculateNilaiBagiHasilFromPinjaman($nilaiPinjaman);
-
-        return [
-            'no_kontrak' => $this->no_kontrak ?? '',
-            'nama_client' => $this->nama_client ?? '',
-            'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
-            'nilai_pinjaman' => $nilaiPinjaman,
-            'nilai_bunga' => $nilaiBagiHasil,
-            'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
-            'due_date' => parseCarbonDate($this->due_date) ?? '',
-            'dokumen_kontrak' => $this->dokumen_kontrak,
-            'dokumen_so' => $this->dokumen_so,
-            'dokumen_bast' => $this->dokumen_bast,
-            'dokumen_lainnya' => $this->dokumen_lainnya,
-        ];
-    }
-
-    /**
      * Menyiapkan data untuk Installment
      */
     private function prepareInstallmentData(): array
@@ -83,33 +58,10 @@ trait FieldInputInvoice
             'no_invoice' => $this->no_invoice ?? '',
             'nama_client' => $this->nama_client ?? '',
             'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
-            'invoice_date' => parseCarbonDate($this->invoice_date) ?? '',
+            'invoice_date' => parseCarbonDate($this->invoice_date)?->format('d/m/Y') ?? '',
             'nama_barang' => $this->nama_barang ?? '',
             'dokumen_invoice' => $this->dokumen_invoice,
             'dokumen_lainnya' => $this->dokumen_lainnya,
-        ];
-    }
-
-    /**
-     * Menyiapkan data untuk Factoring
-     */
-    private function prepareFactoringData(): array
-    {
-        $nilaiPinjaman = rupiahToRawValue($this->nilai_pinjaman ?? 0);
-        $nilaiBagiHasil = $this->calculateNilaiBagiHasilFromPinjaman($nilaiPinjaman);
-
-        return [
-            'no_kontrak' => $this->no_kontrak ?? '',
-            'nama_client' => $this->nama_client ?? '',
-            'nilai_invoice' => rupiahToRawValue($this->nilai_invoice ?? 0),
-            'nilai_pinjaman' => $nilaiPinjaman,
-            'nilai_bunga' => $nilaiBagiHasil,
-            'kontrak_date' => parseCarbonDate($this->kontrak_date)?->format('d/m/Y') ?? '',
-            'due_date' => parseCarbonDate($this->due_date) ?? '',
-            'dokumen_invoice' => $this->dokumen_invoice,
-            'dokumen_kontrak' => $this->dokumen_kontrak,
-            'dokumen_so' => $this->dokumen_so,
-            'dokumen_bast' => $this->dokumen_bast,
         ];
     }
 
@@ -184,15 +136,11 @@ trait FieldInputInvoice
     private function prepareFormData()
     {
         $this->invoice_financing_data = [];
-        $this->po_financing_data = [];
         $this->installment_data = [];
-        $this->factoring_data = [];
 
         $modalTitle = [
             'Invoice Financing' => 'Tambah Invoice Financing',
-            'PO Financing' => 'Tambah PO Financing',
             'Installment' => 'Tambah Invoice Penjamin',
-            'Factoring' => 'Tambah Kontrak Penjamin',
         ];
 
         $this->modal_title = $modalTitle[$this->jenis_pembiayaan];

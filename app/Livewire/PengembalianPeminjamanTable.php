@@ -22,20 +22,14 @@ class PengembalianPeminjamanTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('ulid')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari pengembalian pinjaman...')
-            ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('created_at', 'desc')
-            ->setTableAttributes(['class' => 'table table-hover'])
-            ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari pengembalian pinjaman...'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-            ->setBulkActionsDisabled();
+            ->setEmptyMessage('Tidak ada data pengembalian pinjaman');
     }
 
     public function filters(): array
@@ -82,7 +76,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
     public function builder(): Builder
     {
         $user = Auth::user();
-        
+
         $hasUnrestrictedRole = false;
         if ($user) {
             if ($user->hasRole('super-admin')) {
@@ -235,7 +229,7 @@ class PengembalianPeminjamanTable extends DataTableComponent
                 ->html(),
 
             Column::make('Aksi')
-                ->label(fn ($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
+                ->label(fn($row) => view('livewire.pengembalian-pinjaman.partials.table-actions', [
                     'route_detail' => route('pengembalian.detail', ['id' => $row->ulid])
                 ])->render())
                 ->html()

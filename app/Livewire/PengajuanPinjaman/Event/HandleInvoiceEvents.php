@@ -20,7 +20,7 @@ trait HandleInvoiceEvents
                 'dokumen_kontrak', 
                 'dokumen_so', 
                 'dokumen_bast', 
-                'dokumen_lainnnya'
+                'dokumen_lainnya'
             ])) {
                 $this->{$key . '_current'} = $value;
                 continue;

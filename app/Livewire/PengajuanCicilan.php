@@ -53,7 +53,7 @@ class PengajuanCicilan extends Component
     // Additional data
     public $debiturList = [];
     public $peminjamanList = [];
-    public $availableJenisPembiayaan = ['Invoice Financing', 'PO Financing', 'Installment', 'Factoring'];
+    public $availableJenisPembiayaan = ['Invoice Financing', 'Installment'];
 
     public function mount()
     {

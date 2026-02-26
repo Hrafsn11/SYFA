@@ -6,11 +6,11 @@
                     <h4 class="fw-bold">Penyaluran Dana Investasi</h4>
 
                     @can('penyaluran_dana_investasi.add')
-                        <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
-                            id="btnTambahPenyaluran" data-bs-toggle="modal" data-bs-target="#modalPenyaluranDanaInvestasi">
-                            <i class="fa-solid fa-plus"></i>
-                            <span>Tambah Penyaluran</span>
-                        </button>
+                    <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-3"
+                        id="btnTambahPenyaluran" data-bs-toggle="modal" data-bs-target="#modalPenyaluranDanaInvestasi">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Penyaluran</span>
+                    </button>
                     @endcan
 
                 </div>
@@ -18,9 +18,10 @@
         </div>
 
         <div class="card">
-            <div class="card-body p-0">
-                <div class="card-datatable">
-                        <livewire:penyaluran-dana-investasi.penyaluran-dana-investasi-table />
+            <div class="card-body mt-3">
+                <livewire:penyaluran-dana-investasi.penyaluran-dana-investasi-table />
+            </div>
+        </div>
 
         @include('livewire.penyaluran-dana-investasi.components.modal')
 
@@ -50,85 +51,87 @@
 </div>
 
 @push('scripts')
-    <script>
+<script>
     let nilaiInvestasiMax = 0;
-        const canInputPengembalian = @json(auth()->user()->can('penyaluran_dana_investasi.input_pengembalian'));
+    const canInputPengembalian = @json(auth() -> user() -> can('penyaluran_dana_investasi.input_pengembalian'));
 
-        function afterAction(payload) {
-            window.location.reload();
-        }
+    function afterAction(payload) {
+        Livewire.dispatch('refreshPenyaluranDanaInvestasiTable');
+        $('.modal').modal('hide');
+    }
 
-        function formatRupiah(angka) {
-            if (!angka) return '';
-            const number = angka.toString().replace(/[^0-9]/g, '');
-            return 'Rp ' + number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
+    function formatRupiah(angka) {
+        if (!angka) return '';
+        const number = angka.toString().replace(/[^0-9]/g, '');
+        return 'Rp ' + number.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
 
-        function unformatRupiah(rupiah) {
-            return rupiah.replace(/[^0-9]/g, '');
-        }
+    function unformatRupiah(rupiah) {
+        return rupiah.replace(/[^0-9]/g, '');
+    }
 
-        $(document).ready(function () {
-            // Initialize flatpickr
-            const flatpickrPengiriman = flatpickr("#tanggal_pengiriman_dana", {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                minDate: "today",
-                onChange: (selectedDates, dateStr) => @this.set('tanggal_pengiriman_dana', dateStr)
-                });
+    $(document).ready(function() {
+        // Initialize flatpickr
+        const flatpickrPengiriman = flatpickr("#tanggal_pengiriman_dana", {
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            minDate: "today",
+            onChange: (selectedDates, dateStr) => @this.set('tanggal_pengiriman_dana', dateStr)
+        });
 
-            const flatpickrPengembalian = flatpickr("#tanggal_pengembalian", {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                minDate: "today",
-                onChange: (selectedDates, dateStr) => @this.set('tanggal_pengembalian', dateStr)
-                });
+        const flatpickrPengembalian = flatpickr("#tanggal_pengembalian", {
+            dateFormat: "Y-m-d",
+            allowInput: true,
+            minDate: "today",
+            onChange: (selectedDates, dateStr) => @this.set('tanggal_pengembalian', dateStr)
+        });
 
-            // Initialize select2
-            $('#id_pengajuan_investasi').select2({
-                dropdownParent: $('#modalPenyaluranDanaInvestasi'),
-                width: '100%',
-                placeholder: 'Pilih No Kontrak',
-                allowClear: true
-            }).on('change', function () {
-                const selectedOption = $(this).find('option:selected');
-                const sisaDana = parseFloat(selectedOption.data('sisa-dana')) || 0;
-                const nilaiInvestasi = selectedOption.data('nilai-investasi');
-                nilaiInvestasiMax = sisaDana;
-                if (sisaDana && nilaiInvestasi) {
-                    $('#nilai-investasi-info').html(`
-                        <div class="alert alert-info py-2 mt-2">
-                            <small>
-                                <i class="ti ti-info-circle me-1"></i>
-                                Nilai Investasi: <strong>Rp ${parseFloat(nilaiInvestasi).toLocaleString('id-ID')}</strong> |
-                                Sisa Dana Tersedia: <strong>Rp ${sisaDana.toLocaleString('id-ID')}</strong>
-                            </small>
-                        </div>
-                    `);
-                } else {
-                    $('#nilai-investasi-info').html('');
-                }
-                @this.set('id_pengajuan_investasi', $(this).val());
-            });
+        // Initialize select2
+        $('#id_pengajuan_investasi').select2({
+            dropdownParent: $('#modalPenyaluranDanaInvestasi'),
+            width: '100%',
+            placeholder: 'Pilih No Kontrak',
+            allowClear: true
+        }).on('change', function() {
+            const selectedOption = $(this).find('option:selected');
+            const sisaDana = parseFloat(selectedOption.data('sisa-dana')) || 0;
+            const nilaiInvestasi = selectedOption.data('nilai-investasi');
 
-            $('#id_debitur').select2({
-                dropdownParent: $('#modalPenyaluranDanaInvestasi'),
-                width: '100%',
-                placeholder: 'Pilih Nama Perusahaan',
-                allowClear: true
-            }).on('change', function () {
-                @this.set('id_debitur', $(this).val());
-            });
+            nilaiInvestasiMax = sisaDana;
 
-            // Handle nominal input
-            $('#nominal_yang_disalurkan').on('input', function () {
-                const rawValue = unformatRupiah($(this).val());
-                $(this).val(formatRupiah(rawValue));
-                $('#nominal_raw').val(rawValue);
-                @this.set('nominal_yang_disalurkan', rawValue);
+            if (sisaDana && nilaiInvestasi) {
+                $('#nilai-investasi-info').html(`
+                                <div class="alert alert-info py-2 mt-2">
+                                    <small>
+                                        <strong>Nilai Investasi:</strong> Rp ${parseFloat(nilaiInvestasi).toLocaleString('id-ID')}<br>
+                                        <strong class="text-success">Sisa Dana Tersedia:</strong> Rp ${sisaDana.toLocaleString('id-ID')}
+                                    </small>
+                                </div>
+                            `);
+            } else {
+                $('#nilai-investasi-info').html('');
+            }
+            @this.set('id_pengajuan_investasi', $(this).val());
+        });
 
-                if (nilaiInvestasiMax > 0 && parseFloat(rawValue) > nilaiInvestasiMax) {
-                    $('#nilai-investasi-info').html(`
+        $('#id_debitur').select2({
+            dropdownParent: $('#modalPenyaluranDanaInvestasi'),
+            width: '100%',
+            placeholder: 'Pilih Nama Perusahaan',
+            allowClear: true
+        }).on('change', function() {
+            @this.set('id_debitur', $(this).val());
+        });
+
+        // Handle nominal input
+        $('#nominal_yang_disalurkan').on('input', function() {
+            const rawValue = unformatRupiah($(this).val());
+            $(this).val(formatRupiah(rawValue));
+            $('#nominal_raw').val(rawValue);
+            @this.set('nominal_yang_disalurkan', rawValue);
+
+            if (nilaiInvestasiMax > 0 && parseFloat(rawValue) > nilaiInvestasiMax) {
+                $('#nilai-investasi-info').html(`
                                 <div class="alert alert-danger py-2 mt-2">
                                     <small>
                                         <i class="ti ti-alert-circle me-1"></i>
@@ -137,50 +140,50 @@
                                     </small>
                                 </div>
                             `);
-                    $(this).addClass('is-invalid');
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
-
-            // Modal reset on hide
-            $('#modalPenyaluranDanaInvestasi').on('hidden.bs.modal', function () {
-                $(this).find('form').attr('wire:submit', `{!! $urlAction['store_penyaluran_dana_investasi'] !!}`);
-                $(this).find('.modal-title').text('Tambah Penyaluran Dana Investasi');
-                $(this).find('#btnHapusData').hide();
-
-                $('#id_pengajuan_investasi, #id_debitur').val('').trigger('change');
-                $('#nominal_yang_disalurkan, #nominal_raw').val('');
-                flatpickrPengiriman.clear();
-                flatpickrPengembalian.clear();
-                $('#nilai-investasi-info').html('');
-                nilaiInvestasiMax = 0;
-
-                $(this).find('.form-control').removeClass('is-invalid');
-                $(this).find('.invalid-feedback').text('').hide();
-
-                @this.set('id', null);
-                @this.set('id_pengajuan_investasi', null);
-                @this.set('id_debitur', null);
-                @this.set('nominal_yang_disalurkan', null);
-                @this.set('tanggal_pengiriman_dana', null);
-                @this.set('tanggal_pengembalian', null);
-            }).on('keyup change', '.form-control, .form-select', function () {
-                $(this).removeClass('is-invalid').closest('.form-group').find('.invalid-feedback').text('').hide();
-            });
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
         });
 
-        // Livewire event untuk detail kontrak
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('kontrak-detail-loaded', (event) => {
-                console.log('Event received:', event);
-                const kontrakData = event.data || event;
-                if (!kontrakData || !kontrakData.details) {
-                    console.error('Invalid data:', kontrakData);
-                    return;
-                }
+        // Modal reset on hide
+        $('#modalPenyaluranDanaInvestasi').on('hidden.bs.modal', function() {
+            $(this).find('form').attr('wire:submit', `{!! $urlAction['store_penyaluran_dana_investasi'] !!}`);
+            $(this).find('.modal-title').text('Tambah Penyaluran Dana Investasi');
+            $(this).find('#btnHapusData').hide();
 
-                let html = `
+            $('#id_pengajuan_investasi, #id_debitur').val('').trigger('change');
+            $('#nominal_yang_disalurkan, #nominal_raw').val('');
+            flatpickrPengiriman.clear();
+            flatpickrPengembalian.clear();
+            $('#nilai-investasi-info').html('');
+            nilaiInvestasiMax = 0;
+
+            $(this).find('.form-control').removeClass('is-invalid');
+            $(this).find('.invalid-feedback').text('').hide();
+
+            @this.set('id', null);
+            @this.set('id_pengajuan_investasi', null);
+            @this.set('id_debitur', null);
+            @this.set('nominal_yang_disalurkan', null);
+            @this.set('tanggal_pengiriman_dana', null);
+            @this.set('tanggal_pengembalian', null);
+        }).on('keyup change', '.form-control, .form-select', function() {
+            $(this).removeClass('is-invalid').closest('.form-group').find('.invalid-feedback').text('').hide();
+        });
+    });
+
+    // Livewire event untuk detail kontrak
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('kontrak-detail-loaded', (event) => {
+            console.log('Event received:', event);
+            const kontrakData = event.data || event;
+            if (!kontrakData || !kontrakData.details) {
+                console.error('Invalid data:', kontrakData);
+                return;
+            }
+
+            let html = `
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="card bg-light">
@@ -213,21 +216,21 @@
                                     </thead>
                                     <tbody>`;
 
-                let totalNominal = 0;
-                kontrakData.details.forEach((item, index) => {
-                    totalNominal += parseFloat(item.nominal_yang_disalurkan || 0);
-                    const nominalDisalurkan = parseFloat(item.nominal_yang_disalurkan || 0);
-                    const nominalDikembalikan = parseFloat(item.nominal_yang_dikembalikan || 0);
-                    const sisaBelumDikembalikan = parseFloat(item.sisa_belum_dikembalikan ?? (nominalDisalurkan - nominalDikembalikan));
+            let totalNominal = 0;
+            kontrakData.details.forEach((item, index) => {
+                totalNominal += parseFloat(item.nominal_yang_disalurkan || 0);
+                const nominalDisalurkan = parseFloat(item.nominal_yang_disalurkan || 0);
+                const nominalDikembalikan = parseFloat(item.nominal_yang_dikembalikan || 0);
+                const sisaBelumDikembalikan = parseFloat(item.sisa_belum_dikembalikan ?? (nominalDisalurkan - nominalDikembalikan));
 
-                    let statusBadge = '<span class="badge bg-label-danger">Belum Lunas</span>';
-                    if (sisaBelumDikembalikan <= 0) {
-                        statusBadge = '<span class="badge bg-label-success">Lunas</span>';
-                    } else if (nominalDikembalikan > 0) {
-                        statusBadge = '<span class="badge bg-label-warning">Sebagian Lunas</span>';
-                    }
+                let statusBadge = '<span class="badge bg-label-danger">Belum Lunas</span>';
+                if (sisaBelumDikembalikan <= 0) {
+                    statusBadge = '<span class="badge bg-label-success">Lunas</span>';
+                } else if (nominalDikembalikan > 0) {
+                    statusBadge = '<span class="badge bg-label-warning">Sebagian Lunas</span>';
+                }
 
-                    html += `
+                html += `
                                 <tr>
                                     <td class="text-center">${index + 1}</td>
                                     <td>${item.nama_perusahaan || '-'}</td>
@@ -261,9 +264,9 @@
                                         </div>
                                     </td>
                                 </tr>`;
-                });
+            });
 
-                html += `
+            html += `
                                     </tbody>
                                     <tfoot class="table-light">
                                         <tr>
@@ -275,50 +278,60 @@
                                 </table>
                             </div>`;
 
-                $('#detailKontrakContent').html(html);
-                const modalEl = document.getElementById('detailKontrakModal');
-                if (modalEl) {
-                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                    modal.show();
-                    console.log('Modal shown');
-                } else {
-                    console.error('Modal element not found');
-                }
-            });
+            $('#detailKontrakContent').html(html);
+            const modalEl = document.getElementById('detailKontrakModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+                console.log('Modal shown');
+            } else {
+                console.error('Modal element not found');
+            }
         });
+    });
 
-        // Delete confirmation
-        $(document).on('click', '#btnHapusData', function (e) {
-            e.preventDefault();
-            $('#modalPenyaluranDanaInvestasi').modal('hide');
-            $('#modalConfirmDelete').modal('show');
+    // Delete confirmation
+    $(document).on('click', '#btnHapusData', function(e) {
+        e.preventDefault();
+        $('#modalPenyaluranDanaInvestasi').modal('hide');
+        $('#modalConfirmDelete').modal('show');
+    });
+
+    $(document).on('click', '#btnConfirmDelete', function(e) {
+        e.preventDefault();
+        const currentIdForDelete = $(this).data('id');
+        if (!currentIdForDelete) return;
+
+        $('#deleteSpinner').removeClass('d-none');
+        $(this).prop('disabled', true);
+
+        $.ajax({
+            url: `{{ route('penyaluran-dana-investasi.destroy', ':id') }}`.replace(':id', currentIdForDelete),
+            type: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: (response) => {
+                $('#modalConfirmDelete').modal('hide');
+                Livewire.dispatch('refreshPenyaluranDanaInvestasiTable');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: response.message || 'Data berhasil dihapus'
+                });
+            },
+            error: (xhr) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: xhr.responseJSON?.message || 'Terjadi kesalahan'
+                });
+            },
+            complete: () => {
+                $('#deleteSpinner').addClass('d-none');
+                $('#btnConfirmDelete').prop('disabled', false);
+            }
         });
-
-        $(document).on('click', '#btnConfirmDelete', function (e) {
-            e.preventDefault();
-            const currentIdForDelete = $(this).data('id');
-            if (!currentIdForDelete) return;
-
-            $('#deleteSpinner').removeClass('d-none');
-            $(this).prop('disabled', true);
-
-            $.ajax({
-                url: '{{ route('penyaluran-dana-investasi.destroy', ':id') }}'.replace(':id', currentIdForDelete),
-                type: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: (response) => {
-                    $('#modalConfirmDelete').modal('hide');
-                    Livewire.dispatch('refreshPenyaluranDanaInvestasiTable');
-                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: response.message || 'Data berhasil dihapus' });
-                },
-                error: (xhr) => {
-                    Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'Terjadi kesalahan' });
-                },
-                complete: () => {
-                    $('#deleteSpinner').addClass('d-none');
-                    $('#btnConfirmDelete').prop('disabled', false);
-                }
-            });
-        });
-    </script>
+    });
+</script>
 @endpush

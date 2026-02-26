@@ -9,9 +9,11 @@ use Illuminate\Validation\ValidationException;
 
 trait HasValidate
 {
-    public function updated($name, $value)
+    public function updated($name, $value): void
     {
-        $this->validateOnly($name); 
+        if (array_key_exists($name, $this->rules())) {
+            $this->validateOnly($name);
+        }
     }
 
     protected function rules()

@@ -15,20 +15,9 @@ use App\Services\PeminjamanNumberService;
 use App\Enums\PengajuanPeminjamanStatusEnum;
 use App\Models\HistoryStatusPengajuanPinjaman;
 use App\Http\Requests\PengajuanPinjamanRequest;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\UploadedFile;
 
-/**
- * PeminjamanController
- *
- * Hanya berisi endpoint yang masih dipanggil secara langsung:
- *  - store        → dipanggil oleh Livewire Create melalui UniversalFormAction
- *  - update       → dipanggil oleh Livewire Create melalui UniversalFormAction
- *  - previewKontrak → dipanggil oleh Livewire Detail (KontrakPdfHandler redirect)
- *  - toggleActive → dipanggil oleh JS fetch di halaman index
- *
- * Semua fitur lain (index, show, create, edit, approval, download kontrak, generate kontrak)
- * sudah ditangani sepenuhnya oleh Livewire components di App\Livewire\PengajuanPinjaman\.
- */
 class PeminjamanController extends Controller
 {
     public function __construct()
@@ -60,7 +49,7 @@ class PeminjamanController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        $no_kontrak = 'SKI/FIN/' . date('Y') . '/' . str_pad($pengajuan->id_pengajuan_peminjaman, 3, '0', STR_PAD_LEFT);
+        $no_kontrak = $pengajuan->no_kontrak ?? ('SKI/FIN/' . date('Y') . '/' . str_pad($pengajuan->id_pengajuan_peminjaman, 3, '0', STR_PAD_LEFT));
 
         $kontrak = [
             'id_peminjaman'        => $id,
@@ -78,12 +67,80 @@ class PeminjamanController extends Controller
             'tenor'                => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
             'biaya_admin'          => 'Rp. 0',
             'nisbah'               => ($pengajuan->persentase_bunga ?? 2) . '% flat / bulan',
-            'denda_keterlambatan'  => '2% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
+            'denda_keterlambatan'  => ($pengajuan->persentase_bunga ?? 2) . '% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
             'jaminan'              => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
             'tanda_tangan'         => $pengajuan->debitur->tanda_tangan ?? null,
         ];
 
         return view('livewire.pengajuan-pinjaman.preview-kontrak', compact('kontrak'));
+    }
+
+    /**
+     * Generate dan download kontrak PDF.
+     * Dipanggil via AJAX POST dari halaman preview-kontrak.
+     */
+    public function downloadKontrakPdf(Request $request, $id): \Illuminate\Http\Response
+    {
+        $this->authorize('peminjaman_dana.generate_kontrak');
+
+        $pengajuan = PengajuanPeminjaman::with('debitur')
+            ->where('id_pengajuan_peminjaman', $id)
+            ->firstOrFail();
+
+        $latestHistory = HistoryStatusPengajuanPinjaman::where('id_pengajuan_peminjaman', $id)
+            ->whereNotNull('nominal_yang_disetujui')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $nilaiPembiayaan = $latestHistory->nominal_yang_disetujui ?? $pengajuan->total_pinjaman ?? 0;
+
+        // Use the no_kontrak sent from the preview view (finalized contract number)
+        $noKontrak = $request->input('no_kontrak', $pengajuan->no_kontrak ?? '');
+
+        $kontrak = [
+            'id_peminjaman'        => $id,
+            'no_kontrak'           => $noKontrak,
+            'no_kontrak2'          => $noKontrak,
+            'tanggal_kontrak'      => now()->format('d F Y'),
+            'nama_perusahaan'      => 'SYNNOVAC CAPITAL',
+            'nama_debitur'         => $pengajuan->debitur->nama ?? 'N/A',
+            'nama_pimpinan'        => $pengajuan->debitur->nama_ceo ?? 'N/A',
+            'alamat'               => $pengajuan->debitur->alamat ?? 'N/A',
+            'tujuan_pembiayaan'    => $pengajuan->tujuan_pembiayaan ?? 'N/A',
+            'jenis_pembiayaan'     => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
+            'nilai_pembiayaan'     => 'Rp. ' . number_format($nilaiPembiayaan, 0, ',', '.'),
+            'hutang_pokok'         => 'Rp. ' . number_format($nilaiPembiayaan, 0, ',', '.'),
+            'tenor'                => ($pengajuan->tenor_pembayaran ?? 1) . ' Bulan',
+            'biaya_admin'          => 'Rp. 0',
+            'nisbah'               => ($pengajuan->persentase_bunga ?? 2) . '% flat / bulan',
+            'denda_keterlambatan'  => ($pengajuan->persentase_bunga ?? 2) . '% dari jumlah yang belum dibayarkan untuk periode pembayaran tersebut',
+            'jaminan'              => $pengajuan->jenis_pembiayaan ?? 'Invoice Financing',
+            'tanda_tangan'         => $pengajuan->debitur->tanda_tangan ?? null,
+        ];
+
+        // Prepare base64-encoded signature images for the blade view
+        $ttdKrediturPath = public_path('assets/img/ttd2.png');
+        $ttdKrediturBase64 = file_exists($ttdKrediturPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($ttdKrediturPath))
+            : '';
+
+        $ttdDebiturBase64 = '';
+        if (!empty($kontrak['tanda_tangan'])) {
+            $ttdDebiturPath = storage_path('app/public/' . $kontrak['tanda_tangan']);
+            if (file_exists($ttdDebiturPath)) {
+                $ttdDebiturBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdDebiturPath));
+            }
+        }
+
+        $pdf = Pdf::loadView('livewire.pengajuan-pinjaman.kontrak-pdf', compact(
+            'kontrak',
+            'ttdKrediturBase64',
+            'ttdDebiturBase64'
+        ))->setPaper('a4', 'portrait');
+
+        $filename = 'Kontrak-' . preg_replace('/[\/\\\\]/', '-', $noKontrak ?: $id) . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     /**
@@ -110,15 +167,15 @@ class PeminjamanController extends Controller
 
         if ($jenisPembiayaan === 'Invoice Financing') {
             $rules['details']                    = 'required|array|min:1';
-            $rules['lampiran_sid']               = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
+            $rules['lampiran_sid']               = 'nullable|file|mimes:pdf,docx,xls,xlsx,png,jpg,jpeg,rar,zip|max:2048';
             $rules['nilai_kol']                  = 'nullable|string';
             $rules['id_instansi']                = 'nullable';
             $rules['sumber_pembiayaan']          = 'nullable';
             $rules['tujuan_pembiayaan']          = 'nullable|string';
             $rules['total_pinjaman']             = 'nullable';
-            $rules['harapan_tanggal_pencairan']  = 'required|date_format:Y-m-d';
+            $rules['harapan_tanggal_pencairan']  = 'required|date_format:d/m/Y';
             $rules['total_bunga']                = 'nullable';
-            $rules['rencana_tgl_pembayaran']     = 'required|date_format:Y-m-d';
+            $rules['rencana_tgl_pembayaran']     = 'required|date_format:d/m/Y';
             $rules['pembayaran_total']           = 'nullable';
         } elseif ($jenisPembiayaan === 'Installment') {
             $rules['details']              = 'required|array|min:1';
@@ -129,32 +186,6 @@ class PeminjamanController extends Controller
             $rules['sfinance']             = 'nullable|numeric';
             $rules['total_pembayaran']     = 'nullable|numeric';
             $rules['yang_harus_dibayarkan'] = 'nullable|numeric';
-        } elseif ($jenisPembiayaan === 'PO Financing') {
-            $rules['details']                   = 'required|array|min:1';
-            $rules['id_instansi']               = 'nullable';
-            $rules['no_kontrak']                = 'nullable|string';
-            $rules['lampiran_sid']              = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
-            $rules['nilai_kol']                 = 'nullable|string';
-            $rules['sumber_pembiayaan']         = 'nullable';
-            $rules['tujuan_pembiayaan']         = 'nullable|string';
-            $rules['total_pinjaman']            = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
-            $rules['total_bunga']               = 'nullable';
-            $rules['rencana_tgl_pembayaran']    = 'required|date_format:Y-m-d';
-            $rules['pembayaran_total']          = 'nullable';
-        } elseif ($jenisPembiayaan === 'Factoring') {
-            $rules['details']                   = 'required|array|min:1';
-            $rules['lampiran_sid']              = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
-            $rules['nilai_kol']                 = 'nullable|string';
-            $rules['id_instansi']               = 'nullable';
-            $rules['sumber_pembiayaan']         = 'nullable';
-            $rules['tujuan_pembiayaan']         = 'nullable|string';
-            $rules['total_pinjaman']            = 'nullable';
-            $rules['harapan_tanggal_pencairan'] = 'required|date_format:Y-m-d';
-            $rules['total_bunga']               = 'nullable';
-            $rules['rencana_tgl_pembayaran']    = 'required|date_format:Y-m-d';
-            $rules['pembayaran_total']          = 'nullable';
-            $rules['total_nominal_yang_dialihkan'] = 'nullable';
         }
 
         $formDataInvoice = $request->input('form_data_invoice', $request->input('details', []));
@@ -176,7 +207,7 @@ class PeminjamanController extends Controller
             $validated['id_instansi']        = null;
             $validated['sumber_pembiayaan']  = 'Internal';
             $validated['persentase_bunga']   = 10;
-        } elseif (in_array($jenisPembiayaan, ['Invoice Financing', 'PO Financing', 'Factoring'])) {
+        } elseif ($jenisPembiayaan === 'Invoice Financing') {
             $validated['id_instansi']        = null;
             $validated['sumber_pembiayaan']  = 'Internal';
             $validated['persentase_bunga']   = 2;
@@ -203,8 +234,12 @@ class PeminjamanController extends Controller
                 'lampiran_sid'              => $lampiran_sid_path,
                 'nilai_kol'                 => $validated['nilai_kol'] ?? null,
                 'tujuan_pembiayaan'         => $validated['tujuan_pembiayaan'] ?? null,
-                'harapan_tanggal_pencairan' => $validated['harapan_tanggal_pencairan'] ?? null,
-                'rencana_tgl_pembayaran'    => $validated['rencana_tgl_pembayaran'] ?? null,
+                'harapan_tanggal_pencairan' => isset($validated['harapan_tanggal_pencairan'])
+                    ? parseCarbonDate($validated['harapan_tanggal_pencairan'])->format('Y-m-d')
+                    : null,
+                'rencana_tgl_pembayaran' => isset($validated['rencana_tgl_pembayaran'])
+                    ? parseCarbonDate($validated['rencana_tgl_pembayaran'])->format('Y-m-d')
+                    : null,
                 'catatan_lainnya'           => $validated['catatan_lainnya'] ?? null,
                 'tenor_pembayaran'          => $validated['tenor_pembayaran'] ?? null,
                 'persentase_bunga'          => $validated['persentase_bunga'] ?? null,
@@ -321,8 +356,8 @@ class PeminjamanController extends Controller
             }
 
             if ($dataPengajuanPeminjaman['jenis_pembiayaan'] === 'Installment') {
-                $dataPengajuanPeminjaman['pps']                   = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.40;
-                $dataPengajuanPeminjaman['s_finance']             = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.60;
+                $dataPengajuanPeminjaman['pps']                   = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.60;
+                $dataPengajuanPeminjaman['s_finance']             = (float) $dataPengajuanPeminjaman['total_bunga'] * 0.40;
                 $dataPengajuanPeminjaman['yang_harus_dibayarkan'] = (float) ($dataPengajuanPeminjaman['pembayaran_total'] / $dataPengajuanPeminjaman['tenor_pembayaran']);
                 $dataPengajuanPeminjaman['harapan_tanggal_pencairan'] = null;
                 $dataPengajuanPeminjaman['rencana_tgl_pembayaran']    = null;
@@ -381,9 +416,6 @@ class PeminjamanController extends Controller
         }
     }
 
-    /**
-     * Toggle active/non-active status (dipanggil oleh JS fetch di halaman index).
-     */
     public function toggleActive($id)
     {
         try {
@@ -441,20 +473,6 @@ class PeminjamanController extends Controller
                 'dokumen_bast'    => $getFile('dokumen_bast'),
                 'dokumen_lainnya' => $getFile('dokumen_lainnya'),
             ]);
-        } elseif ($jenis === 'PO Financing') {
-            BuktiPeminjaman::create($base + [
-                'no_kontrak'      => $det['no_kontrak']  ?? null,
-                'nama_client'     => $det['nama_client'] ?? null,
-                'nilai_invoice'   => $clean($det['nilai_invoice']  ?? null),
-                'nilai_pinjaman'  => $clean($det['nilai_pinjaman'] ?? null),
-                'nilai_bunga'     => $clean($det['nilai_bunga']    ?? null),
-                'kontrak_date'    => $det['kontrak_date'] ?? null,
-                'due_date'        => $det['due_date']     ?? null,
-                'dokumen_kontrak' => $getFile('dokumen_kontrak'),
-                'dokumen_so'      => $getFile('dokumen_so'),
-                'dokumen_bast'    => $getFile('dokumen_bast'),
-                'dokumen_lainnya' => $getFile('dokumen_lainnya'),
-            ]);
         } elseif ($jenis === 'Installment') {
             BuktiPeminjaman::create($base + [
                 'no_invoice'      => $det['no_invoice']  ?? null,
@@ -464,20 +482,6 @@ class PeminjamanController extends Controller
                 'invoice_date'    => $det['invoice_date'] ?? null,
                 'dokumen_invoice' => $getFile('dokumen_invoice'),
                 'dokumen_lainnya' => $getFile('dokumen_lainnya'),
-            ]);
-        } elseif ($jenis === 'Factoring') {
-            BuktiPeminjaman::create($base + [
-                'no_kontrak'      => $det['no_kontrak']  ?? null,
-                'nama_client'     => $det['nama_client'] ?? null,
-                'nilai_invoice'   => $clean($det['nilai_invoice']  ?? null),
-                'nilai_pinjaman'  => $clean($det['nilai_pinjaman'] ?? null),
-                'nilai_bunga'     => $clean($det['nilai_bunga']    ?? null),
-                'kontrak_date'    => $det['kontrak_date'] ?? null,
-                'due_date'        => $det['due_date']     ?? null,
-                'dokumen_invoice' => $getFile('dokumen_invoice'),
-                'dokumen_kontrak' => $getFile('dokumen_kontrak'),
-                'dokumen_so'      => $getFile('dokumen_so'),
-                'dokumen_bast'    => $getFile('dokumen_bast'),
             ]);
         }
     }

@@ -1,29 +1,6 @@
 {{-- Modal Info Readonly - Data yang ditampilkan di modal approval --}}
 <div class="card border mb-3 shadow-none">
     <div class="card-body">
-        {{-- Deviasi --}}
-        <div class="row mb-3">
-            <div class="col-12">
-                <label class="form-label text-muted small">Deviasi</label>
-                <div class="d-flex gap-3 align-items-center">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" 
-                               {{ $latestHistory?->deviasi === 'ya' ? 'checked' : '' }} disabled>
-                        <label class="form-check-label">
-                            <i class="ti ti-check-circle text-success me-1"></i> Ya
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" 
-                               {{ $latestHistory?->deviasi === 'tidak' ? 'checked' : '' }} disabled>
-                        <label class="form-check-label">
-                            <i class="ti ti-x-circle text-danger me-1"></i> Tidak
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         {{-- Nominal --}}
         <div class="row mb-3">
             <div class="col-md-6">
@@ -59,7 +36,7 @@
         
         {{-- Tanggal --}}
         <div class="row">
-            <div class="col-md-6">
+            <div class="{{ $jenis_pembiayaan === 'Invoice Financing' ? 'col-md-6' : 'col-md-12' }}">
                 <label class="form-label text-muted small">Tanggal Pencairan</label>
                 <div class="input-group">
                     <input type="text" class="form-control" 
@@ -69,6 +46,8 @@
                     </span>
                 </div>
             </div>
+            
+            @if($jenis_pembiayaan === 'Invoice Financing')
             <div class="col-md-6">
                 <label class="form-label text-muted small">Tanggal Pencairan yang Diharapkan</label>
                 <div class="input-group">
@@ -79,6 +58,7 @@
                     </span>
                 </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

@@ -31,10 +31,12 @@
             </p>
         </div>
     </div>
+    {{-- KOL HIDDEN - tidak ditampilkan
     <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl">
         <div class="mb-0">
             <small class="text-light fw-semibold d-block mb-1">Nilai KOL</small>
             <p class="fw-bold mb-0">{{ $nilai_kol ?? '-' }}</p>
         </div>
     </div>
+    --}}
 </div>

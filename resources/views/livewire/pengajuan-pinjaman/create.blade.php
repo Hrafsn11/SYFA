@@ -9,6 +9,17 @@
     </div>
     <div class="card">
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Terdapat beberapa kesalahan:</strong>
+                    <ul class="mb-0 mt-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <form wire:submit="{{ isset($id) ? $urlAction['update'] : $urlAction['store'] }}">
                 <div class="row">
                     <div class="col-lg mb-3">
@@ -19,7 +30,7 @@
                 {{-- Sumber Pembiayaan dihilangkan karena sudah di-hardcode ke Internal di backend --}}
                 <input type="hidden" wire:model="sumber_pembiayaan" value="Internal">
     
-                <div class="card border-1 mb-3 shadow-none">
+                <div class="card border mb-3 shadow-none">
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-lg-3 col-sm-12 mb-3 form-group">
@@ -39,9 +50,9 @@
                             </div>
                         </div>
     
-                        {{-- khusus Invoice Financing & PO Financing --}}
+                        {{-- khusus Invoice Financing --}}
                         <div class="row mb-3" id="rowLampiranSID">
-                            <div class="col-md-6 form-group">
+                            <div class="col-md-12 form-group">
                                 <div class="d-flex justify-content-between">
                                     <label for="lampiran_sid" class="form-label">Lampiran SID</label>
                                     @if (isset($lampiran_sid_current))
@@ -52,11 +63,14 @@
                                 <div class="invalid-feedback" wire:ignore></div>
                                 <small class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                             </div>
+                            
+                            {{-- KOL HIDDEN - tidak ditampilkan
                             <div class="col-md-6 form-group" wire:ignore>
                                 <label for="nilai_kol" class="form-label">Nilai KOL</label>
                                 <input type="text" class="form-control" id="nilai_kol" wire:model="nilai_kol" placeholder="Nilai KOL" readonly disabled>
                                 <div class="invalid-feedback"></div>
                             </div>
+                            --}}
                             <div class="col-md-12 mt-3 form-group" wire:ignore>
                                 <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
                                 <input type="text" class="form-control" id="tujuan_pembiayaan" wire:model.blur="tujuan_pembiayaan" placeholder="Tujuan Pembiayaan"/>
@@ -68,24 +82,14 @@
                         <div class="row" wire:block-when-change-state="jenis_pembiayaan">
                             <div class="col-md-12 form-group" wire:ignore>
                                 <label class="form-label mb-2">Jenis Pembiayaan</label>
-                                <div class="d-flex">
                                     <div class="form-check me-3">
                                         <input wire:model.change="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio" type="radio" value="Invoice Financing" id="invoice_financing">
                                         <label class="form-check-label" for="invoice_financing">Invoice Financing</label>
                                     </div>
                                     <div class="form-check me-3">
-                                        <input wire:model.change="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio" type="radio" value="PO Financing" id="po_financing">
-                                        <label class="form-check-label" for="po_financing">PO Financing</label>
-                                    </div>
-                                    <div class="form-check me-3">
                                         <input wire:model.change="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio" type="radio" value="Installment" id="installment">
                                         <label class="form-check-label" for="installment">Installment</label>
                                     </div>
-                                    <div class="form-check">
-                                        <input wire:model.change="jenis_pembiayaan" class="form-check-input jenis-pembiayaan-radio" type="radio" value="Factoring" id="factoring">
-                                        <label class="form-check-label" for="factoring">Factoring</label>
-                                    </div>
-                                </div>
                                 <div class="invalid-feedback"></div>
                             </div>
                         </div>
@@ -97,7 +101,7 @@
                     @include('livewire.pengajuan-pinjaman.components.table_create')
                 </div>
     
-                <div class="card border-1 mb-4 shadow-none">
+                <div class="card border mb-4 shadow-none">
                     <div class="card-body">
                         @if ($jenis_pembiayaan == 'Installment')
                         <!-- Form khusus untuk Installment -->
@@ -108,18 +112,15 @@
                                     <input type="text" class="form-control input-rupiah" id="nominal_pinjaman" wire:model="nominal_pinjaman" placeholder="Rp 0" readonly disabled>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-6 form-group" wire:ignore>
+                                <div class="col-md-6 form-group">
                                     <label for="tenor_pembayaran" class="form-label">Tenor Pembayaran</label>
-                                    <livewire:components.select2 
-                                        :list_data="$list_tenor_pembayaran"
-                                        value_name="value"
-                                        value_label="label"
-                                        data_placeholder="Pilih Tenor Pembayaran"
-                                        model_name="tenor_pembayaran"
-                                        :value="$tenor_pembayaran"
-                                        :allow_clear="true"
-                                        :tags="false"
-                                    />
+                                    <select wire:model.live="tenor_pembayaran" class="form-select" id="tenor_pembayaran">
+                                        <option value="">-- Pilih Tenor Pembayaran --</option>
+                                        <option value="3">3 Bulan</option>
+                                        <option value="6">6 Bulan</option>
+                                        <option value="9">9 Bulan</option>
+                                        <option value="12">12 Bulan</option>
+                                    </select>
                                     <div class="invalid-feedback"></div>
                                 </div>
                             </div>
@@ -147,7 +148,7 @@
                                     <label for="total_pembayaran_installment" class="form-label">Total Pembayaran
                                         <i class="ti ti-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Total yang harus dibayarkan"></i>
                                     </label>
-                                    <input type="text" class="form-control bg-light" id="total_pembayaran_installment" wier:model="total_pembayaran_installment" readonly disabled>
+                                    <input type="text" class="form-control bg-light" id="total_pembayaran_installment" wire:model="total_pembayaran_installment" readonly disabled>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 <div class="col-md-6 form-group">
@@ -162,11 +163,11 @@
                         </div>
                         {{-- end form khusus installment --}}
                         @else
-                        <!-- Form untuk selain Invoice Financing && PO Financing -->
+                        <!-- Form untuk selain Invoice Financing -->
                         <div id="formNonInstallment">
                             <div class="row">
                                 <div class="col-md-6 form-group mb-3">
-                                    <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">{{ $jenis_pembiayaan == 'Factoring' ? 'Total Nominal Yang Dialihkan' : 'Total Pinjaman' }}</label>
+                                    <label for="total_pinjaman" class="form-label" id="labelTotalPinjaman">Total Pinjaman</label>
                                     <input type="text" class="form-control input-rupiah non-editable" id="total_pinjaman" wire:model="total_pinjaman" placeholder="Rp 0" readonly disabled>
                                     <div class="invalid-feedback"></div>
                                 </div>
