@@ -216,9 +216,8 @@ class Create extends Component
         $this->tanggal_pencairan = Carbon::parse($this->tanggalPencairanReal)->format('d-m-Y');
 
         $this->availableInvoices = $pengajuan->buktiPeminjaman->map(function ($bukti) use ($pengajuan) {
-            $label = ($pengajuan->jenis_pembiayaan === 'Invoice Financing') ? $bukti->no_invoice : (in_array($pengajuan->jenis_pembiayaan, ['PO Financing', 'Factoring']) ? $bukti->no_kontrak : '');
-
-            $nilai = ($pengajuan->jenis_pembiayaan === 'Invoice Financing') ? $bukti->nilai_invoice : (in_array($pengajuan->jenis_pembiayaan, ['PO Financing', 'Factoring']) ? $bukti->nilai_pinjaman : 0);
+            $label = ($pengajuan->jenis_pembiayaan === 'Invoice Financing') ? $bukti->no_invoice : '';
+            $nilai = ($pengajuan->jenis_pembiayaan === 'Invoice Financing') ? $bukti->nilai_invoice : 0;
 
             if (!$label) return null;
 
@@ -407,6 +406,21 @@ class Create extends Component
 
         if ($nominal < 1) {
             $this->dispatch('alert', ['type' => 'error', 'message' => 'Nominal harus lebih dari 0']);
+            return;
+        }
+
+        // Validasi: nominal tidak boleh melebihi total sisa pinjaman
+        $totalSisaPinjaman = ($this->total_pinjaman ?? 0) + ($this->total_bunga ?? 0);
+        $totalBayarLainnya = collect($this->pengembalian_invoices)
+            ->filter(fn($item, $idx) => $editingIndex === null || $idx != $editingIndex)
+            ->sum('nominal');
+        $maksimalBayar = $totalSisaPinjaman - $totalBayarLainnya;
+
+        if ($nominal > $maksimalBayar) {
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'Nominal melebihi total sisa pinjaman. Maksimal: Rp ' . number_format($maksimalBayar, 0, ',', '.')
+            ]);
             return;
         }
 

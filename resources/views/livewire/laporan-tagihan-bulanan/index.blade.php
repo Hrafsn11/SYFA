@@ -22,7 +22,7 @@
             </div>
 
             <div class="card">
-                <div class="card-datatable">
+                <div class="card-body mt-3">
                     <livewire:laporan-tagihan-bulanan-table />
                 </div>
             </div>

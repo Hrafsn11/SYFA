@@ -414,7 +414,7 @@
                                                                                     'color' => 'success',
                                                                                     'icon' => 'ti-user-check',
                                                                                 ],
-                                                                                'Dana Sudah Dicairkan' => [
+                                                                                'Upload Bukti Transfer' => [
                                                                                     'color' => 'primary',
                                                                                     'icon' => 'ti-file-upload',
                                                                                 ],
@@ -459,7 +459,7 @@
                                                                                 },
                                                                                 'Disetujui oleh CEO SKI' =>
                                                                                     'Validasi CEO SKI - Disetujui',
-                                                                                'Dana Sudah Dicairkan' =>
+                                                                                'Upload Bukti Transfer' =>
                                                                                     'Upload Bukti Transfer',
                                                                                 'Generate Kontrak' =>
                                                                                     'Generate Kontrak',
@@ -483,7 +483,7 @@
                                                                                     : 'Pengajuan ditolak.',
                                                                                 'Disetujui oleh CEO SKI' =>
                                                                                     'Pengajuan telah disetujui oleh CEO SKI.',
-                                                                                'Dana Sudah Dicairkan' =>
+                                                                                'Upload Bukti Transfer' =>
                                                                                     'Bukti transfer investasi telah diupload.',
                                                                                 'Generate Kontrak' =>
                                                                                     'Kontrak investasi telah digenerate.',
@@ -519,7 +519,7 @@
                                                                         -
                                                                     @endif
                                                                 </small>
-                                                                @if ($history->status == 'Dana Sudah Dicairkan' && $investasi['upload_bukti_transfer'])
+                                                                @if ($history->status == 'Upload Bukti Transfer' && $investasi['upload_bukti_transfer'])
                                                                     <button type="button" class="btn btn-sm btn-primary"
                                                                         onclick="previewBuktiTransfer('{{ asset('storage/' . $investasi['upload_bukti_transfer']) }}')">
                                                                         <i class="ti ti-eye me-1"></i>

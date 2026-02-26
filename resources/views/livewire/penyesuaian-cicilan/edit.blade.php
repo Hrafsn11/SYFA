@@ -114,7 +114,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Suku Bunga Per Tahun (%) <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('suku_bunga_per_tahun') is-invalid @enderror"
-                                        wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100">
+                                        wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100" disabled>
                                     @error('suku_bunga_per_tahun')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -123,7 +123,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
-                                        wire:model.live="jangka_waktu_total" min="1">
+                                        wire:model.live="jangka_waktu_total" min="1" disabled>
                                     @error('jangka_waktu_total')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -132,7 +132,7 @@
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Masa Tenggang (Bulan) <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('masa_tenggang') is-invalid @enderror"
-                                        wire:model.live="masa_tenggang" min="0">
+                                        wire:model.live="masa_tenggang" min="0" disabled>
                                     <small class="text-muted">Hanya bayar margin selama masa tenggang</small>
                                     @error('masa_tenggang')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -146,87 +146,28 @@
                                             <input type="text"
                                                 class="form-control @error('tanggal_mulai_cicilan') is-invalid @enderror"
                                                 id="tgl_mulai_cicilan" placeholder="yyyy-mm-dd" autocomplete="off"
-                                                value="{{ $tanggal_mulai_cicilan }}">
+                                                value="{{ $tanggal_mulai_cicilan }}" disabled>
                                             <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                                         </div>
                                     </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
-                                                class="text-danger">*</span></label>
-                                        <select class="form-select" disabled style="background-color: #f5f5f9;">
-                                            <option value="{{ $metode_perhitungan }}" selected>
-                                                Metode {{ $metode_perhitungan }}
-                                            </option>
-                                        </select>
-                                        <small class="text-muted">Metode perhitungan tidak dapat diubah setelah program
-                                            dibuat</small>
-                                        @error('metode_perhitungan')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Suku Bunga Per Tahun (%) <span
-                                                class="text-danger">*</span></label>
-                                        <input type="number"
-                                            class="form-control @error('suku_bunga_per_tahun') is-invalid @enderror"
-                                            wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100">
-                                        @error('suku_bunga_per_tahun')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Jangka Waktu Total (Bulan) <span
-                                                class="text-danger">*</span></label>
-                                        <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
-                                            wire:model.live="jangka_waktu_total" min="1">
-                                        @error('jangka_waktu_total')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Masa Tenggang (Bulan) <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control @error('masa_tenggang') is-invalid @enderror"
-                                            wire:model.live="masa_tenggang" min="0">
-                                        <small class="text-muted">Hanya bayar margin selama masa tenggang</small>
-                                        @error('masa_tenggang')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Tanggal Mulai Cicilan <span class="text-danger">*</span></label>
-                                        <div wire:ignore>
-                                            <div class="input-group">
-                                                <input type="text"
-                                                    class="form-control @error('tanggal_mulai_cicilan') is-invalid @enderror"
-                                                    id="tgl_mulai_cicilan" placeholder="yyyy-mm-dd" autocomplete="off"
-                                                    value="{{ $tanggal_mulai_cicilan }}">
-                                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
-                                            </div>
-                                        </div>
-                                        @error('tanggal_mulai_cicilan')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-12 mb-3">
-                                        <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
-                                            wire:loading.attr="disabled">
-                                            <span wire:loading.remove wire:target="hitungJadwalAngsuran"
-                                                class="d-flex align-items-center">
-                                                <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
-                                            </span>
-                                            <span wire:loading wire:target="hitungJadwalAngsuran">
-                                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                                Menghitung...
-                                            </span>
-                                        </button>
-                                    </div>
+                                    @error('tanggal_mulai_cicilan')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
+
+                                <!-- <div class="col-12 mb-3">
+                                    <button type="button" class="btn btn-primary" wire:click="hitungJadwalAngsuran"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="hitungJadwalAngsuran"
+                                            class="d-flex align-items-center">
+                                            <i class="ti ti-calculator me-1"></i>Hitung Jadwal Angsuran
+                                        </span>
+                                        <span wire:loading wire:target="hitungJadwalAngsuran">
+                                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                            Menghitung...
+                                        </span>
+                                    </button>
+                                </div> -->
                             </div>
 
                         @else
@@ -248,10 +189,14 @@
 
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Nominal yang Disetujui <span class="text-danger">*</span></label>
-                                    <input type="number" class="form-control @error('nominal_yg_disetujui') is-invalid @enderror"
-                                        wire:model.live="nominal_yg_disetujui" min="1">
+                                    <div wire:ignore>
+                                        <input type="text" id="nominal_yg_disetujui_input" class="form-control"
+                                            placeholder="Rp 0"
+                                            value="{{ $nominal_yg_disetujui ? 'Rp ' . number_format($nominal_yg_disetujui, 0, ',', '.') : '' }}">
+                                    </div>
+                                    <input type="hidden" wire:model.live="nominal_yg_disetujui">
                                     @error('nominal_yg_disetujui')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
 
@@ -735,6 +680,13 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Format nominal_yg_disetujui as Rupiah
+            $(document).on('input', '#nominal_yg_disetujui_input', function () {
+                const raw = $(this).val().replace(/[^0-9]/g, '');
+                $(this).val(raw ? 'Rp ' + parseInt(raw).toLocaleString('id-ID') : '');
+                @this.set('nominal_yg_disetujui', raw ? parseInt(raw) : null);
+            });
+
             // Init Datepicker
             $('#tgl_mulai_cicilan').datepicker({
                 format: 'yyyy-mm-dd',

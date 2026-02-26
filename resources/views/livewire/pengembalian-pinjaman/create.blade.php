@@ -31,7 +31,7 @@
                         @enderror
                     </div>
                 </div>
-                <div class="card border-1 shadow-none mb-4">
+                <div class="card border shadow-none mb-4">
                     <div class="card-body">
                         <div class="row mb-3">
                             <div class="col-md-6 mb-2">
@@ -70,8 +70,6 @@
                                 <label for="invoice_dibayarkan">
                                     @if ($jenisPembiayaan === 'Invoice Financing')
                                         Invoice Yang Akan Dibayar
-                                    @elseif(in_array($jenisPembiayaan, ['PO Financing', 'Factoring']))
-                                        Kontrak Yang Akan Dibayar
                                     @else
                                         Yang Akan Dibayar
                                     @endif
@@ -93,8 +91,6 @@
                                 <label for="nominal_invoice">
                                     @if ($jenisPembiayaan === 'Invoice Financing')
                                         Nominal Invoice
-                                    @elseif(in_array($jenisPembiayaan, ['PO Financing', 'Factoring']))
-                                        Nominal Kontrak
                                     @else
                                         Nominal
                                     @endif
@@ -238,7 +234,7 @@
                         @if ($isLate && $bulanKeterlambatan > 0)
                             <div class="alert alert-warning border-warning mb-3">
                                 <div class="d-flex align-items-start gap-3">
-                                    <div class="flex-grow-1">
+                                    <div class="grow">
                                         <h6 class="alert-heading mb-2">
                                             <i class="ti ti-clock-exclamation me-1"></i>
                                             Pembayaran Terlambat {{ $bulanKeterlambatan }} Bulan

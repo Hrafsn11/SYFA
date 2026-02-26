@@ -43,7 +43,7 @@
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Nomor Kontrak (Preview)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-warning text-dark">
+                                <span class="input-group-text text-white" style="background-color: #13ABAB;">
                                     <i class="ti ti-file-certificate"></i>
                                 </span>
                                 <input type="text" class="form-control bg-light fw-bold"
@@ -68,7 +68,7 @@
                         <div class="d-flex flex-wrap gap-2">
                             @if(is_array($dataKontrak['jenis_restrukturisasi']) && count($dataKontrak['jenis_restrukturisasi']) > 0)
                                 @foreach($dataKontrak['jenis_restrukturisasi'] as $jenis)
-                                    <span class="badge bg-primary">{{ $jenis }}</span>
+                                    <span class="badge" style="background-color: #13ABAB;">{{ $jenis }}</span>
                                 @endforeach
                             @else
                                 <span class="text-muted">-</span>
@@ -166,8 +166,8 @@
                             <label class="form-label fw-bold">
                                 11. Jaminan <span class="text-danger">*</span>
                             </label>
-                            <textarea wire:model="jaminan" class="form-control @error('jaminan') is-invalid @enderror"
-                                rows="2" placeholder="Masukkan jaminan yang disepakati..."></textarea>
+                            <input type="text" wire:model="jaminan" class="form-control @error('jaminan') is-invalid @enderror"
+                                rows="2" placeholder="Masukkan jaminan yang disepakati..."></input>
                             @error('jaminan')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -221,7 +221,7 @@
 
                         {{-- Generate Kontrak --}}
                         <button type="button" wire:click="generateKontrak" wire:loading.attr="disabled"
-                            class="btn btn-success btn-lg">
+                            class="btn btn-primary btn-lg">
                             <span wire:loading.remove wire:target="generateKontrak">
                                 <i class="ti ti-file-check me-2"></i>Generate Kontrak
                             </span>

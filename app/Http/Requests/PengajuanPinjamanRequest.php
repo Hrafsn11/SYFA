@@ -34,7 +34,7 @@ class PengajuanPinjamanRequest extends FormRequest
         $validate = [
             // Always required for all types
             'nama_rekening' => 'required',
-            'tujuan_pembiayaan' => 'nullable|required_unless:jenis_pembiayaan,Factoring,Installment',
+            'tujuan_pembiayaan' => 'nullable|required_unless:jenis_pembiayaan,Installment',
             'jenis_pembiayaan' => 'required|in:' . implode(',', JenisPembiayaanEnum::getConstants()),
             'catatan_lainnya' => 'nullable',
             
@@ -44,8 +44,8 @@ class PengajuanPinjamanRequest extends FormRequest
                 'nullable',
                 function ($attribute, $value, $fail) {
                     $jenisPembiayaan = $this->input('jenis_pembiayaan');
-                    // Only validate for Invoice Financing or PO Financing
-                    if (in_array($jenisPembiayaan, ['Invoice Financing', 'PO Financing'])) {
+                    // Only validate for Invoice Financing
+                    if (in_array($jenisPembiayaan, ['Invoice Financing'])) {
                         // Check if file is required
                         if (!$value && !$this->input('lampiran_sid_current')) {
                             $fail('Lampiran SID harus diupload untuk ' . $jenisPembiayaan . '.');
@@ -74,7 +74,7 @@ class PengajuanPinjamanRequest extends FormRequest
                 },
             ],
             
-            // Required for Invoice Financing, PO Financing, and Factoring
+            // Required for Invoice Financing
             'harapan_tanggal_pencairan' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
             'rencana_tgl_pembayaran' => 'required_unless:jenis_pembiayaan,Installment|date_format:d/m/Y',
             
@@ -83,9 +83,9 @@ class PengajuanPinjamanRequest extends FormRequest
         ];
 
         $jenisPembiayaan = $this->input('jenis_pembiayaan');
-        // Handle both 'form_data_invoice' (Invoice/PO) and 'details' (Factoring/Installment) keys
-        $formDataInvoice = $this->input('form_data_invoice', $this->input('details', []));
-        $invoiceKey = $this->has('form_data_invoice') ? 'form_data_invoice' : 'details';
+        // Handle 'form_data_invoice' keys (Invoice Financing / Installment)
+        $formDataInvoice = $this->input('form_data_invoice', []);
+        $invoiceKey = 'form_data_invoice';
         
         if ($jenisPembiayaan && !empty($formDataInvoice)) {
             $invoiceRequest = new InvoicePengajuanPinjamanRequest();
@@ -114,7 +114,7 @@ class PengajuanPinjamanRequest extends FormRequest
             'jenis_pembiayaan.in' => 'Jenis pembiayaan tidak valid.',
             
             'id_instansi.exists' => 'Instansi tidak valid.',
-            'lampiran_sid.required_if' => 'Lampiran SID harus diupload untuk Invoice Financing atau PO Financing.',
+            'lampiran_sid.required_if' => 'Lampiran SID harus diupload untuk Invoice Financing.',
             'lampiran_sid.image' => 'Lampiran SID harus berupa gambar.',
             'lampiran_sid.mimes' => 'Lampiran SID harus berupa gambar JPEG, PNG, atau JPG.',
             'lampiran_sid.max' => 'Lampiran SID tidak boleh lebih besar dari 2MB.',

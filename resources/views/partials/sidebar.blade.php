@@ -35,7 +35,7 @@
             @if ($isSFinance)
                 @canany(['sfinance.menu.dashboard_pembiayaan', 'sfinance.menu.dashboard_pembiayaan_investasi'])
                     <li
-                        class="menu-item {{ RouteHelper::routeIs('dashboard.*') || RouteHelper::routeIs('dashboard.pembiayaan') || RouteHelper::routeIs('dashboard.investasi') ? 'open' : '' }}">
+                        class="menu-item {{ RouteHelper::routeIs('dashboard.*') || RouteHelper::routeIs('dashboard.pembiayaan') || RouteHelper::routeIs('dashboard.investasi') || RouteHelper::routeIs('dashboard.cicilan') ? 'open' : '' }}">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons ti ti-smart-home"></i>
                             <div data-i18n="Dashboard">Dashboard</div>
@@ -60,6 +60,12 @@
                                     </a>
                                 </li>
                             @endcan
+                            <li class="menu-item {{ RouteHelper::routeIs('dashboard.cicilan') ? 'active' : '' }}">
+                                <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.cicilan') }}"
+                                    class="menu-link">
+                                    <div data-i18n="Dashboard Cicilan Restrukturisasi">Dashboard Cicilan Restrukturisasi</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 @endcanany

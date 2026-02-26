@@ -81,42 +81,6 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                 if ($this->index_data_invoice !== null) $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
                 break;
 
-            case 'PO Financing':
-                $validate = array_merge($validate, [
-                    'no_kontrak' => [
-                        'required',
-                        'string',
-                        function ($attribute, $value, $fail) use ($formDataInvoice) {
-                            if (is_array($formDataInvoice)) {
-                                $collection = collect($formDataInvoice);
-                                $max = 2;
-
-                                if (!is_null($this->index_data_invoice) && $collection->has($this->index_data_invoice)) {
-                                    $collection->forget($this->index_data_invoice);
-                                    $max = 1;
-                                }
-
-                                $existingNoKontrak = $collection->where('no_kontrak', $value)->count();
-                                if ($existingNoKontrak >= $max) {
-                                    $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
-                                }
-                            }
-                        },
-                    ],
-                    'nama_client' => 'required|string',
-                    'nilai_invoice' => 'required',
-                    'nilai_pinjaman' => 'required',
-                    'kontrak_date' => 'required|date_format:d/m/Y',
-                    'due_date' => 'required|date_format:d/m/Y',
-                    'dokumen_kontrak' => 'required|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_so' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_lainnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                ]);
-
-                if ($this->index_data_invoice !== null) $validate['dokumen_kontrak'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
-                break;
-
             case 'Installment':
                 $validate = array_merge($validate, [
                     'no_invoice' => [
@@ -146,43 +110,6 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     'nama_barang' => 'required|string',
                     'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                     'dokumen_lainnya' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                ]);
-
-                if ($this->index_data_invoice !== null) $validate['dokumen_invoice'] = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
-                break;
-
-            case 'Factoring':
-                $validate = array_merge($validate, [
-                    'no_kontrak' => [
-                        'required',
-                        'string',
-                        function ($attribute, $value, $fail) use ($formDataInvoice) {
-                            if (is_array($formDataInvoice)) {
-                                $collection = collect($formDataInvoice);
-                                $max = 2;
-
-                                if (!is_null($this->index_data_invoice) && $collection->has($this->index_data_invoice)) {
-                                    $collection->forget($this->index_data_invoice);
-                                    $max = 1;
-                                }
-
-                                $existingNoKontrak = $collection->where('no_kontrak', $value)->count();
-
-                                if ($existingNoKontrak >= $max) {
-                                    $fail('No. Kontrak sudah digunakan dalam list kontrak yang akan ditambahkan.');
-                                }
-                            }
-                        },
-                    ],
-                    'nama_client' => 'required|string',
-                    'nilai_invoice' => 'required',
-                    'nilai_pinjaman' => 'required',
-                    'kontrak_date' => 'required|date_format:d/m/Y',
-                    'due_date' => 'required|date_format:d/m/Y',
-                    'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_kontrak' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_so' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
-                    'dokumen_bast' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
                 ]);
                 break;
 

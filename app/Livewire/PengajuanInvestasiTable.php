@@ -20,39 +20,14 @@ class PengajuanInvestasiTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengajuan_investasi')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari pengajuan investasi...')
-            ->setSearchDebounce(500)
-
-            // Pagination
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
-
-            // Default Sort
             ->setDefaultSort('created_at', 'desc')
-
-            // Table Styling
-            ->setTableAttributes([
-                'class' => 'table table-hover',
-            ])
-            ->setTheadAttributes([
-                'class' => 'table-light',
-            ])
-            ->setSearchFieldAttributes([
-                'class' => 'form-control',
-                'placeholder' => 'Cari pengajuan investasi...',
-            ])
-            ->setPerPageFieldAttributes([
-                'class' => 'form-select',
-            ])
-
-            // Enable Filters
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-
-            // Disable Bulk Actions
-            ->setBulkActionsDisabled();
+            ->setEmptyMessage('Tidak ada data pengajuan investasi');
     }
 
     public function filters(): array
@@ -80,7 +55,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                     'Investor Setuju' => 'Investor Setuju',
                     'Disetujui oleh CEO SKI' => 'Disetujui oleh CEO SKI',
                     'Disetujui oleh Direktur SKI' => 'Disetujui oleh Direktur SKI',
-                    'Dana Sudah Dicairkan' => 'Dana Sudah Dicairkan',
+                    'Generate Kontrak' => 'Generate Kontrak',
                     'Ditolak' => 'Ditolak',
                     'Rejected' => 'Rejected',
                 ])
@@ -216,7 +191,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                         'Investor Setuju' => 'bg-success',
                         'Disetujui oleh CEO SKI' => 'bg-success',
                         'Disetujui oleh Direktur SKI' => 'bg-success',
-                        'Dana Sudah Dicairkan' => 'bg-primary',
+                        'Generate Kontrak' => 'bg-info',
                         'Ditolak' => 'bg-danger',
                         'Rejected' => 'bg-danger',
                         default => 'bg-secondary'

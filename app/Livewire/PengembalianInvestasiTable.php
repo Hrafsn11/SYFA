@@ -21,20 +21,14 @@ class PengembalianInvestasiTable extends DataTableComponent
     public function configure(): void
     {
         $this->setPrimaryKey('id_pengembalian_investasi')
-            ->setSearchEnabled()
-            ->setSearchPlaceholder('Cari Pengembalian...')
-            ->setSearchDebounce(500)
             ->setPerPageAccepted([10, 25, 50, 100])
-            ->setPerPageVisibilityEnabled()
             ->setPerPage(10)
             ->setDefaultSort('pengembalian_investasi.created_at', 'desc')
-            ->setTableAttributes(['class' => 'table table-hover'])
-            ->setTheadAttributes(['class' => 'table-light'])
-            ->setSearchFieldAttributes(['class' => 'form-control', 'placeholder' => 'Cari...'])
-            ->setPerPageFieldAttributes(['class' => 'form-select'])
+            ->setSearchStatus(true)
+            ->setColumnSelectStatus(true)
             ->setFiltersEnabled()
             ->setFiltersVisibilityStatus(true)
-            ->setBulkActionsDisabled();
+            ->setEmptyMessage('Tidak ada data pengembalian investasi');
     }
 
     public function filters(): array

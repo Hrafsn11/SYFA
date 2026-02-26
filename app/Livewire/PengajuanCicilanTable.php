@@ -17,9 +17,7 @@ class PengajuanCicilanTable extends DataTableComponent
 
     private const BADGE_COLORS_PEMBIAYAAN = [
         'Invoice Financing' => 'primary',
-        'PO Financing' => 'success',
         'Installment' => 'warning',
-        'Factoring' => 'info',
     ];
 
     private const BADGE_COLORS_STATUS = [

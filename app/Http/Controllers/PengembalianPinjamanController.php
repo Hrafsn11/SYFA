@@ -65,9 +65,6 @@ class PengembalianPinjamanController extends Controller
                     if ($jenisPembiayaan === 'Invoice Financing') {
                         $labelField = $b->no_invoice;
                         $nilaiAsli = (float) $b->nilai_pinjaman;
-                    } elseif (in_array($jenisPembiayaan, ['PO Financing', 'Factoring'])) {
-                        $labelField = $b->no_kontrak;
-                        $nilaiAsli = (float) $b->nilai_pinjaman;
                     } else {
                         $labelField = $b->no_invoice ?? $b->no_kontrak;
                         $nilaiAsli = (float) $b->nilai_pinjaman;
@@ -133,6 +130,13 @@ class PengembalianPinjamanController extends Controller
                 $pengajuan = PengajuanPeminjaman::findOrFail($validated['kode_peminjaman']);
                 $tanggalPencairan = $this->parseDate($validated['tanggal_pencairan']);
 
+                // 1b. Validasi: total pembayaran tidak boleh melebihi total sisa pinjaman
+                $totalSisaPinjaman = ($validated['total_pinjaman'] ?? 0) + ($validated['total_bunga'] ?? 0);
+                $totalBayar = collect($pengembalianInvoices)->sum(fn($i) => (float) (is_array($i) ? ($i['nominal'] ?? 0) : ($i->nominal ?? 0)));
+                if ($totalBayar > $totalSisaPinjaman) {
+                    return Response::error('Total pembayaran (Rp ' . number_format($totalBayar, 0, ',', '.') . ') melebihi total sisa pinjaman (Rp ' . number_format($totalSisaPinjaman, 0, ',', '.') . ')');
+                }
+
                 // 2. Create Parent Record
                 $pengembalian = PengembalianPinjaman::create([
                     'id_pengajuan_peminjaman' => $validated['kode_peminjaman'],
@@ -153,10 +157,17 @@ class PengembalianPinjamanController extends Controller
                 ]);
 
                 // 3. Update sisa bayar di pengajuan_peminjaman
-                $pengajuan->update([
+                $updateData = [
                     'sisa_bayar_pokok'  => $validated['sisa_utang'],
                     'sisa_bunga'   => $validated['sisa_bunga'],
-                ]);
+                ];
+
+                // Jika sudah lunas (sisa pokok dan bunga = 0), update status menjadi 'Lunas'
+                if ($validated['sisa_utang'] <= 0 && $validated['sisa_bunga'] <= 0) {
+                    $updateData['status'] = 'Lunas';
+                }
+
+                $pengajuan->update($updateData);
 
                 // 4. Process Invoices & Reports
                 $this->processInvoices($pengembalian, $pengembalianInvoices, $validated, $pengajuan);
@@ -355,10 +366,20 @@ class PengembalianPinjamanController extends Controller
             // Update sisa bayar di pengajuan_peminjaman
             $pengajuan = PengajuanPeminjaman::find($pengembalian->id_pengajuan_peminjaman);
             if ($pengajuan) {
-                $pengajuan->update([
+                $updateData = [
                     'sisa_bayar_pokok'  => $validated['sisa_utang'],
                     'sisa_bunga'   => $validated['sisa_bunga'],
-                ]);
+                ];
+
+                // Jika sudah lunas (sisa pokok dan bunga = 0), update status menjadi 'Lunas'
+                // Jika belum lunas, kembalikan ke 'Dana Sudah Dicairkan' (untuk kasus edit koreksi)
+                if ($validated['sisa_utang'] <= 0 && $validated['sisa_bunga'] <= 0) {
+                    $updateData['status'] = 'Lunas';
+                } else {
+                    $updateData['status'] = 'Dana Sudah Dicairkan';
+                }
+
+                $pengajuan->update($updateData);
             }
 
             DB::commit();

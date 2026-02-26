@@ -5,18 +5,10 @@
     <div class="col-12 col-sm-6 col-md-4 col-lg-4">
         <div class="mb-0">
             <small class="text-light fw-semibold d-block mb-1">
-                @if ($jenis_pembiayaan === 'Factoring')
-                    Total Nominal Yang Dialihkan
-                @else
-                    Nominal Pinjaman
-                @endif
+                Nominal Pinjaman
             </small>
             <p class="mb-0 text-success fw-semibold">Rp.
-                @if ($jenis_pembiayaan === 'Factoring')
-                    {{ number_format($latestHistory->nominal_yang_disetujui ?? ($nominal_pinjaman ?? 0), 0, ',', '.') }}
-                @else
-                    {{ number_format($latestHistory->nominal_yang_disetujui ?? ($nominal_pinjaman ?? 0), 0, ',', '.') }}
-                @endif
+                {{ number_format($latestHistory->nominal_yang_disetujui ?? ($nominal_pinjaman ?? 0), 0, ',', '.') }}
             </p>
         </div>
     </div>
@@ -69,7 +61,7 @@
             </div>
         </div>
     @else
-        {{-- Non-Installment Fields (Invoice Financing, PO Financing, Factoring) --}}
+        {{-- Non-Installment Fields (Invoice Financing) --}}
         <div class="col-12 col-sm-6 col-md-4 col-lg-4">
             <div class="mb-0">
                 <small class="text-light fw-semibold d-block mb-1">Harapan Tanggal Pencairan</small>

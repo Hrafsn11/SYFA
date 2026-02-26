@@ -30,7 +30,7 @@ class PenyaluranDanaInvestasiIndex extends Component
 
     public $id_penyaluran_selected;
     public $riwayat_list = [];
-    
+
     public $tanggal_input_pengembalian;
     public $bukti_input_pengembalian;
     public $catatan_pengembalian;
@@ -84,14 +84,14 @@ class PenyaluranDanaInvestasiIndex extends Component
             DB::beginTransaction();
 
             $penyaluran = \App\Models\PenyaluranDanaInvestasi::findOrFail($id);
-            
+
             $sisaBelumDikembalikan = $penyaluran->sisa_belum_dikembalikan;
 
             if ($nominal < 0) {
                 $this->dispatch('showAlert', type: 'error', message: 'Nominal yang dikembalikan tidak boleh negatif!');
                 return;
             }
-            
+
             if ($nominal > $sisaBelumDikembalikan) {
                 $this->dispatch('showAlert', type: 'error', message: 'Nominal yang dikembalikan tidak boleh lebih besar dari sisa yang belum dikembalikan (Rp ' . number_format($sisaBelumDikembalikan, 0, ',', '.') . ')!');
                 return;
@@ -110,7 +110,7 @@ class PenyaluranDanaInvestasiIndex extends Component
                 'catatan' => $this->catatan_pengembalian,
                 'diinput_oleh' => Auth::id(),
             ]);
-            
+
             $totalDikembalikan = $penyaluran->riwayatPengembalian()->sum('nominal_dikembalikan');
             $penyaluran->update([
                 'nominal_yang_dikembalikan' => $totalDikembalikan
@@ -129,9 +129,9 @@ class PenyaluranDanaInvestasiIndex extends Component
             $this->catatan_pengembalian = '';
 
             $sisaSekarang = $penyaluran->fresh()->sisa_belum_dikembalikan;
-            
+
             $this->dispatch('refreshPenyaluranDanaInvestasiTable');
-            
+
             $message = 'Nominal pengembalian berhasil disimpan!';
             if ($sisaSekarang <= 0) {
                 $message .= ' Status: LUNAS!';
@@ -139,7 +139,6 @@ class PenyaluranDanaInvestasiIndex extends Component
                 $message .= ' Sisa: Rp ' . number_format($sisaSekarang, 0, ',', '.');
             }
             $this->dispatch('pengembalian-success', message: $message);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error simpan pengembalian: ' . $e->getMessage());
@@ -156,14 +155,14 @@ class PenyaluranDanaInvestasiIndex extends Component
             DB::beginTransaction();
 
             $penyaluran = \App\Models\PenyaluranDanaInvestasi::findOrFail($id);
-            
+
             $sisaBelumDikembalikan = $penyaluran->sisa_belum_dikembalikan;
 
             if ($nominal < 0) {
                 $this->dispatch('showAlert', type: 'error', message: 'Nominal yang dikembalikan tidak boleh negatif!');
                 return;
             }
-            
+
             if ($nominal > $sisaBelumDikembalikan) {
                 $this->dispatch('showAlert', type: 'error', message: 'Nominal yang dikembalikan tidak boleh lebih besar dari sisa yang belum dikembalikan (Rp ' . number_format($sisaBelumDikembalikan, 0, ',', '.') . ')!');
                 return;
@@ -177,7 +176,7 @@ class PenyaluranDanaInvestasiIndex extends Component
                 'catatan' => $catatan,
                 'diinput_oleh' => Auth::id(),
             ]);
-            
+
             $totalDikembalikan = $penyaluran->riwayatPengembalian()->sum('nominal_dikembalikan');
             $penyaluran->update([
                 'nominal_yang_dikembalikan' => $totalDikembalikan
@@ -193,9 +192,9 @@ class PenyaluranDanaInvestasiIndex extends Component
             DB::commit();
 
             $sisaSekarang = $penyaluran->fresh()->sisa_belum_dikembalikan;
-            
+
             $this->dispatch('refreshPenyaluranDanaInvestasiTable');
-            
+
             $message = 'Nominal pengembalian berhasil disimpan!';
             if ($sisaSekarang <= 0) {
                 $message .= ' Status: LUNAS!';
@@ -203,7 +202,6 @@ class PenyaluranDanaInvestasiIndex extends Component
                 $message .= ' Sisa: Rp ' . number_format($sisaSekarang, 0, ',', '.');
             }
             $this->dispatch('pengembalian-success', message: $message);
-
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error updating nominal pengembalian: ' . $e->getMessage());
@@ -217,16 +215,16 @@ class PenyaluranDanaInvestasiIndex extends Component
     public function lihatRiwayat($id)
     {
         $this->id_penyaluran_selected = $id;
-        
+
         $penyaluran = \App\Models\PenyaluranDanaInvestasi::with(['pengajuanInvestasi', 'debitur', 'riwayatPengembalian.user'])
             ->find($id);
-        
+
         if (!$penyaluran) {
             $this->dispatch('showAlert', type: 'error', message: 'Data tidak ditemukan!');
             return;
         }
 
-        $this->riwayat_list = $penyaluran->riwayatPengembalian->map(function($item) {
+        $this->riwayat_list = $penyaluran->riwayatPengembalian->map(function ($item) {
             return [
                 'id' => $item->id_riwayat,
                 'tanggal' => $item->tanggal_pengembalian->format('d/m/Y'),

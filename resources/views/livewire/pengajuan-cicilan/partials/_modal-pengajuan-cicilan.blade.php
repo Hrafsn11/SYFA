@@ -221,7 +221,7 @@
                                         <label class="form-label">Jenis Pembiayaan <span
                                                 class="text-danger">*</span></label>
                                         <div class="row" id="jenis-pembiayaan-wrapper">
-                                            @foreach (['Invoice Financing', 'PO Financing', 'Installment', 'Factoring'] as $jenis)
+                                            @foreach (['Invoice Financing', 'Installment'] as $jenis)
                                                 <div class="col-sm mb-md-0 mb-2">
                                                     <div class="form-check custom-option custom-option-basic disabled" 
                                                          id="option_{{ str_replace(' ', '_', strtolower($jenis)) }}">
