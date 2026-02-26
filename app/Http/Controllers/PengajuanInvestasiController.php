@@ -200,7 +200,7 @@ class PengajuanInvestasiController extends Controller
                     'Submit Dokumen' => 2,
                     'Dokumen Tervalidasi' => 3,
                     'Disetujui oleh CEO SKI' => 4,
-                    'Dana Sudah Dicairkan' => 5,
+                    'Generate Kontrak' => 5,
                     'Selesai' => 6,
                 ];
                 $currentStep = $stepMapping[$status] ?? $pengajuan->current_step;
@@ -214,7 +214,7 @@ class PengajuanInvestasiController extends Controller
             ]);
 
             // Handle file upload for Dana Sudah Dicairkan
-            if ($status === 'Dana Sudah Dicairkan' && $request->hasFile('dokumen_transfer')) {
+            if ($status === 'Generate Kontrak' && $request->hasFile('dokumen_transfer')) {
                 $file = $request->file('dokumen_transfer');
                 $path = $file->store('bukti_transfer_investasi', 'public');
                 $pengajuan->update(['upload_bukti_transfer' => $path]);
@@ -236,7 +236,7 @@ class PengajuanInvestasiController extends Controller
             }
 
             // Add approval/rejection data
-            if (in_array($status, ['Dokumen Tervalidasi', 'Disetujui oleh CEO SKI', 'Dana Sudah Dicairkan', 'Selesai'])) {
+            if (in_array($status, ['Dokumen Tervalidasi', 'Disetujui oleh CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'])) {
                 $historyData['approve_by'] = Auth::id();
                 if (!isset($historyData['validasi_bagi_hasil'])) {
                     $historyData['validasi_bagi_hasil'] = 'disetujui';
@@ -478,14 +478,14 @@ class PengajuanInvestasiController extends Controller
 
                 // Update status to next step (Step 5: Generate Kontrak)
                 $pengajuan->update([
-                    'status' => 'Dana Sudah Dicairkan',
+                    'status' => 'Generate Kontrak',
                     'current_step' => 5,
                 ]);
 
-                // Create history
+                // Create history for Upload Bukti Transfer
                 HistoryStatusPengajuanInvestor::create([
                     'id_pengajuan_investasi' => $pengajuan->id_pengajuan_investasi,
-                    'status' => 'Dana Sudah Dicairkan',
+                    'status' => 'Upload Bukti Transfer',
                     'date' => now()->toDateString(),
                     'time' => now()->toTimeString(),
                     'current_step' => 5,

@@ -55,7 +55,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                     'Investor Setuju' => 'Investor Setuju',
                     'Disetujui oleh CEO SKI' => 'Disetujui oleh CEO SKI',
                     'Disetujui oleh Direktur SKI' => 'Disetujui oleh Direktur SKI',
-                    'Dana Sudah Dicairkan' => 'Dana Sudah Dicairkan',
+                    'Generate Kontrak' => 'Generate Kontrak',
                     'Ditolak' => 'Ditolak',
                     'Rejected' => 'Rejected',
                 ])
@@ -191,7 +191,7 @@ class PengajuanInvestasiTable extends DataTableComponent
                         'Investor Setuju' => 'bg-success',
                         'Disetujui oleh CEO SKI' => 'bg-success',
                         'Disetujui oleh Direktur SKI' => 'bg-success',
-                        'Dana Sudah Dicairkan' => 'bg-primary',
+                        'Generate Kontrak' => 'bg-info',
                         'Ditolak' => 'bg-danger',
                         'Rejected' => 'bg-danger',
                         default => 'bg-secondary'

@@ -212,8 +212,9 @@ class Create extends Component
             return;
         }
 
-        // Validasi Logika Masa Tenggang
-        if ($this->masa_tenggang >= $this->jangka_waktu_total) {
+        // Validasi Logika Masa Tenggang - hanya untuk metode normal (bukan special case)
+        $isSpecialCase = in_array('Pengurangan tunggakan pokok/margin', $this->restrukturisasi->jenis_restrukturisasi);
+        if (!$isSpecialCase && $this->masa_tenggang >= $this->jangka_waktu_total) {
             $this->addError('masa_tenggang', 'Masa tenggang tidak boleh melebihi atau sama dengan jangka waktu total!');
             $this->show_jadwal = false;
             return;
@@ -363,33 +364,45 @@ class Create extends Component
         $this->total_cicilan = $totalCicilan;
     }
 
-    // Khususon Pengurangan tunggakan pokok/margin
+    // Khusus: Pengurangan tunggakan pokok/margin
+    // Tidak ada bunga, tidak ada masa tenggang, tidak ada tanggal jatuh tempo.
+    // Hanya membagi rata nominal_yg_disetujui ke sejumlah bulan.
     private function calculatePenguranganTunggakanPokok()
     {
-        $totalPokok = $this->nominal_yg_disetujui;
-        $bulan = $this->jangka_waktu_total;
+        $nominal = (float) $this->nominal_yg_disetujui;
+        $bulan   = (int) $this->jangka_waktu_total;
 
-        $cicilan = $totalPokok / $bulan;
+        // Bagi rata ke setiap bulan, sisa cent masuk ke bulan terakhir
+        $cicilanPerBulan = floor($nominal / $bulan);
+        $sisa            = $nominal - ($cicilanPerBulan * $bulan);
 
-        $jadwal = [];
-        $totalMargin = 0;
+        $jadwal       = [];
+        $totalPokok   = 0;
+        $totalMargin  = 0;
         $totalCicilan = 0;
 
-        for ($i = 1; $i <= $this->jangka_waktu_total; $i++) {
-            $totalMargin += 0;
-            $totalCicilan += $cicilan;
+        for ($i = 1; $i <= $bulan; $i++) {
+            $pokok = $cicilanPerBulan + ($i === $bulan ? $sisa : 0);
+
+            $totalPokok   += $pokok;
+            $totalCicilan += $pokok;
 
             $jadwal[] = [
-                'no' => $i,
-                'pokok' => $cicilan,
-                'margin' => 0,
+                'no'                     => $i,
+                'tanggal_jatuh_tempo'    => null,
+                'tanggal_jatuh_tempo_raw'=> null,
+                'pokok'                  => $pokok,
+                'margin'                 => 0,
+                'total_cicilan'          => $pokok,
+                'catatan'                => '',
+                'is_grace_period'        => false,
             ];
         }
 
         $this->jadwal_angsuran = $jadwal;
-        $this->total_pokok = $totalPokok;
-        $this->total_margin = $totalMargin;
-        $this->total_cicilan = $totalCicilan;
+        $this->total_pokok     = $totalPokok;
+        $this->total_margin    = $totalMargin;
+        $this->total_cicilan   = $totalCicilan;
     }
 
     /**
@@ -503,18 +516,22 @@ class Create extends Component
                 ];
 
             } else {
+                // Special case: Pengurangan Tunggakan Pokok/Margin
+                // Tidak memiliki suku bunga, masa tenggang, atau tanggal mulai cicilan.
                 $filled = [
-                    'id_pengajuan_cicilan' => $this->id_pengajuan_cicilan,
-                    'metode_perhitungan' => $metodeValid,
-                    'plafon_pembiayaan' => (float) $this->plafon_pembiayaan,
-                    'jangka_waktu_total' => (int) $this->jangka_waktu_total,
-                    'nominal_yg_disetujui' => (double) $this->nominal_yg_disetujui,
-                    'total_pokok' => (float) $this->total_pokok,
-                    'total_margin' => (float) $this->total_margin,
-                    'total_cicilan' => (float) $this->total_cicilan,
-                    'status' => 'Menunggu Generate Kontrak',
-                    'created_by' => Auth::id(),
-                    'updated_by' => Auth::id(),
+                    'id_pengajuan_cicilan'  => $this->id_pengajuan_cicilan,
+                    'metode_perhitungan'    => 'Flat',   // default agar kolom NOT NULL terpenuhi
+                    'plafon_pembiayaan'     => (float) $this->plafon_pembiayaan,
+                    'suku_bunga_per_tahun'  => 0,
+                    'jangka_waktu_total'    => (int) $this->jangka_waktu_total,
+                    'masa_tenggang'         => 0,
+                    'nominal_yg_disetujui'  => (float) $this->nominal_yg_disetujui,
+                    'total_pokok'           => (float) $this->total_pokok,
+                    'total_margin'          => 0,
+                    'total_cicilan'         => (float) $this->total_cicilan,
+                    'status'                => 'Menunggu Generate Kontrak',
+                    'created_by'            => Auth::id(),
+                    'updated_by'            => Auth::id(),
                 ];
             }
 
@@ -599,17 +616,18 @@ class Create extends Component
                 ]);
             }
         } else {
+            $plafonInt = (int) $this->plafon_pembiayaan;
             $this->validate([
                 'jangka_waktu_total' => 'required|integer|min:1|max:360',
-                'nominal_yg_disetujui' => 'required|integer|min:1|max:' . $this->plafon_pembiayaan,
+                'nominal_yg_disetujui' => 'required|numeric|min:1|max:' . $plafonInt,
             ], [
                 'jangka_waktu_total.required' => 'Jangka waktu harus diisi.',
                 'jangka_waktu_total.min' => 'Jangka waktu minimal 1 bulan.',
                 'jangka_waktu_total.max' => 'Jangka waktu maksimal 360 bulan (30 tahun).',
                 'nominal_yg_disetujui.required' => 'Nominal yang Disetujui harus diisi.',
-                'nominal_yg_disetujui.integer' => 'Nominal harus angka.',
-                'nominal_yg_disetujui.min' => 'Nominal tidak boleh 0',
-                'nominal_yg_disetujui.max' => 'Nominal tidak boleh lebih dari plafon',
+                'nominal_yg_disetujui.numeric' => 'Nominal harus berupa angka.',
+                'nominal_yg_disetujui.min' => 'Nominal tidak boleh 0.',
+                'nominal_yg_disetujui.max' => 'Nominal tidak boleh melebihi plafon (Rp ' . number_format($plafonInt, 0, ',', '.') . ').',
             ]);
         }
     }

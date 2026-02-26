@@ -64,9 +64,10 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Plafon Pembiayaan (Rp) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('plafon_pembiayaan') is-invalid @enderror"
-                            wire:model="plafon_pembiayaan" step="0.01" min="0" readonly
-                            @if ($isEdit) readonly style="background-color: #f5f5f9;" @endif>
+                        <input type="text" class="form-control @error('plafon_pembiayaan') is-invalid @enderror"
+                            value="{{ $plafon_pembiayaan ? 'Rp ' . number_format($plafon_pembiayaan, 0, ',', '.') : '' }}"
+                            readonly style="background-color: #f5f5f9;">
+                        <input type="hidden" wire:model="plafon_pembiayaan">
                         @error('plafon_pembiayaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -186,10 +187,14 @@
 
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Nominal yang Disetujui <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control @error('nominal_yg_disetujui') is-invalid @enderror"
-                            wire:model.live="nominal_yg_disetujui" min="1">
+                        <div wire:ignore>
+                            <input type="text" id="nominal_yg_disetujui_input" class="form-control"
+                                placeholder="Rp 0"
+                                value="{{ $nominal_yg_disetujui ? 'Rp ' . number_format($nominal_yg_disetujui, 0, ',', '.') : '' }}">
+                        </div>
+                        <input type="hidden" wire:model.live="nominal_yg_disetujui">
                         @error('nominal_yg_disetujui')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -605,6 +610,13 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
+            // Format nominal_yg_disetujui as Rupiah
+            $(document).on('input', '#nominal_yg_disetujui_input', function () {
+                const raw = $(this).val().replace(/[^0-9]/g, '');
+                $(this).val(raw ? 'Rp ' + parseInt(raw).toLocaleString('id-ID') : '');
+                @this.set('nominal_yg_disetujui', raw ? parseInt(raw) : null);
+            });
+
             // Init Datepicker
             $('#tgl_mulai_cicilan').datepicker({
                 format: 'yyyy-mm-dd',

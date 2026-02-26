@@ -1,5 +1,5 @@
-<div>
-    <div wire:ignore>
+<div wire:ignore>
+    <div>
         <div class="row">
             <div class="col-12">
                 <div class="mb-4 d-flex justify-content-between align-items-center">
