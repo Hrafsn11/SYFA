@@ -42,14 +42,12 @@ class ArPerbulanService
             $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth();
             
             $jumlahPinjaman = PengajuanPeminjaman::where('pengajuan_peminjaman.id_debitur', $id_debitur)
-                ->where('pengajuan_peminjaman.status', 'Dana Sudah Dicairkan')
-                ->join('history_status_pengajuan_pinjaman', function($join) use ($endOfMonth) {
-                    $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'history_status_pengajuan_pinjaman.id_pengajuan_peminjaman')
-                        ->whereNotNull('history_status_pengajuan_pinjaman.tanggal_pencairan')
-                        ->whereDate('history_status_pengajuan_pinjaman.tanggal_pencairan', '<=', $endOfMonth);
+                ->whereIn('pengajuan_peminjaman.status', ['Dana Sudah Dicairkan', 'Lunas'])
+                ->whereHas('historyStatus', function($query) use ($endOfMonth) {
+                    $query->whereNotNull('tanggal_pencairan')
+                          ->whereDate('tanggal_pencairan', '<=', $endOfMonth);
                 })
-                ->distinct()
-                ->count('pengajuan_peminjaman.id_pengajuan_peminjaman');
+                ->count();
             $arPerbulan = ArPerbulan::updateOrCreate(
                 [
                     'id_debitur' => $id_debitur,
@@ -97,15 +95,14 @@ class ArPerbulanService
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth();
 
         $result = PengajuanPeminjaman::where('pengajuan_peminjaman.id_debitur', $id_debitur)
-            ->where('pengajuan_peminjaman.status', 'Dana Sudah Dicairkan')
-            ->join('history_status_pengajuan_pinjaman', function($join) use ($endOfMonth) {
-                $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'history_status_pengajuan_pinjaman.id_pengajuan_peminjaman')
-                    ->whereNotNull('history_status_pengajuan_pinjaman.tanggal_pencairan')
-                    ->whereDate('history_status_pengajuan_pinjaman.tanggal_pencairan', '<=', $endOfMonth);
+            ->whereIn('pengajuan_peminjaman.status', ['Dana Sudah Dicairkan', 'Lunas'])
+            ->whereHas('historyStatus', function($query) use ($endOfMonth) {
+                $query->whereNotNull('tanggal_pencairan')
+                      ->whereDate('tanggal_pencairan', '<=', $endOfMonth);
             })
             ->selectRaw('
-                COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) as total_pokok,
-                COALESCE(SUM(DISTINCT COALESCE(pengajuan_peminjaman.total_bunga_saat_ini, pengajuan_peminjaman.total_bunga)), 0) as total_bunga
+                COALESCE(SUM(pengajuan_peminjaman.total_pinjaman), 0) as total_pokok,
+                COALESCE(SUM(COALESCE(pengajuan_peminjaman.total_bunga_saat_ini, pengajuan_peminjaman.total_bunga)), 0) as total_bunga
             ')
             ->first();
 

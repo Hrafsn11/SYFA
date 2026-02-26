@@ -148,7 +148,7 @@ class PengajuanPinjamanTable extends DataTableComponent
 
             Column::make('Tanggal Dicairkan')
                 ->label(function ($row) {
-                    if ($row->status !== 'Dana Sudah Dicairkan') {
+                    if (!in_array($row->status, ['Dana Sudah Dicairkan', 'Lunas'])) {
                         return '<div class="text-center"><span class="text-muted">-</span></div>';
                     }
 

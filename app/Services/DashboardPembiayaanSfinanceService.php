@@ -83,8 +83,8 @@ class DashboardPembiayaanSfinanceService
         $pembayaranStats = $this->calculateStats($totalPembayaranMasukPrevious, $totalPembayaranMasuk);
 
         // 3. Total Sisa Belum Terbayar
-        $totalSisaBelumTerbayar = $this->getTotalSisaBelumTerbayar($endOfMonth);
-        $totalSisaBelumTerbayarPrevious = $this->getTotalSisaBelumTerbayar($endOfPreviousMonth);
+        $totalSisaBelumTerbayar = $totalDisbursement - $totalPembayaranMasuk;
+        $totalSisaBelumTerbayarPrevious = $totalDisbursementPrevious - $totalPembayaranMasukPrevious;
         $sisaStats = $this->calculateStats($totalSisaBelumTerbayarPrevious, $totalSisaBelumTerbayar);
 
         // 4. Total Outstanding Piutang
@@ -155,12 +155,10 @@ class DashboardPembiayaanSfinanceService
 
     private function getTotalDisbursement(Carbon $startDate, Carbon $endDate): float
     {
-        $query = PengajuanPeminjaman::where('pengajuan_peminjaman.status', 'Dana Sudah Dicairkan')
-            ->join('history_status_pengajuan_pinjaman', function ($join) use ($startDate, $endDate) {
-                $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'history_status_pengajuan_pinjaman.id_pengajuan_peminjaman')
-                    ->whereIn('history_status_pengajuan_pinjaman.current_step', [3, 4, 6])
-                    ->whereNotNull('history_status_pengajuan_pinjaman.tanggal_pencairan')
-                    ->whereBetween('history_status_pengajuan_pinjaman.tanggal_pencairan', [$startDate, $endDate]);
+        $query = PengajuanPeminjaman::whereIn('pengajuan_peminjaman.status', ['Dana Sudah Dicairkan', 'Lunas'])
+            ->whereHas('historyStatus', function ($query) use ($startDate, $endDate) {
+                $query->whereNotNull('tanggal_pencairan')
+                    ->whereBetween('tanggal_pencairan', [$startDate, $endDate]);
             });
 
         // Apply restriction for Debitur
@@ -170,7 +168,7 @@ class DashboardPembiayaanSfinanceService
             return 0.0;
         }
 
-        $result = $query->selectRaw('COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) + COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bunga), 0) as total')
+        $result = $query->selectRaw('COALESCE(SUM(pengajuan_peminjaman.total_pinjaman), 0) + COALESCE(SUM(pengajuan_peminjaman.total_bunga), 0) as total')
             ->first();
         return (float)($result->total ?? 0);
     }
@@ -198,40 +196,6 @@ class DashboardPembiayaanSfinanceService
         return (float)($result->total ?? 0);
     }
 
-    private function getTotalSisaBelumTerbayar(Carbon $endDate): float
-    {
-        $baseQuery = DB::table('pengembalian_pinjaman')
-            ->whereDate('pengembalian_pinjaman.created_at', '<=', $endDate);
-
-        // Apply restriction for Debitur
-        if ($this->isRestricted && $this->debiturId) {
-            $baseQuery->join('pengajuan_peminjaman as pm_filter', 'pengembalian_pinjaman.id_pengajuan_peminjaman', '=', 'pm_filter.id_pengajuan_peminjaman')
-                ->where('pm_filter.id_debitur', $this->debiturId);
-        } elseif ($this->isRestricted && !$this->debiturId) {
-            return 0.0;
-        }
-
-        $latestPerPengajuan = $baseQuery->selectRaw('MAX(pengembalian_pinjaman.ulid) as latest_ulid, pengembalian_pinjaman.id_pengajuan_peminjaman')
-            ->groupBy('pengembalian_pinjaman.id_pengajuan_peminjaman')
-            ->pluck('latest_ulid')
-            ->toArray();
-
-        if (empty($latestPerPengajuan)) return 0.0;
-
-        $query = DB::table('pengembalian_pinjaman as pp')
-            ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
-            ->where('pm.status', 'Dana Sudah Dicairkan')
-            ->whereIn('pp.ulid', $latestPerPengajuan);
-
-        // Apply restriction for Debitur
-        if ($this->isRestricted && $this->debiturId) {
-            $query->where('pm.id_debitur', $this->debiturId);
-        }
-
-        $result = $query->selectRaw('COALESCE(SUM(pp.sisa_bayar_pokok), 0) + COALESCE(SUM(pp.sisa_bunga), 0) as total')
-            ->first();
-        return (float)($result->total ?? 0);
-    }
 
     private function getTotalOutstandingPiutang(Carbon $endDate): float
     {
@@ -265,12 +229,10 @@ class DashboardPembiayaanSfinanceService
         $startOfMonth = Carbon::create($tahun, $bulanInt, 1)->startOfMonth();
         $endOfMonth = Carbon::create($tahun, $bulanInt, 1)->endOfMonth();
 
-        $query = PengajuanPeminjaman::where('pengajuan_peminjaman.status', 'Dana Sudah Dicairkan')
-            ->join('history_status_pengajuan_pinjaman', function ($join) use ($startOfMonth, $endOfMonth) {
-                $join->on('pengajuan_peminjaman.id_pengajuan_peminjaman', '=', 'history_status_pengajuan_pinjaman.id_pengajuan_peminjaman')
-                    ->whereIn('history_status_pengajuan_pinjaman.current_step', [3, 4, 6])
-                    ->whereNotNull('history_status_pengajuan_pinjaman.tanggal_pencairan')
-                    ->whereBetween('history_status_pengajuan_pinjaman.tanggal_pencairan', [$startOfMonth, $endOfMonth]);
+        $query = PengajuanPeminjaman::whereIn('pengajuan_peminjaman.status', ['Dana Sudah Dicairkan', 'Lunas'])
+            ->whereHas('historyStatus', function ($query) use ($startOfMonth, $endOfMonth) {
+                $query->whereNotNull('tanggal_pencairan')
+                    ->whereBetween('tanggal_pencairan', [$startOfMonth, $endOfMonth]);
             })
             ->join('master_debitur_dan_investor as md', 'pengajuan_peminjaman.id_debitur', '=', 'md.id_debitur');
 
@@ -281,7 +243,7 @@ class DashboardPembiayaanSfinanceService
             return ['categories' => [], 'pokok' => [], 'bunga' => []];
         }
 
-        $result = $query->selectRaw('md.nama as debitur, COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_pinjaman), 0) as pokok, COALESCE(SUM(DISTINCT pengajuan_peminjaman.total_bunga), 0) as bunga')
+        $result = $query->selectRaw('md.nama as debitur, COALESCE(SUM(pengajuan_peminjaman.total_pinjaman), 0) as pokok, COALESCE(SUM(pengajuan_peminjaman.total_bunga), 0) as bunga')
             ->groupBy('md.id_debitur', 'md.nama')
             ->orderBy('md.nama')
             ->get();
@@ -351,7 +313,7 @@ class DashboardPembiayaanSfinanceService
             ->selectRaw('COALESCE(SUM(pp.sisa_bunga), 0) as bunga')
             ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
             ->join('master_debitur_dan_investor as md', 'pm.id_debitur', '=', 'md.id_debitur')
-            ->where('pm.status', 'Dana Sudah Dicairkan')
+            ->whereIn('pm.status', ['Dana Sudah Dicairkan', 'Lunas'])
             ->whereDate('pp.created_at', '<=', $endOfMonth)
             ->whereRaw('pp.ulid IN (SELECT MAX(pp2.ulid) FROM pengembalian_pinjaman pp2 WHERE pp2.id_pengajuan_peminjaman = pp.id_pengajuan_peminjaman AND DATE(pp2.created_at) <= ?)', [$endOfMonth->toDateString()]);
 
@@ -513,7 +475,7 @@ class DashboardPembiayaanSfinanceService
             ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
             ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
             ->join('master_debitur_dan_investor as md', 'pm.id_debitur', '=', 'md.id_debitur')
-            ->where('pm.status', 'Dana Sudah Dicairkan')
+            ->whereIn('pm.status', ['Dana Sudah Dicairkan', 'Lunas'])
             ->whereMonth('rp.created_at', $bulanInt)
             ->whereYear('rp.created_at', $tahun);
 
@@ -534,7 +496,7 @@ class DashboardPembiayaanSfinanceService
                 ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
                 ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
                 ->where('pm.id_debitur', $debitur->id_debitur)
-                ->where('pm.status', 'Dana Sudah Dicairkan')
+                ->whereIn('pm.status', ['Dana Sudah Dicairkan', 'Lunas'])
                 ->whereMonth('rp.created_at', $bulanInt)
                 ->whereYear('rp.created_at', $tahun)
                 ->select('rp.due_date', 'rp.created_at as tanggal_pembayaran', 'rp.nilai_total_pengembalian')

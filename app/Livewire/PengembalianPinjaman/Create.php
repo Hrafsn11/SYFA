@@ -409,6 +409,21 @@ class Create extends Component
             return;
         }
 
+        // Validasi: nominal tidak boleh melebihi total sisa pinjaman
+        $totalSisaPinjaman = ($this->total_pinjaman ?? 0) + ($this->total_bunga ?? 0);
+        $totalBayarLainnya = collect($this->pengembalian_invoices)
+            ->filter(fn($item, $idx) => $editingIndex === null || $idx != $editingIndex)
+            ->sum('nominal');
+        $maksimalBayar = $totalSisaPinjaman - $totalBayarLainnya;
+
+        if ($nominal > $maksimalBayar) {
+            $this->dispatch('alert', [
+                'type' => 'error',
+                'message' => 'Nominal melebihi total sisa pinjaman. Maksimal: Rp ' . number_format($maksimalBayar, 0, ',', '.')
+            ]);
+            return;
+        }
+
         if ($editingIndex === null && !$this->modalFile) {
             $this->dispatch('alert', ['type' => 'error', 'message' => 'Bukti pembayaran harus diupload']);
             return;

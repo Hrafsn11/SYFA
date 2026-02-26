@@ -347,7 +347,11 @@ trait ApprovalActions
                 $pengajuan->update([
                     'tanggal_jatuh_tempo' => $tanggalJatuhTempo->format('Y-m-d'),
                     'sisa_bayar_pokok'    => $pengajuan->sisa_bayar_pokok ?? $pengajuan->total_pinjaman,
+                    'sisa_bunga'          => $pengajuan->sisa_bunga ?? $pengajuan->total_bunga,
                 ]);
+
+                // Update pencatatan Laporan Tagihan Bulanan / AR Perbulan
+                app(\App\Services\ArPerbulanService::class)->updateAROnPencairan($pengajuan->id_debitur, $pencairan);
             }
         });
     }

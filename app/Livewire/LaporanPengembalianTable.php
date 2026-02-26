@@ -156,7 +156,7 @@ class LaporanPengembalianTable extends DataTableComponent
                 })
                 ->html(),
 
-            Column::make('Total Bulan Pemakaian', 'total_bulan_pemakaian')
+            Column::make('Total hari Pemakaian', 'total_bulan_pemakaian')
                 ->sortable()
                 ->format(fn($value) => '<div class="text-center">' . ($value ?: '-') . '</div>')
                 ->html(),
