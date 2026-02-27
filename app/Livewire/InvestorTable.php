@@ -192,7 +192,7 @@ class InvestorTable extends DataTableComponent
                 ->label(function ($row) {
                     $this->setUrlLoadData('get_data_' . $row->id_debitur, 'master-data.debitur-investor.edit', ['id' => $row->id_debitur, 'callback' => 'editData']);
 
-                    return view('livewire.master-data-debitur-investor.partials.investor-table-actions', [
+                    return view('livewire.master-data.debitur-dan-investor.components.investor-table-actions', [
                         'id' => $row->id_debitur,
                         'status' => $row->status
                     ]);

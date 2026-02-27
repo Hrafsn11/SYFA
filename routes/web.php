@@ -126,18 +126,9 @@ Route::middleware([
 
     // Detail restrukturisasi menggunakan Controller dengan Pure AJAX (bukan Livewire component)
     Route::get('detail-restrukturisasi/{id}', [\App\Http\Controllers\PengajuanCicilanController::class, 'show'])->name('detail-restrukturisasi');
-
-    // Pengembalian Pinjaman - Migrated to Livewire (see routes/livewire_route.php)
-    // Index and Create routes are handled by Livewire components
     Route::post('pengembalian/store', [PengembalianPinjamanController::class, 'store'])->name('pengembalian.store');
     Route::get('pengembalian/export-pdf', [PengembalianPinjamanController::class, 'exportPdf'])->name('pengembalian.export-pdf');
 
-    // Debitur Piutang - Migrated to Livewire (see routes/livewire_route.php)
-    // Route::get('riwayat-tagihan', function () {
-    //     return view('livewire.riwayat-tagihan.index');
-    // })->name('riwayat-tagihan.index');
-
-    // AJAX endpoints for Debitur Piutang modals (Table 2 & 3)
     Route::get('riwayat-tagihan/histori', [App\Http\Controllers\RiwayatTagihanController::class, 'getHistoriPembayaran'])->name('riwayat-tagihan.histori');
     Route::get('riwayat-tagihan/summary', [App\Http\Controllers\RiwayatTagihanController::class, 'getSummaryData'])->name('riwayat-tagihan.summary');
 
@@ -146,7 +137,6 @@ Route::middleware([
     Route::post('laporan-tagihan-bulanan/update', [LaporanTagihanBulananController::class, 'updateAR'])->name('laporan-tagihan-bulanan.update');
 
     // AR Performance - Migrated to Livewire (see routes/livewire_route.php)
-    // Main route moved to Livewire
     // Route::get('monitoring-pembayaran', [MonitoringPembayaranController::class, 'index'])->name('monitoring-pembayaran.index');
 
     // AJAX endpoints (still needed for modal)
@@ -216,7 +206,7 @@ Route::middleware([
     Route::get('config-matrix-pinjaman/{id}/edit', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'edit'])->name('config-matrix-pinjaman.edit');
     Route::put('config-matrix-pinjaman/{id}', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'update'])->name('config-matrix-pinjaman.update');
     Route::delete('config-matrix-pinjaman/{id}', [\App\Http\Controllers\ConfigMatrixPinjamanController::class, 'destroy'])->name('config-matrix-pinjaman.destroy');
-    Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
+    // Route::get('config-matrix-score', ConfigMatrixScore::class)->name('matrixscore');
 
     // Master Debitur dan Investor
     Route::prefix('master-data/debitur-investor')->name('master-data.debitur-investor.')->group(function () {

@@ -5,7 +5,6 @@ namespace App\Helpers;
 class ModuleHelper
 {
     const MODULE_SFINANCE = 'sfinance';
-    const MODULE_SFINLOG = 'sfinlog';
     const MODULE_MASTER_DATA = 'master-data';
     const MODULE_PORTOFOLIO = 'portofolio';
 
@@ -26,8 +25,6 @@ class ModuleHelper
             
             if (str_starts_with($uri, 'sfinance')) {
                 return self::MODULE_SFINANCE;
-            } elseif (str_starts_with($uri, 'sfinlog')) {
-                return self::MODULE_SFINLOG;
             } elseif (str_starts_with($uri, 'master-data') || str_starts_with($uri, 'config-')) {
                 return self::MODULE_MASTER_DATA;
             } elseif (str_starts_with($uri, 'portofolio')) {
@@ -43,7 +40,7 @@ class ModuleHelper
      */
     public static function setActiveModule(string $module): void
     {
-        if (in_array($module, [self::MODULE_SFINANCE, self::MODULE_SFINLOG, self::MODULE_MASTER_DATA, self::MODULE_PORTOFOLIO])) {
+        if (in_array($module, [self::MODULE_SFINANCE, self::MODULE_MASTER_DATA, self::MODULE_PORTOFOLIO])) {
             session(['active_module' => $module]);
         }
     }
@@ -54,14 +51,6 @@ class ModuleHelper
     public static function isSFinance(): bool
     {
         return self::getCurrentModule() === self::MODULE_SFINANCE;
-    }
-
-    /**
-     * Check if current module is SFinlog
-     */
-    public static function isSFinlog(): bool
-    {
-        return self::getCurrentModule() === self::MODULE_SFINLOG;
     }
 
     /**
@@ -89,7 +78,6 @@ class ModuleHelper
         
         return match($module) {
             self::MODULE_SFINANCE => 'SFinance',
-            self::MODULE_SFINLOG => 'SFinlog',
             self::MODULE_MASTER_DATA => 'Master Data & Configuration',
             self::MODULE_PORTOFOLIO => 'Portofolio',
             default => 'SYFA'
@@ -105,7 +93,6 @@ class ModuleHelper
         
         return match($module) {
             self::MODULE_SFINANCE => 'sfinance',
-            self::MODULE_SFINLOG => 'sfinlog',
             self::MODULE_MASTER_DATA => 'master-data',
             self::MODULE_PORTOFOLIO => 'portofolio',
             default => ''

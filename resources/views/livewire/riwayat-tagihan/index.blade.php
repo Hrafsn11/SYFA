@@ -1,8 +1,8 @@
 <div>
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <h4 class="fw-bold mb-0">Debitur Piutang</h4>
-            <p class="text-muted mb-0">Data piutang debitur dan riwayat pembayaran</p>
+            <h4 class="fw-bold mb-0">Riwayat Tagihan</h4>
+            <p class="text-muted mb-0">Data riwayat tagihan</p>
         </div>
         <div class="col-md-6 text-end">
             <button wire:click="export" class="btn btn-success" wire:loading.attr="disabled">

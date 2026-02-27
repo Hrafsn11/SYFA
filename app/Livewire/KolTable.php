@@ -96,7 +96,7 @@ class KolTable extends DataTableComponent
             Column::make("Aksi")
                 ->label(function ($row) {
                     $this->setUrlLoadData('get_data_' . $row->id_kol, 'master-data.kol.edit', ['id' => $row->id_kol, 'callback' => 'editData']);
-                    return view('livewire.master-data-kol.partials.table-actions', ['id' => $row->id_kol])->render();
+                    return view('livewire.master-data.components.table-actions', ['id' => $row->id_kol])->render();
                 })
                 ->html()
                 ->excludeFromColumnSelect(),

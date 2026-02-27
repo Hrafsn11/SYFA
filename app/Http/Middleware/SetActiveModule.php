@@ -21,8 +21,6 @@ class SetActiveModule
         // Set module based on route prefix
         if (str_starts_with($uri, 'sfinance')) {
             ModuleHelper::setActiveModule(ModuleHelper::MODULE_SFINANCE);
-        } elseif (str_starts_with($uri, 'sfinlog')) {
-            ModuleHelper::setActiveModule(ModuleHelper::MODULE_SFINLOG);
         } elseif (str_starts_with($uri, 'master-data') || str_starts_with($uri, 'config-')) {
             ModuleHelper::setActiveModule(ModuleHelper::MODULE_MASTER_DATA);
         } elseif (str_starts_with($uri, 'portofolio')) {

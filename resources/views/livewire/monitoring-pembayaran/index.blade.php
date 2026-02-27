@@ -48,15 +48,8 @@
     </div>
 
     <div wire:loading.remove>
-        @if($arData->isEmpty())
-            <div class="alert alert-info" role="alert">
-                <i class="ti ti-info-circle me-2"></i>
-                Tidak ada data pembayaran untuk periode ini. Data akan muncul setelah debitur melakukan pembayaran.
-            </div>
-        @else
-            {{-- Table Component --}}
-            <livewire:monitoring-pembayaran-table :arData="$arData" :tahun="$tahun" :bulan="$bulan" :key="$tahun-$bulan" />
-        @endif
+        {{-- Table always renders; empty state is handled inside the table's @empty row --}}
+        <livewire:monitoring-pembayaran-table :arData="$arData" :tahun="$tahun" :bulan="$bulan" :key="$tahun . '-' . ($bulan ?? 'all')" />
     </div>
     
     {{-- Modal Component --}}
