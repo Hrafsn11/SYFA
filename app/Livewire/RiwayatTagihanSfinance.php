@@ -46,16 +46,13 @@ class RiwayatTagihanSfinance extends DataTableComponent
                 'pengajuan_peminjaman.total_bunga_saat_ini',
                 'pengajuan_peminjaman.sisa_bunga as sisa_bunga_pengajuan',
                 'master_debitur_dan_investor.nama as nama_debitur',
-                'first_bukti.id_bukti_peminjaman',
                 'first_bukti.nama_client as objek_jaminan',
                 'first_bukti.no_invoice',
                 'first_bukti.no_kontrak',
                 DB::raw('COALESCE(pengajuan_peminjaman.lama_pemakaian, pengembalian_pinjaman.lama_pemakaian, 0) as masa_penggunaan'),
                 'pengembalian_pinjaman.sisa_bunga as kurang_bayar_bunga',
                 'pengembalian_pinjaman.sisa_bayar_pokok as sisa_pokok',
-                'pengembalian_pinjaman.ulid as id_pengembalian_pinjaman',
                 DB::raw('(SELECT nominal_yang_disetujui FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND validasi_dokumen = "disetujui" ORDER BY created_at DESC LIMIT 1) as nilai_dicairkan'),
-                DB::raw('(SELECT id_history_status_pengajuan_pinjaman FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND validasi_dokumen = "disetujui" ORDER BY created_at DESC LIMIT 1) as id_history_dicairkan'),
                 DB::raw('(SELECT tanggal_pencairan FROM history_status_pengajuan_pinjaman WHERE id_pengajuan_peminjaman = pengajuan_peminjaman.id_pengajuan_peminjaman AND tanggal_pencairan IS NOT NULL ORDER BY created_at DESC LIMIT 1) as tanggal_pencairan'),
                 DB::raw('(SELECT SUM(nilai_total_pengembalian) FROM report_pengembalian WHERE id_pengembalian = pengembalian_pinjaman.ulid) as nilai_bayar_total'),
                 DB::raw('(SELECT MAX(created_at) FROM report_pengembalian WHERE id_pengembalian = pengembalian_pinjaman.ulid) as tanggal_bayar_terakhir'),
@@ -229,31 +226,6 @@ class RiwayatTagihanSfinance extends DataTableComponent
                 $bagiHasilPerBulan = $bagiHasil / $masaPenggunaanBulan;
                 return 'Rp ' . number_format($bagiHasilPerBulan, 0, ',', '.');
             }),
-
-            Column::make('Aksi')
-                ->label(function ($row) {
-                    if (!auth()->user()->can('riwayat_tagihan.edit')) {
-                        return '-';
-                    }
-
-                    $data = json_encode([
-                        'id_pengajuan' => $row->id_pengajuan_peminjaman,
-                        'id_bukti' => $row->id_bukti_peminjaman,
-                        'id_history' => $row->id_history_dicairkan,
-                        'id_pengembalian' => $row->id_pengembalian_pinjaman,
-                        'objek_jaminan' => $row->objek_jaminan,
-                        'nilai_dicairkan' => $row->nilai_dicairkan,
-                        'persentase_bunga' => $row->persentase_bunga,
-                        'kurang_bayar_bunga' => $row->kurang_bayar_bunga,
-                    ]);
-
-                    return '<button type="button" class="btn btn-sm btn-primary edit-debitur-piutang-btn" 
-                                data-row=\'' . htmlspecialchars($data, ENT_QUOTES) . '\'>
-                                <i class="ti ti-edit"></i>
-                            </button>';
-                })
-                ->html()
-                ->excludeFromColumnSelect(),
 
             Column::make('Subtotal Sisa Pokok + Bunga')
                 ->label(function ($row) {

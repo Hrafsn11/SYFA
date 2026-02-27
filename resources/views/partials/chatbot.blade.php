@@ -11,14 +11,14 @@
 {{-- ── Styles ────────────────────────────────────────────────────── --}}
 <style>
 :root {
-    --c-navy:       #0f1e45;
-    --c-navy-light: #162454;
-    --c-lav:        #7c6af6;
-    --c-lav-light:  #a89af9;
-    --c-lav-bg:     #eef0ff;
+    --c-navy:       #0d8f8f;
+    --c-navy-light: #0b7a7a;
+    --c-lav:        #13ABAB;
+    --c-lav-light:  #5dcece;
+    --c-lav-bg:     #e6f7f7;
     --c-surface:    #ffffff;
-    --c-bg:         #f4f5fb;
-    --c-border:     #e4e5f5;
+    --c-bg:         #f4fafa;
+    --c-border:     #d0eded;
     --c-text:       #1e2a45;
     --c-muted:      #6b7a99;
     --c-danger:     #ef4444;
@@ -27,9 +27,9 @@
     --radius-lg:    18px;
     --radius-md:    12px;
     --radius-sm:    8px;
-    --shadow-lg:    0 20px 60px rgba(15,30,69,.18);
-    --shadow-md:    0 4px 16px rgba(15,30,69,.10);
-    --shadow-sm:    0 2px 8px  rgba(15,30,69,.07);
+    --shadow-lg:    0 20px 60px rgba(19,171,171,.16);
+    --shadow-md:    0 4px 16px rgba(19,171,171,.11);
+    --shadow-sm:    0 2px 8px  rgba(19,171,171,.07);
 }
 
 /* ── Bubble Toggle ── */
@@ -38,11 +38,11 @@
     bottom: 28px;
     right: 28px;
     z-index: 9999;
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--c-lav) 0%, var(--c-navy) 100%);
-    box-shadow: 0 6px 24px rgba(124,106,246,.45);
+    background: linear-gradient(135deg, #13ABAB 0%, #0d8f8f 100%);
+    box-shadow: 0 6px 24px rgba(19,171,171,.45);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -52,9 +52,9 @@
 }
 #syfa-chat-bubble:hover {
     transform: scale(1.08);
-    box-shadow: 0 10px 32px rgba(124,106,246,.6);
+    box-shadow: 0 10px 32px rgba(19,171,171,.6);
 }
-#syfa-chat-bubble i { color: #fff; font-size: 24px; }
+#syfa-chat-bubble i { color: #fff; font-size: 22px; }
 #syfa-chat-bubble .chat-badge {
     position: absolute;
     top: 2px; right: 2px;
@@ -89,42 +89,42 @@
     to   { opacity:1; transform: translateY(0)    scale(1);   }
 }
 
-/* ── Header — Glassmorphism ── */
+/* ── Header ── */
 .chat-header {
-    background: linear-gradient(135deg, var(--c-navy) 0%, var(--c-navy-light) 100%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 15px 18px;
+    background: linear-gradient(135deg, #13ABAB 0%, #0d8f8f 100%);
+    padding: 14px 16px;
     display: flex;
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px 18px 0 0;
 }
 .chat-header-avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: rgba(124,106,246,.35);
-    border: 1.5px solid rgba(168,154,249,.5);
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.2);
+    border: 1.5px solid rgba(255,255,255,.3);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
-.chat-header-avatar i { color: var(--c-lav-light); font-size: 18px; }
-.chat-header-info h6 { color: #fff; margin: 0; font-size: 13.5px; font-weight: 700; letter-spacing:.2px; }
-.chat-header-info small { color: rgba(255,255,255,.6); font-size: 11px; display:flex; align-items:center; gap:5px; }
-.status-dot { width:7px; height:7px; border-radius:50%; background: var(--c-success); box-shadow:0 0 6px var(--c-success); display:inline-block; }
+.chat-header-avatar i { color: #fff; font-size: 17px; }
+.chat-header-info h6 { color: #fff; margin: 0; font-size: 13px; font-weight: 700; letter-spacing:.2px; line-height:1.2; }
+.chat-header-info small { color: rgba(255,255,255,.8); font-size: 10.5px; display:flex; align-items:center; gap:5px; margin-top:1px; }
+.status-dot { width:7px; height:7px; border-radius:50%; background: #7dffd4; box-shadow:0 0 6px #7dffd4; display:inline-block; animation: pulseDot 2s infinite; }
+@keyframes pulseDot { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 .chat-header-actions { margin-left: auto; display: flex; gap: 6px; }
 .chat-header-actions button {
-    background: rgba(255,255,255,.12);
-    border: 1px solid rgba(255,255,255,.15);
-    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.15);
+    border: none;
+    color: rgba(255,255,255,.9);
     width: 30px; height: 30px;
     border-radius: var(--radius-sm); cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: background .15s;
     font-size: 13px;
 }
-.chat-header-actions button:hover { background: rgba(255,255,255,.25); color:#fff; }
+.chat-header-actions button:hover { background: rgba(255,255,255,.28); color:#fff; }
 
 /* ── Messages Area ── */
 .chat-messages {
@@ -151,7 +151,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700;
 }
-.msg-avatar.bot-av  { background: linear-gradient(135deg,var(--c-lav),var(--c-navy)); color:#fff; }
+.msg-avatar.bot-av  { background: #13ABAB; color:#fff; }
 .msg-avatar.user-av { background: var(--c-lav-bg); color: var(--c-lav); border: 1.5px solid var(--c-border); }
 
 /* ── Bubbles ── */
@@ -170,10 +170,10 @@
     color: var(--c-text);
 }
 .msg-bubble.user {
-    background: linear-gradient(135deg, var(--c-lav) 0%, var(--c-navy) 100%);
+    background: #13ABAB;
     color: #fff;
     border-bottom-right-radius: 4px;
-    box-shadow: 0 3px 12px rgba(124,106,246,.3);
+    box-shadow: 0 3px 12px rgba(19,171,171,.3);
 }
 .msg-bubble.bot.animate-in {
     animation: msgFadeIn .3s ease forwards;
@@ -185,20 +185,20 @@
 /* Markdown inside bot bubble */
 .msg-bubble.bot p { margin: 0 0 6px; }
 .msg-bubble.bot p:last-child { margin-bottom: 0; }
-.msg-bubble.bot strong { color: var(--c-navy); }
+.msg-bubble.bot strong { color: #0d8f8f; }
 .msg-bubble.bot ul, .msg-bubble.bot ol { margin: 4px 0 6px 16px; padding:0; }
 .msg-bubble.bot li { margin-bottom: 3px; }
-.msg-bubble.bot h3, .msg-bubble.bot h4 { margin: 8px 0 4px; color: var(--c-navy); font-size: 13px; }
+.msg-bubble.bot h3, .msg-bubble.bot h4 { margin: 8px 0 4px; color: #0d8f8f; font-size: 13px; }
 .msg-bubble.bot hr { border: none; border-top: 1px solid var(--c-border); margin: 8px 0; }
 .msg-bubble.bot code { background: var(--c-lav-bg); color: var(--c-lav); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
 /* Markdown Table */
 .msg-bubble.bot table { width:100%; border-collapse:collapse; font-size:12px; margin:8px 0; border-radius:var(--radius-sm); overflow:hidden; box-shadow:var(--shadow-sm); }
-.msg-bubble.bot thead tr { background: var(--c-navy); color:#fff; }
+.msg-bubble.bot thead tr { background: #13ABAB; color:#fff; }
 .msg-bubble.bot th { padding:7px 10px; text-align:left; font-weight:600; white-space:nowrap; font-size:11.5px; }
 .msg-bubble.bot td { padding:6px 10px; border-bottom:1px solid var(--c-border); }
-.msg-bubble.bot tbody tr:nth-child(even) { background: var(--c-lav-bg); }
-.msg-bubble.bot tbody tr:last-child td { border-bottom:none; font-weight:700; background:#e8e6ff; }
-.msg-bubble.bot tbody tr:hover { background:#f0eeff; }
+.msg-bubble.bot tbody tr:nth-child(even) { background: #f0fdfc; }
+.msg-bubble.bot tbody tr:last-child td { border-bottom:none; font-weight:700; background:#e6f7f7; }
+.msg-bubble.bot tbody tr:hover { background:#f0fdfc; }
 
 /* ── Typing Indicator ── */
 .typing-indicator {
@@ -239,9 +239,9 @@
 }
 .quick-replies::-webkit-scrollbar { display: none; }
 .quick-reply-btn {
-    background: var(--c-surface);
-    border: 1.5px solid var(--c-lav);
-    color: var(--c-lav);
+    background: #f0fafa;
+    border: 1.5px solid #b2e5e5;
+    color: #13ABAB;
     border-radius: 20px;
     padding: 5px 14px;
     font-size: 11.5px;
@@ -253,9 +253,10 @@
     box-shadow: var(--shadow-sm);
 }
 .quick-reply-btn:hover {
-    background: var(--c-lav);
+    background: #13ABAB;
     color: #fff;
-    box-shadow: 0 3px 10px rgba(124,106,246,.3);
+    border-color: #13ABAB;
+    box-shadow: 0 3px 10px rgba(19,171,171,.3);
     transform: translateY(-1px);
 }
 
@@ -287,23 +288,23 @@
     font-family: inherit;
 }
 .chat-input-area textarea:focus {
-    border-color: var(--c-lav);
+    border-color: #13ABAB;
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(124,106,246,.12);
+    box-shadow: 0 0 0 3px rgba(19,171,171,.12);
 }
 .chat-send-btn {
-    width: 40px; height: 40px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(135deg, var(--c-lav), var(--c-navy));
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: #13ABAB;
     border: none;
     color: #fff;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    transition: opacity .15s, transform .15s, box-shadow .15s;
-    box-shadow: 0 3px 10px rgba(124,106,246,.35);
+    transition: background .15s, transform .15s, box-shadow .15s;
+    box-shadow: 0 3px 10px rgba(19,171,171,.35);
 }
-.chat-send-btn:not(:disabled):hover { transform: scale(1.05); box-shadow: 0 5px 16px rgba(124,106,246,.5); }
+.chat-send-btn:not(:disabled):hover { background: #0d8f8f; transform: scale(1.05); box-shadow: 0 5px 16px rgba(19,171,171,.5); }
 .chat-send-btn:disabled { opacity: .4; cursor: default; box-shadow: none; transform: none; }
 
 /* ── Footer branding ── */
@@ -320,7 +321,7 @@
 
 /* ── Drag ── */
 #syfa-chat-bubble { cursor: grab; }
-#syfa-chat-bubble.is-dragging { cursor: grabbing; transform: scale(1.1); box-shadow: 0 12px 36px rgba(124,106,246,.6); }
+#syfa-chat-bubble.is-dragging { cursor: grabbing; transform: scale(1.1); box-shadow: 0 12px 36px rgba(19,171,171,.6); }
 
 /* ── Resize handle ── */
 #chat-resize-handle {
@@ -348,7 +349,7 @@
 
 {{-- ── Bubble Button ───────────────────────────────────────────── --}}
 <button id="syfa-chat-bubble" title="SYFA Financial Assistant" aria-label="Buka Chatbot">
-    <i class="ti ti-chart-line"></i>
+    <i class="ti ti-message-chatbot"></i>
     <span class="chat-badge" id="chatbot-badge"></span>
 </button>
 
@@ -356,7 +357,7 @@
 <div id="syfa-chat-window" role="dialog" aria-label="SYFA Financial Assistant">
     {{-- Header --}}
     <div class="chat-header" id="chat-drag-handle">
-        <div class="chat-header-avatar"><i class="ti ti-building-bank"></i></div>
+        <div class="chat-header-avatar"><i class="ti ti-robot"></i></div>
         <div class="chat-header-info">
             <h6>SYFA Financial Assistant</h6>
             <small><span class="status-dot"></span> Aktif — Konsultan Keuangan Digital</small>
@@ -394,7 +395,7 @@
             <i class="ti ti-send" style="font-size:16px;"></i>
         </button>
     </div>
-    <div class="chat-footer-brand">Powered by SYFA · Data real-time dari sistem</div>
+    <div class="chat-footer-brand">Powered by SYFA</div>
     <div id="chat-resize-handle" title="Ubah ukuran"></div>
 </div>
 
@@ -443,7 +444,7 @@
         const avatar = document.createElement('div');
         avatar.className = 'msg-avatar ' + (role === 'bot' ? 'bot-av' : 'user-av');
         avatar.innerHTML = role === 'bot'
-            ? '<i class="ti ti-building-bank" style="font-size:13px;"></i>'
+            ? '<i class="ti ti-robot" style="font-size:13px;"></i>'
             : '<span>' + USER_INIT + '</span>';
 
         const bubble = document.createElement('div');
@@ -469,7 +470,7 @@
         row.id = 'typing-row';
         const av = document.createElement('div');
         av.className = 'msg-avatar bot-av';
-        av.innerHTML = '<i class="ti ti-building-bank" style="font-size:13px;"></i>';
+        av.innerHTML = '<i class="ti ti-robot" style="font-size:13px;"></i>';
         const ind = document.createElement('div');
         ind.className = 'typing-indicator';
         ind.innerHTML = '<span></span><span></span><span></span>';

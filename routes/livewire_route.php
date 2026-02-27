@@ -40,7 +40,6 @@ Route::get('monitoring-pembayaran', \App\Livewire\ArPerformanceIndex::class)->na
 
 // Debitur Piutang
 Route::get('riwayat-tagihan', \App\Livewire\DebiturPiutangIndex::class)->name('riwayat-tagihan.index');
-Route::post('riwayat-tagihan/update', [\App\Http\Controllers\RiwayatTagihanController::class, 'update'])->name('riwayat-tagihan.update');
 
 // SFinlog - Pengajuan Investasi
 Route::get('sfinlog/pengajuan-investasi', \App\Livewire\SFinlog\PengajuanInvestasiSFinlog::class)->name('sfinlog.pengajuan-investasi.index');

@@ -45,6 +45,20 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
+                        <!-- Nilai Investasi & Sisa Dana - shown after No Kontrak selected -->
+                        <div class="row g-3 mb-3" id="info-investasi-fields" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label">Nilai Investasi</label>
+                                <input type="text" class="form-control bg-light" id="input-nilai-investasi"
+                                    disabled readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Sisa Dana Tersedia</label>
+                                <input type="text" class="form-control bg-light" id="input-sisa-dana"
+                                    disabled readonly>
+                            </div>
+                        </div>
+
                         <!-- Nominal yang Disalurkan -->
                         <div class="col-12 mb-3 form-group">
                             <label for="nominal_yang_disalurkan" class="form-label">
@@ -53,7 +67,7 @@
                             <input type="text" class="form-control" id="nominal_yang_disalurkan"
                                 placeholder="Ketik angka saja (contoh: 10000000)" autocomplete="off">
                             <input type="hidden" id="nominal_raw" wire:model="nominal_yang_disalurkan">
-                            <small class="text-muted" id="nilai-investasi-info"></small>
+                            <div id="nilai-investasi-info"></div>
                             <div class="invalid-feedback"></div>
                         </div>
 
@@ -205,79 +219,83 @@
 {{-- Modal Riwayat Pengembalian --}}
 <div wire:ignore.self class="modal fade" id="modalRiwayatPengembalian" tabindex="-1"
     aria-labelledby="modalRiwayatPengembalianLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalRiwayatPengembalianLabel">Riwayat Pengembalian Dana</h5>
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-2 p-2" style="background:#e6f7f5;">
+                        <i class="ti ti-refresh fs-5" style="color:#0d9488;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0" id="modalRiwayatPengembalianLabel">Riwayat Pengembalian Dana</h5>
+                        <small class="text-muted" id="riwayat_subtitle"></small>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <!-- Info Summary -->
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3">Informasi Penyaluran</h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <table class="table table-sm table-borderless">
-                                            <tr>
-                                                <td width="40%"><strong>No. Kontrak:</strong></td>
-                                                <td id="riwayat_no_kontrak">-</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Nama Perusahaan:</strong></td>
-                                                <td id="riwayat_nama_perusahaan">-</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <table class="table table-sm table-borderless">
-                                            <tr>
-                                                <td width="40%"><strong>Nominal Disalurkan:</strong></td>
-                                                <td id="riwayat_nominal_disalurkan">-</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Total Dikembalikan:</strong></td>
-                                                <td id="riwayat_total_dikembalikan" class="text-success fw-bold">-</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Sisa:</strong></td>
-                                                <td id="riwayat_sisa" class="text-danger fw-bold">-</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="row g-2 mb-4 mt-1">
+                    <div class="col-6 col-md-4">
+                        <div class="rounded-2 p-3 h-100" style="background:#f0fdfc;border:1px solid #99f6e4;">
+                            <div class="text-uppercase fw-semibold mb-1" style="font-size:0.65rem;color:#0d9488;letter-spacing:.05em;">No. Kontrak</div>
+                            <div class="fw-bold" style="color:#134e4a;font-size:0.9rem;" id="riwayat_no_kontrak">-</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="rounded-2 p-3 h-100" style="background:#f8f9fa;border:1px solid #dee2e6;">
+                            <div class="text-uppercase fw-semibold mb-1" style="font-size:0.65rem;color:#6c757d;letter-spacing:.05em;">Nama Perusahaan</div>
+                            <div class="fw-bold" style="color:#212529;font-size:0.9rem;" id="riwayat_nama_perusahaan">-</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="rounded-2 p-3 h-100" style="background:#f0fdfc;border:1px solid #99f6e4;">
+                            <div class="text-uppercase fw-semibold mb-1" style="font-size:0.65rem;color:#0d9488;letter-spacing:.05em;">Nominal Disalurkan</div>
+                            <div class="fw-bold" style="color:#134e4a;font-size:0.9rem;" id="riwayat_nominal_disalurkan">-</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <div class="rounded-2 p-3 h-100" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+                            <div class="text-uppercase fw-semibold mb-1" style="font-size:0.65rem;color:#15803d;letter-spacing:.05em;">Total Dikembalikan</div>
+                            <div class="fw-bold" style="color:#166534;font-size:0.9rem;" id="riwayat_total_dikembalikan">-</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <div class="rounded-2 p-3 h-100" style="background:#fff5f5;border:1px solid #fecaca;">
+                            <div class="text-uppercase fw-semibold mb-1" style="font-size:0.65rem;color:#dc2626;letter-spacing:.05em;">Sisa</div>
+                            <div class="fw-bold" style="color:#991b1b;font-size:0.9rem;" id="riwayat_sisa">-</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabel Riwayat -->
-                <h6 class="fw-bold mb-3">Daftar Riwayat Pengembalian</h6>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="tableRiwayatPengembalian">
-                        <thead class="table-light">
+                <div class="d-flex align-items-center mb-3">
+                    <span class="text-uppercase fw-semibold" style="font-size:0.7rem;color:#0d9488;letter-spacing:.06em;">Daftar Riwayat Pengembalian</span>
+                    <div class="flex-grow-1 ms-2" style="height:1px;background:#e2e8f0;"></div>
+                </div>
+                <div class="table-responsive rounded-2" style="border:1px solid #e2e8f0;">
+                    <table class="table table-hover align-middle mb-0" id="tableRiwayatPengembalian">
+                        <thead style="background:#f8f9fa;">
                             <tr>
-                                <th class="text-center" width="5%">No</th>
-                                <th class="text-center">Tanggal</th>
-                                <th class="text-center">Nominal</th>
-                                <th class="text-center">Bukti</th>
-                                <th class="text-center">Catatan</th>
-                                <th class="text-center">Diinput Oleh</th>
-                                <th class="text-center">Waktu Input</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;" width="5%">No</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;">Tanggal</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;">Nominal</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;">Bukti</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;">Catatan</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;">Diinput Oleh</th>
+                                <th class="text-center" style="font-size:0.75rem;font-weight:600;color:#6c757d;border-bottom:1px solid #dee2e6;">Waktu Input</th>
                             </tr>
                         </thead>
                         <tbody id="riwayat_tbody">
                             <tr>
-                                <td colspan="7" class="text-center">Tidak ada data</td>
+                                <td colspan="7" class="text-center text-muted py-4">Tidak ada data</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -411,6 +429,7 @@
                 }
                 
                 // Populate info summary
+                $('#riwayat_subtitle').text(data.no_kontrak || '');
                 $('#riwayat_no_kontrak').text(data.no_kontrak || '-');
                 $('#riwayat_nama_perusahaan').text(data.nama_perusahaan || '-');
                 $('#riwayat_nominal_disalurkan').text(data.nominal_disalurkan || '-');
@@ -427,13 +446,13 @@
                     riwayatList.forEach((item, index) => {
                         html += `
                             <tr>
-                                <td class="text-center">${index + 1}</td>
-                                <td class="text-center">${item.tanggal || '-'}</td>
-                                <td class="text-end">${item.nominal || '-'}</td>
-                                <td class="text-center">${item.bukti ? '<a href="' + item.bukti + '" target="_blank" class="btn btn-sm btn-info"><i class="ti ti-file"></i> Lihat</a>' : '-'}</td>
-                                <td>${item.catatan || '-'}</td>
-                                <td class="text-center">${item.user || '-'}</td>
-                                <td class="text-center">${item.created_at || '-'}</td>
+                                <td class="text-center" style="font-size:0.85rem;">${index + 1}</td>
+                                <td class="text-center" style="font-size:0.85rem;">${item.tanggal || '-'}</td>
+                                <td class="text-end fw-semibold" style="font-size:0.85rem;color:#16a34a;">${item.nominal || '-'}</td>
+                                <td class="text-center">${item.bukti ? '<a href="' + item.bukti + '" target="_blank" class="btn btn-sm rounded-pill px-3" style="background:#e6f7f5;color:#0d9488;border:1px solid #99f6e4;font-size:0.75rem;"><i class="ti ti-file me-1"></i>Lihat</a>' : '<span class="text-muted">-</span>'}</td>
+                                <td style="font-size:0.85rem;">${item.catatan || '-'}</td>
+                                <td class="text-center" style="font-size:0.85rem;">${item.user || '-'}</td>
+                                <td class="text-center" style="font-size:0.85rem;">${item.created_at || '-'}</td>
                             </tr>
                         `;
                     });
