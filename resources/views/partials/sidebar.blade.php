@@ -237,39 +237,14 @@
                 <span class="menu-header-text">Master Data</span>
             </li>
 
-            @can('master_data.view')
-                <li class="menu-item {{ request()->routeIs('master-data.*') ? 'open' : '' }}">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <i class="menu-icon tf-icons ti ti-database"></i>
-                        <div data-i18n="Master Data">Master Data</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item">
-                            <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
-                                class="menu-link">
-                                <div data-i18n="Sumber Pendanaan Eksternal">Sumber Pendanaan Eksternal</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}"
-                                class="menu-link">
-                                <div data-i18n="Debitur dan Investor">Debitur dan Investor</div>
-                            </a>
-                        </li>
-                        {{-- <li class="menu-item {{ request()->is('master-data/karyawan-ski*') ? 'active' : '' }}">
-                            <a href="{{ route('master-data.karyawan-ski.index') }}" class="menu-link">
-                                <div data-i18n="Master Karyawan SKI">Master Karyawan SKI</div>
-                            </a>
-                        </li> --}}
-                        <li class="menu-item {{ request()->is('master-data/cells-project') ? 'active' : '' }}">
-                            <a wire:navigate.hover href="{{ route('master-data.cells-project.index') }}"
-                                class="menu-link">
-                                <div data-i18n="List Cells Project SFinlog">List Cells Project SFinlog</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            @endcan
+            <li class="menu-item {{ request()->routeIs('master-data.debitur-investor.index') ? 'active' : '' }}">
+                <a wire:navigate.hover href="{{ route('master-data.debitur-investor.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons ti ti-database"></i>
+                    <div data-i18n="Debitur Dan Investor">Debitur Dan Investor</div>
+                </a>
+            </li>
+
+
 
             <!-- Configuration Section -->
             <li class="menu-header small text-uppercase">

@@ -11,7 +11,6 @@ Route::get('/file-preview/{filename}', [\App\Http\Controllers\FilePreviewControl
 // dashboard
 Route::get('dashboard', Dashboard::class)->name('dashboard.index');
 
-Route::get('/master-data/sumber-pendanaan-eksternal', \App\Livewire\MasterData\SumberPendanaanEksternal::class)->name('master-data.sumber-pendanaan-eksternal.index');
 Route::get('/master-data/debitur-investor', \App\Livewire\MasterData\DebiturDanInvestor::class)->name('master-data.debitur-investor.index');
 Route::get('/master-data/master-karyawan-ski', \App\Livewire\MasterData\MasterKaryawanSki::class)->name('master-data.master-karyawan-ski.index');
 
@@ -42,9 +41,6 @@ Route::get('monitoring-pembayaran', \App\Livewire\ArPerformanceIndex::class)->na
 // Debitur Piutang
 Route::get('riwayat-tagihan', \App\Livewire\DebiturPiutangIndex::class)->name('riwayat-tagihan.index');
 Route::post('riwayat-tagihan/update', [\App\Http\Controllers\RiwayatTagihanController::class, 'update'])->name('riwayat-tagihan.update');
-
-// Master Cells Project
-Route::get('/master-data/cells-project', \App\Livewire\MasterData\MasterCellsProject::class)->name('master-data.cells-project.index');
 
 // SFinlog - Pengajuan Investasi
 Route::get('sfinlog/pengajuan-investasi', \App\Livewire\SFinlog\PengajuanInvestasiSFinlog::class)->name('sfinlog.pengajuan-investasi.index');
