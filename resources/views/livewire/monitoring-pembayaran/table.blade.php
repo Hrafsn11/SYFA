@@ -17,11 +17,11 @@
     </div>
     <div class="card-body p-2">
         <div class="table-responsive">
-            <table class="table table-bordered table-hover mb-0" style="white-space: nowrap;">
+            <table class="table table-bordered table-hover mb-0 monitoring-ar-table" style="white-space: nowrap;">
                 <thead class="table-light">
                     <tr>
-                        <th class="text-center align-middle" style="width: 50px;">No</th>
-                        <th class="text-center align-middle" style="min-width: 200px;">Debitur</th>
+                        <th class="text-center align-middle" style="width: 50px; position: sticky; left: 0; z-index: 3; background-color: #f8f9fa !important; box-shadow: 2px 0 5px rgba(0,0,0,0.07);">No</th>
+                        <th class="text-center align-middle" style="min-width: 200px; position: sticky; left: 50px; z-index: 3; background-color: #f8f9fa !important; box-shadow: 2px 0 5px rgba(0,0,0,0.07);">Debitur</th>
                         <th class="text-center" style="min-width: 150px;">Belum Jatuh Tempo</th>
                         <th class="text-center" style="min-width: 120px;">By Transaction</th>
                         <th class="text-center" style="min-width: 150px;">DEL (1-30)</th>
@@ -39,8 +39,8 @@
                 <tbody>
                     @forelse($arData as $index => $debitur)
                         <tr>
-                            <td class="text-center">{{ $index + 1 }}</td>
-                            <td class="fw-semibold">{{ $debitur['nama_debitur'] }}</td>
+                            <td class="text-center sticky-col" style="position: sticky; left: 0; z-index: 2; background-color: #ffffff !important; box-shadow: 2px 0 5px rgba(0,0,0,0.07);">{{ $index + 1 }}</td>
+                            <td class="fw-semibold sticky-col" style="position: sticky; left: 50px; z-index: 2; background-color: #ffffff !important; box-shadow: 2px 0 5px rgba(0,0,0,0.07);">{{ $debitur['nama_debitur'] }}</td>
 
                             {{-- Belum Jatuh Tempo --}}
                             <td class="text-end">
@@ -188,9 +188,31 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="14" class="text-center text-muted py-4">
-                                <i class="ti ti-inbox mb-2" style="font-size: 2rem;"></i>
-                                <p class="mb-0">Tidak ada data pembayaran</p>
+                            <td colspan="14">
+                                <div class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+                                    <div class="mb-3" style="opacity: 0.25;">
+                                        <i class="ti ti-report-off" style="font-size: 3.5rem; line-height: 1;"></i>
+                                    </div>
+                                    <p class="fw-semibold mb-1" style="font-size: 1rem; color: #566a7f;">
+                                        Belum ada data pembayaran
+                                    </p>
+                                    <p class="small text-center mb-0" style="max-width: 340px; color: #8592a3;">
+                                        Tidak ada transaksi untuk periode
+                                        @if($bulan)
+                                            @php
+                                                $emptyBulanNama = [
+                                                    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+                                                    '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+                                                    '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                                                ];
+                                            @endphp
+                                            <strong>{{ $emptyBulanNama[$bulan] ?? $bulan }} {{ $tahun }}</strong>.
+                                        @else
+                                            <strong>Tahun {{ $tahun }}</strong>.
+                                        @endif
+                                        Data akan muncul setelah debitur melakukan pembayaran.
+                                    </p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -199,3 +221,38 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    /* ── Sticky NO + DEBITUR columns ─────────────────────── */
+    .monitoring-ar-table th:nth-child(1),
+    .monitoring-ar-table td:nth-child(1) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.07);
+    }
+    .monitoring-ar-table th:nth-child(2),
+    .monitoring-ar-table td:nth-child(2) {
+        position: sticky;
+        left: 50px;
+        z-index: 2;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.07);
+    }
+    /* Header cells sit above body cells */
+    .monitoring-ar-table thead th:nth-child(1),
+    .monitoring-ar-table thead th:nth-child(2) {
+        z-index: 3;
+        background: #f8f9fa !important;
+    }
+    /* Body rows: white by default */
+    .monitoring-ar-table tbody td:nth-child(1),
+    .monitoring-ar-table tbody td:nth-child(2) {
+        background-color: #ffffff !important;
+    }
+    /* Preserve hover color on sticky cells */
+    .monitoring-ar-table tbody tr:hover td.sticky-col {
+        background-color: #eef2ff !important;
+    }
+</style>
+@endpush

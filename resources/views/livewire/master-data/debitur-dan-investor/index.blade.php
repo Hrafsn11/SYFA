@@ -132,7 +132,7 @@
             if (key === 'flagging_investor') {
                 // Already handled above
                 return;
-            } else if (['nama_bank', 'id_kol'].includes(key)) {
+            } else if (['nama_bank'].includes(key)) {
                 // Select dropdown handling
                 $('#' + key).val(value).trigger('change');
             } else {

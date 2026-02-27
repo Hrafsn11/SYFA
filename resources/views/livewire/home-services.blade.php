@@ -132,7 +132,7 @@
                         <p class="text-muted mb-4 small flex-grow-1">
                             Pengaturan master data, parameter sistem, dan konfigurasi aplikasi
                         </p>
-                        <a href="{{ route('master-data.kol.index') }}" class="btn btn-warning w-100 fw-semibold">
+                        <a href="{{ route('master-data.debitur-investor.index') }}" class="btn btn-warning w-100 fw-semibold">
                             Go to Application
                         </a>
                     </div>

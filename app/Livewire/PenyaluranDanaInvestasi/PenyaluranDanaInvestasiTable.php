@@ -285,7 +285,7 @@ class PenyaluranDanaInvestasiTable extends DataTableComponent
                     return '<div class="text-center">
                         <button wire:click="showKontrakDetail(\'' . $nomorKontrak . '\')" 
                                 class="btn btn-sm btn-primary">
-                            <i class="ti ti-eye me-1"></i> Lihat Detail
+                            <i class="ti ti-file me-1"></i>
                         </button>
                     </div>';
                 })

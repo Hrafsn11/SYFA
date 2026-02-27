@@ -28,7 +28,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header p-2">
-                <h5 class="modal-title" id="modalRestrukturisasiTitle">Pengajuan Restrukturisasi</h5>
+                <h5 class="modal-title" id="modalRestrukturisasiTitle">Pengajuan Cicilan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 

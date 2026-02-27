@@ -38,9 +38,6 @@ trait FieldInputDetail
     public $lampiran_sid;
 
     #[FieldInput]
-    public $nilai_kol;
-
-    #[FieldInput]
     public $tanda_tangan;
 
     // ============================================

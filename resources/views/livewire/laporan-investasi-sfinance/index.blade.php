@@ -1,4 +1,5 @@
 <div>
+    {{-- Page Header --}}
     <div class="mb-4 d-flex justify-content-between align-items-center">
         <div>
             <h4 class="fw-bold mb-1">Laporan Investasi SFinance</h4>
@@ -6,33 +7,38 @@
         </div>
     </div>
 
-  
-    {{-- Table Card (filter inside) --}}
+    {{-- Table Card --}}
     <div class="card shadow-sm border-0">
-        {{-- Filter Bar --}}
+
+        {{-- Controls Bar --}}
         <div class="card-header bg-white border-bottom py-3">
             <div class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label small fw-semibold text-muted mb-1">Pencarian</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0">
-                            <i class="ti ti-search text-muted"></i>
-                        </span>
+
+                {{-- Search --}}
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing:.04em;font-size:.7rem;">
+                        <i class="ti ti-search me-1"></i>Pencarian
+                    </label>
+                    <div class="input-group input-group-sm">
                         <input type="text"
-                            class="form-control border-start-0 ps-0"
+                            class="form-control"
                             placeholder="Deposan, no kontrak, status..."
                             wire:model.live.debounce.400ms="globalSearch">
                         @if($globalSearch)
-                            <button class="btn btn-outline-secondary" type="button" wire:click="$set('globalSearch', '')" title="Hapus pencarian">
+                            <button class="btn btn-outline-secondary" type="button"
+                                wire:click="$set('globalSearch', '')" title="Hapus pencarian">
                                 <i class="ti ti-x"></i>
                             </button>
                         @endif
                     </div>
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-muted mb-1">Tahun</label>
-                    <select class="form-select" wire:model.live="year">
+                {{-- Tahun --}}
+                <div class="col-6 col-md-2">
+                    <label class="form-label small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing:.04em;font-size:.7rem;">
+                        <i class="ti ti-calendar me-1"></i>Tahun
+                    </label>
+                    <select class="form-select form-select-sm" wire:model.live="year">
                         <option value="">Semua Tahun</option>
                         @for ($y = date('Y') + 3; $y >= date('Y') - 10; $y--)
                             <option value="{{ $y }}">{{ $y }}</option>
@@ -40,9 +46,12 @@
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label small fw-semibold text-muted mb-1">Status</label>
-                    <select class="form-select" wire:model.live="filterStatus">
+                {{-- Status --}}
+                <div class="col-6 col-md-2">
+                    <label class="form-label small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing:.04em;font-size:.7rem;">
+                        <i class="ti ti-filter me-1"></i>Status
+                    </label>
+                    <select class="form-select form-select-sm" wire:model.live="filterStatus">
                         <option value="">Semua Status</option>
                         <option value="Aktif">Aktif</option>
                         <option value="Lunas">Lunas</option>
@@ -50,19 +59,54 @@
                     </select>
                 </div>
 
-                <div class="col-md-4 d-flex align-items-end justify-content-end gap-2">
+                {{-- Active-filter badges + Reset --}}
+                <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end flex-wrap gap-1">
+                    @if($globalSearch)
+                        <span class="badge bg-label-primary d-flex align-items-center gap-1" style="font-size:.78rem;">
+                            <i class="ti ti-search" style="font-size:.75rem;"></i>
+                            {{ Str::limit($globalSearch, 20) }}
+                        </span>
+                    @endif
+                    @if($year)
+                        <span class="badge bg-label-info d-flex align-items-center gap-1" style="font-size:.78rem;">
+                            <i class="ti ti-calendar" style="font-size:.75rem;"></i>
+                            {{ $year }}
+                        </span>
+                    @endif
+                    @if($filterStatus)
+                        <span class="badge bg-label-secondary d-flex align-items-center gap-1" style="font-size:.78rem;">
+                            <i class="ti ti-tag" style="font-size:.75rem;"></i>
+                            {{ $filterStatus }}
+                        </span>
+                    @endif
                     @if($globalSearch || $year || $filterStatus)
-                        <button class="btn btn-outline-secondary btn-sm" wire:click="clearFilters">
-                            <i class="ti ti-filter-off me-1"></i>Reset Filter
+                        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                            wire:click="clearFilters">
+                            <i class="ti ti-filter-off"></i>
+                            <span>Reset</span>
                         </button>
                     @endif
-                    <small class="text-muted">
-                    </small>
                 </div>
             </div>
         </div>
 
-        {{-- Table --}}
+        {{-- Color legend --}}
+        <div class="px-3 pt-2 pb-1 border-bottom bg-white d-flex align-items-center gap-3 flex-wrap">
+            <span class="badge-group">
+                <span class="dot dot-info"></span>
+                <span>Data Investasi</span>
+            </span>
+            <span class="badge-group">
+                <span class="dot dot-cof"></span>
+                <span>CoF Per Bulan</span>
+            </span>
+            <span class="badge-group">
+                <span class="dot dot-danger"></span>
+                <span>Pengembalian</span>
+            </span>
+        </div>
+
+        {{-- Table (scrollable) --}}
         <div class="laporan-tabel-wrapper">
             <livewire:laporan-investasi-s-finance-table
                 :year="$year"
@@ -75,7 +119,16 @@
 @push('styles')
 <style>
     /* ── Wrapper scroll ────────────────────────────────── */
-    
+    .laporan-tabel-wrapper {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+    /* Rappasoft wrapper inside — must also allow scroll */
+    .laporan-tabel-wrapper > div {
+        min-width: 0;
+    }
+
     /* ── Table base ─────────────────────────────────────── */
     #laporan-investasi-tabel {
         border-collapse: separate;
@@ -127,10 +180,10 @@
         color: #8b2e2e !important;
     }
 
-    /* ── Sticky td bg ───────────────────────────────────── */
+    /* ── Sticky td background ───────────────────────────── */
     #laporan-investasi-tabel tbody td:nth-child(-n+4) { background: #fff; }
-    #laporan-investasi-tabel tbody tr:hover td:nth-child(-n+4) { background: #f0f5ff; }
-    #laporan-investasi-tabel tbody tr:hover td { background: #f0f5ff; }
+    #laporan-investasi-tabel tbody tr:hover td:nth-child(-n+4) { background: #eef2ff; }
+    #laporan-investasi-tabel tbody tr:hover td { background: #eef2ff; }
 
     /* ── Body ───────────────────────────────────────────── */
     #laporan-investasi-tabel tbody td {
@@ -143,6 +196,40 @@
     }
     #laporan-investasi-tabel tbody tr:nth-child(odd)  { background: #fafbfc; }
     #laporan-investasi-tabel tbody tr:nth-child(even) { background: #fff; }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    #laporan-investasi-tabel tbody td[colspan] {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #a0aec0;
+        font-size: 0.875rem;
+    }
+
+    /* ── Rappasoft per-page & pagination row ─────────────── */
+    .laporan-tabel-wrapper [wire\:id] > div:first-child,
+    .laporan-tabel-wrapper .d-flex.justify-content-between {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid #e7eaf0;
+        background: #fff;
+    }
+    .laporan-tabel-wrapper .pagination {
+        margin-bottom: 0;
+    }
+    .laporan-tabel-wrapper .pagination .page-link {
+        font-size: 0.82rem;
+        padding: 0.3rem 0.6rem;
+        color: #566a7f;
+        border-color: #d9dee3;
+    }
+    .laporan-tabel-wrapper .pagination .page-item.active .page-link {
+        background-color: #696cff;
+        border-color: #696cff;
+        color: #fff;
+    }
+    .laporan-tabel-wrapper .pagination .page-link:hover {
+        background-color: #f0f1ff;
+        color: #696cff;
+    }
 
     /* ── Legend dots ────────────────────────────────────── */
     .badge-group {

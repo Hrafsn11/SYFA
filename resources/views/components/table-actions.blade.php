@@ -9,7 +9,7 @@
     @endif
     @if (isset($editUrl) && $editUrl)
         <a href="{{ $editUrl }}" class="btn btn-sm btn-outline-warning" title="Edit Program">
-            <i class="ti ti-edit"></i>
+            <i class="ti ti-receipt"></i>
         </a>
     @endif
 </div>

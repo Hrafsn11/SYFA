@@ -58,9 +58,8 @@ class InvestorTable extends DataTableComponent
     public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
-            ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor')
+            ->select('id_debitur', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor')
             ->orderBy('created_at', 'desc');
     }
 
@@ -192,7 +191,7 @@ class InvestorTable extends DataTableComponent
                 ->label(function ($row) {
                     $this->setUrlLoadData('get_data_' . $row->id_debitur, 'master-data.debitur-investor.edit', ['id' => $row->id_debitur, 'callback' => 'editData']);
 
-                    return view('livewire.master-data-debitur-investor.partials.investor-table-actions', [
+                    return view('livewire.master-data.debitur-dan-investor.components.investor-table-actions', [
                         'id' => $row->id_debitur,
                         'status' => $row->status
                     ]);

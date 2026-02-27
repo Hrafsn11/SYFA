@@ -28,10 +28,18 @@
         <!-- Modal Detail Kontrak -->
         <div wire:ignore.self class="modal fade" id="detailKontrakModal" tabindex="-1"
             aria-labelledby="detailKontrakModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="detailKontrakModalLabel">Detail Penyaluran Dana Investasi</h5>
+                    <div class="modal-header border-0 pb-0">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-2 p-2" style="background:#e6f7f5;">
+                                <i class="ti ti-building-bank fs-5" style="color:#0d9488;"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold mb-0" id="detailKontrakModalLabel">Detail Penyaluran Dana Investasi</h5>
+                                <small class="text-muted" id="detailKontrakSubtitle"></small>
+                            </div>
+                        </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="detailKontrakContent">
@@ -41,8 +49,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Tutup</button>
                     </div>
                 </div>
             </div>
@@ -100,15 +108,13 @@
             nilaiInvestasiMax = sisaDana;
 
             if (sisaDana && nilaiInvestasi) {
-                $('#nilai-investasi-info').html(`
-                                <div class="alert alert-info py-2 mt-2">
-                                    <small>
-                                        <strong>Nilai Investasi:</strong> Rp ${parseFloat(nilaiInvestasi).toLocaleString('id-ID')}<br>
-                                        <strong class="text-success">Sisa Dana Tersedia:</strong> Rp ${sisaDana.toLocaleString('id-ID')}
-                                    </small>
-                                </div>
-                            `);
+                $('#input-nilai-investasi').val('Rp ' + parseFloat(nilaiInvestasi).toLocaleString('id-ID'));
+                $('#input-sisa-dana').val('Rp ' + sisaDana.toLocaleString('id-ID'));
+                $('#info-investasi-fields').show();
+                $('#nilai-investasi-info').html('');
             } else {
+                $('#info-investasi-fields').hide();
+                $('#input-nilai-investasi, #input-sisa-dana').val('');
                 $('#nilai-investasi-info').html('');
             }
             @this.set('id_pengajuan_investasi', $(this).val());
@@ -143,6 +149,7 @@
                 $(this).addClass('is-invalid');
             } else {
                 $(this).removeClass('is-invalid');
+                $('#nilai-investasi-info').html('');
             }
         });
 
@@ -156,6 +163,8 @@
             $('#nominal_yang_disalurkan, #nominal_raw').val('');
             flatpickrPengiriman.clear();
             flatpickrPengembalian.clear();
+            $('#info-investasi-fields').hide();
+            $('#input-nilai-investasi, #input-sisa-dana').val('');
             $('#nilai-investasi-info').html('');
             nilaiInvestasiMax = 0;
 
@@ -184,34 +193,46 @@
             }
 
             let html = `
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <div class="card bg-light">
-                                        <div class="card-body">
-                                            <h6 class="fw-bold mb-3">Informasi Kontrak</h6>
-                                            <table class="table table-sm table-borderless">
-                                                <tr><td width="40%"><strong>No. Kontrak:</strong></td><td>${kontrakData.nomor_kontrak || '-'}</td></tr>
-                                                <tr><td><strong>Nama Investor:</strong></td><td>${kontrakData.nama_investor || '-'}</td></tr>
-                                                <tr><td><strong>Jumlah Investasi:</strong></td><td>Rp ${new Intl.NumberFormat('id-ID').format(kontrakData.jumlah_investasi || 0)}</td></tr>
-                                                <tr><td><strong>Lama Investasi:</strong></td><td>${kontrakData.lama_investasi || '-'} Bulan</td></tr>
-                                            </table>
-                                        </div>
+                            <p class="text-muted small fw-semibold text-uppercase mb-2" style="letter-spacing:0.05em;">Informasi Kontrak</p>
+                            <div class="row g-2 mb-4">
+                                <div class="col-6 col-md-3">
+                                    <div class="rounded-2 p-3 h-100" style="background:#f8fffe;border:1px solid #e0f2f0;">
+                                        <p class="text-muted small mb-1">No. Kontrak</p>
+                                        <p class="fw-semibold mb-0 small" style="color:#0d9488;">${kontrakData.nomor_kontrak || '-'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="rounded-2 p-3 h-100" style="background:#f8fffe;border:1px solid #e0f2f0;">
+                                        <p class="text-muted small mb-1">Nama Investor</p>
+                                        <p class="fw-semibold mb-0 small text-dark">${kontrakData.nama_investor || '-'}</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="rounded-2 p-3 h-100" style="background:#f8fffe;border:1px solid #e0f2f0;">
+                                        <p class="text-muted small mb-1">Jumlah Investasi</p>
+                                        <p class="fw-semibold mb-0" style="color:#0d9488;font-size:0.9rem;">Rp ${new Intl.NumberFormat('id-ID').format(kontrakData.jumlah_investasi || 0)}</p>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="rounded-2 p-3 h-100" style="background:#f8fffe;border:1px solid #e0f2f0;">
+                                        <p class="text-muted small mb-1">Lama Investasi</p>
+                                        <p class="fw-semibold mb-0 small text-dark">${kontrakData.lama_investasi || '-'} Bulan</p>
                                     </div>
                                 </div>
                             </div>
-                            <h6 class="fw-bold mb-3">Riwayat Penyaluran Dana</h6>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="table-light">
+                            <p class="text-muted small fw-semibold text-uppercase mb-2" style="letter-spacing:0.05em;">Riwayat Penyaluran Dana</p>
+                            <div class="table-responsive rounded-2" style="border:1px solid #e9ecef;">
+                                <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+                                    <thead style="background:#f8f9fa;">
                                         <tr>
-                                            <th class="text-center" width="5%">No</th>
-                                            <th class="text-center">Nama Perusahaan</th>
-                                            <th class="text-center">Nominal Disalurkan</th>
-                                            <th class="text-center">Nominal Dikembalikan</th>
-                                            <th class="text-center">Tanggal Pengiriman</th>
-                                            <th class="text-center">Tanggal Pengembalian</th>
-                                            <th class="text-center">Status</th>
-                                            <th class="text-center">Aksi</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold" style="width:40px;">NO</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold">NAMA PERUSAHAAN</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold text-end">NOMINAL DISALURKAN</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold text-end">NOMINAL DIKEMBALIKAN</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold">TGL PENGIRIMAN</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold">TGL PENGEMBALIAN</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold text-center">STATUS</th>
+                                            <th class="px-3 py-2 text-muted fw-semibold text-center">AKSI</th>
                                         </tr>
                                     </thead>
                                     <tbody>`;
@@ -223,22 +244,24 @@
                 const nominalDikembalikan = parseFloat(item.nominal_yang_dikembalikan || 0);
                 const sisaBelumDikembalikan = parseFloat(item.sisa_belum_dikembalikan ?? (nominalDisalurkan - nominalDikembalikan));
 
-                let statusBadge = '<span class="badge bg-label-danger">Belum Lunas</span>';
+                let statusBadge;
                 if (sisaBelumDikembalikan <= 0) {
-                    statusBadge = '<span class="badge bg-label-success">Lunas</span>';
+                    statusBadge = '<span class="badge rounded-pill px-3 py-1" style="background:#e6f7f0;color:#198754;font-size:0.75rem;">Lunas</span>';
                 } else if (nominalDikembalikan > 0) {
-                    statusBadge = '<span class="badge bg-label-warning">Sebagian Lunas</span>';
+                    statusBadge = '<span class="badge rounded-pill px-3 py-1" style="background:#fff8e6;color:#b45309;font-size:0.75rem;">Sebagian Lunas</span>';
+                } else {
+                    statusBadge = '<span class="badge rounded-pill px-3 py-1" style="background:#fff0f0;color:#dc3545;font-size:0.75rem;">Belum Lunas</span>';
                 }
 
                 html += `
                                 <tr>
-                                    <td class="text-center">${index + 1}</td>
-                                    <td>${item.nama_perusahaan || '-'}</td>
-                                    <td class="text-end">Rp ${new Intl.NumberFormat('id-ID').format(nominalDisalurkan)}</td>
-                                    <td class="text-end">Rp ${new Intl.NumberFormat('id-ID').format(nominalDikembalikan)}</td>
-                                    <td class="text-center">${item.tanggal_pengiriman_dana ? new Date(item.tanggal_pengiriman_dana).toLocaleDateString('id-ID') : '-'}</td>
-                                    <td class="text-center">${item.tanggal_pengembalian ? new Date(item.tanggal_pengembalian).toLocaleDateString('id-ID') : '-'}</td>
-                                    <td class="text-center">${statusBadge}</td>
+                                    <td class="px-3 text-center">${index + 1}</td>
+                                    <td class="px-3 fw-medium">${item.nama_perusahaan || '-'}</td>
+                                    <td class="px-3 text-end fw-medium" style="color:#0d9488;">Rp ${new Intl.NumberFormat('id-ID').format(nominalDisalurkan)}</td>
+                                    <td class="px-3 text-end">Rp ${new Intl.NumberFormat('id-ID').format(nominalDikembalikan)}</td>
+                                    <td class="px-3 text-muted small">${item.tanggal_pengiriman_dana ? new Date(item.tanggal_pengiriman_dana).toLocaleDateString('id-ID') : '-'}</td>
+                                    <td class="px-3 text-muted small">${item.tanggal_pengembalian ? new Date(item.tanggal_pengembalian).toLocaleDateString('id-ID') : '-'}</td>
+                                    <td class="px-3 text-center">${statusBadge}</td>
                                     <td class="text-center">
                                         <div class="d-flex gap-1 justify-content-center">
                                             ${canInputPengembalian && sisaBelumDikembalikan > 0 ? `
@@ -266,19 +289,24 @@
                                 </tr>`;
             });
 
+            if (kontrakData.details.length === 0) {
+                html += `<tr><td colspan="8" class="text-center text-muted py-4">Belum ada data penyaluran</td></tr>`;
+            }
+
             html += `
                                     </tbody>
-                                    <tfoot class="table-light">
+                                    <tfoot style="background:#f8f9fa;border-top:2px solid #dee2e6;">
                                         <tr>
-                                            <th colspan="2" class="text-end">Total:</th>
-                                            <th class="text-end">Rp ${new Intl.NumberFormat('id-ID').format(totalNominal)}</th>
-                                            <th colspan="5"></th>
+                                            <td colspan="2" class="px-3 py-2 fw-bold text-end">TOTAL:</td>
+                                            <td class="px-3 py-2 fw-bold text-end" style="color:#0d9488;">Rp ${new Intl.NumberFormat('id-ID').format(totalNominal)}</td>
+                                            <td colspan="5"></td>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>`;
 
             $('#detailKontrakContent').html(html);
+            $('#detailKontrakSubtitle').text(kontrakData.nomor_kontrak || '');
             const modalEl = document.getElementById('detailKontrakModal');
             if (modalEl) {
                 const modal = bootstrap.Modal.getOrCreateInstance(modalEl);

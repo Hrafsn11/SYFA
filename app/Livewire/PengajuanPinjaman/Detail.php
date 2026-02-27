@@ -105,7 +105,6 @@ class Detail extends Component
         $this->no_rekening = $this->pengajuan->no_rekening;
         $this->nama_rekening = $this->pengajuan->nama_rekening;
         $this->lampiran_sid = $this->pengajuan->lampiran_sid;
-        $this->nilai_kol = $this->pengajuan->nilai_kol;
         $this->tanda_tangan = $debitur->tanda_tangan ?? null;
     }
 

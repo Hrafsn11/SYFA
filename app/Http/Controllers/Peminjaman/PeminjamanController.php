@@ -168,7 +168,6 @@ class PeminjamanController extends Controller
         if ($jenisPembiayaan === 'Invoice Financing') {
             $rules['details']                    = 'required|array|min:1';
             $rules['lampiran_sid']               = 'nullable|file|mimes:pdf,docx,xls,xlsx,png,jpg,jpeg,rar,zip|max:2048';
-            $rules['nilai_kol']                  = 'nullable|string';
             $rules['id_instansi']                = 'nullable';
             $rules['sumber_pembiayaan']          = 'nullable';
             $rules['tujuan_pembiayaan']          = 'nullable|string';
@@ -232,7 +231,6 @@ class PeminjamanController extends Controller
                 'sumber_pembiayaan'         => $validated['sumber_pembiayaan'] ?? null,
                 'id_instansi'               => $validated['id_instansi'] ?? null,
                 'lampiran_sid'              => $lampiran_sid_path,
-                'nilai_kol'                 => $validated['nilai_kol'] ?? null,
                 'tujuan_pembiayaan'         => $validated['tujuan_pembiayaan'] ?? null,
                 'harapan_tanggal_pencairan' => isset($validated['harapan_tanggal_pencairan'])
                     ? parseCarbonDate($validated['harapan_tanggal_pencairan'])->format('Y-m-d')
@@ -322,12 +320,8 @@ class PeminjamanController extends Controller
             $masterDebitur = MasterDebiturDanInvestor::where('email', auth()->user()->email)
                 ->where('flagging', 'tidak')
                 ->where('status', 'active')
-                ->with('kol')
-                ->first();
 
-            $dataPengajuanPeminjaman['nama_bank']  = $masterDebitur->nama_bank;
             $dataPengajuanPeminjaman['no_rekening'] = $masterDebitur->no_rek;
-            $dataPengajuanPeminjaman['nilai_kol']   = $masterDebitur->kol->kol;
 
             if (empty($dataPengajuanPeminjaman['total_pinjaman'])) {
                 $dataPengajuanPeminjaman['total_pinjaman'] = $dataPengajuanPeminjaman['jenis_pembiayaan'] === 'Installment'

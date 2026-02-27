@@ -57,9 +57,8 @@ class DebiturTable extends DataTableComponent
     public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
-            ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor')
+            ->select('id_debitur', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor')
             ->orderBy('created_at', 'desc');
     }
 
@@ -144,16 +143,6 @@ class DebiturTable extends DataTableComponent
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
                 ->html(),
 
-            Column::make('KOL Perusahaan', 'id_kol')
-                ->sortable()
-                ->searchable()
-                ->format(function ($value, $row) {
-                    $kolValue = optional($row->kol)->kol ?? '-';
-
-                    return '<div class="text-center">'.$kolValue.'</div>';
-                })
-                ->html(),
-
             Column::make('Nama Bank', 'nama_bank')
                 ->sortable()
                 ->searchable()
@@ -205,7 +194,7 @@ class DebiturTable extends DataTableComponent
                 ->label(function ($row) {
                     $this->setUrlLoadData('get_data_' . $row->id_debitur, 'master-data.debitur-investor.edit', ['id' => $row->id_debitur, 'callback' => 'editData']);
 
-                    return view('livewire.master-data-debitur-investor.partials.debitur-table-actions', [
+                    return view('livewire.master-data.debitur-dan-investor.components.debitur-table-actions', [
                         'id' => $row->id_debitur,
                         'status' => $row->status
                     ]);

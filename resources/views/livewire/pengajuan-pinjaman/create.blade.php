@@ -64,13 +64,7 @@
                                 <small class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                             </div>
                             
-                            {{-- KOL HIDDEN - tidak ditampilkan
-                            <div class="col-md-6 form-group" wire:ignore>
-                                <label for="nilai_kol" class="form-label">Nilai KOL</label>
-                                <input type="text" class="form-control" id="nilai_kol" wire:model="nilai_kol" placeholder="Nilai KOL" readonly disabled>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            --}}
+                            {{-- KOL HIDDEN REMOVED --}}
                             <div class="col-md-12 mt-3 form-group" wire:ignore>
                                 <label for="tujuan_pembiayaan" class="form-label">Tujuan Pembiayaan</label>
                                 <input type="text" class="form-control" id="tujuan_pembiayaan" wire:model.blur="tujuan_pembiayaan" placeholder="Tujuan Pembiayaan"/>
