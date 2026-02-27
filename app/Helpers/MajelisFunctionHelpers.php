@@ -511,7 +511,7 @@ if (!function_exists('sendNotificationWithMail')) {
                                     $message_replaced = strip_tags($message_replaced);
 
                                     $debitur = MasterDebiturDanInvestor::where('id_debitur', $data['id_debitur'])->first();
-                                    $kol = $debitur->kol ? $debitur->kol->kol : 0;
+                                    $kol = 0; // id_kol column removed
                                     if($data['spk_number'] == 1) {
                                         if(!$debitur) {
                                             continue;

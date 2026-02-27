@@ -10,12 +10,6 @@
         </button>
     @endcan
 
-    <a href="{{ route('master-data.debitur-investor.history-kol', $id) }}" 
-       class="btn btn-sm btn-icon btn-text-info rounded-pill waves-effect" 
-       title="Lihat History KOL">
-        <i class="ti ti-history"></i>
-    </a>
-
     {{-- Button Toggle Status / Unlock --}}
     @can('master_data.delete')
         @if($status === 'active')

@@ -4,7 +4,6 @@ namespace App\Livewire\MasterData;
 
 use Livewire\Component;
 use App\Enums\BanksEnum;
-use App\Models\MasterKol;
 use Livewire\WithFileUploads;
 use App\Attributes\FieldInput;
 use App\Livewire\Traits\HasModal;
@@ -18,13 +17,13 @@ class DebiturDanInvestor extends Component
 {
     use HasUniversalFormAction, HasValidate, HasModal, WithFileUploads;
     private string $validateClass = DebiturDanInvestorRequest::class;
-    public $kol, $banks;
+    public $banks;
 
     #[ParameterIDRoute]
     public $id; // untuk edit data
     
     #[FieldInput]
-    public $nama, $kode_perusahaan, $email, $nama_bank, $deposito, $nama_ceo, $email_ceo, $nama_direktur_holding, $email_direktur_holding, $nama_komisaris, $email_komisaris, $alamat, $no_telepon, $no_rek, $npwp, $id_kol, $password, $password_confirmation, $flagging, $flagging_investor;
+    public $nama, $kode_perusahaan, $email, $nama_bank, $deposito, $nama_ceo, $email_ceo, $nama_direktur_holding, $email_direktur_holding, $nama_komisaris, $email_komisaris, $alamat, $no_telepon, $no_rek, $npwp, $password, $password_confirmation, $flagging, $flagging_investor;
 
     #[FieldInput]
     #[Renderless]
@@ -37,7 +36,6 @@ class DebiturDanInvestor extends Component
         $this->setUrlSaveData('status_master_debitur_dan_investor', 'master-data.debitur-investor.toggle-status', ["id" => "id_placeholder", "callback" => "afterAction"]);
         $this->setUrlSaveData('unlock_master_debitur_dan_investor', 'master-data.debitur-investor.unlock', ["id" => "id_placeholder", "callback" => "afterAction"]);
 
-        $this->kol = MasterKol::orderBy('id_kol', 'asc')->get();
         $this->banks = BanksEnum::getConstants();
         $this->flagging = 'tidak';
     }
@@ -63,7 +61,7 @@ class DebiturDanInvestor extends Component
         // For investor: exclude debitur-specific fields
         else {
             $listInput = array_filter($listInput, function ($value) {
-                return !in_array($value, ['nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'id_kol', 'npwp']);
+                return !in_array($value, ['nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'npwp']);
             });
         }
 
@@ -107,7 +105,6 @@ class DebiturDanInvestor extends Component
         $this->no_telepon = null;
         $this->no_rek = null;
         $this->npwp = null;
-        $this->id_kol = null;
         $this->password = null;
         $this->password_confirmation = null;
         $this->flagging = 'tidak';

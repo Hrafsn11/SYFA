@@ -100,21 +100,6 @@ class PengajuanPinjamanTable extends DataTableComponent
                 })
                 ->html(),
 
-            // Column::make('Nilai Kol', 'nilai_kol')
-            //     ->sortable()
-            //     ->searchable()
-            //     ->format(function ($value, $row) {
-            //         $kol = $row->debitur->kol->kol ?? null;
-            //         $displayValue = isset($kol) ? $kol : '-';
-
-            //         if ($displayValue === '-') {
-            //             return '<div class="text-center"><span class="text-muted">-</span></div>';
-            //         }
-
-            //         return '<div class="text-center"><span class="badge bg-danger">' . $displayValue . '</span></div>';
-            //     })
-            //     ->html(),
-
             Column::make('Status', 'status')
                 ->sortable()
                 ->searchable()

@@ -21,7 +21,6 @@ class PengajuanPeminjaman extends Model
         'no_rekening',
         'nama_rekening',
         'lampiran_sid',
-        'nilai_kol',
         'tujuan_pembiayaan',
         'jenis_pembiayaan',
         'total_pinjaman',

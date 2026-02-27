@@ -244,11 +244,6 @@
                         <div data-i18n="Master Data">Master Data</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item {{ request()->routeIs('master-data.kol.*') ? 'active' : '' }}">
-                            <a wire:navigate.hover href="{{ route('master-data.kol.index') }}" class="menu-link">
-                                <div data-i18n="KOL">KOL</div>
-                            </a>
-                        </li>
                         <li class="menu-item">
                             <a wire:navigate.hover href="{{ route('master-data.sumber-pendanaan-eksternal.index') }}"
                                 class="menu-link">

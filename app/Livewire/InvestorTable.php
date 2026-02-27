@@ -58,9 +58,8 @@ class InvestorTable extends DataTableComponent
     public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
-            ->with('kol')
             ->where('flagging', 'ya')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor')
+            ->select('id_debitur', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'deposito', 'nama_ceo', 'nama_bank', 'no_rek', 'tanda_tangan', 'flagging', 'flagging_investor')
             ->orderBy('created_at', 'desc');
     }
 

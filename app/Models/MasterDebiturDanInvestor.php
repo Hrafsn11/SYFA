@@ -20,7 +20,6 @@ class MasterDebiturDanInvestor extends Model
 
     protected $fillable = [
         'user_id',
-        'id_kol',
         'nama',
         'kode_perusahaan',
         'alamat',
@@ -49,11 +48,6 @@ class MasterDebiturDanInvestor extends Model
         'status' => 'string',
         'deposito' => 'string',
     ];
-
-    public function kol()
-    {
-        return $this->belongsTo(MasterKol::class, 'id_kol', 'id_kol');
-    }
 
     public function user()
     {

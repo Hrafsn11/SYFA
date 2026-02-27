@@ -178,7 +178,6 @@ class GlobalSearchController extends Controller
             ['title' => 'Pengembalian Investasi', 'route' => 'pengembalian-investasi.index', 'keywords' => ['pengembalian', 'investasi', 'return']],
 
             // Master Data
-            ['title' => 'Master KOL', 'route' => 'master-data.kol.index', 'keywords' => ['master', 'kol', 'kolektibilitas']],
             ['title' => 'Sumber Pendanaan Eksternal', 'route' => 'master-data.sumber-pendanaan-eksternal.index', 'keywords' => ['sumber', 'pendanaan', 'eksternal', 'external', 'funding']],
             ['title' => 'Master Debitur dan Investor', 'route' => 'master-data.debitur-investor.index', 'keywords' => ['master', 'debitur', 'investor', 'debtor']],
             ['title' => 'Master Cells Project', 'route' => 'master-data.cells-project.index', 'keywords' => ['master', 'cells', 'project', 'proyek']],

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Master;
 use App\Helpers\Response;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\MasterKol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
@@ -18,11 +17,10 @@ class DebiturDanInvestorController extends Controller
 {
     // public function index()
     // {
-    //     $kol = MasterKol::orderBy('id_kol', 'asc')->get();
     //     $banks = [
     //         'BCA','BSI','Mandiri','BRI','BNI','Danamon','Permata Bank','OCBC','Panin Bank','UOB Indonesia','CIMB Niaga'
     //     ];
-    //     return view('livewire.master-data-debitur-investor.index', compact('kol','banks'));
+    //     return view('livewire.master-data-debitur-investor.index', compact('banks'));
     // }
 
     public function store(DebiturDanInvestorRequest $request)
@@ -71,7 +69,7 @@ class DebiturDanInvestorController extends Controller
             }
 
             $debitur = MasterDebiturDanInvestor::create($validated);
-            $debitur->load('kol', 'user');
+            $debitur->load('user');
 
             DB::commit();
 
@@ -88,7 +86,7 @@ class DebiturDanInvestorController extends Controller
 
     public function edit($id)
     {
-        $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->with('kol')->firstOrFail();
+        $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->firstOrFail();
         if ($debitur->flagging == 'ya') {
             $result = [
                 'nama' => $debitur->nama,
@@ -115,7 +113,6 @@ class DebiturDanInvestorController extends Controller
                 'no_telepon' => $debitur->no_telepon,
                 'nama_bank' => $debitur->nama_bank,
                 'no_rek' => $debitur->no_rek,
-                'id_kol' => $debitur->id_kol,
                 'npwp' => $debitur->npwp,
                 // 'tanda_tangan' => $debitur->tanda_tangan
             ];
@@ -232,15 +229,6 @@ class DebiturDanInvestorController extends Controller
         } catch (\Exception $e) {
             return Response::errorCatch($e);
         }
-    }
-
-    public function historyKol($id)
-    {
-        $debitur = MasterDebiturDanInvestor::where('id_debitur', $id)->with('kol')->firstOrFail();
-
-        return view('livewire.kol-history.index', [
-            'debitur' => $debitur
-        ]);
     }
 
     public function deleteSignature($id)

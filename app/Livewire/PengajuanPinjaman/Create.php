@@ -33,7 +33,6 @@ class Create extends Component
     public $nama_bank;
     public $no_rekening;
     public $lampiran_sid_current;
-    public $nilai_kol;
     // besides installment
     public $total_pinjaman;
     public $total_bunga;
@@ -73,7 +72,6 @@ class Create extends Component
         $masterDebiturDanInvestor = MasterDebiturDanInvestor::where('email', auth()->user()->email)
             ->where('flagging', 'tidak')
             ->where('status', 'active')
-            ->with('kol')
             ->first();
 
         if (!$masterDebiturDanInvestor) {
@@ -82,7 +80,6 @@ class Create extends Component
 
         $this->nama_bank = $masterDebiturDanInvestor->nama_bank;
         $this->no_rekening = $masterDebiturDanInvestor->no_rek;
-        $this->nilai_kol = $masterDebiturDanInvestor->kol?->kol;
 
         if ($this->id !== null) $this->edit();
     }

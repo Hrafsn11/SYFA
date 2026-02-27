@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\MasterKol;
 use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use App\Models\MasterDebiturDanInvestor;
@@ -32,7 +31,6 @@ class MasterDebiturSeeder extends Seeder
             [
                 'id_debitur' => strtolower((string) Str::ulid()),
                 'user_id' => $superAdmin->id,
-                'id_kol' => MasterKol::where('kol', 0)->first()?->id_kol ?? 1,
                 'nama' => 'Super Admin',
                 'alamat' => 'Jakarta',
                 'email' => $superAdmin->email,
@@ -55,7 +53,6 @@ class MasterDebiturSeeder extends Seeder
             [
                 'id_debitur' => strtolower((string) Str::ulid()),
                 'user_id' => $superAdmin->id,
-                'id_kol' => MasterKol::where('kol', 0)->first()?->id_kol ?? 1, 
                 'nama' => 'Super Admin',
                 'alamat' => 'Jakarta',
                 'email' => $superAdmin->email,

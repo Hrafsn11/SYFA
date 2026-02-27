@@ -14,7 +14,6 @@ class Table extends DataTableComponent
 
     protected $model = LaporanInvestasi::class;
     protected $listeners = [
-        'refreshKolTable' => '$refresh'
     ];
 
     public function configure(): void

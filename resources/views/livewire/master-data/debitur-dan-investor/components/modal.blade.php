@@ -196,22 +196,6 @@
                             <div class="invalid-feedback"></div>
                         </div>
 
-                        <!-- KOL Perusahaan (Hanya untuk Debitur) -->
-                        <div class="col-12 mb-3 form-group debitur-section d-none">
-                            <label for="id_kol" class="form-label">KOL Perusahaan <span
-                                    class="text-danger">*</span></label>
-                            <select id="id_kol" class="form-select select2" wire:model.blur="id_kol">
-                                <option value="">Pilih KOL</option>
-                                @foreach ($kol as $kolItem)
-                                    <option value="{{ $kolItem->id_kol }}">{{ $kolItem->kol }}</option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted" id="kol-info-text" style="display: none;">
-                                <i class="ti ti-info-circle"></i> Debitur baru otomatis mendapat KOL 0
-                            </small>
-                            <div class="invalid-feedback"></div>
-                        </div>
-
                         <!-- Upload Tanda Tangan (Untuk Debitur dan Investor) -->
                         <div class="col-12 mb-3 form-group">
                             <label class="form-label">

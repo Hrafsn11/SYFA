@@ -57,9 +57,8 @@ class DebiturTable extends DataTableComponent
     public function builder(): Builder
     {
         return MasterDebiturDanInvestor::query()
-            ->with('kol')
             ->where('flagging', 'tidak')
-            ->select('id_debitur', 'id_kol', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor')
+            ->select('id_debitur', 'nama', 'kode_perusahaan', 'alamat', 'email', 'no_telepon', 'status', 'nama_ceo', 'email_ceo', 'nama_direktur_holding', 'email_direktur_holding', 'nama_komisaris', 'email_komisaris', 'nama_bank', 'no_rek', 'npwp', 'flagging', 'tanda_tangan', 'flagging_investor')
             ->orderBy('created_at', 'desc');
     }
 
@@ -142,16 +141,6 @@ class DebiturTable extends DataTableComponent
                 ->sortable()
                 ->searchable()
                 ->format(fn ($value) => '<div class="text-center">'.($value ?? '-').'</div>')
-                ->html(),
-
-            Column::make('KOL Perusahaan', 'id_kol')
-                ->sortable()
-                ->searchable()
-                ->format(function ($value, $row) {
-                    $kolValue = optional($row->kol)->kol ?? '-';
-
-                    return '<div class="text-center">'.$kolValue.'</div>';
-                })
                 ->html(),
 
             Column::make('Nama Bank', 'nama_bank')
