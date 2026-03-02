@@ -35,7 +35,7 @@
             @else
                 <a href="{{ route('penyesuaian-cicilan.edit', $program->id_penyesuaian_cicilan) }}"
                     class="btn btn-outline-warning">
-                    <i class="ti ti-pencil me-1"></i>Edit Program
+                    <i class="ti ti-receipt me-1"></i>Bayar Cicilan
                 </a>
             @endif
             <a href="{{ route('penyesuaian-cicilan.index') }}" class="btn btn-outline-primary">
