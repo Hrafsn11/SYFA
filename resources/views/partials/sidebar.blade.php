@@ -171,7 +171,7 @@
                     <li class="menu-item {{ RouteHelper::routeIs('laporan-pengembalian*') ? 'active' : '' }}">
                         <a wire:navigate.hover href="{{ RouteHelper::route('laporan-pengembalian.index') }}" class="menu-link">
                             <i class="menu-icon tf-icons ti ti-file-text"></i>
-                            <div data-i18n="Report Pengembalian">Report Pengembalian</div>
+                            <div data-i18n="Laporan Pengembalian">Laporan Pengembalian</div>
                         </a>
                     </li>
                 @endcan
