@@ -70,7 +70,7 @@ class Detail extends Component
     protected function loadData(): void
     {
         $this->pengajuan = PengajuanPeminjaman::with([
-            'debitur.kol',
+            'debitur',
             'instansi',
             'buktiPeminjaman'
         ])->findOrFail($this->id);
