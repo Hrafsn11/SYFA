@@ -16,40 +16,16 @@ class ChatbotService
     protected string $apiUrl;
     protected string $model;
     protected string $apiKey;
-    protected bool   $isLocal;
 
     public function __construct()
     {
-        $driver = config('services.llm.driver', 'nvidia');
-        $this->isLocal = ($driver === 'local');
-
-        match ($driver) {
-            'groq' => [
-                $this->apiUrl = 'https://api.groq.com/openai/v1/chat/completions',
-                $this->model  = 'llama-3.1-8b-instant',
-                $this->apiKey = config('services.groq.api_key', ''),
-            ],
-            'local' => [
-                $base = rtrim(config('services.lmstudio.base_url', 'http://127.0.0.1:1234'), '/'),
-                $this->apiUrl = $base . '/v1/chat/completions',
-                $this->model  = config('services.lmstudio.model', 'google/gemma-3-4b'),
-                $this->apiKey = '',
-            ],
-            'nvidia' => [
-                $this->apiUrl = 'https://integrate.api.nvidia.com/v1/chat/completions',
-                $this->model  = config('services.nvidia.model', 'moonshotai/kimi-k2.5'),
-                $this->apiKey = config('services.nvidia.api_key', ''),
-            ],
-            default => [ // kimi
-                $this->apiUrl = 'https://api.moonshot.ai/v1/chat/completions',
-                $this->model  = config('services.kimi.model', 'kimi-k2-turbo-preview'),
-                $this->apiKey = config('services.kimi.api_key', ''),
-            ],
-        };
+        $this->apiUrl = 'https://integrate.api.nvidia.com/v1/chat/completions';
+        $this->model  = config('services.nvidia.model', 'mistralai/mistral-large-3-675b-instruct-2512');
+        $this->apiKey = config('services.nvidia.api_key', '');
     }
 
     /**
-     * Kirim pesan ke Groq dengan konteks data SYFA user.
+     * Kirim pesan ke NVIDIA NIM dengan konteks data SYFA user.
      */
     public function chat(User $user, string $message, array $history = []): array
     {
@@ -57,43 +33,28 @@ class ChatbotService
         $messages     = $this->buildMessages($systemPrompt, $history, $message);
 
         try {
-            $headers = ['Content-Type' => 'application/json'];
-            if (!$this->isLocal && $this->apiKey) {
-                $headers['Authorization'] = 'Bearer ' . $this->apiKey;
-            }
-
-            $driver = config('services.llm.driver', 'nvidia');
-
-            $payload = [
-                'model'       => $this->model,
-                'messages'    => $messages,
-                'temperature' => ($driver === 'nvidia') ? 0.15 : 0.4,
+            $headers = [
+                'Content-Type'  => 'application/json',
+                'Authorization' => 'Bearer ' . $this->apiKey,
             ];
 
-            // Local  : tanpa batas — model tentukan sendiri
-            // Kimi   : 4096 (moonshot-v1-8k support 8k context)
-            // Groq   : 768 hemat kuota RPD
-            // NVIDIA : 2048, mistral-large-3
-            if ($driver === 'groq') {
-                $payload['max_tokens'] = 768;
-            } elseif ($driver === 'kimi') {
-                $payload['max_tokens'] = 4096;
-            } elseif ($driver === 'nvidia') {
-                $payload['max_tokens']         = 2048;
-                $payload['top_p']              = 1.0;
-                $payload['frequency_penalty']  = 0.0;
-                $payload['presence_penalty']   = 0.0;
-            }
+            $payload = [
+                'model'             => $this->model,
+                'messages'          => $messages,
+                'temperature'       => 0.15,
+                'max_tokens'        => 2048,
+                'top_p'             => 1.0,
+                'frequency_penalty' => 0.0,
+                'presence_penalty'  => 0.0,
+            ];
 
-            $timeout = ($this->isLocal || $driver === 'nvidia') ? 120 : 60;
-            $response = Http::timeout($timeout)
+            $response = Http::timeout(120)
                 ->withHeaders($headers)
                 ->post($this->apiUrl, $payload);
 
             if ($response->failed()) {
                 $status = $response->status();
-                $driver = config('services.llm.driver', 'nvidia');
-                Log::error("LLM API error [{$driver}]", ['status' => $status, 'body' => $response->body()]);
+                Log::error('NVIDIA NIM API error', ['status' => $status, 'body' => $response->body()]);
 
                 if ($status === 429) {
                     return [
@@ -129,10 +90,7 @@ class ChatbotService
         $peran   = $isAdmin ? 'Admin SYFA' : "Finance Officer — {$nama}";
 
         // ── 1. BASE SYSTEM ROLE (statis, selalu dikirim, ~180 token) ─────────
-        $driver  = config('services.llm.driver', 'nvidia');
-        $maxResp = ($driver === 'groq')
-            ? 'Maks respons: 4 paragraf atau 1 tabel.'
-            : 'Jawab selengkap yang diperlukan; tabel boleh penuh semua baris.';
+        $maxResp = 'Jawab selengkap yang diperlukan; tabel boleh penuh semua baris.';
 
         $base = <<<PROMPT
         Kamu adalah **SYFA Assistant**, konsultan keuangan digital internal SYFA (Captive Finance Grup Holding).
@@ -347,7 +305,7 @@ class ChatbotService
     }
 
     /**
-     * Bangun array messages untuk Groq / OpenAI-compatible API (multi-turn conversation).
+     * Bangun array messages untuk NVIDIA NIM / OpenAI-compatible API (multi-turn conversation).
      */
     protected function buildMessages(string $systemPrompt, array $history, string $newMessage): array
     {
