@@ -36,7 +36,7 @@ return [
     */
     'nvidia' => [
         'api_key' => env('NVIDIA_API_KEY'),
-        'model'   => env('NVIDIA_MODEL', 'mistralai/mistral-large-3-675b-instruct-2512'),
+        'model'   => env('NVIDIA_MODEL', 'openai/gpt-oss-120b'),
     ],
 
 ];
