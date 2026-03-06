@@ -181,7 +181,7 @@
                     'sfinance.menu.penyaluran_dana_investasi', 'sfinance.menu.laporan_investasi',
                     'sfinance.menu.pengembalian_investasi'])
                     <!-- Investasi Section -->
-                    @if(Auth::user()->role !== 'debitur')
+                    @if(Auth::user()->role !== 'Debitur')
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Investasi</span>
                         </li>

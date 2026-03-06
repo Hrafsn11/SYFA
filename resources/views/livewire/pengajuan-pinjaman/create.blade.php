@@ -48,6 +48,11 @@
                                 <input type="text" class="form-control" id="nama_rekening" wire:model.blur="nama_rekening" placeholder="Masukkan Nama Rekening">
                                 <div class="invalid-feedback"></div>
                             </div>
+                            @error('nama_rekening')
+                            <div class="col-12 mt-n2 mb-2">
+                                <div class="text-danger" style="font-size:0.875em;">{{ $message }}</div>
+                            </div>
+                            @enderror
                         </div>
     
                         {{-- khusus Invoice Financing --}}
@@ -61,6 +66,9 @@
                                 </div>
                                 <input class="form-control" type="file" id="lampiran_sid" wire:model.blur="lampiran_sid" wire:ignore>
                                 <div class="invalid-feedback" wire:ignore></div>
+                                @error('lampiran_sid')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
                                 <small class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
                             </div>
                             
@@ -70,6 +78,11 @@
                                 <input type="text" class="form-control" id="tujuan_pembiayaan" wire:model.blur="tujuan_pembiayaan" placeholder="Tujuan Pembiayaan"/>
                                 <div class="invalid-feedback"></div>
                             </div>
+                            @error('tujuan_pembiayaan')
+                            <div class="col-12 mt-1">
+                                <div class="text-danger" style="font-size:0.875em;">{{ $message }}</div>
+                            </div>
+                            @enderror
                         </div>
                         {{-- end --}}
     
@@ -86,6 +99,11 @@
                                     </div>
                                 <div class="invalid-feedback"></div>
                             </div>
+                            @error('jenis_pembiayaan')
+                            <div class="col-12 mt-1">
+                                <div class="text-danger" style="font-size:0.875em;">{{ $message }}</div>
+                            </div>
+                            @enderror
                         </div>
                     </div>
                 </div>
@@ -108,14 +126,14 @@
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label for="tenor_pembayaran" class="form-label">Tenor Pembayaran</label>
-                                    <select wire:model.live="tenor_pembayaran" class="form-select" id="tenor_pembayaran">
+                                    <select wire:model.live="tenor_pembayaran" class="form-select @error('tenor_pembayaran') is-invalid @enderror" id="tenor_pembayaran">
                                         <option value="">-- Pilih Tenor Pembayaran --</option>
                                         <option value="3">3 Bulan</option>
                                         <option value="6">6 Bulan</option>
                                         <option value="9">9 Bulan</option>
                                         <option value="12">12 Bulan</option>
                                     </select>
-                                    <div class="invalid-feedback"></div>
+                                    @error('tenor_pembayaran') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
     
@@ -178,6 +196,11 @@
                                     />
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                @error('harapan_tanggal_pencairan')
+                                <div class="col-12 mt-n2 mb-2">
+                                    <div class="text-danger" style="font-size:0.875em;">{{ $message }}</div>
+                                </div>
+                                @enderror
                             </div>
     
                             <div class="row">
@@ -202,6 +225,11 @@
                                     />
                                     <div class="invalid-feedback"></div>
                                 </div>
+                                @error('rencana_tgl_pembayaran')
+                                <div class="col-12 mt-n2 mb-2">
+                                    <div class="text-danger" style="font-size:0.875em;">{{ $message }}</div>
+                                </div>
+                                @enderror
                                 <div class="col-md-4 form-group mb-3">
                                     <label for="pembayaran_total" class="form-label">Pembayaran Total</label>
                                     <div class="input-group">
@@ -222,6 +250,11 @@
                         <textarea class="form-control" id="catatan_lainnya" wire:model.blur="catatan_lainnya" rows="3" placeholder="Masukkan Catatan"></textarea>
                         <div class="invalid-feedback"></div>
                     </div>
+                    @error('catatan_lainnya')
+                    <div class="col-12 mt-1">
+                        <div class="text-danger" style="font-size:0.875em;">{{ $message }}</div>
+                    </div>
+                    @enderror
                 </div>
     
                 <div class="d-flex justify-content-end gap-2">
