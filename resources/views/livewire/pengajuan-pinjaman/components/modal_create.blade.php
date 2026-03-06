@@ -8,6 +8,15 @@
                 </div>
                 <form wire:submit="saveDataInvoice">
                     <div class="modal-body">
+                        @if ($errors->any())
+                            <div class="alert alert-danger py-2 mb-3">
+                                <ul class="mb-0 ps-3">
+                                    @foreach ($errors->all() as $error)
+                                        <li style="font-size:0.85rem;">{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         @switch($jenis_pembiayaan)
                             @case('Invoice Financing')
                                 <!-- Form Invoice Financing -->
@@ -15,13 +24,13 @@
                                     <div class="row mb-3">
                                         <div class="col-md-4 form-group">
                                             <label class="form-label" for="no_invoice">No. Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" placeholder="Masukkan No. Invoice" wire:model.blur="no_invoice">
-                                            <div class="invalid-feedback"></div>
+                                            <input type="text" class="form-control @error('no_invoice') is-invalid @enderror" id="no_invoice" placeholder="Masukkan No. Invoice" wire:model.blur="no_invoice">
+                                            @error('no_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label class="form-label" for="nama_client">Nama Client</label>
-                                            <input type="text" class="form-control" id="nama_client" placeholder="Masukkan Nama Client" wire:model.blur="nama_client">
-                                            <div class="invalid-feedback"></div>
+                                            <input type="text" class="form-control @error('nama_client') is-invalid @enderror" id="nama_client" placeholder="Masukkan Nama Client" wire:model.blur="nama_client">
+                                            @error('nama_client') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label class="form-label" for="nilai_invoice">Nilai Invoice</label>
@@ -31,7 +40,7 @@
                                                 placeholder="Rp 0"
                                                 wire:key="invoice_financing_nilai_invoice"
                                             />
-                                            <div class="invalid-feedback"></div>
+                                            @error('nilai_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -43,7 +52,7 @@
                                                 placeholder="Rp 0"
                                                 wire:key="invoice_financing_nilai_pinjaman"
                                             />
-                                            <div class="invalid-feedback"></div>
+                                            @error('nilai_pinjaman') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label class="form-label" for="nilai_bunga">NILAI BUNGA</label>
@@ -51,7 +60,6 @@
                                                 <input type="text" class="form-control input-rupiah" id="nilai_bunga" placeholder="Rp 0" readonly disabled wire:model.live="nilai_bunga">
                                                 <span class="input-group-text">/Bulan</span>
                                             </div>
-                                            <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -66,7 +74,7 @@
                                                 :today_highlight="true"
                                                 wire:key="invoice_financing_invoice_date"
                                             />
-                                            <div class="invalid-feedback"></div>
+                                            @error('invoice_date') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label class="form-label" for="due_date">Due Date</label>
@@ -79,7 +87,7 @@
                                                 :today_highlight="true"
                                                 wire:key="invoice_financing_due_date"
                                             />
-                                            <div class="invalid-feedback"></div>
+                                            @error('due_date') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -90,9 +98,9 @@
                                                     <a href="{{ getFileUrl($dokumen_invoice_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
+                                            <input type="file" class="form-control @error('dokumen_invoice') is-invalid @enderror" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
-                                            <div class="invalid-feedback"></div>
+                                            @error('dokumen_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <div class="d-flex justify-content-between">
@@ -101,9 +109,9 @@
                                                     <a href="{{ getFileUrl($dokumen_kontrak_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control" id="dokumen_kontrak"  wire:model.blur="dokumen_kontrak">
+                                            <input type="file" class="form-control @error('dokumen_kontrak') is-invalid @enderror" id="dokumen_kontrak"  wire:model.blur="dokumen_kontrak">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
-                                            <div class="invalid-feedback"></div>
+                                            @error('dokumen_kontrak') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -114,9 +122,9 @@
                                                     <a href="{{ getFileUrl($dokumen_so_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control" id="dokumen_so" wire:model.blur="dokumen_so">
+                                            <input type="file" class="form-control @error('dokumen_so') is-invalid @enderror" id="dokumen_so" wire:model.blur="dokumen_so">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
-                                            <div class="invalid-feedback"></div>
+                                            @error('dokumen_so') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <div class="d-flex justify-content-between">
@@ -125,9 +133,9 @@
                                                     <a href="{{ getFileUrl($dokumen_bast_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control" id="dokumen_bast"  wire:model.blur="dokumen_bast">
+                                            <input type="file" class="form-control @error('dokumen_bast') is-invalid @enderror" id="dokumen_bast"  wire:model.blur="dokumen_bast">
                                             <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
-                                            <div class="invalid-feedback"></div>
+                                            @error('dokumen_bast') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -138,18 +146,18 @@
                                     <div class="row mb-3">
                                         <div class="col-md-4 form-group">
                                             <label class="form-label" for="no_invoice">No. Invoice</label>
-                                            <input type="text" class="form-control" id="no_invoice" placeholder="Masukkan No. Invoice"  wire:model.blur="no_invoice">
-                                            <div class="invalid-feedback"></div>
+                                            <input type="text" class="form-control @error('no_invoice') is-invalid @enderror" id="no_invoice" placeholder="Masukkan No. Invoice"  wire:model.blur="no_invoice">
+                                            @error('no_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label class="form-label" for="nama_client">Nama Client</label>
-                                            <input type="text" class="form-control" id="nama_client" placeholder="Masukkan Nama Client" wire:model.blur="nama_client">
-                                            <div class="invalid-feedback"></div>
+                                            <input type="text" class="form-control @error('nama_client') is-invalid @enderror" id="nama_client" placeholder="Masukkan Nama Client" wire:model.blur="nama_client">
+                                            @error('nama_client') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label class="form-label" for="nilai_invoice">Nilai Invoice</label>
-                                            <input type="text" class="form-control input-rupiah" id="nilai_invoice" placeholder="Rp 0" wire:model.blur="nilai_invoice">
-                                            <div class="invalid-feedback"></div>
+                                            <input type="text" class="form-control input-rupiah @error('nilai_invoice') is-invalid @enderror" id="nilai_invoice" placeholder="Rp 0" wire:model.blur="nilai_invoice">
+                                            @error('nilai_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -164,12 +172,12 @@
                                                 :today_highlight="true"
                                                 wire:key="installment_invoice_date"
                                             />
-                                            <div class="invalid-feedback"></div>
+                                            @error('invoice_date') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label class="form-label" for="nama_barang">Nama Barang</label>
-                                            <input type="text" class="form-control" id="nama_barang" placeholder="Masukkan Nama Barang" wire:model.blur="nama_barang">
-                                            <div class="invalid-feedback"></div>
+                                            <input type="text" class="form-control @error('nama_barang') is-invalid @enderror" id="nama_barang" placeholder="Masukkan Nama Barang" wire:model.blur="nama_barang">
+                                            @error('nama_barang') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="row mb-3">
@@ -180,9 +188,9 @@
                                                     <a href="{{ getFileUrl($dokumen_invoice_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
+                                            <input type="file" class="form-control @error('dokumen_invoice') is-invalid @enderror" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
-                                            <div class="invalid-feedback"></div>
+                                            @error('dokumen_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <div class="d-flex justify-content-between">
@@ -191,9 +199,9 @@
                                                     <a href="{{ getFileUrl($dokumen_lainnnya_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control" id="dokumen_lainnya" wire:model.blur="dokumen_lainnya">
+                                            <input type="file" class="form-control @error('dokumen_lainnya') is-invalid @enderror" id="dokumen_lainnya" wire:model.blur="dokumen_lainnya">
                                             <small class="text-muted">Maximum upload file size: 2 MB.</small>
-                                            <div class="invalid-feedback"></div>
+                                            @error('dokumen_lainnya') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>

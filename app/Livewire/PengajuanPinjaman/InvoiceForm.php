@@ -52,6 +52,15 @@ class InvoiceForm extends Component
         return view('livewire.pengajuan-pinjaman.components.modal_create');
     }
 
+    protected function setAdditionalValidationData(): array
+    {
+        return [
+            'jenis_pembiayaan'   => $this->jenis_pembiayaan,
+            'form_data_invoice'  => $this->form_data_invoice ?? [],
+            'index_data_invoice' => $this->index_data_invoice,
+        ];
+    }
+
     public function saveDataInvoice()
     {
         $this->validate();
