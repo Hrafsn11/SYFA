@@ -319,6 +319,38 @@
     flex-shrink: 0;
 }
 
+/* ── Table scroll wrapper ── */
+.table-scroll-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 6px 0;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+.table-scroll-wrap::-webkit-scrollbar { height: 4px; }
+.table-scroll-wrap::-webkit-scrollbar-track { background: var(--c-lav-bg); }
+.table-scroll-wrap::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 4px; }
+.msg-bubble.bot .table-scroll-wrap table {
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* ── Streaming cursor ── */
+.msg-bubble.bot.streaming::after {
+    content: '\25AE';
+    animation: blink .7s step-end infinite;
+    color: var(--c-lav);
+    font-size: 14px;
+    margin-left: 1px;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
 /* ── Drag ── */
 #syfa-chat-bubble { cursor: grab; }
 #syfa-chat-bubble.is-dragging { cursor: grabbing; transform: scale(1.1); box-shadow: 0 12px 36px rgba(19,171,171,.6); }
@@ -409,8 +441,9 @@
         marked.setOptions({ breaks: true, gfm: true });
     }
 
-    const ROUTE_MSG   = '{{ route("chatbot.message") }}';
-    const ROUTE_CLEAR = '{{ route("chatbot.clear") }}';
+    const ROUTE_MSG    = '{{ route("chatbot.message") }}';
+    const ROUTE_STREAM = '{{ route("chatbot.stream") }}';
+    const ROUTE_CLEAR  = '{{ route("chatbot.clear") }}';
     const CSRF        = '{{ csrf_token() }}';
     const USER_INIT   = '{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}';
 
@@ -432,7 +465,10 @@
         if (typeof marked === 'undefined') {
             return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         }
-        const html = marked.parse(text);
+        let html = marked.parse(text);
+        // Bungkus setiap <table> dalam div scrollable
+        html = html.replace(/<table/g, '<div class="table-scroll-wrap"><table');
+        html = html.replace(/<\/table>/g, '</table></div>');
         return typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
     }
 
@@ -492,6 +528,33 @@
         });
     }
 
+    // ── Streaming bubble helpers ──────────────────────────────────
+    function appendStreamingBubble() {
+        const row    = document.createElement('div');
+        row.className = 'msg-row bot';
+        const avatar  = document.createElement('div');
+        avatar.className = 'msg-avatar bot-av';
+        avatar.innerHTML = '<i class="ti ti-robot" style="font-size:13px;"></i>';
+        const bubble  = document.createElement('div');
+        bubble.className = 'msg-bubble bot streaming';
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+        messagesEl.appendChild(row);
+        scrollBottom();
+        return bubble;
+    }
+
+    function updateStreamingBubble(bubble, text) {
+        bubble.textContent = text;
+        scrollBottom();
+    }
+
+    function finalizeStreamingBubble(bubble, text) {
+        bubble.classList.remove('streaming');
+        bubble.innerHTML = renderMarkdown(text || 'Maaf, saya tidak bisa menjawab saat ini.');
+        scrollBottom();
+    }
+
     // ── Quick replies ─────────────────────────────────────────────
     function setQuickReplies(replies) {
         quickReplies.innerHTML = '';
@@ -527,7 +590,7 @@
         appendMsg('bot', welcomeText, false);
     }
 
-    // ── Send message ──────────────────────────────────────────────
+    // ── Send message (SSE streaming) ──────────────────────────────
     async function sendMessage(text) {
         text = (text !== undefined ? text : inputEl.value).trim();
         if (!text || isBusy) return;
@@ -541,31 +604,74 @@
         showTyping();
 
         try {
-            const resp = await fetch(ROUTE_MSG, {
+            const resp = await fetch(ROUTE_STREAM, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': CSRF,
-                    'Accept': 'application/json',
+                    'Accept':       'text/event-stream',
                 },
                 body: JSON.stringify({ message: text }),
             });
 
-            const data = await resp.json();
             hideTyping();
 
-            if (data.success) {
-                appendMsg('bot', data.message);
-                setQuickReplies(data.quick_replies || []);
-            } else {
+            if (!resp.ok || !resp.body) {
                 appendMsg('bot', '⚠️ Maaf, terjadi kesalahan. Silakan coba beberapa saat lagi.');
+                isBusy = false;
+                sendBtn.disabled = inputEl.value.trim() === '';
+                return;
             }
+
+            const bubble  = appendStreamingBubble();
+            let fullText  = '';
+            const reader  = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let buf = '';
+
+            outer: while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buf += decoder.decode(value, { stream: true });
+                const lines = buf.split('\n');
+                buf = lines.pop();
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const raw = line.slice(6).trim();
+                    if (!raw) continue;
+                    let evt;
+                    try { evt = JSON.parse(raw); } catch { continue; }
+
+                    if (evt.token) {
+                        fullText += evt.token;
+                        updateStreamingBubble(bubble, fullText);
+                    }
+                    if (evt.done) {
+                        finalizeStreamingBubble(bubble, fullText);
+                        setQuickReplies(evt.quick_replies || []);
+                        break outer;
+                    }
+                    if (evt.error) {
+                        finalizeStreamingBubble(bubble, fullText || '⚠️ Maaf, terjadi gangguan. Silakan coba lagi.');
+                        break outer;
+                    }
+                }
+            }
+
+            // Jika stream selesai tapi done event belum diterima
+            if (bubble.classList.contains('streaming')) {
+                finalizeStreamingBubble(bubble, fullText);
+            }
+
         } catch (e) {
             hideTyping();
             appendMsg('bot', '⚠️ Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
         }
 
         isBusy = false;
+        sendBtn.disabled = inputEl.value.trim() === '';
     }
 
     // ── Toggle window (handled inside bubble drag section below) ──

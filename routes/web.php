@@ -46,6 +46,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage'])->name('chatbot.message');
+    Route::post('/chatbot/stream',  [ChatbotController::class, 'streamMessage'])->name('chatbot.stream');
     Route::post('/chatbot/clear',   [ChatbotController::class, 'clearHistory'])->name('chatbot.clear');
 });
 

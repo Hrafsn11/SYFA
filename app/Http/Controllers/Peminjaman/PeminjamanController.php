@@ -320,6 +320,7 @@ class PeminjamanController extends Controller
             $masterDebitur = MasterDebiturDanInvestor::where('email', auth()->user()->email)
                 ->where('flagging', 'tidak')
                 ->where('status', 'active')
+                ->first();
 
             $dataPengajuanPeminjaman['no_rekening'] = $masterDebitur->no_rek;
 
