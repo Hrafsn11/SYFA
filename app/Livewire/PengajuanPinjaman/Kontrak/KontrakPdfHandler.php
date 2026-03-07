@@ -60,7 +60,15 @@ trait KontrakPdfHandler
      */
     public function previewKontrak(): mixed
     {
-        $this->authorize('peminjaman_dana.generate_kontrak');
+        // Allow admin/finance users who can generate contracts AND debitur who need to review/sign
+        abort_unless(
+            auth()->user()->canAny([
+                'peminjaman_dana.generate_kontrak',
+                'peminjaman_dana.persetujuan_debitur',
+                'peminjaman_dana.konfirmasi_debitur',
+            ]),
+            403
+        );
 
         $id = $this->pengajuan->id_pengajuan_peminjaman;
 
