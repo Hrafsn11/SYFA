@@ -4,7 +4,7 @@
     @php
         use Carbon\Carbon;
 
-        $pengajuan = $program->pengajuanRestrukturisasi;
+        $pengajuan = $program->PengajuanCicilan;
         $debitur = $pengajuan->debitur;
 
         $dataKontrak = [
