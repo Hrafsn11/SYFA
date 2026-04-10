@@ -53,7 +53,7 @@
                                     class="menu-item {{ RouteHelper::routeIs('dashboard.investasi') ? 'active' : '' }}">
                                     <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.investasi') }}"
                                         class="menu-link">
-                                        <div data-i18n="Pembiayaan Investasi Deposito SFinance">Pembiayaan Investasi Deposito
+                                        <div data-i18n="Pembiayaan Investasi Deposito SFinance">Dashboard Investasi 
                                             SFinance
                                         </div>
                                     </a>

@@ -61,6 +61,28 @@
 
                 {{-- Active-filter badges + Reset --}}
                 <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end flex-wrap gap-1">
+                    <button class="btn btn-sm btn-success d-flex align-items-center gap-1"
+                        wire:click="exportExcel"
+                        wire:loading.attr="disabled"
+                        wire:target="exportExcel">
+                        <span wire:loading.remove wire:target="exportExcel">
+                            <i class="ti ti-file-spreadsheet"></i>
+                        </span>
+                        <span wire:loading wire:target="exportExcel" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Export Excel</span>
+                    </button>
+
+                    <button class="btn btn-sm btn-danger d-flex align-items-center gap-1"
+                        wire:click="exportPdf"
+                        wire:loading.attr="disabled"
+                        wire:target="exportPdf">
+                        <span wire:loading.remove wire:target="exportPdf">
+                            <i class="ti ti-file-type-pdf"></i>
+                        </span>
+                        <span wire:loading wire:target="exportPdf" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Export PDF</span>
+                    </button>
+
                     @if($globalSearch)
                         <span class="badge bg-label-primary d-flex align-items-center gap-1" style="font-size:.78rem;">
                             <i class="ti ti-search" style="font-size:.75rem;"></i>
