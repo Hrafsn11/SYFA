@@ -59,12 +59,14 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('sfinance.menu.dashboard_cicilan')
                             <li class="menu-item {{ RouteHelper::routeIs('dashboard.cicilan') ? 'active' : '' }}">
                                 <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.cicilan') }}"
                                     class="menu-link">
                                     <div data-i18n="Dashboard Cicilan Restrukturisasi">Dashboard Cicilan Restrukturisasi</div>
                                 </a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
                 @endcanany

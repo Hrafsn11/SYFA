@@ -48,6 +48,7 @@ class RolePermissionSeeder extends Seeder
             // Menu Sfinance
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
+            'sfinance.menu.dashboard_cicilan',
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.laporan_tagihan_bulanan',
             'sfinance.menu.monitoring_pembayaran',
@@ -318,6 +319,7 @@ class RolePermissionSeeder extends Seeder
             // SFinance Menu
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
+            'sfinance.menu.dashboard_cicilan',
             'sfinance.menu.pengajuan_peminjaman',
             'sfinance.menu.laporan_tagihan_bulanan',
             'sfinance.menu.monitoring_pembayaran',
@@ -414,6 +416,7 @@ class RolePermissionSeeder extends Seeder
             // Dashboard Access
             'sfinance.menu.dashboard_pembiayaan',
             'sfinance.menu.dashboard_pembiayaan_investasi',
+            'sfinance.menu.dashboard_cicilan',
 
             // Menu Access
             'sfinance.menu.pengembalian_dana',

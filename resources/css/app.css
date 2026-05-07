@@ -183,6 +183,39 @@
   font-weight: 600;
 }
 
+/* Sidebar menu label marquee (hover only when overflow) */
+.layout-menu .menu-link .menu-text-marquee {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.layout-menu .menu-link .menu-text-marquee > span {
+  display: inline-block;
+  padding-right: var(--marquee-gap, 1rem);
+  will-change: transform;
+}
+
+.layout-menu .menu-link:hover .menu-text-marquee.is-overflow > span {
+  animation: menu-text-marquee var(--marquee-duration, 5s) linear infinite;
+}
+
+@keyframes menu-text-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - var(--marquee-gap, 1rem)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-menu .menu-link:hover .menu-text-marquee.is-overflow > span {
+    animation: none;
+  }
+}
+
 @media (max-width: 768px) {
   .stepper-arrow {
     min-width: 140px;
