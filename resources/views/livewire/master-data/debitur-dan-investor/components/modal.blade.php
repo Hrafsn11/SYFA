@@ -55,13 +55,6 @@
                                         Reguler
                                     </label>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" id="deposito_khusus" value="khusus"
-                                        wire:model.blur="deposito">
-                                    <label class="form-check-label" for="deposito_khusus">
-                                        Khusus
-                                    </label>
-                                </div>
                             </div>
                             <div class="invalid-feedback"></div>
                         </div>
@@ -75,20 +68,6 @@
                                         wire:model.blur="flagging_investor" name="flagging_investor">
                                     <label class="form-check-label" for="flagging_investor_sfinance">
                                         SFinance
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_sfinlog" value="sfinlog"
-                                        wire:model.blur="flagging_investor" name="flagging_investor">
-                                    <label class="form-check-label" for="flagging_investor_sfinlog">
-                                        SFinlog
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input @error('flagging_investor') is-invalid @enderror" type="radio" id="flagging_investor_both" value="sfinance,sfinlog"
-                                        wire:model.blur="flagging_investor" name="flagging_investor">
-                                    <label class="form-check-label" for="flagging_investor_both">
-                                        Keduanya
                                     </label>
                                 </div>
                             </div>
@@ -212,9 +191,15 @@
                         <div class="col-md-6 mb-3 form-group password-section">
                             <label for="password" class="form-label" id="password-label">Password <span class="text-danger"
                                     id="password-required">*</span></label>
-                            <input type="password" class="form-control" id="password"
-                                placeholder="Masukkan password" wire:model.blur="password"
-                                autocomplete="new-password">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password"
+                                    placeholder="Masukkan password" wire:model.blur="password"
+                                    autocomplete="new-password">
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-target="password" aria-label="Tampilkan password">
+                                    <i class="ti ti-eye"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback"></div>
                             <small class="text-muted">
                                 Min. 8 karakter, harus ada huruf kapital, huruf kecil, dan angka.
@@ -225,9 +210,15 @@
                         <div class="col-md-6 mb-3 form-group password-section">
                             <label for="password_confirmation" class="form-label" id="password-confirm-label">Konfirmasi Password <span
                                     class="text-danger" id="password-confirm-required">*</span></label>
-                            <input type="password" class="form-control" id="password_confirmation"
-                                wire:model.blur="password_confirmation" placeholder="Konfirmasi password"
-                                autocomplete="new-password">
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password_confirmation"
+                                    wire:model.blur="password_confirmation" placeholder="Konfirmasi password"
+                                    autocomplete="new-password">
+                                <button class="btn btn-outline-secondary toggle-password" type="button"
+                                    data-target="password_confirmation" aria-label="Tampilkan konfirmasi password">
+                                    <i class="ti ti-eye"></i>
+                                </button>
+                            </div>
                             <div class="invalid-feedback"></div>
                         </div>
                     </div>
@@ -245,6 +236,32 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".toggle-password").forEach(function (button) {
+            button.addEventListener("click", function () {
+                var targetId = button.getAttribute("data-target");
+                var input = document.getElementById(targetId);
+                if (!input) {
+                    return;
+                }
+
+                var isHidden = input.getAttribute("type") === "password";
+                input.setAttribute("type", isHidden ? "text" : "password");
+                button.setAttribute(
+                    "aria-label",
+                    isHidden ? "Sembunyikan password" : "Tampilkan password"
+                );
+                var icon = button.querySelector("i");
+                if (icon) {
+                    icon.classList.toggle("ti-eye", !isHidden);
+                    icon.classList.toggle("ti-eye-off", isHidden);
+                }
+            });
+        });
+    });
+</script>
 
 {{-- Modal Confirm Delete --}}
 <div class="modal fade" id="modalConfirmDeleteDebitur" tabindex="-1">

@@ -57,13 +57,6 @@
                                             Reguler
                                         </label>
                                     </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="jenis_investasi"
-                                            id="jenis_investasi_khusus" value="khusus" required disabled>
-                                        <label class="form-check-label" for="jenis_investasi_khusus">
-                                            Khusus
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
