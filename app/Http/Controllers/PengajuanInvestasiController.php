@@ -2,20 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\Response;
 use App\Helpers\ListNotifSFinance;
-use App\Models\PengajuanInvestasi;
+use App\Helpers\Response;
+use App\Http\Requests\PengajuanInvestasiRequest;
 use App\Models\HistoryStatusPengajuanInvestor;
 use App\Models\MasterDebiturDanInvestor;
-use App\Http\Requests\PengajuanInvestasiRequest;
-use App\Services\KontrakInvestasiService;
+use App\Models\PengajuanInvestasi;
 use App\Services\ContractNumberService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use App\Services\KontrakInvestasiService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PengajuanInvestasiController extends Controller
 {
@@ -74,7 +74,7 @@ class PengajuanInvestasiController extends Controller
                 'updated_by' => Auth::id(),
             ]);
 
-            if (!empty($validated['nomor_kontrak'] ?? null)) {
+            if (! empty($validated['nomor_kontrak'] ?? null)) {
                 if (PengajuanInvestasi::where('nomor_kontrak', $validated['nomor_kontrak'])->exists()) {
                     return Response::error('Nomor kontrak sudah digunakan.');
                 }
@@ -99,6 +99,7 @@ class PengajuanInvestasiController extends Controller
             return Response::success($pengajuan, 'Pengajuan investasi berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return Response::errorCatch($e, 'Gagal membuat pengajuan investasi');
         }
     }
@@ -141,7 +142,7 @@ class PengajuanInvestasiController extends Controller
 
         if (empty($pengajuan->nomor_kontrak) && $pengajuan->current_step >= 4) {
             // Generate preview tanpa save ke database
-            if ($pengajuan->investor && !empty($pengajuan->investor->kode_perusahaan)) {
+            if ($pengajuan->investor && ! empty($pengajuan->investor->kode_perusahaan)) {
                 $previewNomorKontrak = ContractNumberService::generateInvestasi(
                     $pengajuan->investor->kode_perusahaan,
                     $pengajuan->jenis_investasi,
@@ -165,6 +166,7 @@ class PengajuanInvestasiController extends Controller
     {
         try {
             $pengajuan = PengajuanInvestasi::findOrFail($id);
+
             return Response::success($pengajuan, 'Data pengajuan investasi berhasil diambil');
         } catch (\Exception $e) {
             return Response::errorCatch($e, 'Gagal mengambil data');
@@ -238,16 +240,16 @@ class PengajuanInvestasiController extends Controller
             // Add approval/rejection data
             if (in_array($status, ['Dokumen Tervalidasi', 'Disetujui oleh CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'])) {
                 $historyData['approve_by'] = Auth::id();
-                if (!isset($historyData['validasi_bagi_hasil'])) {
+                if (! isset($historyData['validasi_bagi_hasil'])) {
                     $historyData['validasi_bagi_hasil'] = 'disetujui';
                 }
                 // Add catatan if provided
-                if ($request->has('catatan') && !empty($request->input('catatan'))) {
+                if ($request->has('catatan') && ! empty($request->input('catatan'))) {
                     $historyData['catatan'] = $request->input('catatan');
                 }
             } elseif ($status === 'Ditolak' || str_contains($status, 'Ditolak')) {
                 $historyData['reject_by'] = Auth::id();
-                if (!isset($historyData['validasi_bagi_hasil'])) {
+                if (! isset($historyData['validasi_bagi_hasil'])) {
                     $historyData['validasi_bagi_hasil'] = 'ditolak';
                 }
                 $historyData['catatan_validasi_dokumen_ditolak'] = $request->input('catatan_validasi_dokumen_ditolak', $request->input('catatan', ''));
@@ -269,6 +271,7 @@ class PengajuanInvestasiController extends Controller
             ], 'Status berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return Response::errorCatch($e, 'Gagal memperbarui status');
         }
     }
@@ -313,9 +316,10 @@ class PengajuanInvestasiController extends Controller
             // Check if nomor_kontrak exists
             if (empty($pengajuan->nomor_kontrak)) {
                 Log::error('Download kontrak failed: Nomor kontrak belum di-generate', ['id' => $id]);
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Nomor kontrak belum di-generate'
+                    'message' => 'Nomor kontrak belum di-generate',
                 ], 404);
             }
 
@@ -330,7 +334,7 @@ class PengajuanInvestasiController extends Controller
             // Generate PDF using DomPDF with config
             $pdf = Pdf::loadHTML($html);
             $pdf->setPaper('A4', 'portrait');
-            
+
             // Set DomPDF options
             $pdf->setOptions([
                 'isHtml5ParserEnabled' => true,
@@ -347,19 +351,19 @@ class PengajuanInvestasiController extends Controller
                 'debugLayoutPaddingBox' => false,
             ]);
 
-            $filename = 'Kontrak_Investasi_' . str_replace('/', '_', $pengajuan->nomor_kontrak) . '_' . date('Ymd') . '.pdf';
+            $filename = 'Kontrak_Investasi_'.str_replace('/', '_', $pengajuan->nomor_kontrak).'_'.date('Ymd').'.pdf';
 
             return $pdf->download($filename);
         } catch (\Exception $e) {
-            Log::error('Error download kontrak PDF: ' . $e->getMessage(), [
+            Log::error('Error download kontrak PDF: '.$e->getMessage(), [
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal membuat PDF: ' . $e->getMessage()
+                'message' => 'Gagal membuat PDF: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -388,6 +392,7 @@ class PengajuanInvestasiController extends Controller
             return Response::success($pengajuan, 'Pengajuan investasi berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return Response::errorCatch($e, 'Gagal memperbarui pengajuan investasi');
         }
     }
@@ -445,6 +450,7 @@ class PengajuanInvestasiController extends Controller
             return Response::success($pengajuan, 'Status berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return Response::errorCatch($e, 'Gagal memperbarui status');
         }
     }
@@ -468,7 +474,7 @@ class PengajuanInvestasiController extends Controller
                 }
 
                 $file = $request->file('file');
-                $filename = time() . '_' . $file->getClientOriginalName();
+                $filename = time().'_'.$file->getClientOriginalName();
                 $path = $file->storeAs('bukti_transfer_investasi', $filename, 'public');
 
                 $pengajuan->update([
@@ -501,6 +507,7 @@ class PengajuanInvestasiController extends Controller
             return Response::success($pengajuan, 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return Response::errorCatch($e, 'Terjadi kesalahan saat upload bukti transfer');
         }
     }
@@ -525,7 +532,7 @@ class PengajuanInvestasiController extends Controller
                 ->where('id_pengajuan_investasi', '<=', $pengajuan->id_pengajuan_investasi)
                 ->count();
 
-            $nomorDeposito = 'DC' . $year . str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
+            $nomorDeposito = 'DC'.$year.str_pad($countThisYear, 4, '0', STR_PAD_LEFT);
 
             // Get description based on deposito type
             $deskripsi = $pengajuan->jenis_investasi === 'Khusus'
@@ -539,22 +546,22 @@ class PengajuanInvestasiController extends Controller
             // Format dates
             $tanggalInvestasi = $tanggalInvestasiCarbon->translatedFormat('d F Y');
             $tanggalBerakhir = $tanggalBerakhirCarbon->translatedFormat('d F Y');
-            $jangkaWaktu = $tanggalInvestasi . ' - ' . $tanggalBerakhir;
+            $jangkaWaktu = $tanggalInvestasi.' - '.$tanggalBerakhir;
 
             $data = [
                 'nama_deposan' => $pengajuan->nama_investor,
                 'nomor_deposito' => $nomorDeposito,
                 'deskripsi' => $deskripsi,
-                'nilai_deposito' => 'Rp ' . number_format($pengajuan->jumlah_investasi, 0, ',', '.'),
+                'nilai_deposito' => 'Rp '.number_format($pengajuan->jumlah_investasi, 0, ',', '.'),
                 'kode_transaksi' => $pengajuan->nomor_kontrak ?? '-',
                 'jangka_waktu' => $jangkaWaktu,
-                'bagi_hasil' => $pengajuan->bunga_pertahun . ' % P.A NET',
-                'nilai_investasi_text' => 'Rp. ' . number_format($pengajuan->jumlah_investasi, 2, ',', '.'),
+                'bagi_hasil' => $pengajuan->bunga_pertahun.' % P.A NET',
+                'nilai_investasi_text' => 'Rp. '.number_format($pengajuan->jumlah_investasi, 2, ',', '.'),
             ];
 
             return view('livewire.pengajuan-investasi.sertifikat', compact('data'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal menggenerate sertifikat: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menggenerate sertifikat: '.$e->getMessage());
         }
     }
 
@@ -583,8 +590,8 @@ class PengajuanInvestasiController extends Controller
             }
 
             // Validasi: Nomor kontrak belum pernah di-generate
-            if (!empty($investasi->nomor_kontrak)) {
-                return Response::error('Nomor kontrak sudah pernah di-generate: ' . $investasi->nomor_kontrak, 400);
+            if (! empty($investasi->nomor_kontrak)) {
+                return Response::error('Nomor kontrak sudah pernah di-generate: '.$investasi->nomor_kontrak, 400);
             }
 
             // Validasi: Investor harus punya kode perusahaan
@@ -649,12 +656,13 @@ class PengajuanInvestasiController extends Controller
 
             return Response::success([
                 'nomor_kontrak' => $nomorKontrak,
-                'id_pengajuan' => $investasi->id_pengajuan_investasi
-            ], 'Nomor kontrak berhasil di-generate: ' . $nomorKontrak);
+                'id_pengajuan' => $investasi->id_pengajuan_investasi,
+            ], 'Nomor kontrak berhasil di-generate: '.$nomorKontrak);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error generate kontrak investasi: ' . $e->getMessage());
+            Log::error('Error generate kontrak investasi: '.$e->getMessage());
+
             return Response::errorCatch($e, 'Gagal generate kontrak investasi');
         }
     }
@@ -665,18 +673,23 @@ class PengajuanInvestasiController extends Controller
     private function buildKontrakHTML($kontrak)
     {
         try {
+            $kontrak['jenis_deposito'] = $kontrak['jenis_deposito'] ?? ($kontrak['jenis_investasi'] ?? '-');
+            $kontrak['bagi_hasil'] = $kontrak['bagi_hasil'] ?? ($kontrak['bunga'] ?? 0);
+
+            $jenisDeposito = $kontrak['jenis_deposito'];
+
             // Load logo as base64 - resize if needed
             $logoPath = public_path('assets/img/branding/Logo.jpg');
             $logoBase64 = '';
             if (file_exists($logoPath)) {
                 try {
-                    $logoBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoPath));
+                    $logoBase64 = 'data:image/jpeg;base64,'.base64_encode(file_get_contents($logoPath));
                     Log::info('Logo loaded successfully');
                 } catch (\Exception $e) {
-                    Log::warning('Error loading logo: ' . $e->getMessage());
+                    Log::warning('Error loading logo: '.$e->getMessage());
                 }
             } else {
-                Log::warning('Logo file not found: ' . $logoPath);
+                Log::warning('Logo file not found: '.$logoPath);
             }
 
             // Load TTD perusahaan as base64
@@ -684,28 +697,42 @@ class PengajuanInvestasiController extends Controller
             $ttdPerusahaan = '';
             if (file_exists($ttdPerusahaanPath)) {
                 try {
-                    $ttdPerusahaan = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdPerusahaanPath));
+                    $ttdPerusahaan = 'data:image/png;base64,'.base64_encode(file_get_contents($ttdPerusahaanPath));
                     Log::info('TTD Perusahaan loaded successfully');
                 } catch (\Exception $e) {
-                    Log::warning('Error loading TTD Perusahaan: ' . $e->getMessage());
+                    Log::warning('Error loading TTD Perusahaan: '.$e->getMessage());
                 }
             } else {
-                Log::warning('TTD Perusahaan file not found: ' . $ttdPerusahaanPath);
+                Log::warning('TTD Perusahaan file not found: '.$ttdPerusahaanPath);
+            }
+
+            // Load mark/logo Synnovac untuk layer bawah tanda tangan PIHAK KEDUA
+            $markPerusahaanPath = public_path('assets/img/image.png');
+            $markPerusahaan = '';
+            if (file_exists($markPerusahaanPath)) {
+                try {
+                    $markPerusahaan = 'data:image/png;base64,'.base64_encode(file_get_contents($markPerusahaanPath));
+                    Log::info('Mark Perusahaan loaded successfully');
+                } catch (\Exception $e) {
+                    Log::warning('Error loading Mark Perusahaan: '.$e->getMessage());
+                }
+            } else {
+                Log::warning('Mark Perusahaan file not found: '.$markPerusahaanPath);
             }
 
             // Load TTD investor as base64 if exists
             $ttdInvestor = '';
-            if (!empty($kontrak['tanda_tangan_investor'])) {
-                $ttdInvestorPath = storage_path('app/public/' . $kontrak['tanda_tangan_investor']);
+            if (! empty($kontrak['tanda_tangan_investor'])) {
+                $ttdInvestorPath = storage_path('app/public/'.$kontrak['tanda_tangan_investor']);
                 if (file_exists($ttdInvestorPath)) {
                     try {
-                        $ttdInvestor = 'data:image/png;base64,' . base64_encode(file_get_contents($ttdInvestorPath));
+                        $ttdInvestor = 'data:image/png;base64,'.base64_encode(file_get_contents($ttdInvestorPath));
                         Log::info('TTD Investor loaded successfully');
                     } catch (\Exception $e) {
-                        Log::warning('Error loading TTD Investor: ' . $e->getMessage());
+                        Log::warning('Error loading TTD Investor: '.$e->getMessage());
                     }
                 } else {
-                    Log::warning('TTD Investor file not found: ' . $ttdInvestorPath);
+                    Log::warning('TTD Investor file not found: '.$ttdInvestorPath);
                 }
             }
 
@@ -714,7 +741,7 @@ class PengajuanInvestasiController extends Controller
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Kontrak Investasi - ' . htmlspecialchars($kontrak['nomor_kontrak']) . '</title>
+    <title>Kontrak Investasi - '.htmlspecialchars($kontrak['nomor_kontrak']).'</title>
     <style>
         @page {
             margin: 20mm 15mm;
@@ -782,31 +809,51 @@ class PengajuanInvestasiController extends Controller
             padding: 10px;
         }
         .signature-space {
-            height: 80px;
+            height: 90px;
+            width: 150px;
+            margin: 0 auto 10px;
             margin-bottom: 10px;
+            position: relative;
         }
         .signature-img {
             max-height: 80px;
             max-width: 150px;
+        }
+        .mark-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150px;
+            height: 80px;
+            object-fit: contain;
+            opacity: 0.9;
+        }
+        .ttd-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150px;
+            height: 80px;
+            object-fit: contain;
         }
     </style>
 </head>
 <body>
     <!-- Header dengan Logo -->
     <div class="header-logo">
-        ' . ($logoBase64 ? '<img src="' . $logoBase64 . '" alt="S-Capital Logo">' : '') . '
+        '.($logoBase64 ? '<img src="'.$logoBase64.'" alt="S-Capital Logo">' : '').'
     </div>
 
     <!-- Judul Kontrak -->
     <div class="title">
-        <h5>SURAT PERJANJIAN KERJASAMA INVESTASI DEPOSITO ' . $kontrak['jenis_deposito'] . '</h5>
-        <p>No: ' . $kontrak['nomor_kontrak'] . '</p>
+        <h5>SURAT PERJANJIAN KERJASAMA INVESTASI DEPOSITO '.$jenisDeposito.'</h5>
+        <p>No: '.$kontrak['nomor_kontrak'].'</p>
     </div>
 
     <!-- Pembukaan -->
     <div class="content">
         <p>
-            Pada hari ini <strong>' . $kontrak['hari'] . '</strong>, tanggal <strong>' . $kontrak['tanggal_kontrak'] . '</strong>, yang bertanda tangan di bawah ini:
+            Pada hari ini <strong>'.$kontrak['hari'].'</strong>, tanggal <strong>'.$kontrak['tanggal_kontrak'].'</strong>, yang bertanda tangan di bawah ini:
         </p>
 
         <!-- Pihak Pertama (Investor) -->
@@ -814,17 +861,17 @@ class PengajuanInvestasiController extends Controller
             <tr>
                 <td width="5%">1.</td>
                 <td width="25%">Nama</td>
-                <td width="70%">: ' . $kontrak['nama_investor'] . '</td>
+                <td width="70%">: '.$kontrak['nama_investor'].'</td>
             </tr>
             <tr>
                 <td></td>
                 <td>Perusahaan</td>
-                <td>: ' . $kontrak['perusahaan_investor'] . '</td>
+                <td>: '.$kontrak['perusahaan_investor'].'</td>
             </tr>
             <tr>
                 <td></td>
                 <td>Alamat</td>
-                <td>: ' . $kontrak['alamat_investor'] . '</td>
+                <td>: '.$kontrak['alamat_investor'].'</td>
             </tr>
         </table>
         <p>Untuk selanjutnya disebut sebagai <strong>PIHAK PERTAMA</strong>.</p>
@@ -857,7 +904,7 @@ class PengajuanInvestasiController extends Controller
         </p>
 
         <div class="indent">
-            <p>1. Bahwa PIHAK PERTAMA adalah selaku Investor yang memiliki dana sebesar ' . $kontrak['jumlah_investasi_angka'] . ' (' . $kontrak['jumlah_investasi_text'] . ') untuk selanjutnya disebut sebagai Dana Deposito kepada S-Finance untuk Pembiayaan usaha yang dibawah naungan S-Finance.</p>
+            <p>1. Bahwa PIHAK PERTAMA adalah selaku Investor yang memiliki dana sebesar '.$kontrak['jumlah_investasi_angka'].' ('.$kontrak['jumlah_investasi_text'].') untuk selanjutnya disebut sebagai Dana Deposito kepada S-Finance untuk Pembiayaan usaha yang dibawah naungan S-Finance.</p>
             
             <p>2. Bahwa PIHAK KEDUA adalah Penyalur, monitoring dan Penjamin Dana Deposito yang menerima Dana Deposito dari PIHAK PERTAMA.</p>
             
@@ -879,7 +926,7 @@ class PengajuanInvestasiController extends Controller
         <!-- PASAL II -->
         <div class="pasal">PASAL II<br>RUANG LINGKUP</div>
         <div class="indent">
-            <p>1. Dalam pelaksanaan perjanjian ini, PIHAK PERTAMA memberi Dana Deposito kepada PIHAK KEDUA sebesar ' . $kontrak['jumlah_investasi_angka'] . ' (' . $kontrak['jumlah_investasi_text'] . ') dan PIHAK KEDUA dengan ini menerima penyerahan Dana Deposito tersebut dari PIHAK PERTAMA serta menyanggupi sebagai penyalur, monitoring, dan penjamin dana Deposito</p>
+            <p>1. Dalam pelaksanaan perjanjian ini, PIHAK PERTAMA memberi Dana Deposito kepada PIHAK KEDUA sebesar '.$kontrak['jumlah_investasi_angka'].' ('.$kontrak['jumlah_investasi_text'].') dan PIHAK KEDUA dengan ini menerima penyerahan Dana Deposito tersebut dari PIHAK PERTAMA serta menyanggupi sebagai penyalur, monitoring, dan penjamin dana Deposito</p>
             
             <p>2. PIHAK KEDUA dengan ini berjanji dan mengikatkan diri untuk mengelola perputaran Dana Deposito secara khusus pada Usaha Pembiayaan di dibawah naungan S-Finance.</p>
         </div>
@@ -887,9 +934,9 @@ class PengajuanInvestasiController extends Controller
         <!-- PASAL III -->
         <div class="pasal">PASAL III<br>JANGKA WAKTU KERJASAMA</div>
         <div class="indent">
-            <p>1. Perjanjian kerjasama ini berlaku sampai tanggal ' . $kontrak['tanggal_jatuh_tempo'] . ' dan dapat diperpanjang dengan persetujuan PARA PIHAK dengan konfirmasi 2 minggu sebelum berakhir kontrak.</p>
+            <p>1. Perjanjian kerjasama ini berlaku sampai tanggal '.$kontrak['tanggal_jatuh_tempo'].' dan dapat diperpanjang dengan persetujuan PARA PIHAK dengan konfirmasi 2 minggu sebelum berakhir kontrak.</p>
             
-            <p>2. Jangka waktu penutupan deposito adalah sampai ' . $kontrak['tanggal_jatuh_tempo'] . '. Jika deposito diambil sebelum masa waktunya, maka akan dikenakan penalti sebesar 1% dari nilai nominal deposito</p>
+            <p>2. Jangka waktu penutupan deposito adalah sampai '.$kontrak['tanggal_jatuh_tempo'].'. Jika deposito diambil sebelum masa waktunya, maka akan dikenakan penalti sebesar 1% dari nilai nominal deposito</p>
             
             <p>3. Persetujuan perpanjangan Perjanjian kerjasama yang dimaksudkan dapat dilakukan secara otomatis berdasarkan konfirmasi awal dari PIHAK PERTAMA kepada PIHAK KEDUA, atau Non Otomatis jika diperlukan adanya Keputusan Deposito dari PIHAK PERTAMA jika terdapat perubahan objek atau skema Deposito didalam kelolaan usaha PIHAK KETIGA</p>
         </div>
@@ -897,26 +944,26 @@ class PengajuanInvestasiController extends Controller
         <!-- Continue with other Pasal sections (abbreviated for space) -->
         <div class="pasal">PASAL IV<br>HAK DAN KEWAJIBAN PIHAK PERTAMA</div>
         <div class="indent">
-            <p>1. Memberikan Dana Deposito kepada PIHAK KEDUA sebesar ' . $kontrak['jumlah_investasi_angka'] . ' (' . $kontrak['jumlah_investasi_text'] . ') yang di tempatkan/ditransfer ke rekening S-Finance</p>
+            <p>1. Memberikan Dana Deposito kepada PIHAK KEDUA sebesar '.$kontrak['jumlah_investasi_angka'].' ('.$kontrak['jumlah_investasi_text'].') yang di tempatkan/ditransfer ke rekening S-Finance</p>
             <p>2. Berhak meminta kembali Dana Deposito yang telah diserahkan kepada PIHAK KEDUA dengan ketentuan berdasarkan Pasal III Ayat 2.</p>
             <p>3. Menerima hasil keuntungan atas pengelolaan Dana Deposito dari PIHAK KEDUA, sesuai dengan Pasal VI perjanjian ini</p>
         </div>
 
         <div class="pasal">PASAL V<br>HAK DAN KEWAJIBAN PIHAK KEDUA</div>
         <div class="indent">
-            <p>1. Menerima Dana Deposito dari PIHAK PERTAMA sebesar ' . $kontrak['jumlah_investasi_angka'] . ' (' . $kontrak['jumlah_investasi_text'] . ') yang ditempatkan di rekening S-Finance</p>
+            <p>1. Menerima Dana Deposito dari PIHAK PERTAMA sebesar '.$kontrak['jumlah_investasi_angka'].' ('.$kontrak['jumlah_investasi_text'].') yang ditempatkan di rekening S-Finance</p>
             <p>2. Menyalurkan, monitoring Dana Deposito PIHAK PERTAMA</p>
             <p>3. Memberikan bagian hasil keuntungan kepada PIHAK PERTAMA.</p>
         </div>
 
         <div class="pasal">PASAL VI<br>PEMBAGIAN HASIL</div>
         <div class="indent">
-            <p>1. Bagi Hasil kepada PIHAK PERTAMA sebesar ' . $kontrak['bagi_hasil'] . ' % per Tahun terhitung dari tanggal diterimanya dana oleh PIHAK KEDUA dan nilai bagi hasil akan diberikan dari PIHAK KEDUA di akhir periode kerjasama.</p>
+            <p>1. Bagi Hasil kepada PIHAK PERTAMA sebesar '.$kontrak['bagi_hasil'].' % per Tahun terhitung dari tanggal diterimanya dana oleh PIHAK KEDUA dan nilai bagi hasil akan diberikan dari PIHAK KEDUA di akhir periode kerjasama.</p>
             <p>2. Jika dana masuk di atas tanggal 20, maka bagi hasil akan di hitung di bulan berikutnya.</p>
         </div>
 
         <br>
-        <p class="text-start">Jakarta, ' . $kontrak['tanggal_kontrak'] . '</p>
+        <p class="text-start">Jakarta, '.$kontrak['tanggal_kontrak'].'</p>
 
         <!-- Tanda Tangan -->
         <div class="signature-section">
@@ -926,15 +973,16 @@ class PengajuanInvestasiController extends Controller
                         <strong>PIHAK PERTAMA</strong><br>
                         (Investor)<br><br>
                         <div class="signature-space">
-                            ' . ($ttdInvestor ? '<img src="' . $ttdInvestor . '" class="signature-img">' : '') . '
+                            '.($ttdInvestor ? '<img src="'.$ttdInvestor.'" class="signature-img">' : '').'
                         </div>
-                        <strong>' . $kontrak['nama_investor'] . '</strong>
+                        <strong>'.$kontrak['nama_investor'].'</strong>
                     </td>
                     <td class="signature-col">
                         <strong>PIHAK KEDUA</strong><br>
                         (PT. Synnovac Kapital Indonesia)<br><br>
                         <div class="signature-space">
-                            ' . ($ttdPerusahaan ? '<img src="' . $ttdPerusahaan . '" class="signature-img">' : '') . '
+                            '.($markPerusahaan ? '<img src="'.$markPerusahaan.'" class="mark-img">' : '').'
+                            '.($ttdPerusahaan ? '<img src="'.$ttdPerusahaan.'" class="ttd-overlay">' : '').'
                         </div>
                         <strong>Muhamad Kurniawan</strong><br>
                         Direktur
@@ -949,7 +997,7 @@ class PengajuanInvestasiController extends Controller
 
             return $html;
         } catch (\Exception $e) {
-            Log::error('Error building kontrak HTML: ' . $e->getMessage());
+            Log::error('Error building kontrak HTML: '.$e->getMessage());
             throw $e;
         }
     }

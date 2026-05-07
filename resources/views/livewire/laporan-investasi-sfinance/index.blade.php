@@ -8,7 +8,7 @@
     </div>
 
     {{-- Table Card --}}
-    <div class="card shadow-sm border-0">
+    <div class="card">
 
         {{-- Controls Bar --}}
         <div class="card-header bg-white border-bottom py-3">
@@ -16,7 +16,7 @@
 
                 {{-- Search --}}
                 <div class="col-12 col-md-4">
-                    <label class="form-label small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing:.04em;font-size:.7rem;">
+                    <label class="form-label small fw-semibold text-muted mb-1 laporan-filter-label">
                         <i class="ti ti-search me-1"></i>Pencarian
                     </label>
                     <div class="input-group input-group-sm">
@@ -35,7 +35,7 @@
 
                 {{-- Tahun --}}
                 <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing:.04em;font-size:.7rem;">
+                    <label class="form-label small fw-semibold text-muted mb-1 laporan-filter-label">
                         <i class="ti ti-calendar me-1"></i>Tahun
                     </label>
                     <select class="form-select form-select-sm" wire:model.live="year">
@@ -48,7 +48,7 @@
 
                 {{-- Status --}}
                 <div class="col-6 col-md-2">
-                    <label class="form-label small fw-semibold text-uppercase text-muted mb-1" style="letter-spacing:.04em;font-size:.7rem;">
+                    <label class="form-label small fw-semibold text-muted mb-1 laporan-filter-label">
                         <i class="ti ti-filter me-1"></i>Status
                     </label>
                     <select class="form-select form-select-sm" wire:model.live="filterStatus">
@@ -60,7 +60,7 @@
                 </div>
 
                 {{-- Active-filter badges + Reset --}}
-                <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end flex-wrap gap-1">
+                <div class="col-12 col-md-4 d-flex align-items-end justify-content-md-end flex-wrap gap-1 laporan-action-wrap">
                     <button class="btn btn-sm btn-success d-flex align-items-center gap-1"
                         wire:click="exportExcel"
                         wire:loading.attr="disabled"
@@ -113,19 +113,21 @@
         </div>
 
         {{-- Color legend --}}
-        <div class="px-3 pt-2 pb-1 border-bottom bg-white d-flex align-items-center gap-3 flex-wrap">
-            <span class="badge-group">
-                <span class="dot dot-info"></span>
-                <span>Data Investasi</span>
-            </span>
-            <span class="badge-group">
-                <span class="dot dot-cof"></span>
-                <span>CoF Per Bulan</span>
-            </span>
-            <span class="badge-group">
-                <span class="dot dot-danger"></span>
-                <span>Pengembalian</span>
-            </span>
+        <div class="px-3 pt-2 pb-2 border-bottom bg-white d-flex align-items-center justify-content-between gap-2 flex-wrap">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <span class="badge-group">
+                    <span class="dot dot-info"></span>
+                    <span>Data Investasi</span>
+                </span>
+                <span class="badge-group">
+                    <span class="dot dot-cof"></span>
+                    <span>CoF Per Bulan</span>
+                </span>
+                <span class="badge-group">
+                    <span class="dot dot-danger"></span>
+                    <span>Pengembalian</span>
+                </span>
+            </div>
         </div>
 
         {{-- Table (scrollable) --}}
@@ -140,6 +142,11 @@
 
 @push('styles')
 <style>
+    .laporan-filter-label {
+        letter-spacing: normal;
+        font-size: 0.78rem;
+    }
+
     /* ── Wrapper scroll ────────────────────────────────── */
     .laporan-tabel-wrapper {
         overflow-x: auto;
@@ -156,6 +163,7 @@
         border-collapse: separate;
         border-spacing: 0;
         min-width: 2800px;
+        margin-bottom: 0;
     }
 
     /* ── Sticky columns ─────────────────────────────────── */
@@ -179,42 +187,44 @@
 
     /* ── Header ─────────────────────────────────────────── */
     #laporan-investasi-tabel thead th {
-        background: #f8f9fa !important;
-        color: #566a7f !important;
-        font-size: 0.75rem;
-        font-weight: 700;
+        background: #fff !important;
+        color: #696c87 !important;
+        font-size: 0.875rem;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-        padding: 10px 14px;
+        letter-spacing: 0.02em;
+        padding: 0.75rem 0.95rem;
         white-space: nowrap;
-        border-bottom: 2px solid #d9dee3 !important;
-        border-color: #e7eaf0 !important;
+        border-top: 0 !important;
+        border-bottom: 1px solid #eceef1 !important;
+        border-color: #eceef1 !important;
     }
 
     /* CoF Per Bulan header accent */
     #laporan-investasi-tabel thead th:nth-child(n+14):nth-child(-n+25) {
-        background: #eef3f8 !important;
-        color: #3a6186 !important;
+        background: #fbfcff !important;
+        color: #696c87 !important;
     }
     /* Pengembalian header accent */
     #laporan-investasi-tabel thead th:nth-child(n+26) {
-        background: #fdf2f2 !important;
-        color: #8b2e2e !important;
+        background: #fcfcfd !important;
+        color: #696c87 !important;
     }
 
     /* ── Sticky td background ───────────────────────────── */
     #laporan-investasi-tabel tbody td:nth-child(-n+4) { background: #fff; }
-    #laporan-investasi-tabel tbody tr:hover td:nth-child(-n+4) { background: #eef2ff; }
-    #laporan-investasi-tabel tbody tr:hover td { background: #eef2ff; }
+    #laporan-investasi-tabel tbody tr:hover td:nth-child(-n+4) { background: #f5f7ff; }
+    #laporan-investasi-tabel tbody tr:hover td { background: #f5f7ff; }
 
     /* ── Body ───────────────────────────────────────────── */
     #laporan-investasi-tabel tbody td {
-        font-size: 0.82rem;
-        padding: 8px 14px;
+        font-size: 0.86rem;
+        padding: 0.78rem 0.95rem;
         white-space: nowrap;
         vertical-align: middle;
-        border-color: #e7eaf0;
-        color: #444;
+        border-top: 1px solid #eceef1;
+        border-color: #eceef1;
+        color: #697a8d;
     }
     #laporan-investasi-tabel tbody tr:nth-child(odd)  { background: #fafbfc; }
     #laporan-investasi-tabel tbody tr:nth-child(even) { background: #fff; }
@@ -231,36 +241,81 @@
     .laporan-tabel-wrapper [wire\:id] > div:first-child,
     .laporan-tabel-wrapper .d-flex.justify-content-between {
         padding: 0.6rem 1rem;
-        border-top: 1px solid #e7eaf0;
+        border-top: 1px solid #eceef1;
         background: #fff;
     }
     .laporan-tabel-wrapper .pagination {
         margin-bottom: 0;
     }
     .laporan-tabel-wrapper .pagination .page-link {
-        font-size: 0.82rem;
+        font-size: 0.84rem;
         padding: 0.3rem 0.6rem;
-        color: #566a7f;
+        color: #697a8d;
         border-color: #d9dee3;
     }
     .laporan-tabel-wrapper .pagination .page-item.active .page-link {
-        background-color: #696cff;
-        border-color: #696cff;
+        background-color: #03c3ec;
+        border-color: #03c3ec;
         color: #fff;
     }
     .laporan-tabel-wrapper .pagination .page-link:hover {
-        background-color: #f0f1ff;
-        color: #696cff;
+        background-color: rgba(3, 195, 236, 0.08);
+        color: #03c3ec;
+    }
+
+    .laporan-tabel-wrapper .form-select,
+    .laporan-tabel-wrapper .form-control {
+        border-color: #d9dee3;
+        color: #697a8d;
+        font-size: 0.95rem;
+    }
+
+    .laporan-tabel-wrapper .form-select:focus,
+    .laporan-tabel-wrapper .form-control:focus {
+        border-color: rgba(3, 195, 236, 0.45);
+        box-shadow: 0 0 0 0.15rem rgba(3, 195, 236, 0.18);
+    }
+
+    .laporan-action-wrap .btn-success {
+        background-color: #03c3ec;
+        border-color: #03c3ec;
+    }
+
+    .laporan-action-wrap .btn-success:hover,
+    .laporan-action-wrap .btn-success:focus {
+        background-color: #02afd4;
+        border-color: #02afd4;
     }
 
     /* ── Legend dots ────────────────────────────────────── */
     .badge-group {
         display: inline-flex; align-items: center; gap: 6px;
-        font-size: 0.78rem; color: #6c757d; font-weight: 500;
+        font-size: 0.82rem; color: #6c757d; font-weight: 500;
     }
     .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
     .dot-info   { background: #566a7f; }
     .dot-cof    { background: #3a6186; }
     .dot-danger { background: #8b2e2e; }
+
+    @media (max-width: 991.98px) {
+        .laporan-action-wrap {
+            justify-content: flex-start !important;
+        }
+
+        .laporan-action-wrap .btn {
+            min-width: 128px;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        #laporan-investasi-tabel {
+            min-width: 2400px;
+        }
+
+        .laporan-action-wrap .btn {
+            min-width: 120px;
+        }
+    }
 </style>
 @endpush
