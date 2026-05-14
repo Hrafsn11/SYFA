@@ -37,6 +37,7 @@ return [
     'nvidia' => [
         'api_key' => env('NVIDIA_API_KEY'),
         'model'   => env('NVIDIA_MODEL', 'openai/gpt-oss-120b'),
+        'url'     => env('NVIDIA_URL', 'https://integrate.api.nvidia.com/v1/chat/completions'),
     ],
 
 ];
