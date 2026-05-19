@@ -57,7 +57,7 @@ class DashboardInvestasiDeposito extends Component
         $summaryData = $this->getSummaryData();
         $chartData = $this->getChartData();
 
-        return view('livewire.dashboard-investasi-deposito', [
+        return view('livewire.dashboard.investasi', [
             'summaryData' => $summaryData,
             'chartData' => $chartData,
             'monthOptions' => $this->service->getMonthOptions(),
