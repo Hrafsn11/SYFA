@@ -282,10 +282,9 @@
                 cashflowChart.render();
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                renderCashflowChart();
-            });
-
+            // Gunakan hanya livewire:navigated — event ini selalu terpicu
+            // baik saat navigasi SPA maupun saat halaman pertama kali dimuat.
+            // DOMContentLoaded tidak digunakan agar tidak terjadi render ganda.
             document.addEventListener('livewire:navigated', function() {
                 setTimeout(renderCashflowChart, 150);
             });

@@ -44,7 +44,7 @@
                                 <li class="menu-item {{ RouteHelper::routeIs('dashboard.pembiayaan') ? 'active' : '' }}">
                                     <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.pembiayaan') }}"
                                         class="menu-link">
-                                        <div data-i18n="Dashboard Pembiayaan SFinance">Dashboard Pembiayaan SFinance</div>
+                                        <div data-i18n="Dashboard Pembiayaan">Dashboard Pembiayaan</div>
                                     </a>
                                 </li>
                             @endcan
@@ -53,8 +53,7 @@
                                     class="menu-item {{ RouteHelper::routeIs('dashboard.investasi') ? 'active' : '' }}">
                                     <a wire:navigate.hover href="{{ RouteHelper::route('dashboard.investasi') }}"
                                         class="menu-link">
-                                        <div data-i18n="Pembiayaan Investasi Deposito SFinance">Dashboard Investasi 
-                                            SFinance
+                                        <div data-i18n="Pembiayaan Investasi Deposito">Dashboard Investasi 
                                         </div>
                                     </a>
                                 </li>

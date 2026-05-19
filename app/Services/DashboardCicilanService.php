@@ -23,36 +23,150 @@ class DashboardCicilanService
     ];
 
     // =========================================================
+    // AUTHORIZATION HELPERS
+    // =========================================================
+
+    /**
+     * Cek apakah user saat ini memiliki akses tidak terbatas (admin/internal).
+     * Super-admin dan role dengan restriction = 1 dapat melihat semua data.
+     */
+    private function isUnrestricted(): bool
+    {
+        $user = auth()->user();
+
+        if (!$user || $user->hasRole('super-admin')) {
+            return true;
+        }
+
+        return $user->roles->contains(fn($role) => $role->restriction == 1);
+    }
+
+    /**
+     * Kembalikan id_debitur milik user yang sedang login.
+     * Null jika user tidak memiliki data debitur terkait.
+     */
+    private function getAuthDebiturId(): ?string
+    {
+        return auth()->user()?->debiturInvestor?->id_debitur;
+    }
+
+    /**
+     * Terapkan filter debitur pada query PengajuanCicilan.
+     * - Admin/unrestricted: tidak ada filter tambahan.
+     * - Debitur: hanya data milik debitur sendiri.
+     * - User tanpa debitur: tidak ada data (1 = 0).
+     */
+    private function applyDebiturScope(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        if ($this->isUnrestricted()) {
+            return $query;
+        }
+
+        $idDebitur = $this->getAuthDebiturId();
+
+        if ($idDebitur) {
+            return $query->where('pengajuan_cicilan.id_debitur', $idDebitur);
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
+
+    /**
+     * Kembalikan array id_pengajuan_cicilan yang boleh diakses user saat ini.
+     * Digunakan untuk filter pada query PenyesuaianCicilan dan JadwalAngsuran.
+     */
+    private function getAllowedPengajuanIds(): ?array
+    {
+        if ($this->isUnrestricted()) {
+            return null; // null = tidak ada filter (semua boleh)
+        }
+
+        $idDebitur = $this->getAuthDebiturId();
+
+        if (!$idDebitur) {
+            return []; // array kosong = tidak ada data
+        }
+
+        return PengajuanCicilan::where('id_debitur', $idDebitur)
+            ->pluck('id_pengajuan_cicilan')
+            ->toArray();
+    }
+
+    /**
+     * Terapkan filter pada query PenyesuaianCicilan berdasarkan allowed pengajuan ids.
+     */
+    private function applyPenyesuaianScope(\Illuminate\Database\Eloquent\Builder $query, ?array $allowedIds): \Illuminate\Database\Eloquent\Builder
+    {
+        if ($allowedIds === null) {
+            return $query;
+        }
+
+        if (empty($allowedIds)) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('id_pengajuan_cicilan', $allowedIds);
+    }
+
+    /**
+     * Terapkan filter pada query JadwalAngsuran berdasarkan allowed penyesuaian ids.
+     */
+    private function applyJadwalScope(\Illuminate\Database\Eloquent\Builder $query, ?array $allowedIds): \Illuminate\Database\Eloquent\Builder
+    {
+        if ($allowedIds === null) {
+            return $query;
+        }
+
+        if (empty($allowedIds)) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        // Dapatkan id_penyesuaian_cicilan dari pengajuan yang diizinkan
+        $penyesuaianIds = PenyesuaianCicilan::whereIn('id_pengajuan_cicilan', $allowedIds)
+            ->pluck('id_penyesuaian_cicilan')
+            ->toArray();
+
+        if (empty($penyesuaianIds)) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('id_penyesuaian_cicilan', $penyesuaianIds);
+    }
+
+    // =========================================================
     // SUMMARY CARDS
     // =========================================================
 
     public function getSummaryData(): array
     {
-        $totalPengajuan = PengajuanCicilan::count();
-        $dalamProses    = PengajuanCicilan::whereNotIn('status', ['Selesai', 'Ditolak'])->count();
-        $selesai        = PengajuanCicilan::where('status', 'Selesai')->count();
-        $ditolak        = PengajuanCicilan::where('status', 'like', '%Ditolak%')->count();
+        $allowedIds = $this->getAllowedPengajuanIds();
 
-        // Gunakan total_cicilan (bukan plafon_pembiayaan) agar angka akurat
-        $totalCicilanKeseluruhan = (float) PenyesuaianCicilan::sum('total_cicilan');
+        $baseQuery = fn() => $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds);
 
-        // Total sudah terbayar dari tabel penyesuaian_cicilan (di-update saat konfirmasi pembayaran)
-        $totalTerbayar = (float) PenyesuaianCicilan::sum('total_terbayar');
+        $totalPengajuan = $baseQuery()->count();
+        $dalamProses    = $baseQuery()->whereNotIn('status', ['Selesai', 'Ditolak'])->count();
+        $selesai        = $baseQuery()->where('status', 'Selesai')->count();
+        $ditolak        = $baseQuery()->where('status', 'like', '%Ditolak%')->count();
 
-        // Sisa belum terbayar
-        $totalSisa = max(0, $totalCicilanKeseluruhan - $totalTerbayar);
+        $penyesuaianQuery = fn() => $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds);
+
+        $totalCicilanKeseluruhan = (float) $penyesuaianQuery()->sum('total_cicilan');
+        $totalTerbayar           = (float) $penyesuaianQuery()->sum('total_terbayar');
+        $totalSisa               = max(0, $totalCicilanKeseluruhan - $totalTerbayar);
 
         $persenTerbayar = $totalCicilanKeseluruhan > 0
             ? round(($totalTerbayar / $totalCicilanKeseluruhan) * 100, 1)
             : 0.0;
 
-        // Angsuran jatuh tempo hari ini
-        $angsuranJatuhTempoHariIni = JadwalAngsuran::whereDate('tanggal_jatuh_tempo', Carbon::today())
+        $jadwalQuery = fn() => $this->applyJadwalScope(JadwalAngsuran::query(), $allowedIds);
+
+        $angsuranJatuhTempoHariIni = $jadwalQuery()
+            ->whereDate('tanggal_jatuh_tempo', Carbon::today())
             ->whereNotIn('status', ['Lunas'])
             ->count();
 
-        // Angsuran terlambat (sudah lewat jatuh tempo, belum lunas)
-        $angsuranTerlambat = JadwalAngsuran::where('tanggal_jatuh_tempo', '<', Carbon::today())
+        $angsuranTerlambat = $jadwalQuery()
+            ->where('tanggal_jatuh_tempo', '<', Carbon::today())
             ->whereNotIn('status', ['Lunas'])
             ->count();
 
@@ -81,6 +195,7 @@ class DashboardCicilanService
         $masuk      = [];
         $selesai    = [];
         $ditolak    = [];
+        $allowedIds = $this->getAllowedPengajuanIds();
 
         for ($i = 11; $i >= 0; $i--) {
             $m = $pivot->copy()->subMonths($i);
@@ -89,11 +204,12 @@ class DashboardCicilanService
 
             $categories[] = self::BULAN_NAMA[$m->month] . ' ' . $m->year;
 
-            $masuk[]   = PengajuanCicilan::whereBetween('created_at', [$start, $end])->count();
-            $selesai[] = PengajuanCicilan::where('status', 'Selesai')
-                ->whereBetween('updated_at', [$start, $end])->count();
-            $ditolak[] = PengajuanCicilan::where('status', 'like', '%Ditolak%')
-                ->whereBetween('updated_at', [$start, $end])->count();
+            $masuk[]   = $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds)
+                ->whereBetween('created_at', [$start, $end])->count();
+            $selesai[] = $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds)
+                ->where('status', 'Selesai')->whereBetween('updated_at', [$start, $end])->count();
+            $ditolak[] = $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds)
+                ->where('status', 'like', '%Ditolak%')->whereBetween('updated_at', [$start, $end])->count();
         }
 
         return compact('categories', 'masuk', 'selesai', 'ditolak');
@@ -109,6 +225,7 @@ class DashboardCicilanService
         $categories = [];
         $pokok      = [];
         $margin     = [];
+        $allowedIds = $this->getAllowedPengajuanIds();
 
         for ($i = 11; $i >= 0; $i--) {
             $m     = $pivot->copy()->subMonths($i);
@@ -117,9 +234,8 @@ class DashboardCicilanService
 
             $categories[] = self::BULAN_NAMA[$m->month] . ' ' . $m->year;
 
-            // Ambil angsuran yang dibayar di bulan ini (Lunas atau Dibayar Sebagian)
-            // Proporsikan total_terbayar ke pokok/margin berdasarkan rasio di jadwal
-            $rows = JadwalAngsuran::whereBetween('tanggal_bayar', [$start, $end])
+            $rows = $this->applyJadwalScope(JadwalAngsuran::query(), $allowedIds)
+                ->whereBetween('tanggal_bayar', [$start, $end])
                 ->whereNotNull('tanggal_bayar')
                 ->whereIn('status', ['Lunas', 'Dibayar Sebagian'])
                 ->selectRaw('
@@ -150,7 +266,10 @@ class DashboardCicilanService
         $end   = $start->copy()->endOfMonth();
         $label = self::BULAN_NAMA[(int) $bulan] . ' ' . $tahun;
 
-        $rows = PenyesuaianCicilan::where(function ($q) use ($start, $end) {
+        $allowedIds = $this->getAllowedPengajuanIds();
+
+        $rows = $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds)
+            ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('tanggal_mulai_cicilan', [$start, $end])
                     ->orWhereBetween('created_at', [$start, $end]);
             })
@@ -169,6 +288,7 @@ class DashboardCicilanService
         $categories = [];
         $pokok      = [];
         $margin     = [];
+        $allowedIds = $this->getAllowedPengajuanIds();
 
         for ($m = 1; $m <= 12; $m++) {
             $start = Carbon::create((int) $tahun, $m, 1)->startOfMonth();
@@ -176,11 +296,11 @@ class DashboardCicilanService
 
             $categories[] = self::BULAN_NAMA[$m];
 
-            // Gunakan tanggal_mulai_cicilan agar merepresentasikan kapan program aktif
-            $rows = PenyesuaianCicilan::where(function ($q) use ($start, $end) {
-                $q->whereBetween('tanggal_mulai_cicilan', [$start, $end])
-                    ->orWhereBetween('created_at', [$start, $end]);
-            })
+            $rows = $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds)
+                ->where(function ($q) use ($start, $end) {
+                    $q->whereBetween('tanggal_mulai_cicilan', [$start, $end])
+                        ->orWhereBetween('created_at', [$start, $end]);
+                })
                 ->selectRaw('SUM(total_pokok) as sum_pokok, SUM(total_margin) as sum_margin')
                 ->first();
 
@@ -197,11 +317,12 @@ class DashboardCicilanService
 
     public function getAngsuranStatusData(string $bulan, int|string $tahun): array
     {
-        $pivot      = Carbon::create((int) $tahun, (int) $bulan, 1)->endOfMonth();
-        $categories = [];
-        $lunas      = [];
+        $pivot           = Carbon::create((int) $tahun, (int) $bulan, 1)->endOfMonth();
+        $categories      = [];
+        $lunas           = [];
         $dibayarSebagian = [];
-        $belumLunas = [];
+        $belumLunas      = [];
+        $allowedIds      = $this->getAllowedPengajuanIds();
 
         for ($i = 11; $i >= 0; $i--) {
             $m     = $pivot->copy()->subMonths($i);
@@ -210,11 +331,14 @@ class DashboardCicilanService
 
             $categories[] = self::BULAN_NAMA[$m->month] . ' ' . $m->year;
 
-            $lunas[]           = JadwalAngsuran::whereBetween('tanggal_jatuh_tempo', [$start, $end])
+            $lunas[]           = $this->applyJadwalScope(JadwalAngsuran::query(), $allowedIds)
+                ->whereBetween('tanggal_jatuh_tempo', [$start, $end])
                 ->where('status', 'Lunas')->count();
-            $dibayarSebagian[] = JadwalAngsuran::whereBetween('tanggal_jatuh_tempo', [$start, $end])
+            $dibayarSebagian[] = $this->applyJadwalScope(JadwalAngsuran::query(), $allowedIds)
+                ->whereBetween('tanggal_jatuh_tempo', [$start, $end])
                 ->where('status', 'Dibayar Sebagian')->count();
-            $belumLunas[]      = JadwalAngsuran::whereBetween('tanggal_jatuh_tempo', [$start, $end])
+            $belumLunas[]      = $this->applyJadwalScope(JadwalAngsuran::query(), $allowedIds)
+                ->whereBetween('tanggal_jatuh_tempo', [$start, $end])
                 ->whereNotIn('status', ['Lunas', 'Dibayar Sebagian'])->count();
         }
 
@@ -227,14 +351,12 @@ class DashboardCicilanService
 
     public function getAngsuranJatuhTempoData(): array
     {
-        $today = Carbon::today();
-        $limit = $today->copy()->addDays(30);
+        $today      = Carbon::today();
+        $limit      = $today->copy()->addDays(30);
+        $allowedIds = $this->getAllowedPengajuanIds();
 
-        return JadwalAngsuran::with([
-            'penyesuaianCicilan.pengajuanCicilan',
-        ])
-            // Tampilkan: (1) yang belum lunas & sudah lewat JT (overdue), dan
-            //            (2) yang belum lunas & JT dalam 30 hari ke depan
+        return $this->applyJadwalScope(JadwalAngsuran::query(), $allowedIds)
+            ->with(['penyesuaianCicilan.pengajuanCicilan'])
             ->where('tanggal_jatuh_tempo', '<=', $limit)
             ->whereNotIn('status', ['Lunas'])
             ->orderBy('tanggal_jatuh_tempo')
@@ -268,16 +390,19 @@ class DashboardCicilanService
             'Submit Dokumen'          => ['label' => 'Submit Dokumen',          'color' => 'info'],
             'Dokumen Tervalidasi'     => ['label' => 'Dokumen Tervalidasi',     'color' => 'success'],
             'Disetujui CEO SKI'       => ['label' => 'Disetujui CEO SKI',       'color' => 'success'],
-            'Disetujui Direktur SKI'  => ['label' => 'Disetujui Direktur SKI', 'color' => 'success'],
+            'Disetujui Direktur SKI'  => ['label' => 'Disetujuan Direktur SKI', 'color' => 'success'],
             'Selesai'                 => ['label' => 'Selesai',                 'color' => 'primary'],
             'Ditolak'                 => ['label' => 'Ditolak',                 'color' => 'danger'],
         ];
 
-        $rows = PengajuanCicilan::selectRaw(
-            'status,
-             COUNT(*) as jumlah,
-             SUM(COALESCE(sisa_pokok_belum_dibayar, jumlah_plafon_awal, 0)) as total_plafon'
-        )
+        $allowedIds = $this->getAllowedPengajuanIds();
+
+        $rows = $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds)
+            ->selectRaw(
+                'status,
+                 COUNT(*) as jumlah,
+                 SUM(COALESCE(sisa_pokok_belum_dibayar, jumlah_plafon_awal, 0)) as total_plafon'
+            )
             ->groupBy('status')
             ->get()
             ->keyBy('status');
@@ -302,14 +427,17 @@ class DashboardCicilanService
 
     public function getMetodePerhitunganData(): array
     {
-        return PenyesuaianCicilan::selectRaw(
-            'metode_perhitungan,
-             COUNT(*) as jumlah,
-             SUM(plafon_pembiayaan) as total_plafon,
-             AVG(jangka_waktu_total) as rata_jangka_waktu,
-             SUM(total_terbayar) as total_terbayar,
-             SUM(total_cicilan)  as total_cicilan'
-        )
+        $allowedIds = $this->getAllowedPengajuanIds();
+
+        return $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds)
+            ->selectRaw(
+                'metode_perhitungan,
+                 COUNT(*) as jumlah,
+                 SUM(plafon_pembiayaan) as total_plafon,
+                 AVG(jangka_waktu_total) as rata_jangka_waktu,
+                 SUM(total_terbayar) as total_terbayar,
+                 SUM(total_cicilan)  as total_cicilan'
+            )
             ->groupBy('metode_perhitungan')
             ->get()
             ->map(function ($row) {
@@ -333,7 +461,11 @@ class DashboardCicilanService
 
     public function getJenisRestrukturisasiData(): array
     {
-        $allRecords = PengajuanCicilan::whereNotNull('jenis_restrukturisasi')->get();
+        $allowedIds = $this->getAllowedPengajuanIds();
+        $allRecords = $this->applyPenyesuaianScope(
+            PengajuanCicilan::whereNotNull('jenis_restrukturisasi'),
+            $allowedIds
+        )->get();
 
         $counts = [];
         foreach ($allRecords as $record) {
@@ -368,13 +500,15 @@ class DashboardCicilanService
         $start = $m->copy()->startOfMonth();
         $end   = $m->copy()->endOfMonth();
 
-        $label = self::BULAN_NAMA[$m->month] . ' ' . $m->year;
+        $label      = self::BULAN_NAMA[$m->month] . ' ' . $m->year;
+        $allowedIds = $this->getAllowedPengajuanIds();
+        $baseQuery  = fn() => $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds);
 
         return [
             'categories' => [$label],
-            'masuk'      => [PengajuanCicilan::whereBetween('created_at', [$start, $end])->count()],
-            'selesai'    => [PengajuanCicilan::where('status', 'Selesai')->whereBetween('updated_at', [$start, $end])->count()],
-            'ditolak'    => [PengajuanCicilan::where('status', 'like', '%Ditolak%')->whereBetween('updated_at', [$start, $end])->count()],
+            'masuk'      => [$baseQuery()->whereBetween('created_at', [$start, $end])->count()],
+            'selesai'    => [$baseQuery()->where('status', 'Selesai')->whereBetween('updated_at', [$start, $end])->count()],
+            'ditolak'    => [$baseQuery()->where('status', 'like', '%Ditolak%')->whereBetween('updated_at', [$start, $end])->count()],
         ];
     }
 
@@ -384,7 +518,10 @@ class DashboardCicilanService
         $lunas      = [];
         $belumLunas = [];
 
-        $penyesuaian = PenyesuaianCicilan::with(['pengajuanCicilan', 'jadwalAngsuran'])->get();
+        $allowedIds  = $this->getAllowedPengajuanIds();
+        $penyesuaian = $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds)
+            ->with(['pengajuanCicilan', 'jadwalAngsuran'])
+            ->get();
 
         foreach ($penyesuaian as $p) {
             $nama = $p->pengajuanCicilan?->nama_perusahaan ?? 'Tidak Diketahui';
@@ -405,9 +542,11 @@ class DashboardCicilanService
 
     public function getDebiturMonitoringData(): array
     {
-        $today = Carbon::today();
+        $today      = Carbon::today();
+        $allowedIds = $this->getAllowedPengajuanIds();
 
-        return PenyesuaianCicilan::with(['pengajuanCicilan', 'jadwalAngsuran'])
+        return $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds)
+            ->with(['pengajuanCicilan', 'jadwalAngsuran'])
             ->get()
             ->map(function ($p) use ($today) {
                 $angsuran     = $p->jadwalAngsuran;
