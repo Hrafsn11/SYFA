@@ -220,6 +220,8 @@
         (function() {
             'use strict';
 
+            let cashflowChart = null;
+
             function getCashflowData() {
                 const holder = document.getElementById('chart-data-holder');
                 if (!holder) return null;
@@ -269,14 +271,20 @@
 
                 const el = document.querySelector('#chartCashflow');
                 if (!el) return;
-                const chart = new ApexCharts(el, options);
-                chart.render();
+
+                if (cashflowChart) {
+                    cashflowChart.destroy();
+                    cashflowChart = null;
+                    el.innerHTML = '';
+                }
+
+                cashflowChart = new ApexCharts(el, options);
+                cashflowChart.render();
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                renderCashflowChart();
-            });
-
+            // Gunakan hanya livewire:navigated — event ini selalu terpicu
+            // baik saat navigasi SPA maupun saat halaman pertama kali dimuat.
+            // DOMContentLoaded tidak digunakan agar tidak terjadi render ganda.
             document.addEventListener('livewire:navigated', function() {
                 setTimeout(renderCashflowChart, 150);
             });

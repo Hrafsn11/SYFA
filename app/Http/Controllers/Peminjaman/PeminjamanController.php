@@ -167,7 +167,7 @@ class PeminjamanController extends Controller
 
         if ($jenisPembiayaan === 'Invoice Financing') {
             $rules['details']                    = 'required|array|min:1';
-            $rules['lampiran_sid']               = 'nullable|file|mimes:pdf,docx,xls,xlsx,png,jpg,jpeg,rar,zip|max:2048';
+            $rules['lampiran_sid']               = 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048';
             $rules['id_instansi']                = 'nullable';
             $rules['sumber_pembiayaan']          = 'nullable';
             $rules['tujuan_pembiayaan']          = 'nullable|string';

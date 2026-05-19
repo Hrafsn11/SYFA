@@ -234,6 +234,124 @@
             $('.modal').modal('show');
         });
 
+        /**
+         * Validasi client-side untuk nilai invoice dan nilai pinjaman.
+         * Mencegah submit jika nilai kosong, 0, atau negatif.
+         * Nilai dari Cleave.js sudah berupa raw number string (misal: "1000000").
+         */
+        function getCurrencyRawValue(inputEl) {
+            if (!inputEl) return null;
+            // Cleave.js dari currency-field component menyimpan instance di _cleaveInstance
+            if (inputEl._cleaveInstance) {
+                const raw = inputEl._cleaveInstance.getRawValue();
+                return raw === '' ? null : parseFloat(raw);
+            }
+            // Fallback: gunakan getCleaveRawValue global (untuk input-rupiah biasa)
+            // atau bersihkan format manual
+            if (typeof window.getCleaveRawValue === 'function') {
+                const raw = window.getCleaveRawValue(inputEl);
+                return raw === 0 && inputEl.value.replace(/[^0-9]/g, '') === '' ? null : raw;
+            }
+            const cleaned = String(inputEl.value).replace(/[^0-9]/g, '');
+            return cleaned === '' ? null : parseInt(cleaned, 10);
+        }
+
+        function showFieldError(wrapperEl, message) {
+            let feedback = wrapperEl.querySelector('.client-invalid-feedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback d-block client-invalid-feedback';
+                wrapperEl.appendChild(feedback);
+            }
+            feedback.textContent = message;
+            const input = wrapperEl.querySelector('input');
+            if (input) input.classList.add('is-invalid');
+        }
+
+        function clearFieldError(wrapperEl) {
+            const feedback = wrapperEl.querySelector('.client-invalid-feedback');
+            if (feedback) feedback.remove();
+            const input = wrapperEl.querySelector('input');
+            if (input) input.classList.remove('is-invalid');
+        }
+
+        function validateInvoiceFinancingValues() {
+            const modal = document.getElementById('modalTambahInvoice');
+            if (!modal) return true;
+
+            const nilaiInvoiceWrapper = modal.querySelector('[wire\\:key="invoice_financing_nilai_invoice"]');
+            const nilaiPinjamanWrapper = modal.querySelector('[wire\\:key="invoice_financing_nilai_pinjaman"]');
+
+            let isValid = true;
+
+            if (nilaiInvoiceWrapper) {
+                const input = nilaiInvoiceWrapper.querySelector('input');
+                const value = getCurrencyRawValue(input);
+                clearFieldError(nilaiInvoiceWrapper);
+                if (value === null || value <= 0) {
+                    showFieldError(nilaiInvoiceWrapper, 'Nilai invoice harus lebih dari 0.');
+                    isValid = false;
+                }
+            }
+
+            if (nilaiPinjamanWrapper) {
+                const input = nilaiPinjamanWrapper.querySelector('input');
+                const value = getCurrencyRawValue(input);
+                clearFieldError(nilaiPinjamanWrapper);
+                if (value === null || value <= 0) {
+                    showFieldError(nilaiPinjamanWrapper, 'Nilai pinjaman harus lebih dari 0.');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function validateInstallmentValues() {
+            const modal = document.getElementById('modalTambahInvoice');
+            if (!modal) return true;
+
+            // Field input-rupiah biasa dengan id="nilai_invoice" pada form Installment
+            const nilaiInvoiceInput = modal.querySelector('#nilai_invoice.input-rupiah');
+            if (!nilaiInvoiceInput) return true;
+
+            const wrapper = nilaiInvoiceInput.closest('.form-group') ?? nilaiInvoiceInput.parentElement;
+            const value = getCurrencyRawValue(nilaiInvoiceInput);
+
+            clearFieldError(wrapper);
+            if (value === null || value <= 0) {
+                showFieldError(wrapper, 'Nilai invoice harus lebih dari 0.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Intercept submit form modal sebelum dikirim ke Livewire
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('#modalTambahInvoice form');
+            if (!form) return;
+
+            const isInvoiceFinancing = !!document.querySelector('[wire\\:key="invoice_financing_nilai_invoice"]');
+            const isInstallment = !!document.querySelector('#nilai_invoice.input-rupiah');
+
+            let isValid = true;
+
+            if (isInvoiceFinancing) isValid = validateInvoiceFinancingValues() && isValid;
+            if (isInstallment)     isValid = validateInstallmentValues()       && isValid;
+
+            if (!isValid) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+        }, true);
+
+        // Bersihkan error client-side saat modal ditutup
+        document.getElementById('modalTambahInvoice')?.addEventListener('hidden.bs.modal', function () {
+            this.querySelectorAll('.client-invalid-feedback').forEach(el => el.remove());
+            this.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        });
+
         // Re-initialize datepickers and currency fields when modal is shown
         $('#modalTambahInvoice').on('shown.bs.modal', function () {
             // Re-init datepickers in modal
@@ -282,7 +400,6 @@
             // Re-init Cleave.js for currency fields in modal
             $(this).find('.currency-field-wrapper input').each(function() {
                 const input = this;
-                const inputId = $(this).attr('id');
                 
                 if (input._cleaveInstance) {
                     return; // Already initialized

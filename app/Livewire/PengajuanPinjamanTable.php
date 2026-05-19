@@ -155,7 +155,6 @@ class PengajuanPinjamanTable extends DataTableComponent
                 ->label(fn($row) => view('livewire.pengajuan-pinjaman.partials.table-actions', [
                     'id' => $row->id_pengajuan_peminjaman,
                     'status' => $row->status,
-                    'is_active' => $row->is_active
                 ])->render())
                 ->html()
                 ->excludeFromColumnSelect(),

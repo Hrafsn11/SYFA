@@ -67,6 +67,7 @@
 .approval-modal-overlay .modal-body {
     padding: 1.5rem;
     overflow: visible !important;
+    position: relative;
 }
 
 .approval-modal-overlay .modal-footer {
@@ -78,18 +79,17 @@
     border-top: 1px solid #dee2e6;
 }
 
-[x-cloak] {
-    display: none !important;
-}
-
-/* Flatpickr z-index fix */
-.flatpickr-calendar {
+/* Bootstrap Datepicker z-index fix untuk modal overlay */
+.datepicker {
     z-index: 10100 !important;
 }
 
-.flatpickr-calendar .flatpickr-day {
-    display: inline-flex !important;
-    visibility: visible !important;
+#modal-validasi-dokumen-body .datepicker {
+    position: absolute !important;
+}
+
+[x-cloak] {
+    display: none !important;
 }
 </style>
 
@@ -113,7 +113,7 @@
                 <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
             </div>
             <form wire:submit.prevent="validasiDokumenSetuju">
-                <div class="modal-body">
+                <div class="modal-body" id="modal-validasi-dokumen-body">
                     <div class="row">
                         {{-- Nominal Pengajuan --}}
                         <div class="col-md-6 mb-3">
@@ -164,7 +164,13 @@
                                        class="form-control" 
                                        id="input_tanggal_pencairan"
                                        placeholder="DD/MM/YYYY"
-                                       autocomplete="off">
+                                       data-format="dd/mm/yyyy"
+                                       data-autoclose="true"
+                                       data-today-highlight="true"
+                                       datepicker-livewire-modal="tanggal_pencairan"
+                                       autocomplete="off"
+                                       readonly
+                                       style="background-color: white !important; cursor: pointer !important;">
                                 <span class="input-group-text">
                                     <i class="ti ti-calendar"></i>
                                 </span>
@@ -721,31 +727,36 @@
 </div>
 
 {{-- ================================================ --}}
-{{-- Initialize Flatpickr and Cleave for Modal --}}
+{{-- Initialize Bootstrap Datepicker and Cleave for Modal --}}
 {{-- ================================================ --}}
 <script>
 // Global function to initialize modal inputs
 window.initModalValidasiInputs = function() {
     setTimeout(function() {
-        // Initialize Flatpickr for date input
-        const dateInput = document.getElementById('input_tanggal_pencairan');
+        // Initialize Bootstrap Datepicker (konsisten dengan halaman create)
+        const $dateInput = $('#input_tanggal_pencairan');
         const hiddenDate = document.getElementById('hidden_tanggal_pencairan');
-        
-        if (dateInput && typeof flatpickr !== 'undefined') {
+
+        if ($dateInput.length) {
             // Destroy existing instance if any
-            if (dateInput._flatpickr) {
-                dateInput._flatpickr.destroy();
+            if ($dateInput.data('datepicker')) {
+                $dateInput.off('changeDate');
+                $dateInput.datepicker('destroy');
             }
-            
-            flatpickr(dateInput, {
-                dateFormat: 'd/m/Y',
-                allowInput: true,
-                disableMobile: true,
-                onChange: function(selectedDates, dateStr) {
-                    if (hiddenDate) {
-                        hiddenDate.value = dateStr;
-                        hiddenDate.dispatchEvent(new Event('input', { bubbles: true }));
-                    }
+
+            $dateInput.datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                orientation: 'bottom auto',
+                container: '#modal-validasi-dokumen-body'
+            }).on('hide', function(e) {
+                e.stopPropagation();
+            }).on('changeDate', function() {
+                const dateValue = $dateInput.val();
+                if (hiddenDate && dateValue) {
+                    hiddenDate.value = dateValue;
+                    hiddenDate.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
         }
@@ -774,17 +785,15 @@ window.initModalValidasiInputs = function() {
             // Sync on input change
             currencyInput.addEventListener('input', function() {
                 if (hiddenCurrency) {
-                    const rawValue = cleaveInstance.getRawValue();
-                    hiddenCurrency.value = rawValue;
+                    hiddenCurrency.value = cleaveInstance.getRawValue();
                     hiddenCurrency.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
-            
+
             // Also sync on blur
             currencyInput.addEventListener('blur', function() {
                 if (hiddenCurrency) {
-                    const rawValue = cleaveInstance.getRawValue();
-                    hiddenCurrency.value = rawValue;
+                    hiddenCurrency.value = cleaveInstance.getRawValue();
                     hiddenCurrency.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             });
@@ -804,12 +813,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Listen for Livewire closeModal event
 document.addEventListener('livewire:init', function() {
     Livewire.on('closeModal', () => {
-        // Dispatch Alpine event to close all modals
         window.dispatchEvent(new CustomEvent('close-all-modals'));
     });
     
     Livewire.on('approvalSuccess', (data) => {
-        // Close all modals on success
         window.dispatchEvent(new CustomEvent('close-all-modals'));
     });
 });
