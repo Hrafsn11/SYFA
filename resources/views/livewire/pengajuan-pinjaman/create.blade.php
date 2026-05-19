@@ -64,12 +64,12 @@
                                     <a href="{{ getFileUrl($lampiran_sid_current) }}" target="_blank"><small>Current File</small></a>
                                     @endif
                                 </div>
-                                <input class="form-control" type="file" id="lampiran_sid" wire:model.blur="lampiran_sid" wire:ignore>
+                                <input class="form-control" type="file" id="lampiran_sid" wire:model.blur="lampiran_sid" wire:ignore accept=".pdf,.png,.jpg,.jpeg">
                                 <div class="invalid-feedback" wire:ignore></div>
                                 @error('lampiran_sid')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
-                                <small class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
+                                <small class="form-text mb-3">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                             </div>
                             
                             {{-- KOL HIDDEN REMOVED --}}

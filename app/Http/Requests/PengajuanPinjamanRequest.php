@@ -57,12 +57,12 @@ class PengajuanPinjamanRequest extends FormRequest
                                 $fail('Lampiran SID tidak valid.');
                                 return;
                             }
-                            $allowedMimes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'image/png', 'image/jpeg', 'image/jpg', 'application/x-rar-compressed', 'application/zip'];
-                            $allowedExtensions = ['pdf', 'docx', 'xls', 'xlsx', 'png', 'jpg', 'jpeg', 'rar', 'zip'];
+                            $allowedMimes = ['application/pdf', 'image/png', 'image/jpeg'];
+                            $allowedExtensions = ['pdf', 'png', 'jpg', 'jpeg'];
                             $extension = strtolower($value->getClientOriginalExtension());
                             
                             if (!in_array($value->getMimeType(), $allowedMimes) && !in_array($extension, $allowedExtensions)) {
-                                $fail('Lampiran SID harus berupa file PDF, DOCX, XLS, PNG, RAR, atau ZIP.');
+                                $fail('Lampiran SID harus berupa file PDF, PNG, atau JPG.');
                                 return;
                             }
                             if ($value->getSize() > 2048 * 1024) {
@@ -116,7 +116,7 @@ class PengajuanPinjamanRequest extends FormRequest
             'id_instansi.exists' => 'Instansi tidak valid.',
             'lampiran_sid.required_if' => 'Lampiran SID harus diupload untuk Invoice Financing.',
             'lampiran_sid.image' => 'Lampiran SID harus berupa gambar.',
-            'lampiran_sid.mimes' => 'Lampiran SID harus berupa gambar JPEG, PNG, atau JPG.',
+            'lampiran_sid.mimes' => 'Lampiran SID harus berupa file PDF, PNG, atau JPG.',
             'lampiran_sid.max' => 'Lampiran SID tidak boleh lebih besar dari 2MB.',
             
             // Form data invoice/contract

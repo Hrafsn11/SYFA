@@ -1,14 +1,9 @@
-@php
-    $isActive = $is_active === 'active';
-@endphp
-
 <div class="d-flex justify-content-center gap-1" id="action-row-{{ $id }}">
     <a href="{{ route('peminjaman.detail', $id) }}" 
        wire:navigate
        class="btn btn-sm btn-outline-primary action-btn" 
-       title="Lihat Detail"
-       data-action="detail"
-       @if(!$isActive) style="pointer-events: none; opacity: 0.5;" @endif>
+       title="Lihat Detail" 
+       data-action="detail">
         <i class="ti ti-file-text"></i>
     </a>
     
@@ -19,20 +14,9 @@
         class="btn btn-sm btn-outline-warning action-btn edit-btn" 
         title="Edit"
         data-action="edit"
-        data-status="{{ $status }}"
-        @if(!$isActive) style="pointer-events: none; opacity: 0.5;" @endif>
+        data-status="{{ $status }}">
             <i class="fas fa-edit"></i>
         </a> 
-    @endcan
-
-    @can('peminjaman_dana.active/non_active')
-        <button class="btn btn-sm btn-icon {{ $isActive ? 'btn-text-danger' : 'btn-text-success' }} rounded-pill waves-effect pengajuan-toggle-status-btn" 
-                type="button"
-                data-id="{{ $id }}"
-                data-active="{{ $isActive ? 'true' : 'false' }}"
-                title="{{ $isActive ? 'Nonaktifkan' : 'Aktifkan' }}">
-            <i class="{{ $isActive ? 'ti ti-circle-x' : 'ti ti-circle-check' }}"></i>
-        </button>
     @endcan
     
     

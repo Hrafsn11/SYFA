@@ -68,8 +68,24 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                         },
                     ],
                     'nama_client' => 'required|string',
-                    'nilai_invoice' => 'required',
-                    'nilai_pinjaman' => 'required',
+                    'nilai_invoice' => [
+                        'required',
+                        function ($attribute, $value, $fail) {
+                            $raw = rupiahToRawValue($value);
+                            if ($raw <= 0) {
+                                $fail('Nilai invoice harus lebih dari 0.');
+                            }
+                        },
+                    ],
+                    'nilai_pinjaman' => [
+                        'required',
+                        function ($attribute, $value, $fail) {
+                            $raw = rupiahToRawValue($value);
+                            if ($raw <= 0) {
+                                $fail('Nilai pinjaman harus lebih dari 0.');
+                            }
+                        },
+                    ],
                     'invoice_date' => 'required|date_format:d/m/Y|before_or_equal:due_date',
                     'due_date' => 'required|date_format:d/m/Y',
                     'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
@@ -105,7 +121,15 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                         },
                     ],
                     'nama_client' => 'required|string',
-                    'nilai_invoice' => 'required',
+                    'nilai_invoice' => [
+                        'required',
+                        function ($attribute, $value, $fail) {
+                            $raw = rupiahToRawValue($value);
+                            if ($raw <= 0) {
+                                $fail('Nilai invoice harus lebih dari 0.');
+                            }
+                        },
+                    ],
                     'invoice_date' => 'required|date_format:d/m/Y',
                     'nama_barang' => 'required|string',
                     'dokumen_invoice' => 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip',
