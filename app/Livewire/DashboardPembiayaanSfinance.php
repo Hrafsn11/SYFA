@@ -147,8 +147,10 @@ class DashboardPembiayaanSfinance extends Component
         $chartData = $this->getChartData();
         $hasData = $this->checkDataAvailability($chartData);
         $arTableData = $this->service->getArTableData($this->bulanTable, $this->tahunTable);
+        $cashflowData = $this->service->getCashflowTrend(6);
+        $paymentStatus = $this->service->getPaymentStatus();
 
-        return view('livewire.dashboard-pembiayaan-sfinance', [
+        return view('livewire.dashboard.pembiayaan', [
             'summaryData' => $summaryData,
             'chartData' => $chartData,
             'hasDataDisbursement' => $hasData['disbursement'],
@@ -156,6 +158,8 @@ class DashboardPembiayaanSfinance extends Component
             'hasDataSisa' => $hasData['sisa'],
             'hasDataPiutang' => $hasData['piutang'],
             'arTableData' => $arTableData,
+            'cashflowData' => $cashflowData,
+            'paymentStatus' => $paymentStatus,
             'monthOptions' => $this->getMonthOptions(),
             'yearOptions' => $this->getYearOptions(),
         ])->layout('layouts.app', [

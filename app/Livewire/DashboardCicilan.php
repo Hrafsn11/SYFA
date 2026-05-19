@@ -67,7 +67,7 @@ class DashboardCicilan extends Component
 
         $debiturMonitoringData = $this->service->getDebiturMonitoringData();
 
-        return view('livewire.dashboard-cicilan', compact(
+        return view('livewire.dashboard.cicilan', compact(
             'summaryData',
             'chartData',
             'monthYearOptions',

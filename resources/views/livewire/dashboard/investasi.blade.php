@@ -504,12 +504,8 @@
 
                     $select.off('change.dashboard').on('change.dashboard', function() {
                         const val = $(this).val();
-                        const $component = $(this).closest('[wire\\:id]');
-                        const componentId = $component.attr('wire:id');
-
-                        if (componentId && typeof Livewire !== 'undefined') {
-                            Livewire.find(componentId).set(config.property, val || null);
-                        }
+                        const wid = $(this).closest('[wire\\:id]').attr('wire:id');
+                        if (wid && typeof Livewire !== 'undefined') Livewire.find(wid).set(config.property, val || null);
                     });
                 });
             }

@@ -543,4 +543,113 @@ class DashboardPembiayaanSfinanceService
         }
         return $result;
     }
+
+    public function getCashflowTrend(int $months = 6): array
+    {
+        $months = max(1, $months);
+        $categories = [];
+        $outData = [];
+        $inData = [];
+
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $startOfMonth = $date->copy()->startOfMonth();
+            $endOfMonth = $date->copy()->endOfMonth();
+
+            $categories[] = $date->format('M Y');
+            $outData[] = $this->getTotalDisbursement($startOfMonth, $endOfMonth);
+            $inData[] = $this->getTotalPembayaranMasuk($startOfMonth, $endOfMonth);
+        }
+
+        return [
+            'categories' => $categories,
+            'out' => $outData,
+            'in' => $inData,
+        ];
+    }
+
+    public function getPaymentStatus(): array
+    {
+        $lastPayment = DB::table('report_pengembalian as rp')
+            ->join('pengembalian_pinjaman as pp', 'rp.id_pengembalian', '=', 'pp.ulid')
+            ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman');
+
+        if ($this->isRestricted && $this->debiturId) {
+            $lastPayment->where('pm.id_debitur', $this->debiturId);
+        } elseif ($this->isRestricted && !$this->debiturId) {
+            return [
+                'last_payment' => null,
+                'next_due' => null,
+                'installment' => ['paid' => 0, 'total' => 0],
+            ];
+        }
+
+        $lastPayment = $lastPayment->orderBy('rp.created_at', 'desc')
+            ->select('rp.created_at', 'rp.nilai_total_pengembalian', 'pp.nominal_invoice', 'pm.nomor_peminjaman')
+            ->first();
+
+        $nextDueQuery = PengajuanPeminjaman::query()
+            ->whereIn('status', ['Dana Sudah Dicairkan'])
+            ->where(function ($q) {
+                $q->whereNotNull('rencana_tgl_pembayaran')
+                    ->orWhereNotNull('tanggal_jatuh_tempo');
+            })
+            ->orderByRaw('COALESCE(rencana_tgl_pembayaran, tanggal_jatuh_tempo) ASC');
+
+        if ($this->isRestricted && $this->debiturId) {
+            $nextDueQuery->where('id_debitur', $this->debiturId);
+        }
+
+        $nextDue = $nextDueQuery
+            ->select(
+                'nomor_peminjaman',
+                'yang_harus_dibayarkan',
+                'total_pinjaman',
+                'total_bunga',
+                'rencana_tgl_pembayaran',
+                'tanggal_jatuh_tempo'
+            )
+            ->first();
+
+        $installmentQuery = PengajuanPeminjaman::query()
+            ->where('jenis_pembiayaan', 'Installment')
+            ->whereIn('status', ['Dana Sudah Dicairkan', 'Lunas']);
+
+        if ($this->isRestricted && $this->debiturId) {
+            $installmentQuery->where('id_debitur', $this->debiturId);
+        }
+
+        $totalInstallments = (int) $installmentQuery->sum('tenor_pembayaran');
+
+        $paidInstallmentsQuery = DB::table('pengembalian_pinjaman as pp')
+            ->join('pengajuan_peminjaman as pm', 'pp.id_pengajuan_peminjaman', '=', 'pm.id_pengajuan_peminjaman')
+            ->where('pm.jenis_pembiayaan', 'Installment');
+
+        if ($this->isRestricted && $this->debiturId) {
+            $paidInstallmentsQuery->where('pm.id_debitur', $this->debiturId);
+        }
+
+        $paidInstallments = (int) $paidInstallmentsQuery->count();
+
+        $lastPaymentDate = $lastPayment?->created_at ? Carbon::parse($lastPayment->created_at)->format('d M Y') : null;
+        $nextDueRaw = $nextDue?->rencana_tgl_pembayaran ?? $nextDue?->tanggal_jatuh_tempo;
+        $nextDueDate = $nextDueRaw ? Carbon::parse($nextDueRaw)->format('d M Y') : null;
+
+        return [
+            'last_payment' => $lastPayment ? [
+                'date' => $lastPaymentDate,
+                'amount' => (float) ($lastPayment->nilai_total_pengembalian ?? $lastPayment->nominal_invoice ?? 0),
+                'reference' => $lastPayment->nomor_peminjaman ?? null,
+            ] : null,
+            'next_due' => $nextDue ? [
+                'date' => $nextDueDate,
+                'amount' => (float) ($nextDue->yang_harus_dibayarkan ?? (($nextDue->total_pinjaman ?? 0) + ($nextDue->total_bunga ?? 0))),
+                'reference' => $nextDue->nomor_peminjaman ?? null,
+            ] : null,
+            'installment' => [
+                'paid' => $paidInstallments,
+                'total' => $totalInstallments,
+            ],
+        ];
+    }
 }

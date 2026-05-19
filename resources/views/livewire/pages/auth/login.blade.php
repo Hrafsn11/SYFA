@@ -79,8 +79,8 @@ new #[Layout('layouts.guest')] class extends Component {
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner py-6">
                 <!-- Login -->
-                <div class="card">
-                    <div class="card-body">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-6 p-md-8">
                         <!-- Logo -->
                         <div class="app-brand justify-content-center mb-6">
                             <a href="{{ route('login') }}" class="app-brand-link">
@@ -91,21 +91,26 @@ new #[Layout('layouts.guest')] class extends Component {
                             </a>
                         </div>
                         <!-- /Logo -->
-                        <p class="mb-2">Login to your account</p>
+                        <div class="text-center mb-7">
+                            <h4 class="mb-2">Masuk ke akun Anda</h4>
+                            <p class="text-muted mb-0">Gunakan email atau username yang terdaftar</p>
+                        </div>
 
                         <form class="mb-4" wire:submit.prevent="login">
-                            <div class="mb-6">
+                            <div class="mb-5">
+                                <label for="email" class="form-label">Email atau Username</label>
                                 <input wire:model="email" type="text"
-                                    class="form-control @error('email') is-invalid @enderror" id="email"
-                                    placeholder="Email or Username" autocomplete="username" autofocus />
+                                    class="form-control form-control-lg @error('email') is-invalid @enderror"
+                                    id="email" placeholder="contoh@domain.com" autocomplete="username" autofocus />
                                 @error('email')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="mb-6 form-password-toggle">
+                            <div class="mb-5 form-password-toggle">
+                                <label for="password" class="form-label">Password</label>
                                 <div class="input-group input-group-merge">
                                     <input wire:model="password" type="password" id="password"
-                                        class="form-control @error('password') is-invalid @enderror"
+                                        class="form-control form-control-lg @error('password') is-invalid @enderror"
                                         placeholder="Password" autocomplete="current-password"
                                         aria-describedby="password" />
                                     <span class="input-group-text cursor-pointer" id="togglePassword"
@@ -117,9 +122,9 @@ new #[Layout('layouts.guest')] class extends Component {
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="my-8">
-                                <div class="d-flex justify-content-between">
-                                    <div class="form-check mb-0 ms-2">
+                            <div class="my-6">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="form-check mb-0">
                                         <input wire:model="remember" class="form-check-input" type="checkbox"
                                             id="remember-me" />
                                         <label class="form-check-label" for="remember-me"> Remember Me </label>
@@ -130,8 +135,8 @@ new #[Layout('layouts.guest')] class extends Component {
                                     @endif --}}
                                 </div>
                             </div>
-                            <div class="mb-6">
-                                <button class="btn btn-primary d-grid w-100" type="submit"
+                            <div class="mb-2">
+                                <button class="btn btn-primary btn-lg d-grid w-100" type="submit"
                                     wire:loading.attr="disabled">
                                     <span wire:loading.remove wire:target="login">Login</span>
                                     <span wire:loading wire:target="login">
