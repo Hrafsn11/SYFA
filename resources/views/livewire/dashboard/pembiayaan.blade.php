@@ -220,6 +220,8 @@
         (function() {
             'use strict';
 
+            let cashflowChart = null;
+
             function getCashflowData() {
                 const holder = document.getElementById('chart-data-holder');
                 if (!holder) return null;
@@ -269,8 +271,15 @@
 
                 const el = document.querySelector('#chartCashflow');
                 if (!el) return;
-                const chart = new ApexCharts(el, options);
-                chart.render();
+
+                if (cashflowChart) {
+                    cashflowChart.destroy();
+                    cashflowChart = null;
+                    el.innerHTML = '';
+                }
+
+                cashflowChart = new ApexCharts(el, options);
+                cashflowChart.render();
             }
 
             document.addEventListener('DOMContentLoaded', function() {
