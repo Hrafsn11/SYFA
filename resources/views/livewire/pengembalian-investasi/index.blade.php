@@ -28,7 +28,6 @@
 @push('scripts')
 <script>
     let select2Kontrak;
-    let flatpickrTanggal;
 
     // Best Practice: Pattern from PenyaluranDeposito
     function afterAction(payload) {
@@ -79,9 +78,8 @@
     }
 
     $('#modalPengembalianInvestasi').on('shown.bs.modal', function() {
-        // Destroy previous instances
+        // Destroy previous Select2 instance
         if (select2Kontrak) $('#id_pengajuan_investasi').select2('destroy');
-        if (flatpickrTanggal) flatpickrTanggal.destroy();
 
         // Init Select2
         select2Kontrak = $('#id_pengajuan_investasi').select2({
@@ -123,11 +121,10 @@
             }
         });
 
-        // ✅ NEW: Auto-reload if kontrak already selected when modal opens
+        // Auto-reload if kontrak already selected when modal opens
         let currentValue = $('#id_pengajuan_investasi').val();
         if (currentValue) {
             @this.call('loadDataKontrak', currentValue).then(() => {
-                // Handle dana_pokok_dibayar
                 let danaTersedia = @this.get('dana_tersedia');
                 if (danaTersedia == 0) {
                     $('#dana_pokok_dibayar').val('Rp 0').prop('disabled', true);
@@ -135,7 +132,6 @@
                     @this.set('dana_pokok_dibayar', 0);
                 }
 
-                // Handle bunga_dibayar
                 let sisaBunga = @this.get('sisa_bunga');
                 if (sisaBunga == 0) {
                     $('#bunga_dibayar').val('Rp 0').prop('disabled', true);
@@ -145,14 +141,35 @@
             });
         }
 
-        // Init Flatpickr
-        flatpickrTanggal = flatpickr('#tanggal_pengembalian', {
-            dateFormat: 'Y-m-d',
-            allowInput: true,
-            onChange: function(selectedDates, dateStr) {
-                @this.set('tanggal_pengembalian', dateStr);
+        // Init Bootstrap Datepicker (konsisten dengan halaman lain)
+        const $tanggal = $('#tanggal_pengembalian');
+        const hiddenTanggal = document.getElementById('tanggal_pengembalian_hidden');
+
+        if ($tanggal.data('datepicker')) {
+            $tanggal.off('changeDate');
+            $tanggal.datepicker('destroy');
+        }
+
+        $tanggal.datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayHighlight: true,
+            orientation: 'top auto'
+        }).on('hide', function(e) {
+            e.stopPropagation();
+        }).on('changeDate', function() {
+            const dateValue = $tanggal.val();
+            if (hiddenTanggal && dateValue) {
+                hiddenTanggal.value = dateValue;
+                hiddenTanggal.dispatchEvent(new Event('input', { bubbles: true }));
             }
         });
+
+        // Set nilai awal dari Livewire ke datepicker
+        const initialDate = @this.get('tanggal_pengembalian');
+        if (initialDate) {
+            $tanggal.datepicker('setDate', initialDate);
+        }
 
         $('#dana_pokok_dibayar').on('input', function() {
             const rawValue = unformatRupiah($(this).val());
@@ -169,10 +186,18 @@
         });
 
     }).on('hidden.bs.modal', function() {
-        // Reset form
+        // Destroy datepicker saat modal ditutup
+        const $tanggal = $('#tanggal_pengembalian');
+        if ($tanggal.data('datepicker')) {
+            $tanggal.off('changeDate');
+            $tanggal.datepicker('destroy');
+        }
+
+        // Reset Select2
         if (select2Kontrak) {
             $('#id_pengajuan_investasi').val(null).trigger('change');
         }
+
         // Clear formatted inputs
         $('#dana_pokok_dibayar').val('');
         $('#bunga_dibayar').val('');
