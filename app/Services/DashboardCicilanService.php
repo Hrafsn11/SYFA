@@ -141,18 +141,26 @@ class DashboardCicilanService
     {
         $allowedIds = $this->getAllowedPengajuanIds();
 
-        $baseQuery = fn() => $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds);
-
-        $totalPengajuan = $baseQuery()->count();
-        $dalamProses    = $baseQuery()->whereNotIn('status', ['Selesai', 'Ditolak'])->count();
-        $selesai        = $baseQuery()->where('status', 'Selesai')->count();
-        $ditolak        = $baseQuery()->where('status', 'like', '%Ditolak%')->count();
-
+        $baseQuery        = fn() => $this->applyPenyesuaianScope(PengajuanCicilan::query(), $allowedIds);
         $penyesuaianQuery = fn() => $this->applyPenyesuaianScope(PenyesuaianCicilan::query(), $allowedIds);
 
-        $totalCicilanKeseluruhan = (float) $penyesuaianQuery()->sum('total_cicilan');
-        $totalTerbayar           = (float) $penyesuaianQuery()->sum('total_terbayar');
-        $totalSisa               = max(0, $totalCicilanKeseluruhan - $totalTerbayar);
+        // KPI 1 – Total Pengajuan (dari tabel pengajuan_cicilan)
+        $totalPengajuan = $baseQuery()->count();
+
+        // KPI 2 – Dalam Proses: penyesuaian_cicilan dengan status 'Berjalan'
+        $dalamProses = $penyesuaianQuery()->where('status', 'Berjalan')->count();
+
+        // KPI 3 – Total Cicilan Belum Dibayar: total_cicilan - total_terbayar
+        $totalCicilanKeseluruhan  = (float) $penyesuaianQuery()->sum('total_cicilan');
+        $totalTerbayar            = (float) $penyesuaianQuery()->sum('total_terbayar');
+        $totalCicilanBelumDibayar = max(0, $totalCicilanKeseluruhan - $totalTerbayar);
+
+        // KPI 4 – Cicilan Lunas: penyesuaian_cicilan dengan status 'Lunas'
+        $cicilanLunas = $penyesuaianQuery()->where('status', 'Lunas')->count();
+
+        // Data tambahan untuk Status Cicilan card
+        $selesai = $baseQuery()->where('status', 'Selesai')->count();
+        $ditolak = $baseQuery()->where('status', 'like', '%Ditolak%')->count();
 
         $persenTerbayar = $totalCicilanKeseluruhan > 0
             ? round(($totalTerbayar / $totalCicilanKeseluruhan) * 100, 1)
@@ -176,8 +184,10 @@ class DashboardCicilanService
             'selesai'                       => $selesai,
             'ditolak'                       => $ditolak,
             'total_cicilan_keseluruhan'     => $totalCicilanKeseluruhan,
+            'total_cicilan_belum_dibayar'   => $totalCicilanBelumDibayar,
             'total_terbayar'                => $totalTerbayar,
-            'total_sisa'                    => $totalSisa,
+            'total_sisa'                    => $totalCicilanBelumDibayar,
+            'cicilan_lunas'                 => $cicilanLunas,
             'persen_terbayar'               => $persenTerbayar,
             'angsuran_jatuh_tempo_hari_ini' => $angsuranJatuhTempoHariIni,
             'angsuran_terlambat'            => $angsuranTerlambat,

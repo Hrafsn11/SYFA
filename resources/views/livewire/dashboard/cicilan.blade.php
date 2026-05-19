@@ -9,7 +9,8 @@
     @php
         $totalCicilan = (float) ($summaryData['total_cicilan_keseluruhan'] ?? 0);
         $totalTerbayar = (float) ($summaryData['total_terbayar'] ?? 0);
-        $totalSisa = max(0, $totalCicilan - $totalTerbayar);
+        $totalBelumDibayar = (float) ($summaryData['total_cicilan_belum_dibayar'] ?? max(0, $totalCicilan - $totalTerbayar));
+        $cicilanLunas = (int) ($summaryData['cicilan_lunas'] ?? 0);
         $persenTerbayar = (float) ($summaryData['persen_terbayar'] ?? 0);
         $debiturCount = is_array($debiturMonitoringData ?? null) ? count($debiturMonitoringData) : 0;
     @endphp
@@ -39,7 +40,7 @@
                         <div>
                             <div class="kpi-label">Dalam Proses</div>
                             <div class="kpi-value">{{ number_format($summaryData['dalam_proses'] ?? 0) }}</div>
-                            <div class="kpi-meta text-muted">Belum selesai</div>
+                            <div class="kpi-meta text-muted">Status berjalan</div>
                         </div>
                         <div class="kpi-icon bg-soft-warning">
                             <i class="ti ti-loader"></i>
@@ -54,9 +55,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="kpi-label">Total Cicilan</div>
-                            <div class="kpi-value">Rp {{ number_format($totalCicilan, 0, ',', '.') }}</div>
-                            <div class="kpi-meta text-muted">Total penyesuaian</div>
+                            <div class="kpi-label">Total Cicilan Belum Dibayar</div>
+                            <div class="kpi-value">Rp {{ number_format($totalBelumDibayar, 0, ',', '.') }}</div>
+                            <div class="kpi-meta text-muted">Total cicilan &minus; terbayar</div>
                         </div>
                         <div class="kpi-icon bg-soft-success">
                             <i class="ti ti-currency-dollar"></i>
@@ -71,12 +72,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="kpi-label">Persentase Terbayar</div>
-                            <div class="kpi-value">{{ number_format($persenTerbayar, 1) }}%</div>
-                            <div class="kpi-meta text-muted">Cicilan terbayar</div>
+                            <div class="kpi-label">Total Cicilan Lunas</div>
+                            <div class="kpi-value">{{ number_format($cicilanLunas) }}</div>
+                            <div class="kpi-meta text-muted">Program berstatus Lunas</div>
                         </div>
                         <div class="kpi-icon bg-soft-danger">
-                            <i class="ti ti-chart-pie"></i>
+                            <i class="ti ti-circle-check"></i>
                         </div>
                     </div>
                 </div>
@@ -116,8 +117,22 @@
                         <div class="status-value">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-label">Sisa Pembayaran</div>
-                        <div class="status-value">Rp {{ number_format($totalSisa, 0, ',', '.') }}</div>
+                        <div class="status-label">Sisa Belum Dibayar</div>
+                        <div class="status-value">Rp {{ number_format($totalBelumDibayar, 0, ',', '.') }}</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Program Berjalan</div>
+                        <div class="status-value">
+                            {{ number_format($summaryData['dalam_proses'] ?? 0) }} program
+                            <span class="status-sub">Sedang aktif berjalan</span>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Program Lunas</div>
+                        <div class="status-value">
+                            {{ number_format($cicilanLunas) }} program
+                            <span class="status-sub">Seluruh cicilan terlunasi</span>
+                        </div>
                     </div>
                     <div class="status-item">
                         <div class="status-label">Debitur Terpantau</div>

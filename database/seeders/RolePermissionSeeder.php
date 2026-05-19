@@ -15,20 +15,15 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Temporarily change cache driver to array to avoid database cache issues
         $originalCacheDriver = config('cache.default');
         config(['cache.default' => 'array']);
 
-        // Reset cached roles and permissions
         try {
             app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         } catch (\Exception $e) {
-            // Cache table might not exist yet during fresh migrations
-            // This is safe to ignore as the cache will be cleared when needed
         }
 
         DB::transaction(function () {
-            // Create permissions (idempotent)
         $permissions = [
             // User Management
             'users.view',
@@ -185,8 +180,7 @@ class RolePermissionSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
-
-        // Create roles and assign permissions (idempotent)
+        
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
         $superAdminRole->syncPermissions(Permission::all());
 

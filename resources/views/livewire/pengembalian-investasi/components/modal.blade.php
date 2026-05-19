@@ -150,12 +150,22 @@
                             <label for="tanggal_pengembalian" class="form-label">
                                 Tanggal Pengembalian <span class="text-danger">*</span>
                             </label>
-                            <input type="text"
-                                class="form-control @error('tanggal_pengembalian') is-invalid @enderror"
-                                id="tanggal_pengembalian" wire:model="tanggal_pengembalian"
-                                placeholder="Pilih tanggal">
+                            <div class="input-group">
+                                <input type="text"
+                                    class="form-control @error('tanggal_pengembalian') is-invalid @enderror"
+                                    id="tanggal_pengembalian"
+                                    placeholder="YYYY-MM-DD"
+                                    data-format="yyyy-mm-dd"
+                                    data-autoclose="true"
+                                    data-today-highlight="true"
+                                    autocomplete="off"
+                                    readonly
+                                    style="background-color: white !important; cursor: pointer !important;">
+                                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                            </div>
+                            <input type="hidden" id="tanggal_pengembalian_hidden" wire:model="tanggal_pengembalian">
                             @error('tanggal_pengembalian')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 

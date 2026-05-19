@@ -30,13 +30,17 @@ class Table extends DataTableComponent
     {
         $user = Auth::user();
 
-
-        $isAdmin = $user && $user->roles()->where('restriction', 1)->exists();
+        // Super-admin dan role dengan restriction = 1 dapat melihat semua data
+        // (konsisten dengan HasDebiturAuthorization trait)
+        $isUnrestricted = $user && (
+            $user->hasRole('super-admin') ||
+            $user->roles()->where('restriction', 1)->exists()
+        );
 
         $query = PenyesuaianCicilan::query()
             ->with(['PengajuanCicilan.debitur', 'creator']);
 
-        if (!$isAdmin) {
+        if (!$isUnrestricted) {
             $debitur = \App\Models\MasterDebiturDanInvestor::where('user_id', Auth::id())->first();
 
             if (!$debitur) {
@@ -196,13 +200,11 @@ class Table extends DataTableComponent
                 ->label(function ($row) {
                     $detailUrl = route('penyesuaian-cicilan.show', $row->id_penyesuaian_cicilan);
 
-                    // Edit hanya bisa jika kontrak sudah di-generate
                     $editUrl = null;
                     if (!is_null($row->kontrak_generated_at) && auth()->user()->can('penyesuaian_cicilan.edit')) {
                         $editUrl = route('penyesuaian-cicilan.edit', $row->id_penyesuaian_cicilan);
                     }
 
-                    // Tambah tombol Generate Kontrak jika kontrak belum di-generate
                     $generateKontrakUrl = null;
                     if (is_null($row->kontrak_generated_at) && auth()->user()->can('penyesuaian_cicilan.generate_kontrak')) {
                         $generateKontrakUrl = route('penyesuaian-cicilan.generate-kontrak', $row->id_penyesuaian_cicilan);
