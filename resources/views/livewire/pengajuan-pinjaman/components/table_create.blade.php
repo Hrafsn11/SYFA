@@ -65,10 +65,18 @@
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
-                                        <td><a onclick="return false;" class="btn btn-sm btn-outline-primary" title="Edit" wire:click='editInvoice({{ $index }})'>
-                                            <i class="ti ti-edit" wire:loading.remove wire:target='editInvoice({{ $index }})'></i>
-                                            <span class="spinner-border spinner-border-sm" wire:loading wire:target='editInvoice({{ $index }})'></span>
-                                        </a></td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a onclick="return false;" class="btn btn-sm btn-outline-primary" title="Edit" wire:click='editInvoice({{ $index }})'>
+                                                    <i class="ti ti-edit" wire:loading.remove wire:target='editInvoice({{ $index }})'></i>
+                                                    <span class="spinner-border spinner-border-sm" wire:loading wire:target='editInvoice({{ $index }})'></span>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Hapus" wire:click='deleteInvoice({{ $index }})' wire:confirm="Yakin ingin menghapus invoice ini?">
+                                                    <i class="ti ti-trash" wire:loading.remove wire:target='deleteInvoice({{ $index }})'></i>
+                                                    <span class="spinner-border spinner-border-sm" wire:loading wire:target='deleteInvoice({{ $index }})'></span>
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="13" class="text-center">No Data</td></td></tr>
@@ -124,10 +132,18 @@
                                                 <span class="text-muted">-</span>
                                             @endif
                                         </td>
-                                        <td><a onclick="return false;" class="btn btn-sm btn-outline-primary" title="Edit" wire:click='editInvoice({{ $index }})'>
-                                            <i class="ti ti-edit" wire:loading.remove wire:target='editInvoice({{ $index }})'></i>
-                                            <span class="spinner-border spinner-border-sm" wire:loading wire:target='editInvoice({{ $index }})'></span>
-                                        </a></td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a onclick="return false;" class="btn btn-sm btn-outline-primary" title="Edit" wire:click='editInvoice({{ $index }})'>
+                                                    <i class="ti ti-edit" wire:loading.remove wire:target='editInvoice({{ $index }})'></i>
+                                                    <span class="spinner-border spinner-border-sm" wire:loading wire:target='editInvoice({{ $index }})'></span>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Hapus" wire:click='deleteInvoice({{ $index }})' wire:confirm="Yakin ingin menghapus invoice ini?">
+                                                    <i class="ti ti-trash" wire:loading.remove wire:target='deleteInvoice({{ $index }})'></i>
+                                                    <span class="spinner-border spinner-border-sm" wire:loading wire:target='deleteInvoice({{ $index }})'></span>
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr><td colspan="13" class="text-center">No Data</td></td></tr>

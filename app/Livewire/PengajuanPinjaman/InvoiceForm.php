@@ -43,7 +43,16 @@ class InvoiceForm extends Component
         $this->prepareFormInvoice();
 
         if ($this->pengajuan !== null) {
-            $this->edit();
+            // Isi form_data_invoice dari data DB agar sinkron dengan parent
+            $this->form_data_invoice = $this->pengajuan->buktiPeminjaman->map(function ($item) {
+                return collect($item->toArray())->only([
+                    'no_invoice', 'no_kontrak', 'nama_client',
+                    'nilai_invoice', 'nilai_pinjaman', 'nilai_bunga',
+                    'invoice_date', 'due_date', 'kontrak_date',
+                    'dokumen_invoice', 'dokumen_kontrak', 'dokumen_so',
+                    'dokumen_bast', 'dokumen_lainnya', 'nama_barang',
+                ])->all();
+            })->values()->toArray();
         }
     }
 
@@ -63,7 +72,19 @@ class InvoiceForm extends Component
 
     public function saveDataInvoice()
     {
-        $this->validate();
+        // Bangun rules dengan exclude IDs jika pengajuan sudah ada di DB
+        $excludeIds = [];
+        if ($this->pengajuan !== null) {
+            $excludeIds = \App\Models\BuktiPeminjaman::where('id_pengajuan_peminjaman', $this->pengajuan->id_pengajuan_peminjaman)
+                ->pluck('id_bukti_peminjaman')
+                ->toArray();
+        }
+
+        $invoiceRequest = new \App\Http\Requests\InvoicePengajuanPinjamanRequest();
+        $rules = $invoiceRequest->getRules($this->jenis_pembiayaan, $this->form_data_invoice ?? [], $excludeIds);
+        $messages = $invoiceRequest->messages();
+
+        $this->validate($rules, $messages);
         
         $formData = $this->prepareFormDataByJenisPembiayaan();
         if ($this->index_data_invoice !== null) {
@@ -78,6 +99,9 @@ class InvoiceForm extends Component
     private function updateInvoiceData($formData)
     {
         if ($this->index_data_invoice !== null) {
+            // Pertahankan dokumen lama jika tidak diupload ulang
+            $existingItem = $this->form_data_invoice[$this->index_data_invoice] ?? [];
+            
             foreach ([
                 'dokumen_invoice', 
                 'dokumen_kontrak', 
@@ -86,7 +110,7 @@ class InvoiceForm extends Component
                 'dokumen_lainnya'
             ] as $dokumen) {
                 if (array_key_exists($dokumen, $formData) && is_null($formData[$dokumen])) {
-                    $formData[$dokumen] = $this->form_data_invoice[$this->index_data_invoice][$dokumen];
+                    $formData[$dokumen] = $existingItem[$dokumen] ?? null;
                 }
             }
 

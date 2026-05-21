@@ -49,6 +49,17 @@ trait HasUniversalFormAction
         $primaryKey = $this->getValidatePrimaryKey();
         if ($primaryKey) $this->form_data[$primaryKey] = $this->{$primaryKey};
 
+        // Ganti nilai placeholder di params dengan nilai property Livewire yang sesuai.
+        // Contoh: ["id" => "id_placeholder"] → ["id" => $this->id]
+        foreach ($params as $key => $value) {
+            if (is_string($value) && str_ends_with($value, '_placeholder')) {
+                $propertyName = str_replace('_placeholder', '', $value);
+                if (property_exists($this, $propertyName)) {
+                    $params[$key] = $this->{$propertyName};
+                }
+            }
+        }
+
         $payload = (new UniversalFormAction($this))->saveData([
             'route' => $routeName,
             'params' => $params,

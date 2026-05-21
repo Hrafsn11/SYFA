@@ -92,12 +92,13 @@ class PengajuanPinjamanRequest extends FormRequest
             $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, $formDataInvoice);
             
             foreach ($invoiceRules as $key => $rule) {
-                if ($key == 'no_invoice' || $key == 'no_kontrak') {
-                    $rule = array_merge($rule, ['distinct']);
+                $ruleArray = (array) $rule;
+                
+                if ($key === 'no_invoice' || $key === 'no_kontrak') {
+                    $ruleArray[] = 'distinct';
                 }
 
-                // Apply rules to the correct key (form_data_invoice or details)
-                $validate["{$invoiceKey}.*.{$key}"] = $rule;
+                $validate["{$invoiceKey}.*.{$key}"] = $ruleArray;
             }
         }
 

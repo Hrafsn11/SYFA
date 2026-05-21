@@ -99,6 +99,11 @@ class Create extends Component
             }
         }
 
+        // Sertakan id_debitur saat mode edit agar lolos validasi di controller update()
+        if ($this->id !== null && $this->pengajuan !== null) {
+            $this->form_data['id_debitur'] = $this->pengajuan->id_debitur;
+        }
+
         if ($this->jenis_pembiayaan != JenisPembiayaanEnum::INSTALLMENT) {
             unset($this->form_data['tenor_pembayaran']);
         } else {
@@ -109,7 +114,9 @@ class Create extends Component
 
     public function editInvoice($idx)
     {
-        $this->dispatch('edit-invoice', $this->form_data_invoice[$idx]);
+        $data = $this->form_data_invoice[$idx];
+        $data['_edit_index'] = $idx;
+        $this->dispatch('edit-invoice', $data);
     }
 
     protected function setAdditionalValidationData(): array
@@ -123,13 +130,29 @@ class Create extends Component
     private function edit()
     {
         $this->pengajuan = PengajuanPeminjaman::with(['debitur', 'instansi', 'buktiPeminjaman'])->findOrFail($this->id);
-        $this->form_data_invoice = collect($this->pengajuan->buktiPeminjaman)->toArray();
+        
+        // Ambil hanya field yang relevan dari bukti peminjaman
+        $this->form_data_invoice = $this->pengajuan->buktiPeminjaman->map(function ($item) {
+            return collect($item->toArray())->only([
+                'no_invoice', 'no_kontrak', 'nama_client',
+                'nilai_invoice', 'nilai_pinjaman', 'nilai_bunga',
+                'invoice_date', 'due_date', 'kontrak_date',
+                'dokumen_invoice', 'dokumen_kontrak', 'dokumen_so',
+                'dokumen_bast', 'dokumen_lainnya', 'nama_barang',
+            ])->all();
+        })->values()->toArray();
+
+        // Set lampiran_sid_current agar view tahu file sudah ada
+        $this->lampiran_sid_current = $this->pengajuan->lampiran_sid;
 
         foreach ($this->pengajuan->toArray() as $key => $value) {
-            if ($key == 'sumber_pembiayaan') {
+            if ($value === null) continue;
+            
+            if ($key === 'sumber_pembiayaan') {
                 $data = ucfirst($value);
             } elseif (in_array($key, ['harapan_tanggal_pencairan', 'rencana_tgl_pembayaran'])) {
-                $data = parseCarbonDate($value)->format('d/m/Y');
+                $parsed = parseCarbonDate($value);
+                $data = $parsed ? $parsed->format('d/m/Y') : $value;
             } else {
                 $data = $value;
             }
@@ -137,6 +160,34 @@ class Create extends Component
             if (property_exists($this, $key)) {
                 $this->{$key} = $data;
             }
+        }
+
+        $this->title = 'Edit Pengajuan Peminjaman';
+    }
+
+    /**
+     * Hapus invoice dari list berdasarkan index.
+     */
+    public function deleteInvoice(int $index): void
+    {
+        if (isset($this->form_data_invoice[$index])) {
+            unset($this->form_data_invoice[$index]);
+            $this->form_data_invoice = array_values($this->form_data_invoice);
+
+            // Dispatch ke InvoiceForm agar sinkron
+            $this->dispatch(
+                'invoiceTotalsUpdated',
+                totalPinjaman: collect($this->form_data_invoice)->sum(fn($item) => (double) ($item['nilai_pinjaman'] ?? 0)),
+                totalBagiHasil: collect($this->form_data_invoice)->sum(fn($item) => (double) ($item['nilai_pinjaman'] ?? 0) * 0.02),
+                formDataInvoice: $this->form_data_invoice
+            )->self();
+
+            // Recalculate totals
+            $this->handleInvoiceTotalsUpdated(
+                collect($this->form_data_invoice)->sum(fn($item) => (double) ($item['nilai_pinjaman'] ?? $item['nilai_invoice'] ?? 0)),
+                collect($this->form_data_invoice)->sum(fn($item) => (double) ($item['nilai_pinjaman'] ?? $item['nilai_invoice'] ?? 0) * 0.02),
+                $this->form_data_invoice
+            );
         }
     }
 
