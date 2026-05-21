@@ -242,11 +242,18 @@ class PeminjamanController extends Controller
                 ->getRules($jenisPembiayaan, $normalizedDetails, $existingBuktiIds);
 
             foreach ($invoiceRules as $key => $rule) {
+                // Normalize: jika rule berupa string pipe-separated, pecah menjadi array
+                if (is_string($rule)) {
+                    $ruleArray = explode('|', $rule);
+                } else {
+                    $ruleArray = (array) $rule;
+                }
+                
                 // Tambahkan distinct untuk no_invoice/no_kontrak
                 if (in_array($key, ['no_invoice', 'no_kontrak'])) {
-                    $rule = array_merge((array) $rule, ['distinct']);
+                    $ruleArray[] = 'distinct';
                 }
-                $rules["details.*.{$key}"] = $rule;
+                $rules["details.*.{$key}"] = $ruleArray;
             }
 
             // Field tambahan yang tidak ada di invoice rules tapi perlu disimpan
