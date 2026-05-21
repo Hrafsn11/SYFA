@@ -92,7 +92,11 @@ class PengajuanPinjamanRequest extends FormRequest
             $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, $formDataInvoice);
             
             foreach ($invoiceRules as $key => $rule) {
-                $ruleArray = (array) $rule;
+                if (is_string($rule)) {
+                    $ruleArray = explode('|', $rule);
+                } else {
+                    $ruleArray = (array) $rule;
+                }
                 
                 if ($key === 'no_invoice' || $key === 'no_kontrak') {
                     $ruleArray[] = 'distinct';
