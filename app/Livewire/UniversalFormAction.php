@@ -38,7 +38,7 @@ class UniversalFormAction
             
             $this->instanceLivewire->dispatch('after-action', [
                 'callback' => $callback,
-                'payload' => $result,
+                'payload' => ['original' => $result->original],
             ]);
 
             return (object) $result->original;
@@ -79,6 +79,22 @@ class UniversalFormAction
         } catch (\Throwable $e) {
             $this->instanceLivewire->dispatch('show-error', message: $e->getMessage());
             $this->instanceLivewire->addError('general', $e->getMessage());
+        }
+    }
+
+    /**
+     * Salin semua UploadedFile dari data (termasuk nested array) ke request files bag.
+     */
+    private function copyFilesToRequest(Request $request, array $data, string $prefix = ''): void
+    {
+        foreach ($data as $key => $value) {
+            $dotKey = $prefix !== '' ? "{$prefix}.{$key}" : (string) $key;
+
+            if ($value instanceof \Illuminate\Http\UploadedFile) {
+                $request->files->set($dotKey, $value);
+            } elseif (is_array($value)) {
+                $this->copyFilesToRequest($request, $value, $dotKey);
+            }
         }
     }
 
@@ -132,6 +148,15 @@ class UniversalFormAction
 
                     $arguments[] = $formRequest;
 
+                    continue;
+                }
+
+                // Jika parameter adalah Illuminate\Http\Request biasa
+                if ($type && ($type === Request::class || is_subclass_of($type, Request::class))) {
+                    $baseRequest = Request::create('/', 'POST', $this->formData);
+                    // Salin semua UploadedFile dari formData ke request (termasuk nested array)
+                    $this->copyFilesToRequest($baseRequest, $this->formData);
+                    $arguments[] = $baseRequest;
                     continue;
                 }
 

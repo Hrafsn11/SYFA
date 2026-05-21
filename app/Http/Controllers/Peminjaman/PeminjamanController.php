@@ -151,13 +151,54 @@ class PeminjamanController extends Controller
         $pengajuan = PengajuanPeminjaman::findOrFail($id);
 
         if (!in_array($pengajuan->status, ['Draft', 'Validasi Ditolak'])) {
-            return redirect()->route('peminjaman')->with('error', 'Pengajuan dengan status ' . $pengajuan->status . ' tidak dapat diedit.');
+            return Response::error(null, 'Pengajuan dengan status ' . $pengajuan->status . ' tidak dapat diedit.', 422);
         }
 
         $jenisPembiayaan = $request->input('jenis_pembiayaan');
 
+        // ── 1. Pastikan id_debitur tersedia ──────────────────────────────────
+        if (empty($request->input('id_debitur'))) {
+            $request->merge(['id_debitur' => $pengajuan->id_debitur]);
+        }
+
+        // ── 2. Tangani lampiran_sid lama (string path, bukan file baru) ──────
+        $existingLampiranSid = null;
+        if (!$request->hasFile('lampiran_sid') && is_string($request->input('lampiran_sid'))) {
+            $existingLampiranSid = $request->input('lampiran_sid') ?: $pengajuan->lampiran_sid;
+            $request->request->remove('lampiran_sid');
+        }
+
+        // ── 3. Normalisasi data invoice ──────────────────────────────────────
+        // Livewire mengirim key 'form_data_invoice', controller menggunakan 'details'
+        $rawInvoice = $request->input('form_data_invoice', $request->input('details', []));
+
+        $normalizedDetails = collect($rawInvoice)->map(function (array $item) {
+            // Konversi tanggal Y-m-d → d/m/Y agar lolos validasi date_format:d/m/Y
+            foreach (['invoice_date', 'due_date', 'kontrak_date'] as $field) {
+                if (!empty($item[$field])) {
+                    $parsed = parseCarbonDate($item[$field]);
+                    if ($parsed) {
+                        $item[$field] = $parsed->format('d/m/Y');
+                    }
+                }
+            }
+
+            // Pindahkan path dokumen lama ke key 'existing_*' agar tidak gagal validasi 'file'
+            foreach (['dokumen_invoice', 'dokumen_kontrak', 'dokumen_so', 'dokumen_bast', 'dokumen_lainnya'] as $dok) {
+                if (isset($item[$dok]) && is_string($item[$dok]) && $item[$dok] !== '') {
+                    $item['existing_' . $dok] = $item[$dok];
+                    unset($item[$dok]);
+                }
+            }
+
+            return $item;
+        })->values()->all();
+
+        $request->merge(['details' => $normalizedDetails]);
+
+        // ── 4. Bangun rules validasi ─────────────────────────────────────────
         $rules = [
-            'id_debitur'       => 'required|string|size:26',
+            'id_debitur'       => 'required|string',
             'nama_bank'        => 'nullable|string',
             'no_rekening'      => 'nullable|string',
             'nama_rekening'    => 'nullable|string',
@@ -166,132 +207,123 @@ class PeminjamanController extends Controller
         ];
 
         if ($jenisPembiayaan === 'Invoice Financing') {
-            $rules['details']                    = 'required|array|min:1';
-            $rules['lampiran_sid']               = 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048';
-            $rules['id_instansi']                = 'nullable';
-            $rules['sumber_pembiayaan']          = 'nullable';
-            $rules['tujuan_pembiayaan']          = 'nullable|string';
-            $rules['total_pinjaman']             = 'nullable';
-            $rules['harapan_tanggal_pencairan']  = 'required|date_format:d/m/Y';
-            $rules['total_bunga']                = 'nullable';
-            $rules['rencana_tgl_pembayaran']     = 'required|date_format:d/m/Y';
-            $rules['pembayaran_total']           = 'nullable';
+            $rules += [
+                'details'                   => 'required|array|min:1',
+                'lampiran_sid'              => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:2048',
+                'id_instansi'               => 'nullable',
+                'sumber_pembiayaan'         => 'nullable',
+                'tujuan_pembiayaan'         => 'nullable|string',
+                'total_pinjaman'            => 'nullable',
+                'harapan_tanggal_pencairan' => 'required|date_format:d/m/Y',
+                'total_bunga'               => 'nullable',
+                'rencana_tgl_pembayaran'    => 'required|date_format:d/m/Y',
+                'pembayaran_total'          => 'nullable',
+            ];
         } elseif ($jenisPembiayaan === 'Installment') {
-            $rules['details']              = 'required|array|min:1';
-            $rules['total_pinjaman']       = 'nullable';
-            $rules['tenor_pembayaran']     = 'nullable|in:3,6,9,12';
-            $rules['persentase_bunga']     = 'nullable|numeric';
-            $rules['pps']                  = 'nullable|numeric';
-            $rules['sfinance']             = 'nullable|numeric';
-            $rules['total_pembayaran']     = 'nullable|numeric';
-            $rules['yang_harus_dibayarkan'] = 'nullable|numeric';
+            $rules += [
+                'details'               => 'required|array|min:1',
+                'total_pinjaman'        => 'nullable',
+                'tenor_pembayaran'      => 'nullable|in:3,6,9,12',
+                'persentase_bunga'      => 'nullable|numeric',
+                'pps'                   => 'nullable|numeric',
+                'sfinance'              => 'nullable|numeric',
+                'total_pembayaran'      => 'nullable|numeric',
+                'yang_harus_dibayarkan' => 'nullable|numeric',
+            ];
         }
 
-        $formDataInvoice = $request->input('form_data_invoice', $request->input('details', []));
-        $invoiceKey = $request->has('form_data_invoice') ? 'form_data_invoice' : 'details';
-        if ($jenisPembiayaan && !empty($formDataInvoice)) {
-            $invoiceRequest = new \App\Http\Requests\InvoicePengajuanPinjamanRequest();
-            $invoiceRules = $invoiceRequest->getRules($jenisPembiayaan, $formDataInvoice);
+        // Tambahkan rules per-item invoice dengan exclude IDs untuk unique check
+        if ($jenisPembiayaan && !empty($normalizedDetails)) {
+            $existingBuktiIds = BuktiPeminjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
+                ->pluck('id_bukti_peminjaman')
+                ->toArray();
+
+            $invoiceRules = (new \App\Http\Requests\InvoicePengajuanPinjamanRequest())
+                ->getRules($jenisPembiayaan, $normalizedDetails, $existingBuktiIds);
+
             foreach ($invoiceRules as $key => $rule) {
-                if ($key === 'no_invoice' || $key === 'no_kontrak') {
+                // Tambahkan distinct untuk no_invoice/no_kontrak
+                if (in_array($key, ['no_invoice', 'no_kontrak'])) {
                     $rule = array_merge((array) $rule, ['distinct']);
                 }
-                $rules["{$invoiceKey}.*.{$key}"] = $rule;
+                $rules["details.*.{$key}"] = $rule;
             }
+
+            // Field tambahan yang tidak ada di invoice rules tapi perlu disimpan
+            $rules['details.*.nilai_bunga'] = 'nullable';
+            $rules['details.*.nama_barang'] = 'nullable|string';
         }
 
+        // ── 5. Validasi ──────────────────────────────────────────────────────
         $validated = $request->validate($rules);
 
-        if ($jenisPembiayaan === 'Installment') {
-            $validated['id_instansi']        = null;
-            $validated['sumber_pembiayaan']  = 'Internal';
-            $validated['persentase_bunga']   = 10;
-        } elseif ($jenisPembiayaan === 'Invoice Financing') {
-            $validated['id_instansi']        = null;
-            $validated['sumber_pembiayaan']  = 'Internal';
-            $validated['persentase_bunga']   = 2;
-        }
+        // Override nilai yang selalu fixed
+        $validated['sumber_pembiayaan'] = 'Internal';
+        $validated['id_instansi']       = null;
+        $validated['persentase_bunga']  = $jenisPembiayaan === 'Installment' ? 10 : 2;
 
+        // ── 6. Simpan ke database ────────────────────────────────────────────
         DB::beginTransaction();
         try {
-            $lampiran_sid_path = $pengajuan->lampiran_sid;
+            // Handle lampiran SID
+            $lampiranSidPath = $existingLampiranSid ?? $pengajuan->lampiran_sid;
             if ($request->hasFile('lampiran_sid')) {
-                if ($lampiran_sid_path && Storage::disk('public')->exists($lampiran_sid_path)) {
-                    Storage::disk('public')->delete($lampiran_sid_path);
+                if ($lampiranSidPath && Storage::disk('public')->exists($lampiranSidPath)) {
+                    Storage::disk('public')->delete($lampiranSidPath);
                 }
-                $lampiran_sid_path = $request->file('lampiran_sid')->store('lampiran_sid', 'public');
+                $lampiranSidPath = $request->file('lampiran_sid')->store('lampiran_sid', 'public');
             }
 
-            $updateData = [
+            $pengajuan->update([
                 'id_debitur'                => $validated['id_debitur'],
                 'nama_bank'                 => $validated['nama_bank'] ?? null,
                 'no_rekening'               => $validated['no_rekening'] ?? null,
                 'nama_rekening'             => $validated['nama_rekening'] ?? null,
                 'jenis_pembiayaan'          => $validated['jenis_pembiayaan'],
-                'sumber_pembiayaan'         => $validated['sumber_pembiayaan'] ?? null,
-                'id_instansi'               => $validated['id_instansi'] ?? null,
-                'lampiran_sid'              => $lampiran_sid_path,
+                'sumber_pembiayaan'         => $validated['sumber_pembiayaan'],
+                'id_instansi'               => $validated['id_instansi'],
+                'lampiran_sid'              => $lampiranSidPath,
                 'tujuan_pembiayaan'         => $validated['tujuan_pembiayaan'] ?? null,
                 'harapan_tanggal_pencairan' => isset($validated['harapan_tanggal_pencairan'])
                     ? parseCarbonDate($validated['harapan_tanggal_pencairan'])->format('Y-m-d')
                     : null,
-                'rencana_tgl_pembayaran' => isset($validated['rencana_tgl_pembayaran'])
+                'rencana_tgl_pembayaran'    => isset($validated['rencana_tgl_pembayaran'])
                     ? parseCarbonDate($validated['rencana_tgl_pembayaran'])->format('Y-m-d')
                     : null,
                 'catatan_lainnya'           => $validated['catatan_lainnya'] ?? null,
                 'tenor_pembayaran'          => $validated['tenor_pembayaran'] ?? null,
-                'persentase_bunga'          => $validated['persentase_bunga'] ?? null,
-                'updated_by'               => auth()->id(),
-                'status'                   => 'Draft',
-            ];
-
-            foreach (['total_pinjaman', 'total_bunga', 'pembayaran_total', 'pps', 'yang_harus_dibayarkan', 'total_nominal_yang_dialihkan'] as $field) {
-                if ($request->has($field)) {
-                    $updateData[$field === 'pps' ? 'pps' : ($field === 'sfinance' ? 's_finance' : $field)]
-                        = preg_replace('/[^0-9.]/', '', $request->input($field));
-                }
-            }
-            if ($request->has('sfinance')) {
-                $updateData['s_finance'] = preg_replace('/[^0-9.]/', '', $request->input('sfinance'));
-            }
-
-            $pengajuan->update($updateData);
+                'persentase_bunga'          => $validated['persentase_bunga'],
+                'updated_by'                => auth()->id(),
+                'status'                    => 'Draft',
+            ]);
 
             HistoryStatusPengajuanPinjaman::create([
                 'id_pengajuan_peminjaman' => $pengajuan->id_pengajuan_peminjaman,
-                'status'       => 'Draft',
-                'current_step' => 1,
+                'status'                  => 'Draft',
+                'current_step'            => 1,
             ]);
 
+            // Ambil data bukti lama sebelum dihapus (untuk fallback file path)
             $existingBukti = BuktiPeminjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)
                 ->get()
-                ->keyBy(function ($item) use ($jenisPembiayaan) {
-                    return in_array($jenisPembiayaan, ['Invoice Financing', 'Installment'])
-                        ? ($item->no_invoice ?? 'tmp_' . $item->id_bukti_peminjaman)
-                        : ($item->no_kontrak   ?? 'tmp_' . $item->id_bukti_peminjaman);
-                })
+                ->keyBy(fn($item) => in_array($jenisPembiayaan, ['Invoice Financing', 'Installment'])
+                    ? ($item->no_invoice ?? 'tmp_' . $item->id_bukti_peminjaman)
+                    : ($item->no_kontrak  ?? 'tmp_' . $item->id_bukti_peminjaman)
+                )
                 ->toArray();
 
             BuktiPeminjaman::where('id_pengajuan_peminjaman', $pengajuan->id_pengajuan_peminjaman)->delete();
 
-            $details = $validated['details'];
-            foreach ($details as $i => $det) {
+            foreach ($validated['details'] as $i => $det) {
                 $this->storeBuktiPeminjaman($request, $pengajuan->id_pengajuan_peminjaman, $jenisPembiayaan, $i, $det, $existingBukti);
             }
 
             DB::commit();
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => true, 'message' => 'Pengajuan pinjaman berhasil diupdate!', 'data' => $pengajuan]);
-            }
-
-            return redirect()->route('peminjaman')->with('success', 'Pengajuan pinjaman berhasil diupdate!');
+            return Response::success(null, 'Pengajuan pinjaman berhasil diupdate!');
         } catch (\Exception $e) {
             DB::rollBack();
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Gagal mengupdate: ' . $e->getMessage()], 422);
-            }
-            return back()->withInput()->with('error', 'Gagal mengupdate pengajuan pinjaman: ' . $e->getMessage());
+            return Response::errorCatch($e, 'Gagal mengupdate pengajuan pinjaman.');
         }
     }
 
@@ -443,13 +475,18 @@ class PeminjamanController extends Controller
                     return $request->file($key)->store('peminjaman/invoices', 'public');
                 }
             }
+            // Gunakan path lama yang disimpan saat normalisasi (existing_dokumen_*)
+            if (!empty($det['existing_' . $field])) {
+                return $det['existing_' . $field];
+            }
+            // Fallback ke $existing yang di-build dari DB sebelum delete
             $existingKey = in_array($jenis, ['Invoice Financing', 'Installment'])
                 ? ($det['no_invoice'] ?? null)
                 : ($det['no_kontrak']   ?? null);
             return $existing[$existingKey][$field] ?? null;
         };
 
-        $clean = fn($v) => $v !== null ? preg_replace('/[^0-9]/', '', $v) : null;
+        $clean = fn($v) => $v !== null ? (string) (int) round((float) preg_replace('/[^0-9.]/', '', $v)) : null;
 
         $base = ['id_pengajuan_peminjaman' => $idPengajuan];
 
@@ -460,8 +497,8 @@ class PeminjamanController extends Controller
                 'nilai_invoice'   => $clean($det['nilai_invoice']  ?? null),
                 'nilai_pinjaman'  => $clean($det['nilai_pinjaman'] ?? null),
                 'nilai_bunga'     => $clean($det['nilai_bunga']    ?? null),
-                'invoice_date'    => $det['invoice_date'] ?? null,
-                'due_date'        => $det['due_date']     ?? null,
+                'invoice_date'    => !empty($det['invoice_date']) ? parseCarbonDate($det['invoice_date'])?->format('Y-m-d') : null,
+                'due_date'        => !empty($det['due_date'])     ? parseCarbonDate($det['due_date'])?->format('Y-m-d')     : null,
                 'dokumen_invoice' => $getFile('dokumen_invoice'),
                 'dokumen_kontrak' => $getFile('dokumen_kontrak'),
                 'dokumen_so'      => $getFile('dokumen_so'),
@@ -474,7 +511,7 @@ class PeminjamanController extends Controller
                 'nama_client'     => $det['nama_client'] ?? null,
                 'nama_barang'     => $det['nama_barang'] ?? null,
                 'nilai_invoice'   => $clean($det['nilai_invoice'] ?? null),
-                'invoice_date'    => $det['invoice_date'] ?? null,
+                'invoice_date'    => !empty($det['invoice_date']) ? parseCarbonDate($det['invoice_date'])?->format('Y-m-d') : null,
                 'dokumen_invoice' => $getFile('dokumen_invoice'),
                 'dokumen_lainnya' => $getFile('dokumen_lainnya'),
             ]);
