@@ -283,6 +283,10 @@
                 'ID Investor tidak tersedia. Silakan refresh halaman atau hubungi admin.',
                 'Data Investor Tidak Ditemukan');
 
+            const jumlahInvestasi = getCleave('jumlah_investasi');
+            if (!jumlahInvestasi || jumlahInvestasi <= 0) return alert('warning',
+                'Jumlah investasi harus lebih dari Rp 0.', 'Jumlah Tidak Valid');
+
             const editId = $('#editFormKerjaInvestorId').val();
             const jenisInvestasi = $('input[name="jenis_investasi"]:checked').val();
             const $spinner = $('#btnSimpanSpinner');
@@ -295,7 +299,7 @@
                 jenis_investasi: jenisInvestasi.charAt(0).toUpperCase() + jenisInvestasi.slice(1),
                 tanggal_investasi: $('#bs-datepicker-tanggal-pembayaran').val(),
                 lama_investasi: $('#lama_investasi').val(),
-                jumlah_investasi: getCleave('jumlah_investasi'),
+                jumlah_investasi: jumlahInvestasi,
                 bunga_pertahun: $('#bunga').val(),
                 _token: CSRF,
                 ...(editId && {
