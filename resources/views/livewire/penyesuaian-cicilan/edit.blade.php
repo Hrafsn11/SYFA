@@ -181,7 +181,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
-                                        wire:model.live="jangka_waktu_total" min="1">
+                                        wire:model.live="jangka_waktu_total" min="1" required>
                                     @error('jangka_waktu_total')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -192,7 +192,7 @@
                                     <div wire:ignore>
                                         <input type="text" id="nominal_yg_disetujui_input" class="form-control"
                                             placeholder="Rp 0"
-                                            value="{{ $nominal_yg_disetujui ? 'Rp ' . number_format($nominal_yg_disetujui, 0, ',', '.') : '' }}">
+                                            value="{{ $nominal_yg_disetujui ? 'Rp ' . number_format($nominal_yg_disetujui, 0, ',', '.') : '' }}" required>
                                     </div>
                                     <input type="hidden" wire:model.live="nominal_yg_disetujui">
                                     @error('nominal_yg_disetujui')

@@ -14,6 +14,7 @@ class Select2 extends Component
     public $value = null;
     public $allow_clear = true;
     public $tags = false;
+    public $is_required = false;
     private $previousValue = null;
 
     public function mount(
@@ -24,7 +25,8 @@ class Select2 extends Component
         $model_name = 'data',
         $value = null,
         $allow_clear = true,
-        $tags = false
+        $tags = false,
+        $is_required = false
     ){
         $this->list_data = $list_data;
         $this->value_name = $value_name;
@@ -34,6 +36,7 @@ class Select2 extends Component
         $this->value = $value;
         $this->allow_clear = $allow_clear;
         $this->tags = $tags;
+        $this->is_required = $is_required;
     }
 
     public function render()

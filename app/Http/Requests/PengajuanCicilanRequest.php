@@ -78,14 +78,14 @@ class PengajuanCicilanRequest extends FormRequest
             'rencana_pemulihan_usaha' => 'required|string',
             
             // Step 4: Dokumen Pendukung
-            'dokumen_ktp_pic' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'dokumen_npwp_perusahaan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'dokumen_laporan_keuangan' => 'nullable|file|mimes:pdf,xlsx,xls|max:5120',
-            'dokumen_arus_kas' => 'nullable|file|mimes:pdf,xlsx,xls|max:5120',
-            'dokumen_kondisi_eksternal' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'dokumen_kontrak_pembiayaan' => 'nullable|file|mimes:pdf|max:5120',
+            'dokumen_ktp_pic' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'dokumen_npwp_perusahaan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'dokumen_laporan_keuangan' => 'required|file|mimes:pdf,xlsx,xls|max:5120',
+            'dokumen_arus_kas' => 'required|file|mimes:pdf,xlsx,xls|max:5120',
+            'dokumen_kondisi_eksternal' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'dokumen_kontrak_pembiayaan' => 'required|file|mimes:pdf|max:5120',
             'dokumen_lainnya' => 'nullable|file|mimes:pdf,jpg,jpeg,png,xlsx,xls|max:5120',
-            'dokumen_tanda_tangan' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'dokumen_tanda_tangan' => 'required|file|mimes:jpg,jpeg,png|max:2048',
             'tempat' => 'nullable|string|max:100',
             'tanggal' => 'nullable|date',
         ];
@@ -95,6 +95,9 @@ class PengajuanCicilanRequest extends FormRequest
             $validate['dokumen_npwp_perusahaan'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
             $validate['dokumen_laporan_keuangan'] = 'nullable|file|mimes:pdf,xlsx,xls|max:5120';
             $validate['dokumen_arus_kas'] = 'nullable|file|mimes:pdf,xlsx,xls|max:5120';
+            $validate['dokumen_kondisi_eksternal'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
+            $validate['dokumen_kontrak_pembiayaan'] = 'nullable|file|mimes:pdf|max:5120';
+            $validate['dokumen_tanda_tangan'] = 'nullable|file|mimes:jpg,jpeg,png|max:2048';
         }
 
         return $validate;
@@ -134,6 +137,13 @@ class PengajuanCicilanRequest extends FormRequest
             'rencana_pemulihan_usaha.required' => 'Rencana pemulihan usaha harus diisi.',
             
             // Step 4
+            'dokumen_ktp_pic.required' => 'Dokumen KTP PIC harus diunggah.',
+            'dokumen_npwp_perusahaan.required' => 'Dokumen NPWP perusahaan harus diunggah.',
+            'dokumen_laporan_keuangan.required' => 'Laporan keuangan terbaru harus diunggah.',
+            'dokumen_arus_kas.required' => 'Dokumen arus kas harus diunggah.',
+            'dokumen_kondisi_eksternal.required' => 'Bukti kondisi eksternal harus diunggah.',
+            'dokumen_kontrak_pembiayaan.required' => 'Kontrak pembiayaan harus diunggah.',
+            'dokumen_tanda_tangan.required' => 'Tanda tangan perusahaan harus diunggah.',
             'dokumen_ktp_pic.file' => 'Dokumen KTP PIC harus berupa file.',
             'dokumen_ktp_pic.mimes' => 'Dokumen KTP PIC harus berformat PDF, JPG, JPEG, atau PNG.',
             'dokumen_ktp_pic.max' => 'Ukuran dokumen KTP PIC maksimal 2MB.',
