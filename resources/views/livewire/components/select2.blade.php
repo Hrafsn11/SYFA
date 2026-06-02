@@ -6,6 +6,7 @@
         data-allow-clear="{{ $allow_clear ? 'true' : 'false' }}"
         data-tags="{{ $tags ? 'true' : 'false' }}" 
         select2-livewire="{{ $model_name }}"
+        @if($is_required) required @endif
     >
     <option value="">-- {{ $data_placeholder }} --</option>
     @foreach ($list_data as $key => $item)

@@ -442,7 +442,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_ktp_pic') is-invalid @enderror"
                                                     id="dokumen_ktp_pic" name="dokumen_ktp_pic" 
-                                                    accept=".pdf,.jpg,.jpeg,.png" />
+                                                    accept=".pdf,.jpg,.jpeg,.png" required />
                                                 <label class="input-group-text" for="dokumen_ktp_pic">Upload</label>
                                             </div>
                                             @error('dokumen_ktp_pic')
@@ -461,7 +461,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_npwp_perusahaan') is-invalid @enderror"
                                                     id="dokumen_npwp_perusahaan" name="dokumen_npwp_perusahaan" 
-                                                    accept=".pdf,.jpg,.jpeg,.png" />
+                                                    accept=".pdf,.jpg,.jpeg,.png" required />
                                                 <label class="input-group-text"
                                                     for="dokumen_npwp_perusahaan">Upload</label>
                                             </div>
@@ -481,7 +481,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_laporan_keuangan') is-invalid @enderror"
                                                     id="dokumen_laporan_keuangan" name="dokumen_laporan_keuangan" 
-                                                    accept=".pdf,.xlsx,.xls" />
+                                                    accept=".pdf,.xlsx,.xls" required />
                                                 <label class="input-group-text"
                                                     for="dokumen_laporan_keuangan">Upload</label>
                                             </div>
@@ -501,7 +501,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_arus_kas') is-invalid @enderror"
                                                     id="dokumen_arus_kas" name="dokumen_arus_kas" 
-                                                    accept=".pdf,.xlsx,.xls" />
+                                                    accept=".pdf,.xlsx,.xls" required />
                                                 <label class="input-group-text" for="dokumen_arus_kas">Upload</label>
                                             </div>
                                             @error('dokumen_arus_kas')
@@ -520,7 +520,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_kondisi_eksternal') is-invalid @enderror"
                                                     id="dokumen_kondisi_eksternal" name="dokumen_kondisi_eksternal" 
-                                                    accept=".pdf,.jpg,.jpeg,.png" />
+                                                    accept=".pdf,.jpg,.jpeg,.png" required />
                                                 <label class="input-group-text"
                                                     for="dokumen_kondisi_eksternal">Upload</label>
                                             </div>
@@ -540,7 +540,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_kontrak_pembiayaan') is-invalid @enderror"
                                                     id="dokumen_kontrak_pembiayaan" name="dokumen_kontrak_pembiayaan" 
-                                                    accept=".pdf" />
+                                                    accept=".pdf" required />
                                                 <label class="input-group-text"
                                                     for="dokumen_kontrak_pembiayaan">Upload</label>
                                             </div>
@@ -577,7 +577,7 @@
                                                 <input type="file"
                                                     class="form-control @error('dokumen_tanda_tangan') is-invalid @enderror"
                                                     id="dokumen_tanda_tangan" name="dokumen_tanda_tangan" 
-                                                    accept=".jpg,.jpeg,.png" />
+                                                    accept=".jpg,.jpeg,.png" required />
                                                 <label class="input-group-text" for="dokumen_tanda_tangan">Upload</label>
                                             </div>
                                             @error('dokumen_tanda_tangan')

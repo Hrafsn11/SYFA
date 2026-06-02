@@ -37,6 +37,7 @@
                                     :value="$id_pengajuan_cicilan"
                                     :allow_clear="true"
                                     :tags="false"
+                                    :is_required="true"
                                     wire:key="select2-pengajuan-{{ count($approvedRestrukturisasi) }}"
                                 />
                             </div>
@@ -88,11 +89,23 @@
                         <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
                                 class="text-danger">*</span></label>
                         @if (!$isEdit)
-                            <select class="form-select @error('metode_perhitungan') is-invalid @enderror"
-                                wire:model.live="metode_perhitungan">
-                                <option value="Flat">Metode Flat</option>
-                                <option value="Anuitas">Metode Efektif (Anuitas)</option>
-                            </select>
+                            <div wire:ignore>
+                                <livewire:components.select2
+                                    :list_data="[
+                                        ['value' => 'Flat', 'label' => 'Metode Flat'],
+                                        ['value' => 'Anuitas', 'label' => 'Metode Efektif (Anuitas)']
+                                    ]"
+                                    value_name="value"
+                                    value_label="label"
+                                    data_placeholder="Pilih Metode"
+                                    model_name="metode_perhitungan"
+                                    :value="$metode_perhitungan"
+                                    :allow_clear="false"
+                                    :tags="false"
+                                    :is_required="true"
+                                    wire:key="select2-metode-{{ $metode_perhitungan }}"
+                                />
+                            </div>
                         @else
                             <select class="form-select" disabled style="background-color: #f5f5f9;">
                                 <option value="{{ $metode_perhitungan }}" selected>
@@ -110,7 +123,7 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Suku Bunga Per Tahun (%) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control @error('suku_bunga_per_tahun') is-invalid @enderror"
-                            wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100">
+                            wire:model.live="suku_bunga_per_tahun" step="0.01" min="0" max="100" required>
                         @error('suku_bunga_per_tahun')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -119,7 +132,7 @@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
-                            wire:model.live="jangka_waktu_total" min="1">
+                            wire:model.live="jangka_waktu_total" min="1" required>
                         @error('jangka_waktu_total')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -128,7 +141,7 @@
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Masa Tenggang (Bulan) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control @error('masa_tenggang') is-invalid @enderror"
-                            wire:model.live="masa_tenggang" min="0">
+                            wire:model.live="masa_tenggang" min="0" required>
                         <small class="text-muted">Hanya bayar margin selama masa tenggang</small>
                         @error('masa_tenggang')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -142,7 +155,7 @@
                                 <input type="text"
                                     class="form-control @error('tanggal_mulai_cicilan') is-invalid @enderror"
                                     id="tgl_mulai_cicilan" placeholder="yyyy-mm-dd" autocomplete="off"
-                                    value="{{ $tanggal_mulai_cicilan }}">
+                                    value="{{ $tanggal_mulai_cicilan }}" required>
                                 <span class="input-group-text"><i class="ti ti-calendar"></i></span>
                             </div>
                         </div>
@@ -179,7 +192,7 @@
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Jangka Waktu Total (Bulan) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control @error('jangka_waktu_total') is-invalid @enderror"
-                            wire:model.live="jangka_waktu_total" min="1">
+                            wire:model.live="jangka_waktu_total" min="1" required>
                         @error('jangka_waktu_total')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -190,7 +203,7 @@
                         <div wire:ignore>
                             <input type="text" id="nominal_yg_disetujui_input" class="form-control"
                                 placeholder="Rp 0"
-                                value="{{ $nominal_yg_disetujui ? 'Rp ' . number_format($nominal_yg_disetujui, 0, ',', '.') : '' }}">
+                                value="{{ $nominal_yg_disetujui ? 'Rp ' . number_format($nominal_yg_disetujui, 0, ',', '.') : '' }}" required>
                         </div>
                         <input type="hidden" wire:model.live="nominal_yg_disetujui">
                         @error('nominal_yg_disetujui')
