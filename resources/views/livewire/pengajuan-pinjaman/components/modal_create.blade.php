@@ -55,7 +55,7 @@
                                             @error('nilai_pinjaman') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label class="form-label" for="nilai_bunga">NILAI BUNGA</label>
+                                            <label class="form-label" for="nilai_bunga">Nilai Bunga</label>
                                             <div class="input-group">
                                                 <input type="text" class="form-control input-rupiah" id="nilai_bunga" placeholder="Rp 0" readonly disabled wire:model.live="nilai_bunga">
                                                 <span class="input-group-text">/Bulan</span>
@@ -98,8 +98,8 @@
                                                     <a href="{{ getFileUrl($dokumen_invoice_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control @error('dokumen_invoice') is-invalid @enderror" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
-                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
+                                            <input type="file" class="form-control @error('dokumen_invoice') is-invalid @enderror" id="dokumen_invoice" wire:model.blur="dokumen_invoice" accept=".pdf, .png, .jpg, .jpeg">
+                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                                             @error('dokumen_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
@@ -109,8 +109,8 @@
                                                     <a href="{{ getFileUrl($dokumen_kontrak_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control @error('dokumen_kontrak') is-invalid @enderror" id="dokumen_kontrak"  wire:model.blur="dokumen_kontrak">
-                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
+                                            <input type="file" class="form-control @error('dokumen_kontrak') is-invalid @enderror" id="dokumen_kontrak"  wire:model.blur="dokumen_kontrak" accept=".pdf, .png, .jpg, .jpeg">
+                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                                             @error('dokumen_kontrak') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
@@ -122,8 +122,8 @@
                                                     <a href="{{ getFileUrl($dokumen_so_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control @error('dokumen_so') is-invalid @enderror" id="dokumen_so" wire:model.blur="dokumen_so">
-                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
+                                            <input type="file" class="form-control @error('dokumen_so') is-invalid @enderror" id="dokumen_so" wire:model.blur="dokumen_so" accept=".pdf, .png, .jpg, .jpeg">
+                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                                             @error('dokumen_so') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
@@ -133,8 +133,8 @@
                                                     <a href="{{ getFileUrl($dokumen_bast_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control @error('dokumen_bast') is-invalid @enderror" id="dokumen_bast"  wire:model.blur="dokumen_bast">
-                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, docx, xls, png, rar, zip)</small>
+                                            <input type="file" class="form-control @error('dokumen_bast') is-invalid @enderror" id="dokumen_bast"  wire:model.blur="dokumen_bast" accept=".pdf, .png, .jpg, .jpeg">
+                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                                             @error('dokumen_bast') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
@@ -188,8 +188,8 @@
                                                     <a href="{{ getFileUrl($dokumen_invoice_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control @error('dokumen_invoice') is-invalid @enderror" id="dokumen_invoice" wire:model.blur="dokumen_invoice">
-                                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                                            <input type="file" class="form-control @error('dokumen_invoice') is-invalid @enderror" id="dokumen_invoice" wire:model.blur="dokumen_invoice" accept=".pdf, .png, .jpg, .jpeg">
+                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                                             @error('dokumen_invoice') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                         <div class="col-md-6 form-group">
@@ -199,8 +199,8 @@
                                                     <a href="{{ getFileUrl($dokumen_lainnnya_current) }}" target="_blank"><small>Current File</small></a>
                                                 @endif
                                             </div>
-                                            <input type="file" class="form-control @error('dokumen_lainnya') is-invalid @enderror" id="dokumen_lainnya" wire:model.blur="dokumen_lainnya">
-                                            <small class="text-muted">Maximum upload file size: 2 MB.</small>
+                                            <input type="file" class="form-control @error('dokumen_lainnya') is-invalid @enderror" id="dokumen_lainnya" wire:model.blur="dokumen_lainnya" accept=".pdf, .png, .jpg, .jpeg">
+                                            <small class="text-muted">Maximum upload file size: 2 MB. (Type File: pdf, png, jpg)</small>
                                             @error('dokumen_lainnya') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
@@ -298,8 +298,17 @@
                 const input = nilaiPinjamanWrapper.querySelector('input');
                 const value = getCurrencyRawValue(input);
                 clearFieldError(nilaiPinjamanWrapper);
+                
+                let valInvoice = 0;
+                if (nilaiInvoiceWrapper) {
+                    valInvoice = getCurrencyRawValue(nilaiInvoiceWrapper.querySelector('input'));
+                }
+                
                 if (value === null || value <= 0) {
                     showFieldError(nilaiPinjamanWrapper, 'Nilai pinjaman harus lebih dari 0.');
+                    isValid = false;
+                } else if (valInvoice !== null && valInvoice > 0 && value > valInvoice) {
+                    showFieldError(nilaiPinjamanWrapper, 'Nilai pinjaman tidak boleh lebih besar dari nilai invoice.');
                     isValid = false;
                 }
             }

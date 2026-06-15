@@ -43,7 +43,7 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
         $noInvoiceRules = ['required', 'string', $uniqueNoInvoice];
 
         // Rule dokumen — nullable (file lama dipertahankan jika tidak diupload ulang)
-        $dokumenRule = 'nullable|file|max:2048|mimes:pdf,docx,xls,png,rar,zip';
+        $dokumenRule = 'nullable|file|max:2048|mimes:pdf,png,jpg,jpeg';
 
         switch ($jenisPembiayaan) {
             case 'Invoice Financing':
@@ -58,9 +58,7 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
                     ],
                     'nilai_pinjaman'  => [
                         'required',
-                        fn($attr, $val, $fail) => rupiahToRawValue($val) <= 0
-                            ? $fail('Nilai pinjaman harus lebih dari 0.')
-                            : null,
+                        new \App\Rules\PinjamanLteInvoiceRule(),
                     ],
                     'invoice_date'    => 'required|date_format:d/m/Y|before_or_equal:due_date',
                     'due_date'        => 'required|date_format:d/m/Y',
@@ -113,19 +111,19 @@ class InvoicePengajuanPinjamanRequest extends FormRequest
             'due_date.date_format'         => 'Tanggal jatuh tempo harus berformat DD/MM/YYYY.',
             'dokumen_invoice.file'         => 'Dokumen invoice harus berupa file.',
             'dokumen_invoice.max'          => 'Ukuran dokumen invoice maksimal 2 MB.',
-            'dokumen_invoice.mimes'        => 'Format dokumen invoice harus pdf, docx, xls, png, rar, atau zip.',
+            'dokumen_invoice.mimes'        => 'Format dokumen invoice harus pdf, png, atau jpg.',
             'dokumen_kontrak.file'         => 'Dokumen kontrak harus berupa file.',
             'dokumen_kontrak.max'          => 'Ukuran dokumen kontrak maksimal 2 MB.',
-            'dokumen_kontrak.mimes'        => 'Format dokumen kontrak harus pdf, docx, xls, png, rar, atau zip.',
+            'dokumen_kontrak.mimes'        => 'Format dokumen kontrak harus pdf, png, atau jpg.',
             'dokumen_so.file'              => 'Dokumen SO harus berupa file.',
             'dokumen_so.max'               => 'Ukuran dokumen SO maksimal 2 MB.',
-            'dokumen_so.mimes'             => 'Format dokumen SO harus pdf, docx, xls, png, rar, atau zip.',
+            'dokumen_so.mimes'             => 'Format dokumen SO harus pdf, png, atau jpg.',
             'dokumen_bast.file'            => 'Dokumen BAST harus berupa file.',
             'dokumen_bast.max'             => 'Ukuran dokumen BAST maksimal 2 MB.',
-            'dokumen_bast.mimes'           => 'Format dokumen BAST harus pdf, docx, xls, png, rar, atau zip.',
+            'dokumen_bast.mimes'           => 'Format dokumen BAST harus pdf, png, atau jpg.',
             'dokumen_lainnya.file'         => 'Dokumen lainnya harus berupa file.',
             'dokumen_lainnya.max'          => 'Ukuran dokumen lainnya maksimal 2 MB.',
-            'dokumen_lainnya.mimes'        => 'Format dokumen lainnya harus pdf, docx, xls, png, rar, atau zip.',
+            'dokumen_lainnya.mimes'        => 'Format dokumen lainnya harus pdf, png, atau jpg.',
             'nama_barang.required'         => 'Nama barang harus diisi.',
             'nama_barang.string'           => 'Nama barang harus berupa teks.',
         ];
