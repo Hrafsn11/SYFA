@@ -86,6 +86,29 @@ class LaporanInvestasiSFinanceTable extends DataTableComponent
                     ->orWhereHas('penyaluranDanaInvestasi');
             });
 
+        $user = auth()->user();
+        $hasUnrestrictedRole = false;
+
+        if ($user) {
+            if ($user->hasRole('super-admin')) {
+                $hasUnrestrictedRole = true;
+            } else {
+                $roles = $user->roles;
+                $hasUnrestrictedRole = $roles->contains(function ($role) {
+                    return $role->restriction == 1;
+                });
+            }
+        }
+
+        if (!$hasUnrestrictedRole) {
+            $debiturInvestor = $user ? $user->debitur : null;
+            if ($debiturInvestor) {
+                $query->where('pengajuan_investasi.id_debitur_dan_investor', $debiturInvestor->id_debitur);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         if (!empty($this->filterStatus)) {
             $query->where('status', $this->filterStatus);
         }

@@ -64,74 +64,49 @@ class DashboardInvestasiDepositoService
 
     public function getSummaryData(): array
     {
-        $now = Carbon::now();
-        $currentMonth = (int)$now->format('m');
-        $currentYear = (int)$now->format('Y');
-
-        $previousMonth = $currentMonth - 1;
-        $previousYear = $currentYear;
-        if ($previousMonth < 1) {
-            $previousMonth = 12;
-            $previousYear = $currentYear - 1;
-        }
-
-        $namaBulan = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember'
-        ];
-
         // 1. Total Deposito Pokok
-        $totalDepositoPokok = $this->getTotalDepositoPokok($currentYear, $currentMonth);
-        $totalDepositoPokokPrev = $this->getTotalDepositoPokok($previousYear, $previousMonth);
-        $depositoPokokStats = $this->calculateStats($totalDepositoPokokPrev, $totalDepositoPokok);
+        $totalDepositoPokok = $this->getTotalDepositoPokok();
 
         // 2. Total CoF
-        $totalCoF = $this->getTotalCoF($currentYear, $currentMonth);
-        $totalCoFPrev = $this->getTotalCoF($previousYear, $previousMonth);
-        $cofStats = $this->calculateStats($totalCoFPrev, $totalCoF);
+        $totalCoF = $this->getTotalCoF();
 
         // 3. Total Pengembalian
-        $totalPengembalian = $this->getTotalPengembalian($currentYear, $currentMonth);
-        $totalPengembalianPrev = $this->getTotalPengembalian($previousYear, $previousMonth);
-        $pengembalianStats = $this->calculateStats($totalPengembalianPrev, $totalPengembalian);
+        $totalPengembalian = $this->getTotalPengembalian();
 
         // 4. Total Outstanding
-        $totalOutstanding = $this->getTotalOutstanding($currentYear, $currentMonth);
-        $totalOutstandingPrev = $this->getTotalOutstanding($previousYear, $previousMonth);
-        $outstandingStats = $this->calculateStats($totalOutstandingPrev, $totalOutstanding);
+        $totalOutstanding = $this->getTotalOutstanding();
+
+        // 5. Total Dana Disalurkan
+        $totalDisalurkan = $this->getTotalDisalurkan();
+
+        // 6. Outstanding Penyaluran
+        $outstandingPenyaluran = $this->getOutstandingPenyaluran();
 
         return [
             'total_deposito_pokok' => $totalDepositoPokok,
-            'total_deposito_pokok_percentage' => $depositoPokokStats['percentage'],
-            'total_deposito_pokok_is_increase' => $depositoPokokStats['is_increase'],
-            'total_deposito_pokok_is_new' => $depositoPokokStats['is_new'],
+            'total_deposito_pokok_percentage' => 0.0,
+            'total_deposito_pokok_is_increase' => false,
+            'total_deposito_pokok_is_new' => false,
 
             'total_cof' => $totalCoF,
-            'total_cof_percentage' => $cofStats['percentage'],
-            'total_cof_is_increase' => $cofStats['is_increase'],
-            'total_cof_is_new' => $cofStats['is_new'],
+            'total_cof_percentage' => 0.0,
+            'total_cof_is_increase' => false,
+            'total_cof_is_new' => false,
 
             'total_pengembalian' => $totalPengembalian,
-            'total_pengembalian_percentage' => $pengembalianStats['percentage'],
-            'total_pengembalian_is_increase' => $pengembalianStats['is_increase'],
-            'total_pengembalian_is_new' => $pengembalianStats['is_new'],
+            'total_pengembalian_percentage' => 0.0,
+            'total_pengembalian_is_increase' => false,
+            'total_pengembalian_is_new' => false,
 
             'total_outstanding' => $totalOutstanding,
-            'total_outstanding_percentage' => $outstandingStats['percentage'],
-            'total_outstanding_is_increase' => $outstandingStats['is_increase'],
-            'total_outstanding_is_new' => $outstandingStats['is_new'],
+            'total_outstanding_percentage' => 0.0,
+            'total_outstanding_is_increase' => false,
+            'total_outstanding_is_new' => false,
 
-            'previous_month_name' => $namaBulan[$previousMonth] ?? '',
+            'total_disalurkan' => $totalDisalurkan,
+            'outstanding_penyaluran' => $outstandingPenyaluran,
+
+            'previous_month_name' => '',
         ];
     }
 
@@ -152,23 +127,21 @@ class DashboardInvestasiDepositoService
         ];
     }
 
-    private function getTotalDepositoPokok(int $year, int $month): float
+    private function getTotalDepositoPokok(): float
     {
         $query = DB::table('pengajuan_investasi')
-            ->whereYear('tanggal_investasi', $year)
-            ->whereMonth('tanggal_investasi', $month);
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
 
         $this->applyRestriction($query);
 
         return (float)$query->sum('jumlah_investasi');
     }
 
-    private function getTotalCoF(int $year, int $month): float
+    private function getTotalCoF(): float
     {
         $query = DB::table('pengajuan_investasi')
             ->select('jumlah_investasi', 'bunga_pertahun')
-            ->whereYear('tanggal_investasi', $year)
-            ->whereMonth('tanggal_investasi', $month);
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
 
         $this->applyRestriction($query);
 
@@ -186,12 +159,11 @@ class DashboardInvestasiDepositoService
         return $totalCof;
     }
 
-    private function getTotalPengembalian(int $year, int $month): float
+    private function getTotalPengembalian(): float
     {
         $query = DB::table('pengembalian_investasi as pi')
             ->join('pengajuan_investasi as pj', 'pi.id_pengajuan_investasi', '=', 'pj.id_pengajuan_investasi')
-            ->whereYear('pi.tanggal_pengembalian', $year)
-            ->whereMonth('pi.tanggal_pengembalian', $month);
+            ->whereNotIn('pj.status', ['Draft', 'Rejected', 'Ditolak']);
 
         if ($this->isRestricted && $this->investorId) {
             $query->where('pj.id_debitur_dan_investor', $this->investorId);
@@ -203,15 +175,35 @@ class DashboardInvestasiDepositoService
             ->value('total');
     }
 
-    private function getTotalOutstanding(int $year, int $month): float
+    private function getTotalOutstanding(): float
     {
         $query = DB::table('pengajuan_investasi')
-            ->whereYear('tanggal_investasi', $year)
-            ->whereMonth('tanggal_investasi', $month);
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
 
         $this->applyRestriction($query);
 
         return (float)$query->selectRaw('COALESCE(SUM(sisa_pokok + sisa_bunga), 0) as total')
+            ->value('total');
+    }
+
+    private function getTotalDisalurkan(): float
+    {
+        $query = DB::table('pengajuan_investasi')
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
+
+        $this->applyRestriction($query);
+
+        return (float)$query->sum('total_disalurkan');
+    }
+
+    private function getOutstandingPenyaluran(): float
+    {
+        $query = DB::table('pengajuan_investasi')
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
+
+        $this->applyRestriction($query);
+
+        return (float)$query->selectRaw('COALESCE(SUM(total_disalurkan - total_kembali_dari_penyaluran), 0) as total')
             ->value('total');
     }
 
@@ -418,5 +410,166 @@ class DashboardInvestasiDepositoService
             '11' => 'November',
             '12' => 'Desember',
         ];
+    }
+
+    public function getTrenInvestasiData(): array
+    {
+        $pivot = Carbon::today()->startOfMonth();
+        $categories = [];
+        $masuk = [];
+        $pengembalian = [];
+
+        $bulanNama = [
+            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+        ];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $m = $pivot->copy()->subMonths($i);
+            $start = $m->copy()->startOfMonth();
+            $end = $m->copy()->endOfMonth();
+
+            $categories[] = $bulanNama[$m->month] . ' ' . $m->year;
+
+            // Masuk Query
+            $masukQuery = DB::table('pengajuan_investasi')
+                ->whereBetween('tanggal_investasi', [$start, $end])
+                ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
+            $this->applyRestriction($masukQuery);
+            $masuk[] = (float)$masukQuery->sum('jumlah_investasi');
+
+            // Pengembalian Query
+            $kembaliQuery = DB::table('pengembalian_investasi as pi')
+                ->join('pengajuan_investasi as pj', 'pi.id_pengajuan_investasi', '=', 'pj.id_pengajuan_investasi')
+                ->whereBetween('pi.tanggal_pengembalian', [$start, $end])
+                ->whereNotIn('pj.status', ['Draft', 'Rejected', 'Ditolak']);
+                
+            if ($this->isRestricted && $this->investorId) {
+                $kembaliQuery->where('pj.id_debitur_dan_investor', $this->investorId);
+            } elseif ($this->isRestricted && !$this->investorId) {
+                $pengembalian[] = 0.0;
+                continue;
+            }
+            $pengembalian[] = (float)$kembaliQuery->sum(DB::raw('pi.dana_pokok_dibayar + pi.bunga_dibayar'));
+        }
+
+        return compact('categories', 'masuk', 'pengembalian');
+    }
+
+    public function getUpcomingMaturingInvestments(): array
+    {
+        $query = DB::table('pengajuan_investasi')
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak'])
+            ->where('sisa_pokok', '>', 0);
+            
+        $this->applyRestriction($query);
+        
+        $investments = $query->get();
+        $upcoming = [];
+        $today = Carbon::today();
+        $limit = Carbon::today()->addDays(30);
+        
+        foreach ($investments as $inv) {
+            $startDate = Carbon::parse($inv->tanggal_investasi);
+            $maturityDate = $startDate->copy()->addMonths((int)$inv->lama_investasi);
+            
+            // Check if maturity date is in the next 30 days
+            if ($maturityDate->gte($today) && $maturityDate->lte($limit)) {
+                $upcoming[] = [
+                    'nomor_kontrak' => $inv->nomor_kontrak ?? '-',
+                    'nama_investor' => $inv->nama_investor,
+                    'pic' => $inv->nama_pic_kontrak ?? '-',
+                    'jumlah_investasi' => (float)$inv->jumlah_investasi,
+                    'sisa_pokok' => (float)$inv->sisa_pokok,
+                    'tanggal_jatuh_tempo' => $maturityDate->format('d/m/Y'),
+                    'hari_tersisa' => (int)$today->diffInDays($maturityDate, false),
+                ];
+            }
+        }
+        
+        // Sort by days remaining ascending
+        usort($upcoming, fn($a, $b) => $a['hari_tersisa'] <=> $b['hari_tersisa']);
+        
+        return $upcoming;
+    }
+
+    public function getUpcomingMaturingDistributions(): array
+    {
+        $query = DB::table('penyaluran_dana_investasi as pdi')
+            ->join('pengajuan_investasi as pi', 'pdi.id_pengajuan_investasi', '=', 'pi.id_pengajuan_investasi')
+            ->join('master_debitur_dan_investor as md', 'pdi.id_debitur', '=', 'md.id_debitur')
+            ->select([
+                'pdi.*',
+                'pi.nomor_kontrak as nomor_kontrak_investasi',
+                'md.nama as nama_debitur',
+                'md.nama_ceo as pic_debitur',
+            ])
+            ->whereNotIn('pi.status', ['Draft', 'Rejected', 'Ditolak'])
+            ->whereRaw('pdi.nominal_yang_disalurkan > pdi.nominal_yang_dikembalikan');
+
+        $this->applyRestriction($query, 'pi.id_debitur_dan_investor');
+
+        $distributions = $query->get();
+        $upcoming = [];
+        $today = Carbon::today();
+        $limit = Carbon::today()->addDays(30);
+
+        foreach ($distributions as $dist) {
+            $returnDate = Carbon::parse($dist->tanggal_pengembalian);
+            
+            if ($returnDate->gte($today) && $returnDate->lte($limit)) {
+                $sisaBelumKembali = (float)$dist->nominal_yang_disalurkan - (float)$dist->nominal_yang_dikembalikan;
+                $upcoming[] = [
+                    'id_penyaluran_dana_investasi' => $dist->id_penyaluran_dana_investasi,
+                    'nomor_kontrak_investasi' => $dist->nomor_kontrak_investasi ?: '-',
+                    'nama_debitur' => $dist->nama_debitur,
+                    'pic' => $dist->pic_debitur ?? '-',
+                    'nominal_disalurkan' => (float)$dist->nominal_yang_disalurkan,
+                    'sisa_tagihan' => $sisaBelumKembali,
+                    'tanggal_jatuh_tempo' => $returnDate->format('d/m/Y'),
+                    'hari_tersisa' => (int)$today->diffInDays($returnDate, false),
+                ];
+            }
+        }
+
+        usort($upcoming, fn($a, $b) => $a['hari_tersisa'] <=> $b['hari_tersisa']);
+
+        return $upcoming;
+    }
+
+    public function getTopInvestorsList(): array
+    {
+        $query = DB::table('pengajuan_investasi')
+            ->select('nama_investor', DB::raw('SUM(jumlah_investasi) as total_investasi'), DB::raw('SUM(sisa_pokok) as total_outstanding'))
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak'])
+            ->groupBy('nama_investor')
+            ->orderBy('total_investasi', 'desc')
+            ->limit(5);
+            
+        $this->applyRestriction($query);
+        
+        return $query->get()->toArray();
+    }
+
+    public function getJenisInvestasiMix(): array
+    {
+        $query = DB::table('pengajuan_investasi')
+            ->select('jenis_investasi', DB::raw('COUNT(*) as jumlah'), DB::raw('SUM(jumlah_investasi) as total'))
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak'])
+            ->groupBy('jenis_investasi');
+            
+        $this->applyRestriction($query);
+        
+        $data = $query->get();
+        $labels = [];
+        $values = [];
+        
+        foreach ($data as $row) {
+            $labels[] = $row->jenis_investasi ?: 'Lainnya';
+            $values[] = (float)$row->total;
+        }
+        
+        return compact('labels', 'values');
     }
 }
