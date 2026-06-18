@@ -61,6 +61,12 @@ class DashboardInvestasiDeposito extends Component
             'summaryData' => $summaryData,
             'chartData' => $chartData,
             'monthOptions' => $this->service->getMonthOptions(),
+            'trenInvestasi' => $this->service->getTrenInvestasiData(),
+            'upcomingMaturities' => $this->service->getUpcomingMaturingInvestments(),
+            'upcomingDistributions' => $this->service->getUpcomingMaturingDistributions(),
+            'topInvestors' => $this->service->getTopInvestorsList(),
+            'jenisInvestasiMix' => $this->service->getJenisInvestasiMix(),
+            'isRestricted' => $this->service->isUserRestricted(),
         ])->layout('layouts.app', [
             'title' => 'Dashboard Investasi SFinance'
         ]);
