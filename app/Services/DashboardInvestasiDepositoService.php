@@ -412,46 +412,97 @@ class DashboardInvestasiDepositoService
         ];
     }
 
-    public function getTrenInvestasiData(): array
+    public function getTrenInvestasiData(?string $bulanTahun = null): array
     {
-        $pivot = Carbon::today()->startOfMonth();
+        if (empty($bulanTahun)) {
+            // Default: 12-Month Rolling Trend
+            $pivot = Carbon::today()->startOfMonth();
+            $categories = [];
+            $masuk = [];
+            $pengembalian = [];
+
+            $bulanNama = [
+                1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+                9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+            ];
+
+            for ($i = 11; $i >= 0; $i--) {
+                $m = $pivot->copy()->subMonths($i);
+                $start = $m->copy()->startOfMonth();
+                $end = $m->copy()->endOfMonth();
+
+                $categories[] = $bulanNama[$m->month] . ' ' . $m->year;
+
+                // Masuk Query
+                $masukQuery = DB::table('pengajuan_investasi')
+                    ->whereBetween('tanggal_investasi', [$start, $end])
+                    ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
+                $this->applyRestriction($masukQuery);
+                $masuk[] = (float)$masukQuery->sum('jumlah_investasi');
+
+                // Pengembalian Query
+                $kembaliQuery = DB::table('pengembalian_investasi as pi')
+                    ->join('pengajuan_investasi as pj', 'pi.id_pengajuan_investasi', '=', 'pj.id_pengajuan_investasi')
+                    ->whereBetween('pi.tanggal_pengembalian', [$start, $end])
+                    ->whereNotIn('pj.status', ['Draft', 'Rejected', 'Ditolak']);
+                    
+                if ($this->isRestricted && $this->investorId) {
+                    $kembaliQuery->where('pj.id_debitur_dan_investor', $this->investorId);
+                } elseif ($this->isRestricted && !$this->investorId) {
+                    $pengembalian[] = 0.0;
+                    continue;
+                }
+                $pengembalian[] = (float)$kembaliQuery->sum(DB::raw('pi.dana_pokok_dibayar + pi.bunga_dibayar'));
+            }
+
+            return compact('categories', 'masuk', 'pengembalian');
+        }
+
+        // Selected month: Daily Trend for that month
+        try {
+            $pivot = Carbon::createFromFormat('Y-m-d', $bulanTahun . '-01')->startOfMonth();
+        } catch (\Exception $e) {
+            $pivot = Carbon::today()->startOfMonth();
+        }
+
+        $startOfMonth = $pivot->copy()->startOfMonth();
+        $endOfMonth = $pivot->copy()->endOfMonth();
+        $daysInMonth = $pivot->daysInMonth;
+
+        // Fetch inputs
+        $masukQuery = DB::table('pengajuan_investasi')
+            ->select(DB::raw('DAY(tanggal_investasi) as day_num'), DB::raw('SUM(jumlah_investasi) as total'))
+            ->whereBetween('tanggal_investasi', [$startOfMonth, $endOfMonth])
+            ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak'])
+            ->groupBy(DB::raw('DAY(tanggal_investasi)'));
+        $this->applyRestriction($masukQuery);
+        $masukRaw = $masukQuery->pluck('total', 'day_num')->all();
+
+        $kembaliQuery = DB::table('pengembalian_investasi as pi')
+            ->join('pengajuan_investasi as pj', 'pi.id_pengajuan_investasi', '=', 'pj.id_pengajuan_investasi')
+            ->select(DB::raw('DAY(pi.tanggal_pengembalian) as day_num'), DB::raw('SUM(pi.dana_pokok_dibayar + pi.bunga_dibayar) as total'))
+            ->whereBetween('pi.tanggal_pengembalian', [$startOfMonth, $endOfMonth])
+            ->whereNotIn('pj.status', ['Draft', 'Rejected', 'Ditolak'])
+            ->groupBy(DB::raw('DAY(pi.tanggal_pengembalian)'));
+
+        if ($this->isRestricted && $this->investorId) {
+            $kembaliQuery->where('pj.id_debitur_dan_investor', $this->investorId);
+            $kembaliRaw = $kembaliQuery->pluck('total', 'day_num')->all();
+        } elseif ($this->isRestricted && !$this->investorId) {
+            $kembaliRaw = [];
+        } else {
+            $kembaliRaw = $kembaliQuery->pluck('total', 'day_num')->all();
+        }
+
         $categories = [];
         $masuk = [];
         $pengembalian = [];
 
-        $bulanNama = [
-            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
-            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
-            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
-        ];
-
-        for ($i = 11; $i >= 0; $i--) {
-            $m = $pivot->copy()->subMonths($i);
-            $start = $m->copy()->startOfMonth();
-            $end = $m->copy()->endOfMonth();
-
-            $categories[] = $bulanNama[$m->month] . ' ' . $m->year;
-
-            // Masuk Query
-            $masukQuery = DB::table('pengajuan_investasi')
-                ->whereBetween('tanggal_investasi', [$start, $end])
-                ->whereNotIn('status', ['Draft', 'Rejected', 'Ditolak']);
-            $this->applyRestriction($masukQuery);
-            $masuk[] = (float)$masukQuery->sum('jumlah_investasi');
-
-            // Pengembalian Query
-            $kembaliQuery = DB::table('pengembalian_investasi as pi')
-                ->join('pengajuan_investasi as pj', 'pi.id_pengajuan_investasi', '=', 'pj.id_pengajuan_investasi')
-                ->whereBetween('pi.tanggal_pengembalian', [$start, $end])
-                ->whereNotIn('pj.status', ['Draft', 'Rejected', 'Ditolak']);
-                
-            if ($this->isRestricted && $this->investorId) {
-                $kembaliQuery->where('pj.id_debitur_dan_investor', $this->investorId);
-            } elseif ($this->isRestricted && !$this->investorId) {
-                $pengembalian[] = 0.0;
-                continue;
-            }
-            $pengembalian[] = (float)$kembaliQuery->sum(DB::raw('pi.dana_pokok_dibayar + pi.bunga_dibayar'));
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $categories[] = sprintf('%02d', $day);
+            $masuk[] = (float)($masukRaw[$day] ?? 0.0);
+            $pengembalian[] = (float)($kembaliRaw[$day] ?? 0.0);
         }
 
         return compact('categories', 'masuk', 'pengembalian');

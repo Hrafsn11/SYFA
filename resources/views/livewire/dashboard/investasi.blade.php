@@ -88,9 +88,27 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Tren Investasi & Pengembalian</h5>
-                    <small class="text-muted">Analisis arus dana 12 bulan terakhir</small>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">Tren Investasi & Pengembalian</h5>
+                        <small class="text-muted">
+                            @if($bulanTahunTren)
+                                Analisis arus dana harian untuk bulan yang dipilih
+                            @else
+                                Analisis arus dana 12 bulan terakhir
+                            @endif
+                        </small>
+                    </div>
+                    <div wire:ignore style="width: 180px;">
+                        <select id="filterBulanTahunTren" class="form-select select2">
+                            <option></option>
+                            @foreach ($monthYearOptions as $value => $label)
+                                <option value="{{ $value }}" {{ $bulanTahunTren == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div wire:ignore id="chartTrenInvestasi" style="min-height: 350px;"></div>
@@ -385,6 +403,23 @@
             margin-top: 0.1rem;
             font-weight: normal;
         }
+
+        .select2-container { width: 100% !important; }
+        #filterBulanTahunTren + .select2-container {
+            width: 180px !important;
+            min-width: 180px !important;
+            max-width: 180px !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection,
+        .select2-container--default.select2-container--open .select2-selection {
+            border-color: #86b7fe !important;
+        }
     </style>
 @endpush
 
@@ -470,11 +505,33 @@
                 observer.observe(holder, { attributes: true, subtree: true });
             }
 
+            function initSelect2() {
+                const $select = $('#filterBulanTahunTren');
+                if (!$select.length) return;
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.select2('destroy');
+                }
+                $select.select2({ 
+                    minimumResultsForSearch: Infinity, 
+                    width: 'resolve', 
+                    dropdownAutoWidth: false,
+                    allowClear: true,
+                    placeholder: '12 Bulan Terakhir'
+                });
+                setTimeout(() => $select.next('.select2-container').css({ width: '180px', 'min-width': '180px', 'max-width': '180px' }), 10);
+                $select.off('change.dashboard').on('change.dashboard', function () {
+                    const val = $(this).val();
+                    const wid = $(this).closest('[wire\\:id]').attr('wire:id');
+                    if (wid && typeof Livewire !== 'undefined') Livewire.find(wid).set('bulanTahunTren', val || null);
+                });
+            }
+
             function initializeDashboard() {
                 if (typeof ApexCharts === 'undefined') {
                     setTimeout(initializeDashboard, 200);
                     return;
                 }
+                initSelect2();
                 renderTrenChart();
                 setupDataObserver();
             }
