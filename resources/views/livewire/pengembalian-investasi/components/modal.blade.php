@@ -107,7 +107,7 @@
                                 Dana Pokok Yang Dibayarkan @if(!$id_pengajuan_investasi || $dana_tersedia > 0)<span class="text-danger">*</span>@endif
                             </label>
                             <div wire:ignore>
-                                <input type="text" class="form-control @error('dana_pokok_dibayar') is-invalid @enderror"
+                                <input type="text" class="form-control"
                                     id="dana_pokok_dibayar" placeholder="Ketik angka saja (contoh: 10000000)"
                                     autocomplete="off" {{ $id_pengajuan_investasi && $dana_tersedia == 0 ? 'disabled' : '' }}>
                                 <input type="hidden" id="dana_pokok_raw" wire:model="dana_pokok_dibayar">
@@ -119,9 +119,7 @@
                                     <small class="text-muted">Maksimal: Rp {{ number_format($dana_tersedia, 0, ',', '.') }}</small>
                                 @endif
                             @endif
-                            @error('dana_pokok_dibayar')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="invalid-feedback"></div>
                         </div>
 
                         <div class="col-md-6 mb-3 form-group">
@@ -129,7 +127,7 @@
                                 Bunga Yang Dibayarkan @if(!$id_pengajuan_investasi || $sisa_bunga > 0)<span class="text-danger">*</span>@endif
                             </label>
                             <div wire:ignore>
-                                <input type="text" class="form-control @error('bunga_dibayar') is-invalid @enderror"
+                                <input type="text" class="form-control"
                                     id="bunga_dibayar" placeholder="Ketik angka saja (contoh: 1000000)"
                                     autocomplete="off" {{ $id_pengajuan_investasi && $sisa_bunga == 0 ? 'disabled' : '' }}>
                                 <input type="hidden" id="bunga_raw" wire:model="bunga_dibayar">
@@ -141,9 +139,7 @@
                                     <small class="text-muted">Maksimal: Rp {{ number_format($sisa_bunga, 0, ',', '.') }}</small>
                                 @endif
                             @endif
-                            @error('bunga_dibayar')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="invalid-feedback"></div>
                         </div>
 
                         <div class="col-md-6 mb-3 form-group">
