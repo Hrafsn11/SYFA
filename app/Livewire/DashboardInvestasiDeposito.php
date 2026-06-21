@@ -12,6 +12,7 @@ class DashboardInvestasiDeposito extends Component
     public $bulanCoF;
     public $bulanPengembalian;
     public $bulanSisaInvestasi;
+    public $bulanTahunTren;
 
     protected DashboardInvestasiDepositoService $service;
 
@@ -27,6 +28,7 @@ class DashboardInvestasiDeposito extends Component
         $this->bulanCoF = $currentMonth;
         $this->bulanPengembalian = $currentMonth;
         $this->bulanSisaInvestasi = $currentMonth;
+        $this->bulanTahunTren = null;
     }
 
     public function updatedBulanInvestasiPokok(): void {}
@@ -36,6 +38,18 @@ class DashboardInvestasiDeposito extends Component
     public function updatedBulanPengembalian(): void {}
 
     public function updatedBulanSisaInvestasi(): void {}
+
+    public function updatedBulanTahunTren(): void {}
+
+    public function getMonthYearOptions(): array
+    {
+        $options = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $m = Carbon::now()->subMonths($i);
+            $options[$m->format('Y-m')] = $m->translatedFormat('F Y');
+        }
+        return $options;
+    }
 
     private function getSummaryData(): array
     {
@@ -61,7 +75,8 @@ class DashboardInvestasiDeposito extends Component
             'summaryData' => $summaryData,
             'chartData' => $chartData,
             'monthOptions' => $this->service->getMonthOptions(),
-            'trenInvestasi' => $this->service->getTrenInvestasiData(),
+            'monthYearOptions' => $this->getMonthYearOptions(),
+            'trenInvestasi' => $this->service->getTrenInvestasiData($this->bulanTahunTren),
             'upcomingMaturities' => $this->service->getUpcomingMaturingInvestments(),
             'upcomingDistributions' => $this->service->getUpcomingMaturingDistributions(),
             'topInvestors' => $this->service->getTopInvestorsList(),
