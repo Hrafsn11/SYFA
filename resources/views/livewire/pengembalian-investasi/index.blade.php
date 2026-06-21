@@ -41,6 +41,22 @@
 
     document.addEventListener('livewire:init', () => {
         Livewire.on('closeModal', () => $('#modalPengembalianInvestasi').modal('hide'));
+
+        Livewire.on('fail-validation', (payload) => {
+            const errors = payload[0];
+            if (errors.dana_pokok_dibayar) {
+                $('#dana_pokok_dibayar').addClass('is-invalid');
+                $('#dana_pokok_dibayar').closest('.form-group').find('.invalid-feedback')
+                    .addClass('d-block')
+                    .text(errors.dana_pokok_dibayar[0]);
+            }
+            if (errors.bunga_dibayar) {
+                $('#bunga_dibayar').addClass('is-invalid');
+                $('#bunga_dibayar').closest('.form-group').find('.invalid-feedback')
+                    .addClass('d-block')
+                    .text(errors.bunga_dibayar[0]);
+            }
+        });
     });
 
     function formatRupiah(angka) {
@@ -171,18 +187,66 @@
             $tanggal.datepicker('setDate', initialDate);
         }
 
-        $('#dana_pokok_dibayar').on('input', function() {
-            const rawValue = unformatRupiah($(this).val());
+        function validateDanaPokok(rawValue) {
+            const danaTersedia = parseFloat(@this.get('dana_tersedia')) || 0;
+            const $el = $('#dana_pokok_dibayar');
+            const $fb = $el.closest('.form-group').find('.invalid-feedback');
+
+            if (rawValue > danaTersedia) {
+                $el.addClass('is-invalid');
+                $fb.addClass('d-block').text('Dana pokok yang dibayarkan tidak boleh melebihi dana tersedia (Maksimal: ' + formatRupiah(danaTersedia) + ')');
+                return false;
+            } else {
+                $el.removeClass('is-invalid');
+                $fb.removeClass('d-block').text('');
+                return true;
+            }
+        }
+
+        function validateBunga(rawValue) {
+            const sisaBunga = parseFloat(@this.get('sisa_bunga')) || 0;
+            const $el = $('#bunga_dibayar');
+            const $fb = $el.closest('.form-group').find('.invalid-feedback');
+
+            if (rawValue > sisaBunga) {
+                $el.addClass('is-invalid');
+                $fb.addClass('d-block').text('Bunga yang dibayarkan tidak boleh melebihi sisa bunga (Maksimal: ' + formatRupiah(sisaBunga) + ')');
+                return false;
+            } else {
+                $el.removeClass('is-invalid');
+                $fb.removeClass('d-block').text('');
+                return true;
+            }
+        }
+
+        $('#dana_pokok_dibayar').off('input').on('input', function() {
+            const rawValue = parseFloat(unformatRupiah($(this).val())) || 0;
             $(this).val(formatRupiah(rawValue));
             $('#dana_pokok_raw').val(rawValue);
             @this.set('dana_pokok_dibayar', rawValue);
+            validateDanaPokok(rawValue);
         });
 
-        $('#bunga_dibayar').on('input', function() {
-            const rawValue = unformatRupiah($(this).val());
+        $('#bunga_dibayar').off('input').on('input', function() {
+            const rawValue = parseFloat(unformatRupiah($(this).val())) || 0;
             $(this).val(formatRupiah(rawValue));
             $('#bunga_raw').val(rawValue);
             @this.set('bunga_dibayar', rawValue);
+            validateBunga(rawValue);
+        });
+
+        $('#formPengembalianInvestasi').off('submit').on('submit', function(e) {
+            const danaPokokVal = parseFloat(unformatRupiah($('#dana_pokok_dibayar').val())) || 0;
+            const bungaVal = parseFloat(unformatRupiah($('#bunga_dibayar').val())) || 0;
+            
+            const isDanaPokokValid = validateDanaPokok(danaPokokVal);
+            const isBungaValid = validateBunga(bungaVal);
+            
+            if (!isDanaPokokValid || !isBungaValid) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
         });
 
     }).on('hidden.bs.modal', function() {
