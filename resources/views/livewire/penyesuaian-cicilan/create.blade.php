@@ -89,23 +89,11 @@
                         <label class="form-label">Metode Perhitungan Plafon Pembiayaan <span
                                 class="text-danger">*</span></label>
                         @if (!$isEdit)
-                            <div wire:ignore>
-                                <livewire:components.select2
-                                    :list_data="[
-                                        ['value' => 'Flat', 'label' => 'Metode Flat'],
-                                        ['value' => 'Anuitas', 'label' => 'Metode Efektif (Anuitas)']
-                                    ]"
-                                    value_name="value"
-                                    value_label="label"
-                                    data_placeholder="Pilih Metode"
-                                    model_name="metode_perhitungan"
-                                    :value="$metode_perhitungan"
-                                    :allow_clear="false"
-                                    :tags="false"
-                                    :is_required="true"
-                                    wire:key="select2-metode-{{ $metode_perhitungan }}"
-                                />
-                            </div>
+                            <select class="form-select @error('metode_perhitungan') is-invalid @enderror"
+                                wire:model.live="metode_perhitungan" required>
+                                <option value="Flat">Metode Flat</option>
+                                <option value="Anuitas">Metode Efektif (Anuitas)</option>
+                            </select>
                         @else
                             <select class="form-select" disabled style="background-color: #f5f5f9;">
                                 <option value="{{ $metode_perhitungan }}" selected>
