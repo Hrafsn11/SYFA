@@ -193,150 +193,158 @@
                                     <!-- Konten Step 5: Generate Kontrak (After Dana Sudah Dicairkan) -->
                                     <div id="kontrak-step5" class="d-none">
                                         @can('investasi.generate_kontrak')
-                                            <h5 class="mb-4">Generate Kontrak Investasi</h5>
+                                            @if(empty($investasi['nomor_kontrak']))
+                                                <h5 class="mb-4">Generate Kontrak Investasi</h5>
+                                            @else
+                                                <h5 class="mb-4">Detail Kontrak Investasi</h5>
+                                            @endif
+                                        @else
+                                            <h5 class="mb-4">Detail Kontrak Investasi</h5>
+                                        @endcan
 
-                                            <!-- Data Kontrak (10 Fields) -->
-                                            <div class="card mb-4">
-                                                <div class="card-header">
-                                                    <h6 class="mb-0">Data Kontrak</h6>
-                                                </div>
-                                                <div class="card-body">
-                                                    <form id="formGenerateKontrak">
-                                                        <div class="row g-3">
+                                        <!-- Data Kontrak (10 Fields) -->
+                                        <div class="card mb-4">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">Data Kontrak</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <form id="formGenerateKontrak">
+                                                    <div class="row g-3">
                                                         @php
-                                                                $kontrakFields = [
-                                                                    'Nama Perusahaan' =>
-                                                                        $investasi['nama_investor'] ?? '-',
-                                                                    'Jenis Investasi' => ucfirst(
-                                                                        $investasi['jenis_investasi'] ?? '-',
+                                                            $kontrakFields = [
+                                                                'Nama Perusahaan' =>
+                                                                    $investasi['nama_investor'] ?? '-',
+                                                                'Jenis Investasi' => ucfirst(
+                                                                    $investasi['jenis_investasi'] ?? '-',
+                                                                ),
+                                                                'Jumlah Investasi' =>
+                                                                    'Rp ' .
+                                                                    number_format(
+                                                                        $investasi['jumlah_investasi'] ?? 0,
+                                                                        0,
+                                                                        ',',
+                                                                        '.',
                                                                     ),
-                                                                    'Jumlah Investasi' =>
-                                                                        'Rp ' .
-                                                                        number_format(
-                                                                            $investasi['jumlah_investasi'] ?? 0,
-                                                                            0,
-                                                                            ',',
-                                                                            '.',
-                                                                        ),
-                                                                    'Persentase Bunga' =>
-                                                                        $investasi['jenis_investasi'] === 'Reguler'
-                                                                            ? '10%'
-                                                                            : ($investasi['bunga_pertahun'] ?? 0) .
-                                                                                '%',
-                                                                    'Lama Investasi' =>
-                                                                        ($investasi['lama_investasi'] ?? '-') .
-                                                                        ' Bulan',
-                                                                    'Tanggal Investasi' => $investasi[
-                                                                        'tanggal_investasi'
-                                                                    ]
-                                                                        ? \Carbon\Carbon::parse(
-                                                                            $investasi['tanggal_investasi'],
-                                                                        )->format('d F Y')
-                                                                        : '-',
-                                                                    'Tanggal Jatuh Tempo' => $investasi[
-                                                                        'tanggal_investasi'
-                                                                    ]
-                                                                        ? ($investasi['jenis_investasi'] === 'Reguler'
-                                                                            ? \Carbon\Carbon::createFromDate(
-                                                                                \Carbon\Carbon::parse(
-                                                                                    $investasi['tanggal_investasi'],
-                                                                                )->year,
-                                                                                12,
-                                                                                31,
-                                                                            )->format('d F Y')
-                                                                            : \Carbon\Carbon::parse(
+                                                                'Persentase Bunga' =>
+                                                                    $investasi['jenis_investasi'] === 'Reguler'
+                                                                        ? '10%'
+                                                                        : ($investasi['bunga_pertahun'] ?? 0) .
+                                                                            '%',
+                                                                'Lama Investasi' =>
+                                                                    ($investasi['lama_investasi'] ?? '-') .
+                                                                    ' Bulan',
+                                                                'Tanggal Investasi' => $investasi[
+                                                                    'tanggal_investasi'
+                                                                ]
+                                                                    ? \Carbon\Carbon::parse(
+                                                                        $investasi['tanggal_investasi'],
+                                                                    )->format('d F Y')
+                                                                    : '-',
+                                                                'Tanggal Jatuh Tempo' => $investasi[
+                                                                    'tanggal_investasi'
+                                                                ]
+                                                                    ? ($investasi['jenis_investasi'] === 'Reguler'
+                                                                        ? \Carbon\Carbon::createFromDate(
+                                                                            \Carbon\Carbon::parse(
                                                                                 $investasi['tanggal_investasi'],
+                                                                            )->year,
+                                                                            12,
+                                                                            31,
+                                                                        )->format('d F Y')
+                                                                        : \Carbon\Carbon::parse(
+                                                                            $investasi['tanggal_investasi'],
+                                                                        )
+                                                                            ->addMonths(
+                                                                                $investasi['lama_investasi'],
                                                                             )
-                                                                                ->addMonths(
-                                                                                    $investasi['lama_investasi'],
-                                                                                )
-                                                                                ->format('d F Y'))
-                                                                        : '-',
-                                                                ];
-                                                            @endphp
-                                                            
-                                                            {{-- Input Nama PIC (Editable) --}}
-                                                            <div class="col-md-6">
-                                                                <label for="namaPicKontrak" class="form-label">
-                                                                    Nama PIC/CEO Investor <span class="text-danger">*</span>
-                                                                </label>
-                                                                <input type="text" class="form-control" id="namaPicKontrak" 
-                                                                    name="nama_pic_kontrak"
-                                                                    value="{{ $investasi['nama_pic_kontrak'] ?? '' }}"
-                                                                    placeholder="Masukkan nama PIC/CEO investor"
-                                                                    {{ !empty($investasi['nomor_kontrak']) ? 'readonly' : 'required' }}>
-                                                                <div class="invalid-feedback">
-                                                                    Nama PIC/CEO harus diisi
-                                                                </div>
-                                                            </div>
-                                                            
-                                                            @foreach ($kontrakFields as $label => $value)
-                                                                <div class="col-md-6">
-                                                                    <label
-                                                                        class="form-label text-muted small">{{ $label }}</label>
-                                                                    @if ($label === 'Alamat')
-                                                                        <textarea class="form-control" rows="2" readonly>{{ $value }}</textarea>
-                                                                    @else
-                                                                        <input type="text" class="form-control"
-                                                                            value="{{ $value }}" readonly>
-                                                                    @endif
-                                                                </div>
-                                                            @endforeach
-                                                            <div class="col-md-6">
-                                                                <label class="form-label text-muted small">Alamat</label>
-                                                                <textarea class="form-control" rows="2" readonly>{{ $investasi['alamat'] ?? '-' }}</textarea>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label for="nomorKontrak" class="form-label">Nomor Kontrak</label>
-                                                                @if(!empty($investasi['nomor_kontrak']))
-                                                                    <input type="text" class="form-control" 
-                                                                        value="{{ $investasi['nomor_kontrak'] }}" readonly>
-                                                                    <div class="form-text text-success">
-                                                                        <i class="ti ti-check-circle me-1"></i>Nomor kontrak sudah di-generate
-                                                                    </div>
-                                                                @elseif(!empty($investasi['preview_nomor_kontrak']))
-                                                                    <input type="text" class="form-control bg-light" 
-                                                                        id="nomorKontrak"
-                                                                        value="{{ $investasi['preview_nomor_kontrak'] }}"
-                                                                        readonly>
-                                                                    <div class="form-text text-warning">
-                                                                        <i class="ti ti-alert-circle me-1"></i>Preview nomor kontrak (belum tersimpan)
-                                                                    </div>
-                                                                @elseif(!empty($investasi['kode_perusahaan_missing']))
-                                                                    <input type="text" class="form-control bg-light" 
-                                                                        id="nomorKontrak"
-                                                                        value="Kode perusahaan investor belum diisi"
-                                                                        readonly>
-                                                                    <div class="form-text text-danger">
-                                                                        <i class="ti ti-alert-triangle me-1"></i>Hubungi admin untuk mengisi kode perusahaan investor terlebih dahulu
-                                                                    </div>
-                                                                @else
-                                                                    <input type="text" class="form-control bg-light" 
-                                                                        id="nomorKontrak"
-                                                                        value="Menunggu approval CEO"
-                                                                        readonly>
-                                                                    <div class="form-text text-muted">
-                                                                        <i class="ti ti-info-circle me-1"></i>Nomor kontrak akan muncul setelah disetujui CEO
-                                                                    </div>
-                                                                @endif
+                                                                            ->format('d F Y'))
+                                                                    : '-',
+                                                            ];
+                                                        @endphp
+                                                        
+                                                        {{-- Input Nama PIC (Editable ONLY for admin generator role) --}}
+                                                        <div class="col-md-6">
+                                                            <label for="namaPicKontrak" class="form-label">
+                                                                Nama PIC/CEO Investor <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" id="namaPicKontrak" 
+                                                                name="nama_pic_kontrak"
+                                                                value="{{ $investasi['nama_pic_kontrak'] ?? '' }}"
+                                                                placeholder="Masukkan nama PIC/CEO investor"
+                                                                {{ (!empty($investasi['nomor_kontrak']) || !auth()->user()->can('investasi.generate_kontrak')) ? 'readonly' : 'required' }}>
+                                                            <div class="invalid-feedback">
+                                                                Nama PIC/CEO harus diisi
                                                             </div>
                                                         </div>
-
-                                                        <hr class="my-4">
-
-                                                        <div class="d-flex justify-content-end gap-2">
+                                                        
+                                                        @foreach ($kontrakFields as $label => $value)
+                                                            <div class="col-md-6">
+                                                                <label
+                                                                    class="form-label text-muted small">{{ $label }}</label>
+                                                                @if ($label === 'Alamat')
+                                                                    <textarea class="form-control" rows="2" readonly>{{ $value }}</textarea>
+                                                                @else
+                                                                    <input type="text" class="form-control"
+                                                                        value="{{ $value }}" readonly>
+                                                                @endif
+                                                            </div>
+                                                        @endforeach
+                                                        <div class="col-md-6">
+                                                            <label class="form-label text-muted small">Alamat</label>
+                                                            <textarea class="form-control" rows="2" readonly>{{ $investasi['alamat'] ?? '-' }}</textarea>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label for="nomorKontrak" class="form-label">Nomor Kontrak</label>
                                                             @if(!empty($investasi['nomor_kontrak']))
-                                                                <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['nomor_kontrak']]) }}" 
-                                                                    class="btn btn-outline-primary" target="_blank">
-                                                                    <i class="ti ti-eye me-2"></i>
-                                                                    Preview Kontrak
-                                                                </a>
+                                                                <input type="text" class="form-control" 
+                                                                    value="{{ $investasi['nomor_kontrak'] }}" readonly>
+                                                                <div class="form-text text-success">
+                                                                    <i class="ti ti-check-circle me-1"></i>Nomor kontrak sudah di-generate
+                                                                </div>
                                                             @elseif(!empty($investasi['preview_nomor_kontrak']))
-                                                                <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['preview_nomor_kontrak']]) }}" 
-                                                                    class="btn btn-outline-secondary" target="_blank">
-                                                                    <i class="ti ti-eye me-2"></i>
-                                                                    Preview Kontrak
-                                                                </a>
+                                                                <input type="text" class="form-control bg-light" 
+                                                                    id="nomorKontrak"
+                                                                    value="{{ $investasi['preview_nomor_kontrak'] }}"
+                                                                    readonly>
+                                                                <div class="form-text text-warning">
+                                                                    <i class="ti ti-alert-circle me-1"></i>Preview nomor kontrak (belum tersimpan)
+                                                                </div>
+                                                            @elseif(!empty($investasi['kode_perusahaan_missing']))
+                                                                <input type="text" class="form-control bg-light" 
+                                                                    id="nomorKontrak"
+                                                                    value="Kode perusahaan investor belum diisi"
+                                                                    readonly>
+                                                                <div class="form-text text-danger">
+                                                                    <i class="ti ti-alert-triangle me-1"></i>Hubungi admin untuk mengisi kode perusahaan investor terlebih dahulu
+                                                                </div>
+                                                            @else
+                                                                <input type="text" class="form-control bg-light" 
+                                                                    id="nomorKontrak"
+                                                                    value="Menunggu approval CEO"
+                                                                    readonly>
+                                                                <div class="form-text text-muted">
+                                                                    <i class="ti ti-info-circle me-1"></i>Nomor kontrak akan muncul setelah disetujui CEO
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <hr class="my-4">
+
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        @if(!empty($investasi['nomor_kontrak']))
+                                                            <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['nomor_kontrak']]) }}" 
+                                                                class="btn btn-outline-primary" target="_blank">
+                                                                <i class="ti ti-eye me-2"></i>
+                                                                Preview Kontrak
+                                                            </a>
+                                                        @elseif(!empty($investasi['preview_nomor_kontrak']))
+                                                            <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['preview_nomor_kontrak']]) }}" 
+                                                                class="btn btn-outline-secondary" target="_blank">
+                                                                <i class="ti ti-eye me-2"></i>
+                                                                Preview Kontrak
+                                                            </a>
+                                                            @can('investasi.generate_kontrak')
                                                                 <button type="submit" class="btn btn-success"
                                                                     id="btnGenerateKontrak">
                                                                     <span class="spinner-border spinner-border-sm me-2 d-none"
@@ -344,21 +352,22 @@
                                                                     <i class="ti ti-file-check me-2"></i>
                                                                     Generate Kontrak
                                                                 </button>
-                                                            @elseif(!empty($investasi['kode_perusahaan_missing']))
+                                                            @endcan
+                                                        @elseif(!empty($investasi['kode_perusahaan_missing']))
+                                                            @can('investasi.generate_kontrak')
                                                                 <button type="button" class="btn btn-secondary" disabled>
                                                                     <i class="ti ti-alert-triangle me-2"></i>
                                                                     Kode Perusahaan Belum Diisi
                                                                 </button>
-                                                            @endif
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        @else
-                                            <div class="alert alert-info">
-                                                Anda tidak memiliki izin untuk melakukan generate kontrak.
-                                            </div>
-                                        @endif
+                                                            @else
+                                                                <span class="text-warning small d-flex align-items-center">
+                                                                    <i class="ti ti-alert-triangle me-1"></i>Kontrak sedang diproses oleh admin.
+                                                                </span>
+                                                            @endcan
+                                                        @endif
+                                                    </div>
+                                                </form>
+                                        </div>
                                     </div>
                                     <!-- End Konten Step 5 -->
                                 </div>
@@ -782,8 +791,8 @@
                 $('#alertPeninjauan').toggle(!isDraft && !isDitolak && STEP < 6);
 
                 // Kontrak tab
-                $('#kontrak-default').toggleClass('d-none', STEP === 5);
-                $('#kontrak-step5').toggleClass('d-none', STEP !== 5);
+                $('#kontrak-default').toggleClass('d-none', STEP >= 5 || nomorKontrakFromDB !== '');
+                $('#kontrak-step5').toggleClass('d-none', STEP < 5 && nomorKontrakFromDB === '');
             }
 
 
