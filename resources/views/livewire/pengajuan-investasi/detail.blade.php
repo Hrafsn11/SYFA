@@ -10,7 +10,7 @@
             <!-- Stepper -->
             <div class="stepper-container mb-4">
                 <div class="stepper-wrapper">
-                    @foreach (['Pengajuan Investasi', 'Validasi Bagi Hasil', 'Validasi CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'] as $i => $name)
+                    @foreach (['Pengajuan Investasi', 'Validasi Bagi Hasil', 'Validasi CEO SKI', 'Upload Bukti Transfer', 'Validasi Bukti Transfer', 'Generate Kontrak', 'Selesai'] as $i => $name)
                         <div class="stepper-item" data-step="{{ $i + 1 }}">
                             <div class="stepper-node"></div>
                             <div class="stepper-content">
@@ -35,12 +35,24 @@
                         Pengajuan investasi Anda <strong>Ditolak pada Validasi Bagi Hasil</strong>. Anda dapat mengedit dan
                         submit ulang pengajuan dengan memperbaiki data yang diperlukan.
                     </div>
-                @elseif($investasi['current_step'] == 6)
-                    <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
-                        <i class="fas fa-times-circle me-2"></i>
-                        Pengajuan investasi Anda <strong>Ditolak oleh CEO SKI</strong>. Proses investasi telah ditutup dan
-                        tidak dapat diajukan ulang.
-                    </div>
+                @elseif($investasi['current_step'] == 7)
+                    @php
+                        $latestReject = $histories->where('status', 'Ditolak')->first();
+                        $rejectedAtStep = $latestReject ? $latestReject->current_step : 7;
+                    @endphp
+                    @if($rejectedAtStep == 3)
+                        <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Pengajuan investasi Anda <strong>Ditolak oleh CEO SKI</strong>. Proses investasi telah ditutup dan
+                            tidak dapat diajukan ulang.
+                        </div>
+                    @else
+                        <div class="alert alert-danger mb-4" role="alert" id="alertDitolak">
+                            <i class="fas fa-times-circle me-2"></i>
+                            Pengajuan investasi Anda <strong>Ditolak pada Validasi Bukti Transfer</strong>. Proses investasi telah ditutup dan
+                            tidak dapat diajukan ulang.
+                        </div>
+                    @endif
                 @endif
             @else
                 <div class="alert alert-warning mb-4" role="alert" id="alertPeninjauan">
@@ -117,6 +129,12 @@
                                                     <button type="button" class="btn btn-primary d-none" id="btnUploadBukti">
                                                         <i class="ti ti-upload me-2"></i>
                                                         Upload Bukti Transfer
+                                                    </button>
+                                                @endcan
+                                                @can('investasi.validasi_bukti_transfer')
+                                                    <button type="button" class="btn btn-primary d-none" id="btnValidasiBuktiTransfer">
+                                                        <i class="ti ti-check me-2"></i>
+                                                        Validasi Bukti Transfer
                                                     </button>
                                                 @endcan
                                             </div>
@@ -428,6 +446,10 @@
                                                                                     'color' => 'primary',
                                                                                     'icon' => 'ti-file-upload',
                                                                                 ],
+                                                                                'Bukti Transfer Disetujui' => [
+                                                                                    'color' => 'success',
+                                                                                    'icon' => 'ti-check',
+                                                                                ],
                                                                                 'Generate Kontrak' => [
                                                                                     'color' => 'info',
                                                                                     'icon' => 'ti-file-text',
@@ -465,12 +487,15 @@
                                                                                     2
                                                                                         => 'Validasi Bagi Hasil - Ditolak',
                                                                                     3 => 'Validasi CEO SKI - Ditolak',
+                                                                                    5 => 'Validasi Bukti Transfer - Ditolak',
                                                                                     default => 'Pengajuan Ditolak',
                                                                                 },
                                                                                 'Disetujui oleh CEO SKI' =>
                                                                                     'Validasi CEO SKI - Disetujui',
                                                                                 'Upload Bukti Transfer' =>
                                                                                     'Upload Bukti Transfer',
+                                                                                'Bukti Transfer Disetujui' =>
+                                                                                    'Validasi Bukti Transfer - Disetujui',
                                                                                 'Generate Kontrak' =>
                                                                                     'Generate Kontrak',
                                                                                 'Selesai' => 'Proses Selesai',
@@ -495,6 +520,8 @@
                                                                                     'Pengajuan telah disetujui oleh CEO SKI.',
                                                                                 'Upload Bukti Transfer' =>
                                                                                     'Bukti transfer investasi telah diupload.',
+                                                                                'Bukti Transfer Disetujui' =>
+                                                                                    'Bukti transfer telah divalidasi dan disetujui.',
                                                                                 'Generate Kontrak' =>
                                                                                     'Kontrak investasi telah digenerate.',
                                                                                 'Selesai' =>
@@ -596,8 +623,42 @@
         </div>
     @endcan
 
+    <!-- Modal Validasi Bukti Transfer -->
+    @can('investasi.validasi_bukti_transfer')
+        <div class="modal fade" id="modalValidasiBuktiTransfer" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Validasi Bukti Transfer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <hr class="my-2">
+                    <div class="modal-body">
+                        <h5 class="mb-3">Apakah anda yakin menyetujui Bukti Transfer Investasi ini?</h5>
+                        
+                        <div class="mb-3">
+                            <label for="catatan_validasi_bukti" class="form-label">Catatan Validasi <small class="text-muted">(Opsional)</small></label>
+                            <textarea class="form-control" id="catatan_validasi_bukti" rows="3" placeholder="Masukkan catatan jika ada..."></textarea>
+                        </div>
+                        
+                        <p class="mb-0 text-muted">Silahkan klik button hijau jika anda akan menyetujui, atau button merah untuk
+                            menolak.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="btnKonfirmasiSetujuBukti">
+                            Setuju
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btnTolakBukti">
+                            Tolak
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endcan
+
     <!-- Modal Hasil Review (Penolakan) -->
-    @canany(['investasi.validasi_bagi_hasil', 'investasi.validasi_ceo_ski'])
+    @canany(['investasi.validasi_bagi_hasil', 'investasi.validasi_ceo_ski', 'investasi.validasi_bukti_transfer'])
         <div class="modal fade" id="modalHasilReview" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -782,6 +843,7 @@
                 $('#btnSetujuiPengajuan').toggleClass('d-none', STEP !== 2 || isDraft || isDitolak);
                 $('#btnValidasiCEO').toggleClass('d-none', STEP !== 3 || isDraft || isDitolak);
                 $('#btnUploadBukti').toggleClass('d-none', STEP !== 4 || isDraft || isDitolak);
+                $('#btnValidasiBuktiTransfer').toggleClass('d-none', STEP !== 5 || isDraft || isDitolak);
 
                 // Toggle alerts
                 const alerts = {
@@ -789,11 +851,11 @@
                     Ditolak: '#alertDitolak'
                 };
                 Object.entries(alerts).forEach(([status, id]) => $(id).toggle(STATUS === status));
-                $('#alertPeninjauan').toggle(!isDraft && !isDitolak && STEP < 6);
+                $('#alertPeninjauan').toggle(!isDraft && !isDitolak && STEP < 7);
 
                 // Kontrak tab
-                $('#kontrak-default').toggleClass('d-none', STEP >= 5 || nomorKontrakFromDB !== '');
-                $('#kontrak-step5').toggleClass('d-none', STEP < 5 && nomorKontrakFromDB === '');
+                $('#kontrak-default').toggleClass('d-none', STEP >= 6 || nomorKontrakFromDB !== '');
+                $('#kontrak-step5').toggleClass('d-none', STEP < 6 && nomorKontrakFromDB === '');
             }
 
 
@@ -880,6 +942,23 @@
             ));
 
             $('#btnTolakCEO').click(() => (hideModal('modalValidasiCEO'), setTimeout(() => showModal(
+                'modalHasilReview'), 300)));
+
+            // Button handlers for Step 5 (Validasi Bukti Transfer)
+            $('#btnValidasiBuktiTransfer').click(() => showModal('modalValidasiBuktiTransfer'));
+
+            $('#btnKonfirmasiSetujuBukti').click(() => ajaxPost(
+                `/pengajuan-investasi/${ID}/approval`, {
+                    status: 'Bukti Transfer Disetujui',
+                    catatan: $('#catatan_validasi_bukti').val()
+                },
+                () => (hideModal('modalValidasiBuktiTransfer'), showSuccessReload(
+                    'Bukti transfer berhasil disetujui')),
+                '#btnKonfirmasiSetujuBukti',
+                'Memproses...'
+            ));
+
+            $('#btnTolakBukti').click(() => (hideModal('modalValidasiBuktiTransfer'), setTimeout(() => showModal(
                 'modalHasilReview'), 300)));
 
             $('#btnUploadBukti').click(() => showModal('modalUploadBuktiTransfer'));

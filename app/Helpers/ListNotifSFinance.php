@@ -418,7 +418,7 @@ class ListNotifSFinance
         } else if ($status === 'Dokumen Tervalidasi') {
             $notif = NotificationFeature::where('name', 'pengajuan_investasi_disetujui_finance_ski')->first();
         } else if ($status === 'Ditolak' || str_contains($status, 'Ditolak')) {
-            // Cek dari history apakah ditolak di step 2 (SKI Finance) atau step 3 (CEO SKI)
+            // Cek dari history apakah ditolak di step 2 (SKI Finance), step 3 (CEO SKI), atau step 5 (Validasi Bukti Transfer)
             $history = \App\Models\HistoryStatusPengajuanInvestor::where('id_pengajuan_investasi', $pengajuan->id_pengajuan_investasi)
                 ->where('validasi_bagi_hasil', 'ditolak')
                 ->orderBy('created_at', 'desc')
@@ -429,10 +429,14 @@ class ListNotifSFinance
                     $notif = NotificationFeature::where('name', 'pengajuan_investasi_ditolak_finance_ski')->first();
                 } else if ($history->current_step == 3) {
                     $notif = NotificationFeature::where('name', 'pengajuan_investasi_ditolak_ceo_ski')->first();
+                } else if ($history->current_step == 5) {
+                    $notif = NotificationFeature::where('name', 'pengajuan_investasi_bukti_transfer_ditolak_sfinance')->first();
                 }
             }
         } else if ($status === 'Disetujui oleh CEO SKI') {
             $notif = NotificationFeature::where('name', 'pengajuan_investasi_disetujui_ceo_ski')->first();
+        } else if ($status === 'Upload Bukti Transfer') {
+            $notif = NotificationFeature::where('name', 'bukti_transfer_investasi_diupload_sfinance')->first();
         } else if ($status === 'Generate Kontrak') {
             $notif = NotificationFeature::where('name', 'kontrak_investasi_dibuat_sfinance')->first();
         } else if ($status === 'Selesai') {

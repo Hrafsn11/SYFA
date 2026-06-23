@@ -186,14 +186,19 @@ class PengajuanInvestasiController extends Controller
 
             // Determine next step based on status
             // Special handling for rejection
+            $historyStep = $pengajuan->current_step;
             if ($status === 'Ditolak') {
                 // If rejected at Step 2 (Validasi Bagi Hasil) -> back to Step 1 (can resubmit)
                 if ($pengajuan->current_step == 2) {
                     $currentStep = 1;
                 }
-                // If rejected at Step 3 (Validasi CEO) -> jump to Step 6 (Selesai/Final)
+                // If rejected at Step 3 (Validasi CEO) -> jump to Step 7 (Selesai/Final)
                 elseif ($pengajuan->current_step == 3) {
-                    $currentStep = 6;
+                    $currentStep = 7;
+                }
+                // If rejected at Step 5 (Validasi Bukti Transfer) -> jump to Step 7 (Selesai/Final)
+                elseif ($pengajuan->current_step == 5) {
+                    $currentStep = 7;
                 } else {
                     $currentStep = $pengajuan->current_step;
                 }
@@ -202,15 +207,24 @@ class PengajuanInvestasiController extends Controller
                     'Submit Dokumen' => 2,
                     'Dokumen Tervalidasi' => 3,
                     'Disetujui oleh CEO SKI' => 4,
-                    'Generate Kontrak' => 5,
-                    'Selesai' => 6,
+                    'Upload Bukti Transfer' => 5,
+                    'Bukti Transfer Disetujui' => 6,
+                    'Generate Kontrak' => 6,
+                    'Selesai' => 7,
                 ];
                 $currentStep = $stepMapping[$status] ?? $pengajuan->current_step;
+                $historyStep = $currentStep;
+            }
+
+            // Convert history status 'Bukti Transfer Disetujui' to actual column status 'Generate Kontrak'
+            $investmentStatus = $status;
+            if ($status === 'Bukti Transfer Disetujui') {
+                $investmentStatus = 'Generate Kontrak';
             }
 
             // Update pengajuan status and step
             $pengajuan->update([
-                'status' => $status,
+                'status' => $investmentStatus,
                 'current_step' => $currentStep,
                 'updated_by' => Auth::id(),
             ]);
@@ -228,7 +242,7 @@ class PengajuanInvestasiController extends Controller
                 'status' => $status,
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'current_step' => $currentStep,
+                'current_step' => $historyStep,
                 'submit_step1_by' => Auth::id(),
             ];
 
@@ -238,7 +252,7 @@ class PengajuanInvestasiController extends Controller
             }
 
             // Add approval/rejection data
-            if (in_array($status, ['Dokumen Tervalidasi', 'Disetujui oleh CEO SKI', 'Upload Bukti Transfer', 'Generate Kontrak', 'Selesai'])) {
+            if (in_array($status, ['Dokumen Tervalidasi', 'Disetujui oleh CEO SKI', 'Upload Bukti Transfer', 'Bukti Transfer Disetujui', 'Generate Kontrak', 'Selesai'])) {
                 $historyData['approve_by'] = Auth::id();
                 if (! isset($historyData['validasi_bagi_hasil'])) {
                     $historyData['validasi_bagi_hasil'] = 'disetujui';
@@ -266,7 +280,7 @@ class PengajuanInvestasiController extends Controller
             ListNotifSFinance::menuPengajuanInvestasi($status, $pengajuan);
 
             return Response::success([
-                'status' => $status,
+                'status' => $investmentStatus,
                 'current_step' => $currentStep,
             ], 'Status berhasil diperbarui!');
         } catch (\Exception $e) {
@@ -482,9 +496,9 @@ class PengajuanInvestasiController extends Controller
                     'updated_by' => Auth::id(),
                 ]);
 
-                // Update status to next step (Step 5: Generate Kontrak)
+                // Update status to next step (Step 5: Validasi Bukti Transfer)
                 $pengajuan->update([
-                    'status' => 'Generate Kontrak',
+                    'status' => 'Upload Bukti Transfer',
                     'current_step' => 5,
                 ]);
 
@@ -503,6 +517,11 @@ class PengajuanInvestasiController extends Controller
             }
 
             DB::commit();
+
+            if ($request->hasFile('file')) {
+                // Kirim notifikasi untuk bukti transfer diupload
+                ListNotifSFinance::menuPengajuanInvestasi('Upload Bukti Transfer', $pengajuan);
+            }
 
             return Response::success($pengajuan, 'Bukti transfer berhasil diupload');
         } catch (\Exception $e) {
@@ -584,9 +603,9 @@ class PengajuanInvestasiController extends Controller
             // Get pengajuan investasi
             $investasi = PengajuanInvestasi::with('investor')->findOrFail($id);
 
-            // Validasi: Pastikan pengajuan sudah disetujui CEO (current_step >= 4)
-            if ($investasi->current_step < 4) {
-                return Response::error('Pengajuan belum disetujui CEO. Tidak bisa generate kontrak.', 400);
+            // Validasi: Pastikan pengajuan sudah disetujui Finance (current_step >= 6)
+            if ($investasi->current_step < 6) {
+                return Response::error('Bukti transfer belum disetujui Finance. Tidak bisa generate kontrak.', 400);
             }
 
             // Validasi: Nomor kontrak belum pernah di-generate
@@ -619,7 +638,7 @@ class PengajuanInvestasiController extends Controller
                 'status' => 'Generate Kontrak',
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'current_step' => 6,
+                'current_step' => 7,
                 'submit_step1_by' => Auth::id(),
             ]);
 
@@ -630,10 +649,10 @@ class PengajuanInvestasiController extends Controller
             // Kirim notifikasi untuk kontrak investasi dibuat
             ListNotifSFinance::menuPengajuanInvestasi('Generate Kontrak', $investasi);
 
-            // Update status to completed (Step 6: Selesai)
+            // Update status to completed (Step 7: Selesai)
             $investasi->update([
                 'status' => 'Selesai',
-                'current_step' => 6,
+                'current_step' => 7,
             ]);
 
             // Create history for "Selesai"
@@ -642,7 +661,7 @@ class PengajuanInvestasiController extends Controller
                 'status' => 'Selesai',
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'current_step' => 6,
+                'current_step' => 7,
                 'submit_step1_by' => Auth::id(),
             ]);
 
