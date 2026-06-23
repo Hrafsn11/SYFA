@@ -542,6 +542,30 @@ class NotificationSFinanceSeeder extends Seeder
             'message' => 'Dana investasi dari investor [[nama.investor]] sebesar [[nominal]] telah diterima. Status investasi: Selesai.',
         ]);
         
+        // 8. Bukti Transfer Investasi Diupload (Menunggu Validasi) - SKI Finance
+        $bukti_transfer_diupload = NotificationFeature::firstOrCreate([
+            'name' => 'bukti_transfer_investasi_diupload_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $bukti_transfer_diupload->id_notification_feature,
+            'role_assigned' => json_encode([$finance->id]),
+            'message' => 'Investor [[nama.investor]] telah mengupload bukti transfer. Silakan lakukan validasi.',
+        ]);
+
+        // 9. Bukti Transfer Investasi Ditolak - Investor
+        $bukti_transfer_ditolak = NotificationFeature::firstOrCreate([
+            'name' => 'pengajuan_investasi_bukti_transfer_ditolak_sfinance',
+            'module' => 's_finance',
+        ]);
+
+        NotificationFeatureDetail::firstOrCreate([
+            'notification_feature_id' => $bukti_transfer_ditolak->id_notification_feature,
+            'role_assigned' => json_encode([$investor->id]),
+            'message' => 'Bukti transfer pengajuan investasi dari investor [[nama.investor]] ditolak oleh SKI Finance.',
+        ]);
+        
         // NOTIFICATION FEATURES UNTUK PENYALURAN INVESTASI
 
         // 1. Debitur Menerima Dana Investasi - Debitur

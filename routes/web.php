@@ -32,12 +32,26 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Halaman landing setelah login (tanpa middleware checkPermission)
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-])->get('/home-services', HomeServices::class)->name('home.services');
+])->group(function () {
+    Route::get('/home-services', HomeServices::class)->name('home.services');
+    
+    Route::get('/check-auth', function () {
+        $user = auth()->user();
+        return response()->json([
+            'logged_in' => true,
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'roles' => $user->getRoleNames(),
+            'has_validasi_bukti_transfer_permission' => $user->can('investasi.validasi_bukti_transfer'),
+            'all_permissions' => $user->getAllPermissions()->pluck('name'),
+        ]);
+    });
+});
 
 // Chatbot routes (auth only, no checkPermission - accessible by all logged-in users)
 Route::middleware([

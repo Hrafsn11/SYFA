@@ -127,6 +127,7 @@ class RolePermissionSeeder extends Seeder
             'investasi.validasi_bagi_hasil',
             'investasi.validasi_ceo_ski',
             'investasi.upload_bukti_transfer',
+            'investasi.validasi_bukti_transfer',
             'investasi.generate_kontrak',
             // Pengajuan Investasi Finlog Management
             'pengajuan_investasi_finlog.view',
@@ -349,6 +350,7 @@ class RolePermissionSeeder extends Seeder
             'peminjaman_dana.upload_dokumen_transfer',
             'pengajuan_cicilan.validasi_dokumen',
             'investasi.validasi_bagi_hasil',
+            'investasi.validasi_bukti_transfer',
             'investasi.generate_kontrak',
 
             // Penyaluran Dana Investasi (Finance SKI can create/edit)
