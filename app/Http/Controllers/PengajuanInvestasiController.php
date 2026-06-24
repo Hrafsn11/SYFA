@@ -315,6 +315,7 @@ class PengajuanInvestasiController extends Controller
         // Use nomor_kontrak from request if provided, otherwise use from database
         $nomorKontrak = $request->input('nomor_kontrak') ?? $pengajuan->nomor_kontrak;
         $kontrak = $kontrakService->generateKontrakData($pengajuan, $nomorKontrak);
+        $kontrak['status'] = $pengajuan->status;
 
         return view('livewire.pengajuan-investasi.preview-kontrak', compact('kontrak'));
     }
@@ -339,6 +340,7 @@ class PengajuanInvestasiController extends Controller
 
             // Generate kontrak data
             $kontrak = $kontrakService->generateKontrakData($pengajuan, $pengajuan->nomor_kontrak);
+            $kontrak['status'] = $pengajuan->status;
 
             Log::info('Kontrak data generated', ['kontrak_keys' => array_keys($kontrak)]);
 
@@ -694,6 +696,7 @@ class PengajuanInvestasiController extends Controller
         try {
             $kontrak['jenis_deposito'] = $kontrak['jenis_deposito'] ?? ($kontrak['jenis_investasi'] ?? '-');
             $kontrak['bagi_hasil'] = $kontrak['bagi_hasil'] ?? ($kontrak['bunga'] ?? 0);
+            $status = $kontrak['status'] ?? 'Draft';
 
             $jenisDeposito = $kontrak['jenis_deposito'];
 
@@ -992,7 +995,7 @@ class PengajuanInvestasiController extends Controller
                         <strong>PIHAK PERTAMA</strong><br>
                         (Investor)<br><br>
                         <div class="signature-space">
-                            '.($ttdInvestor ? '<img src="'.$ttdInvestor.'" class="signature-img">' : '').'
+                            '.(($status === 'Selesai' && $ttdInvestor) ? '<img src="'.$ttdInvestor.'" class="signature-img">' : '<div style="height: 80px; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 9pt; color: #777;">[ Belum Ditandatangani ]</div>').'
                         </div>
                         <strong>'.$kontrak['nama_investor'].'</strong>
                     </td>
@@ -1000,8 +1003,10 @@ class PengajuanInvestasiController extends Controller
                         <strong>PIHAK KEDUA</strong><br>
                         (PT. Synnovac Kapital Indonesia)<br><br>
                         <div class="signature-space">
-                            '.($markPerusahaan ? '<img src="'.$markPerusahaan.'" class="mark-img">' : '').'
-                            '.($ttdPerusahaan ? '<img src="'.$ttdPerusahaan.'" class="ttd-overlay">' : '').'
+                            '.($status === 'Selesai' ? 
+                                (($markPerusahaan ? '<img src="'.$markPerusahaan.'" class="mark-img">' : '').
+                                ($ttdPerusahaan ? '<img src="'.$ttdPerusahaan.'" class="ttd-overlay">' : '')) : 
+                                '<div style="height: 80px; border: 1px dashed #ccc; text-align: center; line-height: 80px; font-size: 9pt; color: #777;">[ TTD Otomatis saat Generate ]</div>').'
                         </div>
                         <strong>Muhamad Kurniawan</strong><br>
                         Direktur
