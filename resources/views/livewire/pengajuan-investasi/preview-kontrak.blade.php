@@ -19,7 +19,7 @@
 
             <!-- Card Preview Kontrak -->
             <div class="card">
-                <div class="card-body p-4 p-md-5" id="kontrak-content">
+                <div class="card-body p-4 p-md-5 {{ ($kontrak['status'] ?? '') !== 'Selesai' ? 'kontrak-draft-watermark' : '' }}" id="kontrak-content">
                     <!-- Header dengan Logo -->
                     <div class="text-end mb-4">
                         <img src="{{ asset('assets/img/branding/Logo.jpg') }}" alt="S-Capital Logo" style="height: 60px;">
@@ -328,23 +328,31 @@
                         <div class="row mt-5">
                             <div class="col-6 text-center">
                                 <p class="mb-5"><strong>PIHAK PERTAMA</strong></p>
-                                @if($kontrak['tanda_tangan_investor'])
+                                @if(($kontrak['status'] ?? '') === 'Selesai' && $kontrak['tanda_tangan_investor'])
                                     <img src="{{ asset('storage/' . $kontrak['tanda_tangan_investor']) }}" alt="TTD Investor"
                                         style="max-width: 150px; max-height: 80px;" class="mb-3">
                                 @else
-                                    <div style="height: 80px;" class="mb-3"></div>
+                                    <div style="height: 80px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; max-width: 150px; margin: 0 auto 1rem;" class="mb-3 text-muted small">
+                                        [ Belum Ditandatangani ]
+                                    </div>
                                 @endif
                                 <p class="mb-0"><strong>{{ $kontrak['nama_investor'] }}</strong></p>
                                 <p class="mb-0">{{ $kontrak['perusahaan_investor'] }}</p>
                             </div>
                             <div class="col-6 text-center">
                                 <p class="mb-5"><strong>PIHAK KEDUA</strong></p>
-                                <div
-                                    style="position: relative; display: inline-block; width: 150px; height: 80px; margin-bottom: 1rem; background-image: url('{{ asset('assets/img/image.png') }}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
-                                    <img src="{{ asset('assets/img/ttd.png') }}" alt="TTD CEO"
-                                        style="position: absolute; top: 0; left: 0; width: 150px; height: 80px; object-fit: contain; z-index: 2; mix-blend-mode: multiply;"
-                                        onload="this.style.opacity='1'" onerror="this.style.opacity='1'">
-                                </div>
+                                @if(($kontrak['status'] ?? '') === 'Selesai')
+                                    <div
+                                        style="position: relative; display: inline-block; width: 150px; height: 80px; margin-bottom: 1rem; background-image: url('{{ asset('assets/img/image.png') }}'); background-size: contain; background-repeat: no-repeat; background-position: center;">
+                                        <img src="{{ asset('assets/img/ttd.png') }}" alt="TTD CEO"
+                                            style="position: absolute; top: 0; left: 0; width: 150px; height: 80px; object-fit: contain; z-index: 2; mix-blend-mode: multiply;"
+                                            onload="this.style.opacity='1'" onerror="this.style.opacity='1'">
+                                    </div>
+                                @else
+                                    <div style="height: 80px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; max-width: 170px; margin: 0 auto 1rem;" class="mb-3 text-muted small">
+                                        [ TTD Otomatis saat Generate ]
+                                    </div>
+                                @endif
                                 <p class="mb-0"><strong>Muhamad Kurniawan</strong></p>
                                 <p class="mb-0">CEO PT. Synnovac Kapital Indonesia</p>
                             </div>
@@ -406,6 +414,11 @@
 
         .kontrak-content table {
             margin-bottom: 1rem;
+        }
+
+        .kontrak-draft-watermark {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text fill='rgba(220, 53, 69, 0.22)' font-size='32' font-family='sans-serif' font-weight='bold' x='40' y='180' transform='rotate(-30 40 180)' letter-spacing='4'>DRAFT PREVIEW</text></svg>");
+            background-repeat: repeat;
         }
 
         @media print {
