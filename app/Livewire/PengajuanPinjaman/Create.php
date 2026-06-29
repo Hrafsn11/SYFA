@@ -15,6 +15,7 @@ use App\Livewire\Traits\HasUniversalFormAction;
 use App\Livewire\PengajuanPinjaman\Event\HandleCreateEvents;
 use App\Livewire\PengajuanPinjaman\FieldsInput\FieldInputCreate;
 use App\Livewire\PengajuanPinjaman\Dispatch\HandleCreateDispatch;
+use App\Attributes\FieldInput;
 
 class Create extends Component
 {
@@ -30,7 +31,11 @@ class Create extends Component
     public $id = null;
 
     public $nama_perusahaan;
+    
+    #[FieldInput]
     public $nama_bank;
+    
+    #[FieldInput]
     public $no_rekening;
     public $lampiran_sid_current;
     // besides installment
