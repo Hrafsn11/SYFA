@@ -192,6 +192,7 @@
                                         format="dd/mm/yyyy"
                                         :autoclose="true" 
                                         :today_highlight="true"
+                                        :start_date="now()->toDateString()"
                                         wire:key="create_harapan_tanggal_pencairan"
                                     />
                                     <div class="invalid-feedback"></div>
@@ -212,17 +213,12 @@
                                     </div>
                                     <div class="invalid-feedback"></div>
                                 </div>
-                                <div class="col-md-4 form-group mb-3" wire:ignore>
+                                <div class="col-md-4 form-group mb-3">
                                     <label for="rencana_tgl_pembayaran" class="form-label">Rencana Tanggal Pembayaran</label>
-                                    <livewire:components.datepicker-bootstrap 
-                                        model_name="rencana_tgl_pembayaran"
-                                        :value="$rencana_tgl_pembayaran"
-                                        data_placeholder="DD/MM/YYYY"
-                                        format="dd/mm/yyyy"
-                                        :autoclose="true"
-                                        :today_highlight="true"
-                                        wire:key="create_rencana_tgl_pembayaran"
-                                    />
+                                    <div class="input-group">
+                                        <input type="text" class="form-control non-editable" id="rencana_tgl_pembayaran" wire:model="rencana_tgl_pembayaran" placeholder="DD/MM/YYYY" readonly disabled style="background-color: #f5f5f9;">
+                                        <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                                    </div>
                                     <div class="invalid-feedback"></div>
                                 </div>
                                 @error('rencana_tgl_pembayaran')

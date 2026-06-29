@@ -35,6 +35,21 @@ trait HandleCreateEvents
         }
     }
 
+    public function updatedHarapanTanggalPencairan($value)
+    {
+        if (!empty($value)) {
+            try {
+                $date = \Carbon\Carbon::createFromFormat('d/m/Y', $value);
+                // Tambah 1 bulan tanpa overflow (misal 31 Jan -> 28 Feb)
+                $newDate = $date->addMonthNoOverflow()->format('d/m/Y');
+                
+                $this->rencana_tgl_pembayaran = $newDate;
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
+        }
+    }
+
     /**
      * Handler ketika jenis_pembiayaan berubah.
      * Semua jenis pembiayaan menggunakan sumber_pembiayaan = Internal.
