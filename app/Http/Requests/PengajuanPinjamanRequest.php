@@ -33,6 +33,8 @@ class PengajuanPinjamanRequest extends FormRequest
         
         $validate = [
             // Always required for all types
+            'nama_bank' => 'nullable',
+            'no_rekening' => 'nullable',
             'nama_rekening' => 'required',
             'tujuan_pembiayaan' => 'nullable|required_unless:jenis_pembiayaan,Installment',
             'jenis_pembiayaan' => 'required|in:' . implode(',', JenisPembiayaanEnum::getConstants()),

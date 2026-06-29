@@ -63,16 +63,15 @@ trait ApprovalActions
         ]);
     }
 
-    /**
-     * Validasi dokumen dan setujui pencairan (Step 2 -> 3).
-     */
     public function validasiDokumenSetuju()
     {
         $this->authorize('peminjaman_dana.validasi_dokumen');
         $this->validate([
-            'nominal_yang_disetujui' => 'required|numeric|min:0',
+            'nominal_yang_disetujui' => 'required|numeric|min:0|max:' . $this->nominal_pinjaman,
             'tanggal_pencairan' => 'required|date_format:d/m/Y',
             'persentase_bunga' => 'required|numeric|min:0|max:100',
+        ], [
+            'nominal_yang_disetujui.max' => 'Nominal disetujui tidak boleh melebihi nominal pengajuan.'
         ]);
 
         $totalBagiHasil = $this->nominal_yang_disetujui * ($this->persentase_bunga / 100);
@@ -87,12 +86,18 @@ trait ApprovalActions
             'catatan_validasi_dokumen_disetujui' => $this->catatan_approval,
             'current_step' => 3,
         ], function ($pengajuan) use ($totalBagiHasil) {
+            $parsedTanggal = $this->parseTanggal($this->tanggal_pencairan);
+            $rencanaTanggalPembayaran = $parsedTanggal 
+                ? \Carbon\Carbon::parse($parsedTanggal)->addMonthNoOverflow()->format('Y-m-d') 
+                : $pengajuan->rencana_tgl_pembayaran;
+
             // Update data peminjaman
             $pengajuan->update([
                 'total_pinjaman' => $this->nominal_yang_disetujui,
                 'persentase_bunga' => $this->persentase_bunga,
                 'total_bunga' => $totalBagiHasil,
                 'pembayaran_total' => $this->nominal_yang_disetujui + $totalBagiHasil,
+                'rencana_tgl_pembayaran' => $rencanaTanggalPembayaran,
             ]);
         });
     }
