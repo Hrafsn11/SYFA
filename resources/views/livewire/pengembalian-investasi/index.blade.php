@@ -84,7 +84,7 @@
     function showErrorAlert(message) {
         Swal.fire({
             icon: 'error',
-            title: 'Error!',
+            title: 'Gagal!',
             text: message,
             confirmButtonText: 'OK',
             customClass: {

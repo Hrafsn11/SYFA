@@ -172,7 +172,7 @@
                         <input type="file" class="form-control" wire:model="bukti_input_pengembalian" accept="image/*,.pdf">
                         <small class="text-muted">Format: JPG, PNG, PDF (Max 2MB)</small>
                         <div wire:loading wire:target="bukti_input_pengembalian" class="text-info mt-1">
-                            <span class="spinner-border spinner-border-sm"></span> Uploading...
+                            <span class="spinner-border spinner-border-sm"></span> Mengunggah...
                         </div>
                     </div>
 

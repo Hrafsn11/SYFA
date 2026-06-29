@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate of Deposito - {{ $data['nomor_deposito'] }}</title>
+    <title>Sertifikat Deposito - {{ $data['nomor_deposito'] }}</title>
     <style>
         @font-face {
             font-family: 'Amsterdam Two';
@@ -543,7 +543,7 @@
     <!-- Download Button -->
     <div class="no-print">
         <button onclick="window.print()" class="btn-download">
-            <i class="fa fa-download"></i> Download PDF
+            <i class="fa fa-download"></i> Unduh PDF
         </button>
     </div>
 
@@ -564,7 +564,7 @@
         </div>
 
         <!-- Title -->
-        <div class="title">Certificate of Deposito</div>
+        <div class="title">Sertifikat Deposito</div>
 
         <!-- Content -->
         <div class="content">

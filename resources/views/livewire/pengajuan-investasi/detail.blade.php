@@ -87,7 +87,7 @@
                                         <button type="button" class="nav-link" data-bs-toggle="tab"
                                             data-bs-target="#activity" role="tab" aria-selected="false">
                                             <i class="ti ti-activity me-2"></i>
-                                            <span class="d-none d-sm-inline">Activity</span>
+                                            <span class="d-none d-sm-inline">Aktivitas</span>
                                         </button>
                                     </li>
                                 </ul>
@@ -354,13 +354,13 @@
                                                             <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['nomor_kontrak']]) }}" 
                                                                 class="btn btn-outline-primary" target="_blank">
                                                                 <i class="ti ti-eye me-2"></i>
-                                                                Preview Kontrak
+                                                                Pratinjau Kontrak
                                                             </a>
                                                         @elseif(!empty($investasi['preview_nomor_kontrak']))
                                                             <a href="{{ route('pengajuan-investasi.preview-kontrak', ['id' => $investasi['id'], 'nomor_kontrak' => $investasi['preview_nomor_kontrak']]) }}" 
                                                                 class="btn btn-outline-secondary" target="_blank">
                                                                 <i class="ti ti-eye me-2"></i>
-                                                                Preview Kontrak
+                                                                Pratinjau Kontrak
                                                             </a>
                                                             @can('investasi.generate_kontrak')
                                                                 <button type="submit" class="btn btn-success"
@@ -368,7 +368,7 @@
                                                                     <span class="spinner-border spinner-border-sm me-2 d-none"
                                                                         id="btnGenerateKontrakSpinner"></span>
                                                                     <i class="ti ti-file-check me-2"></i>
-                                                                    Generate Kontrak
+                                                                    Buat Kontrak
                                                                 </button>
                                                             @endcan
                                                         @elseif(!empty($investasi['kode_perusahaan_missing']))
@@ -478,7 +478,7 @@
                                                                         @php
                                                                             $statusTitles = [
                                                                                 'Draft' => 'Draft Pengajuan',
-                                                                                'Submit Dokumen' => 'Dokumen Disubmit',
+                                                                                'Submit Dokumen' => 'Dokumen Diajukan',
                                                                                 'Dokumen Tervalidasi' =>
                                                                                     'Validasi Bagi Hasil - Disetujui',
                                                                                 'Ditolak' => match (
@@ -493,11 +493,11 @@
                                                                                 'Disetujui oleh CEO SKI' =>
                                                                                     'Validasi CEO SKI - Disetujui',
                                                                                 'Upload Bukti Transfer' =>
-                                                                                    'Upload Bukti Transfer',
+                                                                                    'Unggah Bukti Transfer',
                                                                                 'Bukti Transfer Disetujui' =>
                                                                                     'Validasi Bukti Transfer - Disetujui',
                                                                                 'Generate Kontrak' =>
-                                                                                    'Generate Kontrak',
+                                                                                    'Buat Kontrak',
                                                                                 'Selesai' => 'Proses Selesai',
                                                                             ];
                                                                         @endphp
@@ -507,9 +507,9 @@
                                                                         @php
                                                                             $statusDescriptions = [
                                                                                 'Draft' =>
-                                                                                    'Pengajuan investasi dibuat sebagai draft.',
+                                                                                    'Pengajuan investasi dibuat sebagai draf.',
                                                                                 'Submit Dokumen' =>
-                                                                                    'Dokumen pengajuan berhasil disubmit untuk validasi.',
+                                                                                    'Dokumen pengajuan berhasil diajukan untuk validasi.',
                                                                                 'Dokumen Tervalidasi' =>
                                                                                     'Bagi hasil telah divalidasi dan disetujui.',
                                                                                 'Ditolak' => $history->catatan_validasi_dokumen_ditolak
@@ -519,11 +519,11 @@
                                                                                 'Disetujui oleh CEO SKI' =>
                                                                                     'Pengajuan telah disetujui oleh CEO SKI.',
                                                                                 'Upload Bukti Transfer' =>
-                                                                                    'Bukti transfer investasi telah diupload.',
+                                                                                    'Bukti transfer investasi telah diunggah.',
                                                                                 'Bukti Transfer Disetujui' =>
                                                                                     'Bukti transfer telah divalidasi dan disetujui.',
                                                                                 'Generate Kontrak' =>
-                                                                                    'Kontrak investasi telah digenerate.',
+                                                                                    'Kontrak investasi telah dibuat.',
                                                                                 'Selesai' =>
                                                                                     'Proses investasi telah selesai.',
                                                                             ];
@@ -567,7 +567,7 @@
                                                                     <button type="button" class="btn btn-sm btn-success"
                                                                         onclick="previewKontrakFromHistory()">
                                                                         <i class="ti ti-file-text me-1"></i>
-                                                                        Preview Kontrak
+                                                                        Pratinjau Kontrak
                                                                     </button>
                                                                 @endif
                                                             </div>
@@ -698,7 +698,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Upload Bukti Transfer</h5>
+                        <h5 class="modal-title">Unggah Bukti Transfer</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form id="formUploadBuktiTransfer">
@@ -727,7 +727,7 @@
                             </button>
                             <button type="submit" class="btn btn-primary">
                                 <span class="spinner-border spinner-border-sm me-2 d-none" id="btnUploadSpinner"></span>
-                                Upload
+                                Unggah
                             </button>
                         </div>
                     </form>
@@ -776,7 +776,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Preview Bukti Transfer</h5>
+                    <h5 class="modal-title">Pratinjau Bukti Transfer</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center">
@@ -788,7 +788,7 @@
                 <div class="modal-footer">
                     <a id="downloadBukti" href="" download class="btn btn-primary">
                         <i class="ti ti-download me-1"></i>
-                        Download
+                        Unduh
                     </a>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                 </div>
@@ -888,7 +888,7 @@
                 `/pengajuan-investasi/${ID}/approval`, {
                     status: 'Submit Dokumen'
                 },
-                () => showSuccessReload('Pengajuan berhasil di-submit'),
+                () => showSuccessReload('Pengajuan berhasil diajukan'),
                 '#btnSubmitPengajuan',
                 '<i class="fas fa-spinner fa-spin me-2"></i>Mengirim...'
             ));
@@ -1026,7 +1026,7 @@
                         html: `Generate nomor kontrak untuk investasi ini?<br><br><small><strong>Nama PIC/CEO:</strong> ${namaPicKontrak}</small>`,
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonText: 'Ya, Generate',
+                        confirmButtonText: 'Ya, Buat Kontrak',
                         cancelButtonText: 'Batal'
                     });
 
@@ -1053,7 +1053,7 @@
                         await Swal.fire({
                             icon: 'success',
                             title: 'Berhasil!',
-                            text: data.message || 'Nomor kontrak berhasil di-generate',
+                            text: data.message || 'Nomor kontrak berhasil dibuat',
                             showConfirmButton: true
                         });
                         window.location.reload();

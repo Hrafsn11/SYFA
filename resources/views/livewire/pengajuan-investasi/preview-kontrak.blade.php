@@ -14,7 +14,7 @@
 
             <!-- Judul Halaman -->
             <div class="mb-4">
-                <h4 class="fw-bold mb-1">Contract Preview</h4>
+                <h4 class="fw-bold mb-1">Pratinjau Kontrak</h4>
             </div>
 
             <!-- Card Preview Kontrak -->
@@ -350,7 +350,7 @@
                                     </div>
                                 @else
                                     <div style="height: 80px; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; max-width: 170px; margin: 0 auto 1rem;" class="mb-3 text-muted small">
-                                        [ TTD Otomatis saat Generate ]
+                                        [ TTD Otomatis saat Dibuat ]
                                     </div>
                                 @endif
                                 <p class="mb-0"><strong>Muhamad Kurniawan</strong></p>
@@ -365,7 +365,7 @@
             <div class="mt-3 d-flex justify-content-end gap-2">
                 <button type="button" class="btn btn-danger" id="btnGeneratePDF">
                     <i class="ti ti-file-type-pdf me-2"></i>
-                    Generate PDF
+                    Unduh PDF
                 </button>
             </div>
         </div>
@@ -382,7 +382,7 @@
 
                 // Show loading state
                 $btn.prop('disabled', true);
-                $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Generating PDF...');
+                $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Membuat PDF...');
 
                 // Direct download via GET request (simple redirect)
                 const downloadUrl = `/pengajuan-investasi/${investasiId}/download-kontrak`;
@@ -417,7 +417,7 @@
         }
 
         .kontrak-draft-watermark {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text fill='rgba(220, 53, 69, 0.22)' font-size='32' font-family='sans-serif' font-weight='bold' x='40' y='180' transform='rotate(-30 40 180)' letter-spacing='4'>DRAFT PREVIEW</text></svg>");
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><text fill='rgba(220, 53, 69, 0.22)' font-size='32' font-family='sans-serif' font-weight='bold' x='40' y='180' transform='rotate(-30 40 180)' letter-spacing='4'>PRATINJAU DRAF</text></svg>");
             background-repeat: repeat;
         }
 

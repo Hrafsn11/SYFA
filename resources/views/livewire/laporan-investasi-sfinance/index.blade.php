@@ -69,7 +69,7 @@
                             <i class="ti ti-file-spreadsheet"></i>
                         </span>
                         <span wire:loading wire:target="exportExcel" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span>Export Excel</span>
+                        <span>Ekspor Excel</span>
                     </button>
 
                     <button class="btn btn-sm btn-danger d-flex align-items-center gap-1"
@@ -80,7 +80,7 @@
                             <i class="ti ti-file-type-pdf"></i>
                         </span>
                         <span wire:loading wire:target="exportPdf" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span>Export PDF</span>
+                        <span>Ekspor PDF</span>
                     </button>
 
                     @if($globalSearch)
@@ -105,7 +105,7 @@
                         <button class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
                             wire:click="clearFilters">
                             <i class="ti ti-filter-off"></i>
-                            <span>Reset</span>
+                            <span>Atur Ulang</span>
                         </button>
                     @endif
                 </div>
