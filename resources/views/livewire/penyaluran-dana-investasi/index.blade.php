@@ -45,7 +45,7 @@
                     <div class="modal-body" id="detailKontrakContent">
                         <div class="text-center py-5">
                             <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                                <span class="visually-hidden">Memuat...</span>
                             </div>
                         </div>
                     </div>
@@ -281,7 +281,7 @@
                                             ` : ''}
                                             <button type="button" class="btn btn-sm btn-info" 
                                                 wire:click="lihatRiwayat('${item.id}')"
-                                                title="Lihat History">
+                                                title="Lihat Riwayat">
                                                 <i class="ti ti-history"></i>
                                             </button>
                                         </div>
@@ -351,7 +351,7 @@
             error: (xhr) => {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error!',
+                    title: 'Gagal!',
                     text: xhr.responseJSON?.message || 'Terjadi kesalahan'
                 });
             },

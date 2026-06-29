@@ -21,7 +21,7 @@
     @if ($status === 'Selesai')
         <a href="{{ route('pengajuan-investasi.download-sertifikat', $id) }}"
             class="btn btn-sm btn-outline-success" target="_blank"
-            title="Download Sertifikat">
+            title="Unduh Sertifikat">
             <i class="ti ti-certificate"></i>
         </a>
     @endif

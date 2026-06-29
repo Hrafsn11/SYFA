@@ -153,7 +153,7 @@
         let cleaveInstances = {},
             deleteId = null;
 
-        const alert = (icon, html, title = icon === 'error' ? 'Error!' : icon === 'success' ? 'Berhasil!' :
+        const alert = (icon, html, title = icon === 'error' ? 'Gagal!' : icon === 'success' ? 'Berhasil!' :
                 'Perhatian') =>
             Swal.fire({
                 icon,
@@ -317,7 +317,7 @@
                 data,
                 success: (res) => !res.error && ($modal.modal('hide'), Livewire.dispatch(
                     'refreshPengajuanInvestasiTable'), alert('success', res.message || (
-                    editId ? 'Data berhasil diupdate' : 'Data berhasil ditambahkan'
+                    editId ? 'Data berhasil diperbarui' : 'Data berhasil ditambahkan'
                 ))),
                 error: (xhr) => alert('error', xhr.responseJSON?.errors ? Object.values(xhr
                         .responseJSON.errors).flat().join('<br>') : xhr.responseJSON

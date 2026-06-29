@@ -173,7 +173,7 @@
                                 id="bukti_transfer" wire:model="bukti_transfer" accept=".pdf,.jpg,.jpeg,.png">
                             <div wire:loading wire:target="bukti_transfer" class="mt-1">
                                 <small class="text-primary"><span
-                                        class="spinner-border spinner-border-sm me-1"></span>Uploading...</small>
+                                        class="spinner-border spinner-border-sm me-1"></span>Mengunggah...</small>
                             </div>
                             @error('bukti_transfer')
                                 <div class="invalid-feedback">{{ $message }}</div>
